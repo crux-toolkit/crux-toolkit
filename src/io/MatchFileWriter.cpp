@@ -135,7 +135,7 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = false;
       break;
 
-    /// added by Yang
+    // added by Yang
     case PRECURSOR_INTENSITY_RANK_M0_COL:
     case PRECURSOR_INTENSITY_RANK_M1_COL:
     case PRECURSOR_INTENSITY_RANK_M2_COL:

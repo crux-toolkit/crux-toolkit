@@ -76,8 +76,13 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
   max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
   cache_end_ = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
-
   memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
+
+  // added by Yang
+  largest_mzbin_ = 0;
+  smallest_mzbin_ = 1000000;
+
+  filtered_peaks_mzbins_.clear();
 
   if (Params::GetBool("skip-preprocessing")) {
     for (int i = 0; i < spectrum.Size(); ++i) {
@@ -99,7 +104,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     int max_charge = spectrum.MaxCharge();
 
     // Fill peaks
-    int largest_mz = 0;
     double highest_intensity = 0;
     for (int i = spectrum.Size() - 1; i >= 0; --i) {
       double peak_location = spectrum.M_Z(i);
@@ -126,9 +130,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
       int mz = MassConstants::mass2bin(peak_location);
       double intensity = spectrum.Intensity(i);
-      if ((mz > largest_mz) && (intensity > 0)) {
-        largest_mz = mz;
-      }
+      if ((mz > largest_mzbin_) && (intensity > 0)) { largest_mzbin_ = mz; }
+      if ((mz < smallest_mzbin_) && (intensity > 0)) { smallest_mzbin_ = mz; }
 
       intensity = sqrt(intensity);
       if (intensity > highest_intensity) {
@@ -140,10 +143,12 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
 
     double intensity_cutoff = highest_intensity * 0.05;
-
     double normalizer = 0.0;
-    int region_size = largest_mz / NUM_SPECTRUM_REGIONS + 1;
+    int region_size = largest_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
+
     for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+      vector<pair<int, double>> region_peaks;
+
       highest_intensity = 0;
       int high_index = i;
       for (int j = 0; j < region_size; ++j) {
@@ -151,6 +156,10 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         if (peaks_[index] <= intensity_cutoff) {
           peaks_[index] = 0;
         }
+        else {
+        	region_peaks.push_back(make_pair(index, peaks_[index]));
+        }
+
         if (peaks_[index] > highest_intensity) {
           highest_intensity = peaks_[index];
           high_index = index;
@@ -166,7 +175,32 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
           peaks_[index] *= normalizer;
         }
       }
+
+      // added by Yang
+      // sort region_peaks w.r.t the descending intensity
+      sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
+      // save the top samanda-regional-topk peaks per region
+      for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
+    	  if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
+    	  // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
+    	  int peak_mzbin = region_peaks[peak_idx].first;
+    	  filtered_peaks_mzbins_.push_back(peak_mzbin);
+
+    	  if (Params::GetBool("use-flanking-peaks")) {
+    		  filtered_peaks_mzbins_.push_back(peak_mzbin-1);
+    		  filtered_peaks_mzbins_.push_back(peak_mzbin+1);
+    	  }
+      }
+
+      sort( filtered_peaks_mzbins_.begin(), filtered_peaks_mzbins_.end() );
+      filtered_peaks_mzbins_.erase(unique( filtered_peaks_mzbins_.begin(), filtered_peaks_mzbins_.end() ), filtered_peaks_mzbins_.end() );
+
     }
+
+    // added by Yang
+    carp(CARP_DETAILED_DEBUG, "Observed Spectrum mz range:[%d, %d] \t region_size: %d", smallest_mzbin_, largest_mzbin_, region_size );
+    carp(CARP_DETAILED_DEBUG, "filtered_region_peaks: %d", filtered_peaks_mzbins_.size() );
+
 
 #ifdef DEBUG
     if (debug) {

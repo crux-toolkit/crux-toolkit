@@ -43,7 +43,7 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }
 
-  /// added by Yang
+  // added by Yang
   ms1_spectrum_number_ = spec.ms1_spectrum_number();
   iso_window_lower_mz_ = spec.iso_window_lower_mz();
   iso_window_upper_mz_ = spec.iso_window_upper_mz();
@@ -126,7 +126,7 @@ void Spectrum::FillPB(pb::Spectrum* spec) {
     spec->add_peak_intensity(uint64(peak_intensity_[i]*intensity_denom + 0.5));
   }
 
-  /// added by Yang
+  // added by Yang
   spec->set_ms1_spectrum_number(ms1_spectrum_number_);
   spec->set_iso_window_lower_mz(iso_window_lower_mz_);
   spec->set_iso_window_upper_mz(iso_window_upper_mz_);
@@ -408,11 +408,15 @@ vector<int> Spectrum::CreateEvidenceVectorDiscretized(
 
 /// added by Yang
 int Spectrum::MS1SpectrumNum() const { return ms1_spectrum_number_; }
+
 double Spectrum::IsoWindowLowerMZ() const { return iso_window_lower_mz_; }
+
 double Spectrum::IsoWindowUpperMZ() const { return iso_window_upper_mz_; }
+
 double Spectrum::MaxPeakMz() const {
 	return *max_element(peak_m_z_.begin(), peak_m_z_.end());
 }
+
 vector<double> Spectrum::DescendingSortedPeakIntensity() {
 	vector<double> sorted_intensity_vec(peak_intensity_);
 	std::sort(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), greater<double>());
@@ -571,5 +575,3 @@ void SpectrumCollection::Sort() {
   MakeSpecCharges();
   sort(spec_charges_.begin(), spec_charges_.end());
 }
-
-

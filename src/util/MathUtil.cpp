@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <algorithm>
 
 using namespace std;
 
@@ -15,6 +16,31 @@ double MathUtil::Round(double x, int decimals) {
 bool MathUtil::AlmostEqual(double x, double y, int precision) {
   return abs(x - y) < 5*pow(10.0, -(precision + 1));
 }
+
+// added by Yang
+int MathUtil::factorial(int n) {
+  int product = 1;
+  for (int i = 1; i <= n; i++) { product *= i; }
+  return product;
+}
+
+double MathUtil::LogNChooseK(int n, int k) {
+	double result = 0;
+	for (int i = 1; i <= k; i++) { result += log(n-i+1) - log(i); }
+	return result;
+}
+
+double MathUtil::LogSumExp(std::vector<double>* log_values) {
+	if (log_values->size() <= 0) { return 0.0; }
+	else {
+		double max_value = *max_element(log_values->begin(), log_values->end());
+		double sum = 0;
+		for (int i = 0; i < log_values->size() ; i++){ sum += exp(log_values->at(i) - max_value); }
+		return log(sum) + max_value;
+	}
+
+}
+
 
 MathUtil::Combination::Combination(size_t n, size_t k)
   : n_(n) {

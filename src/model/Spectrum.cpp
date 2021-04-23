@@ -380,7 +380,7 @@ bool Spectrum::parseMstoolkitSpectrum
       zstates_.push_back(zstate);
     }
   } else { // if no charge states detected, decide based on spectrum
-	  charge_state_assigned_ = assignZState();
+	charge_state_assigned_ = assignZState();
   }
 
   return true;
@@ -418,7 +418,7 @@ bool Spectrum::parsePwizSpecInfo(
   has_peaks_ = true;
   carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 
-  /// added by Yang
+  // added by Yang
   if ( pwiz_spectrum->precursors.size() <= 0 ) {
 	  SpectrumZState zstate;
 	  zstate.setMZ(precursor_mz_, 1);
@@ -438,10 +438,12 @@ bool Spectrum::parsePwizSpecInfo(
 
   // each charge state(s) stored in selectedIon(s)
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
-  if (ions.empty()) { carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_); }
+  if (ions.empty()) {
+	  carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
+  }
 
 
-  /// added by Yang
+  // added by Yang
   FLOAT_T selected_ion_m_z = ions[0].cvParam(pzd::MS_selected_ion_m_z).valueAs<double>();
   iso_window_lower_mz_ = selected_ion_m_z - iso_window.cvParam(pzd::MS_isolation_window_lower_offset).valueAs<double>();
   iso_window_upper_mz_ = selected_ion_m_z + iso_window.cvParam(pzd::MS_isolation_window_upper_offset).valueAs<double>();
@@ -519,9 +521,9 @@ bool Spectrum::parsePwizSpecInfo(
           zstates_.push_back(zstate);
         }
       } else { // we have no charge information
-        /// added by Yang
-    	if (dia_mode) { charge_state_assigned_ = assignZStateDIA(); } //add +1, +2, ... max-precursor-charge
-    	else { charge_state_assigned_ = assignZState(); } //do choose charge and add +1 or +2,+3
+        // added by Yang
+        if (dia_mode) { charge_state_assigned_ = assignZStateDIA(); } //add +1, +2, ... max-precursor-charge
+        else { charge_state_assigned_ = assignZState(); } //do choose charge and add +1 or +2,+3
       }
     }
 
@@ -530,7 +532,7 @@ bool Spectrum::parsePwizSpecInfo(
   return true;
 }
 
-/// added by Yang
+// added by Yang
 void Spectrum::setMS1Scan(int ms1scan) { ms1_scan_ = ms1scan; }
 int Spectrum::getMS1Scan() const { return ms1_scan_; }
 FLOAT_T Spectrum::getIsoWindowLowerMZ() const { return iso_window_lower_mz_; }

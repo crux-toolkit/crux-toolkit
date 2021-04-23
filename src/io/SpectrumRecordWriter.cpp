@@ -30,7 +30,7 @@ bool SpectrumRecordWriter::convert(
   carp(CARP_INFO, "Converting ms_level %d ... ", ms_level);
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
 
-  /// added by Yang
+  // added by Yang
   if ( ms_level < 1 || ms_level > 2 ) { carp(CARP_FATAL, "ms_level must be 1 or 2 instead of %d.", ms_level); }
 
 
@@ -67,7 +67,7 @@ bool SpectrumRecordWriter::convert(
   carp(CARP_DETAILED_DEBUG, "Starting to convert spectrum to pb..." );
   // Go through the spectrum list and write each spectrum
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-	(*i)->sortPeaks(_PEAK_LOCATION);
+	(*i)->sortPeaks(_PEAK_LOCATION); // Sort by m/z
 
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
@@ -107,12 +107,10 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     spectra.push_back(pb::Spectrum());
     pb::Spectrum& newSpectrum = spectra.back();
 
-    /// added by Yang
+    // added by Yang
     newSpectrum.set_ms1_spectrum_number(s->getMS1Scan());
     newSpectrum.set_iso_window_lower_mz(s->getIsoWindowLowerMZ());
     newSpectrum.set_iso_window_upper_mz(s->getIsoWindowUpperMZ());
-    // plot charge and mz
-    // carp(CARP_DETAILED_DEBUG, "getPbSpectra \t precursor_m_z:%f \t charge:%d", i->getMZ(), i->getCharge() );
 
     newSpectrum.set_spectrum_number(scan_num);
     newSpectrum.set_precursor_m_z(i->getMZ());

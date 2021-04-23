@@ -2105,23 +2105,16 @@ double TideSearchApplication::calcCombinedPval(
   //compute first term (p-values are completely dependent)
   double firstTerm = 0.0;
   for (int i = 0; i < intPartofM; i++) {
-    firstTerm += pow(lnpy, i) / double(factorial(i));
+    firstTerm += pow(lnpy, i) / double(MathUtil::factorial(i));
   }
   firstTerm = pow(p, y) * firstTerm;
 
   //compute second term (p-values are completely independent)
-  double secondTerm = pow(p, y) * realPartofM * pow(lnpy, intPartofM) / (double)factorial(intPartofM);
+  double secondTerm = pow(p, y) * realPartofM * pow(lnpy, intPartofM) / (double)MathUtil::factorial(intPartofM);
 
   return firstTerm + secondTerm;
 }
 
-int TideSearchApplication::factorial(int n) {
-  int product = 1;
-  for (int i = 1; i <= n; i++) {
-    product *= i;
-  }
-  return product;
-}
 /*
  * Local Variables:
  * mode: c

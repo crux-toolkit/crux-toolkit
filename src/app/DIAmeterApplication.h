@@ -57,6 +57,7 @@ class DIAmeterApplication : public CruxApplication {
 	const ProteinVec& proteins, ///< proteins corresponding with peptides
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
+	ObservedPeakSet* observed,
 	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
 	map<string, double>* peptide_predrt_map
   );
@@ -68,6 +69,14 @@ class DIAmeterApplication : public CruxApplication {
 	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
 	int charge
   );
+
+  void computeMS2Pval(
+	const vector<TideMatchSet::Arr::iterator>& vec,
+	const ActivePeptideQueue* peptides,
+	ObservedPeakSet* observed,
+	map<TideMatchSet::Arr::iterator, double>* ms2pval_map
+  );
+
 
   void computeWindowDIA(
 		  const SpectrumCollection::SpecCharge& sc,
@@ -145,8 +154,8 @@ class DIAmeterApplication : public CruxApplication {
 #endif
 
 /*
+ * TODO remove temporary commands finally
  * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta cerevisiae_orf_trans_all
- * gdb -ex=r --args src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --verbosity 60 > log.txt 2> error.txt 1> output.txt
- * src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 > log.txt 2> error.txt 1> output.txt
+ * gdb -ex=r --args src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 > log.txt 2> error.txt 1> output.txt
  *
  */

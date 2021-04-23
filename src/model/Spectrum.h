@@ -67,7 +67,7 @@ class Spectrum{
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
   bool             charge_state_assigned_;
 
-  /// Added by Yang
+  // added by Yang
   FLOAT_T iso_window_lower_mz_;
   FLOAT_T iso_window_upper_mz_;
   int ms1_scan_;
@@ -137,7 +137,7 @@ class Spectrum{
   std::vector<Peak> getPeaks() const;
 
 
-  /// Added by Yang
+  // added by Yang
   void setMS1Scan(int ms1scan);
   int getMS1Scan() const;
   FLOAT_T getIsoWindowLowerMZ() const;
@@ -183,7 +183,7 @@ class Spectrum{
     const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
     int firstScan,
     int lastScan,
-	bool dia_mode = false
+    bool dia_mode = false
   );
   
   /**

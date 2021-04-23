@@ -11,6 +11,11 @@ class MathUtil {
   static double Round(double x, int decimals = 0);
   static bool AlmostEqual(double x, double y, int precision);
 
+  // added by Yang
+  static int factorial(int n);
+  static double LogNChooseK(int n, int k);
+  static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
+
   template<typename T>
   static double Sum(const T& values) {
     double sum = 0;
