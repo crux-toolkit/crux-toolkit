@@ -157,7 +157,7 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   int first_scan = -1;
   int last_scan = -1;
 
-  /// added by Yang
+  // added by Yang
   int curr_ms1_scan = -1;
 
 
@@ -243,7 +243,7 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
       break;
     }
 
-    /// added by Yang
+    // added by Yang
     if (spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() == 1) {
     	curr_ms1_scan = scan_number_begin;
     	if (scan_number_begin != scan_number_end) { carp(CARP_FATAL, "scan_number_begin %d should equal to scan_number_end %d.", scan_number_begin, scan_number_end); }
@@ -254,7 +254,7 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
 
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
     if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end, dia_mode)) {
-    	/// added by Yang
+    	// added by Yang
     	crux_spectrum->setMS1Scan(curr_ms1_scan);
     	carp(CARP_DETAILED_DEBUG, "curr_ms1_scan: %d ", curr_ms1_scan );
 

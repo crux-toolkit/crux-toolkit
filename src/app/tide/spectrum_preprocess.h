@@ -127,6 +127,7 @@ class ObservedPeakSet {
     bin_offset_ = bin_offset;
     NL_ = NL; //NL means neutral loss
     FP_ = FP; //FP means flanking peaks
+
   }
 
   ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
@@ -213,6 +214,11 @@ class ObservedPeakSet {
         cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
   }
 
+  // added by Yang
+  int LargestMzbin() const { return largest_mzbin_; };
+  int SmallestMzbin() const { return smallest_mzbin_; };
+  vector<int>& FilteredPeakMzbins() { return filtered_peaks_mzbins_; }
+
  private:
   int& Peak(TheoreticalPeakType peak_type, int index) {
     // Note the different order than for TheoreticalPeakPair's constructor.
@@ -234,6 +240,11 @@ class ObservedPeakSet {
 
   MaxBin max_mz_;
   int cache_end_;
+
+
+  // added by Yang
+  vector<int> filtered_peaks_mzbins_;
+  int largest_mzbin_, smallest_mzbin_;
 
   friend class ObservedPeakTester;
 };

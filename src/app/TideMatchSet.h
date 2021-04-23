@@ -42,7 +42,7 @@ class TideMatchSet {
     int rank;
     double tailor;  //Added by AKF    
 
-    /*/// added by Yang
+    /*// added by Yang
     double prec_intensity_logrank;
     double rt_diff;
     double frag_pval;
@@ -108,11 +108,12 @@ class TideMatchSet {
     ofstream* file,
     bool decoyFile,
     bool multiDecoy,
-    bool sp
+    bool compute_sp
   );
 
-  /// added by Yang
-  static void writeHeadersDIA(ofstream* file, bool sp);
+  // added by Yang
+  static void writeHeadersDIA(ofstream* file, bool compute_sp);
+
   void writeToFileDIA(
       ofstream* file,
       int top_n,
@@ -137,6 +138,7 @@ class TideMatchSet {
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
     int top_n,
+	int numDecoys,
     bool highScoreBest // indicates semantics of score magnitude
   );
 

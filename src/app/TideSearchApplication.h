@@ -12,6 +12,7 @@
 #include "spectrum.pb.h"
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
+#include "util/MathUtil.h"
 
 using namespace std;
 
@@ -41,12 +42,12 @@ struct InputFile {
 };
 
 struct ScSortByMz {
-	explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-	bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
-		return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+    bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+        return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
 				(y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-	}
-	double precursor_window_;
+    }
+    double precursor_window_;
 };
 
 class TideSearchApplication : public CruxApplication {
@@ -202,7 +203,7 @@ private:
 
   static bool proteinLevelDecoys();
 
-  static vector<int> getNegativeIsotopeErrors();
+  static vector<int> getNegativeIsotopeErrors() ;
 
   static void computeWindow(
       const SpectrumCollection::SpecCharge& sc,
@@ -370,8 +371,6 @@ private:
     double p,
     int numPval
   );
-
-  int factorial(int n);
 
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();

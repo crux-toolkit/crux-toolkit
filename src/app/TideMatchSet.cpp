@@ -162,7 +162,7 @@ void TideMatchSet::writeToFile(
 
   bool brief = Params::GetBool("brief-output");
 
-  const Peptide* peptide = peptides->GetPeptide(0);
+  Peptide* peptide = peptides->GetPeptide(0);
   const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
   int pos = peptide->FirstLocPos();
   string proteinNames = getProteinName(*protein,
@@ -258,7 +258,6 @@ void TideMatchSet::writeToFile(
   }
 }
 
-
 /**
  * Write matches to output files
  * This is for writing tab-delimited only
@@ -286,7 +285,7 @@ void TideMatchSet::report(
        top_n, matches_->size());
 
   vector<Arr::iterator> targets, decoys;
-  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, highScoreBest);
+  gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, decoys_per_target, highScoreBest);
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
   map<Arr::iterator, FLOAT_T> delta_lcn_map;
@@ -307,149 +306,148 @@ void TideMatchSet::report(
               compute_sp ? &sp_map : NULL, rwlock);
 }
 
+// added by Yang
+void TideMatchSet::writeHeadersDIA(ofstream* file, bool compute_sp) {
+   const int headers[] = {
+       FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+       PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
+       XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
+      PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
+      RT_DIFF_COL, FRAGMENT_PVALUE_COL, PRECURSOR_FRAGMENT_COELUTE_COL, ENSEMBLE_SCORE_COL,
+       DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
+       PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
+     };
 
-/// added by Yang
-void TideMatchSet::writeHeadersDIA(ofstream* file, bool sp) {
-	const int headers[] = {
-	    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-	    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
-	    XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
-		PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
-		RT_DIFF_COL, FRAGMENT_PVALUE_COL, PRECURSOR_FRAGMENT_COELUTE_COL, ENSEMBLE_SCORE_COL,
-	    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
-	    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL,
-	  };
-
-	size_t numHeaders = sizeof(headers) / sizeof(int);
-	bool writtenHeader = false;
-	for (size_t i = 0; i < numHeaders; ++i) {
-		int header = headers[i];
-		if (!sp && (header == SP_SCORE_COL || header == SP_RANK_COL ||
-				header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) { continue; }
-		// if (header == FILE_COL && !Params::GetBool("file-column") ) { continue; }
-		colPrint(&writtenHeader, file, get_column_header(header));
-	}
-	*file << endl;
+   size_t numHeaders = sizeof(headers) / sizeof(int);
+   bool writtenHeader = false;
+   for (size_t i = 0; i < numHeaders; ++i) {
+      int header = headers[i];
+      if (!compute_sp && (header == SP_SCORE_COL || header == SP_RANK_COL ||
+            header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) { continue; }
+      // if (header == FILE_COL && !Params::GetBool("file-column") ) { continue; }
+      colPrint(&writtenHeader, file, get_column_header(header));
+   }
+   *file << endl;
 }
 
 void TideMatchSet::writeToFileDIA(
-	ofstream* file,
-	int top_n,
-	const vector<Arr::iterator>& vec,
-	const string& spectrum_filename,
-	const Spectrum* spectrum,
-	int charge,
-	const ActivePeptideQueue* peptides,
-	const ProteinVec& proteins,
-	const vector<const pb::AuxLocation*>& locations,
-	const map<Arr::iterator, FLOAT_T>* delta_cn_map,
-	const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
-	const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
-	const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
-	map<string, double>* peptide_predrt_map
+   ofstream* file,
+   int top_n,
+   const vector<Arr::iterator>& vec,
+   const string& spectrum_filename,
+   const Spectrum* spectrum,
+   int charge,
+   const ActivePeptideQueue* peptides,
+   const ProteinVec& proteins,
+   const vector<const pb::AuxLocation*>& locations,
+   const map<Arr::iterator, FLOAT_T>* delta_cn_map,
+   const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
+   const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+   const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+   map<string, double>* peptide_predrt_map
 ) {
-	if (!file || vec.empty()) { return; }
+   if (!file || vec.empty()) { return; }
 
-	int massPrecision = Params::GetInt("mass-precision");
-	int precision = Params::GetInt("precision");
-	const int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
+   int massPrecision = Params::GetInt("mass-precision");
+   int precision = Params::GetInt("precision");
+   const int concatDistinctMatches = peptides->ActiveTargets() + peptides->ActiveDecoys();
 
-	for (size_t idx = 0; idx < vec.size(); idx++) {
-		const Arr::iterator& i = vec[idx];
-		const Peptide* peptide = peptides->GetPeptide(i->rank);
-		size_t rank;
+   for (size_t idx = 0; idx < vec.size(); idx++) {
+      const Arr::iterator& i = vec[idx];
+      Peptide* peptide = peptides->GetPeptide(i->rank);
+      size_t rank;
 
-		if (idx >= top_n) { return; }
-		rank = idx + 1;
+      if (idx >= top_n) { return; }
+      rank = idx + 1;
 
-		const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
-		int pos = peptide->FirstLocPos();
-		string proteinNames = getProteinName(*protein, (!protein->has_target_pos()) ? pos : protein->target_pos());
-		string flankingAAs, n_term, c_term;
-		getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
-		flankingAAs = n_term + c_term;
+      const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
+      int pos = peptide->FirstLocPos();
+      string proteinNames = getProteinName(*protein, (!protein->has_target_pos()) ? pos : protein->target_pos());
+      string flankingAAs, n_term, c_term;
+      getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
+      flankingAAs = n_term + c_term;
 
-		// look for other locations
-		if (peptide->HasAuxLocationsIndex()) {
-			const pb::AuxLocation* aux = locations[peptide->AuxLocationsIndex()];
-			for (int j = 0; j < aux->location_size(); j++) {
-				const pb::Location& location = aux->location(j);
-		        protein = proteins[location.protein_id()];
-		        pos = location.pos();
-		        proteinNames += "," + getProteinName(*protein, (!protein->has_target_pos()) ? pos : protein->target_pos());
-		        getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
-		        flankingAAs += "," + n_term + c_term;
-			}
-		}
+      // look for other locations
+      if (peptide->HasAuxLocationsIndex()) {
+         const pb::AuxLocation* aux = locations[peptide->AuxLocationsIndex()];
+         for (int j = 0; j < aux->location_size(); j++) {
+            const pb::Location& location = aux->location(j);
+              protein = proteins[location.protein_id()];
+              pos = location.pos();
+              proteinNames += "," + getProteinName(*protein, (!protein->has_target_pos()) ? pos : protein->target_pos());
+              getFlankingAAs(peptide, protein, pos, &n_term, &c_term);
+              flankingAAs += "," + n_term + c_term;
+         }
+      }
 
-		Crux::Peptide cruxPep = getCruxPeptide(peptide);
-		const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
+      Crux::Peptide cruxPep = getCruxPeptide(peptide);
+      const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
 
-		// FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL, PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL,
-		*file << spectrum_filename << '\t'
-			  << spectrum->SpectrumNumber() << '\t'
-			  << charge << '\t'
-			  << StringUtils::ToString(spectrum->PrecursorMZ(), massPrecision) << '\t'
-			  << StringUtils::ToString((spectrum->PrecursorMZ() - MASS_PROTON) * charge, massPrecision) << '\t'
-		      << StringUtils::ToString(cruxPep.calcModifiedMass(), massPrecision) << '\t'
-		      << delta_cn_map->at(i) << '\t'
-		      << delta_lcn_map->at(i) << '\t';
+      // FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL, PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL,
+      *file << spectrum_filename << '\t'
+           << spectrum->SpectrumNumber() << '\t'
+           << charge << '\t'
+           << StringUtils::ToString(spectrum->PrecursorMZ(), massPrecision) << '\t'
+           << StringUtils::ToString((spectrum->PrecursorMZ() - MASS_PROTON) * charge, massPrecision) << '\t'
+            << StringUtils::ToString(cruxPep.calcModifiedMass(), massPrecision) << '\t'
+            << delta_cn_map->at(i) << '\t'
+            << delta_lcn_map->at(i) << '\t';
 
-		if (sp_map) {
-			// SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL
-			*file << StringUtils::ToString(sp_data->sp_score, precision) << '\t'
-				  << sp_map->at(i).second << '\t'
-				  << sp_data->matched_ions << '\t'
-				  << sp_data->total_ions << '\t';
-		}
+      if (sp_map) {
+         // SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL
+         *file << StringUtils::ToString(sp_data->sp_score, precision) << '\t'
+              << sp_map->at(i).second << '\t'
+              << sp_data->matched_ions << '\t'
+              << sp_data->total_ions << '\t';
+      }
 
-		// XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL
-		*file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t'
-        	  << StringUtils::ToString(i->tailor, precision, true) << '\t'
-        	  << rank << '\t';
+      // XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL
+      *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t'
+             << StringUtils::ToString(i->tailor, precision, true) << '\t'
+             << rank << '\t';
 
-		// PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL
-		boost::tuple<double, double, double> intensity_tuple = intensity_map->at(i);
-		*file << StringUtils::ToString(intensity_tuple.get<0>(), precision, true) << '\t'
-			  << StringUtils::ToString(intensity_tuple.get<1>(), precision, true) << '\t'
-			  << StringUtils::ToString(intensity_tuple.get<2>(), precision, true) << '\t';
+      // PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL
+      boost::tuple<double, double, double> intensity_tuple = intensity_map->at(i);
+      *file << StringUtils::ToString(intensity_tuple.get<0>(), precision, true) << '\t'
+           << StringUtils::ToString(intensity_tuple.get<1>(), precision, true) << '\t'
+           << StringUtils::ToString(intensity_tuple.get<2>(), precision, true) << '\t';
 
-		// TODO
-		// RT_DIFF_COL
+      // TODO
+      // RT_DIFF_COL
 
-		double predrt = 0.5;
-		map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
-		if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
-		// carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
-		*file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
+      double predrt = 0.5;
+      map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
+      if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
+      // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
+      *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
 
 
-		// TODO
-		// FRAGMENT_PVALUE_COL
-		*file << StringUtils::ToString(0.0, precision, true) << '\t';
+      // TODO
+      // FRAGMENT_PVALUE_COL
+      *file << StringUtils::ToString(0.0, precision, true) << '\t';
 
-		// TODO
-		// PRECURSOR_FRAGMENT_COELUTE_COL
-		*file << StringUtils::ToString(0.0, precision, true) << '\t';
+      // TODO
+      // PRECURSOR_FRAGMENT_COELUTE_COL
+      *file << StringUtils::ToString(0.0, precision, true) << '\t';
 
-		// TODO
-		// ENSEMBLE_SCORE_COL
-		*file << StringUtils::ToString(0.0, precision, true) << '\t';
+      // TODO
+      // ENSEMBLE_SCORE_COL
+      *file << StringUtils::ToString(0.0, precision, true) << '\t';
 
-		// DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL, PROTEIN_ID_COL, FLANKING_AA_COL
-		*file << concatDistinctMatches << '\t'
-			  << cruxPep.getModifiedSequenceWithMasses() << '\t'
-			  << cruxPep.getModsString() << '\t'
-			  << CleavageType << '\t'
-			  << proteinNames << '\t'
-			  << flankingAAs << '\t';
+      // DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL, PROTEIN_ID_COL, FLANKING_AA_COL
+      *file << concatDistinctMatches << '\t'
+           << cruxPep.getModifiedSequenceWithMasses() << '\t'
+           << cruxPep.getModsString() << '\t'
+           << CleavageType << '\t'
+           << proteinNames << '\t'
+           << flankingAAs << '\t';
 
-		// TARGET_DECOY_COL
-		if (peptide->IsDecoy()) { *file << "decoy"; }
-		else { *file << "target"; }
+      // TARGET_DECOY_COL
+      if (peptide->IsDecoy()) { *file << "decoy"; }
+      else { *file << "target"; }
 
-		*file << endl;
-	}
+      *file << endl;
+   }
 }
 
 
@@ -487,7 +485,7 @@ void TideMatchSet::writeToFile(
 
   for (size_t idx = 0; idx < vec.size(); idx++) {
     const Arr::iterator& i = vec[idx];
-    const Peptide* peptide = peptides->GetPeptide(i->rank);
+    Peptide* peptide = peptides->GetPeptide(i->rank);
     size_t rank;
     if (concat || !peptide->IsDecoy() || decoys_per_target <= 1) {
       // concat, target file, or only 1 decoy per target
@@ -656,7 +654,6 @@ void TideMatchSet::colPrint(
   *printTab = true;
 }
 
-
 /**
  * Write headers for tab delimited file
  */
@@ -664,7 +661,7 @@ void TideMatchSet::writeHeaders(
   ofstream* file, 
   bool decoyFile, 
   bool multiDecoy, 
-  bool sp
+  bool compute_sp
 ) {
   if (!file) {
     return;
@@ -684,7 +681,7 @@ void TideMatchSet::writeHeaders(
   bool writtenHeader = false;
   for (size_t i = 0; i < numHeaders; ++i) {
     int header = headers[i];
-    if (!sp &&
+    if (!compute_sp &&
         (header == SP_SCORE_COL || header == SP_RANK_COL ||
          header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) {
       continue;
@@ -817,6 +814,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
   vector<Arr::iterator>& targetsOut,
   vector<Arr::iterator>& decoysOut,
   int top_n,
+  int numDecoys,
   bool highScoreBest // indicates semantics of score magnitude
 ) {
   switch (cur_score_function_) {
@@ -864,7 +862,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
       pop_heap(matches_->begin(), i--, highScoreBest ? lessCombinedPvalScore : moreCombinedPvalScore);
       break;
     }
-    const Peptide& peptide = *(peptides->GetPeptide(i->rank));
+    Peptide& peptide = *(peptides->GetPeptide(i->rank));
     if (concat || !peptide.IsDecoy()) {
       if (targetsOut.size() < gatherSize) {
         targetsOut.push_back(i);
@@ -996,7 +994,7 @@ void TideMatchSet::computeSpData(
   spData.reserve(vec.size());
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
     spData.push_back(make_pair(*i, SpScorer::SpScoreData()));
-    const Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
+    Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
     pb::Peptide* pb_peptide = getPbPeptide(peptide);
     sp_scorer->Score(*pb_peptide, spData.back().second);
     delete pb_peptide;

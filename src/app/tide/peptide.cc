@@ -64,7 +64,7 @@ void Peptide::Show() {
 }
 
 template<class W>
-void Peptide::AddIons(W* workspace) const {
+void Peptide::AddIons(W* workspace) {
   // Use workspace to assemble all B and Y ions. workspace will determine
   // which, if any, associated ions will be represented.
   double max_possible_peak = numeric_limits<double>::infinity();
@@ -73,10 +73,14 @@ void Peptide::AddIons(W* workspace) const {
 
   vector<double> aa_masses = getAAMasses();
 
+  // added by Yang
+  ion_mzbins_.clear();
+
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
+    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
     total += aa_masses[i];
   }
 
@@ -84,6 +88,7 @@ void Peptide::AddIons(W* workspace) const {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
+    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
     total += aa_masses[i];
   }
 
@@ -92,6 +97,7 @@ void Peptide::AddIons(W* workspace) const {
   total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 2);
+    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
     total += aa_masses[i];
   }
 
@@ -99,8 +105,17 @@ void Peptide::AddIons(W* workspace) const {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 2);
+    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
     total += aa_masses[i];
   }
+
+  // added by Yang
+   sort(ion_mzbins_.begin(), ion_mzbins_.end());
+  /*carp(CARP_DETAILED_DEBUG, "peptide:%s", Seq().c_str() );
+  for (int ion_idx=0; ion_idx<ion_mzbins_.size(); ++ion_idx) {
+	  carp(CARP_DETAILED_DEBUG, "ion mzbin:%d", ion_mzbins_[ion_idx] );
+  }*/
+
 }
 
 template<class W>
@@ -167,7 +182,7 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 //	exit(1);  
 }
 
-void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) {
   AddIons<TheoreticalPeakSet>(workspace);   // Generic workspace
 #ifdef DEBUG
   Show();

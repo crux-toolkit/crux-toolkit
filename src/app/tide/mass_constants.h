@@ -126,10 +126,10 @@ class MassConstants {
     return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*MASS_PROTON;
   }
 
-  /// added by Yang
-  static unsigned int mz2bin(double mz) {
+  // added by Yang
+  /*static unsigned int mz2bin(double mz) {
 	  return (unsigned int)((mz/bin_width_) + 1.0 - bin_offset_);
-  }
+  }*/
 
   static double bin_width_;
   static double bin_offset_;
