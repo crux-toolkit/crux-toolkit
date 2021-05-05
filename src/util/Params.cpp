@@ -777,9 +777,7 @@ Params::Params() : finalized_(false) {
   //Added for tailor score calibration method by AKF
   InitBoolParam("use-tailor-calibration", false,
     "Fast, but heuristic PSM score calibration[[html: as described in "
-    "<a href=\"https://pubmed.ncbi.nlm.nih.gov/32175744/\">Tailor: "
-    "A Nonparametric and Rapid Score Calibration Method for Database "
-    "Search-Based Peptide Identification in Shotgun Proteomics</a>]].",
+    "<a href=\"https://pubmed.ncbi.nlm.nih.gov/32175744/\">this article</a>]].",
     "Available for tide-search", true);    
   InitStringParam("store-index", "",
     "When providing a FASTA file as the index, the generated binary index will be stored at "
