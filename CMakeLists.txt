@@ -26,11 +26,20 @@ macro(use_cxx11)
   endif (CMAKE_VERSION VERSION_LESS "3.1")
 endmacro(use_cxx11)
 
+if(UNIX)
+  include(CTest)
+endif(UNIX)
+
 use_cxx11()
+
+MESSAGE( STATUS "GOOGLE_TEST = ${GOOGLE_TEST}" )
 
 add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
+if(GOOGLE_TEST)
+  add_subdirectory(test/google-test)
+endif(GOOGLE_TEST)
 
 
 # Only process smoke tests directory if it exiists
