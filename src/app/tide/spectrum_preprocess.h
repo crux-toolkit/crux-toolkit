@@ -118,7 +118,7 @@ class ObservedPeakSet {
  public:
 
   ObservedPeakSet(double bin_width = MassConstants::bin_width_,
-     double bin_offset = MassConstants::bin_width_,
+     double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
