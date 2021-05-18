@@ -31,9 +31,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include <regex>
-#include <pwiz/utility/misc/SHA1.h>
 #include "FileUtils.h"
 #include "crux_version.h"
+
+#define ULONG_MAX 0xFFFFFFFE
+#include <pwiz/utility/misc/SHA1.h>
 
 using namespace std;
 
