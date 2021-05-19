@@ -92,7 +92,7 @@ def validate(xml_path, xsd_path):
     try:
         xsd.assertValid(xml)
     except etree.DocumentInvalid as err:
-        sys.stdout.write(err.error_log)
+        sys.stdout.write(str(err.error_log))
         raise etree.DocumentInvalid("The XML file failed to validate.")
 
 
