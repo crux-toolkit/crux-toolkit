@@ -66,6 +66,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "precursor intensity logrank M2", // added by Yang
   "rt-diff", // added by Yang
   "fragment p-value", // added by Yang
+  "precursor coelution", // added by Yang
+  "fragment coelution", // added by Yang
   "precursor fragment coelution", // added by Yang
   "ensemble score", // added by Yang
 #ifdef NEW_COLUMNS

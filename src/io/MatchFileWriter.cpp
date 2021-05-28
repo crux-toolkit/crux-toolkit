@@ -141,7 +141,9 @@ void MatchFileWriter::setPrecision() {
     case PRECURSOR_INTENSITY_RANK_M2_COL:
     case RT_DIFF_COL:
     case FRAGMENT_PVALUE_COL:
-    case PRECURSOR_FRAGMENT_COELUTE_COL:
+    case COELUTE_MS1_COL:
+    case COELUTE_MS2_COL:
+    case COELUTE_MS1_MS2_COL:
     case ENSEMBLE_SCORE_COL:
     	match_precision_[col_idx] = 4;
     	match_fixed_float_[col_idx] = false;

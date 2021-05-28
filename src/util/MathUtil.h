@@ -9,12 +9,16 @@
 class MathUtil {
  public:
   static double Round(double x, int decimals = 0);
-  static bool AlmostEqual(double x, double y, int precision);
+  static bool AlmostEqual(double x, double y, int precision = 6);
 
   // added by Yang
   static int factorial(int n);
   static double LogNChooseK(int n, int k);
   static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
+
+  double static MaxInArr(double* arr_values, int size);
+  double static NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
+
 
   template<typename T>
   static double Sum(const T& values) {

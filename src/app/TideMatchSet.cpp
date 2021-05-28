@@ -313,7 +313,7 @@ void TideMatchSet::writeHeadersDIA(ofstream* file, bool compute_sp) {
        PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
        XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
       PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
-      RT_DIFF_COL, FRAGMENT_PVALUE_COL, PRECURSOR_FRAGMENT_COELUTE_COL, ENSEMBLE_SCORE_COL,
+      RT_DIFF_COL, FRAGMENT_PVALUE_COL, COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
        DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
        PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
      };
@@ -344,6 +344,7 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+   const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
    const map<Arr::iterator, double>* ms2pval_map,
    map<string, double>* peptide_predrt_map
 ) {
@@ -418,15 +419,17 @@ void TideMatchSet::writeToFileDIA(
       map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
       if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
       // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
-      *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
+      *file << StringUtils::ToString(-fabs(predrt - spectrum->RTime()), precision, true) << '\t';
 
       // FRAGMENT_PVALUE_COL
       double ms2pval = ms2pval_map->at(i);
       *file << StringUtils::ToString(ms2pval, precision, true) << '\t';
 
-      // TODO
-      // PRECURSOR_FRAGMENT_COELUTE_COL
-      *file << StringUtils::ToString(0.0, precision, true) << '\t';
+      // COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL
+      boost::tuple<double, double, double> coelute_tuple = coelute_map->at(i);
+      *file << StringUtils::ToString(coelute_tuple.get<0>(), precision, true) << '\t'
+            << StringUtils::ToString(coelute_tuple.get<1>(), precision, true) << '\t'
+            << StringUtils::ToString(coelute_tuple.get<2>(), precision, true) << '\t';
 
       // TODO
       // ENSEMBLE_SCORE_COL

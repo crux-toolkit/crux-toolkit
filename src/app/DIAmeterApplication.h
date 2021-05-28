@@ -42,12 +42,18 @@ class DIAmeterApplication : public CruxApplication {
  protected:
   // string output_file_name_;
   double avg_noise_intensity_logrank_;
+  int scan_gap_;
+  int max_ms1scan_;
+  int max_ms1_mzbin_, max_ms2_mzbin_;
+
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
 
   SpectrumCollection* loadSpectra(const std::string& file);
 
-  double loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+  void loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+
+  void buildSpectraIndexFromIsoWindow(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
 
   void reportDIA(
 	ofstream* output_file,  ///< output file to write to
@@ -59,6 +65,7 @@ class DIAmeterApplication : public CruxApplication {
 	TideMatchSet* matches, ///< object to manage PSMs
 	ObservedPeakSet* observed,
 	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	map<int, double*>* ms2scan_intensity_map,
 	map<string, double>* peptide_predrt_map
   );
 
@@ -77,6 +84,14 @@ class DIAmeterApplication : public CruxApplication {
 	map<TideMatchSet::Arr::iterator, double>* ms2pval_map
   );
 
+  void computePrecFragCoelute(
+  	const vector<TideMatchSet::Arr::iterator>& vec,
+  	const ActivePeptideQueue* peptides,
+	vector<pair<double*, double*>>* intensity_arrs_vector,
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+	int charge
+  );
+
 
   void computeWindowDIA(
 		  const SpectrumCollection::SpecCharge& sc,
@@ -85,7 +100,8 @@ class DIAmeterApplication : public CruxApplication {
 		  vector<double>* out_min,
 		  vector<double>* out_max,
 		  double* min_range,
-		  double* max_range );
+		  double* max_range
+  );
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
@@ -157,5 +173,6 @@ class DIAmeterApplication : public CruxApplication {
  * TODO remove temporary commands finally
  * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta cerevisiae_orf_trans_all
  * gdb -ex=r --args src/./crux diameter --precursor-window 10 --top-match 5 --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 > log.txt 2> error.txt 1> output.txt
+ * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all
  *
  */
