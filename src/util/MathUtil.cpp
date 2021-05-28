@@ -38,7 +38,36 @@ double MathUtil::LogSumExp(std::vector<double>* log_values) {
 		for (int i = 0; i < log_values->size() ; i++){ sum += exp(log_values->at(i) - max_value); }
 		return log(sum) + max_value;
 	}
+}
 
+double MathUtil::MaxInArr(double* arr_values, int size) {
+	if (arr_values == NULL || size <= 0) { return 0; }
+
+	double max_value = arr_values[0];
+	for (int i=0; i<size; ++i) {
+		if (arr_values[i] > max_value) { max_value = arr_values[i]; }
+	}
+	return max_value;
+}
+
+double MathUtil::NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt) {
+	if (src_values == NULL || tgt_values == NULL || size <= 0) { return 0; }
+
+	double prod_sum = 0, src_sum = 0, tgt_sum = 0;
+	for (int i=0; i<size; ++i) {
+		if (take_sqrt) {
+			prod_sum += sqrt(src_values[i]) * sqrt(tgt_values[i]);
+			src_sum += src_values[i];
+			tgt_sum += tgt_values[i];
+		} else {
+			prod_sum += src_values[i] * tgt_values[i];
+			src_sum += src_values[i] * src_values[i];
+			tgt_sum += tgt_values[i] * tgt_values[i];
+		}
+	}
+
+	if (AlmostEqual(prod_sum, 0)) { return 0; }
+	else { return prod_sum / sqrt(src_sum * tgt_sum); }
 }
 
 

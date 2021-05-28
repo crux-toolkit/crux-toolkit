@@ -2052,6 +2052,14 @@ Params::Params() : finalized_(false) {
       "and in each segment, the k most intense peaks are preserved.",
       "It is used for DIAmeter and possibly Tide-Search", true);
 
+  InitIntParam("coelution-oneside-scans", 5, 1, 100,
+        "(2*coelution-oneside-scans+1) scans will be used to construct the chromatogram for coelution correlation analysis",
+        "It is used for DIAmeter", true);
+
+  InitIntParam("coelution-topk", 3, 1, 10,
+          "The number of topk values to consider to calculate precursor fragment coelution",
+          "It is used for DIAmeter", true);
+
 
   Categorize();
 }
