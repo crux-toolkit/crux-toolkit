@@ -173,9 +173,6 @@ if (UNIX)
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
-    PATCH_COMMAND ${CMAKE_COMMAND}  -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/src/CMakeLists.txt
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/CMakeLists.txt
     INSTALL_COMMAND ""
   )
 else (UNIX)
