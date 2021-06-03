@@ -70,6 +70,17 @@ double MathUtil::NormalizedDotProduct(double* src_values, double* tgt_values, in
 	else { return prod_sum / sqrt(src_sum * tgt_sum); }
 }
 
+std::vector<double> MathUtil::linspace(double start, double end, int num) {
+	std::vector<double> linspaced;
+
+	if (num < 2) { throw runtime_error("linspace should contain at least two points"); }
+	double delta = (end - start) / (num - 1);
+	for(int i=0; i < num-1; ++i) { linspaced.push_back(start + delta * i); }
+	linspaced.push_back(end);
+
+	return linspaced;
+}
+
 
 MathUtil::Combination::Combination(size_t n, size_t k)
   : n_(n) {

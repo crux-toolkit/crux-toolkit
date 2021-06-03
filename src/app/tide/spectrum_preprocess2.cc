@@ -198,9 +198,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
 
     // added by Yang
-    carp(CARP_DETAILED_DEBUG, "Observed Spectrum mz range:[%d, %d] \t region_size: %d", smallest_mzbin_, largest_mzbin_, region_size );
-    carp(CARP_DETAILED_DEBUG, "filtered_region_peaks: %d", filtered_peaks_mzbins_.size() );
-
+    // carp(CARP_DETAILED_DEBUG, "Observed Spectrum mz range:[%d, %d] \t region_size: %d", smallest_mzbin_, largest_mzbin_, region_size );
+    // carp(CARP_DETAILED_DEBUG, "filtered_region_peaks: %d", filtered_peaks_mzbins_.size() );
 
 #ifdef DEBUG
     if (debug) {

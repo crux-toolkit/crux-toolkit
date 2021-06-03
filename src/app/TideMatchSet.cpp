@@ -286,6 +286,7 @@ void TideMatchSet::report(
 
   vector<Arr::iterator> targets, decoys;
   gatherTargetsAndDecoys(peptides, proteins, targets, decoys, top_n, decoys_per_target, highScoreBest);
+  carp(CARP_DETAILED_DEBUG, "Gathered targets:%d \t decoy:%d", targets.size(), decoys.size());
 
   map<Arr::iterator, FLOAT_T> delta_cn_map;
   map<Arr::iterator, FLOAT_T> delta_lcn_map;
@@ -362,6 +363,8 @@ void TideMatchSet::writeToFileDIA(
       if (idx >= top_n) { return; }
       rank = idx + 1;
 
+      // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t rank1:%d \t rank2:%d \t xcorr:%f", peptide->Seq().c_str(), i->rank, rank, i->xcorr_score );
+
       const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
       int pos = peptide->FirstLocPos();
       string proteinNames = getProteinName(*protein, (!protein->has_target_pos()) ? pos : protein->target_pos());
@@ -419,7 +422,11 @@ void TideMatchSet::writeToFileDIA(
       map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
       if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
       // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
-      *file << StringUtils::ToString(-fabs(predrt - spectrum->RTime()), precision, true) << '\t';
+      *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
+      /* *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '|'
+    		<< StringUtils::ToString(predrt, precision, true) << '|'
+			<< StringUtils::ToString(spectrum->RTime(), precision, true) << '\t'; */
+
 
       // FRAGMENT_PVALUE_COL
       double ms2pval = ms2pval_map->at(i);

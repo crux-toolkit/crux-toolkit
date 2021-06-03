@@ -120,6 +120,7 @@ class MassConstants {
     *delta = unique_deltas_[unique_delta_index];
   }
   static unsigned int mass2bin(double mass, int charge = 1) {
+	// carp(CARP_DETAILED_DEBUG, "bin_width_:%f \t bin_offset_:%f", bin_width_, bin_offset_);
     return (unsigned int)((mass + (charge - 1)*MASS_PROTON)/(charge*bin_width_) + 1.0 - bin_offset_);
   }
   static double bin2mass(int bin, int charge = 1) {
