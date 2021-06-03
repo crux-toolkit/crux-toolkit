@@ -16,8 +16,9 @@ class MathUtil {
   static double LogNChooseK(int n, int k);
   static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
 
-  double static MaxInArr(double* arr_values, int size);
-  double static NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
+  static double MaxInArr(double* arr_values, int size);
+  static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
+  static std::vector<double> linspace(double start, double end, int num);
 
 
   template<typename T>
