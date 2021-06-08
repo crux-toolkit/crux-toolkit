@@ -56,6 +56,17 @@ int TideSearchApplication::main(const vector<string>& input_files) {
 int TideSearchApplication::main(const vector<string>& input_files, const string input_index) {
   carp(CARP_INFO, "Running tide-search...");
 
+  // Brief output only works with text-format.
+  if ( Params::GetBool("brief-output") ) {
+    if ( !Params::GetBool("txt-output") ||
+         Params::GetBool("mzid-output") ||
+         Params::GetBool("pin-output") ||
+         Params::GetBool("pepxml-output") ) {
+      carp(CARP_FATAL, "The brief-output option is only compatible with text output.");
+    }
+  }
+
+
   // prevent different output formats from using threading
   if (!Params::GetBool("peptide-centric-search")) {
     NUM_THREADS = Params::GetInt("num-threads");

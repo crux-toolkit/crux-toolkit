@@ -252,7 +252,7 @@ Params::Params() : finalized_(false) {
     "type, the spectrum precursor m+h value is converted to mass, and the window is defined "
     "as that mass +/- precursor-window. If the m+h value is not available, then the mass is "
     "calculated from the precursor m/z and provided charge. The peptide mass is computed as "
-    "the sum of the average amino acid masses plus 18 Da for the terminal OH group. The mz "
+    "the sum of the monoisotopic amino acid masses plus 18 Da for the terminal OH group. The mz "
     "window-type calculates the window as spectrum precursor m/z +/- precursor-window and "
     "then converts the resulting m/z range to the peptide mass range using the precursor "
     "charge. For the parts-per-million (ppm) window-type, the spectrum mass is calculated as "
@@ -871,7 +871,8 @@ Params::Params() : finalized_(false) {
                "0=poll CPU to set num threads; else specify num threads directly.",
                "Available for tide-search tab-delimited files only.", true);
   InitBoolParam("brief-output", false,
-    "Output in tab-delimited text only the file name, scan number, charge, score and peptide.",
+    "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
+    "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
     "Available for tide-search", true);
   /*
    * Comet parameters
