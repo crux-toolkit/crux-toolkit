@@ -272,11 +272,13 @@ makePerformancePlot("assign-confidence",
                     [("comet/comet.q.txt", "Comet E-value"),
                      ("tide-p-value/tide-search.q.txt", "Tide p-value"),
                      ("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
+                     ("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
                      ("tide-tailor/tide-search.q.txt", "Tide Tailor")])
 makePerformancePlot("percolator",
                     [("comet/comet.percolator.q.txt", "Comet Percolator"),
                      ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
                      ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
+                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
                      ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator")])
 
 
