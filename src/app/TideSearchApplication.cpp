@@ -607,7 +607,7 @@ void TideSearchApplication::search(void* threadarg) {
     vector<double>* max_mass = new vector<double>();
     vector<bool>* candidatePeptideStatus = new vector<bool>();
     double min_range, max_range;
-    computeWindow(*sc, window_type, precursor_window, max_charge,
+    computeWindow(*sc, window_type, precursor_window,
                   negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 
     //TODO throw error when fragment-tolerance and evidence-granularity parameters are defined
@@ -1437,7 +1437,6 @@ void TideSearchApplication::computeWindow(
   const SpectrumCollection::SpecCharge& sc,
   WINDOW_TYPE_T window_type,
   double precursor_window,
-  int max_charge,
   vector<int>* negative_isotope_errors,
   vector<double>* out_min,
   vector<double>* out_max,
@@ -1460,8 +1459,9 @@ void TideSearchApplication::computeWindow(
       out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
       out_max->push_back((mz_minus_proton + precursor_window) * sc.charge + (*ie * unit_dalton));
     }
-    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*max_charge;
-    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*max_charge;
+    // N.B. Next two lines used to have max_charge instead of sc.charge. Not sure why. --WSN 9 Jun 2021
+    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*sc.charge;
+    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*sc.charge;
     break;
   }
   case WINDOW_PPM: {

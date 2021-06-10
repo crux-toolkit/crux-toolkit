@@ -161,7 +161,6 @@ private:
     const SpectrumCollection::SpecCharge& sc,
     WINDOW_TYPE_T window_type,
     double precursor_window,
-    int max_charge,
     vector<int>* negative_isotope_errors,
     vector<double>* out_min,
     vector<double>* out_max,
