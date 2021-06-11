@@ -241,7 +241,7 @@ runSearch("tide-p-value", "tide-search", "--exact-p-value T",
           database, "tide-p-value/tide-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
 runSearch("tide-res-ev", "tide-search",
-          "--exact-p-value T --score-function residue-evidence",
+          "--exact-p-value T --score-function residue-evidence --fragment-tolerance 1.0005079",
           database, "tide-res-ev/tide-search.txt",
           "res-ev p-value", "--score \"res-ev p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
