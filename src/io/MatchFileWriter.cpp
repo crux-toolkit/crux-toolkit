@@ -140,7 +140,8 @@ void MatchFileWriter::setPrecision() {
     case PRECURSOR_INTENSITY_RANK_M1_COL:
     case PRECURSOR_INTENSITY_RANK_M2_COL:
     case RT_DIFF_COL:
-    case FRAGMENT_PVALUE_COL:
+    case DYN_FRAGMENT_PVALUE_COL:
+    case STA_FRAGMENT_PVALUE_COL:
     case COELUTE_MS1_COL:
     case COELUTE_MS2_COL:
     case COELUTE_MS1_MS2_COL:

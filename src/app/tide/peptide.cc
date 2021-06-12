@@ -10,6 +10,7 @@
 #include "theoretical_peak_set.h"
 #include "peptide.h"
 #include "compiler.h"
+#include "util/StringUtils.h"
 
 #ifdef DEBUG
 DEFINE_int32(debug_peptide_id, -1, "Peptide id to debug.");
@@ -72,15 +73,19 @@ void Peptide::AddIons(W* workspace) {
     max_possible_peak = MaxBin::Global().CacheBinEnd();
 
   vector<double> aa_masses = getAAMasses();
+  // carp(CARP_DETAILED_DEBUG, "**********aa_masses:%s", StringUtils::JoinDoubleVec(aa_masses, ',').c_str() );
+
 
   // added by Yang
   ion_mzbins_.clear();
+  ion_mzs_.clear();
 
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
+    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 1));
     total += aa_masses[i];
   }
 
@@ -89,6 +94,7 @@ void Peptide::AddIons(W* workspace) {
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
+    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 1));
     total += aa_masses[i];
   }
 
@@ -98,6 +104,7 @@ void Peptide::AddIons(W* workspace) {
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 2);
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
+    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 2));
     total += aa_masses[i];
   }
 
@@ -106,11 +113,14 @@ void Peptide::AddIons(W* workspace) {
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 2);
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
+    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 2));
     total += aa_masses[i];
   }
 
   // added by Yang
-   sort(ion_mzbins_.begin(), ion_mzbins_.end());
+  // sort(ion_mzbins_.begin(), ion_mzbins_.end());
+  // sort(ion_mzs_.begin(), ion_mzs_.end());
+
   /*carp(CARP_DETAILED_DEBUG, "peptide:%s", Seq().c_str() );
   for (int ion_idx=0; ion_idx<ion_mzbins_.size(); ++ion_idx) {
 	  carp(CARP_DETAILED_DEBUG, "ion mzbin:%d", ion_mzbins_[ion_idx] );
@@ -241,12 +251,14 @@ vector<double> Peptide::getAAMasses() const {
       masses_charge[i] = MassConstants::mono_table[*residue];
     }
   }
+
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
     masses_charge[index] += delta;
   }
+
   return masses_charge;
 }
 

@@ -222,6 +222,7 @@ class Peptide {
 	  return mass / (charge * 1.0) + MASS_PROTON;
   }
   vector<int>& IonMzbins() { return ion_mzbins_; }
+  vector<double>& IonMzs() { return ion_mzs_; } // added for debug purpose
 
 
  private:
@@ -254,6 +255,7 @@ class Peptide {
 
   // added by Yang
   vector<int> ion_mzbins_;
+  vector<double> ion_mzs_; // added for debug purpose
 };
 
 #endif // PEPTIDE_H
