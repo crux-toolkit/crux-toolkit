@@ -121,6 +121,7 @@ class ObservedPeakSet {
      double bin_offset = MassConstants::bin_width_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
+	  raw_peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
 
     bin_width_  = bin_width;
@@ -130,7 +131,7 @@ class ObservedPeakSet {
 
   }
 
-  ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
+  ~ObservedPeakSet() { delete[] peaks_; delete[] raw_peaks_; delete[] cache_; }
 
   const int* GetCache() const { return cache_; } //TODO 261: access restriction?
 
@@ -217,7 +218,8 @@ class ObservedPeakSet {
   // added by Yang
   int LargestMzbin() const { return largest_mzbin_; };
   int SmallestMzbin() const { return smallest_mzbin_; };
-  vector<int>& FilteredPeakMzbins() { return filtered_peaks_mzbins_; }
+  vector<int>& DynamicFilteredPeakMzbins() { return dyn_filtered_peak_mzbins_; }
+  vector<int>& StaticFilteredPeakMzbins() { return sta_filtered_peak_mzbins_; }
 
  private:
   int& Peak(TheoreticalPeakType peak_type, int index) {
@@ -243,8 +245,10 @@ class ObservedPeakSet {
 
 
   // added by Yang
-  vector<int> filtered_peaks_mzbins_;
-  int largest_mzbin_, smallest_mzbin_;
+  vector<int> dyn_filtered_peak_mzbins_;
+  vector<int> sta_filtered_peak_mzbins_;
+  int largest_mzbin_, smallest_mzbin_, max_mzbin_;
+  double* raw_peaks_;
 
   friend class ObservedPeakTester;
 };

@@ -38,7 +38,8 @@ enum MATCH_COLUMNS_T {
   PRECURSOR_INTENSITY_RANK_M1_COL, // added by Yang
   PRECURSOR_INTENSITY_RANK_M2_COL, // added by Yang
   RT_DIFF_COL, // added by Yang
-  FRAGMENT_PVALUE_COL, // added by Yang
+  DYN_FRAGMENT_PVALUE_COL, // added by Yang
+  STA_FRAGMENT_PVALUE_COL, // added by Yang
   COELUTE_MS1_COL, // added by Yang
   COELUTE_MS2_COL, // added by Yang
   COELUTE_MS1_MS2_COL, // added by Yang

@@ -314,7 +314,8 @@ void TideMatchSet::writeHeadersDIA(ofstream* file, bool compute_sp) {
        PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
        XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
       PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
-      RT_DIFF_COL, FRAGMENT_PVALUE_COL, COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
+      RT_DIFF_COL, DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
+	  COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
        DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
        PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
      };
@@ -346,7 +347,8 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-   const map<Arr::iterator, double>* ms2pval_map,
+   const map<Arr::iterator, double>* dyn_ms2pval_map,
+   const map<Arr::iterator, double>* sta_ms2pval_map,
    map<string, double>* peptide_predrt_map
 ) {
    if (!file || vec.empty()) { return; }
@@ -428,9 +430,11 @@ void TideMatchSet::writeToFileDIA(
 			<< StringUtils::ToString(spectrum->RTime(), precision, true) << '\t'; */
 
 
-      // FRAGMENT_PVALUE_COL
-      double ms2pval = ms2pval_map->at(i);
-      *file << StringUtils::ToString(ms2pval, precision, true) << '\t';
+      // DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
+      double dyn_ms2pval = dyn_ms2pval_map->at(i);
+      double sta_ms2pval = sta_ms2pval_map->at(i);
+      *file << StringUtils::ToString(dyn_ms2pval, precision, true) << '\t'
+    		<< StringUtils::ToString(sta_ms2pval, precision, true) << '\t';
 
       // COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL
       boost::tuple<double, double, double> coelute_tuple = coelute_map->at(i);
