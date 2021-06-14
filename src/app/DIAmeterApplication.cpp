@@ -173,8 +173,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
             	double min_range, max_range;
 
             	// TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
-            	computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
             	// carp(CARP_DETAILED_DEBUG, "==============MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
+            	computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 
 
             	// Normalize the observed spectrum and compute the cache of frequently-needed
@@ -187,7 +187,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
             	if (nCandPeptide == 0) { continue; }
 
             	// carp(CARP_DETAILED_DEBUG, "==============min_mass:%s \t max_mass:%s", StringUtils::Join(*min_mass, ',').c_str(), StringUtils::Join(*max_mass, ',').c_str()  );
-            	carp(CARP_DETAILED_DEBUG, "==============nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass_range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
+            	// carp(CARP_DETAILED_DEBUG, "==============nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass_range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
 
 
             	TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
@@ -280,7 +280,7 @@ void DIAmeterApplication::reportDIA(
    computePrecIntRank(targets, peptides, intensity_rank_arr, &intensity_map, charge);
    computePrecIntRank(decoys, peptides, intensity_rank_arr, &intensity_map, charge);
 
-   // calcualte precursor fragment coelution
+   // calculte precursor fragment coelution
    carp(CARP_DEBUG, "scan_gap:%d \t coelution-oneside-scans:%d", scan_gap_, Params::GetInt("coelution-oneside-scans") );
 
    // extract the MS1 and MS2 scan numbers which constitute the local chromatogram
@@ -293,8 +293,7 @@ void DIAmeterApplication::reportDIA(
 	   valid_ms1scans.push_back(candidate_ms1scan);
 	   valid_ms2scans.push_back(candidate_ms2scan);
    }
-   // carp(CARP_DETAILED_DEBUG, "valid_ms1scans:%s ", StringUtils::Join(valid_ms1scans, ',').c_str() );
-   // carp(CARP_DETAILED_DEBUG, "valid_ms2scans:%s ", StringUtils::Join(valid_ms2scans, ',').c_str() );
+   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^valid_ms1scans:%s \t valid_ms2scans:%s", StringUtils::Join(valid_ms1scans, ',').c_str(), StringUtils::Join(valid_ms2scans, ',').c_str() );
 
    // Loop through each corresponding ms1scan and ms2scan pair
    vector<pair<double*, double*>> intensity_arrs_vector;
@@ -375,10 +374,11 @@ void DIAmeterApplication::computePrecFragCoelute(
 	   double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
 	   // Fragment signals
 	   vector<int> ion_mzbins = peptide.IonMzbins();
+	   vector<double> ion_mzs = peptide.IonMzs();
 	   // Precursor and fragment chromatograms
 	   vector<double*> ms1_chroms, ms2_chroms;
 
-	   // carp(CARP_DETAILED_DEBUG, "ion_mzbins:%s", StringUtils::Join(ion_mzbins, ',').c_str() );
+	   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^Peptide:%s \t charge:%d \t mass:%f", peptide.Seq().c_str(), charge, peptide.Mass() );
 
 	   // build Precursor chromatograms
 	   for (int prec_offset=0; prec_offset<3; ++prec_offset ) {
@@ -393,6 +393,7 @@ void DIAmeterApplication::computePrecFragCoelute(
 			   if (ms1_intensity_arr != NULL && peptide_mzbin < max_ms1_mzbin_) { intensity_arr[coelute_idx] = ms1_intensity_arr[peptide_mzbin]; }
 		   }
 		   ms1_chroms.push_back(intensity_arr);
+		   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^peptide_mz:%f \t peptide_mzbin:%d \t intensity_arr:%s", peptide_mz_m0 + 1.0*prec_offset/(charge * 1.0), peptide_mzbin,  StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
 	   }
 	   // carp(CARP_DETAILED_DEBUG, "ms1_chroms:%d ", ms1_chroms.size() );
 
@@ -409,6 +410,7 @@ void DIAmeterApplication::computePrecFragCoelute(
 			   if (ms2_intensity_arr != NULL && ion_mzbin < max_ms2_mzbin_) { intensity_arr[coelute_idx] = ms2_intensity_arr[ion_mzbin]; }
 		   }
 		   ms2_chroms.push_back(intensity_arr);
+		   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^ion_mz:%f \t ion_mzbin:%d \t intensity_arr:%s", ion_mzs.at(frag_offset), ion_mzbin,  StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
 	   }
 	   // carp(CARP_DETAILED_DEBUG, "ms2_chroms:%d", ms2_chroms.size() );
 
@@ -420,7 +422,6 @@ void DIAmeterApplication::computePrecFragCoelute(
 		   }
 	   }
 	   sort(ms1_corrs.begin(), ms1_corrs.end(), greater<double>());
-	   ms1_corrs.resize(Params::GetInt("coelution-topk"));
 
 	   // calculate correlation among MS2
 	   ms2_corrs.clear();
@@ -430,7 +431,6 @@ void DIAmeterApplication::computePrecFragCoelute(
 		   }
 	   }
 	   sort(ms2_corrs.begin(), ms2_corrs.end(), greater<double>());
-	   ms2_corrs.resize(Params::GetInt("coelution-topk"));
 
 	   // calculate correlation among MS1 and MS2
 	   ms1_ms2_corrs.clear();
@@ -440,7 +440,12 @@ void DIAmeterApplication::computePrecFragCoelute(
 		   }
 	   }
 	   sort(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), greater<double>());
+
+	   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^ms1_corrs:%s \t ms2_corrs:%s \t ms1_ms2_corrs:%s", StringUtils::JoinDoubleVec(ms1_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms2_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms1_ms2_corrs, ',').c_str()  );
+	   ms1_corrs.resize(Params::GetInt("coelution-topk"));
+	   ms2_corrs.resize(Params::GetInt("coelution-topk"));
 	   ms1_ms2_corrs.resize(Params::GetInt("coelution-topk"));
+
 
 	   double ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size();
 	   double ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size();
@@ -767,7 +772,7 @@ void DIAmeterApplication::computeWindowDIA(
    }
    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*sc.charge;
    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*sc.charge;
-   // carp(CARP_DETAILED_DEBUG, "Scan=%d Charge=%d Mass window=[%f, %f]", sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
+   // carp(CARP_DETAILED_DEBUG, "==============scan:%d \t sc.charge:%d \t out_window:[%f, %f] \t out_range:[%f, %f]", sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0], (*min_range), (*max_range) );
 }
 
 double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
