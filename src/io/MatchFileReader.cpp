@@ -212,6 +212,21 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
+
+    // DIAmeter related, added by Yang
+    /*
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M1, !empty(PRECURSOR_INTENSITY_RANK_M1_COL));
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M2, !empty(PRECURSOR_INTENSITY_RANK_M2_COL));
+    match_collection->setScoredType(RT_DIFF, !empty(RT_DIFF_COL));
+    match_collection->setScoredType(DYN_FRAGMENT_PVALUE, !empty(DYN_FRAGMENT_PVALUE_COL));
+    match_collection->setScoredType(STA_FRAGMENT_PVALUE, !empty(STA_FRAGMENT_PVALUE_COL));
+    match_collection->setScoredType(COELUTE_MS1, !empty(COELUTE_MS1_COL));
+    match_collection->setScoredType(COELUTE_MS2, !empty(COELUTE_MS2_COL));
+    match_collection->setScoredType(COELUTE_MS1_MS2, !empty(COELUTE_MS1_MS2_COL));
+    match_collection->setScoredType(ENSEMBLE_SCORE, !empty(ENSEMBLE_SCORE_COL));
+	*/
+
     if (!empty(DECOY_INDEX_COL)) {
       match_collection->setHasDecoyIndexes(true);
     }
@@ -333,6 +348,21 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
+
+
+  // DIAmeter related, added by Yang
+  /*
+  if (!empty(PRECURSOR_INTENSITY_RANK_M0_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M0, getFloat(PRECURSOR_INTENSITY_RANK_M0_COL)); }
+  if (!empty(PRECURSOR_INTENSITY_RANK_M1_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M1, getFloat(PRECURSOR_INTENSITY_RANK_M1_COL)); }
+  if (!empty(PRECURSOR_INTENSITY_RANK_M2_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M2, getFloat(PRECURSOR_INTENSITY_RANK_M2_COL)); }
+  if (!empty(RT_DIFF_COL)) { match->setScore(RT_DIFF, getFloat(RT_DIFF_COL)); }
+  if (!empty(DYN_FRAGMENT_PVALUE_COL)) { match->setScore(DYN_FRAGMENT_PVALUE, getFloat(DYN_FRAGMENT_PVALUE_COL)); }
+  if (!empty(STA_FRAGMENT_PVALUE_COL)) { match->setScore(STA_FRAGMENT_PVALUE, getFloat(STA_FRAGMENT_PVALUE_COL)); }
+  if (!empty(COELUTE_MS1_COL)) { match->setScore(COELUTE_MS1, getFloat(COELUTE_MS1_COL)); }
+  if (!empty(COELUTE_MS2_COL)) { match->setScore(COELUTE_MS2, getFloat(COELUTE_MS2_COL)); }
+  if (!empty(COELUTE_MS1_MS2_COL)) { match->setScore(COELUTE_MS1_MS2, getFloat(COELUTE_MS1_MS2_COL)); }
+  if (!empty(ENSEMBLE_SCORE_COL)) { match->setScore(ENSEMBLE_SCORE, getFloat(ENSEMBLE_SCORE_COL)); }
+   */
 
   // get experiment size
   int experimentSize = 0;

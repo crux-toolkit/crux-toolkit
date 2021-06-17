@@ -108,6 +108,8 @@ class DIAmeterApplication : public CruxApplication {
 
   void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
 
+  void edgeFiltering(const string& input_feature_filename, const string& output_pin_filename);
+
 
  public:
   static const double XCORR_SCALING;
