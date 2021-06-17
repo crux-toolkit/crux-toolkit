@@ -18,6 +18,8 @@
 #include "util/StringUtils.h"
 #include "util/MathUtil.h"
 
+#include "io/DIAmeterFileReader.h"
+
 
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
@@ -74,178 +76,217 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
   // Output setup
-  string output_file_name_ = make_file_path("diameter-search.txt");
-  ofstream* output_file = create_stream_in_path(output_file_name_.c_str(), NULL, Params::GetBool("overwrite"));
-  TideMatchSet::writeHeadersDIA(output_file, Params::GetBool("compute-sp"));
+  string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
+  string output_file_name_sorted_ = make_file_path("diameter-search.sorted.txt");
+  string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
+  string output_pin_name_ = make_file_path("diameter-search.pin");
 
-  map<string, double> peptide_predrt_map;
-  getPeptidePredRTMapping(&peptide_predrt_map);
+  // Extract all edge features
+  if (!FileUtils::Exists(output_file_name_unsorted_) /* || Params::GetBool("overwrite") */) {
+	  carp(CARP_DEBUG, "Either file exists or it needs to be overwrite:%s", output_file_name_unsorted_.c_str());
 
-  vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
-  vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
+	  ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
+	  TideMatchSet::writeHeadersDIA(output_file, Params::GetBool("compute-sp"));
 
-  // Loop through spectrum files
-  for (pair<vector<InputFile>::const_iterator, vector<InputFile>::const_iterator> f(ms1_spectra_files.begin(), ms2_spectra_files.begin());
-     f.first != ms1_spectra_files.end() && f.second != ms2_spectra_files.end(); ++f.first, ++f.second) {
+	  map<string, double> peptide_predrt_map;
+	  getPeptidePredRTMapping(&peptide_predrt_map);
 
-     string ms1_spectra_file = (f.first)->SpectrumRecords;
-     string ms2_spectra_file = (f.second)->SpectrumRecords;
-     string origin_file = (f.second)->OriginalName;
+	  vector<InputFile> ms1_spectra_files = getInputFiles(input_files, 1);
+	  vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
 
-     // load MS1 and MS2 spectra
-     map<int, pair<double*, double*>> ms1scan_intensity_rank_map;
-     loadMS1Spectra(ms1_spectra_file, &ms1scan_intensity_rank_map);
-     SpectrumCollection* spectra = loadSpectra(ms2_spectra_file);
-     carp(CARP_DEBUG, "max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
+	  // Loop through spectrum files
+	  for (pair<vector<InputFile>::const_iterator, vector<InputFile>::const_iterator> f(ms1_spectra_files.begin(), ms2_spectra_files.begin());
+		 f.first != ms1_spectra_files.end() && f.second != ms2_spectra_files.end(); ++f.first, ++f.second) {
 
-     // insert the search code here and will split into a new function later
-     double highest_ms2_mz = spectra->FindHighestMZ();
-     MaxBin::SetGlobalMax(highest_ms2_mz);
-     resetMods();
-     carp(CARP_DEBUG, "Maximum observed MS2 m/z:%f", highest_ms2_mz);
+		 string ms1_spectra_file = (f.first)->SpectrumRecords;
+		 string ms2_spectra_file = (f.second)->SpectrumRecords;
+		 string origin_file = (f.second)->OriginalName;
 
-     // Active queue to process the indexed peptides
-     ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader->Reader(), proteins);
-     active_peptide_queue->setElutionWindow(0);
-     active_peptide_queue->setPeptideCentric(false);
-     active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
-     active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, output_file, NULL, highest_ms2_mz);
+		 // load MS1 and MS2 spectra
+		 map<int, pair<double*, double*>> ms1scan_intensity_rank_map;
+		 loadMS1Spectra(ms1_spectra_file, &ms1scan_intensity_rank_map);
+		 SpectrumCollection* spectra = loadSpectra(ms2_spectra_file);
+		 carp(CARP_DEBUG, "max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
 
-     // initialize fields required for output
-     // Not sure if it is necessary, will check later
-     const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
-     int* sc_index = new int(-1);
-     FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
-     int print_interval = Params::GetInt("print-search-progress");
-     // Keep track of observed peaks that get filtered out in various ways.
-     long int num_range_skipped = 0;
-     long int num_precursors_skipped = 0;
-     long int num_isotopes_skipped = 0;
-     long int num_retained = 0;
+		 // insert the search code here and will split into a new function later
+		 double highest_ms2_mz = spectra->FindHighestMZ();
+		 MaxBin::SetGlobalMax(highest_ms2_mz);
+		 resetMods();
+		 carp(CARP_DEBUG, "Maximum observed MS2 m/z:%f", highest_ms2_mz);
 
-     // This is the main search loop.
-     // DIAmeter supports spectrum centric match report only
-     if (Params::GetBool("peptide-centric-search")) { carp(CARP_FATAL, "Spectrum-centric match only!"); }
+		 // Active queue to process the indexed peptides
+		 ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader->Reader(), proteins);
+		 active_peptide_queue->setElutionWindow(0);
+		 active_peptide_queue->setPeptideCentric(false);
+		 active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
+		 active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, output_file, NULL, highest_ms2_mz);
 
-     ObservedPeakSet observed(bin_width_, bin_offset_, Params::GetBool("use-neutral-loss-peaks"), Params::GetBool("use-flanking-peaks") );
+		 // initialize fields required for output
+		 // Not sure if it is necessary, will check later
+		 const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+		 int* sc_index = new int(-1);
+		 FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
+		 int print_interval = Params::GetInt("print-search-progress");
+		 // Keep track of observed peaks that get filtered out in various ways.
+		 long int num_range_skipped = 0;
+		 long int num_precursors_skipped = 0;
+		 long int num_isotopes_skipped = 0;
+		 long int num_retained = 0;
 
-     // Note:
-     // We don't traverse the collection of SpecCharge, which is sorted by neutral mass and if the neutral mass is equal, sort by the MS2 scan.
-     // Notice that in the DIA setting, each different neutral mass correspond to a (scan-win, charge) pair.
-     // Therefore, we divide the collection of SpecCharge into different chunks, each of which contains spectra
-     // corresponding to the same (scan-win, charge) pair. Within each chunk, the spectra should be sort by the MS2 scan.
-     // The motivation here is to build per chunk (i.e. scan-win) map to extract chromatogram for precursor-fragment coelution.
+		 // This is the main search loop.
+		 // DIAmeter supports spectrum centric match report only
+		 if (Params::GetBool("peptide-centric-search")) { carp(CARP_FATAL, "Spectrum-centric match only!"); }
 
-     vector<SpectrumCollection::SpecCharge> spec_charge_chunk;
-     int curr_precursor_mz = 0;
+		 ObservedPeakSet observed(bin_width_, bin_offset_, Params::GetBool("use-neutral-loss-peaks"), Params::GetBool("use-flanking-peaks") );
 
-     for (vector<SpectrumCollection::SpecCharge>::const_iterator sc_chunk = spec_charges->begin();sc_chunk < spec_charges->begin() + (spec_charges->size()); sc_chunk++) {
-        ++(*sc_index);
-        if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) { carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete", *sc_index, *sc_index / sc_total * 100); }
+		 // Note:
+		 // We don't traverse the collection of SpecCharge, which is sorted by neutral mass and if the neutral mass is equal, sort by the MS2 scan.
+		 // Notice that in the DIA setting, each different neutral mass correspond to a (scan-win, charge) pair.
+		 // Therefore, we divide the collection of SpecCharge into different chunks, each of which contains spectra
+		 // corresponding to the same (scan-win, charge) pair. Within each chunk, the spectra should be sort by the MS2 scan.
+		 // The motivation here is to build per chunk (i.e. scan-win) map to extract chromatogram for precursor-fragment coelution.
 
-        Spectrum* spectrum_chunk = sc_chunk->spectrum;
-        int precursor_mz_chunk = int(spectrum_chunk->PrecursorMZ());
+		 vector<SpectrumCollection::SpecCharge> spec_charge_chunk;
+		 int curr_precursor_mz = 0;
 
-        // deal with a chunk if it's either the end of the same mz or it's the last element
-        if (((precursor_mz_chunk != curr_precursor_mz) || (sc_chunk == (spec_charges->begin() + spec_charges->size()-1)))
-        		&& (spec_charge_chunk.size() > 0) ) {
-            // carp(CARP_DETAILED_DEBUG, "curr_precursor_mz=%d\tspec_charge_chunk size=%d", curr_precursor_mz, spec_charge_chunk.size());
+		 for (vector<SpectrumCollection::SpecCharge>::const_iterator sc_chunk = spec_charges->begin();sc_chunk < spec_charges->begin() + (spec_charges->size()); sc_chunk++) {
+			++(*sc_index);
+			if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) { carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete", *sc_index, *sc_index / sc_total * 100); }
 
-            // cache the MS2 peaks specific to the current isolation window
-            map<int, double*> ms2scan_intensity_map;
-            buildSpectraIndexFromIsoWindow(&spec_charge_chunk, &ms2scan_intensity_map);
-        	// carp(CARP_DETAILED_DEBUG, "max_ms1_mzbin:%d \t max_ms2_mzbin:%d", max_ms1_mzbin_, max_ms2_mzbin_);
+			Spectrum* spectrum_chunk = sc_chunk->spectrum;
+			int precursor_mz_chunk = int(spectrum_chunk->PrecursorMZ());
 
+			// deal with a chunk if it's either the end of the same mz or it's the last element
+			if (((precursor_mz_chunk != curr_precursor_mz) || (sc_chunk == (spec_charges->begin() + spec_charges->size()-1)))
+					&& (spec_charge_chunk.size() > 0) ) {
+				// carp(CARP_DETAILED_DEBUG, "curr_precursor_mz=%d\tspec_charge_chunk size=%d", curr_precursor_mz, spec_charge_chunk.size());
 
-            for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk.begin();sc < spec_charge_chunk.begin() + (spec_charge_chunk.size()); sc++)
-            {
-            	Spectrum* spectrum = sc->spectrum;
-            	double precursor_mz = spectrum->PrecursorMZ();
-            	int scan_num = spectrum->SpectrumNumber();
-            	int ms1_scan_num = spectrum->MS1SpectrumNum();
-            	int charge = sc->charge;
-
-            	// The active peptide queue holds the candidate peptides for spectrum.
-            	// Calculate and set the window, depending on the window type.
-            	vector<double>* min_mass = new vector<double>();
-            	vector<double>* max_mass = new vector<double>();
-            	vector<bool>* candidatePeptideStatus = new vector<bool>();
-            	double min_range, max_range;
-
-            	// TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
-            	// carp(CARP_DETAILED_DEBUG, "==============MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
-            	computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+				// cache the MS2 peaks specific to the current isolation window
+				map<int, double*> ms2scan_intensity_map;
+				buildSpectraIndexFromIsoWindow(&spec_charge_chunk, &ms2scan_intensity_map);
+				// carp(CARP_DETAILED_DEBUG, "max_ms1_mzbin:%d \t max_ms2_mzbin:%d", max_ms1_mzbin_, max_ms2_mzbin_);
 
 
-            	// Normalize the observed spectrum and compute the cache of frequently-needed
-            	// values for taking dot products with theoretical spectra.
-            	// TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
-            	observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
-            	int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
-            	int candidatePeptideStatusSize = candidatePeptideStatus->size();
-            	// carp(CARP_DETAILED_DEBUG, "nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
-            	if (nCandPeptide == 0) { continue; }
+				for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk.begin();sc < spec_charge_chunk.begin() + (spec_charge_chunk.size()); sc++)
+				{
+					Spectrum* spectrum = sc->spectrum;
+					double precursor_mz = spectrum->PrecursorMZ();
+					int scan_num = spectrum->SpectrumNumber();
+					int ms1_scan_num = spectrum->MS1SpectrumNum();
+					int charge = sc->charge;
 
-            	// carp(CARP_DETAILED_DEBUG, "==============min_mass:%s \t max_mass:%s", StringUtils::Join(*min_mass, ',').c_str(), StringUtils::Join(*max_mass, ',').c_str()  );
-            	// carp(CARP_DETAILED_DEBUG, "==============nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass_range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
+					// The active peptide queue holds the candidate peptides for spectrum.
+					// Calculate and set the window, depending on the window type.
+					vector<double>* min_mass = new vector<double>();
+					vector<double>* max_mass = new vector<double>();
+					vector<bool>* candidatePeptideStatus = new vector<bool>();
+					double min_range, max_range;
+
+					// TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+					// carp(CARP_DETAILED_DEBUG, "==============MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
+					computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 
 
-            	TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
-            	// Programs for taking the dot-product with the observed spectrum are laid
-            	// out in memory managed by the active_peptide_queue, one program for each
-            	// candidate peptide. The programs will store the results directly into
-            	// match_arr. We now pass control to those programs.
-            	TideSearchApplication::collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2, candidatePeptideStatusSize, charge);
+					// Normalize the observed spectrum and compute the cache of frequently-needed
+					// values for taking dot products with theoretical spectra.
+					// TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
+					observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
+					int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+					int candidatePeptideStatusSize = candidatePeptideStatus->size();
+					// carp(CARP_DETAILED_DEBUG, "nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
+					if (nCandPeptide == 0) { continue; }
 
-            	// The denominator used in the Tailor score calibration method
-            	double quantile_score = getTailorQuantile(&match_arr2);
-            	// carp(CARP_DETAILED_DEBUG, "Tailor quantile_score:%f", quantile_score);
+					// carp(CARP_DETAILED_DEBUG, "==============min_mass:%s \t max_mass:%s", StringUtils::Join(*min_mass, ',').c_str(), StringUtils::Join(*max_mass, ',').c_str()  );
+					// carp(CARP_DETAILED_DEBUG, "==============nCandPeptide:%d \t candidatePeptideStatusSize:%d \t mass_range:[%f,%f]", nCandPeptide, candidatePeptideStatusSize, min_range, max_range);
 
-            	TideMatchSet::Arr match_arr(nCandPeptide);
-            	for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
-            	   /// Yang: I cannot understand here that the peptide index and the rank is complement.
-            	   /// More attention is needed.
-            	   int peptide_idx = candidatePeptideStatusSize - (it->second);
-            	   if ((*candidatePeptideStatus)[peptide_idx]) {
-            	      TideMatchSet::Scores curScore;
-            	       curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
-            	       curScore.rank = it->second;
-            	       curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
-            	       match_arr.push_back(curScore);
-            	       // carp(CARP_DETAILED_DEBUG, "peptide_idx:%d \t xcorr_score:%f \t rank:%d", peptide_idx, curScore.xcorr_score, curScore.rank);
-            	   }
-            	}
 
-            	TideMatchSet matches(&match_arr, highest_ms2_mz);
-            	if (!match_arr.empty()) { reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations, &matches, &observed, &ms1scan_intensity_rank_map, &ms2scan_intensity_map, &peptide_predrt_map); }
+					TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
+					// Programs for taking the dot-product with the observed spectrum are laid
+					// out in memory managed by the active_peptide_queue, one program for each
+					// candidate peptide. The programs will store the results directly into
+					// match_arr. We now pass control to those programs.
+					TideSearchApplication::collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2, candidatePeptideStatusSize, charge);
 
-            }
+					// The denominator used in the Tailor score calibration method
+					double quantile_score = getTailorQuantile(&match_arr2);
+					// carp(CARP_DETAILED_DEBUG, "Tailor quantile_score:%f", quantile_score);
 
-            // clear up for next chunk
-            for (map<int, double*>::const_iterator i = ms2scan_intensity_map.begin(); i != ms2scan_intensity_map.end(); i++) { delete[] (i->second); }
-            ms2scan_intensity_map.clear();
-            spec_charge_chunk.clear();
-        }
+					TideMatchSet::Arr match_arr(nCandPeptide);
+					for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
+					   /// Yang: I cannot understand here that the peptide index and the rank is complement.
+					   /// More attention is needed.
+					   int peptide_idx = candidatePeptideStatusSize - (it->second);
+					   if ((*candidatePeptideStatus)[peptide_idx]) {
+						  TideMatchSet::Scores curScore;
+						   curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
+						   curScore.rank = it->second;
+						   curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
+						   match_arr.push_back(curScore);
+						   // carp(CARP_DETAILED_DEBUG, "peptide_idx:%d \t xcorr_score:%f \t rank:%d", peptide_idx, curScore.xcorr_score, curScore.rank);
+					   }
+					}
 
-        curr_precursor_mz = precursor_mz_chunk;
-        spec_charge_chunk.push_back(*sc_chunk);
+					TideMatchSet matches(&match_arr, highest_ms2_mz);
+					if (!match_arr.empty()) { reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations, &matches, &observed, &ms1scan_intensity_rank_map, &ms2scan_intensity_map, &peptide_predrt_map); }
 
-        // carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%d \t charge:%d ", ms1_scan_num, scan_num, precursor_mz, charge);
-     }
+				}
 
-     // clean up
-     delete spectra;
-     delete sc_index;
-     for (map<int, pair<double*, double*>>::const_iterator i = ms1scan_intensity_rank_map.begin(); i != ms1scan_intensity_rank_map.end(); i++) {
-        delete[] (i->second).first;
-        delete[] (i->second).second;
-     }
-     ms1scan_intensity_rank_map.clear();
-     delete active_peptide_queue;
+				// clear up for next chunk
+				for (map<int, double*>::const_iterator i = ms2scan_intensity_map.begin(); i != ms2scan_intensity_map.end(); i++) { delete[] (i->second); }
+				ms2scan_intensity_map.clear();
+				spec_charge_chunk.clear();
+			}
+
+			curr_precursor_mz = precursor_mz_chunk;
+			spec_charge_chunk.push_back(*sc_chunk);
+
+			// carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%d \t charge:%d ", ms1_scan_num, scan_num, precursor_mz, charge);
+		 }
+
+		 // clean up
+		 delete spectra;
+		 delete sc_index;
+		 for (map<int, pair<double*, double*>>::const_iterator i = ms1scan_intensity_rank_map.begin(); i != ms1scan_intensity_rank_map.end(); i++) {
+			delete[] (i->second).first;
+			delete[] (i->second).second;
+		 }
+		 ms1scan_intensity_rank_map.clear();
+		 delete active_peptide_queue;
+	  }
+
+	  // clean up
+	  if (output_file) { delete output_file; }
+
   }
-  /* */
+
+  // Sort the edges first by the scan number then by the charge state
+  if (!FileUtils::Exists(output_file_name_sorted_) /* || Params::GetBool("overwrite") */) {
+  	  carp(CARP_DEBUG, "Either file exists or it needs to be overwrite:%s", output_file_name_sorted_.c_str());
+
+  	  stringstream cmd_ss;
+  	  cmd_ss << "sort " << output_file_name_unsorted_ << " -k2n -k3n -o " << output_file_name_sorted_;
+  	  carp(CARP_DEBUG, "sort command:%s", cmd_ss.str().c_str());
+  	  system(cmd_ss.str().c_str());
+  }
+  if (!FileUtils::Exists(output_file_name_sorted_)) { carp(CARP_FATAL, "The file must exists! %s", output_file_name_sorted_.c_str()); }
+
+  // standardize the features
+  if (!FileUtils::Exists(output_file_name_scaled_) /* || Params::GetBool("overwrite") */) {
+	  DIAmeterFileReader diameterReader(output_file_name_sorted_.c_str());
+	  diameterReader.calcDataQuantile();
+	  diameterReader.writeScaledFile(output_file_name_scaled_.c_str());
+  }
+
+  // filter the edges and genereate .pin file
+  edgeFiltering(output_file_name_scaled_, output_pin_name_);
+
   return 0;
 }
+
+void DIAmeterApplication::edgeFiltering(const string& input_feature_filename, const string& output_pin_filename) {
+
+}
+
 
 void DIAmeterApplication::reportDIA(
    ofstream* output_file,  //< output file to write to

@@ -180,6 +180,7 @@ set (
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
   app/TideSearchApplication.cpp
+  io/DIAmeterFileReader.cpp
   app/DIAmeterApplication.cpp
   util/utils.cpp
 )

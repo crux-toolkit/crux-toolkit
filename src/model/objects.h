@@ -478,6 +478,20 @@ enum _scorer_type {
   BOTH_PVALUE, //combined res-ev pvalue and xcorr pvalue. added by Andy Lin
   TAILOR_SCORE,  //Added for tailor score calibration method by AKF
 
+  // DIAmeter-related scores, added by Yang
+  /*
+  PRECURSOR_INTENSITY_RANK_M0,
+  PRECURSOR_INTENSITY_RANK_M1,
+  PRECURSOR_INTENSITY_RANK_M2,
+  RT_DIFF,
+  DYN_FRAGMENT_PVALUE,
+  STA_FRAGMENT_PVALUE,
+  COELUTE_MS1,
+  COELUTE_MS2,
+  COELUTE_MS1_MS2,
+  ENSEMBLE_SCORE,
+  */
+
   // The following are computed by assign-confidence.
   SIDAK_ADJUSTED,             ///< Sidak adjusted p-value
   TIDE_SEARCH_EXACT_SMOOTHED, ///< smoothed p-value
