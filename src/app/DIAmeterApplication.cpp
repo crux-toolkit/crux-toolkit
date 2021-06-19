@@ -18,7 +18,8 @@
 #include "util/StringUtils.h"
 #include "util/MathUtil.h"
 
-#include "io/DIAmeterFileReader.h"
+#include "io/DIAmeterFeatureScaler.h"
+#include "io/DIAmeterPSMFilter.h"
 
 
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
@@ -79,6 +80,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
   string output_file_name_sorted_ = make_file_path("diameter-search.sorted.txt");
   string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
+  string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
   string output_pin_name_ = make_file_path("diameter-search.pin");
 
   // Extract all edge features
@@ -255,8 +257,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  }
 
 	  // clean up
-	  if (output_file) { delete output_file; }
-
+	  if (output_file) { output_file->close(); delete output_file; }
   }
 
   // Sort the edges first by the scan number then by the charge state
@@ -272,19 +273,22 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
   // standardize the features
   if (!FileUtils::Exists(output_file_name_scaled_) /* || Params::GetBool("overwrite") */) {
-	  DIAmeterFileReader diameterReader(output_file_name_sorted_.c_str());
-	  diameterReader.calcDataQuantile();
-	  diameterReader.writeScaledFile(output_file_name_scaled_.c_str());
+	  DIAmeterFeatureScaler diameterScaler(output_file_name_sorted_.c_str());
+	  diameterScaler.calcDataQuantile();
+	  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
-  // filter the edges and genereate .pin file
-  edgeFiltering(output_file_name_scaled_, output_pin_name_);
+  // filter the edges
+  if (!FileUtils::Exists(output_file_name_filtered_) /* || Params::GetBool("overwrite") */) {
+	  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
+	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str());
+  }
+
+  // generate .pin file
+
+
 
   return 0;
-}
-
-void DIAmeterApplication::edgeFiltering(const string& input_feature_filename, const string& output_pin_filename) {
-
 }
 
 

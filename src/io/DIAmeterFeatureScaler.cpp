@@ -1,31 +1,27 @@
 
 //#include "MatchColumns.h"
-#include "DIAmeterFileReader.h"
+#include "DIAmeterFeatureScaler.h"
 #include "DelimitedFile.h"
 #include "carp.h"
 
 using namespace std;
 
-DIAmeterFileReader::DIAmeterFileReader(const char* file_name) {
+DIAmeterFeatureScaler::DIAmeterFeatureScaler(const char* file_name) {
 	fileReader_ = new DelimitedFileReader(file_name, true);
     parseHeader();
 }
 
-DIAmeterFileReader::~DIAmeterFileReader() {
+DIAmeterFeatureScaler::~DIAmeterFeatureScaler() {
 	delete fileReader_;
 	for(std::vector<int>::iterator it = toscale_column_indices_.begin(); it != toscale_column_indices_.end(); ++it) {
 		delete toscale_match_values_[*it];
 	}
 }
 
-void DIAmeterFileReader::writeScaledFile(const char* output_file_name) {
+void DIAmeterFeatureScaler::writeScaledFile(const char* output_file_name) {
 	 fileReader_->reset();
 	 std::vector<std::string> output_vec;
 	 std::vector<std::string> column_names = fileReader_->getColumnNames();
-
-	 // std::vector<int> column_indices;
-	 // for (int idx = 0; idx < column_names.size(); idx++) { column_indices.push_back(fileReader_->findColumn(column_names.at(idx))); }
-	 // carp(CARP_DEBUG, "column_indices:%s", StringUtils::Join(column_indices, '\t').c_str() );
 
 	 ofstream* output_file = create_stream_in_path(output_file_name, NULL, Params::GetBool("overwrite"));
 	 *output_file << StringUtils::Join(column_names, '\t').c_str() << endl;
@@ -49,10 +45,10 @@ void DIAmeterFileReader::writeScaledFile(const char* output_file_name) {
 		 fileReader_->next();
 	 }
 
-	 if (output_file) { delete output_file; }
+	 if (output_file) { output_file->close(); delete output_file; }
 }
 
-void DIAmeterFileReader::calcDataQuantile(double quantile_low, double quantile_high) {
+void DIAmeterFeatureScaler::calcDataQuantile(double quantile_low, double quantile_high) {
 	int record_cnt = 0;
 	fileReader_->reset();
 	while (fileReader_->hasNext()) {
@@ -82,7 +78,7 @@ void DIAmeterFileReader::calcDataQuantile(double quantile_low, double quantile_h
 	}
 }
 
-void DIAmeterFileReader::parseHeader() {
+void DIAmeterFeatureScaler::parseHeader() {
   for (int idx = 0; idx < NUMBER_MATCH_COLUMNS; idx++) {
     match_indices_[idx] = fileReader_->findColumn(get_column_header(idx));
     toscale_match_values_[idx] = NULL;
@@ -108,7 +104,7 @@ void DIAmeterFileReader::parseHeader() {
 }
 
 
-std::vector<bool> DIAmeterFileReader::getMatchColumnsPresent() {
+std::vector<bool> DIAmeterFeatureScaler::getMatchColumnsPresent() {
 	std::vector<bool> col_is_present;
 	col_is_present.assign(NUMBER_MATCH_COLUMNS, false);
 	for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++) {
