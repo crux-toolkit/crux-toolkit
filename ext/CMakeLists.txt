@@ -240,7 +240,7 @@ ExternalProject_Add(
 ExternalProject_Add(
   MSToolkit
   GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-  GIT_TAG 0077644
+  GIT_TAG rev83
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -248,18 +248,13 @@ ExternalProject_Add(
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
   PATCH_COMMAND
+    COMMAND
+      unzip -o src/zlib1211.zip -d src
+    COMMAND
+      tar xvf src/expat-2.2.9.tar.gz -C src
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/include/MSReader.h
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/
-    COMMAND ${CMAKE_COMMAND} -E copy
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/MSReader.cpp
-       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
-    COMMAND ${CMAKE_COMMAND} -E copy
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/mzMLWriter.cpp
-       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
   BUILD_IN_SOURCE 1
 )
 
