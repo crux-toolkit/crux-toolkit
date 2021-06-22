@@ -1,6 +1,6 @@
 project(crux)
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.6)
+cmake_policy(VERSION 3.6)
 
 if (BUILD_32)
   message("-- 32 bit build selected")

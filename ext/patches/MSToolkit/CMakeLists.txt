@@ -7,11 +7,11 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
 # COMPILE MSToolkit
 ###############################################################################
 
-set(EXPAT_PATH ./src/expat-2.2.0)
+set(EXPAT_PATH ./src/expat-2.2.9/lib)
 set(MST_PATH ./src/MSToolkit)
 set(MZIMLTOOLS_PATH ./src/mzIMLTools)
 set(MZPARSER_PATH ./src/mzParser)
-set(ZLIB_PATH ./src/zlib-1.2.8)
+set(ZLIB_PATH ./src/zlib-1.2.11)
 
 set(
   EXPAT 
@@ -42,6 +42,7 @@ endif (WIN32 AND NOT Cygwin)
 
 set(
   MZIMLTOOLS
+  ${MZIMLTOOLS_PATH}/CAffiliation.cpp
   ${MZIMLTOOLS_PATH}/CAdditionalSearchParams.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisCollection.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisData.cpp
@@ -49,6 +50,7 @@ set(
   ${MZIMLTOOLS_PATH}/CAnalysisProtocolCollection.cpp
   ${MZIMLTOOLS_PATH}/CAnalysisSoftware.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisSoftwareList.cpp 
+  ${MZIMLTOOLS_PATH}/CAuditCollection.cpp 
   ${MZIMLTOOLS_PATH}/CContactRole.cpp 
   ${MZIMLTOOLS_PATH}/CCvList.cpp 
   ${MZIMLTOOLS_PATH}/CDatabaseName.cpp 
@@ -61,6 +63,7 @@ set(
   ${MZIMLTOOLS_PATH}/CFragmentArray.cpp 
   ${MZIMLTOOLS_PATH}/CFragmentation.cpp 
   ${MZIMLTOOLS_PATH}/CFragmentationTable.cpp 
+  ${MZIMLTOOLS_PATH}/CFragmentTolerance.cpp 
   ${MZIMLTOOLS_PATH}/CInputs.cpp 
   ${MZIMLTOOLS_PATH}/CIonType.cpp
   ${MZIMLTOOLS_PATH}/CMassTable.cpp 
@@ -68,14 +71,19 @@ set(
   ${MZIMLTOOLS_PATH}/CModification.cpp 
   ${MZIMLTOOLS_PATH}/CModificationParams.cpp 
   ${MZIMLTOOLS_PATH}/CMzIdentML.cpp 
+  ${MZIMLTOOLS_PATH}/COrganization.cpp 
+  ${MZIMLTOOLS_PATH}/CParent.cpp 
+  ${MZIMLTOOLS_PATH}/CParentTolerance.cpp 
   ${MZIMLTOOLS_PATH}/CPeptide.cpp 
   ${MZIMLTOOLS_PATH}/CPeptideEvidence.cpp 
   ${MZIMLTOOLS_PATH}/CPeptideHypothesis.cpp
+  ${MZIMLTOOLS_PATH}/CPerson.cpp 
   ${MZIMLTOOLS_PATH}/CProteinAmbiguityGroup.cpp 
   ${MZIMLTOOLS_PATH}/CProteinDetection.cpp 
   ${MZIMLTOOLS_PATH}/CProteinDetectionHypothesis.cpp  
   ${MZIMLTOOLS_PATH}/CProteinDetectionList.cpp 
   ${MZIMLTOOLS_PATH}/CProteinDetectionProtocol.cpp
+  ${MZIMLTOOLS_PATH}/CProvider.cpp 
   ${MZIMLTOOLS_PATH}/CPSM.cpp 
   ${MZIMLTOOLS_PATH}/CResidue.cpp 
   ${MZIMLTOOLS_PATH}/CRole.cpp
@@ -83,6 +91,7 @@ set(
   ${MZIMLTOOLS_PATH}/CSearchModification.cpp 
   ${MZIMLTOOLS_PATH}/CSearchType.cpp 
   ${MZIMLTOOLS_PATH}/CSequenceCollection.cpp 
+  ${MZIMLTOOLS_PATH}/CSiteRegexp.cpp 
   ${MZIMLTOOLS_PATH}/CSoftwareName.cpp
   ${MZIMLTOOLS_PATH}/CSourceFile.cpp 
   ${MZIMLTOOLS_PATH}/CSpecificityRules.cpp 

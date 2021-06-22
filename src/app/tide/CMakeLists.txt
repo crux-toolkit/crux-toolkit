@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.6)
+cmake_policy(VERSION 3.6)
 
 ###### Set up include and link directories  ######
 if (WIN32 AND NOT CYGWIN)

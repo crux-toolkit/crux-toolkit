@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.1)
-cmake_policy(VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.6)
+cmake_policy(VERSION 3.6)
 
 # Copy files for performance tests in case we are building out of source.
 file(COPY crux.param DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
