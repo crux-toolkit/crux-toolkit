@@ -79,8 +79,16 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
   string output_file_name_sorted_ = make_file_path("diameter-search.sorted.txt");
   string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
-  string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
-  string output_pin_name_ = make_file_path("diameter-search.pin");
+  // string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
+
+  stringstream param_ss;
+  param_ss << "diameter-search.filtered";
+  param_ss << "_prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
+  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
+  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
+  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
+  param_ss << ".txt";
+  string output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
 
   // Extract all edge features
   if (!FileUtils::Exists(output_file_name_unsorted_) /* || Params::GetBool("overwrite") */) {
