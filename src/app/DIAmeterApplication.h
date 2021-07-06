@@ -176,4 +176,6 @@ class DIAmeterApplication : public CruxApplication {
  * gdb -ex=r --args src/./crux diameter --precursor-window 10 --precursor-window-type mz --top-match 5 --use-tailor-calibration T --concat T --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 > log.txt 2> error.txt 1> output.txt
  * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all
  *
+ * src/./crux make-pin --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output --output-file diameter-search.filtered.pin --overwrite T /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered.txt
+ *
  */

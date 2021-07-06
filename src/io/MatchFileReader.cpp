@@ -214,7 +214,6 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
 
     // DIAmeter related, added by Yang
-    /*
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M1, !empty(PRECURSOR_INTENSITY_RANK_M1_COL));
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M2, !empty(PRECURSOR_INTENSITY_RANK_M2_COL));
@@ -225,7 +224,6 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(COELUTE_MS2, !empty(COELUTE_MS2_COL));
     match_collection->setScoredType(COELUTE_MS1_MS2, !empty(COELUTE_MS1_MS2_COL));
     match_collection->setScoredType(ENSEMBLE_SCORE, !empty(ENSEMBLE_SCORE_COL));
-	*/
 
     if (!empty(DECOY_INDEX_COL)) {
       match_collection->setHasDecoyIndexes(true);
@@ -349,9 +347,7 @@ Crux::Match* MatchFileReader::parseMatch() {
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
 
-
   // DIAmeter related, added by Yang
-  /*
   if (!empty(PRECURSOR_INTENSITY_RANK_M0_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M0, getFloat(PRECURSOR_INTENSITY_RANK_M0_COL)); }
   if (!empty(PRECURSOR_INTENSITY_RANK_M1_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M1, getFloat(PRECURSOR_INTENSITY_RANK_M1_COL)); }
   if (!empty(PRECURSOR_INTENSITY_RANK_M2_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M2, getFloat(PRECURSOR_INTENSITY_RANK_M2_COL)); }
@@ -362,7 +358,7 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(COELUTE_MS2_COL)) { match->setScore(COELUTE_MS2, getFloat(COELUTE_MS2_COL)); }
   if (!empty(COELUTE_MS1_MS2_COL)) { match->setScore(COELUTE_MS1_MS2, getFloat(COELUTE_MS1_MS2_COL)); }
   if (!empty(ENSEMBLE_SCORE_COL)) { match->setScore(ENSEMBLE_SCORE, getFloat(ENSEMBLE_SCORE_COL)); }
-   */
+
 
   // get experiment size
   int experimentSize = 0;

@@ -63,8 +63,23 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("lnNumDSP", false));
   features_.push_back(make_pair("dM", true));
   features_.push_back(make_pair("absdM", true));
+
+  // DIAmeter related, added by Yang
+  features_.push_back(make_pair("PrecursorIntRankM0", true));
+  features_.push_back(make_pair("PrecursorIntRankM1", true));
+  features_.push_back(make_pair("PrecursorIntRankM2", true));
+  features_.push_back(make_pair("RTDiff", true));
+  features_.push_back(make_pair("DynFragPVal", true));
+  features_.push_back(make_pair("StaFragPVal", true));
+  features_.push_back(make_pair("CoeluteMS1", true));
+  features_.push_back(make_pair("CoeluteMS2", true));
+  features_.push_back(make_pair("CoeluteMS1MS2", true));
+  features_.push_back(make_pair("EnsembleScore", true));
+
+
   features_.push_back(make_pair("Peptide", true));
   features_.push_back(make_pair("Proteins", true));
+
 }
 
 PinWriter::~PinWriter() { 
@@ -157,6 +172,19 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("NegLog10ResEvPValue", combine_p);
   setEnabledStatus("NegLog10CombinePValue", combine_p);
   setEnabledStatus("TailorScore", tailor);
+
+  // DIAmeter related, added by Yang
+  setEnabledStatus("PrecursorIntRankM0", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M0));
+  setEnabledStatus("PrecursorIntRankM1", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M1));
+  setEnabledStatus("PrecursorIntRankM2", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M2));
+  setEnabledStatus("RTDiff", collection->getScoredType(RT_DIFF));
+  setEnabledStatus("DynFragPVal", collection->getScoredType(DYN_FRAGMENT_PVALUE));
+  setEnabledStatus("StaFragPVal", collection->getScoredType(STA_FRAGMENT_PVALUE));
+  setEnabledStatus("CoeluteMS1", collection->getScoredType(COELUTE_MS1));
+  setEnabledStatus("CoeluteMS2", collection->getScoredType(COELUTE_MS2));
+  setEnabledStatus("CoeluteMS1MS2", collection->getScoredType(COELUTE_MS1_MS2));
+  setEnabledStatus("EnsembleScore", collection->getScoredType(ENSEMBLE_SCORE));
+
 
   int max_charge = 0;
   for (MatchIterator i = MatchIterator(collection); i.hasNext();) {
@@ -281,7 +309,20 @@ void PinWriter::printPSM(
       fields.push_back(getPeptide(peptide));
     } else if (feature == "Proteins") {
       fields.push_back(StringUtils::Join(peptide->getProteinIds(), '\t'));
-    } else {
+    }
+    // DIAmeter related, added by Yang
+    else if (feature == "PrecursorIntRankM0") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }
+    else if (feature == "PrecursorIntRankM1") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M1))); }
+    else if (feature == "PrecursorIntRankM2") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M2))); }
+    else if (feature == "RTDiff") { fields.push_back(StringUtils::ToString(match->getScore(RT_DIFF))); }
+    else if (feature == "DynFragPVal") { fields.push_back(StringUtils::ToString(match->getScore(DYN_FRAGMENT_PVALUE))); }
+    else if (feature == "StaFragPVal") { fields.push_back(StringUtils::ToString(match->getScore(STA_FRAGMENT_PVALUE))); }
+    else if (feature == "CoeluteMS1") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1))); }
+    else if (feature == "CoeluteMS2") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS2))); }
+    else if (feature == "CoeluteMS1MS2") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1_MS2))); }
+    else if (feature == "EnsembleScore") { fields.push_back(StringUtils::ToString(match->getScore(ENSEMBLE_SCORE))); }
+
+    else {
       carp(CARP_FATAL, "Unknown feature: '%s'", feature.c_str());
     }
   }
