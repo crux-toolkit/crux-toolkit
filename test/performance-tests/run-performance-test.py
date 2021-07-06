@@ -11,6 +11,7 @@
 import sys
 import subprocess
 import os
+import pandas as pd
 
 # The location of the crux binary.
 CRUX = "../../src/crux"
@@ -128,12 +129,15 @@ def createParameterFile(parameterFileName):
 
 #############################################################################
 def extractData(inputFileName, columnName, outputFileName):
-  runCommand("%s extract-columns %s \"%s\" > %s" % 
-             (CRUX, inputFileName, columnName, outputFileName), "")
+#  dataset = pd.read_csv(inputFileName, sep='\t')
+#  data_frame = pd.DataFrame(dataset)
+  data_frame = pd.read_csv(inputFileName, sep='\t')
+  data_frame = data_frame[[columnName]]
+  data_frame.to_csv(outputFileName, sep='\t', index=False)
 
 #############################################################################
 def runSearch(outputDirectory, searchName, searchParam, database, 
-              concatenatedDatabase, psmFile, scoreColumn, confidenceParam):
+              psmFile, scoreColumn, confidenceParam):
 
   runCommand("%s %s --output-dir %s --parameter-file %s %s %s %s"
              % (CRUX, searchName, outputDirectory, parameterFileName, 
@@ -154,24 +158,15 @@ def runSearch(outputDirectory, searchName, searchParam, database,
   qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
   extractData(percolatorFile, "percolator q-value", qFile)
 
-  qrankerFile = "%s/q-ranker.target.psms.txt" % outputDirectory
-  runCommand("%s q-ranker --decoy-prefix decoy_ --output-dir %s %s %s"
-             % (CRUX, outputDirectory, ms2, psmFile), qrankerFile)
-
-  qFile = "%s/%s.q-ranker.q.txt" % (outputDirectory, searchName)
-  extractData(qrankerFile, "q-ranker q-value", qFile)
-
-  baristaFile = "%s/barista.target.psms.txt" % outputDirectory
-  runCommand("%s barista --decoy-prefix decoy_ --output-dir %s %s %s %s"
-             % (CRUX, outputDirectory, concatenatedDatabase, ms2, psmFile),
-             baristaFile)
-
-  qFile = "%s/%s.barista.q.txt" % (outputDirectory, searchName)
-  extractData(baristaFile, "barista q-value", qFile)
+  fourColFile = "%s/%s.target.four-col.txt" % (outputDirectory, searchName)
+  dataset = pd.read_csv(psmFile, sep='\t')
+  data_frame = pd.DataFrame(dataset)
+  data_frame = data_frame[["scan", "charge", "sequence", scoreColumn]]
+  data_frame.to_csv(fourColFile, sep='\t', index=False)
 
   reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
-  runCommand("%s extract-columns %s \"scan,charge,sequence,%s\" | awk 'NR > 1' | awk '{print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' | sort -k 1b,1 > %s"
-             % (CRUX, psmFile, scoreColumn, reducedFile), "")
+  runCommand("awk 'NR > 1 {print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' %s | sort -k 1b,1 > %s" %
+             (fourColFile, reducedFile), "")
 
 
 # Create a scatter plot of XCorr scores.
@@ -237,76 +232,54 @@ createParameterFile(parameterFileName)
 runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
            % (CRUX, database, parameterFileName, database, database),
            "%s/tide-index.peptides.target.txt" % database)
-# Create concatenated database for use by Barista
-concatenatedDatabase = "targets-and-decoys.fasta"
-runCommand("cat %s/tide-index.decoy.fasta %s.fa > %s"
-           % (database, database, concatenatedDatabase), "")
 
 # Run four searches (Comet, and Tide XCorr, XCorr p-value, and residue evidence p-value).
 runSearch("tide-xcorr", "tide-search", "", database,
-          concatenatedDatabase, "tide-xcorr/tide-search.txt",
+          "tide-xcorr/tide-search.txt",
           "xcorr score", "")
 runSearch("tide-p-value", "tide-search", "--exact-p-value T",
-          database, concatenatedDatabase, "tide-p-value/tide-search.txt",
+          database, "tide-p-value/tide-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
 runSearch("tide-res-ev", "tide-search",
-          "--exact-p-value T --score-function residue-evidence",
-          database, concatenatedDatabase, "tide-res-ev/tide-search.txt",
+          "--exact-p-value T --score-function residue-evidence --fragment-tolerance 1.0005079",
+          database, "tide-res-ev/tide-search.txt",
           "res-ev p-value", "--score \"res-ev p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
-          concatenatedDatabase, "comet/comet.target.txt",
+          "comet/comet.target.txt",
           "xcorr score", "--score e-value")
 runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", "%s.fa" % database,
-          concatenatedDatabase, "tide-tailor/tide-search.txt",
+          "tide-tailor/tide-search.txt",
           "xcorr score", "")
 
 # Make the performance plots, segregated by search method..
 makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),
-                     ("comet/comet.percolator.q.txt", "Comet Percolator"),
-                     ("comet/comet.q-ranker.q.txt", "Comet q-ranker"),
-                     ("comet/comet.barista.q.txt", "Comet barista")])
+                     ("comet/comet.percolator.q.txt", "Comet Percolator")])
 makePerformancePlot("tide.p-value",
                     [("tide-p-value/tide-search.q.txt", "Tide p-value"),
-                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
-                     ("tide-p-value/tide-search.q-ranker.q.txt", "Tide p-value q-ranker"),
-                     ("tide-p-value/tide-search.barista.q.txt", "Tide p-value barista")])
+                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator")])
 makePerformancePlot("tide.xcorr",
                     [("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
-                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
-                     ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
-                     ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista")])
+                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator")])
 makePerformancePlot("tide.tailor",
                     [("tide-tailor/tide-search.q.txt", "Tide Tailor "),
-                     ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator"),
-                     ("tide-tailor/tide-search.q-ranker.q.txt", "Tide Tailor q-ranker"),
-                     ("tide-tailor/tide-search.barista.q.txt", "Tide Tailor barista")])
+                     ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator")])
 makePerformancePlot("tide.res-ev",
                     [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
-                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
-                     ("tide-res-ev/tide-search.q-ranker.q.txt", "Tide res-ev q-ranker"),
-                    ("tide-res-ev/tide-search.barista.q.txt", "Tide res-ev barista")])
+                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator")])
 
 # Make the performance plots, segregated by post-processor.
 makePerformancePlot("assign-confidence",
                     [("comet/comet.q.txt", "Comet E-value"),
                      ("tide-p-value/tide-search.q.txt", "Tide p-value"),
                      ("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
+                     ("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
                      ("tide-tailor/tide-search.q.txt", "Tide Tailor")])
 makePerformancePlot("percolator",
                     [("comet/comet.percolator.q.txt", "Comet Percolator"),
                      ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
                      ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
+                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
                      ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator")])
-makePerformancePlot("q-ranker",
-                    [("comet/comet.q-ranker.q.txt", "Comet q-ranker"),
-                     ("tide-xcorr/tide-search.q-ranker.q.txt", "Tide XCorr q-ranker"),
-                     ("tide-p-value/tide-search.q-ranker.q.txt", "Tide p-value q-ranker"),
-                     ("tide-tailor/tide-search.q-ranker.q.txt", "Tide Tailor q-ranker")])
-makePerformancePlot("barista",
-                    [("comet/comet.barista.q.txt", "Comet barista"),
-                     ("tide-p-value/tide-search.barista.q.txt", "Tide p-value barista"),
-                     ("tide-xcorr/tide-search.barista.q.txt", "Tide XCorr barista"),
-                     ("tide-tailor/tide-search.barista.q.txt", "Tide Tailor barista")])
 
 
 # Make the XCorr scatter plots.
