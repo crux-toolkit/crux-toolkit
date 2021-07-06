@@ -2076,6 +2076,10 @@ Params::Params() : finalized_(false) {
         "The coefficient to balance the precursor and fragment co-elution feature in calculating the aggregated score",
         "It is used for DIAmeter", true);
 
+  InitStringParam("coeff-tag", "",
+          "The tag to encode the information about coefficients",
+          "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", true);
+
   Categorize();
 }
 
