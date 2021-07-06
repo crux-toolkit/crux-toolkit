@@ -82,11 +82,15 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   // string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
 
   stringstream param_ss;
-  param_ss << "diameter-search.filtered";
-  param_ss << "_prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
-  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
-  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
-  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
+  param_ss << "diameter-search.filtered_";
+
+  string coeff_tag = Params::GetString("coeff-tag");
+  if (coeff_tag.empty()) {
+	  param_ss << "prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
+	  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
+	  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
+	  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
+  } else { param_ss << coeff_tag;  }
   param_ss << ".txt";
   string output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
 
