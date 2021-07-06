@@ -115,7 +115,7 @@ int TideIndexApplication::main(
     var_mod_table.ParsedNtpepModTable(), 
     var_mod_table.ParsedCtpepModTable(),
     var_mod_table.ParsedNtproModTable(),
-    var_mod_table.ParsedCtproModTable(), 0, 0)) {
+    var_mod_table.ParsedCtproModTable(), MassConstants::bin_width_, MassConstants::bin_offset_)) {
     carp(CARP_FATAL, "Error in MassConstants::Init");
   }
 

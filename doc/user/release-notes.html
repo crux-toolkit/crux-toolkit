@@ -51,23 +51,46 @@
 		</nav>
 		<div id="content">
 		<!-- START CONTENT -->
-    <blockquote> 
     <h2>Release notes for Crux</h2>
 
-<h3>Unversioned updates</h3>
+<h3>Unversioned</h3>
+
+<h4>Major changes</h4>
+<ul>
+</ul>
+
+<h4>Minor changes</h4>
+<ul>
+  <li>10 Jun 2021: Fixed bug in computing the m/z window size in
+  Tide.  Affected only the setting when <code>precursor-window-type=mz</code>.</li>
+  <li>7 Jun 2021: Revised documentation and added check to ensure that
+  the brief-output option to tide-search is not used in conjunction
+  with formats other than tab-delimited text output.</li>
+  <li>11 May 2021: Fixed bug in p-value search that incorrectly set the bin_width to 0 when tide-search was given a FASTA file.</li>
+  <li>11 May 2021: Added smoke tests to test case where tide-search is given a FASTA file instead of a index.</li>
+</ul>
+
+<hr/>
+
+<h3>Version 4.0</h3> April 06, 2021
 
 <h4>Major changes</h3>
 
 <ul>
-  <li>March 9, 2021: Removed seldeom used modules: xlink, xlink-assign-ions, xlink-score-spectrum,
+  <li>March 9, 2021: Removed seldom used commands: xlink, xlink-assign-ions, xlink-score-spectrum,
   barista, q-ranker, extract-columns, extract-rows, stat-column, sort-by-column.
   </li>
 
-  <li>March 18, 2020: Add kojak module.
+  <li>Nov. 6, 2020: Updated to use Comet 2019.05.</li>
+
+  <li>Nov. 6, 2020: Added Kojak module for searching for cross-linked peptides.
+  The methodology is described in<br/>
+  <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4428575"/>
+  Hoopmann et al. Journal of Proteome Research, 2015</a>.
   </li>
 
   <li>July 23, 2019: Added the Tailor PSM score calibration method to Tide-search as
-  an option. Updated the performance and smoke-tests.
+  an option.
   </li>
 
   <li>June 4, 2019: The Crux automatic build process was modified to use a cached version 
@@ -92,13 +115,37 @@
 
 <ul>
   <li>
+    Mar 10, 2021: Changed num-threads default to 1.
+  </li>
+  <li>
+    Feb. 12, 2021: Added date of latest commit to version string.
+  </li>
+  <li>
+    Feb. 11, 2021: Fixed bug in support for comet. Output files were
+    being stored in the wrong directory when multiple spectra files
+    were provided.
+  </li>
+  <li>
     Feb 9, 2021: Added process ID number to the names of temporary
     files created by Tide, to avoid conflicts.</li>
+  <li>
+    Jan. 11, 2021: Fixed break in build of Percolator.
+  </li>
   <li>
     December 7, 2020: Updated documentation to remove "+" from the usage statement.
   </li>
   <li>
+    December 4, 2020: Updated schematic diagram of Crux tools.
+  </li>
+  <li>
+    December 3, 2020: Fixed bug in peptide-centric search that caused
+    mis-scaling of XCORR score on some Linux systems.
+  </li>
+  <li>
     September 16, 2020: Add an additional parser to parse scan number out of the “TITLE” line in MGF files. Now the TITLE line can consist of two formats. The first format is TITLE=fileName.scanNumber.scanNumber.charge.dta. The second format is TITLE=fileName.scanNumber.scanNumber.charge File:"fileNameWithExtension", NativeID:"controllerType=0 controllerNumber=1 scan=scanNumber"
+  </li>
+  <li>
+    Sept. 18, 2020: Updated MGF file parser to handle title line.
   </li>
   <li>
     August 28, 2020: Updated documentation for --use-neutral-loss-peaks.
@@ -114,8 +161,20 @@
   </li>
 
   <li>
+    May 28, 2020: Added fixes for pepXML schema validation failures.
+  </li>
+
+  <li>
     April 28, 2020: Added the --brief-output option to tide-search,
-    which prints only a subset of fields to the output file.</li>
+    which prints only a subset of fields to the output file.
+  </li>
+  <li>
+    April 27, 2020: Fixed build of Percolator to use BLAS libraries.
+  </li>
+  <li>
+    March 18, 2020: Crux now builds MSTookit from original repository
+    rather than a fork.
+  </li>
 
   <li>
     December 16, 2019: Fixed a bug in Tailor method where minimal number of candidate
@@ -144,7 +203,7 @@
   </li>
 
   <li>
-    June 9, 2019: Fixed a couple of bugs in the calculation of residue-evidence
+    June 19, 2019: Fixed a couple of bugs in the calculation of residue-evidence
     and res-ev p-value. Correctly released memory when determining amino acid frequency.
     Added a bounds check when adding evidence to the residue-evidence matrix.
     Previously when calculating residue-evidence, all fragment ions were considered to be
@@ -153,10 +212,19 @@
   </li>
 
   <li>
+    April 16, 20219: Fixed Windows path parsing bug in spectral-counts.
+  </li>
+
+  <li>
     April 11, 2019: Changed the default parameters for tide-search so
     that the default mz bin width is 0.02 Da instead of 1.0005079 Da 
     and the default precursor mass window is 50 ppm, rather
     than the previous default of 3 Da.
+  </li>
+
+  <li>
+    November 6, 2018: Decoy generation will now allow duplicate decoy peptides 
+    within a decoy database and bewteen decoy databases.
   </li>
 
   <li>
@@ -196,6 +264,8 @@
     May 30, 2018: Fixed a bug in spectral-counts that affected how the
     parsimony flag reported peptide ranks.</li>
 </ul>
+
+<hr/>
 
 <h3>Version 3.2.x</h3> June 19, 2018
 
@@ -460,7 +530,7 @@ The <code>tide-search</code> command now supports threading. See the
 <code>num-threads</code> parameter for details.</li>
 
 <li>
-Added the <code>pipeline</a> command to run a series of commands, and
+Added the <code>pipeline</code> command to run a series of commands, and
 the <code>cascade-search</code> to run searches across a series of
 databases.</li>
 
@@ -546,7 +616,7 @@ to <code>percolator-seed</code>.</li>
 Default value for <code>use_sparse_matrix</code> changed to <code>1</code>.</li>
 
 <li>
-Default value for <code>use-neutral-loss-peaks<code> changed to <code>true</code>.</li>
+Default value for <code>use-neutral-loss-peaks</code> changed to <code>true</code>.</li>
 
 <li>
 <code>xlink-score-method</code> parameter added to <code>xlink-score-spectrum</code>.</li>
@@ -2137,9 +2207,7 @@ The <code>--version</code> option was added.</li>
 
 <p>March 4, 2008</p>
 
-<blockquote>
 Initial release
-</blockquote>
 	<!-- END CONTENT -->
 		</div>
 	</div>
