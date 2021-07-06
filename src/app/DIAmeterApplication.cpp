@@ -885,6 +885,15 @@ vector<string> DIAmeterApplication::getOptions() const {
 	"use-tailor-calibration",
 
 	"predrt-files",
+	"msamanda-regional-topk",
+	"coelution-oneside-scans",
+	"coelution-topk",
+	"coeff-precursor",
+	"coeff-fragment",
+	"coeff-rtdiff",
+	"coeff-elution",
+	"coeff-tag",
+
     "top-match",
     "use-flanking-peaks",
     "use-neutral-loss-peaks",

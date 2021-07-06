@@ -177,5 +177,6 @@ class DIAmeterApplication : public CruxApplication {
  * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all
  *
  * src/./crux make-pin --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output --output-file diameter-search.filtered.pin --overwrite T /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered.txt
+ * src/./crux percolator --tdc F --output-weights T --overwrite T --unitnorm T --pepxml-output T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output/percolator_prec_1.00_frag_1.00_rt_1.00_elu_1.00 /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered_prec_1.00_frag_1.00_rt_1.00_elu_1.00.txt.pin
  *
  */
