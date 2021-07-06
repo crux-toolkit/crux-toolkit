@@ -21,7 +21,6 @@
 #include "io/DIAmeterFeatureScaler.h"
 #include "io/DIAmeterPSMFilter.h"
 
-
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
 
@@ -284,9 +283,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str());
   }
 
-  // generate .pin file
-
-
+  // generate .pin file by calling make-pin externally
 
   return 0;
 }

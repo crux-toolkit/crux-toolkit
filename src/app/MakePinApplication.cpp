@@ -136,6 +136,19 @@ int MakePinApplication::main(const vector<string>& paths) {
     writer.setEnabledStatus("lnNumDSP", true);
   }
 
+  // DIAmeter related, added by Yang
+  writer.setEnabledStatus("PrecursorIntRankM0", target_collection->getScoredType(PRECURSOR_INTENSITY_RANK_M0));
+  writer.setEnabledStatus("PrecursorIntRankM1", target_collection->getScoredType(PRECURSOR_INTENSITY_RANK_M1));
+  writer.setEnabledStatus("PrecursorIntRankM2", target_collection->getScoredType(PRECURSOR_INTENSITY_RANK_M2));
+  writer.setEnabledStatus("RTDiff", target_collection->getScoredType(RT_DIFF));
+  writer.setEnabledStatus("DynFragPVal", target_collection->getScoredType(DYN_FRAGMENT_PVALUE));
+  writer.setEnabledStatus("StaFragPVal", target_collection->getScoredType(STA_FRAGMENT_PVALUE));
+  writer.setEnabledStatus("CoeluteMS1", target_collection->getScoredType(COELUTE_MS1));
+  writer.setEnabledStatus("CoeluteMS2", target_collection->getScoredType(COELUTE_MS2));
+  writer.setEnabledStatus("CoeluteMS1MS2", target_collection->getScoredType(COELUTE_MS1_MS2));
+  writer.setEnabledStatus("EnsembleScore", target_collection->getScoredType(ENSEMBLE_SCORE));
+
+
   //write .pin file 
   writer.printHeader();
   writer.write(target_collection, vector<MatchCollection*>(1, decoy_collection),

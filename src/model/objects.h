@@ -479,7 +479,6 @@ enum _scorer_type {
   TAILOR_SCORE,  //Added for tailor score calibration method by AKF
 
   // DIAmeter-related scores, added by Yang
-  /*
   PRECURSOR_INTENSITY_RANK_M0,
   PRECURSOR_INTENSITY_RANK_M1,
   PRECURSOR_INTENSITY_RANK_M2,
@@ -490,7 +489,7 @@ enum _scorer_type {
   COELUTE_MS2,
   COELUTE_MS1_MS2,
   ENSEMBLE_SCORE,
-  */
+
 
   // The following are computed by assign-confidence.
   SIDAK_ADJUSTED,             ///< Sidak adjusted p-value
