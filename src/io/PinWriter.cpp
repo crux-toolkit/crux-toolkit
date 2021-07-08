@@ -22,6 +22,7 @@
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
+#include "util/MathUtil.h"
 #include "MassHandler.h"
 #include <boost/foreach.hpp>
 
@@ -65,15 +66,23 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("absdM", true));
 
   // DIAmeter related, added by Yang
-  features_.push_back(make_pair("PrecursorIntRankM0", true));
-  features_.push_back(make_pair("PrecursorIntRankM1", true));
-  features_.push_back(make_pair("PrecursorIntRankM2", true));
-  features_.push_back(make_pair("RTDiff", true));
-  features_.push_back(make_pair("DynFragPVal", true));
-  features_.push_back(make_pair("StaFragPVal", true));
-  features_.push_back(make_pair("CoeluteMS1", true));
-  features_.push_back(make_pair("CoeluteMS2", true));
-  features_.push_back(make_pair("CoeluteMS1MS2", true));
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) {
+     features_.push_back(make_pair("PrecursorIntRankM0", true));
+     features_.push_back(make_pair("PrecursorIntRankM1", true));
+     features_.push_back(make_pair("PrecursorIntRankM2", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) {
+	 features_.push_back(make_pair("DynFragPVal", true));
+	 features_.push_back(make_pair("StaFragPVal", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) {
+	 features_.push_back(make_pair("RTDiff", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) {
+	 features_.push_back(make_pair("CoeluteMS1", true));
+	 features_.push_back(make_pair("CoeluteMS2", true));
+	 features_.push_back(make_pair("CoeluteMS1MS2", true));
+  }
   features_.push_back(make_pair("EnsembleScore", true));
 
 
@@ -174,15 +183,24 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("TailorScore", tailor);
 
   // DIAmeter related, added by Yang
-  setEnabledStatus("PrecursorIntRankM0", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M0));
-  setEnabledStatus("PrecursorIntRankM1", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M1));
-  setEnabledStatus("PrecursorIntRankM2", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M2));
-  setEnabledStatus("RTDiff", collection->getScoredType(RT_DIFF));
-  setEnabledStatus("DynFragPVal", collection->getScoredType(DYN_FRAGMENT_PVALUE));
-  setEnabledStatus("StaFragPVal", collection->getScoredType(STA_FRAGMENT_PVALUE));
-  setEnabledStatus("CoeluteMS1", collection->getScoredType(COELUTE_MS1));
-  setEnabledStatus("CoeluteMS2", collection->getScoredType(COELUTE_MS2));
-  setEnabledStatus("CoeluteMS1MS2", collection->getScoredType(COELUTE_MS1_MS2));
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) {
+     setEnabledStatus("PrecursorIntRankM0", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M0));
+     setEnabledStatus("PrecursorIntRankM1", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M1));
+     setEnabledStatus("PrecursorIntRankM2", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M2));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) {
+     setEnabledStatus("DynFragPVal", collection->getScoredType(DYN_FRAGMENT_PVALUE));
+     setEnabledStatus("StaFragPVal", collection->getScoredType(STA_FRAGMENT_PVALUE));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) {
+     setEnabledStatus("RTDiff", collection->getScoredType(RT_DIFF));
+
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) {
+     setEnabledStatus("CoeluteMS1", collection->getScoredType(COELUTE_MS1));
+     setEnabledStatus("CoeluteMS2", collection->getScoredType(COELUTE_MS2));
+     setEnabledStatus("CoeluteMS1MS2", collection->getScoredType(COELUTE_MS1_MS2));
+  }
   setEnabledStatus("EnsembleScore", collection->getScoredType(ENSEMBLE_SCORE));
 
 
@@ -311,15 +329,15 @@ void PinWriter::printPSM(
       fields.push_back(StringUtils::Join(peptide->getProteinIds(), '\t'));
     }
     // DIAmeter related, added by Yang
-    else if (feature == "PrecursorIntRankM0") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }
-    else if (feature == "PrecursorIntRankM1") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M1))); }
-    else if (feature == "PrecursorIntRankM2") { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M2))); }
-    else if (feature == "RTDiff") { fields.push_back(StringUtils::ToString(match->getScore(RT_DIFF))); }
-    else if (feature == "DynFragPVal") { fields.push_back(StringUtils::ToString(match->getScore(DYN_FRAGMENT_PVALUE))); }
-    else if (feature == "StaFragPVal") { fields.push_back(StringUtils::ToString(match->getScore(STA_FRAGMENT_PVALUE))); }
-    else if (feature == "CoeluteMS1") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1))); }
-    else if (feature == "CoeluteMS2") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS2))); }
-    else if (feature == "CoeluteMS1MS2") { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1_MS2))); }
+    else if (feature == "PrecursorIntRankM0" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }
+    else if (feature == "PrecursorIntRankM1" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M1))); }
+    else if (feature == "PrecursorIntRankM2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M2))); }
+    else if (feature == "RTDiff" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(RT_DIFF))); }
+    else if (feature == "DynFragPVal" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(DYN_FRAGMENT_PVALUE))); }
+    else if (feature == "StaFragPVal" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(STA_FRAGMENT_PVALUE))); }
+    else if (feature == "CoeluteMS1" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1))); }
+    else if (feature == "CoeluteMS2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS2))); }
+    else if (feature == "CoeluteMS1MS2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1_MS2))); }
     else if (feature == "EnsembleScore") { fields.push_back(StringUtils::ToString(match->getScore(ENSEMBLE_SCORE))); }
 
     else {
