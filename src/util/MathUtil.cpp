@@ -81,6 +81,39 @@ std::vector<double> MathUtil::linspace(double start, double end, int num) {
 	return linspaced;
 }
 
+int MathUtil::binarySearch(const double* data_arr, int data_size, double query) {
+	if (data_arr == NULL || data_size <= 0) { return 0; }
+
+	if (query < data_arr[0]) { return data_arr[0]; }
+	if (query > data_arr[data_size-1]) { return data_arr[data_size-1]; }
+
+	int lo = 0, hi = data_size-1;
+	while (lo <= hi) {
+		int mid = int((hi + lo)/2);
+		if (query < data_arr[mid]) { hi = mid - 1; }
+		else if (query > data_arr[mid]) { lo = mid + 1; }
+		else { return data_arr[mid]; }
+	}
+
+	return fabs(data_arr[lo] - query) < fabs(query - data_arr[hi]) ? lo : hi;
+}
+
+int MathUtil::linearSearch(const double* data_arr, int data_size, double query) {
+	if (data_arr == NULL || data_size <= 0) { return 0; }
+
+	int min_idx = 0;
+	double min_diff = fabs(data_arr[0] - query);
+
+	for (int idx=0; idx<data_size; ++idx) {
+		double curr_diff = fabs(data_arr[idx] - query);
+		if (curr_diff <= min_diff) {
+			min_idx = idx;
+			min_diff = curr_diff;
+		}
+	}
+	return min_idx;
+}
+
 
 MathUtil::Combination::Combination(size_t n, size_t k)
   : n_(n) {

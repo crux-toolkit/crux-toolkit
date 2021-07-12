@@ -20,6 +20,10 @@ class MathUtil {
   static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
   static std::vector<double> linspace(double start, double end, int num);
 
+  // find the closest match index from the data array to the query in O(log(n))
+  static int binarySearch(const double* data_arr, int data_size, double query);
+  // find the closest match index from the data array to the query in O(n), as a sanity check
+  static int linearSearch(const double* data_arr, int data_size, double query);
 
   template<typename T>
   static double Sum(const T& values) {

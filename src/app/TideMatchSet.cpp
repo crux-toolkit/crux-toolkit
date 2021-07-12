@@ -423,7 +423,7 @@ void TideMatchSet::writeToFileDIA(
       double predrt = 0.5;
       map<string, double>::iterator predrtIter = peptide_predrt_map->find(cruxPep.getModifiedSequenceWithMasses());
       if (predrtIter != peptide_predrt_map->end()) { predrt = predrtIter->second; }
-      carp(CARP_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
+      // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t pred_rt:%f \t obv_rt:%f", cruxPep.getModifiedSequenceWithMasses().c_str(), predrt, spectrum->RTime() );
       *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '\t';
       /* *file << StringUtils::ToString(fabs(predrt - spectrum->RTime()), precision, true) << '|'
     		<< StringUtils::ToString(predrt, precision, true) << '|'

@@ -51,7 +51,8 @@ class DIAmeterApplication : public CruxApplication {
 
   SpectrumCollection* loadSpectra(const std::string& file);
 
-  void loadMS1Spectra(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+  void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+  void loadMS1SpectraNew(const std::string& file, map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map);
 
   void buildSpectraIndexFromIsoWindow(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
 
@@ -65,17 +66,27 @@ class DIAmeterApplication : public CruxApplication {
 	TideMatchSet* matches, ///< object to manage PSMs
 	ObservedPeakSet* observed,
 	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
 	map<int, double*>* ms2scan_intensity_map,
 	map<string, double>* peptide_predrt_map
   );
 
-  void computePrecIntRank(
+  void computePrecIntRankOld(
 	const vector<TideMatchSet::Arr::iterator>& vec,
 	const ActivePeptideQueue* peptides,
 	const double* intensity_rank_arr,
 	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
 	int charge
   );
+  void computePrecIntRankNew(
+  	const vector<TideMatchSet::Arr::iterator>& vec,
+  	const ActivePeptideQueue* peptides,
+  	const double* mz_arr,
+  	const double* intensity_rank_arr,
+	int peak_num,
+  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+  	int charge
+    );
 
   void computeMS2Pval(
 	const vector<TideMatchSet::Arr::iterator>& vec,
@@ -107,6 +118,8 @@ class DIAmeterApplication : public CruxApplication {
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
   void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
+
+  pair<double, double> closestPPMValue(const double* mz_arr, const double* intensity_arr, int peak_num, double query_mz);
 
 
  public:
