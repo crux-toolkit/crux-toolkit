@@ -95,7 +95,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
 
   // Extract all edge features
-  if (!FileUtils::Exists(output_file_name_unsorted_) || Params::GetBool("overwrite") /* */) {
+  if (!FileUtils::Exists(output_file_name_unsorted_) /* || Params::GetBool("overwrite") */) {
 	  carp(CARP_DEBUG, "Either file exists or it needs to be overwrite:%s", output_file_name_unsorted_.c_str());
 
 	  ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
@@ -643,7 +643,7 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 			   if (prec_ppm_int.first <= Params::GetInt("prec-ppm")) { intensity_arr[coelute_idx] = prec_ppm_int.second; }
 		   }
 		   ms1_chroms.push_back(intensity_arr);
-		   carp(CARP_DEBUG, "^^^^^^^^^^prec_mz:%f \t intensity_arr:%s", prec_mz, StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
+		   // carp(CARP_DEBUG, "^^^^^^^^^^prec_mz:%f \t intensity_arr:%s", prec_mz, StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
 	   }
 
 	   // build Fragment chromatograms
@@ -663,7 +663,7 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 			   if (frag_ppm_int.first <= Params::GetInt("frag-ppm")) { intensity_arr[coelute_idx] = frag_ppm_int.second; }
 		   }
 		   ms2_chroms.push_back(intensity_arr);
-		   carp(CARP_DEBUG, "^^^^^^^^^^frag_mz:%f \t intensity_arr:%s", frag_mz,  StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
+		   // carp(CARP_DEBUG, "^^^^^^^^^^frag_mz:%f \t intensity_arr:%s", frag_mz,  StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
 	   }
 
 	   // calculate correlation among MS1
