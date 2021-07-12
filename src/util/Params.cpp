@@ -2081,9 +2081,13 @@ Params::Params() : finalized_(false) {
           "The tag to encode the information about coefficients",
           "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", true);
 
-  InitIntParam("ppm", 10, 1, 100,
-          "Specify the ppm units for the features used in DIAmeter",
+  InitIntParam("prec-ppm", 10, 1, 100,
+          "Specify the ppm units for the precursor intensity used in DIAmeter",
           "It is used for DIAmeter", true);
+
+  InitIntParam("frag-ppm", 10, 1, 100,
+            "Specify the ppm units for the fragment intensity used in DIAmeter",
+            "It is used for DIAmeter", true);
 
   Categorize();
 }

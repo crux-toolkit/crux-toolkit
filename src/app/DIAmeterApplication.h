@@ -54,7 +54,8 @@ class DIAmeterApplication : public CruxApplication {
   void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
   void loadMS1SpectraNew(const std::string& file, map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map);
 
-  void buildSpectraIndexFromIsoWindow(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
+  void buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
+  void buildSpectraIndexFromIsoWindowNew(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map);
 
   void reportDIA(
 	ofstream* output_file,  ///< output file to write to
@@ -65,9 +66,10 @@ class DIAmeterApplication : public CruxApplication {
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
 	ObservedPeakSet* observed,
-	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	// map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
 	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
-	map<int, double*>* ms2scan_intensity_map,
+	// map<int, double*>* ms2scan_intensity_map,
+	map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map,
 	map<string, double>* peptide_predrt_map
   );
 
@@ -86,7 +88,23 @@ class DIAmeterApplication : public CruxApplication {
 	int peak_num,
   	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
   	int charge
-    );
+  );
+
+  void computePrecFragCoeluteOld(
+  	const vector<TideMatchSet::Arr::iterator>& vec,
+  	const ActivePeptideQueue* peptides,
+	vector<pair<double*, double*>>* intensity_arrs_vector,
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+	int charge
+  );
+  void computePrecFragCoeluteNew(
+    const vector<TideMatchSet::Arr::iterator>& vec,
+    const ActivePeptideQueue* peptides,
+	vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
+  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+  	int charge
+  );
+
 
   void computeMS2Pval(
 	const vector<TideMatchSet::Arr::iterator>& vec,
@@ -96,13 +114,6 @@ class DIAmeterApplication : public CruxApplication {
 	bool dynamic_filter = true
   );
 
-  void computePrecFragCoelute(
-  	const vector<TideMatchSet::Arr::iterator>& vec,
-  	const ActivePeptideQueue* peptides,
-	vector<pair<double*, double*>>* intensity_arrs_vector,
-	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-	int charge
-  );
 
 
   void computeWindowDIA(

@@ -82,7 +82,7 @@ std::vector<double> MathUtil::linspace(double start, double end, int num) {
 }
 
 int MathUtil::binarySearch(const double* data_arr, int data_size, double query) {
-	if (data_arr == NULL || data_size <= 0) { return 0; }
+	if (data_arr == NULL || data_size <= 0) { return -1; }
 
 	if (query < data_arr[0]) { return data_arr[0]; }
 	if (query > data_arr[data_size-1]) { return data_arr[data_size-1]; }
@@ -99,7 +99,7 @@ int MathUtil::binarySearch(const double* data_arr, int data_size, double query) 
 }
 
 int MathUtil::linearSearch(const double* data_arr, int data_size, double query) {
-	if (data_arr == NULL || data_size <= 0) { return 0; }
+	if (data_arr == NULL || data_size <= 0) { return -1; }
 
 	int min_idx = 0;
 	double min_diff = fabs(data_arr[0] - query);
