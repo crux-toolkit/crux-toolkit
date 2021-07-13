@@ -387,7 +387,7 @@ void DIAmeterApplication::reportDIA(
 
 
    // calculte precursor fragment coelution
-   carp(CARP_DEBUG, "scan_gap:%d \t coelution-oneside-scans:%d", scan_gap_, Params::GetInt("coelution-oneside-scans") );
+   carp(CARP_DETAILED_DEBUG, "scan_gap:%d \t coelution-oneside-scans:%d", scan_gap_, Params::GetInt("coelution-oneside-scans") );
    // extract the MS1 and MS2 scan numbers which constitute the local chromatogram
    vector<int> valid_ms1scans, valid_ms2scans;
    for (int offset=-Params::GetInt("coelution-oneside-scans"); offset<=Params::GetInt("coelution-oneside-scans"); ++offset) {
@@ -583,14 +583,12 @@ void DIAmeterApplication::computePrecFragCoeluteOld(
 	   sort(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), greater<double>());
 
 	   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^ms1_corrs:%s \t ms2_corrs:%s \t ms1_ms2_corrs:%s", StringUtils::JoinDoubleVec(ms1_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms2_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms1_ms2_corrs, ',').c_str()  );
-	   ms1_corrs.resize(Params::GetInt("coelution-topk"));
-	   ms2_corrs.resize(Params::GetInt("coelution-topk"));
-	   ms1_ms2_corrs.resize(Params::GetInt("coelution-topk"));
 
+	   double ms1_mean=0, ms2_mean=0, ms1_ms2_mean=0;
+	   if (ms1_corrs.size() > 0) { ms1_corrs.resize(Params::GetInt("coelution-topk")); ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size(); }
+	   if (ms2_corrs.size() > 0) { ms2_corrs.resize(Params::GetInt("coelution-topk")); ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size(); }
+	   if (ms1_ms2_corrs.size() > 0) { ms1_ms2_corrs.resize(Params::GetInt("coelution-topk")); ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size(); }
 
-	   double ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size();
-	   double ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size();
-	   double ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size();
 	   coelute_map->insert(make_pair((*i), boost::make_tuple(ms1_mean, ms2_mean, ms1_ms2_mean)));
 
 	   // carp(CARP_DETAILED_DEBUG, "ms1_corrs:%s ", StringUtils::Join(ms1_corrs, ',').c_str() );
@@ -640,7 +638,7 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 			   int ms1_peak_num = mz_intensity_arrs.get<2>();
 
 			   pair<double, double> prec_ppm_int = closestPPMValue(ms1_mz_arr, ms1_intensity_arr, ms1_peak_num, prec_mz);
-			   if (prec_ppm_int.first <= Params::GetInt("prec-ppm")) { intensity_arr[coelute_idx] = prec_ppm_int.second; }
+			   if (ms1_intensity_arr != NULL && prec_ppm_int.first <= Params::GetInt("prec-ppm")) { intensity_arr[coelute_idx] = prec_ppm_int.second; }
 		   }
 		   ms1_chroms.push_back(intensity_arr);
 		   // carp(CARP_DEBUG, "^^^^^^^^^^prec_mz:%f \t intensity_arr:%s", prec_mz, StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
@@ -660,7 +658,7 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 			   int ms2_peak_num = mz_intensity_arrs.get<5>();
 
 			   pair<double, double> frag_ppm_int = closestPPMValue(ms2_mz_arr, ms2_intensity_arr, ms2_peak_num, frag_mz);
-			   if (frag_ppm_int.first <= Params::GetInt("frag-ppm")) { intensity_arr[coelute_idx] = frag_ppm_int.second; }
+			   if (ms2_intensity_arr != NULL && frag_ppm_int.first <= Params::GetInt("frag-ppm")) { intensity_arr[coelute_idx] = frag_ppm_int.second; }
 		   }
 		   ms2_chroms.push_back(intensity_arr);
 		   // carp(CARP_DEBUG, "^^^^^^^^^^frag_mz:%f \t intensity_arr:%s", frag_mz,  StringUtils::JoinDoubleArr(intensity_arr, coelute_size, ',').c_str()  );
@@ -694,14 +692,10 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 	   sort(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), greater<double>());
 
 	   // carp(CARP_DETAILED_DEBUG, "^^^^^^^^^^ms1_corrs:%s \t ms2_corrs:%s \t ms1_ms2_corrs:%s", StringUtils::JoinDoubleVec(ms1_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms2_corrs, ',').c_str(), StringUtils::JoinDoubleVec(ms1_ms2_corrs, ',').c_str()  );
-	   ms1_corrs.resize(Params::GetInt("coelution-topk"));
-	   ms2_corrs.resize(Params::GetInt("coelution-topk"));
-	   ms1_ms2_corrs.resize(Params::GetInt("coelution-topk"));
-
-
-	   double ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size();
-	   double ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size();
-	   double ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size();
+	   double ms1_mean=0, ms2_mean=0, ms1_ms2_mean=0;
+	   if (ms1_corrs.size() > 0) { ms1_corrs.resize(Params::GetInt("coelution-topk")); ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size(); }
+	   if (ms2_corrs.size() > 0) { ms2_corrs.resize(Params::GetInt("coelution-topk")); ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size(); }
+	   if (ms1_ms2_corrs.size() > 0) { ms1_ms2_corrs.resize(Params::GetInt("coelution-topk")); ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size(); }
 	   coelute_map->insert(make_pair((*i), boost::make_tuple(ms1_mean, ms2_mean, ms1_ms2_mean)));
 
 	   // carp(CARP_DETAILED_DEBUG, "ms1_corrs:%s ", StringUtils::Join(ms1_corrs, ',').c_str() );

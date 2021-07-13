@@ -66,8 +66,10 @@ double MathUtil::NormalizedDotProduct(double* src_values, double* tgt_values, in
 		}
 	}
 
-	if (AlmostEqual(prod_sum, 0)) { return 0; }
-	else { return prod_sum / sqrt(src_sum * tgt_sum); }
+	if (AlmostEqual(prod_sum, 0, 4)) { return 0; }
+
+	double result = prod_sum / sqrt(src_sum * tgt_sum);
+	return (result == result) ? result : 0; // this is to avoid nan
 }
 
 std::vector<double> MathUtil::linspace(double start, double end, int num) {
