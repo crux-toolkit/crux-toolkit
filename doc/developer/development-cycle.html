@@ -25,18 +25,21 @@ this page or others.
 
 <li>
 To begin work on crux, you will need a copy of the code base.
-<a href="https://git-scm.com/docs/git-clone">Clone</a> a clean clean 
+<a href="https://git-scm.com/docs/git-clone">Clone</a> a clean  
 copy from the
 <a href="https://github.com/crux-toolkit/crux-toolkit">GitHub repository</a>
 or update your existing
-working copy.  Some changes can be made directly in the trunk, but if
-you are working on something experimental or sufficiently complicated,
-you can create a <a href="https://git-scm.com/docs/git-branch">branch</a>, do
-your work there, and later merge your changes into the trunk.
-
+working copy.  Unless you are a senior developer on the team it is highly recommended to create 
+a <a href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository">branch</a> and a pull 
+request in GitHub repository for any non-trivial changes. After your work is complete you can merge your changes 
+into master after a code review. Suggested branch naming template is {branch creator}_{brief description}.
 <li>
-Run <code>git pull</code> to make sure you are beginning with an
-exact copy of what is in the repository.
+Run 
+<pre><code>
+    git fetch --all
+    git checkout {your branch name}
+    git pull</code> </pre>
+      to make sure you are making changes in your branch, not in master.
 
 <li>
 <a href="using-cmake.html">Build</a> crux and run the 
@@ -46,8 +49,9 @@ before you start.
 <h2>Implement your changes</h2>
 <li>
 This is the part you already know how to do.  Edit or add files.
-Build and test frequently.  Consider adding new 
-<a href="crux-tests.html">smoke or unit tests</a> for your new
+Build and test frequently. There is no preferred IDE for Crux on Linux, so feel free to use your favorite IDE, as soon
+as it supports CMake. On Windows Crux is built using MS Visual Studio.<br/>
+Consider adding new <a href="crux-tests.html">smoke or unit tests</a> for your new
 functionality or bug-fix.  Remember to follow the 
 <a href="crux-coding-standards.html">coding standards</a>.
 
@@ -58,36 +62,40 @@ final build and test to see that everything is working.
 
 <li>
 Run <code>git status</code> to see the list of files that changed and
-to confirm that you added any new files to Git.
+to confirm that you added any new files to Git. Use <code>git diff -b</code>
+to review your changes before commit.
+
+<li>
+    After you reviewed your changes perform local commit using 
+    <code>git commit -m"Your commit message"</code>. It is a good practice to always provide
+    an informative message with every commit, even when you are on your own branch or fork.
+</li>
 
 <li>
 Run <code>git pull</code> to obtain any changes in the upstream repository.
 If necessary, run <code>git merge</code>, resolve conflicts, build, and test.
 
 <li>
-From the root of the crux project, run <code>git diff &gt;
-my-changes.diff</code>.  Give <code>my-changes.diff</code> a
-short meaningful name, for example new-column.diff.  Look it over to
-make sure it has only those changes you intended. (* see below for
-notes on <a href="#branches">code review in branches</a>)
+    Run <code>git push</code> to publish your changes to your remote branch on GitHub.
+    Now you can go to GitHub and create a <a href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#about-pull-requests">pull request</a> 
+    for your branch. The pull request is a good place
+    to provide a more detailed description of your changes and request a code review.
+</li>
 
 <li>
-Ask someone on the development team to do a code review for you and
-send him or her the diff file.
-
-<li>
-Make any changes suggested by your reviewer.  Build, test, and prepare
-another diff file, repeating the cycle until you and your reviewer
+Make any changes suggested by your reviewer.  Build, test, commit and 
+push your changes, repeating the cycle until you and your reviewer
 have agreed on the set of changes.
 
-<h2>Check in your changes</h2>
+<h2>Merge your changes</h2>
 <li>
-Commit your changes to the repository with <code>git commit</code>.
-Add a short, descriptive comment including the name of your reviewer.
-For example, "Added a new column, myscore, to the output of
-search-for-matches.  Code reviewed by Bill."
-Follow this with <code>git push</code> to send your commit to the GitHub 
-repository for Crux.
+Merge your pull request into master using <a href="https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request">Squash and Merge</a>.
+Make sure you reviewed the commit message before the merge and make it short and concise, 
+especially if your pull request has multiple commits.<br/>
+Since automated Crux bild is done on the master branch only it is a good practice to monitor the 
+TeamCity build after your merge to make sure you did not break anything.<br/>
+To avoid breaking the main build it is a good idea to merge master into your branch and do another 
+round of building and testing before the merge to make sure somebody else's changes do not interfere with yours.
 
 </ol>
 <hr>
@@ -95,12 +103,7 @@ repository for Crux.
 <a name="branches"></a>
 <h2>Notes on branches</h2>
 <p>
-If you are working in a branch, you can change the review cycle
-slightly.  When you are ready for a code review, you may check your
-changes into the branch and point your reviewer to it.  Give him or
-her the name of the branch and the versions to compare for the
-change.  For example, "My changes are in crux/branches/thestuff.  See
--r5444:5466 for the relevant changes".  In a branch, the code need not
+ In a branch, the code need not
 be fully functional when it is reviewed.  For example, if you are
 creating a new class, the first review may be just of the header file
 defining the new class.  It's more important that your reviewer be
@@ -111,24 +114,24 @@ before someone sees it.
 <h2>Notes on simultaneous changes</h2>
 <p>
 You may have several small projects you are working on at once which
-you want reviewed separately.  There are two possible approaches.  You
-may put all the changes in one working copy and have them reviewed and
-checked in separately.  For example, if you are writing some helper
-functions in crux-utils.cpp to be used later, you could prepare those
-files for review separately and check them in separately.
-<pre>
-$ git diff src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c > helper.diff
-$ git commit -m 'Added a do_cool_stuff() to crux-utils. Reviewed by Bill' src/c/crux-utils.cpp src/c/crux-utils.h /src/c/test/unit-tests/check-crux-utils.c
-</pre>
-<p>
-More often than not, the two projects will overlap and it's easier to
-keep two working copies.  In that case, you might implement
-do_cool_stuff() and send it off for review.  Then while you are
-waiting, check out a clean copy and start working on your next
-project.  When the code review comes back, commit the crux-utils
-changes and then you can even delete that copy.  Do <code>svn
-    update</code> in the new project to pick up the crux-utils
-changes.
+you want to be reviewed separately.  Since Git branches are cheap and easy to create,
+it is almost always better and less error prone to have separate branches
+than to make concurrent changes in your workspace and then carve out two separate commits.<br/>
+Also, if your changes involve only Crux code (not build scripts or external dependencies patches)
+it is possible to switch between branches within same workspace without full rebuild.
+  For example, if you are writing some helper
+functions in crux-utils.cpp to be used later, you could do 
+<pre><code>
+    git checkout master
+    git pull            #makes sure you are on the most recent master branch
+    git checkout -b genius_cruxUtilsFix     #creates a new branch from master and checks it out
+</code></pre>
+to create a local branch, do some changes there, then do a (local) commit and create another 
+local branch for some cool stuff you came up with and do some work there. You can keep working and switching between the
+two branches locally until you think one or both of them are ready for the review. At that point you do
+<code>git push -u origin genius_cruxUtilsFix</code> which publishes your local branch to the GitHub repository,
+then go there, create a pull request and request a review.
+
 </p>
 </blockquote>
 </body>

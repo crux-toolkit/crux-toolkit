@@ -6,6 +6,8 @@
 <h1>Coding standards</h1>
 
 <h3>Lint checking</h3>
+<i>(Note: Currently linting is not part of the TeamCity build because it produces too many exceptions.)</i>
+<!-- Will might be able to add more details here since he worked on linting recently. -->
 <p>
 As of spring 2016, we began using <a href="https://en.wikipedia.org/wiki/Cpplint">cpplint</a> to perform style/lint checking on our code base. Because it had built in a number of agreeable standards (from the <a href="http://google.github.io/styleguide/cppguide.html">Google style guide</a>) we decided to incorporate many into our own. We've done this in two groups: lenient rules (for the legacy code with existing errors) and strict rules (the desired standard). The lint checker (<code>cruxlint.sh</code>) runs on one file at a time and takes the flag <code>-l</code> for lenient style checking. For example:
 </p>

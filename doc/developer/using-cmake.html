@@ -15,14 +15,14 @@ for a wider array of platforms.
 Building Crux requires a relatively recent version of CMake,
 preferably version 3.6 or later.
 <p/>
-Documentation for CMake can be fournd <a
+Documentation for CMake can be found <a
 href="http://www.cmake.org/cmake/help/documentation.html">here</a>.
 A CMake tutorial is <a href="http://www.cmake.org/cmake/help/cmake_tutorial.html">here</a>.
 <p />
 To use CMake you write a set of scripts specifying the build in the CMake language.  
 Each of these scripts is named <code>CMakeLists.txt</code>.
-The program <code>cmake</code> on a <code>CMakeLists.txt</code> file
-and it generates the appropriate 'make' files or Visual Studio project files
+The program <code>cmake</code> reads <code>CMakeLists.txt</code> files
+and generates the appropriate 'make' files or Visual Studio project files
 need to perform the actual build.
 Typically a master <code>CMakeLists.txt</code> in the root directory of a project points to
 <code>CMakeLists.txt</code> files in each of the sub-directories involved in the build.
