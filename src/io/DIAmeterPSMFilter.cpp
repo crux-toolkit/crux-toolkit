@@ -72,7 +72,7 @@ void DIAmeterPSMFilter::processPSMGroup(std::vector<PSMByScanCharge>* pooled_dat
 	sort(pooled_data_vec->begin(), pooled_data_vec->end(), psm_sorter);
 
 	PSMByScanCharge psm_baseline = pooled_data_vec->at(0);
-	double ensemble_baseline = psm_baseline.ensemble_score_;
+	double ensemble_baseline = psm_baseline.ensemble_score_ - 0.000001;
 	*output_file << StringUtils::Join(psm_baseline.data_, '\t').c_str() << endl;
 
 	for (int idx = 1; idx < pooled_data_vec->size(); idx++) {

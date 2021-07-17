@@ -66,7 +66,7 @@ class DIAmeterApplication : public CruxApplication {
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
 	ObservedPeakSet* observed,
-	// map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
 	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
 	// map<int, double*>* ms2scan_intensity_map,
 	map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map,
@@ -117,20 +117,28 @@ class DIAmeterApplication : public CruxApplication {
 
 
   void computeWindowDIA(
-		  const SpectrumCollection::SpecCharge& sc,
-		  int max_charge,
-		  vector<int>* negative_isotope_errors,
-		  vector<double>* out_min,
-		  vector<double>* out_max,
-		  double* min_range,
-		  double* max_range
+	const SpectrumCollection::SpecCharge& sc,
+	int max_charge,
+	vector<int>* negative_isotope_errors,
+	vector<double>* out_min,
+	vector<double>* out_max,
+	double* min_range,
+	double* max_range
   );
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
   void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
 
-  pair<double, double> closestPPMValue(const double* mz_arr, const double* intensity_arr, int peak_num, double query_mz);
+  double closestPPMValue(
+	const double* mz_arr,
+	const double* intensity_arr,
+	int peak_num,
+	double query_mz,
+	int ppm_tol,
+	double intensity_default,
+	bool large_better
+  );
 
 
  public:
@@ -196,9 +204,9 @@ class DIAmeterApplication : public CruxApplication {
 
 /*
  * TODO remove temporary commands finally
- * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta cerevisiae_orf_trans_all
- * gdb -ex=r --args src/./crux diameter --precursor-window 10 --precursor-window-type mz --top-match 5 --use-tailor-calibration T --concat T --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all/deeprt.peptides.decoy.txt --verbosity 60 --prec-ppm 10 --frag-ppm 10 > log.txt 2> error.txt 1> output.txt
- * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all
+ * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --mods-spec C+57.02146,3M+15.994915  --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod
+ * gdb -ex=r --args src/./crux diameter --precursor-window 10 --precursor-window-type mz --top-match 5 --use-tailor-calibration T --concat T --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod/deeprt.peptides.decoy.txt --verbosity 60 --prec-ppm 10 --frag-ppm 10 > log.txt 2> error.txt 1> output.txt
+ * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod
  *
  * src/./crux make-pin --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output --output-file diameter-search.filtered.pin --overwrite T /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered.txt
  * src/./crux percolator --tdc F --output-weights T --overwrite T --unitnorm T --pepxml-output T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output/percolator_prec_1.00_frag_1.00_rt_1.00_elu_1.00 /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered_prec_1.00_frag_1.00_rt_1.00_elu_1.00.txt.pin
