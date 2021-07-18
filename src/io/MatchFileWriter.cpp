@@ -135,6 +135,21 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = false;
       break;
 
+    // added by Yang
+    case PRECURSOR_INTENSITY_RANK_M0_COL:
+    case PRECURSOR_INTENSITY_RANK_M1_COL:
+    case PRECURSOR_INTENSITY_RANK_M2_COL:
+    case RT_DIFF_COL:
+    case DYN_FRAGMENT_PVALUE_COL:
+    case STA_FRAGMENT_PVALUE_COL:
+    case COELUTE_MS1_COL:
+    case COELUTE_MS2_COL:
+    case COELUTE_MS1_MS2_COL:
+    case ENSEMBLE_SCORE_COL:
+    	match_precision_[col_idx] = 4;
+    	match_fixed_float_[col_idx] = false;
+    	break;
+
     case NUMBER_MATCH_COLUMNS:
     case INVALID_COL:
       carp(CARP_FATAL, "Invalid match column type for setting precision.");

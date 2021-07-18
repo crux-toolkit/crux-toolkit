@@ -22,4 +22,8 @@ message Spectrum {
   optional double precursor_m_z = 6;
   optional double rtime = 8;
   repeated int32 charge_state = 7 [packed = true]; // may as well use packed
+  
+  optional int32 ms1_spectrum_number = 9;
+  optional double iso_window_lower_mz = 10;
+  optional double iso_window_upper_mz = 11;
 }

@@ -102,7 +102,9 @@ bool StringUtils::IsNumeric(const string& s, bool allowNegative, bool allowDecim
   }
 
   // Decimal can't be last character
-  return !foundDecimal || *(--i) == '.';
+  // return !foundDecimal || *(--i) == '.';
+  if (foundDecimal && *(--i) == '.') return false;
+  return true;
 }
 
 string StringUtils::LineFormat(string s, unsigned limit, unsigned indentSize) {

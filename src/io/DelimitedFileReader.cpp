@@ -249,6 +249,12 @@ const vector<string>& DelimitedFileReader::getColumnNames() {
   return column_names_;
 }
 
+const std::vector<std::string>& DelimitedFileReader::getCurrentRowData() {
+  if (!has_current_) { carp(CARP_FATAL, "End of file!"); }
+  return data_;
+}
+
+
 /**
  *\returns the current row index
  */

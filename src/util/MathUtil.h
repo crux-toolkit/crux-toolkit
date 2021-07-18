@@ -9,7 +9,21 @@
 class MathUtil {
  public:
   static double Round(double x, int decimals = 0);
-  static bool AlmostEqual(double x, double y, int precision);
+  static bool AlmostEqual(double x, double y, int precision = 6);
+
+  // added by Yang
+  static int factorial(int n);
+  static double LogNChooseK(int n, int k);
+  static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
+
+  static double MaxInArr(double* arr_values, int size);
+  static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
+  static std::vector<double> linspace(double start, double end, int num);
+
+  // find the closest match index from the data array to the query in O(log(n))
+  static int binarySearch(const double* data_arr, int data_size, double query);
+  // find the closest match index from the data array to the query in O(n), as a sanity check
+  static int linearSearch(const double* data_arr, int data_size, double query);
 
   template<typename T>
   static double Sum(const T& values) {

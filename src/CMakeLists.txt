@@ -180,6 +180,9 @@ set (
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
   app/TideSearchApplication.cpp
+  io/DIAmeterFeatureScaler.cpp
+  io/DIAmeterPSMFilter.cpp
+  app/DIAmeterApplication.cpp
   util/utils.cpp
 )
 

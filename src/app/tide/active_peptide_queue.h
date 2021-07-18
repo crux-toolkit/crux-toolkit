@@ -43,7 +43,7 @@ class ActivePeptideQueue {
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_; }
-  const Peptide* GetPeptide(int back_index) const {
+  Peptide* GetPeptide(int back_index) const {
     return peptide_centric_ ? current_peptide_ : *(end_ - back_index);
   }
   void SetBinSize(double binWidth, double binOffset) {

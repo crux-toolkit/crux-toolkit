@@ -20,7 +20,9 @@ class SpectrumRecordWriter {
    */
   static bool convert(
     const string& infile, ///< spectra file to convert
-    string outfile  ///< spectrumrecords file to output
+    string outfile,  ///< spectrumrecords file to output
+    int ms_level = 2,  /// MS level to extract (1 or 2)
+    bool dia_mode = false  /// whether it's used in DIAmeter
   );
 
  protected:
