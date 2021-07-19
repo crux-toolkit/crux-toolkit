@@ -229,6 +229,7 @@ vector<string> MakePinApplication::getOptions() const {
     "overwrite",
     "parameter-file",
     "top-match",
+	"unique-scannr", // added by Yang
     "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
