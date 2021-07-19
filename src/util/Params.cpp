@@ -2089,6 +2089,10 @@ Params::Params() : finalized_(false) {
             "Specify the ppm units for the fragment intensity used in DIAmeter",
             "It is used for DIAmeter", true);
 
+  InitBoolParam("unique-scannr", true,
+      "Make the ScanNr of each PSM unique in the .pin file.",
+      "Available for make-pin, DIAmeter.", true);
+
   Categorize();
 }
 

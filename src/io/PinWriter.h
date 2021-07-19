@@ -63,6 +63,9 @@ class PinWriter : public PSMWriter {
   int precision_;
   int mass_precision_;
 
+  // added by Yang
+  int scannr_cnt_;
+
   void printPSM(Crux::Match* match);
 
   std::string getPeptide(Crux::Peptide* pep);

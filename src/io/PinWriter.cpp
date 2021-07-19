@@ -89,6 +89,7 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("Peptide", true));
   features_.push_back(make_pair("Proteins", true));
 
+  scannr_cnt_ = 0;
 }
 
 PinWriter::~PinWriter() { 
@@ -144,6 +145,8 @@ void PinWriter::write(
   const vector<MatchCollection*>& decoys,
   int top_rank
 ) {
+  // added by Yang
+
   vector<MatchCollection*> collections(1, target_collection);
   collections.insert(collections.end(), decoys.begin(), decoys.end());
   for (vector<MatchCollection*>::iterator i = collections.begin();
@@ -260,7 +263,10 @@ void PinWriter::printPSM(
     } else if (feature == "Label") {
       fields.push_back(match->getNullPeptide() ? "-1" : "1");
     } else if (feature == "ScanNr") {
-      fields.push_back(StringUtils::ToString(spectrum->getFirstScan()));
+      // modified by Yang
+      if (Params::GetBool("unique-scannr")) { fields.push_back(StringUtils::ToString(++scannr_cnt_)); }
+      else { fields.push_back(StringUtils::ToString(spectrum->getFirstScan()));  }
+
     } else if (feature == "ExpMass") {
       fields.push_back(StringUtils::ToString(obsMass, mass_precision_));
     } else if (feature == "CalcMass") {

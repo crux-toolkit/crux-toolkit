@@ -1249,6 +1249,7 @@ vector<string> DIAmeterApplication::getOptions() const {
 	"coeff-tag",
 	"prec-ppm",
 	"frag-ppm",
+	"unique-scannr",
 
     "top-match",
     "use-flanking-peaks",
