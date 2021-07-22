@@ -41,18 +41,20 @@ class DIAmeterApplication : public CruxApplication {
 
  protected:
   // string output_file_name_;
-  double avg_noise_intensity_logrank_;
+  double avg_noise_intensity_logrank_, avg_ms1_peaknum_, avg_ms1_intercept_;
   int scan_gap_;
   int max_ms1scan_;
   int max_ms1_mzbin_, max_ms2_mzbin_;
-
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
 
   SpectrumCollection* loadSpectra(const std::string& file);
 
   void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
-  void loadMS1SpectraNew(const std::string& file, map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map);
+  void loadMS1SpectraNew(const std::string& file,
+		  map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
+		  map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
+  );
 
   void buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
   void buildSpectraIndexFromIsoWindowNew(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map);
@@ -68,6 +70,7 @@ class DIAmeterApplication : public CruxApplication {
 	ObservedPeakSet* observed,
 	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
 	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
+	map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
 	// map<int, double*>* ms2scan_intensity_map,
 	map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map,
 	map<string, double>* peptide_predrt_map
@@ -84,9 +87,12 @@ class DIAmeterApplication : public CruxApplication {
   	const vector<TideMatchSet::Arr::iterator>& vec,
   	const ActivePeptideQueue* peptides,
   	const double* mz_arr,
+	const double* intensity_arr,
   	const double* intensity_rank_arr,
+	boost::tuple<double, double> slope_intercept_tp,
 	int peak_num,
   	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
   	int charge
   );
 
@@ -104,7 +110,6 @@ class DIAmeterApplication : public CruxApplication {
   	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
   	int charge
   );
-
 
   void computeMS2Pval(
 	const vector<TideMatchSet::Arr::iterator>& vec,

@@ -347,6 +347,7 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_old,
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_new,
+   const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map_new,
    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
    const map<Arr::iterator, double>* dyn_ms2pval_map,
    const map<Arr::iterator, double>* sta_ms2pval_map,
@@ -415,11 +416,12 @@ void TideMatchSet::writeToFileDIA(
              << rank << '\t';
 
       // PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL
-      // boost::tuple<double, double, double> intensity_tuple_old = intensity_map_old->at(i);
+      boost::tuple<double, double, double> intensity_tuple_old = intensity_map_old->at(i);
       boost::tuple<double, double, double> intensity_tuple_new = intensity_map_new->at(i);
-      *file << StringUtils::ToString(intensity_tuple_new.get<0>(), precision, true) << '\t'
-           << StringUtils::ToString(intensity_tuple_new.get<1>(), precision, true) << '\t'
-           << StringUtils::ToString(intensity_tuple_new.get<2>(), precision, true) << '\t';
+      boost::tuple<double, double, double> logrank_tuple_new = logrank_map_new->at(i);
+      *file << StringUtils::ToString(intensity_tuple_new.get<0>()+intensity_tuple_new.get<1>()+intensity_tuple_new.get<2>(), precision, true) << '\t'
+           << StringUtils::ToString(intensity_tuple_old.get<0>()+intensity_tuple_old.get<1>()+intensity_tuple_old.get<2>(), precision, true) << '\t'
+           << StringUtils::ToString(logrank_tuple_new.get<0>()+logrank_tuple_new.get<1>()+logrank_tuple_new.get<2>(), precision, true) << '\t';
 
       // RT_DIFF_COL
       double predrt = 0.5;
