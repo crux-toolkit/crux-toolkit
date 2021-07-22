@@ -116,6 +116,23 @@ int MathUtil::linearSearch(const double* data_arr, int data_size, double query) 
 	return min_idx;
 }
 
+boost::tuple<double, double> MathUtil::fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values) {
+	if (x_values->size() <= 0 || x_values->size() != y_values->size()) { return boost::make_tuple(0, 0); }
+
+	double x_mean = 0.0, y_mean = 0.0;
+	for (int idx=0; idx<x_values->size(); ++idx) { x_mean += x_values->at(idx); y_mean += y_values->at(idx); }
+	x_mean /= x_values->size(); y_mean /= y_values->size();
+
+	double xx_sum = 0.0, xy_sum = 0.0;
+	for (int idx=0; idx<x_values->size(); ++idx) {
+		xx_sum += (x_values->at(idx)-x_mean) * (x_values->at(idx)-x_mean);
+		xy_sum += (x_values->at(idx)-x_mean) * (y_values->at(idx)-y_mean);
+	}
+	double slope = xy_sum / xx_sum;
+	double intercept = y_mean - slope * x_mean;
+	return boost::make_tuple(slope, intercept);
+}
+
 
 MathUtil::Combination::Combination(size_t n, size_t k)
   : n_(n) {

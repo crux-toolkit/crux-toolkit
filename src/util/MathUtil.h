@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 
+#include "boost/tuple/tuple.hpp"
+
 class MathUtil {
  public:
   static double Round(double x, int decimals = 0);
@@ -24,6 +26,8 @@ class MathUtil {
   static int binarySearch(const double* data_arr, int data_size, double query);
   // find the closest match index from the data array to the query in O(n), as a sanity check
   static int linearSearch(const double* data_arr, int data_size, double query);
+  // fit linear regression
+  static boost::tuple<double, double> fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values);
 
   template<typename T>
   static double Sum(const T& values) {
