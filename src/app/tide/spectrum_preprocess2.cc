@@ -85,8 +85,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   largest_mzbin_ = 0;
   smallest_mzbin_ = max_mzbin_;
 
-  dyn_filtered_peak_mzbins_.clear();
-  sta_filtered_peak_mzbins_.clear();
+  dyn_filtered_peak_tuples_.clear();
+  sta_filtered_peak_tuples_.clear();
 
   if (Params::GetBool("skip-preprocessing")) {
     for (int i = 0; i < spectrum.Size(); ++i) {
@@ -180,17 +180,12 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     	for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
     	    if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
     	    int peak_mzbin = region_peaks[peak_idx].first;
-    	    sta_filtered_peak_mzbins_.push_back(peak_mzbin);
-
-    	    if (Params::GetBool("use-flanking-peaks")) {
-    	    	sta_filtered_peak_mzbins_.push_back(peak_mzbin-1);
-    	    	sta_filtered_peak_mzbins_.push_back(peak_mzbin+1);
-    	    }
+    	    sta_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
     	}
-
     }
-    sort( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() );
-    sta_filtered_peak_mzbins_.erase(unique( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() ), sta_filtered_peak_mzbins_.end() );
+    sort(sta_filtered_peak_tuples_.begin(), sta_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    // sort( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() );
+    // sta_filtered_peak_mzbins_.erase(unique( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() ), sta_filtered_peak_mzbins_.end() );
     // carp(CARP_DETAILED_DEBUG, "**********MS2Scan:%d \t sta_peaks_mzbins:%s", spectrum.SpectrumNumber(), StringUtils::Join(sta_filtered_peak_mzbins_, ',').c_str() );
 
     sort( all_peak_mzbins.begin(), all_peak_mzbins.end() );
@@ -236,18 +231,13 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
     	  if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
     	  // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
-    	  int peak_mzbin = region_peaks[peak_idx].first;
-    	  dyn_filtered_peak_mzbins_.push_back(peak_mzbin);
-
-    	  if (Params::GetBool("use-flanking-peaks")) {
-    		  dyn_filtered_peak_mzbins_.push_back(peak_mzbin-1);
-    		  dyn_filtered_peak_mzbins_.push_back(peak_mzbin+1);
-    	  }
+    	  // int peak_mzbin = region_peaks[peak_idx].first;
+  	      dyn_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
       }
     }
-    // added by Yang
-    sort( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() );
-    dyn_filtered_peak_mzbins_.erase(unique( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() ), dyn_filtered_peak_mzbins_.end() );
+    sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    // sort( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() );
+    // dyn_filtered_peak_mzbins_.erase(unique( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() ), dyn_filtered_peak_mzbins_.end() );
     // carp(CARP_DETAILED_DEBUG, "**********MS2Scan:%d \t smallest_mzbin:%d \t largest_mzbin:%d \t max_mzbin:%d \t dyn_peaks_mzbins:%s", spectrum.SpectrumNumber(), smallest_mzbin_, largest_mzbin_, max_mzbin_, StringUtils::Join(dyn_filtered_peak_mzbins_, ',').c_str() );
 
 

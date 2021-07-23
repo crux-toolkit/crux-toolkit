@@ -363,7 +363,7 @@ void DIAmeterApplication::reportDIA(
    // get top-n targets and decoys by the heap
    vector<TideMatchSet::Arr::iterator> targets, decoys;
    matches->gatherTargetsAndDecoys(peptides, proteins, targets, decoys, Params::GetInt("top-match"), 1, true);
-   carp(CARP_DETAILED_DEBUG, "Gathered targets:%d \t decoy:%d", targets.size(), decoys.size());
+   // carp(CARP_DETAILED_DEBUG, "Gathered targets:%d \t decoy:%d", targets.size(), decoys.size());
 
    // calculate precursor intensity logrank (Old version which is based on discreted mzbin)
    double *intensity_rank_arr_old = NULL;
@@ -394,7 +394,7 @@ void DIAmeterApplication::reportDIA(
 	   intercept_new = (rankIter_new->second).get<1>();
    }
    boost::tuple<double, double> slope_intercept_tp = boost::make_tuple(slope_new, intercept_new);
-   // carp(CARP_DETAILED_DEBUG, "########## ms1_scan:%d \t slope_new:%f \t intercept_new:%f", ms1_scan_num, slope_new, intercept_new );
+   carp(CARP_DEBUG, "********** ms1_scan:%d \t slope_new:%f \t intercept_new:%f", ms1_scan_num, slope_new, intercept_new );
 
    map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> intensity_map_new;
    map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> logrank_map_new;
@@ -482,11 +482,11 @@ void DIAmeterApplication::reportDIA(
 
 
    // calculate MS2 p-value
-   map<TideMatchSet::Arr::iterator, double> dyn_ms2pval_map;
+   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> dyn_ms2pval_map;
    computeMS2Pval(targets, peptides, observed, &dyn_ms2pval_map, true);
    computeMS2Pval(decoys, peptides, observed, &dyn_ms2pval_map, true);
 
-   map<TideMatchSet::Arr::iterator, double> sta_ms2pval_map;
+   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> sta_ms2pval_map;
    computeMS2Pval(targets, peptides, observed, &sta_ms2pval_map, false);
    computeMS2Pval(decoys, peptides, observed, &sta_ms2pval_map, false);
 
@@ -760,27 +760,33 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 }
 
 
-
-
 void DIAmeterApplication::computeMS2Pval(
    const vector<TideMatchSet::Arr::iterator>& vec,
    const ActivePeptideQueue* peptides,
    ObservedPeakSet* observed,
-   map<TideMatchSet::Arr::iterator, double>* ms2pval_map,
+   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
    bool dynamic_filter
 ) {
    int smallest_mzbin = observed->SmallestMzbin();
    int largest_mzbin = observed->LargestMzbin();
 
-   vector<int> filtered_peaks_mzbins = observed->StaticFilteredPeakMzbins();
-   if (dynamic_filter) { filtered_peaks_mzbins = observed->DynamicFilteredPeakMzbins(); }
+   vector<pair<int, double>> filtered_peak_tuples = observed->StaticFilteredPeakTuples();
+   if (dynamic_filter) { filtered_peak_tuples = observed->DynamicFilteredPeakTuples(); }
 
-   double ms2_coverage = 1.0 * filtered_peaks_mzbins.size() / (largest_mzbin - smallest_mzbin + 1);
+   double ms2_coverage = 1.0 * filtered_peak_tuples.size() / (largest_mzbin - smallest_mzbin + 1);
    double log_p = log(ms2_coverage);
    double log_1_min_p = log(1 - ms2_coverage);
 
-   // sort(filtered_peaks_mzbins.begin(), filtered_peaks_mzbins.end()); // sort the vector for calculating the intersection lateron
    // carp(CARP_DETAILED_DEBUG, "Mzbin range:[%d, %d] \t ms2_coverage: %f ", smallest_mzbin, largest_mzbin, ms2_coverage );
+   // a sanity check if filtered_peak_tuples is sorted ascendingly w.r.t mzbin
+   vector<int> filtered_peak_mzbins;
+   vector<double> filtered_peak_intensities;
+   for (int idx=0; idx<filtered_peak_tuples.size(); ++idx) {
+	   filtered_peak_mzbins.push_back(filtered_peak_tuples.at(idx).first);
+	   filtered_peak_intensities.push_back(filtered_peak_tuples.at(idx).second);
+   }
+   // carp(CARP_DETAILED_DEBUG, "********** filtered_peak_mzbins:%s", StringUtils::Join(filtered_peak_mzbins, ',').c_str() );
+   // carp(CARP_DETAILED_DEBUG, "********** filtered_peak_intensities:%s", StringUtils::JoinDoubleVec(filtered_peak_intensities, ',').c_str() );
 
    vector<int> intersect_mzbins;
    vector<double> pvalue_binomial_probs;
@@ -791,8 +797,10 @@ void DIAmeterApplication::computeMS2Pval(
       // carp(CARP_DETAILED_DEBUG, "**********Peptide: %s \t ion_mzbins:%s \t ion_mzs:%s ", peptide.Seq().c_str(), StringUtils::Join(ion_mzbins, ',').c_str(), StringUtils::JoinDoubleVec(peptide.IonMzs(), ',').c_str() );
 
       intersect_mzbins.clear();
-      sort(ion_mzbins.begin(), ion_mzbins.end()); // sort the vector for calculating the intersection lateron
-      set_intersection(filtered_peaks_mzbins.begin(),filtered_peaks_mzbins.end(), ion_mzbins.begin(),ion_mzbins.end(), back_inserter(intersect_mzbins));
+      // sort(ion_mzbins.begin(), ion_mzbins.end()); // sort the vector for calculating the intersection lateron
+      // carp(CARP_DETAILED_DEBUG, "********** ion_mzbins:%s", StringUtils::Join(ion_mzbins, ',').c_str() );
+
+      set_intersection(filtered_peak_mzbins.begin(),filtered_peak_mzbins.end(), ion_mzbins.begin(), ion_mzbins.end(), back_inserter(intersect_mzbins));
       // carp(CARP_DETAILED_DEBUG, "Peak_mzbin: %d \t Ion_mzbin: %d \t overlap: %d ", filtered_peaks_mzbins.size(), ion_mzbins.size(), intersect_mzbins.size() );
       // carp(CARP_DETAILED_DEBUG, "**********peak_mzbins:%s \t intersect_mzbins:%s ", StringUtils::Join(filtered_peaks_mzbins, ',').c_str(), StringUtils::Join(intersect_mzbins, ',').c_str() );
 
@@ -801,9 +809,42 @@ void DIAmeterApplication::computeMS2Pval(
     	  double binomial_prob = MathUtil::LogNChooseK(ion_mzbins.size(), k) + k * log_p + (ion_mzbins.size()-k) * log_1_min_p;
     	  pvalue_binomial_probs.push_back(binomial_prob);
       }
+      double ms2pval1 = -MathUtil::LogSumExp(&pvalue_binomial_probs);
+      double ms2pval2 = 0.0, intensitysum = 0.0;
 
-      double ms2pval = -MathUtil::LogSumExp(&pvalue_binomial_probs);
-      ms2pval_map->insert(make_pair((*i), ms2pval));
+      // deal with another alternative
+      vector<int> b_ion_mzbins = peptide.BIonMzbins();
+      vector<int> y_ion_mzbins = peptide.YIonMzbins();
+      // carp(CARP_DETAILED_DEBUG, "********** b_ion_mzbins:%s", StringUtils::Join(b_ion_mzbins, ',').c_str() );
+      // carp(CARP_DETAILED_DEBUG, "********** y_ion_mzbins:%s", StringUtils::Join(y_ion_mzbins, ',').c_str() );
+
+      intersect_mzbins.clear(); intensitysum = 0.0;
+      set_intersection(filtered_peak_mzbins.begin(),filtered_peak_mzbins.end(), b_ion_mzbins.begin(), b_ion_mzbins.end(), back_inserter(intersect_mzbins));
+      ms2pval2 += MathUtil::gammaln(1.0 + intersect_mzbins.size());
+      for (int k=0; k <intersect_mzbins.size(); ++k ) {
+    	  std::vector<int>::iterator itr = find(filtered_peak_mzbins.begin(), filtered_peak_mzbins.end(), intersect_mzbins.at(k));
+    	  if (itr != filtered_peak_mzbins.cend()) {
+    		  int hit_idx = distance(filtered_peak_mzbins.begin(), itr);
+    		  intensitysum += (filtered_peak_intensities.at(hit_idx)*filtered_peak_intensities.at(hit_idx));
+    		  // carp(CARP_DETAILED_DEBUG, "********** hit_idx:%d \t tgt_mzbin:%d \t hit_mzbin:%d  \t hit_intensity:%f", hit_idx, intersect_mzbins.at(k), filtered_peak_mzbins.at(hit_idx), filtered_peak_intensities.at(hit_idx) );
+    	  }
+      }
+      ms2pval2 += log(1.0 + intensitysum);
+
+      intersect_mzbins.clear(); intensitysum = 0.0;
+      set_intersection(filtered_peak_mzbins.begin(),filtered_peak_mzbins.end(), y_ion_mzbins.begin(), y_ion_mzbins.end(), back_inserter(intersect_mzbins));
+      ms2pval2 += MathUtil::gammaln(1.0 + intersect_mzbins.size());
+      for (int k=0; k <intersect_mzbins.size(); ++k ) {
+    	  std::vector<int>::iterator itr = find(filtered_peak_mzbins.begin(), filtered_peak_mzbins.end(), intersect_mzbins.at(k));
+    	  if (itr != filtered_peak_mzbins.cend()) {
+    		  int hit_idx = distance(filtered_peak_mzbins.begin(), itr);
+    		  intensitysum += (filtered_peak_intensities.at(hit_idx)*filtered_peak_intensities.at(hit_idx));
+    		  // carp(CARP_DETAILED_DEBUG, "********** hit_idx:%d \t tgt_mzbin:%d \t hit_mzbin:%d  \t hit_intensity:%f", hit_idx, intersect_mzbins.at(k), filtered_peak_mzbins.at(hit_idx), filtered_peak_intensities.at(hit_idx) );
+    	  }
+      }
+      ms2pval2 += log(1.0 + intensitysum);
+
+      ms2pval_map->insert(make_pair((*i), boost::make_tuple(ms2pval1, ms2pval2 )));
       // carp(CARP_DETAILED_DEBUG, "pvalue_binomial_probs: size=%d \t ms2pval=%f \t %s ", pvalue_binomial_probs.size(), ms2pval, StringUtils::Join(pvalue_binomial_probs, ',').c_str() );
       // carp(CARP_DETAILED_DEBUG, "**********ms2pval:%f \t smallest_mzbin:%d \t largest_mzbin:%d \t log_p:%f \t ms2_coverage:%f", ms2pval, smallest_mzbin, largest_mzbin, log_p, ms2_coverage );
 

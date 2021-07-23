@@ -77,13 +77,13 @@ void Peptide::AddIons(W* workspace) {
 
 
   // added by Yang
-  ion_mzbins_.clear();
-  ion_mzs_.clear();
+  ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
 
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
+    b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
     ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 1));
     total += aa_masses[i];
@@ -93,6 +93,7 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
+    y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
     ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
     ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 1));
     total += aa_masses[i];
@@ -103,8 +104,9 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 2);
-    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
-    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 2));
+    // b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
+    // ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
+    // ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 2));
     total += aa_masses[i];
   }
 
@@ -112,14 +114,17 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 2);
-    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
-    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 2));
+    // y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
+    // ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
+    // ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 2));
     total += aa_masses[i];
   }
 
   // added by Yang
-  // sort(ion_mzbins_.begin(), ion_mzbins_.end());
-  // sort(ion_mzs_.begin(), ion_mzs_.end());
+  sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
+  sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
+  sort(ion_mzbins_.begin(), ion_mzbins_.end());
+  sort(ion_mzs_.begin(), ion_mzs_.end());
 
   /*carp(CARP_DETAILED_DEBUG, "peptide:%s", Seq().c_str() );
   for (int ion_idx=0; ion_idx<ion_mzbins_.size(); ++ion_idx) {

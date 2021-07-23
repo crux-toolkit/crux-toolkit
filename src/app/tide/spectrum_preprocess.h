@@ -218,8 +218,8 @@ class ObservedPeakSet {
   // added by Yang
   int LargestMzbin() const { return largest_mzbin_; };
   int SmallestMzbin() const { return smallest_mzbin_; };
-  vector<int>& DynamicFilteredPeakMzbins() { return dyn_filtered_peak_mzbins_; }
-  vector<int>& StaticFilteredPeakMzbins() { return sta_filtered_peak_mzbins_; }
+  vector<pair<int, double>>& DynamicFilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
+  vector<pair<int, double>>& StaticFilteredPeakTuples() { return sta_filtered_peak_tuples_; }
 
  private:
   int& Peak(TheoreticalPeakType peak_type, int index) {
@@ -243,10 +243,8 @@ class ObservedPeakSet {
   MaxBin max_mz_;
   int cache_end_;
 
-
   // added by Yang
-  vector<int> dyn_filtered_peak_mzbins_;
-  vector<int> sta_filtered_peak_mzbins_;
+  vector<pair<int, double>> dyn_filtered_peak_tuples_, sta_filtered_peak_tuples_;
   int largest_mzbin_, smallest_mzbin_, max_mzbin_;
   double* raw_peaks_;
 
