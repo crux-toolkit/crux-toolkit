@@ -115,7 +115,7 @@ class DIAmeterApplication : public CruxApplication {
 	const vector<TideMatchSet::Arr::iterator>& vec,
 	const ActivePeptideQueue* peptides,
 	ObservedPeakSet* observed,
-	map<TideMatchSet::Arr::iterator, double>* ms2pval_map,
+	map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
 	bool dynamic_filter = true
   );
 

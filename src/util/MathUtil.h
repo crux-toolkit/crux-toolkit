@@ -29,6 +29,8 @@ class MathUtil {
   // fit linear regression
   static boost::tuple<double, double> fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values);
 
+  static double gammaln(double xx);
+
   template<typename T>
   static double Sum(const T& values) {
     double sum = 0;
