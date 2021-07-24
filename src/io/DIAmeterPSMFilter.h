@@ -11,7 +11,7 @@
 #include "DelimitedFileReader.h"
 #include "MatchColumns.h"
 #include "PSMReader.h"
-
+#include "boost/tuple/tuple.hpp"
 
 // It is the struct to store the DIAmeter PSM features,
 // which is easy to group by (scan, charge), sort by XCorr,
@@ -28,7 +28,6 @@ struct PSMByScanCharge {
 	}
 };
 
-
 class DIAmeterPSMFilter {
  protected:
     int match_indices_[NUMBER_MATCH_COLUMNS];
@@ -38,8 +37,11 @@ class DIAmeterPSMFilter {
     int agg_idx_, scan_idx_, charge_idx_, xcorr_idx_;
     DelimitedFileReader* fileReader_;
 
+    // we use (scan*10+charge) as the key
+    std::map<int, boost::tuple<double, double>> scan_charge_scores_map;
+
     void parseHeader();
-    void processPSMGroup(std::vector<PSMByScanCharge>* pooled_data_vec, ofstream* output_file, bool filter=true);
+    int getKey(int scan, int charge);
 
     static bool psm_sorter(const PSMByScanCharge & psm1, const PSMByScanCharge & psm2);
 
@@ -47,9 +49,10 @@ class DIAmeterPSMFilter {
     DIAmeterPSMFilter(const char* file_name);
     ~DIAmeterPSMFilter();
 
+    void calcBaseline();
     void loadAndFilter(const char* output_file_name, bool filter=true);
-
 };
+
 
 #endif //DIAMETERPSMFILTER_H
 

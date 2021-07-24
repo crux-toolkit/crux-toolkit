@@ -77,22 +77,24 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
   // Output setup
   string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
-  string output_file_name_sorted_ = make_file_path("diameter-search.sorted.txt");
   string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
-  // string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
+  string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
 
-  stringstream param_ss;
-  param_ss << "diameter-search.filtered_";
+  if (Params::GetBool("psm-filter")) {
+	  stringstream param_ss;
+	  param_ss << "diameter-search.filtered_";
 
-  string coeff_tag = Params::GetString("coeff-tag");
-  if (coeff_tag.empty()) {
-	  param_ss << "prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
-	  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
-	  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
-	  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
-  } else { param_ss << coeff_tag;  }
-  param_ss << ".txt";
-  string output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
+	  string coeff_tag = Params::GetString("coeff-tag");
+	  if (coeff_tag.empty()) {
+	  	  param_ss << "prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
+	  	  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
+	  	  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
+	  	  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
+	  } else { param_ss << coeff_tag;  }
+	  param_ss << ".txt";
+	  output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
+  }
+
 
   // Extract all edge features
   if (!FileUtils::Exists(output_file_name_unsorted_) /* || Params::GetBool("overwrite") */) {
@@ -309,28 +311,17 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  if (output_file) { output_file->close(); delete output_file; }
   }
 
-  // Sort the edges first by the scan number then by the charge state
-  if (!FileUtils::Exists(output_file_name_sorted_) /* || Params::GetBool("overwrite") */) {
-  	  carp(CARP_DEBUG, "Either file exists or it needs to be overwrite:%s", output_file_name_sorted_.c_str());
-
-  	  stringstream cmd_ss;
-  	  cmd_ss << "sort " << output_file_name_unsorted_ << " -k2n -k3n -o " << output_file_name_sorted_;
-  	  carp(CARP_DEBUG, "sort command:%s", cmd_ss.str().c_str());
-  	  system(cmd_ss.str().c_str());
-  }
-  if (!FileUtils::Exists(output_file_name_sorted_)) { carp(CARP_FATAL, "The file must exists! %s", output_file_name_sorted_.c_str()); }
-
   // standardize the features
   if (!FileUtils::Exists(output_file_name_scaled_) /* || Params::GetBool("overwrite") */) {
-	  DIAmeterFeatureScaler diameterScaler(output_file_name_sorted_.c_str());
-	  diameterScaler.calcDataQuantile();
-	  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
+  	  DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
+  	  diameterScaler.calcDataQuantile();
+  	  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
   // filter the edges
   if (!FileUtils::Exists(output_file_name_filtered_) /* || Params::GetBool("overwrite") */) {
-	  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
-	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str());
+  	  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
+  	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
 
   // generate .pin file by calling make-pin externally
@@ -731,7 +722,8 @@ void DIAmeterApplication::computePrecFragCoeluteNew(
 
 	   // calculate correlation among MS1 and MS2
 	   ms1_ms2_corrs.clear();
-	   for (int i=0; i<ms1_chroms.size(); ++i) {
+	   // for (int i=0; i<ms1_chroms.size(); ++i) {
+	   for (int i=0; i<1; ++i) {
 		   for (int j=0; j<ms2_chroms.size(); ++j) {
 			   ms1_ms2_corrs.push_back(MathUtil::NormalizedDotProduct(ms1_chroms.at(i), ms2_chroms.at(j), coelute_size));
 		   }
