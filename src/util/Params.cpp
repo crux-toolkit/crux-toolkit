@@ -2093,7 +2093,7 @@ Params::Params() : finalized_(false) {
     "Make the ScanNr of each PSM unique in the .pin file.",
     "It is used for make-pin", true);
 
-  InitBoolParam("psm-filter", true,
+  InitBoolParam("psm-filter", false,
     "Filter the PSM by the ensemble score.",
     "It is used for DIAmeter", true);
 
