@@ -462,7 +462,7 @@ void DIAmeterApplication::reportDIA(
 	   	   ms2_peak_num = (ms2_intensityIter->second).get<2>();
 	   }
 
-	   if (ms1_intensity_arr != NULL and ms2_intensity_arr != NULL) {
+	   if (ms1_intensity_arr != NULL && ms2_intensity_arr != NULL) {
 		   mz_intensity_arrs_vector.push_back(boost::make_tuple(ms1_mz_arr, ms1_intensity_arr, ms1_peak_num, ms2_mz_arr, ms2_intensity_arr, ms2_peak_num));
 	   }
    }
