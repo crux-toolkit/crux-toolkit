@@ -125,9 +125,9 @@ void DIAmeterPSMFilter::loadAndFilter(const char* output_file_name, bool filter)
 
 		double xcorr_baseline = (baselineIter->second).get<0>();
 		double ensemble_baseline = (baselineIter->second).get<1>() - 0.000001;
-		if (filter && (ensemble >= ensemble_baseline)) {
+		if ((!filter) || (ensemble >= ensemble_baseline)) {
 			*output_file << StringUtils::Join(data, '\t').c_str() << endl;
-			carp(CARP_DEBUG, "scan:%d \t charge:%d \t xcorr_baseline.vs.curr:(%f, %f) \t ensemble_baseline.vs.curr:(%f, %f)", scan, charge, xcorr_baseline, xcorr, ensemble_baseline, ensemble);
+			// carp(CARP_DEBUG, "scan:%d \t charge:%d \t xcorr_baseline.vs.curr:(%f, %f) \t ensemble_baseline.vs.curr:(%f, %f)", scan, charge, xcorr_baseline, xcorr, ensemble_baseline, ensemble);
 		}
 
 		fileReader_->next();
