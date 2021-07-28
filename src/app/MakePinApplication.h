@@ -8,6 +8,7 @@
 #define MAKEPINAPPLICATION_H
 
 #include "CruxApplication.h"
+// #include "DIAmeterApplication.h"
 
 #include <string>
 #include <fstream>
@@ -16,6 +17,8 @@
 using namespace std;
 
 class MakePinApplication: public CruxApplication {
+
+ // friend class DIAmeterApplication;
 
  public:
 

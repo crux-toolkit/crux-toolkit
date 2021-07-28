@@ -16,6 +16,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/abspath.h"
 #include "TideSearchApplication.h"
+#include "DIAmeterApplication.h"
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
@@ -26,6 +27,7 @@ std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* 
 class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
+  friend class DIAmeterApplication;
 
  public:
 

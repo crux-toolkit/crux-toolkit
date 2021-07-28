@@ -9,8 +9,8 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "DIAmeterApplication.h"
-#include "ParamMedicApplication.h"
-#include "PSMConvertApplication.h"
+#include "MakePinApplication.h"
+#include "PercolatorApplication.h"
 #include "tide/mass_constants.h"
 #include "TideMatchSet.h"
 #include "util/Params.h"
@@ -24,8 +24,16 @@
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
 
-DIAmeterApplication::DIAmeterApplication() { /* do nothing */ }
-DIAmeterApplication::~DIAmeterApplication() { /* do nothing */ }
+DIAmeterApplication::DIAmeterApplication():
+  remove_index_(""), output_pin_(""), output_percolator_("") { /* do nothing */
+}
+
+DIAmeterApplication::~DIAmeterApplication() {
+  if (!remove_index_.empty()) {
+    carp(CARP_DEBUG, "Removing temp index '%s'", remove_index_.c_str());
+    FileUtils::Remove(remove_index_);
+  }
+}
 
 
 int DIAmeterApplication::main(int argc, char** argv) {
@@ -43,9 +51,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string proteins_file = FileUtils::Join(index, "protix");
   string auxlocs_file = FileUtils::Join(index, "auxlocs");
 
-  // params
-  // Params::Set("concat", true);
-  // Params::Set("use-tailor-calibration", true);
 
   double bin_width_  = Params::GetDouble("mz-bin-width");
   double bin_offset_ = Params::GetDouble("mz-bin-offset");
@@ -82,21 +87,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
   if (Params::GetBool("psm-filter")) {
 	  stringstream param_ss;
-	  param_ss << "diameter-search.filtered_";
-
-	  string coeff_tag = Params::GetString("coeff-tag");
-	  if (coeff_tag.empty()) {
-	  	  param_ss << "prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
-	  	  param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
-	  	  param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
-	  	  param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
-	  } else { param_ss << coeff_tag;  }
-	  param_ss << ".txt";
+	  param_ss << "diameter-search.filtered." << getCoeffTag() << ".txt";
 	  output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
   }
 
+
   // Extract all edge features
-  if (!FileUtils::Exists(output_file_name_unsorted_) /* || Params::GetBool("overwrite") */) {
+  if (!FileUtils::Exists(output_file_name_unsorted_) || Params::GetBool("overwrite") /* */) {
 	  carp(CARP_DEBUG, "Either file exists or it needs to be overwrite:%s", output_file_name_unsorted_.c_str());
 
 	  ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
@@ -213,7 +210,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
 					// TideSearchApplication::computeWindow(*sc, string_to_window_type(Params::GetString("precursor-window-type")), Params::GetDouble("precursor-window"), Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 					// carp(CARP_DETAILED_DEBUG, "==============MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
-					computeWindowDIA(*sc, Params::GetInt("max-precursor-charge"), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+					computeWindowDIA(*sc, &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
 
 
 					// Normalize the observed spectrum and compute the cache of frequently-needed
@@ -311,19 +308,28 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   }
 
   // standardize the features
-  if (!FileUtils::Exists(output_file_name_scaled_) /* || Params::GetBool("overwrite") */) {
+  if (!FileUtils::Exists(output_file_name_scaled_) || Params::GetBool("overwrite") /* */) {
   	  DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
   	  diameterScaler.calcDataQuantile();
   	  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
   // filter the edges
-  if (!FileUtils::Exists(output_file_name_filtered_) /* || Params::GetBool("overwrite") */) {
+  if (!FileUtils::Exists(output_file_name_filtered_) || Params::GetBool("overwrite") /* */) {
   	  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
   	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
 
-  // generate .pin file by calling make-pin externally
+  // generate .pin file by calling make-pin
+  MakePinApplication pinApp;
+  vector<string> paths_vec;
+  paths_vec.push_back(output_file_name_filtered_);
+  if (pinApp.main(paths_vec) != 0) { carp(CARP_FATAL, "Make-pin failed internally in DIAmeter."); }
+
+  // calling percolator
+  PercolatorApplication percolatorApp;\
+  if(!FileUtils::Exists(output_percolator_)) { FileUtils::Mkdir(output_percolator_); }
+  if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
 
   return 0;
 }
@@ -951,7 +957,10 @@ void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_p
    // it's possible that multiple mapping files are provided and concatenated by comma
    vector<string> mapping_paths = StringUtils::Split(Params::GetString("predrt-files"), ",");
    for(int file_idx = 0; file_idx<mapping_paths.size(); file_idx++) {
-      if (!FileUtils::Exists(mapping_paths.at(file_idx))) { carp(CARP_FATAL, "The mapping file %s does not exist! \n", mapping_paths.at(file_idx).c_str()); }
+      if (!FileUtils::Exists(mapping_paths.at(file_idx))) {
+    	  carp(CARP_DEBUG, "The mapping file %s does not exist! \n", mapping_paths.at(file_idx).c_str());
+    	  continue;
+      }
       else { carp(CARP_DEBUG, "parsing the mapping file: %s", mapping_paths.at(file_idx).c_str()); }
 
       std::ifstream file_stream(mapping_paths.at(file_idx).c_str());
@@ -1239,7 +1248,6 @@ SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
 
 void DIAmeterApplication::computeWindowDIA(
   const SpectrumCollection::SpecCharge& sc,
-  int max_charge,
   vector<int>* negative_isotope_errors,
   vector<double>* out_min,
   vector<double>* out_max,
@@ -1256,7 +1264,7 @@ void DIAmeterApplication::computeWindowDIA(
    }
    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*sc.charge;
    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*sc.charge;
-   // carp(CARP_DETAILED_DEBUG, "==============scan:%d \t sc.charge:%d \t out_window:[%f, %f] \t out_range:[%f, %f]", sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0], (*min_range), (*max_range) );
+   carp(CARP_DETAILED_DEBUG, "==============scan:%d \t charge:%d \t precursor_window:%f \t out_window:[%f, %f]", sc.spectrum->SpectrumNumber(), sc.charge, precursor_window, (*out_min)[0], (*out_max)[0] );
 }
 
 double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
@@ -1302,6 +1310,18 @@ double DIAmeterApplication::closestPPMValue(const double* mz_arr, const double* 
 	return matched_intensity;
 }
 
+string DIAmeterApplication::getCoeffTag() {
+	stringstream param_ss;
+	string coeff_tag = Params::GetString("coeff-tag");
+	if (coeff_tag.empty()) {
+		param_ss << "prec_" << StringUtils::ToString(Params::GetDouble("coeff-precursor"), 2);
+		param_ss << "_frag_" << StringUtils::ToString(Params::GetDouble("coeff-fragment"), 2);
+		param_ss << "_rt_" << StringUtils::ToString(Params::GetDouble("coeff-rtdiff"), 2);
+		param_ss << "_elu_" << StringUtils::ToString(Params::GetDouble("coeff-elution"), 2);
+	} else { param_ss << coeff_tag;  }
+	return param_ss.str();
+}
+
 
 string DIAmeterApplication::getName() const {
   return "diameter";
@@ -1335,8 +1355,9 @@ vector<string> DIAmeterApplication::getOptions() const {
     // "precursor-window-type",
     // "spectrum-charge",
     // "spectrum-parser",
-    "concat",
-	"use-tailor-calibration",
+    // "concat",
+	// "use-tailor-calibration",
+    // "use-flanking-peaks",
 
 	"predrt-files",
 	"msamanda-regional-topk",
@@ -1350,9 +1371,7 @@ vector<string> DIAmeterApplication::getOptions() const {
 	"prec-ppm",
 	"frag-ppm",
 	"unique-scannr",
-
     "top-match",
-    "use-flanking-peaks",
     "use-neutral-loss-peaks",
     "verbosity"
   };
@@ -1386,6 +1405,62 @@ COMMAND_T DIAmeterApplication::getCommand() const {
 }
 
 void DIAmeterApplication::processParams() {
+	const string index = Params::GetString("tide database");
+	if (!FileUtils::Exists(index)) { carp(CARP_FATAL, "'%s' does not exist", index.c_str()); }
+	else if (FileUtils::IsRegularFile(index)) { // Index is FASTA file
+		carp(CARP_INFO, "Creating index from '%s'", index.c_str());
+		string targetIndexName = Params::GetString("store-index");
+		if (targetIndexName.empty()) {
+			targetIndexName = FileUtils::Join(Params::GetString("output-dir"), "tide-search.tempindex");
+			remove_index_ = targetIndexName;
+		}
+
+		TideIndexApplication indexApp;
+		indexApp.processParams();
+		if (indexApp.main(index, targetIndexName) != 0) { carp(CARP_FATAL, "tide-index failed."); }
+		Params::Set("tide database", targetIndexName);
+
+	} else { // Index is Tide index directory
+		pb::Header peptides_header;
+		string peptides_file = FileUtils::Join(index, "pepix");
+		HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
+		if ((peptides_header.file_type() != pb::Header::PEPTIDES) || !peptides_header.has_peptides_header()) { carp(CARP_FATAL, "Error reading index (%s).", peptides_file.c_str()); }
+
+		const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+
+		Params::Set("enzyme", pepHeader.enzyme());
+		const char* digestString = digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
+		Params::Set("digestion", digestString);
+		Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
+	}
+
+	// these are DIAmeter-specific settings
+	Params::Set("concat", true);
+	Params::Set("use-tailor-calibration", true);
+	Params::Set("precursor-window-type", "mz");
+
+	// these are makepin-specific settings
+	output_pin_ = "diameter-search.pin";
+	output_percolator_ = FileUtils::Join(Params::GetString("output-dir"), "percolator-output");
+
+	if (Params::GetBool("psm-filter")) {
+		stringstream pin_ss;
+		pin_ss << "diameter-search." << getCoeffTag() << ".pin";
+		output_pin_ = pin_ss.str().c_str();
+
+		stringstream percolator_ss;
+		percolator_ss << "percolator-output-" << getCoeffTag();
+		output_percolator_ = FileUtils::Join(Params::GetString("output-dir"), percolator_ss.str());
+	}
+	Params::Set("output-file", output_pin_);
+	Params::Set("unique-scannr", true);
+	carp(CARP_INFO, "Updating output pin file = '%s'", output_pin_.c_str());
+
+	// these are Percolator-specific settings
+	Params::Set("tdc", false);
+	Params::Set("output-weights", true);
+	Params::Set("only-psms", false);
+	carp(CARP_INFO, "Updating output percolator dir = '%s'", output_percolator_.c_str());
 
 }
 

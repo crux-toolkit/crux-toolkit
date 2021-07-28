@@ -46,6 +46,8 @@ class DIAmeterApplication : public CruxApplication {
   int max_ms1scan_;
   int max_ms1_mzbin_, max_ms2_mzbin_;
 
+  std::string remove_index_, output_pin_, output_percolator_;
+
   vector<InputFile> getInputFiles(const vector<string>& filepaths, int ms_level) const;
 
   SpectrumCollection* loadSpectra(const std::string& file);
@@ -119,11 +121,8 @@ class DIAmeterApplication : public CruxApplication {
 	bool dynamic_filter = true
   );
 
-
-
   void computeWindowDIA(
 	const SpectrumCollection::SpecCharge& sc,
-	int max_charge,
 	vector<int>* negative_isotope_errors,
 	vector<double>* out_min,
 	vector<double>* out_max,
@@ -145,6 +144,7 @@ class DIAmeterApplication : public CruxApplication {
 	bool large_better
   );
 
+  string getCoeffTag();
 
  public:
   static const double XCORR_SCALING;
