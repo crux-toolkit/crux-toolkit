@@ -1438,6 +1438,7 @@ void DIAmeterApplication::processParams() {
 	Params::Set("concat", true);
 	Params::Set("use-tailor-calibration", true);
 	Params::Set("precursor-window-type", "mz");
+	Params::Set("num-threads", 1);
 
 	// these are makepin-specific settings
 	output_pin_ = "diameter-search.pin";
