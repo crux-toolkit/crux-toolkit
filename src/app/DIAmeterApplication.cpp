@@ -307,15 +307,16 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 	  if (output_file) { output_file->close(); delete output_file; }
   }
 
+  /*
   // standardize the features
-  if (!FileUtils::Exists(output_file_name_scaled_) || Params::GetBool("overwrite") /* */) {
+  if (!FileUtils::Exists(output_file_name_scaled_) || Params::GetBool("overwrite")) {
   	  DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
   	  diameterScaler.calcDataQuantile();
   	  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
   // filter the edges
-  if (!FileUtils::Exists(output_file_name_filtered_) || Params::GetBool("overwrite") /* */) {
+  if (!FileUtils::Exists(output_file_name_filtered_) || Params::GetBool("overwrite")) {
   	  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
   	  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
@@ -330,6 +331,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   PercolatorApplication percolatorApp;\
   if(!FileUtils::Exists(output_percolator_)) { FileUtils::Mkdir(output_percolator_); }
   if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
+  */
 
   return 0;
 }
