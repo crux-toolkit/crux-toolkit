@@ -70,7 +70,7 @@ class DIAmeterApplication : public CruxApplication {
 	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
 	TideMatchSet* matches, ///< object to manage PSMs
 	ObservedPeakSet* observed,
-	map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+	// map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
 	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
 	map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
 	// map<int, double*>* ms2scan_intensity_map,
