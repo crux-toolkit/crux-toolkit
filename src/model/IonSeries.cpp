@@ -48,17 +48,17 @@ struct loss_limit{
 };
 
 // Initalize array of loss_limit objects
-void initialize_loss_limit(LOSS_LIMIT_T *array, int size) {
-  if  (size > GlobalParams::getMaxLength()) {
+void IonSeries::initialize_loss_limit() {
+  if  (peptide_length_ > GlobalParams::getMaxLength()) {
     carp(
       CARP_FATAL, 
       "Requested loss_limit array with length = %d, which exceeds the max length of %d.\n"
       "Increase the value of the max-length parameter\n",
-      size,
+      peptide_length_,
       GlobalParams::getMaxLength()
    );
   }
-  memset(array, 0, sizeof(LOSS_LIMIT_T) * size);
+  memset(loss_limit_, 0, sizeof(LOSS_LIMIT_T) * peptide_length_);
 }
 
 //Test cache for speeding up loss limit allocations
@@ -152,7 +152,7 @@ IonSeries::IonSeries(
   
   // create the loss limit array
   loss_limit_ = loss_limit_cache.checkout();
-  initialize_loss_limit(loss_limit_, peptide_length_);
+  initialize_loss_limit();
 }
 
 /**
@@ -220,7 +220,7 @@ void IonSeries::update(
   modified_aa_seq_ = (MODIFIED_AA_T*)mod_seq;
 
   // Initialize the loss limit array for the new peptide
-  initialize_loss_limit(loss_limit_, peptide_length_);
+  initialize_loss_limit();
 }
 
 int IonSeries::incrementPointerCount() {
