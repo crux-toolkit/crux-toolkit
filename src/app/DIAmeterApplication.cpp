@@ -29,9 +29,9 @@ DIAmeterApplication::DIAmeterApplication():
 }
 
 DIAmeterApplication::~DIAmeterApplication() {
-  if (!remove_index_.empty()) {
+  if (!remove_index_.empty() && FileUtils::Exists(remove_index_) ) {
     carp(CARP_DEBUG, "Removing temp index '%s'", remove_index_.c_str());
-    FileUtils::Remove(remove_index_);
+    // FileUtils::Remove(remove_index_);
   }
 }
 
@@ -117,9 +117,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
 		 // changing from loadMS1SpectraOld to loadMS1SpectraNew step-by-step
 		 // The main difference is to replace discretized mzbin with ppm-based
-		 map<int, pair<double*, double*>> ms1scan_intensity_rank_map;
-		 loadMS1SpectraOld(ms1_spectra_file, &ms1scan_intensity_rank_map);
-		 carp(CARP_DEBUG, "old max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
+		 // map<int, pair<double*, double*>> ms1scan_intensity_rank_map;
+		 // loadMS1SpectraOld(ms1_spectra_file, &ms1scan_intensity_rank_map);
+		 // carp(CARP_DEBUG, "old max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
 
 		 map<int, boost::tuple<double*, double*, double*, int>> ms1scan_mz_intensity_rank_map;
 		 map<int, boost::tuple<double, double>> ms1scan_slope_intercept_map;
@@ -257,7 +257,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 						reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations,
 								&matches,
 								&observed,
-								&ms1scan_intensity_rank_map,
+								// &ms1scan_intensity_rank_map,
 								&ms1scan_mz_intensity_rank_map,
 								&ms1scan_slope_intercept_map,
 								// &ms2scan_intensity_map,
@@ -286,11 +286,11 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 		 // clean up
 		 delete spectra;
 		 delete sc_index;
-		 for (map<int, pair<double*, double*>>::const_iterator i = ms1scan_intensity_rank_map.begin(); i != ms1scan_intensity_rank_map.end(); i++) {
-		 	delete[] (i->second).first;
-		 	delete[] (i->second).second;
-		 }
-		 ms1scan_intensity_rank_map.clear();
+		 // for (map<int, pair<double*, double*>>::const_iterator i = ms1scan_intensity_rank_map.begin(); i != ms1scan_intensity_rank_map.end(); i++) {
+		 // 	delete[] (i->second).first;
+		 // 	delete[] (i->second).second;
+		 // }
+		 // ms1scan_intensity_rank_map.clear();
 
 		 for (map<int, boost::tuple<double*, double*, double*, int>>::const_iterator i = ms1scan_mz_intensity_rank_map.begin(); i != ms1scan_mz_intensity_rank_map.end(); i++) {
 		 	delete[] (i->second).get<0>();
@@ -346,7 +346,7 @@ void DIAmeterApplication::reportDIA(
    const vector<const pb::AuxLocation*>& locations,  //< auxiliary locations
    TideMatchSet* matches, //< object to manage PSMs
    ObservedPeakSet* observed,
-   map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
+   // map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
    map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
    map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
    // map<int, double*>* ms2scan_intensity_map,
@@ -363,6 +363,7 @@ void DIAmeterApplication::reportDIA(
    matches->gatherTargetsAndDecoys(peptides, proteins, targets, decoys, Params::GetInt("top-match"), 1, true);
    // carp(CARP_DETAILED_DEBUG, "Gathered targets:%d \t decoy:%d", targets.size(), decoys.size());
 
+   /*
    // calculate precursor intensity logrank (Old version which is based on discreted mzbin)
    double *intensity_rank_arr_old = NULL;
    map<int, pair<double*, double*>>::iterator intensityIter_old = ms1scan_intensity_rank_map->find(ms1_scan_num);
@@ -372,6 +373,7 @@ void DIAmeterApplication::reportDIA(
    map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> intensity_map_old;
    computePrecIntRankOld(targets, peptides, intensity_rank_arr_old, &intensity_map_old, charge);
    computePrecIntRankOld(decoys, peptides, intensity_rank_arr_old, &intensity_map_old, charge);
+   */
 
    // calculate precursor intensity logrank (new version which is ppm-based)
    int peak_num_new = -1; double *mz_arr_new = NULL, *intensity_arr_new = NULL, *intensity_rank_arr_new = NULL;
@@ -514,7 +516,7 @@ void DIAmeterApplication::reportDIA(
 		   &delta_cn_map,
 		   &delta_lcn_map,
 		   Params::GetBool("compute-sp")? &sp_map : NULL,
-           &intensity_map_old,
+           // &intensity_map_old,
 		   &intensity_map_new,
 		   &logrank_map_new,
 		   &coelute_map,
@@ -534,7 +536,7 @@ void DIAmeterApplication::reportDIA(
            &delta_cn_map,
 		   &delta_lcn_map,
 		   Params::GetBool("compute-sp")? &sp_map : NULL,
-		   &intensity_map_old,
+		   // &intensity_map_old,
 		   &intensity_map_new,
 		   &logrank_map_new,
 		   &coelute_map,
@@ -1414,8 +1416,8 @@ void DIAmeterApplication::processParams() {
 		string targetIndexName = Params::GetString("store-index");
 		if (targetIndexName.empty()) {
 			targetIndexName = FileUtils::Join(Params::GetString("output-dir"), "tide-search.tempindex");
-			remove_index_ = targetIndexName;
 		}
+		remove_index_ = targetIndexName;
 
 		Params::Set("peptide-list", true);
 		Params::Set("decoy-format", "peptide-reverse");

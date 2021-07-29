@@ -127,7 +127,7 @@ class TideMatchSet {
       const map<Arr::iterator, FLOAT_T>* delta_cn_map,
       const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
       const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
-	  const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_old,
+	  // const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_old,
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_new,
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map_new,
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
