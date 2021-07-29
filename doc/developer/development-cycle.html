@@ -29,7 +29,7 @@ To begin work on crux, you will need a copy of the code base.
 copy from the
 <a href="https://github.com/crux-toolkit/crux-toolkit">GitHub repository</a>
 or update your existing
-working copy.  Unless you are a senior developer on the team it is highly recommended to create 
+working copy.  For most changes it is highly recommended to create 
 a <a href="https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-and-deleting-branches-within-your-repository">branch</a> and a pull 
 request in GitHub repository for any non-trivial changes. After your work is complete you can merge your changes 
 into master after a code review. Suggested branch naming template is {branch creator}_{brief description}.
@@ -49,7 +49,7 @@ before you start.
 <h2>Implement your changes</h2>
 <li>
 This is the part you already know how to do.  Edit or add files.
-Build and test frequently. There is no preferred IDE for Crux on Linux, so feel free to use your favorite IDE, as soon
+Build and test frequently. There is no preferred IDE for Crux on Linux, so feel free to use your favorite IDE, as long
 as it supports CMake. On Windows Crux is built using MS Visual Studio.<br/>
 Consider adding new <a href="crux-tests.html">smoke or unit tests</a> for your new
 functionality or bug-fix.  Remember to follow the 
@@ -66,7 +66,7 @@ to confirm that you added any new files to Git. Use <code>git diff -b</code>
 to review your changes before commit.
 
 <li>
-    After you reviewed your changes perform local commit using 
+    After you reviewed your changes perform a local commit using 
     <code>git commit -m"Your commit message"</code>. It is a good practice to always provide
     an informative message with every commit, even when you are on your own branch or fork.
 </li>
@@ -92,10 +92,11 @@ have agreed on the set of changes.
 Merge your pull request into master using <a href="https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request">Squash and Merge</a>.
 Make sure you reviewed the commit message before the merge and make it short and concise, 
 especially if your pull request has multiple commits.<br/>
-Since automated Crux bild is done on the master branch only it is a good practice to monitor the 
+Since the automated Crux bild is done on the master branch only it is a good practice to monitor the 
 TeamCity build after your merge to make sure you did not break anything.<br/>
 To avoid breaking the main build it is a good idea to merge master into your branch and do another 
 round of building and testing before the merge to make sure somebody else's changes do not interfere with yours.
+Please delete your branch from the GitHub repository when you are sure your merge is successful.
 
 </ol>
 <hr>
@@ -118,7 +119,7 @@ you want to be reviewed separately.  Since Git branches are cheap and easy to cr
 it is almost always better and less error prone to have separate branches
 than to make concurrent changes in your workspace and then carve out two separate commits.<br/>
 Also, if your changes involve only Crux code (not build scripts or external dependencies patches)
-it is possible to switch between branches within same workspace without full rebuild.
+it is possible to switch between branches within same workspace without a full rebuild.
   For example, if you are writing some helper
 functions in crux-utils.cpp to be used later, you could do 
 <pre><code>
