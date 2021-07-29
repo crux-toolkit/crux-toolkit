@@ -1415,6 +1415,9 @@ void DIAmeterApplication::processParams() {
 			remove_index_ = targetIndexName;
 		}
 
+		Params::Set("peptide-list", true);
+		Params::Set("decoy-format", "peptide-reverse");
+
 		TideIndexApplication indexApp;
 		indexApp.processParams();
 		if (indexApp.main(index, targetIndexName) != 0) { carp(CARP_FATAL, "tide-index failed."); }
