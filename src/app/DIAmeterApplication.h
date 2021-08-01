@@ -52,13 +52,13 @@ class DIAmeterApplication : public CruxApplication {
 
   SpectrumCollection* loadSpectra(const std::string& file);
 
-  void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
+  // void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
   void loadMS1SpectraNew(const std::string& file,
 		  map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
 		  map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
   );
 
-  void buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
+  // void buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
   void buildSpectraIndexFromIsoWindowNew(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map);
 
   void reportDIA(
