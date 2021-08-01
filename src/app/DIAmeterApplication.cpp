@@ -1009,7 +1009,7 @@ void DIAmeterApplication::getPeptidePredRTMapping(map<string, double>* peptide_p
    // carp(CARP_DETAILED_DEBUG, "peptide_predrt_map size:%d", peptide_predrt_map->size());
 }
 
-
+/*
 void DIAmeterApplication::buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map) {
 
 	unsigned int highest_ms2_mzbin = 0;
@@ -1047,6 +1047,7 @@ void DIAmeterApplication::buildSpectraIndexFromIsoWindowOld(vector<SpectrumColle
 	// calculate the maximum mzbin of MS2 spectra
 	max_ms2_mzbin_ = highest_ms2_mzbin;
 }
+*/
 
 void DIAmeterApplication::buildSpectraIndexFromIsoWindowNew(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map) {
 	for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk->begin();sc < spec_charge_chunk->begin() + (spec_charge_chunk->size()); sc++) {
@@ -1070,8 +1071,7 @@ void DIAmeterApplication::buildSpectraIndexFromIsoWindowNew(vector<SpectrumColle
 	}
 }
 
-
-
+/*
 void DIAmeterApplication::loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map) {
    SpectrumCollection* spectra = loadSpectra(file);
    double highest_mz = spectra->FindHighestMZ();
@@ -1141,6 +1141,7 @@ void DIAmeterApplication::loadMS1SpectraOld(const std::string& file, map<int, pa
    // calculate the maximum mzbin of MS1 spectra
    max_ms1_mzbin_ = highest_ms1_mzbin;
 }
+*/
 
 void DIAmeterApplication::loadMS1SpectraNew(const std::string& file,
 		map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
@@ -1228,7 +1229,6 @@ void DIAmeterApplication::loadMS1SpectraNew(const std::string& file,
 	// carp(CARP_DETAILED_DEBUG, "##########avg_ms1_intercept_:%f \t accumulated_intercept_cnt:%f", avg_ms1_intercept_, accumulated_intercept_cnt );
 
 }
-
 
 SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
    SpectrumCollection* spectra = new SpectrumCollection();
@@ -1445,6 +1445,7 @@ void DIAmeterApplication::processParams() {
 	Params::Set("concat", true);
 	Params::Set("use-tailor-calibration", true);
 	Params::Set("precursor-window-type", "mz");
+	Params::Set("spectrum-parser", "pwiz");
 	Params::Set("num-threads", 1);
 
 	// these are makepin-specific settings

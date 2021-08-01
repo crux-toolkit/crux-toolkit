@@ -448,8 +448,9 @@ bool Spectrum::parsePwizSpecInfo(
   iso_window_lower_mz_ = selected_ion_m_z - iso_window.cvParam(pzd::MS_isolation_window_lower_offset).valueAs<double>();
   iso_window_upper_mz_ = selected_ion_m_z + iso_window.cvParam(pzd::MS_isolation_window_upper_offset).valueAs<double>();
   if (!have_precursor_mz) { precursor_mz_ = selected_ion_m_z; }
-  carp(CARP_DETAILED_DEBUG, "selected_ion_m_z: %f ", selected_ion_m_z );
-  carp(CARP_DETAILED_DEBUG, "iso_window_lower_mz_: %f \t iso_window_lower_mz_: %f", iso_window_lower_mz_, iso_window_upper_mz_ );
+  // carp(CARP_DEBUG, "first_scan:%d \t last_scan:%d \t num_peaks:%d", first_scan_, last_scan_, num_peaks );
+  // carp(CARP_DEBUG, "precursor_mz:%f \t iso_window_lower_mz:%f \t iso_window_upper_mz:%f", precursor_mz_, iso_window_lower_mz_, iso_window_upper_mz_ );
+  // carp(CARP_DEBUG, "mzs:%s", StringUtils::JoinDoubleVec(mzs, ',').c_str() );
 
 
   // determined charge states will be stored
