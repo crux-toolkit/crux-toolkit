@@ -202,7 +202,7 @@ private:
 
   static bool proteinLevelDecoys();
 
-  static vector<int> getNegativeIsotopeErrors() ;
+  static vector<int> getNegativeIsotopeErrors();
 
   static void computeWindow(
       const SpectrumCollection::SpecCharge& sc,

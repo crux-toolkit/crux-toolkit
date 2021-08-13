@@ -246,7 +246,7 @@ class ObservedPeakSet {
   // added by Yang
   vector<pair<int, double>> dyn_filtered_peak_tuples_, sta_filtered_peak_tuples_;
   int largest_mzbin_, smallest_mzbin_, max_mzbin_;
-  double* raw_peaks_;
+  double* raw_peaks_; // peaks_ without grass filtering, used in MS2 p-value of DIAmeter
 
   friend class ObservedPeakTester;
 };

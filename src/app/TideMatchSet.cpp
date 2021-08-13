@@ -162,7 +162,7 @@ void TideMatchSet::writeToFile(
 
   bool brief = Params::GetBool("brief-output");
 
-  Peptide* peptide = peptides->GetPeptide(0);
+  const Peptide* peptide = peptides->GetPeptide(0);
   const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
   int pos = peptide->FirstLocPos();
   string proteinNames = getProteinName(*protein,
@@ -326,7 +326,6 @@ void TideMatchSet::writeHeadersDIA(ofstream* file, bool compute_sp) {
       int header = headers[i];
       if (!compute_sp && (header == SP_SCORE_COL || header == SP_RANK_COL ||
             header == BY_IONS_MATCHED_COL || header == BY_IONS_TOTAL_COL)) { continue; }
-      // if (header == FILE_COL && !Params::GetBool("file-column") ) { continue; }
       colPrint(&writtenHeader, file, get_column_header(header));
    }
    *file << endl;
@@ -345,9 +344,8 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, FLOAT_T>* delta_cn_map,
    const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
-   // const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_old,
-   const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map_new,
-   const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map_new,
+   const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+   const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
    const map<Arr::iterator, boost::tuple<double, double>>* dyn_ms2pval_map,
    const map<Arr::iterator, boost::tuple<double, double>>* sta_ms2pval_map,
@@ -366,8 +364,6 @@ void TideMatchSet::writeToFileDIA(
 
       if (idx >= top_n) { return; }
       rank = idx + 1;
-
-      // carp(CARP_DETAILED_DEBUG, "Peptide: %s \t rank1:%d \t rank2:%d \t xcorr:%f", peptide->Seq().c_str(), i->rank, rank, i->xcorr_score );
 
       const pb::Protein* protein = proteins[peptide->FirstLocProteinId()];
       int pos = peptide->FirstLocPos();
@@ -416,12 +412,11 @@ void TideMatchSet::writeToFileDIA(
              << rank << '\t';
 
       // PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL
-      // boost::tuple<double, double, double> intensity_tuple_old = intensity_map_old->at(i);
-      boost::tuple<double, double, double> intensity_tuple_new = intensity_map_new->at(i);
-      boost::tuple<double, double, double> logrank_tuple_new = logrank_map_new->at(i);
-      *file << StringUtils::ToString(intensity_tuple_new.get<0>()+intensity_tuple_new.get<1>()+intensity_tuple_new.get<2>(), precision, true) << '\t'
-           << StringUtils::ToString(intensity_tuple_new.get<0>(), precision, true) << '\t'
-           << StringUtils::ToString(logrank_tuple_new.get<0>()+logrank_tuple_new.get<1>()+logrank_tuple_new.get<2>(), precision, true) << '\t';
+      boost::tuple<double, double, double> intensity_tuple = intensity_map->at(i);
+      boost::tuple<double, double, double> logrank_tuple = logrank_map->at(i);
+      *file << StringUtils::ToString(intensity_tuple.get<0>()+intensity_tuple.get<1>()+intensity_tuple.get<2>(), precision, true) << '\t'
+           << StringUtils::ToString(intensity_tuple.get<0>(), precision, true) << '\t'
+           << StringUtils::ToString(logrank_tuple.get<0>()+logrank_tuple.get<1>()+logrank_tuple.get<2>(), precision, true) << '\t';
 
       // RT_DIFF_COL
       double predrt = 0.5;
