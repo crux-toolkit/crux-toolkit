@@ -176,7 +176,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
     	// sort region_peaks w.r.t the descending intensity
     	sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
-    	// save the top samanda-regional-topk peaks per region
+    	// save the top msamanda-regional-topk peaks per region
     	for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
     	    if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
     	    int peak_mzbin = region_peaks[peak_idx].first;

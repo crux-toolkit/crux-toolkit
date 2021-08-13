@@ -251,15 +251,6 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
   BIN_H2O = mass2bin(mono_h2o,1);
   BIN_NH3 = mass2bin(mono_nh3,1);
 
-  // added by Yang for debugging
-  /* const char* AA = "ACDEFGHIKLMNPQRSTVWY";
-  carp(CARP_DETAILED_DEBUG, "**********AA**********" );
-  for (int currAA = 0; AA[currAA] != '\0'; currAA++) {
-	  string s(1, AA[currAA]);
-	  double aa_mass = AminoAcidUtil::GetMass(AA[currAA], true);
-	  carp(CARP_DETAILED_DEBUG, "aa:%s \t nprotterm_mono:%f \t nterm_mono:%f \t cprotterm_mono:%f \t cterm_mono:%f \t mono:%f \t aa_mass:%f", s.c_str(), nprotterm_mono_table[AA[currAA]], nterm_mono_table[AA[currAA]], cprotterm_mono_table[AA[currAA]], cterm_mono_table[AA[currAA]], mono_table[AA[currAA]], aa_mass );
-  } */
-
   return true;
 }
 

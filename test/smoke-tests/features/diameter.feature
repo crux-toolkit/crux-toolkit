@@ -11,6 +11,5 @@ Scenario Outline: User runs diameter
 
 Examples:
   |test_name           |args                                                      |spectra            |fasta            |actual_output               |expected_output           |
-  |diameter_test1      |--top-match 5 --prec-ppm 10 --frag-ppm 10 --psm-filter F  |diameter_test.mzXML|small-yeast.fasta|diameter-search.tmp.txt     |diameter-search.tmp.txt   |
-  |diameter_test2      |--top-match 5 --prec-ppm 10 --frag-ppm 10 --psm-filter F  |diameter_test.mzXML|small-yeast.fasta|diameter-search.scaled.txt  |diameter-search.scaled.txt|
-  |diameter_test3      |--top-match 5 --prec-ppm 10 --frag-ppm 10 --psm-filter F  |diameter_test.mzXML|small-yeast.fasta|diameter-search.filtered.txt|diameter-search.filtered.txt|
+  |diameter_scale      |--top-match 5 --prec-ppm 10 --frag-ppm 10 --psm-filter F  |diameter_test.mzXML|small-yeast.fasta|diameter-search.scaled.txt  |diameter-search.scaled.txt|
+  |diameter_filter     |--top-match 5 --prec-ppm 10 --frag-ppm 10 --psm-filter F  |diameter_test.mzXML|small-yeast.fasta|diameter-search.filtered.txt|diameter-search.filtered.txt|

@@ -1,3 +1,10 @@
+/**
+ * DIAmeterApplication.h
+ * DATE: June 15, 2021
+ * AUTHOR: Yang Lu
+ * DESCRIPTION: The DIAmeter module for DIA search.
+ **************************************************************************/
+
 #ifndef DIAMETERAPPLICATION_H
 #define DIAMETERAPPLICATION_H
 
@@ -22,20 +29,19 @@ using namespace std;
 // We first want the spectra is sorted by neutral mass like usual.
 // Then if the neutral mass is equal, sort by the MS2 scan
 struct ScSortByMzDIA {
-	bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
-		double precursor_window_x = fabs(x.spectrum->IsoWindowUpperMZ()-x.spectrum->IsoWindowLowerMZ()) / 2;
-		double precursor_window_y = fabs(y.spectrum->IsoWindowUpperMZ()-y.spectrum->IsoWindowLowerMZ()) / 2;
-		// carp(CARP_DETAILED_DEBUG, "precursor_window_x:%f \t precursor_window_y:%f", precursor_window_x, precursor_window_y);
-		//return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_x) * x.charge < (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_y) * y.charge;
+    bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+        double precursor_window_x = fabs(x.spectrum->IsoWindowUpperMZ()-x.spectrum->IsoWindowLowerMZ()) / 2;
+        double precursor_window_y = fabs(y.spectrum->IsoWindowUpperMZ()-y.spectrum->IsoWindowLowerMZ()) / 2;
+        // carp(CARP_DETAILED_DEBUG, "precursor_window_x:%f \t precursor_window_y:%f", precursor_window_x, precursor_window_y);
+        //return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_x) * x.charge < (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_y) * y.charge;
 
-		double mass_x = (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_x) * x.charge;
-		double mass_y = (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_y) * y.charge;
-		if (mass_x < mass_y) { return true; }
-		else if ((mass_x == mass_y) && (x.spectrum->SpectrumNumber() < y.spectrum->SpectrumNumber())) { return true; }
-		else { return false; }
-	}
+        double mass_x = (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_x) * x.charge;
+        double mass_y = (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_y) * y.charge;
+        if (mass_x < mass_y) { return true; }
+        else if ((mass_x == mass_y) && (x.spectrum->SpectrumNumber() < y.spectrum->SpectrumNumber())) { return true; }
+        else { return false; }
+    }
 };
-
 
 class DIAmeterApplication : public CruxApplication {
 
@@ -52,82 +58,64 @@ class DIAmeterApplication : public CruxApplication {
 
   SpectrumCollection* loadSpectra(const std::string& file);
 
-  // void loadMS1SpectraOld(const std::string& file, map<int, pair<double*, double*>>* ms1scan_intensity_rank_map);
-  void loadMS1SpectraNew(const std::string& file,
-		  map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
-		  map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
+  void loadMS1Spectra(const std::string& file,
+          map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
+          map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
   );
 
-  // void buildSpectraIndexFromIsoWindowOld(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map);
-  void buildSpectraIndexFromIsoWindowNew(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map);
+  void buildSpectraIndexFromIsoWindow(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map);
 
   void reportDIA(
-	ofstream* output_file,  ///< output file to write to
-	const string& spectrum_filename, ///< name of spectrum file
-	const SpectrumCollection::SpecCharge& sc, ///< spectrum and charge for matches
-	const ActivePeptideQueue* peptides, ///< peptide queue
-	const ProteinVec& proteins, ///< proteins corresponding with peptides
-	const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
-	TideMatchSet* matches, ///< object to manage PSMs
-	ObservedPeakSet* observed,
-	// map<int, pair<double*, double*>>* ms1scan_intensity_rank_map,
-	map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
-	map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
-	// map<int, double*>* ms2scan_intensity_map,
-	map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map,
-	map<string, double>* peptide_predrt_map
+    ofstream* output_file,  // output file to write to
+    const string& spectrum_filename, // name of spectrum file
+    const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
+    const ActivePeptideQueue* peptides, // peptide queue
+    const ProteinVec& proteins, // proteins corresponding with peptides
+    const vector<const pb::AuxLocation*>& locations,  // auxiliary locations
+    TideMatchSet* matches, // object to manage PSMs
+    ObservedPeakSet* observed,
+    map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
+    map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
+    map<int, boost::tuple<double*, double*, int>>* ms2scan_mz_intensity_map,
+    map<string, double>* peptide_predrt_map
   );
 
-  void computePrecIntRankOld(
-	const vector<TideMatchSet::Arr::iterator>& vec,
-	const ActivePeptideQueue* peptides,
-	const double* intensity_rank_arr,
-	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
-	int charge
-  );
-  void computePrecIntRankNew(
-  	const vector<TideMatchSet::Arr::iterator>& vec,
-  	const ActivePeptideQueue* peptides,
-  	const double* mz_arr,
-	const double* intensity_arr,
-  	const double* intensity_rank_arr,
-	boost::tuple<double, double> slope_intercept_tp,
-	int peak_num,
-  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
-  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
-  	int charge
+  void computePrecIntRank(
+      const vector<TideMatchSet::Arr::iterator>& vec,
+      const ActivePeptideQueue* peptides,
+      const double* mz_arr,
+    const double* intensity_arr,
+      const double* intensity_rank_arr,
+    boost::tuple<double, double> slope_intercept_tp,
+    int peak_num,
+      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
+      int charge
   );
 
-  void computePrecFragCoeluteOld(
-  	const vector<TideMatchSet::Arr::iterator>& vec,
-  	const ActivePeptideQueue* peptides,
-	vector<pair<double*, double*>>* intensity_arrs_vector,
-	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-	int charge
-  );
-  void computePrecFragCoeluteNew(
+  void computePrecFragCoelute(
     const vector<TideMatchSet::Arr::iterator>& vec,
     const ActivePeptideQueue* peptides,
-	vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
-  	map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-  	int charge
+    vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
+      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+      int charge
   );
 
   void computeMS2Pval(
-	const vector<TideMatchSet::Arr::iterator>& vec,
-	const ActivePeptideQueue* peptides,
-	ObservedPeakSet* observed,
-	map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
-	bool dynamic_filter = true
+    const vector<TideMatchSet::Arr::iterator>& vec,
+    const ActivePeptideQueue* peptides,
+    ObservedPeakSet* observed,
+    map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
+    bool dynamic_filter = true
   );
 
   void computeWindowDIA(
-	const SpectrumCollection::SpecCharge& sc,
-	vector<int>* negative_isotope_errors,
-	vector<double>* out_min,
-	vector<double>* out_max,
-	double* min_range,
-	double* max_range
+    const SpectrumCollection::SpecCharge& sc,
+    vector<int>* negative_isotope_errors,
+    vector<double>* out_min,
+    vector<double>* out_max,
+    double* min_range,
+    double* max_range
   );
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
@@ -135,13 +123,13 @@ class DIAmeterApplication : public CruxApplication {
   void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
 
   double closestPPMValue(
-	const double* mz_arr,
-	const double* intensity_arr,
-	int peak_num,
-	double query_mz,
-	int ppm_tol,
-	double intensity_default,
-	bool large_better
+    const double* mz_arr,
+    const double* intensity_arr,
+    int peak_num,
+    double query_mz,
+    int ppm_tol,
+    double intensity_default,
+    bool large_better
   );
 
   string getCoeffTag();
@@ -207,13 +195,3 @@ class DIAmeterApplication : public CruxApplication {
 
 #endif
 
-/*
- * TODO remove temporary commands finally
- * src/./crux tide-index --peptide-list T --decoy-format peptide-reverse --missed-cleavages 2 --enzyme trypsin --max-mass 6000 --mods-spec C+57.02146,3M+15.994915  --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/ /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all.fasta /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod
- * gdb -ex=r --args src/./crux diameter --precursor-window 10 --precursor-window-type mz --top-match 5 --use-tailor-calibration T --concat T --overwrite T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod --predrt-files /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod/deeprt.peptides.target.txt,/media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod/deeprt.peptides.decoy.txt --verbosity 60 --prec-ppm 10 --frag-ppm 10 > log.txt 2> error.txt 1> output.txt
- * src/./crux tide-search --precursor-window 10 --precursor-window-type mz --use-tailor-calibration T --top-match 5 --concat T --overwrite T --num-threads 1 --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output /media/ylu465/Data/proj/data/dia_search/e01306.mzXML /media/ylu465/Data/proj/data/dia_search/cerevisiae_orf_trans_all_mod
- *
- * src/./crux make-pin --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output --output-file diameter-search.filtered.pin --overwrite T /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered.txt
- * src/./crux percolator --tdc F --output-weights T --overwrite T --unitnorm T --pepxml-output T --output-dir /media/ylu465/Data/proj/data/dia_search/crux-output/percolator_prec_1.00_frag_1.00_rt_1.00_elu_1.00 /media/ylu465/Data/proj/data/dia_search/crux-output/diameter-search.filtered_prec_1.00_frag_1.00_rt_1.00_elu_1.00.txt.pin
- *
- */

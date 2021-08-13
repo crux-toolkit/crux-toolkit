@@ -442,16 +442,11 @@ bool Spectrum::parsePwizSpecInfo(
 	  carp(CARP_FATAL, "No selected ions in spectrum %d.", first_scan_);
   }
 
-
   // added by Yang
   FLOAT_T selected_ion_m_z = ions[0].cvParam(pzd::MS_selected_ion_m_z).valueAs<double>();
   iso_window_lower_mz_ = selected_ion_m_z - iso_window.cvParam(pzd::MS_isolation_window_lower_offset).valueAs<double>();
   iso_window_upper_mz_ = selected_ion_m_z + iso_window.cvParam(pzd::MS_isolation_window_upper_offset).valueAs<double>();
   if (!have_precursor_mz) { precursor_mz_ = selected_ion_m_z; }
-  // carp(CARP_DEBUG, "first_scan:%d \t last_scan:%d \t num_peaks:%d", first_scan_, last_scan_, num_peaks );
-  // carp(CARP_DEBUG, "precursor_mz:%f \t iso_window_lower_mz:%f \t iso_window_upper_mz:%f", precursor_mz_, iso_window_lower_mz_, iso_window_upper_mz_ );
-  // carp(CARP_DEBUG, "mzs:%s", StringUtils::JoinDoubleVec(mzs, ',').c_str() );
-
 
   // determined charge states will be stored
   // one per selected ion
