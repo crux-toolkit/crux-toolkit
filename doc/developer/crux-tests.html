@@ -12,12 +12,17 @@ targets for compiling or running various tests.</p>
 <h3>Smoke tests</h3>
 
 <p>
-These tests should be run before any update is committed to SVN.  Note
+These tests should be run before any code changes are merged into master.  Note
 that you do have to run them on a 64-bit machine using 64-bit versions
 of crux. You also need to run the tests with a version of crux
 compiled in release mode (<code>cmake -DCMAKE_BUILD_TYPE=Release
 .</code>).  This is because the existing test result files were built
 on a 64-bit machine in release mode.</p> 
+<i>(Note) The smoke tests are done by running crux with a known set of parameters and
+  comparing the results to an expected output file. Due to the floating
+  math algorithms difference between different OS and hardware platforms the test outputs might still
+  contain minor differences in numeric values that can trigger test failures.
+</i>
 
 <p>
 To run the tests, <a href="https://cukes.info/">Cucumber</a>, 
