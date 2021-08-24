@@ -949,6 +949,10 @@ double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
    int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
 
    if (quantile_pos < 3) { quantile_pos = 3; }
+
+   // suggested by Attila for bug fix
+   if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
+
    quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
 
    // carp(CARP_DETAILED_DEBUG, "==============TailorQuantile Size:%d \t quantile_score:%f", scores.size(), quantile_score );
