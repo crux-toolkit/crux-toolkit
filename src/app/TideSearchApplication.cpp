@@ -665,8 +665,11 @@ void TideSearchApplication::search(void* threadarg) {
           sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
           int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
 
-          if (quantile_pos < 3)
-            quantile_pos = 3;
+          if (quantile_pos < 3) quantile_pos = 3;
+
+          // suggested by Attila for bug fix
+          if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
+
           quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
         }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
