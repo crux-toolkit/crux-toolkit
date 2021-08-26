@@ -237,6 +237,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
                                 &peptide_predrt_map);
                     }
 
+                    delete min_mass;
+                    delete max_mass;
+                    delete candidatePeptideStatus;
                 }
 
                 // clear up for next chunk
@@ -269,6 +272,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
       // clean up
       if (output_file) { output_file->close(); delete output_file; }
   }
+  delete peptide_reader;
 
 
   // standardize the features
@@ -341,7 +345,7 @@ void DIAmeterApplication::reportDIA(
        intercept_new = (rankIter_new->second).get<1>();
    }
    boost::tuple<double, double> slope_intercept_tp = boost::make_tuple(slope_new, intercept_new);
-   carp(CARP_DEBUG, "********** ms1_scan:%d \t slope_new:%f \t intercept_new:%f", ms1_scan_num, slope_new, intercept_new );
+   // carp(CARP_DEBUG, "********** ms1_scan:%d \t slope_new:%f \t intercept_new:%f", ms1_scan_num, slope_new, intercept_new );
 
    map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> intensity_map;
    map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> logrank_map;
@@ -398,13 +402,9 @@ void DIAmeterApplication::reportDIA(
    computePrecFragCoelute(decoys, peptides, &mz_intensity_arrs_vector, &coelute_map, charge);
 
    // calculate MS2 p-value
-   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> dyn_ms2pval_map;
-   computeMS2Pval(targets, peptides, observed, &dyn_ms2pval_map, true);
-   computeMS2Pval(decoys, peptides, observed, &dyn_ms2pval_map, true);
-
-   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> sta_ms2pval_map;
-   computeMS2Pval(targets, peptides, observed, &sta_ms2pval_map, false);
-   computeMS2Pval(decoys, peptides, observed, &sta_ms2pval_map, false);
+   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> ms2pval_map;
+   computeMS2Pval(targets, peptides, observed, &ms2pval_map, true);
+   computeMS2Pval(decoys, peptides, observed, &ms2pval_map, true);
 
    // calculate delta_cn and delta_lcn
    map<TideMatchSet::Arr::iterator, FLOAT_T> delta_cn_map;
@@ -435,8 +435,7 @@ void DIAmeterApplication::reportDIA(
            &intensity_map,
            &logrank_map,
            &coelute_map,
-           &dyn_ms2pval_map,
-           &sta_ms2pval_map,
+           &ms2pval_map,
            peptide_predrt_map);
 
    matches->writeToFileDIA(output_file,
@@ -454,8 +453,7 @@ void DIAmeterApplication::reportDIA(
            &intensity_map,
            &logrank_map,
            &coelute_map,
-           &dyn_ms2pval_map,
-           &sta_ms2pval_map,
+           &ms2pval_map,
            peptide_predrt_map);
 
 }
@@ -567,7 +565,6 @@ void DIAmeterApplication::computePrecFragCoelute(
    }
 }
 
-
 void DIAmeterApplication::computeMS2Pval(
    const vector<TideMatchSet::Arr::iterator>& vec,
    const ActivePeptideQueue* peptides,
@@ -618,6 +615,8 @@ void DIAmeterApplication::computeMS2Pval(
           pvalue_binomial_probs.push_back(binomial_prob);
       }
       double ms2pval1 = -MathUtil::LogSumExp(&pvalue_binomial_probs);
+      if (isnan(ms2pval1) || isinf(ms2pval1)) { ms2pval1 = 0; }
+
       double ms2pval2 = 0.0, intensitysum = 0.0;
 
       // deal with another alternative

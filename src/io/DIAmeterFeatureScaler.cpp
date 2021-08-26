@@ -35,7 +35,11 @@ void DIAmeterFeatureScaler::writeScaledFile(const char* output_file_name) {
             double quantile_low_score = toscale_column_quantiles_.at(idx).first;
             double quantile_high_score = toscale_column_quantiles_.at(idx).second;
 
-            double old_score = StringUtils::FromString<double>(output_vec.at(curr_column_idx));
+            double old_score = 0.0;
+            if (StringUtils::ToLower(output_vec.at(curr_column_idx)) != "nan") {
+            	old_score = StringUtils::FromString<double>(output_vec.at(curr_column_idx));
+            }
+            // double old_score = StringUtils::FromString<double>(output_vec.at(curr_column_idx));
             double new_score = (old_score - quantile_low_score) / (quantile_high_score - quantile_low_score);
             output_vec[curr_column_idx] = StringUtils::ToString<double>(new_score, 6);
         }

@@ -347,8 +347,7 @@ void TideMatchSet::writeToFileDIA(
    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-   const map<Arr::iterator, boost::tuple<double, double>>* dyn_ms2pval_map,
-   const map<Arr::iterator, boost::tuple<double, double>>* sta_ms2pval_map,
+   const map<Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
    map<string, double>* peptide_predrt_map
 ) {
    if (!file || vec.empty()) { return; }
@@ -429,10 +428,9 @@ void TideMatchSet::writeToFileDIA(
 			<< StringUtils::ToString(spectrum->RTime(), precision, true) << '\t'; */
 
       // DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
-      boost::tuple<double, double> dyn_ms2pval = dyn_ms2pval_map->at(i);
-      boost::tuple<double, double> sta_ms2pval = sta_ms2pval_map->at(i);
-      *file << StringUtils::ToString(dyn_ms2pval.get<0>(), precision, true) << '\t'
-    		<< StringUtils::ToString(dyn_ms2pval.get<1>(), precision, true) << '\t';
+      boost::tuple<double, double> ms2pval = ms2pval_map->at(i);
+      *file << StringUtils::ToString(ms2pval.get<0>(), precision, true) << '\t'
+    		<< StringUtils::ToString(ms2pval.get<1>(), precision, true) << '\t';
 
       // COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL
       boost::tuple<double, double, double> coelute_tuple = coelute_map->at(i);
