@@ -357,6 +357,8 @@ double DelimitedFileReader::getDouble(
     return numeric_limits<double>::infinity();
   } else if (string_ans == "-Inf") {
     return -numeric_limits<double>::infinity();
+  } else if (StringUtils::ToLower(string_ans) == "nan") {
+	return 0.0;
   } else {
     return getValue<double>(col_idx);
   }

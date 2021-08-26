@@ -130,8 +130,7 @@ class TideMatchSet {
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
 	  const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-	  const map<Arr::iterator, boost::tuple<double, double>>* dyn_ms2pval_map,
-	  const map<Arr::iterator, boost::tuple<double, double>>* sta_ms2pval_map,
+	  const map<Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
 	  map<string, double>* peptide_predrt_map
   );
 

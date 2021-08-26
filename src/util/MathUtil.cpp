@@ -39,6 +39,7 @@ double MathUtil::gammaln(double xx) {
 }
 
 double MathUtil::LogNChooseK(int n, int k) {
+	if (n <= 0 || n < k) { return 0; }
 	double result = 0;
 	for (int i = 1; i <= k; i++) { result += log(n-i+1) - log(i); }
 	return result;
