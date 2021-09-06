@@ -24,8 +24,10 @@ class MathUtil {
 
   // find the closest match index from the data array to the query in O(log(n))
   static int binarySearch(const double* data_arr, int data_size, double query);
+  static int binarySearch(const std::vector<double>* data_vec, double query);
   // find the closest match index from the data array to the query in O(n), as a sanity check
   static int linearSearch(const double* data_arr, int data_size, double query);
+  static int linearSearch(const std::vector<double>* data_vec, double query);
   // fit linear regression
   static boost::tuple<double, double> fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values);
 

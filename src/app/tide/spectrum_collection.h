@@ -98,6 +98,9 @@ class Spectrum {
   double MaxPeakMz() const;
   vector<double> DescendingSortedPeakIntensity();
 
+  void UpdatePeakSupport(vector<bool>* peak_support_vec);
+  bool Is_supported(int index) const;
+
  private:
   int spectrum_number_;
   double rtime_;
@@ -112,6 +115,7 @@ class Spectrum {
   double iso_window_lower_mz_;
   double iso_window_upper_mz_;
   double obv_rt_;
+  vector<bool> peak_supported_; //used in denoising
 
 };
 
