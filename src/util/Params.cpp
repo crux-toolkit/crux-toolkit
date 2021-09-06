@@ -2097,6 +2097,11 @@ Params::Params() : finalized_(false) {
     "Filter the PSM by the ensemble score.",
     "It is used for DIAmeter", true);
 
+  InitBoolParam("spectra-denoising", false,
+      "Eliminate MS2 peak if neither of the adjacent scans contains the same peak within a specified tolerance.",
+      "It is used for DIAmeter", true);
+
+
   Categorize();
 }
 

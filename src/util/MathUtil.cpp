@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <algorithm>
+#include "io/carp.h"
 
 using namespace std;
 
@@ -101,18 +102,53 @@ std::vector<double> MathUtil::linspace(double start, double end, int num) {
 int MathUtil::binarySearch(const double* data_arr, int data_size, double query) {
 	if (data_arr == NULL || data_size <= 0) { return -1; }
 
-	if (query < data_arr[0]) { return data_arr[0]; }
-	if (query > data_arr[data_size-1]) { return data_arr[data_size-1]; }
+	if (query < data_arr[0]) { return 0; }
+	if (query > data_arr[data_size-1]) { return (data_size-1); }
 
-	int lo = 0, hi = data_size-1;
+	int lo = 0, mid =0, hi = data_size-1;
 	while (lo <= hi) {
-		int mid = int((hi + lo)/2);
+		mid = int((hi + lo)/2);
 		if (query < data_arr[mid]) { hi = mid - 1; }
 		else if (query > data_arr[mid]) { lo = mid + 1; }
-		else { return data_arr[mid]; }
+		else { return mid; }
 	}
 
-	return fabs(data_arr[lo] - query) < fabs(query - data_arr[hi]) ? lo : hi;
+	int min_idx = lo;
+	double min_diff = fabs(data_arr[lo] - query);
+	for (int idx=min(lo, hi)-1; idx<=max(lo, hi)+1; ++idx) {
+		if (idx < 0 || idx >= data_size) { continue; }
+		double curr_diff = fabs(data_arr[idx] - query);
+		if (curr_diff <= min_diff) { min_idx = idx; min_diff = curr_diff; }
+	}
+	return min_idx;
+
+	// return fabs(data_arr[lo] - query) < fabs(query - data_arr[hi]) ? lo : hi;
+}
+
+int MathUtil::binarySearch(const std::vector<double>* data_vec, double query) {
+	if (data_vec == NULL || data_vec->size() <= 0) { return -1; }
+
+	if (query < data_vec->at(0)) { return 0; }
+	if (query > data_vec->at(data_vec->size()-1)) { return (data_vec->size()-1); }
+
+	int lo = 0, mid =0, hi = data_vec->size()-1;
+	while (lo <= hi) {
+		mid = int((hi + lo)/2);
+		// carp(CARP_INFO, "lo=%d\tmid=%d\thi=%d", lo, mid, hi);
+		if (query < data_vec->at(mid)) { hi = mid - 1; }
+		else if (query > data_vec->at(mid)) { lo = mid + 1; }
+		else { return mid; }
+	}
+
+	int min_idx = lo;
+	double min_diff = fabs(data_vec->at(lo) - query);
+	for (int idx=min(lo, hi)-1; idx<=max(lo, hi)+1; ++idx) {
+		if (idx < 0 || idx >= data_vec->size()) { continue; }
+		double curr_diff = fabs(data_vec->at(idx) - query);
+		if (curr_diff <= min_diff) { min_idx = idx; min_diff = curr_diff; }
+	}
+	return min_idx;
+	// return fabs(data_vec->at(lo) - query) < fabs(query - data_vec->at(hi)) ? lo : hi;
 }
 
 int MathUtil::linearSearch(const double* data_arr, int data_size, double query) {
@@ -123,6 +159,22 @@ int MathUtil::linearSearch(const double* data_arr, int data_size, double query) 
 
 	for (int idx=0; idx<data_size; ++idx) {
 		double curr_diff = fabs(data_arr[idx] - query);
+		if (curr_diff <= min_diff) {
+			min_idx = idx;
+			min_diff = curr_diff;
+		}
+	}
+	return min_idx;
+}
+
+int MathUtil::linearSearch(const std::vector<double>* data_vec, double query) {
+	if (data_vec == NULL || data_vec->size() <= 0) { return -1; }
+
+	int min_idx = 0;
+	double min_diff = fabs(data_vec->at(min_idx) - query);
+
+	for (int idx=0; idx<data_vec->size(); ++idx) {
+		double curr_diff = fabs(data_vec->at(idx) - query);
 		if (curr_diff <= min_diff) {
 			min_idx = idx;
 			min_diff = curr_diff;

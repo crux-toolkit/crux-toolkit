@@ -166,21 +166,57 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
             int precursor_mz_chunk = int(spectrum_chunk->PrecursorMZ());
 
             // deal with a chunk if it's either the end of the same mz or it's the last element
-            if (((precursor_mz_chunk != curr_precursor_mz) || (sc_chunk == (spec_charges->begin() + spec_charges->size()-1)))
-                    && (spec_charge_chunk.size() > 0) ) {
-                carp(CARP_DETAILED_DEBUG, "curr_precursor_mz=%d\tspec_charge_chunk size=%d", curr_precursor_mz, spec_charge_chunk.size());
+            if (((precursor_mz_chunk != curr_precursor_mz) || (sc_chunk == (spec_charges->begin() + spec_charges->size()-1))) && (spec_charge_chunk.size() > 0) ) {
+                // carp(CARP_INFO, "curr_precursor_mz=%d\tspec_charge_chunk size=%d", curr_precursor_mz, spec_charge_chunk.size());
 
                 // cache the MS2 peaks specific to the current isolation window
                 map<int, boost::tuple<double*, double*, int>> ms2scan_mz_intensity_map;
                 buildSpectraIndexFromIsoWindow(&spec_charge_chunk, &ms2scan_mz_intensity_map);
 
-                for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk.begin();sc < spec_charge_chunk.begin() + (spec_charge_chunk.size()); sc++)
+                // the TTOF-specific denoising should occur in the for loop below
+                for (int chunk_idx = 0; chunk_idx < spec_charge_chunk.size(); ++chunk_idx)
+                // for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk.begin();sc < spec_charge_chunk.begin() + (spec_charge_chunk.size()); sc++)
                 {
-                    Spectrum* spectrum = sc->spectrum;
+                    // Spectrum* spectrum = sc->spectrum; int charge = sc->charge;
+                	Spectrum* spectrum = spec_charge_chunk.at(chunk_idx).spectrum;
+                	int charge = spec_charge_chunk.at(chunk_idx).charge;
+
                     double precursor_mz = spectrum->PrecursorMZ();
                     int scan_num = spectrum->SpectrumNumber();
                     int ms1_scan_num = spectrum->MS1SpectrumNum();
-                    int charge = sc->charge;
+
+                    //denoising-related
+                    if (Params::GetBool("spectra-denoising")) {
+                    	vector<double> neighbor_mzs;
+                    	vector<int> neighbor_chunk_indices;
+                    	if (chunk_idx > 0) { neighbor_chunk_indices.push_back(chunk_idx - 1); }
+                    	if (chunk_idx < (spec_charge_chunk.size()-1)) { neighbor_chunk_indices.push_back(chunk_idx + 1); }
+
+                    	for (int tmp_idx =0; tmp_idx < neighbor_chunk_indices.size(); ++tmp_idx) {
+                    		int neighbor_chunk_idx = neighbor_chunk_indices.at(tmp_idx);
+                    		Spectrum* neighbor_spectrum = spec_charge_chunk.at(neighbor_chunk_idx).spectrum;
+                    		for (int neighbor_peak_idx=0; neighbor_peak_idx<neighbor_spectrum->Size(); ++neighbor_peak_idx) {
+                    			neighbor_mzs.push_back(neighbor_spectrum->M_Z(neighbor_peak_idx));
+                    		}
+                    	}
+                    	std::sort(neighbor_mzs.begin(), neighbor_mzs.end());
+
+                    	vector<bool> peak_supported;
+                    	for (int peak_idx=0; peak_idx<spectrum->Size(); ++peak_idx) {
+                    		double peak_mz = spectrum->M_Z(peak_idx);
+
+                    		bool supported = false;
+                    		int matched_mz_idx = MathUtil::binarySearch(&neighbor_mzs, peak_mz);
+
+                    		if (matched_mz_idx >= 0) {
+                    			double matched_mz = neighbor_mzs.at(matched_mz_idx);
+                    			double ppm = fabs(peak_mz - matched_mz) * 1000000 / max(peak_mz, matched_mz);
+                    			if (ppm <= Params::GetInt("frag-ppm")) { supported = true; }
+                    		}
+                    		peak_supported.push_back(supported);
+                    	}
+                    	spectrum->UpdatePeakSupport(&peak_supported);
+                    }
 
                     // The active peptide queue holds the candidate peptides for spectrum.
                     // Calculate and set the window, depending on the window type.
@@ -190,7 +226,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
                     double min_range, max_range;
 
                     // carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
-                    computeWindowDIA(*sc, &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+                    computeWindowDIA(spec_charge_chunk.at(chunk_idx), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+
 
                     // Normalize the observed spectrum and compute the cache of frequently-needed
                     // values for taking dot products with theoretical spectra.
@@ -228,7 +265,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
                     TideMatchSet matches(&match_arr, highest_ms2_mz);
                     if (!match_arr.empty()) {
-                        reportDIA(output_file, origin_file, *sc, active_peptide_queue, proteins, locations,
+                        reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins, locations,
                                 &matches,
                                 &observed,
                                 &ms1scan_mz_intensity_rank_map,
@@ -486,7 +523,7 @@ void DIAmeterApplication::computePrecFragCoelute(
            fill_n(intensity_arr, coelute_size, 0);
 
            for (int coelute_idx=0; coelute_idx<coelute_size; ++coelute_idx ) {
-               boost::tuple<double*, double*, int, double*, double*, int> mz_intensity_arrs = mz_intensity_arrs_vector->at(coelute_idx);;
+               boost::tuple<double*, double*, int, double*, double*, int> mz_intensity_arrs = mz_intensity_arrs_vector->at(coelute_idx);
                double* ms1_mz_arr = mz_intensity_arrs.get<0>();
                double* ms1_intensity_arr = mz_intensity_arrs.get<1>();
                int ms1_peak_num = mz_intensity_arrs.get<2>();
@@ -505,7 +542,7 @@ void DIAmeterApplication::computePrecFragCoelute(
            fill_n(intensity_arr, coelute_size, 0);
 
            for (int coelute_idx=0; coelute_idx<coelute_size; ++coelute_idx ) {
-               boost::tuple<double*, double*, int, double*, double*, int> mz_intensity_arrs = mz_intensity_arrs_vector->at(coelute_idx);;
+               boost::tuple<double*, double*, int, double*, double*, int> mz_intensity_arrs = mz_intensity_arrs_vector->at(coelute_idx);
                double* ms2_mz_arr = mz_intensity_arrs.get<3>();
                double* ms2_intensity_arr = mz_intensity_arrs.get<4>();
                int ms2_peak_num = mz_intensity_arrs.get<5>();
@@ -795,11 +832,13 @@ void DIAmeterApplication::buildSpectraIndexFromIsoWindow(vector<SpectrumCollecti
         double* intensity_arr = new double[peak_num];
 
         for (int peak_idx=0; peak_idx<peak_num; ++peak_idx) {
-           double peak_mz = spectrum->M_Z(peak_idx);;
+           double peak_mz = spectrum->M_Z(peak_idx);
            double peak_intensity = spectrum->Intensity(peak_idx);
 
            mz_arr[peak_idx] = peak_mz;
-           intensity_arr[peak_idx] = peak_intensity;
+
+           if (Params::GetBool("spectra-denoising") && !spectrum->Is_supported(peak_idx)) { intensity_arr[peak_idx] = 0; }
+           else { intensity_arr[peak_idx] = peak_intensity; }
            // carp(CARP_DEBUG, "peak_idx:%d \t peak_mz:%f \t peak_intensity:%f", peak_idx, peak_mz, peak_intensity);
         }
         // carp(CARP_DEBUG, "------------------------------------------------");
@@ -831,7 +870,7 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file,
        double* intensity_rank_arr = new double[peak_num];
 
        for (int peak_idx=0; peak_idx<peak_num; ++peak_idx) {
-           double peak_mz = spectrum->M_Z(peak_idx);;
+           double peak_mz = spectrum->M_Z(peak_idx);
            double peak_intensity = spectrum->Intensity(peak_idx);
            double peak_intensity_logrank = log(1.0+std::count_if(sorted_intensity_vec.begin(), sorted_intensity_vec.end(),[&](int val){ return val >= peak_intensity; }));
            // carp(CARP_DETAILED_DEBUG, "peak_idx:%d \t peak_mz:%f \t peak_intensity:%f \t peak_intensity_logrank:%f", peak_idx, peak_mz, peak_intensity, peak_intensity_logrank);

@@ -417,6 +417,23 @@ double Spectrum::MaxPeakMz() const {
 	return *max_element(peak_m_z_.begin(), peak_m_z_.end());
 }
 
+void Spectrum::UpdatePeakSupport(vector<bool>* peak_support_vec) {
+	if (peak_support_vec->size() != Size()) { carp(CARP_FATAL, "peak_support_vec size mismatch!"); }
+	peak_supported_.clear();
+
+	int supported_cnt = 0;
+	for (int peak_idx=0; peak_idx<peak_support_vec->size(); ++peak_idx) {
+		peak_supported_.push_back(peak_support_vec->at(peak_idx));
+		// if (peak_support_vec->at(peak_idx)) { ++supported_cnt; }
+	}
+	// carp(CARP_INFO, "peak_support_vec size=%d \t supported_cnt=%d", peak_supported_.size(), supported_cnt);
+}
+
+bool Spectrum::Is_supported(int index) const {
+	if (index >= peak_supported_.size()) { return true; }
+	return peak_supported_[index];
+}
+
 
 vector<double> Spectrum::DescendingSortedPeakIntensity() {
 	vector<double> sorted_intensity_vec(peak_intensity_);

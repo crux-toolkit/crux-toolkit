@@ -95,6 +95,10 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         (*num_range_skipped)++;
         continue;
       }
+
+      //denoising-related, added by Yang
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
+
       int mz = MassConstants::mass2bin(peak_location);
       double intensity = spectrum.Intensity(i);
       if (intensity > peaks_[mz]) {
@@ -117,6 +121,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         (*num_range_skipped)++;
         continue;
       }
+      //denoising-related, added by Yang
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
 
       // Remove precursor peaks.
       if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
@@ -155,6 +161,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     // static regional peak selection for MS2Pval calculation
     for (int i = 0; i < spectrum.Size(); ++i) {
        double peak_location = spectrum.M_Z(i);
+       if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
 
        int mz = MassConstants::mass2bin(peak_location);
        double intensity = sqrt(spectrum.Intensity(i));
