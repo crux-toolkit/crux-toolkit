@@ -187,7 +187,53 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
                     //denoising-related
                     if (Params::GetBool("spectra-denoising")) {
-                    	vector<double> neighbor_mzs;
+                    	int neighbor_cnt = 0;
+                    	vector<double> proceed_mzs, succeed_mzs;
+                    	if (chunk_idx > 0) {
+                    		++neighbor_cnt;
+                    		int neighbor_chunk_idx = chunk_idx - 1;
+                    		Spectrum* neighbor_spectrum = spec_charge_chunk.at(neighbor_chunk_idx).spectrum;
+                    		for (int neighbor_peak_idx=0; neighbor_peak_idx<neighbor_spectrum->Size(); ++neighbor_peak_idx) {
+                    			proceed_mzs.push_back(neighbor_spectrum->M_Z(neighbor_peak_idx));
+                    		}
+                    		std::sort(proceed_mzs.begin(), proceed_mzs.end());
+                    	}
+
+                    	if (chunk_idx < (spec_charge_chunk.size()-1)) {
+                    		++neighbor_cnt;
+                    		int neighbor_chunk_idx = chunk_idx + 1;
+                    		Spectrum* neighbor_spectrum = spec_charge_chunk.at(neighbor_chunk_idx).spectrum;
+                    		for (int neighbor_peak_idx=0; neighbor_peak_idx<neighbor_spectrum->Size(); ++neighbor_peak_idx) {
+                    		    succeed_mzs.push_back(neighbor_spectrum->M_Z(neighbor_peak_idx));
+                    		}
+                    		std::sort(succeed_mzs.begin(), succeed_mzs.end());
+                    	}
+
+                    	vector<bool> peak_supported;
+                    	for (int peak_idx=0; peak_idx<spectrum->Size(); ++peak_idx) {
+                    		double peak_mz = spectrum->M_Z(peak_idx);
+
+                    	    int supported_cnt = 0;
+                    	    int proceed_mz_idx = MathUtil::binarySearch(&proceed_mzs, peak_mz);
+                    	    if (proceed_mz_idx >= 0) {
+                    	        double matched_mz = proceed_mzs.at(proceed_mz_idx);
+                    	        double ppm = fabs(peak_mz - matched_mz) * 1000000 / max(peak_mz, matched_mz);
+                    	        if (ppm <= Params::GetInt("frag-ppm")) { ++supported_cnt; }
+                    	    }
+
+                    	    int succeed_mz_idx = MathUtil::binarySearch(&succeed_mzs, peak_mz);
+                    	    if (succeed_mz_idx >= 0) {
+                    	        double matched_mz = succeed_mzs.at(succeed_mz_idx);
+                    	        double ppm = fabs(peak_mz - matched_mz) * 1000000 / max(peak_mz, matched_mz);
+                    	        if (ppm <= Params::GetInt("frag-ppm")) { ++supported_cnt; }
+                    	    }
+
+                    	    if (supported_cnt >= neighbor_cnt) { peak_supported.push_back(true); }
+                    	    else { peak_supported.push_back(false); }
+                    	}
+                    	spectrum->UpdatePeakSupport(&peak_supported);
+
+                    	/*vector<double> neighbor_mzs;
                     	vector<int> neighbor_chunk_indices;
                     	if (chunk_idx > 0) { neighbor_chunk_indices.push_back(chunk_idx - 1); }
                     	if (chunk_idx < (spec_charge_chunk.size()-1)) { neighbor_chunk_indices.push_back(chunk_idx + 1); }
@@ -215,7 +261,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
                     		}
                     		peak_supported.push_back(supported);
                     	}
-                    	spectrum->UpdatePeakSupport(&peak_supported);
+                    	spectrum->UpdatePeakSupport(&peak_supported);*/
                     }
 
                     // The active peptide queue holds the candidate peptides for spectrum.
