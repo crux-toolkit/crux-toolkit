@@ -353,9 +353,10 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
 
   FileUtils::Remove(output_file_name_filtered_);
-  FileUtils::Remove(output_pin_);
+  FileUtils::Remove(make_file_path(output_pin_));
   FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.peptides.txt"));
   FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.psms.txt"));
+  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.target.psms.txt"));
 
   return 0;
 }
