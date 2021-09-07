@@ -182,6 +182,7 @@ set (
   app/TideSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
   io/DIAmeterPSMFilter.cpp
+  io/DIAmeterCVSelector.cpp
   app/DIAmeterApplication.cpp
   util/utils.cpp
 )
