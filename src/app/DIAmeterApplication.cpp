@@ -94,7 +94,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   }
 
   // Extract all edge features
-  if (!FileUtils::Exists(output_file_name_unsorted_) || Params::GetBool("overwrite")) {
+  if (!FileUtils::Exists(output_file_name_unsorted_) /*|| Params::GetBool("overwrite")*/ ) {
       carp(CARP_DEBUG, "Either file exists or it needs to be overwritten: %s", output_file_name_unsorted_.c_str());
 
       ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
