@@ -232,36 +232,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
                     	    else { peak_supported.push_back(false); }
                     	}
                     	spectrum->UpdatePeakSupport(&peak_supported);
-
-                    	/*vector<double> neighbor_mzs;
-                    	vector<int> neighbor_chunk_indices;
-                    	if (chunk_idx > 0) { neighbor_chunk_indices.push_back(chunk_idx - 1); }
-                    	if (chunk_idx < (spec_charge_chunk.size()-1)) { neighbor_chunk_indices.push_back(chunk_idx + 1); }
-
-                    	for (int tmp_idx =0; tmp_idx < neighbor_chunk_indices.size(); ++tmp_idx) {
-                    		int neighbor_chunk_idx = neighbor_chunk_indices.at(tmp_idx);
-                    		Spectrum* neighbor_spectrum = spec_charge_chunk.at(neighbor_chunk_idx).spectrum;
-                    		for (int neighbor_peak_idx=0; neighbor_peak_idx<neighbor_spectrum->Size(); ++neighbor_peak_idx) {
-                    			neighbor_mzs.push_back(neighbor_spectrum->M_Z(neighbor_peak_idx));
-                    		}
-                    	}
-                    	std::sort(neighbor_mzs.begin(), neighbor_mzs.end());
-
-                    	vector<bool> peak_supported;
-                    	for (int peak_idx=0; peak_idx<spectrum->Size(); ++peak_idx) {
-                    		double peak_mz = spectrum->M_Z(peak_idx);
-
-                    		bool supported = false;
-                    		int matched_mz_idx = MathUtil::binarySearch(&neighbor_mzs, peak_mz);
-
-                    		if (matched_mz_idx >= 0) {
-                    			double matched_mz = neighbor_mzs.at(matched_mz_idx);
-                    			double ppm = fabs(peak_mz - matched_mz) * 1000000 / max(peak_mz, matched_mz);
-                    			if (ppm <= Params::GetInt("frag-ppm")) { supported = true; }
-                    		}
-                    		peak_supported.push_back(supported);
-                    	}
-                    	spectrum->UpdatePeakSupport(&peak_supported);*/
                     }
 
                     // The active peptide queue holds the candidate peptides for spectrum.
@@ -359,14 +329,14 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
 
   // standardize the features
-  if (!FileUtils::Exists(output_file_name_scaled_) || Params::GetBool("overwrite")) {
+  if (!FileUtils::Exists(output_file_name_scaled_) /*|| Params::GetBool("overwrite")*/ ) {
         DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
         diameterScaler.calcDataQuantile();
         diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
   // filter the edges
-  if (!FileUtils::Exists(output_file_name_filtered_) || Params::GetBool("overwrite")) {
+  if (!FileUtils::Exists(output_file_name_filtered_) /*|| Params::GetBool("overwrite")*/ ) {
         DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
         diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
@@ -381,6 +351,11 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   PercolatorApplication percolatorApp;
   if(!FileUtils::Exists(output_percolator_)) { FileUtils::Mkdir(output_percolator_); }
   if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
+
+  FileUtils::Remove(output_file_name_filtered_);
+  FileUtils::Remove(output_pin_);
+  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.peptides.txt"));
+  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.psms.txt"));
 
   return 0;
 }
