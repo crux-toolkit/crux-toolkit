@@ -239,10 +239,13 @@ ExternalProject_Add(
 
 # MSToolkit
 # Get MSToolkit source from Github
+# GIT_TAG rev83
+# GIT_TAG 229d3d328ca
+# GIT_TAG 4cb705d
 ExternalProject_Add(
   MSToolkit
   GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-  GIT_TAG rev83
+  GIT_TAG 4cb705d
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -267,7 +270,7 @@ if (UNIX)
   set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}
@@ -329,13 +332,14 @@ endif (UNIX)
 
 # Kojak
 # Get Kojak source from GitHub
+# GIT_TAG c1acef0
 set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
 set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
 ExternalProject_Add(
   kojak
+  GIT_TAG defa8c9
   GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
-  GIT_TAG c1acef0
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
