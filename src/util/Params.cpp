@@ -2063,23 +2063,23 @@ Params::Params() : finalized_(false) {
 
   InitDoubleParam("coeff-precursor", 1.0, 0, 100,
     "The coefficient to balance the precursor intensity rank feature in calculating the aggregated score",
-    "It is used for DIAmeter", true);
+    "It is used for DIAmeter", false);
 
   InitDoubleParam("coeff-fragment", 1.0, 0, 100,
     "The coefficient to balance the fragment matching p-value feature in calculating the aggregated score",
-    "It is used for DIAmeter", true);
+    "It is used for DIAmeter", false);
 
   InitDoubleParam("coeff-rtdiff", 1.0, 0, 100,
     "The coefficient to balance the retention time difference feature in calculating the aggregated score",
-    "It is used for DIAmeter", true);
+    "It is used for DIAmeter", false);
 
   InitDoubleParam("coeff-elution", 1.0, 0, 100,
     "The coefficient to balance the precursor and fragment co-elution feature in calculating the aggregated score",
-    "It is used for DIAmeter", true);
+    "It is used for DIAmeter", false);
 
   InitStringParam("coeff-tag", "",
     "The tag to encode the information about coefficients",
-    "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", true);
+    "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", false);
 
   InitIntParam("prec-ppm", 10, 1, 100,
     "Specify the ppm units for the precursor intensity used in DIAmeter",
@@ -2101,6 +2101,10 @@ Params::Params() : finalized_(false) {
       "Eliminate MS2 peak if neither of the adjacent scans contains the same peak within a specified tolerance.",
       "It is used for DIAmeter", true);
 
+  InitStringParam("diameter-instrument", "orbitrap", "orbitrap|tof5600|tof6600",
+    "Specify the instrument platform used to acquire the input spectra. "
+    "This option selects among different sets of coefficient values for the scores computed by diameter.",
+    "It is used for DIAmeter", true);
 
   Categorize();
 }
