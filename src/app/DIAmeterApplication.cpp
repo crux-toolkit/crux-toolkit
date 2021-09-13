@@ -20,6 +20,7 @@
 
 #include "io/DIAmeterFeatureScaler.h"
 #include "io/DIAmeterPSMFilter.h"
+#include "io/DIAmeterCVSelector.h"
 
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
@@ -86,6 +87,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
   string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
   string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
+  string output_file_name_cv_ = make_file_path("diameter-search.cv.filtered.txt");
 
   if (Params::GetBool("psm-filter")) {
       stringstream param_ss;
@@ -341,6 +343,18 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
         diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
 
+  /*
+  // filter the edges by using cross-validation
+  if (!FileUtils::Exists(output_file_name_cv_) || Params::GetBool("overwrite") ) {
+	  DIAmeterCVSelector diameterCVSelector(output_file_name_scaled_.c_str());
+	  diameterCVSelector.loadData(output_file_name_cv_.c_str() );
+
+	  double params[] = {0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6};
+	  vector<double> paramRangeList (params, params + sizeof(params) / sizeof(params[0]));
+	  diameterCVSelector.FoldFilter(output_file_name_cv_.c_str(), &paramRangeList);
+  }
+  */
+
   // generate .pin file by calling make-pin
   MakePinApplication pinApp;
   vector<string> paths_vec;
@@ -352,11 +366,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   if(!FileUtils::Exists(output_percolator_)) { FileUtils::Mkdir(output_percolator_); }
   if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
 
+  /*
   FileUtils::Remove(output_file_name_filtered_);
   FileUtils::Remove(make_file_path(output_pin_));
   FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.peptides.txt"));
   FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.psms.txt"));
   FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.target.psms.txt"));
+  */
 
   return 0;
 }

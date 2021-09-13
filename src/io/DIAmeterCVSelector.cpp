@@ -20,129 +20,232 @@ void DIAmeterCVSelector::parseHeader() {
     for (int idx = 0; idx < NUMBER_MATCH_COLUMNS; idx++) {
         match_indices_[idx] = fileReader_->findColumn(get_column_header(idx));
     }
-    carp(CARP_DEBUG, "ColumnNames:%s", StringUtils::Join(fileReader_->getColumnNames(), ',').c_str() );
+    carp(CARP_DETAILED_DEBUG, "ColumnNames:%s", StringUtils::Join(fileReader_->getColumnNames(), ',').c_str() );
 
+    agg_idx_ = fileReader_->findColumn(get_column_header(ENSEMBLE_SCORE_COL));
+    scan_idx_ = fileReader_->findColumn(get_column_header(SCAN_COL));
+    charge_idx_ = fileReader_->findColumn(get_column_header(CHARGE_COL));
+    peptide_idx_ = fileReader_->findColumn(get_column_header(SEQUENCE_COL));
+    td_idx_ = fileReader_->findColumn(get_column_header(TARGET_DECOY_COL));
 
-
-
-}
-
-
-/*
-
-
-
-void DIAmeterPSMFilter::parseHeader() {
-  for (int idx = 0; idx < NUMBER_MATCH_COLUMNS; idx++) {
-    match_indices_[idx] = fileReader_->findColumn(get_column_header(idx));
-  }
-  carp(CARP_DEBUG, "ColumnNames:%s", StringUtils::Join(fileReader_->getColumnNames(), ',').c_str() );
-
-  toagg_column_ids_.clear();
-  toagg_column_indices_.clear();
-  toagg_column_coeffs_.clear();
-
-  double coeff_precursor = Params::GetDouble("coeff-precursor");
-  double coeff_fragment = Params::GetDouble("coeff-fragment");
-  double coeff_rtdiff = Params::GetDouble("coeff-rtdiff");
-  double coeff_elution = Params::GetDouble("coeff-elution");
-  carp(CARP_DETAILED_DEBUG, "coeff_precursor:%f \t coeff_fragment:%f \t coeff_rtdiff:%f \t coeff_elution:%f", coeff_precursor, coeff_fragment, coeff_rtdiff, coeff_elution );
-
-  MATCH_COLUMNS_T toagg_columns_[] = {TAILOR_COL, RT_DIFF_COL, PRECURSOR_INTENSITY_RANK_M0_COL, DYN_FRAGMENT_PVALUE_COL, COELUTE_MS1_COL };
-  double toagg_coeffs_[] = {1.0, -coeff_rtdiff, -coeff_precursor, coeff_fragment, coeff_elution  };
-
-  for (int idx = 0; idx < sizeof(toagg_columns_)/sizeof(toagg_columns_[0]); idx++) {
-      MATCH_COLUMNS_T curr_column_id = toagg_columns_[idx];
-      const char* curr_column_name = get_column_header(curr_column_id);
-      int curr_column_idx = fileReader_->findColumn(curr_column_name);
-      double curr_column_coeff = toagg_coeffs_[idx];
-      carp(CARP_DEBUG, "ColumnID:%d \t ColumnIndex:%d \t ColumnName:%s \t ColumnCoeff:%f", curr_column_id, curr_column_idx, curr_column_name, curr_column_coeff );
-
-      if (curr_column_idx >= 0) {
-          toagg_column_ids_.push_back(curr_column_id);
-          toagg_column_indices_.push_back(curr_column_idx);
-          toagg_column_coeffs_.push_back(curr_column_coeff);
-      }
-  }
-
-  agg_idx_ = fileReader_->findColumn(get_column_header(ENSEMBLE_SCORE_COL));
-  scan_idx_ = fileReader_->findColumn(get_column_header(SCAN_COL));
-  charge_idx_ = fileReader_->findColumn(get_column_header(CHARGE_COL));
-  xcorr_idx_ = fileReader_->findColumn(get_column_header(XCORR_SCORE_COL));
-  carp(CARP_DETAILED_DEBUG, "ensemble_idx:%d \t scan_idx:%d \t charge_idx:%d \t xcorr_idx:%d", agg_idx_, scan_idx_, charge_idx_, xcorr_idx_ );
+    tailor_idx_ = fileReader_->findColumn(get_column_header(TAILOR_COL));
+    rtdiff_idx_ = fileReader_->findColumn(get_column_header(RT_DIFF_COL));
+    precursor_idx_ = fileReader_->findColumn(get_column_header(PRECURSOR_INTENSITY_RANK_M0_COL));
+    fragment_idx_ = fileReader_->findColumn(get_column_header(DYN_FRAGMENT_PVALUE_COL));
+    elution_idx_ = fileReader_->findColumn(get_column_header(COELUTE_MS1_COL));
+    carp(CARP_DETAILED_DEBUG, "agg_idx_:%d\tscan_idx:%d\tcharge_idx:%d\tpeptide_idx_:%d\ttd_idx_:%d", agg_idx_, scan_idx_, charge_idx_, peptide_idx_, td_idx_ );
+    carp(CARP_DETAILED_DEBUG, "tailor_idx:%d\trtdiff_idx:%d\tprecursor_idx:%d\tfragment_idx:%d\telution_idx:%d", tailor_idx_, rtdiff_idx_, precursor_idx_, fragment_idx_, elution_idx_ );
 
 }
 
-void DIAmeterPSMFilter::calcBaseline() {
+void DIAmeterCVSelector::loadData(const char* output_file_name) {
     fileReader_->reset();
-    scan_charge_scores_map.clear();
+    scPSMList.clear();
+
+    int curr_key = 0, curr_scan = 0, curr_charge = 0;
+    vector<PSMFeatEnsemble> curr_psms;
 
     while (fileReader_->hasNext()) {
-        int scan = fileReader_->getInteger(scan_idx_);
-        int charge = fileReader_->getInteger(charge_idx_);
-        int key = getKey(scan, charge);
+    	int scan = fileReader_->getInteger(scan_idx_);
+    	int charge = fileReader_->getInteger(charge_idx_);
+    	int key = getKey(scan, charge);
 
-        std::vector<std::string> data = fileReader_->getCurrentRowData();
+    	std::string peptide = fileReader_->getString(peptide_idx_);
+    	std::string td = fileReader_->getString(td_idx_);
 
-        double xcorr = fileReader_->getDouble(xcorr_idx_);
-        double ensemble = 0.0;
-        for (int idx = 0; idx < toagg_column_indices_.size(); idx++) {
-            int curr_column_idx = toagg_column_indices_.at(idx);
-            double column_val = fileReader_->getDouble(curr_column_idx);
-            double curr_column_coeff = toagg_column_coeffs_.at(idx);
-            ensemble += column_val * curr_column_coeff;
-        }
+    	bool is_target = true;
+    	if (StringUtils::IEquals(td, "target")) { is_target = true; }
+    	else if (StringUtils::IEquals(td, "decoy")) { is_target = false; }
+    	else { carp(CARP_FATAL, "td is neither target nor decoy: %s", td.c_str()); }
 
-        map<int, boost::tuple<double, double>>::iterator baselineIter = scan_charge_scores_map.find(key);
-        if (baselineIter == scan_charge_scores_map.end()) { scan_charge_scores_map[key] = boost::make_tuple(xcorr, ensemble); }
-        else {
-            double xcorr_old = (baselineIter->second).get<0>();
-            if (xcorr_old < xcorr) {
-                scan_charge_scores_map[key] = boost::make_tuple(xcorr, ensemble);
-            }
-        }
+    	double tailor_val = fileReader_->getDouble(tailor_idx_);
+    	double rtdiff_val = fileReader_->getDouble(rtdiff_idx_);
+    	double precursor_val = fileReader_->getDouble(precursor_idx_);
+    	double fragment_val = fileReader_->getDouble(fragment_idx_);
+    	double elution_val = fileReader_->getDouble(elution_idx_);
+    	std::string row_val = fileReader_->getString();
 
-        fileReader_->next();
+    	// carp(CARP_DETAILED_DEBUG, "scan:%d\t charge:%d\t peptide:%s\t td:%s\t is_target:%d", scan, charge, peptide.c_str(), td.c_str(), int(is_target) );
+    	// carp(CARP_DETAILED_DEBUG, "tailor:%f\t rtdiff:%f\t precursor:%f\t fragment:%f\t elution:%f", tailor_val, rtdiff_val, precursor_val, fragment_val, elution_val);
+
+    	if (curr_key != key) {
+    		if (curr_psms.size() > 0) {
+    			ScanChargePSM scPSM(curr_scan, curr_charge, curr_psms);
+    			scPSMList.push_back(scPSM);
+    		}
+
+    		curr_psms.clear();
+    		curr_key = key;
+    		curr_scan = scan;
+    		curr_charge = charge;
+    	}
+
+    	PSMFeatEnsemble featEnsemble(tailor_val, precursor_val, fragment_val, rtdiff_val, elution_val, is_target, peptide, row_val);
+    	curr_psms.push_back(featEnsemble);
+
+    	fileReader_->next();
     }
+
+    if (curr_psms.size() > 0) {
+        ScanChargePSM scPSM(curr_scan, curr_charge, curr_psms);
+        scPSMList.push_back(scPSM);
+    }
+    carp(CARP_DETAILED_DEBUG, "scPSMList:%d", scPSMList.size());
 }
 
-void DIAmeterPSMFilter::loadAndFilter(const char* output_file_name, bool filter) {
-    calcBaseline();
-    fileReader_->reset();
-
+void DIAmeterCVSelector::FoldFilter(const char* output_file_name, std::vector<double>* paramRangeList, int totalFold) {
     ofstream* output_file = create_stream_in_path(output_file_name, NULL, Params::GetBool("overwrite"));
     *output_file << StringUtils::Join(fileReader_->getColumnNames(), '\t').c_str() << endl;
 
-    while (fileReader_->hasNext()) {
-        int scan = fileReader_->getInteger(scan_idx_);
-        int charge = fileReader_->getInteger(charge_idx_);
-        int key = getKey(scan, charge);
+	vector<int> train_indices, test_indices;
+	for (int targetFold=0; targetFold<totalFold; ++targetFold) {
+		train_indices.clear(); test_indices.clear();
 
-        std::vector<std::string> data = fileReader_->getCurrentRowData();
+		for (int psm_idx=0; psm_idx<scPSMList.size(); ++psm_idx) {
+			ScanChargePSM scPSM = scPSMList.at(psm_idx);
+			int psm_fold = scPSMList.at(psm_idx).getFold(totalFold);
 
-        double xcorr = fileReader_->getDouble(xcorr_idx_);
-        double ensemble = 0.0;
-        for (int idx = 0; idx < toagg_column_indices_.size(); idx++) {
-            int curr_column_idx = toagg_column_indices_.at(idx);
-            double column_val = fileReader_->getDouble(curr_column_idx);
-            double curr_column_coeff = toagg_column_coeffs_.at(idx);
-            ensemble += column_val * curr_column_coeff;
-        }
-        data[agg_idx_] = StringUtils::ToString<double>(ensemble, 6);
+			if (psm_fold == targetFold) { test_indices.push_back(psm_idx); }
+			else { train_indices.push_back(psm_idx); }
+		}
+		carp(CARP_DETAILED_DEBUG, "targetFold:%d\t train_indices:%d\t test_indices:%d", targetFold, train_indices.size(), test_indices.size() );
 
-        map<int, boost::tuple<double, double>>::iterator baselineIter = scan_charge_scores_map.find(key);
-        if (baselineIter == scan_charge_scores_map.end()) { carp(CARP_FATAL, "The key must exist in scan_charge_scores_map! %d", key); }
+		boost::tuple<double, double, double, double> opt_param = selectFoldParam(paramRangeList, &train_indices);
+		double coeff_precursor = opt_param.get<0>();
+		double coeff_frag = opt_param.get<1>();
+		double coeff_rtdiff = opt_param.get<2>();
+		double coeff_elution = opt_param.get<3>();
 
-        double xcorr_baseline = (baselineIter->second).get<0>();
-        double ensemble_baseline = (baselineIter->second).get<1>() - 0.000001;
-        if ((!filter) || (ensemble >= ensemble_baseline)) {
-            *output_file << StringUtils::Join(data, '\t').c_str() << endl;
-        }
+		bool filter = true;
+		if (coeff_precursor < 0 && coeff_frag < 0 && coeff_rtdiff < 0 && coeff_elution < 0) { filter=false; }
 
-        fileReader_->next();
-    }
+		for (int idx=0; idx<test_indices.size(); ++idx) {
+			int psm_idx = test_indices.at(idx);
+			ScanChargePSM scPSM = scPSMList.at(psm_idx);
+			vector<PSMFeatEnsemble> psms = scPSM.psms_;
+			if (psms.size() <= 0) { continue; }
+
+			double tailor_baseline = psms.at(0).tailor_;
+			double ensemble_baseline = psms.at(0).getEnsembleScore(coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution) - 0.000001;
+
+			for (int idx2=0; idx2<psms.size(); ++idx2) {
+				if (psms.at(idx2).tailor_ > tailor_baseline) { carp(CARP_FATAL, "tailor %f shouldn't beat baseline %f!", psms.at(idx2).tailor_, tailor_baseline); }
+				double ensemble = psms.at(idx2).getEnsembleScore(coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution);
+				if ((!filter) || (ensemble >= ensemble_baseline)) { *output_file << psms.at(idx2).data_.c_str() << endl; }
+			}
+		}
+
+	}
 
     if (output_file) { output_file->close(); delete output_file; }
 }
-*/
+
+boost::tuple<double, double, double, double> DIAmeterCVSelector::selectFoldParam(std::vector<double>* paramRangeList, vector<int>* train_indices) {
+	vector<boost::tuple<double, double, double, double>> param_combos;
+	for (int prec_idx=0; prec_idx<paramRangeList->size(); ++prec_idx) {
+		double coeff_precursor = paramRangeList->at(prec_idx);
+		for (int frag_idx=0; frag_idx<paramRangeList->size(); ++frag_idx) {
+			double coeff_frag = paramRangeList->at(frag_idx);
+			for (int rt_idx=0; rt_idx<paramRangeList->size(); ++rt_idx) {
+				double coeff_rtdiff = paramRangeList->at(rt_idx);
+				for (int elut_idx=0; elut_idx<paramRangeList->size(); ++elut_idx) {
+					double coeff_elution = paramRangeList->at(elut_idx);
+					param_combos.push_back(boost::make_tuple(coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution));
+				}
+			}
+		}
+	}
+	carp(CARP_DETAILED_DEBUG, "param_combos:%d", param_combos.size() );
+
+	int max_targetCnt = 0, max_paramIdx = 0;
+	vector<PSMRecord> filtered_records;
+	for (int param_idx=0; param_idx<param_combos.size(); ++param_idx) {
+		boost::tuple<double, double, double, double> curr_param = param_combos.at(param_idx);
+		double coeff_precursor = curr_param.get<0>();
+		double coeff_frag = curr_param.get<1>();
+		double coeff_rtdiff = curr_param.get<2>();
+		double coeff_elution = curr_param.get<3>();
+		carp(CARP_DETAILED_DEBUG, "coeff_precursor:%f\t coeff_frag:%f\t coeff_rtdiff:%f\t coeff_elution:%f", coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution);
+
+		filtered_records.clear();
+		for (int idx=0; idx<train_indices->size(); ++idx) {
+			int psm_idx = train_indices->at(idx);
+			ScanChargePSM scPSM = scPSMList.at(psm_idx);
+			// carp(CARP_DETAILED_DEBUG, "psm_idx:%d\t ms2scan:%d\t charge:%d", psm_idx, scPSM.ms2scan_, scPSM.charge_);
+
+			vector<PSMFeatEnsemble> psms = scPSM.psms_;
+			if (psms.size() <= 0) { continue; }
+
+			double tailor_baseline = psms.at(0).tailor_;
+			double ensemble_baseline = psms.at(0).getEnsembleScore(coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution) - 0.000001;
+
+			for (int idx2=0; idx2<psms.size(); ++idx2) {
+				if (psms.at(idx2).tailor_ > tailor_baseline) { carp(CARP_FATAL, "tailor %f shouldn't beat baseline %f!", psms.at(idx2).tailor_, tailor_baseline); }
+				double ensemble = psms.at(idx2).getEnsembleScore(coeff_precursor, coeff_frag, coeff_rtdiff, coeff_elution);
+				if (ensemble >= ensemble_baseline) {
+					PSMRecord record(ensemble, psms.at(idx2).is_target_, psms.at(idx2).peptide_);
+					filtered_records.push_back(record);
+				}
+			}
+		}
+		sort(filtered_records.begin(), filtered_records.end());
+		int target_cnt = getTargetFDR(&filtered_records);
+		// carp(CARP_DETAILED_DEBUG, "filtered_records:%d\t target_cnt:%d", filtered_records.size(), target_cnt );
+
+		if (target_cnt > max_targetCnt) {
+			max_targetCnt = target_cnt;
+			max_paramIdx = param_idx;
+		}
+	}
+	carp(CARP_DETAILED_DEBUG, "max_targetCnt:%d\t max_paramIdx:%d", max_targetCnt, max_paramIdx );
+
+	// the case when no psm filtering
+	filtered_records.clear();
+	for (int idx=0; idx<train_indices->size(); ++idx) {
+		int psm_idx = train_indices->at(idx);
+		ScanChargePSM scPSM = scPSMList.at(psm_idx);
+		vector<PSMFeatEnsemble> psms = scPSM.psms_;
+		for (int idx2=0; idx2<psms.size(); ++idx2) {
+			PSMRecord record(psms.at(idx2).tailor_, psms.at(idx2).is_target_, psms.at(idx2).peptide_);
+			filtered_records.push_back(record);
+		}
+	}
+	sort(filtered_records.begin(), filtered_records.end());
+	int unfiltered_target_cnt = getTargetFDR(&filtered_records);
+	carp(CARP_DETAILED_DEBUG, "unfiltered_target_cnt:%d", unfiltered_target_cnt);
+
+	if (max_targetCnt > unfiltered_target_cnt) { return param_combos.at(max_paramIdx); }
+	else { return boost::make_tuple(-1, -1, -1, -1); }
+
+}
+
+int DIAmeterCVSelector::getTargetFDR(std::vector<PSMRecord>* records, double fdr_thres) {
+	map<std::string, int> peptide_map;
+	double prev_score = 1000000, target_cnt = 0, decoy_cnt = 0;
+
+	for (int idx=0; idx<records->size(); ++idx) {
+		PSMRecord record = records->at(idx);
+
+		double score = record.score_;
+		bool is_target = record.is_target_;
+		std::string peptide = record.peptide_;
+
+		if (score > prev_score) { carp(CARP_FATAL, "score %f should be decreasing! %f!", score, prev_score); }
+		prev_score = score;
+
+		map<std::string, int>::iterator pepIter = peptide_map.find(peptide);
+		if (pepIter != peptide_map.end()) { continue; }
+		peptide_map[peptide] = 1;
+
+		if (is_target) {
+			target_cnt++;
+			double fdr = decoy_cnt * 1.0 / target_cnt;
+			if (fdr > fdr_thres) { break; }
+		}
+		else { decoy_cnt++; }
+	}
+
+	return int(target_cnt);
+}
+
 
