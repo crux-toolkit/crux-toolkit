@@ -87,7 +87,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
   string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
   string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
-  string output_file_name_cv_ = make_file_path("diameter-search.cv.filtered.txt");
+  // string output_file_name_cv_ = make_file_path("diameter-search.cv.filtered.txt");
 
   if (Params::GetBool("psm-filter")) {
       stringstream param_ss;
@@ -245,7 +245,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
                     // carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
                     computeWindowDIA(spec_charge_chunk.at(chunk_idx), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
-
 
                     // Normalize the observed spectrum and compute the cache of frequently-needed
                     // values for taking dot products with theoretical spectra.
@@ -1090,23 +1089,12 @@ vector<string> DIAmeterApplication::getArgs() const {
 
 vector<string> DIAmeterApplication::getOptions() const {
   string arr[] = {
-    // "file-column",
-    // "fileroot",
     "max-precursor-charge",
-    "min-peaks",
-    "mod-precision",
     "mz-bin-offset",
     "mz-bin-width",
     "output-dir",
     "overwrite",
-    "fragment-tolerance",
     "precursor-window",
-    // "precursor-window-type",
-    // "spectrum-charge",
-    // "spectrum-parser",
-    // "concat",
-    // "use-tailor-calibration",
-    // "use-flanking-peaks",
     "predrt-files",
     "msamanda-regional-topk",
     "coelution-oneside-scans",
@@ -1115,13 +1103,20 @@ vector<string> DIAmeterApplication::getOptions() const {
     "coeff-fragment",
     "coeff-rtdiff",
     "coeff-elution",
-    "coeff-tag",
     "prec-ppm",
     "frag-ppm",
-    "unique-scannr",
     "top-match",
-    "use-neutral-loss-peaks",
+	"diameter-instrument",
     "verbosity"
+    // "min-peaks",
+    // "fragment-tolerance",
+	// "mod-precision",
+    // "coeff-tag",
+    // "unique-scannr",
+    // "use-neutral-loss-peaks",
+	// "spectra-denoising",
+	// "psm-filter",
+
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -1196,6 +1191,30 @@ void DIAmeterApplication::processParams() {
     output_pin_ = "diameter-search.pin";
     output_percolator_ = FileUtils::Join(Params::GetString("output-dir"), "percolator-output");
 
+    if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "orbitrap")) {
+        Params::Set("spectra-denoising", false);
+        Params::Set("psm-filter", false);
+    }
+    else if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "tof5600")) {
+        Params::Set("spectra-denoising", true);
+        Params::Set("psm-filter", true);
+
+        Params::Set("coeff-precursor", 3.2);
+        Params::Set("coeff-fragment", 0.2);
+        Params::Set("coeff-rtdiff", 0.2);
+        Params::Set("coeff-elution", 0.2);
+    }
+    else if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "tof6600")) {
+        Params::Set("spectra-denoising", false);
+        Params::Set("psm-filter", true);
+
+        Params::Set("coeff-precursor", 25.6);
+        Params::Set("coeff-fragment", 0.2);
+        Params::Set("coeff-rtdiff", 0.2);
+        Params::Set("coeff-elution", 0);
+    }
+    else { carp(CARP_FATAL, "Wrong diameter-instrument setup %s!", Params::GetString("diameter-instrument").c_str()); }
+
     if (Params::GetBool("psm-filter")) {
         stringstream pin_ss;
         pin_ss << "diameter-search." << getCoeffTag() << ".pin";
@@ -1214,6 +1233,9 @@ void DIAmeterApplication::processParams() {
     Params::Set("output-weights", true);
     Params::Set("only-psms", false);
     carp(CARP_INFO, "Updating output percolator dir = '%s'", output_percolator_.c_str());
+
+
+	//
 
 }
 
