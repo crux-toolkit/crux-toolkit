@@ -164,7 +164,6 @@ class SpectrumCollection {
   int FindHighestSpectrumNum() const;
   void SetNormalizedObvRTime();
 
-
  private:
   void MakeSpecCharges();
 

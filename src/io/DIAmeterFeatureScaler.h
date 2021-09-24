@@ -13,7 +13,7 @@
 #include "PSMReader.h"
 
 class DIAmeterFeatureScaler {
- protected:
+  protected:
     void parseHeader();
     int match_indices_[NUMBER_MATCH_COLUMNS];
 
@@ -24,14 +24,13 @@ class DIAmeterFeatureScaler {
 
     DelimitedFileReader* fileReader_;
 
- public:
+  public:
     DIAmeterFeatureScaler(const char* file_name);
     ~DIAmeterFeatureScaler();
 
     std::vector<bool> getMatchColumnsPresent();
     void calcDataQuantile(double quantile_low=0.01, double quantile_high=0.99);
     void writeScaledFile(const char* output_file_name);
-
 };
 
 #endif //DIAMETERFEATURESCALER_H

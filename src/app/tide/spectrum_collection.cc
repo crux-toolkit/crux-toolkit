@@ -413,73 +413,67 @@ double Spectrum::IsoWindowLowerMZ() const { return iso_window_lower_mz_; }
 
 double Spectrum::IsoWindowUpperMZ() const { return iso_window_upper_mz_; }
 
-double Spectrum::MaxPeakMz() const {
-	return *max_element(peak_m_z_.begin(), peak_m_z_.end());
-}
+double Spectrum::MaxPeakMz() const { return *max_element(peak_m_z_.begin(), peak_m_z_.end()); }
 
 void Spectrum::UpdatePeakSupport(vector<bool>* peak_support_vec) {
-	if (peak_support_vec->size() != Size()) { carp(CARP_FATAL, "peak_support_vec size mismatch!"); }
-	peak_supported_.clear();
+  if (peak_support_vec->size() != Size()) { carp(CARP_FATAL, "peak_support_vec size mismatch!"); }
+  peak_supported_.clear();
 
-	int supported_cnt = 0;
-	for (int peak_idx=0; peak_idx<peak_support_vec->size(); ++peak_idx) {
-		peak_supported_.push_back(peak_support_vec->at(peak_idx));
-		// if (peak_support_vec->at(peak_idx)) { ++supported_cnt; }
-	}
-	// carp(CARP_INFO, "peak_support_vec size=%d \t supported_cnt=%d", peak_supported_.size(), supported_cnt);
+  int supported_cnt = 0;
+  for (int peak_idx=0; peak_idx<peak_support_vec->size(); ++peak_idx) {
+    peak_supported_.push_back(peak_support_vec->at(peak_idx));
+  }
+  carp(CARP_DETAILED_DEBUG, "peak_support_vec size=%d \t supported_cnt=%d", peak_supported_.size(), supported_cnt);
 }
 
 bool Spectrum::Is_supported(int index) const {
-	if (index >= peak_supported_.size()) { return true; }
-	return peak_supported_[index];
+  if (index >= peak_supported_.size()) { return true; }
+  return peak_supported_[index];
 }
 
 
 vector<double> Spectrum::DescendingSortedPeakIntensity() {
-	vector<double> sorted_intensity_vec(peak_intensity_);
-	std::sort(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), greater<double>());
-	return sorted_intensity_vec;
+  vector<double> sorted_intensity_vec(peak_intensity_);
+  std::sort(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), greater<double>());
+  return sorted_intensity_vec;
 }
 
 
 void SpectrumCollection::SortByMS1SpectrumNum() {
-	// This is for MS1 spectra only!
-	// Adopt MakeSpecCharges() with following changes:
-	// (1) We don't actually need neutral_mass, by which spec_charges_ is sorted
-	// (2) We re-purpose the neutral_mass with ms1_spectrum_number_
-	// (3) Fix charge as 1, which is useless.
+  // This is for MS1 spectra only!
+  // Adopt MakeSpecCharges() with following changes:
+  // (1) We don't actually need neutral_mass, by which spec_charges_ is sorted
+  // (2) We re-purpose the neutral_mass with ms1_spectrum_number_
+  // (3) Fix charge as 1, which is useless.
 
-	int spectrum_index = 0;
-	vector<Spectrum*>::iterator i = spectra_.begin();
-	for (; i != spectra_.end(); ++i) {
-		int ms1_scan = (*i)->MS1SpectrumNum();
-		spec_charges_.push_back(SpecCharge(ms1_scan, 1, *i, spectrum_index));
-		spectrum_index++;
-	}
-	sort(spec_charges_.begin(), spec_charges_.end());
-
+  int spectrum_index = 0;
+  vector<Spectrum*>::iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    int ms1_scan = (*i)->MS1SpectrumNum();
+    spec_charges_.push_back(SpecCharge(ms1_scan, 1, *i, spectrum_index));
+    spectrum_index++;
+  }
+  sort(spec_charges_.begin(), spec_charges_.end());
 }
 
 int SpectrumCollection::FindHighestSpectrumNum() const {
-	// Return the maximum MS2 scan number seen across all input spectra.
-	int highest_scannum = 0;
-	vector<Spectrum*>::const_iterator i = spectra_.begin();
-	for (; i != spectra_.end(); ++i) {
-		int curr_scannum = (*i)->SpectrumNumber();
-		if (curr_scannum > highest_scannum) { highest_scannum = curr_scannum; }
-		// carp(CARP_DETAILED_DEBUG, "scannum:%d \t rt:%f ", curr_scannum, (*i)->RTime() );
-	}
-	return highest_scannum;
+  // Return the maximum MS2 scan number seen across all input spectra.
+  int highest_scannum = 0;
+  vector<Spectrum*>::const_iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    int curr_scannum = (*i)->SpectrumNumber();
+    if (curr_scannum > highest_scannum) { highest_scannum = curr_scannum; }
+  }
+  return highest_scannum;
 }
 
 void SpectrumCollection::SetNormalizedObvRTime() {
-	double highest_scannum = FindHighestSpectrumNum() * 1.0;
+  double highest_scannum = FindHighestSpectrumNum() * 1.0;
 
-	vector<Spectrum*>::const_iterator i = spectra_.begin();
-	for (; i != spectra_.end(); ++i) {
-		(*i)->SetRTime(1.0 * (*i)->SpectrumNumber() / highest_scannum);
-		//carp(CARP_DETAILED_DEBUG, "set scannum:%d \t rt:%f ", (*i)->SpectrumNumber(), (*i)->RTime() );
-	}
+  vector<Spectrum*>::const_iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    (*i)->SetRTime(1.0 * (*i)->SpectrumNumber() / highest_scannum);
+  }
 }
 
 

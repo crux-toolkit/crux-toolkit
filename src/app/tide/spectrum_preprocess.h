@@ -128,7 +128,6 @@ class ObservedPeakSet {
     bin_offset_ = bin_offset;
     NL_ = NL; //NL means neutral loss
     FP_ = FP; //FP means flanking peaks
-
   }
 
   ~ObservedPeakSet() { delete[] peaks_; delete[] raw_peaks_; delete[] cache_; }

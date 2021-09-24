@@ -156,7 +156,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     int dyn_region_size = largest_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
     int sta_region_size = max_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
 
-
     // added by Yang
     // static regional peak selection for MS2Pval calculation
     for (int i = 0; i < spectrum.Size(); ++i) {

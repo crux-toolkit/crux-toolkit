@@ -178,7 +178,6 @@ private:
 
   bool exact_pval_search_;
 
-
   /**
    * Constructor
    */

@@ -115,23 +115,23 @@ class TideMatchSet {
   static void writeHeadersDIA(ofstream* file, bool compute_sp);
 
   void writeToFileDIA(
-      ofstream* file,
-      int top_n,
-      const vector<Arr::iterator>& vec,
-      const string& spectrum_filename,
-      const Spectrum* spectrum,
-      int charge,
-      const ActivePeptideQueue* peptides,
-      const ProteinVec& proteins,
-      const vector<const pb::AuxLocation*>& locations,
-      const map<Arr::iterator, FLOAT_T>* delta_cn_map,
-      const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
-      const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
-	  const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
-	  const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
-	  const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
-	  const map<Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
-	  map<string, double>* peptide_predrt_map
+    ofstream* file,
+    int top_n,
+    const vector<Arr::iterator>& vec,
+    const string& spectrum_filename,
+    const Spectrum* spectrum,
+    int charge,
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
+    const map<Arr::iterator, FLOAT_T>* delta_cn_map,
+    const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+    const map<Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
+    map<string, double>* peptide_predrt_map
   );
 
 
@@ -141,21 +141,21 @@ class TideMatchSet {
     vector<Arr::iterator>& targetsOut,
     vector<Arr::iterator>& decoysOut,
     int top_n,
-	int numDecoys,
+    int numDecoys,
     bool highScoreBest // indicates semantics of score magnitude
   );
 
   static void computeDeltaCns(
-      const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-      map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
-      map<Arr::iterator, FLOAT_T>* delta_lcn_map
+    const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
+    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_lcn_map
   );
 
   static void computeSpData(
-      const vector<Arr::iterator>& vec,
-      map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
-      SpScorer* sp_scorer,
-      const ActivePeptideQueue* peptides
+    const vector<Arr::iterator>& vec,
+    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
+    SpScorer* sp_scorer,
+    const ActivePeptideQueue* peptides
   );
 
   static void initModMap(const pb::ModTable& modTable, ModPosition position);
