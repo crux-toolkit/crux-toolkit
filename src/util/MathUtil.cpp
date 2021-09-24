@@ -25,7 +25,6 @@ int MathUtil::factorial(int n) {
   return product;
 }
 
-// directly copied from CKronik2.cpp
 double MathUtil::gammaln(double xx) {
   double x,y,tmp,ser;
   static double cof[6]={76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5};

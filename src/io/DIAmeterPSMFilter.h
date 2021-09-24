@@ -17,15 +17,15 @@
 // which is easy to group by (scan, charge), sort by XCorr,
 // and filter by the ensemble score
 struct PSMByScanCharge {
-	double xcorr_score_;
-	double ensemble_score_;
-	std::vector<std::string> data_;
+  double xcorr_score_;
+  double ensemble_score_;
+  std::vector<std::string> data_;
 
-	explicit PSMByScanCharge(double xcorr_score_tmp, double ensemble_score_tmp, std::vector<std::string> data_tmp) {
-		xcorr_score_ = xcorr_score_tmp;
-		ensemble_score_ = ensemble_score_tmp;
-		data_ = data_tmp;
-	}
+  explicit PSMByScanCharge(double xcorr_score_tmp, double ensemble_score_tmp, std::vector<std::string> data_tmp) {
+    xcorr_score_ = xcorr_score_tmp;
+    ensemble_score_ = ensemble_score_tmp;
+    data_ = data_tmp;
+  }
 };
 
 class DIAmeterPSMFilter {
@@ -52,7 +52,6 @@ class DIAmeterPSMFilter {
     void calcBaseline();
     void loadAndFilter(const char* output_file_name, bool filter=true);
 };
-
 
 #endif //DIAMETERPSMFILTER_H
 
