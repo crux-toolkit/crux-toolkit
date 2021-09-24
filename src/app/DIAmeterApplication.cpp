@@ -20,7 +20,7 @@
 
 #include "io/DIAmeterFeatureScaler.h"
 #include "io/DIAmeterPSMFilter.h"
-#include "io/DIAmeterCVSelector.h"
+// #include "io/DIAmeterCVSelector.h"
 
 const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
