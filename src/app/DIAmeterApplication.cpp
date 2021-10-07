@@ -45,7 +45,7 @@ int DIAmeterApplication::main(const vector<string>& input_files) {
 }
 
 int DIAmeterApplication::main(const vector<string>& input_files, const string input_index) {
-  carp(CARP_INFO, "Running diameter-search...");
+  carp(CARP_INFO, "Running diameter...");
 
   // DIAmeter supports spectrum centric match report only
   if (Params::GetBool("peptide-centric-search")) { carp(CARP_FATAL, "Spectrum-centric match only!"); }
@@ -84,16 +84,17 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
   // Output setup
-  string output_file_name_unsorted_ = make_file_path("diameter-search.tmp.txt");
-  string output_file_name_scaled_ = make_file_path("diameter-search.scaled.txt");
-  string output_file_name_filtered_ = make_file_path("diameter-search.filtered.txt");
-  // string output_file_name_cv_ = make_file_path("diameter-search.cv.filtered.txt");
+  string output_file_name_unsorted_ = make_file_path("diameter.tmp.txt");
+  string output_file_name_scaled_ = make_file_path("diameter.psm-features.txt");
+  string output_file_name_filtered_ = make_file_path("diameter.psm-features.filtered.txt");
 
+  /*
   if (Params::GetBool("psm-filter")) {
     stringstream param_ss;
     param_ss << "diameter-search.filtered." << getCoeffTag() << ".txt";
     output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
   }
+  */
 
   // Extract all edge features
   if (!FileUtils::Exists(output_file_name_unsorted_) /*|| Params::GetBool("overwrite")*/ ) {
@@ -995,7 +996,31 @@ string DIAmeterApplication::getName() const {
 }
 
 string DIAmeterApplication::getDescription() const {
-  return "DIAmeter description";
+  return
+    "[[html:<p>DIAmeter detects peptides from data-independent acquisition "
+    "mass spectrometry data without requiring a spectral library. "
+    "The input includes centroided DIA data and a proteome FASTA database. "
+    "DIAmeter then searches the DIA data using Tide, "
+    "allowing multiple peptide-spectrum matches (PSMs) per DIA spectrum. "
+    "A subset of these PSMs are selected for further analysis, "
+    "using a greedy bipartite graph matching algorithm. "
+    "Finally, PSMs are augmented and filtered with auxiliary features describing "
+    "various types of evidence supporting the detection of the associated peptide. "
+    "The PSM feature vectors, the output of DIAmeter, should be processed subsequently "
+    "by Percolator to induce a ranking on peptides. "
+    "Percolator will assign each peptide a statistical confidence estimate, "
+    "where highly ranked peptides are detected in the DIA data with stronger confidence. "
+    "Further details are provided here:</p><blockquote>YY Lu, J Bilmes, RA Rodriguez-Mias, J Villen, and WS Noble. "
+    "<a href=\"https://doi.org/10.1093/bioinformatics/btab284\">"
+    "&quot;DIAmeter: Matching peptides to data-independent acquisition mass spectrometry data&quot;</a>. <em>Bioinformatics</em>. "
+    "37(Supplement_1):i434–i442, 2021.</blockquote>"
+    "<p>DIAmeter performs several intermediate steps, as follows:</p>"
+    "<ol><li>If a FASTA file was provided, convert it to an index using tide-index. Otherwise, use the given Tide index.</li>"
+    "<li>Convert the given fragmentation spectra to a binary format.</li>"
+    "<li>Search the spectra against the database and extract the auxiliary features.</li>"
+	"<li>Store the results in Percolator input (PIN) format.</li>"
+    "<li>Run the PIN file through Percolator. </li></ol>"
+	"]]";
 }
 
 vector<string> DIAmeterApplication::getArgs() const {
@@ -1013,19 +1038,19 @@ vector<string> DIAmeterApplication::getOptions() const {
   "mz-bin-width",
   "output-dir",
   "overwrite",
-  "precursor-window",
+  // "precursor-window",
   "predrt-files",
-  "msamanda-regional-topk",
-  "coelution-oneside-scans",
-  "coelution-topk",
-  "coeff-precursor",
-  "coeff-fragment",
-  "coeff-rtdiff",
-  "coeff-elution",
+  // "msamanda-regional-topk",
+  // "coelution-oneside-scans",
+  // "coelution-topk",
+  // "coeff-precursor",
+  // "coeff-fragment",
+  // "coeff-rtdiff",
+  // "coeff-elution",
   "prec-ppm",
   "frag-ppm",
   "top-match",
-	"diameter-instrument",
+  "diameter-instrument",
   "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
@@ -1033,20 +1058,24 @@ vector<string> DIAmeterApplication::getOptions() const {
 
 vector< pair<string, string> > DIAmeterApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("diameter-search.target.txt",
-  "a tab-delimited text file containing the target PSMs. See <a href=\""
-  "../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
-  outputs.push_back(make_pair("diameter-search.decoy.txt",
-  "a tab-delimited text file containing the decoy PSMs. This file will only "
-  "be created if the index was created with decoys."));
-  outputs.push_back(make_pair("diameter-search.params.txt",
+
+  outputs.push_back(make_pair("diameter.psm-features.txt",
+    "a tab-delimited text file containing the feature of the searched PSMs. "));
+  outputs.push_back(make_pair("diameter.psm-features.filtered.txt",
+    "a tab-delimited text file containing the feature of the PSMs after filtering. "));
+  outputs.push_back(make_pair("diameter.features.pin",
+      "the searched PSM results in Percolator input (PIN) format. "));
+  outputs.push_back(make_pair("diameter.params.txt",
   "a file containing the name and value of all parameters/options for the "
   "current operation. Not all parameters in the file may have been used in "
   "the operation. The resulting file can be used with the --parameter-file "
   "option for other Crux programs."));
-  outputs.push_back(make_pair("diameter-search.log.txt",
+  outputs.push_back(make_pair("diameter.log.txt",
   "a log file containing a copy of all messages that were printed to the "
   "screen during execution."));
+  outputs.push_back(make_pair("percolator-output",
+    "the output of percolator after running the PIN file."));
+
   return outputs;
 }
 bool DIAmeterApplication::needsOutputDirectory() const {
@@ -1098,16 +1127,20 @@ void DIAmeterApplication::processParams() {
   Params::Set("num-threads", 1);
 
   // these are makepin-specific param settings
-  output_pin_ = "diameter-search.pin";
+  output_pin_ = "diameter.features.pin";
   output_percolator_ = FileUtils::Join(Params::GetString("output-dir"), "percolator-output");
 
   if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "orbitrap")) {
     Params::Set("spectra-denoising", false);
     Params::Set("psm-filter", false);
+    Params::Set("prec-ppm", 10);
+    Params::Set("frag-ppm", 10);
   }
   else if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "tof5600")) {
     Params::Set("spectra-denoising", true);
     Params::Set("psm-filter", true);
+    Params::Set("prec-ppm", 30);
+    Params::Set("frag-ppm", 30);
 
     Params::Set("coeff-precursor", 3.2);
     Params::Set("coeff-fragment", 0.2);
@@ -1117,6 +1150,8 @@ void DIAmeterApplication::processParams() {
   else if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "tof6600")) {
     Params::Set("spectra-denoising", false);
     Params::Set("psm-filter", true);
+    Params::Set("prec-ppm", 30);
+    Params::Set("frag-ppm", 30);
 
     Params::Set("coeff-precursor", 25.6);
     Params::Set("coeff-fragment", 0.2);
@@ -1125,15 +1160,17 @@ void DIAmeterApplication::processParams() {
   }
   else { carp(CARP_FATAL, "Wrong diameter-instrument setup %s!", Params::GetString("diameter-instrument").c_str()); }
 
+  /*
   if (Params::GetBool("psm-filter")) {
     stringstream pin_ss;
-    pin_ss << "diameter-search." << getCoeffTag() << ".pin";
+    pin_ss << "diameter." << getCoeffTag() << ".pin";
     output_pin_ = pin_ss.str().c_str();
 
     stringstream percolator_ss;
     percolator_ss << "percolator-output-" << getCoeffTag();
     output_percolator_ = FileUtils::Join(Params::GetString("output-dir"), percolator_ss.str());
   }
+  */
   Params::Set("output-file", output_pin_);
   Params::Set("unique-scannr", true);
   carp(CARP_INFO, "Updating output pin file = '%s'", output_pin_.c_str());
