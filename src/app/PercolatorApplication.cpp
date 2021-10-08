@@ -115,18 +115,19 @@ int PercolatorApplication::main(int argc, char** argv) {
  * \returns whether percolator was successful or not
  */
 int PercolatorApplication::main(
-  const string& input_pin ///< file path of pin to process.
+  const string& input_pin, ///< file path of pin to process.
+  const std::string& output_dir_to_overwrite //added by Yang
   ) {
   /* build argument list */
   vector<string> perc_args_vec;
   perc_args_vec.push_back("percolator");
 
-  string output_target_peptides = make_file_path(getFileStem() + ".target.peptides.txt");
-  string output_target_psms = make_file_path(getFileStem() + ".target.psms.txt");
-  string output_target_proteins = make_file_path(getFileStem() + ".target.proteins.txt");
-  string output_decoy_peptides = make_file_path(getFileStem() + ".decoy.peptides.txt");
-  string output_decoy_psms = make_file_path(getFileStem() + ".decoy.psms.txt");
-  string output_decoy_proteins = make_file_path(getFileStem() + ".decoy.proteins.txt");
+  string output_target_peptides = make_file_path(getFileStem() + ".target.peptides.txt", output_dir_to_overwrite);
+  string output_target_psms = make_file_path(getFileStem() + ".target.psms.txt", output_dir_to_overwrite);
+  string output_target_proteins = make_file_path(getFileStem() + ".target.proteins.txt", output_dir_to_overwrite);
+  string output_decoy_peptides = make_file_path(getFileStem() + ".decoy.peptides.txt", output_dir_to_overwrite);
+  string output_decoy_psms = make_file_path(getFileStem() + ".decoy.psms.txt", output_dir_to_overwrite);
+  string output_decoy_proteins = make_file_path(getFileStem() + ".decoy.proteins.txt", output_dir_to_overwrite);
 
   if (Params::GetBool("only-psms")) {
     perc_args_vec.push_back("--only-psms");
@@ -185,7 +186,7 @@ int PercolatorApplication::main(
 
   if (Params::GetBool("pout-output")) {
     perc_args_vec.push_back("--xmloutput");
-    perc_args_vec.push_back(make_file_path(getFileStem() + ".pout.xml"));
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".pout.xml", output_dir_to_overwrite));
     if (Params::GetBool("decoy-xml-output")) {
       perc_args_vec.push_back("--decoy-xml-output");
     }
@@ -225,12 +226,12 @@ int PercolatorApplication::main(
 
   if (Params::GetBool("feature-file-out")) {
     perc_args_vec.push_back("--tab-out");
-    perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt"));
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt", output_dir_to_overwrite));
   }
 
   if (Params::GetBool("output-weights")) {
     perc_args_vec.push_back("--weights");
-    perc_args_vec.push_back(make_file_path(getFileStem() + ".weights.txt"));
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".weights.txt", output_dir_to_overwrite));
   }
   
   if (!Params::GetString("init-weights").empty()) {
@@ -400,7 +401,7 @@ int PercolatorApplication::main(
     carp(CARP_WARNING, "Failed translating Percolator objects into Crux objects");
   }
 
-  string output_dir = Params::GetString("output-dir");
+  // string output_dir = Params::GetString("output-dir");
 
   if (!Params::GetBool("txt-output")) {
     FileUtils::Remove(output_target_peptides);
@@ -409,11 +410,11 @@ int PercolatorApplication::main(
   // write mzid
   if (Params::GetBool("mzid-output")) {
     MzIdentMLWriter mzid_writer, decoy_mzid_writer;
-    string mzid_path = make_file_path(getFileStem() + ".target.mzid");
+    string mzid_path = make_file_path(getFileStem() + ".target.mzid", output_dir_to_overwrite);
     mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
     mzid_writer.addProteinMatches(target_pmc);
     mzid_writer.closeFile();
-    mzid_path = make_file_path(getFileStem() + ".decoy.mzid");
+    mzid_path = make_file_path(getFileStem() + ".decoy.mzid", output_dir_to_overwrite);
     decoy_mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
     decoy_mzid_writer.addProteinMatches(decoy_pmc);
     decoy_mzid_writer.closeFile();
@@ -422,11 +423,11 @@ int PercolatorApplication::main(
   // write pepxml
   if (Params::GetBool("pepxml-output")) {
     PMCPepXMLWriter pep_writer;
-    string pep_path = make_file_path(getFileStem() + ".target.pep.xml");
+    string pep_path = make_file_path(getFileStem() + ".target.pep.xml", output_dir_to_overwrite);
     pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
     pep_writer.write(target_pmc);
     pep_writer.closeFile();
-    pep_path = make_file_path(getFileStem() + ".decoy.pep.xml");
+    pep_path = make_file_path(getFileStem() + ".decoy.pep.xml", output_dir_to_overwrite);
     pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
     pep_writer.write(decoy_pmc);
     pep_writer.closeFile();
