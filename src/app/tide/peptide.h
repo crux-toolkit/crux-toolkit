@@ -172,7 +172,7 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const;
+  void ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace);
   void ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
                                const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
@@ -217,8 +217,19 @@ class Peptide {
   int DecoyIdx() const { return decoyIdx_; }
   vector<double> getAAMasses() const;
 
+  // added by Yang
+  static double MassToMz(double mass, int charge) {
+	  return mass / (charge * 1.0) + MASS_PROTON;
+	  // return mass / (charge * 1.0) + MASS_H;
+  }
+  vector<int>& IonMzbins() { return ion_mzbins_; }
+  vector<int>& BIonMzbins() { return b_ion_mzbins_; }
+  vector<int>& YIonMzbins() { return y_ion_mzbins_; }
+  vector<double>& IonMzs() { return ion_mzs_; } // added for debug purpose
+
+
  private:
-  template<class W> void AddIons(W* workspace) const;
+  template<class W> void AddIons(W* workspace) ;
   template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
@@ -244,6 +255,10 @@ class Peptide {
 
   void* prog1_;
   void* prog2_;
+
+  // added by Yang
+  vector<int> ion_mzbins_, b_ion_mzbins_, y_ion_mzbins_;
+  vector<double> ion_mzs_; // added for debug purpose
 };
 
 #endif // PEPTIDE_H

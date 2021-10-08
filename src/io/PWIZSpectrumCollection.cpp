@@ -140,7 +140,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool PWIZSpectrumCollection::parse() {
+bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   // spectrum_collection has already been parsed
   if(is_parsed_) {
     return false;
@@ -156,6 +156,10 @@ bool PWIZSpectrumCollection::parse() {
   string range_string = Params::GetString("scan-number");
   int first_scan = -1;
   int last_scan = -1;
+
+  // added by Yang
+  int curr_ms1_scan = -1;
+
 
   get_range_from_string(range_string, first_scan, last_scan);
 
@@ -184,11 +188,14 @@ bool PWIZSpectrumCollection::parse() {
       carp(CARP_FATAL, "boost::bad_lexical_cast occured while parsing spectrum.\n"
                        "Do your spectra contain z-lines?");
     }
+
+    int curr_ms_level = spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>();
+    carp(CARP_DEBUG, "ms_level=%d\t", curr_ms_level );
+
     // skip if no peaks or not ms2
-    if (spectrum->defaultArrayLength < 1 ||
-        spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2) {
-      continue;
-    }
+    // if (spectrum->defaultArrayLength < 1 || spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2) { continue; }
+    // if (spectrum->defaultArrayLength < 1 || spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != 2) { continue; }
+
 
     // check that scan number is in range
     int scan_number_begin, scan_number_end;
@@ -199,8 +206,7 @@ bool PWIZSpectrumCollection::parse() {
       carp(CARP_DETAILED_DEBUG, "ms_spectrum_title:%s", ms_spectrum_title.c_str());
       if (ms_peak_list_scans.empty() || !get_first_last_scan_from_string(ms_peak_list_scans, scan_number_begin, scan_number_end)) {
         if (ms_spectrum_title.empty() || !parseFirstLastScanFromTitle(ms_spectrum_title, scan_number_begin, scan_number_end)) {
-          string scan_value = pwiz::msdata::id::translateNativeIDToScanNumber(
-          native_id_format, spectrum->id);
+          string scan_value = pwiz::msdata::id::translateNativeIDToScanNumber(native_id_format, spectrum->id);
           carp(CARP_DETAILED_DEBUG, "scan_value:%s", scan_value.c_str());
           if (scan_value.empty() || !get_range_from_string<int>(
             scan_value.c_str(), scan_number_begin, scan_number_end)) {
@@ -230,24 +236,37 @@ bool PWIZSpectrumCollection::parse() {
       scan_number_begin = ++scan_counter;
       scan_number_end = scan_number_begin;
     }
-    carp(CARP_DETAILED_DEBUG, "found scan:%i %i-%i", scan_number_begin, first_scan, last_scan);
+    carp(CARP_DETAILED_DEBUG, "found scan:%i %i %i-%i", scan_number_begin, scan_number_end, first_scan, last_scan);
     if( scan_number_end < first_scan ) {
       continue;
     } else if( scan_number_begin > last_scan ) {
       break;
     }
 
+    // added by Yang
+    if (spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() == 1) {
+    	curr_ms1_scan = scan_number_begin;
+    	if (scan_number_begin != scan_number_end) { carp(CARP_FATAL, "scan_number_begin %d should equal to scan_number_end %d.", scan_number_begin, scan_number_end); }
+    }
+    // skip if no peaks or ms_level doesn't match
+    if (spectrum->defaultArrayLength < 1 || spectrum->cvParam(pwiz::msdata::MS_ms_level).valueAs<int>() != ms_level) { continue; }
+
+
     Crux::Spectrum* crux_spectrum = new Crux::Spectrum();
-    if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end)) {
-      addSpectrumToEnd(crux_spectrum);
-      spectraByScan_[scan_number_begin] = crux_spectrum;
+    if (crux_spectrum->parsePwizSpecInfo(spectrum, scan_number_begin, scan_number_end, dia_mode)) {
+    	// added by Yang
+    	crux_spectrum->setMS1Scan(curr_ms1_scan);
+    	carp(CARP_DETAILED_DEBUG, "curr_ms1_scan: %d ", curr_ms1_scan );
+
+    	addSpectrumToEnd(crux_spectrum);
+    	spectraByScan_[scan_number_begin] = crux_spectrum;
     } else {
-      delete crux_spectrum;
+    	delete crux_spectrum;
     }
   }
 
+  // carp(CARP_DETAILED_DEBUG, "spectra_ size:%d", spectra_.size() );
   is_parsed_ = true;
-
   return true;
 }
 

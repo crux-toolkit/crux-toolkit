@@ -75,7 +75,8 @@ class PercolatorApplication: public CruxApplication {
    * \returns whether hardklor was successful or not
    */
   int main(
-    const std::string& input_pinxml ///< file path of spectra to process
+    const std::string& input_pinxml, ///< file path of spectra to process
+    const std::string& output_dir_to_overwrite = "" //added by Yang
   );
   
 };
