@@ -661,7 +661,7 @@ void DIAmeterApplication::computeMS2Pval(
       pvalue_binomial_probs.push_back(binomial_prob);
     }
     double ms2pval1 = -MathUtil::LogSumExp(&pvalue_binomial_probs);
-    if (isnan(ms2pval1) || isinf(ms2pval1)) { ms2pval1 = 0; }
+    if (std::isnan(ms2pval1) || std::isinf(ms2pval1)) { ms2pval1 = 0; }
 
     double ms2pval2 = 0.0, intensitysum = 0.0;
 
