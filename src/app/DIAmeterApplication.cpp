@@ -997,6 +997,8 @@ string DIAmeterApplication::getName() const {
 
 string DIAmeterApplication::getDescription() const {
   return
+    "[[nohtml:DIAmeter detects peptides from data-independent acquisition "
+    "mass spectrometry data without requiring a spectral library.]]"
     "[[html:<p>DIAmeter detects peptides from data-independent acquisition "
     "mass spectrometry data without requiring a spectral library. "
     "The input includes centroided DIA data and a proteome FASTA database. "
