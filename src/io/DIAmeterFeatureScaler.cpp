@@ -71,12 +71,16 @@ void DIAmeterFeatureScaler::calcDataQuantile(double quantile_low, double quantil
     std::vector<double>* curr_match_values = toscale_match_values_[curr_column_idx];
     sort(curr_match_values->begin(), curr_match_values->end());
 
-    int quantile_low_pos = (int)(quantile_low*(double)curr_match_values->size()+0.5); // +0.5 is for rounding purpose
-    int quantile_high_pos = (int)(quantile_high*(double)curr_match_values->size()+0.5);
-    double quantile_low_score = curr_match_values->at(quantile_low_pos);
-    double quantile_high_score = curr_match_values->at(quantile_high_pos);
-    toscale_column_quantiles_.push_back(make_pair(quantile_low_score, quantile_high_score));
-    carp(CARP_DETAILED_DEBUG, "ColumnIndex:%d \t ColumnName:%s \t Size:%d \t quantile_low:%f \t quantile_high:%f", curr_column_idx, get_column_header(toscale_column_ids_.at(idx)), toscale_match_values_[curr_column_idx]->size(), quantile_low_score, quantile_high_score );
+    if (curr_match_values->size() <= 0) { toscale_column_quantiles_.push_back(make_pair(0.0, 1.0)); }
+    else {
+        int quantile_low_pos = (int)(quantile_low*(double)curr_match_values->size()+0.5); // +0.5 is for rounding purpose
+        int quantile_high_pos = (int)(quantile_high*(double)curr_match_values->size()+0.5);
+        double quantile_low_score = curr_match_values->at(quantile_low_pos);
+        double quantile_high_score = curr_match_values->at(quantile_high_pos);
+        toscale_column_quantiles_.push_back(make_pair(quantile_low_score, quantile_high_score));
+        carp(CARP_DETAILED_DEBUG, "ColumnIndex:%d \t ColumnName:%s \t Size:%d \t quantile_low:%f \t quantile_high:%f", curr_column_idx, get_column_header(toscale_column_ids_.at(idx)), toscale_match_values_[curr_column_idx]->size(), quantile_low_score, quantile_high_score );
+    }
+
   }
 }
 

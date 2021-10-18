@@ -47,7 +47,7 @@ class DIAmeterApplication : public CruxApplication {
 
  protected:
   // string output_file_name_;
-  double avg_noise_intensity_logrank_, avg_ms1_peaknum_, avg_ms1_intercept_;
+  double avg_noise_intensity_logrank_, avg_ms1_peaknum_, avg_ms1_intercept_, avg_isowin_width_;
   int scan_gap_;
   int max_ms1scan_;
   int max_ms1_mzbin_, max_ms2_mzbin_;

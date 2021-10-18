@@ -2082,12 +2082,12 @@ Params::Params() : finalized_(false) {
     "The tag to encode the information about coefficients",
     "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", false);
 
-  InitIntParam("prec-ppm", 10, 1, 100,
+  InitIntParam("prec-ppm", 10, 1, 1000000,
     "Tolerance used for matching precursors to spectra. "
     "Peptides must be within +/- ‘precursor-ppm’ parts-per-million (ppm) of the spectrum precursor m/z",
     "It is used for DIAmeter. Default = 10 (orbitrap) and =30 (triptof)", true);
 
-  InitIntParam("frag-ppm", 10, 1, 100,
+  InitIntParam("frag-ppm", 10, 1, 1000000,
     "Tolerance used for matching fragment ions to spectrum peaks. "
     "Fragment ions must be within +/- 'fragment-ppm' of the spectrum peak value.",
     "It is used for DIAmeter. Default = 10 (orbitrap) and =30 (triptof)", true);
@@ -2106,7 +2106,11 @@ Params::Params() : finalized_(false) {
 
   InitStringParam("diameter-instrument", "orbitrap", "orbitrap|tof5600|tof6600",
     "Specify the instrument platform used to acquire the input spectra. "
-    "This option selects among different sets of coefficient values for the scores computed by diameter.",
+    "This option selects among different sets of coefficient values for the scores computed by diameter. "
+    "Specifically, the 'orbitrap' setting is equivalent to spectra-denoising=false,psm-filter=false,prec-ppm=10,frag-ppm=10; "
+    "the 'tof5600' is equivalent to spectra-denoising=true,psm-filter=true,prec-ppm=30,frag-ppm=30,coeff-precursor=3.2,coeff-fragment=0.2,coeff-rtdiff=0.2,coeff-elution=0.2; "
+    "the 'tof6600' is equivalent to spectra-denoising=false,psm-filter=true,prec-ppm=30,frag-ppm=30,coeff-precursor=25.6,coeff-fragment=0.2,coeff-rtdiff=0.2,coeff-elution=0. "
+    "Note that parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
 
   Categorize();
