@@ -149,6 +149,20 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
      long int num_isotopes_skipped = 0;
      long int num_retained = 0;
 
+     // Infer the isolation window size, which will be used if windowWideness is not provided in the input file
+     double current_mz = 0; avg_isowin_width_ = 0;
+     vector<double> precursor_mz_vec, precursor_gap_vec;
+     for (vector<SpectrumCollection::SpecCharge>::const_iterator sc_chunk = spec_charges->begin();sc_chunk < spec_charges->begin() + (spec_charges->size()); sc_chunk++) {
+         double precursor_mz = sc_chunk->spectrum->PrecursorMZ();
+         if (precursor_mz > current_mz) {
+             precursor_mz_vec.push_back(precursor_mz);
+             current_mz = precursor_mz;
+         }
+         else if (precursor_mz < current_mz) { break; }
+     }
+     for (int precursor_mz_idx = 1; precursor_mz_idx < precursor_mz_vec.size(); ++precursor_mz_idx) { precursor_gap_vec.push_back(precursor_mz_vec.at(precursor_mz_idx) - precursor_mz_vec.at(precursor_mz_idx-1)); }
+     if (precursor_gap_vec.size() > 0) { avg_isowin_width_ = MathUtil::Mean(precursor_gap_vec); }
+
      // This is the main search loop.
      ObservedPeakSet observed(bin_width_, bin_offset_, Params::GetBool("use-neutral-loss-peaks"), Params::GetBool("use-flanking-peaks") );
 
@@ -932,6 +946,11 @@ void DIAmeterApplication::computeWindowDIA(
    double unit_dalton = BIN_WIDTH;
    double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
    double precursor_window = fabs(sc.spectrum->IsoWindowUpperMZ()-sc.spectrum->IsoWindowLowerMZ()) / 2;
+
+   if (MathUtil::AlmostEqual(precursor_window, 0)) {
+      precursor_window = avg_isowin_width_ / 2;
+      carp(CARP_WARNING, "Input file does not specify window width. Inferring a fixed isolation window size of %f m/z.", precursor_window);
+   }
 
    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
     out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
