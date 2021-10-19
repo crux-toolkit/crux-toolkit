@@ -2107,10 +2107,10 @@ Params::Params() : finalized_(false) {
   InitStringParam("diameter-instrument", "orbitrap", "orbitrap|tof5600|tof6600|na",
     "Specify the instrument platform used to acquire the input spectra. "
     "This option selects among different sets of coefficient values for the scores computed by diameter. "
-    "Specifically, the 'orbitrap' setting is equivalent to spectra-denoising=false,psm-filter=false,prec-ppm=10,frag-ppm=10; "
-    "the 'tof5600' is equivalent to spectra-denoising=true,psm-filter=true,prec-ppm=30,frag-ppm=30,coeff-precursor=3.2,coeff-fragment=0.2,coeff-rtdiff=0.2,coeff-elution=0.2; "
-    "the 'tof6600' is equivalent to spectra-denoising=false,psm-filter=true,prec-ppm=30,frag-ppm=30,coeff-precursor=25.6,coeff-fragment=0.2,coeff-rtdiff=0.2,coeff-elution=0. "
-    "Note that parameters set using diameter-instrument will override any parameters set separately unless 'na' is set. ",
+    "Specifically, the 'orbitrap' setting is equivalent to spectra-denoising=false, psm-filter=false, prec-ppm=10,frag-ppm=10; "
+    "the 'tof5600' is equivalent to spectra-denoising=true, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=3.2, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0.2; "
+    "the 'tof6600' is equivalent to spectra-denoising=false, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=25.6, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0. "
+    "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
 
   Categorize();
