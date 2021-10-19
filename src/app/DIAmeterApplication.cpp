@@ -1179,6 +1179,9 @@ void DIAmeterApplication::processParams() {
     Params::Set("coeff-rtdiff", 0.2);
     Params::Set("coeff-elution", 0);
   }
+  else if (StringUtils::IEquals(Params::GetString("diameter-instrument"), "na")) {
+	// do nothing
+  }
   else { carp(CARP_FATAL, "Wrong diameter-instrument setup %s!", Params::GetString("diameter-instrument").c_str()); }
 
   /*
