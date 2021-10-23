@@ -1206,7 +1206,9 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   for (char c = 'A'; c <= 'Z'; c++) {
     InitDoubleParam(CometApplication::staticModParam(c),
-                    c != 'C' ? 0 : CYSTEINE_DEFAULT, 0, BILLION,
+                    c != 'C' ? 0 : CYSTEINE_DEFAULT, 
+                    -std::numeric_limits<double>::max(), 
+                    std::numeric_limits<double>::max(),
                     "Specify a static modification to the residue " + string(1, c) + ".",
                     "Available for comet.", true);
   }
