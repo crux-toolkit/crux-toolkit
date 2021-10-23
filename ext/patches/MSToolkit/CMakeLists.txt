@@ -12,6 +12,8 @@ set(MST_PATH ./src/MSToolkit)
 set(MZIMLTOOLS_PATH ./src/mzIMLTools)
 set(MZPARSER_PATH ./src/mzParser)
 set(ZLIB_PATH ./src/zlib-1.2.11)
+set(EXPAT_WITH_GETRANDOM OFF)
+set(EXPAT_WITH_SYS_GETRANDOM OFF)
 
 set(
   EXPAT 
@@ -159,7 +161,8 @@ if (UNIX)
   target_compile_options(
     mstoolkitlite
     PUBLIC
-    -O3 -static -I. -I$(HEADER_PATH) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -D_NOSQLITE -DHAVE_EXPAT_CONFIG_H
+    -O3 -static -I. -I$(HEADER_PATH) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC
+    -D_NOSQLITE -DXML_POOR_ENTROPY
   )
 elseif(WIN32 AND NOT CYGWIN)
   target_compile_definitions(
