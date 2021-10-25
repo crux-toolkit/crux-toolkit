@@ -301,7 +301,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}
