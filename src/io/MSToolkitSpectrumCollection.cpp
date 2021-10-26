@@ -27,7 +27,7 @@ MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool MSToolkitSpectrumCollection::parse() {
+bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
 
   // spectrum_collection has already been parsed
   if(is_parsed_) {

@@ -24,6 +24,7 @@
 #include "max_mz.h"
 #include "util/mass.h"
 #include "util/Params.h"
+#include "util/StringUtils.h"
 #include <cmath>
 
 using namespace std;
@@ -76,8 +77,16 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
   max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
   cache_end_ = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
-
   memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
+  memset(raw_peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
+
+  // added by Yang
+  max_mzbin_ = MassConstants::mass2bin(max_peak_mz);
+  largest_mzbin_ = 0;
+  smallest_mzbin_ = max_mzbin_;
+
+  dyn_filtered_peak_tuples_.clear();
+  sta_filtered_peak_tuples_.clear();
 
   if (Params::GetBool("skip-preprocessing")) {
     for (int i = 0; i < spectrum.Size(); ++i) {
@@ -86,6 +95,10 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         (*num_range_skipped)++;
         continue;
       }
+
+      //denoising-related, added by Yang
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
+
       int mz = MassConstants::mass2bin(peak_location);
       double intensity = spectrum.Intensity(i);
       if (intensity > peaks_[mz]) {
@@ -99,7 +112,6 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     int max_charge = spectrum.MaxCharge();
 
     // Fill peaks
-    int largest_mz = 0;
     double highest_intensity = 0;
     for (int i = spectrum.Size() - 1; i >= 0; --i) {
       double peak_location = spectrum.M_Z(i);
@@ -109,10 +121,11 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         (*num_range_skipped)++;
         continue;
       }
+      //denoising-related, added by Yang
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
 
       // Remove precursor peaks.
-      if (remove_precursor &&
-          fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
+      if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
         (*num_precursors_skipped)++;
         continue;
       }
@@ -126,9 +139,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
       int mz = MassConstants::mass2bin(peak_location);
       double intensity = spectrum.Intensity(i);
-      if ((mz > largest_mz) && (intensity > 0)) {
-        largest_mz = mz;
-      }
+      if ((mz > largest_mzbin_) && (intensity > 0)) { largest_mzbin_ = mz; }
+      if ((mz < smallest_mzbin_) && (intensity > 0)) { smallest_mzbin_ = mz; }
 
       intensity = sqrt(intensity);
       if (intensity > highest_intensity) {
@@ -140,17 +152,68 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
 
     double intensity_cutoff = highest_intensity * 0.05;
-
     double normalizer = 0.0;
-    int region_size = largest_mz / NUM_SPECTRUM_REGIONS + 1;
+    int dyn_region_size = largest_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
+    int sta_region_size = max_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
+
+    // added by Yang
+    // static regional peak selection for MS2Pval calculation
+    for (int i = 0; i < spectrum.Size(); ++i) {
+       double peak_location = spectrum.M_Z(i);
+       if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
+
+       int mz = MassConstants::mass2bin(peak_location);
+       double intensity = sqrt(spectrum.Intensity(i));
+       if (intensity > raw_peaks_[mz]) {
+    	   raw_peaks_[mz] = intensity;
+       }
+    }
+
+    vector<int> all_peak_mzbins;
     for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+    	vector<pair<int, double>> region_peaks;
+    	for (int j = 0; j < sta_region_size; ++j) {
+    		int index = i * sta_region_size + j;
+    		if (raw_peaks_[index] > 0) {
+        		region_peaks.push_back(make_pair(index, raw_peaks_[index]));
+        		all_peak_mzbins.push_back(index);
+    		}
+    	}
+
+    	// sort region_peaks w.r.t the descending intensity
+    	sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
+    	// save the top msamanda-regional-topk peaks per region
+    	for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
+    	    if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
+    	    int peak_mzbin = region_peaks[peak_idx].first;
+    	    sta_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
+    	}
+    }
+    sort(sta_filtered_peak_tuples_.begin(), sta_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    // sort( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() );
+    // sta_filtered_peak_mzbins_.erase(unique( sta_filtered_peak_mzbins_.begin(), sta_filtered_peak_mzbins_.end() ), sta_filtered_peak_mzbins_.end() );
+    // carp(CARP_DETAILED_DEBUG, "**********MS2Scan:%d \t sta_peaks_mzbins:%s", spectrum.SpectrumNumber(), StringUtils::Join(sta_filtered_peak_mzbins_, ',').c_str() );
+
+    sort( all_peak_mzbins.begin(), all_peak_mzbins.end() );
+    all_peak_mzbins.erase(unique( all_peak_mzbins.begin(), all_peak_mzbins.end() ), all_peak_mzbins.end() );
+    // carp(CARP_DETAILED_DEBUG, "**********MS2Scan:%d \t max_mzbin:%d \t all_peaks_mzbins:%s", spectrum.SpectrumNumber(), max_mzbin_, StringUtils::Join(all_peak_mzbins, ',').c_str() );
+
+
+    // dynamic regional peak selection for MS2Pval calculation (The original implementation)
+    for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
+      vector<pair<int, double>> region_peaks;
+
       highest_intensity = 0;
       int high_index = i;
-      for (int j = 0; j < region_size; ++j) {
-        int index = i * region_size + j;
+      for (int j = 0; j < dyn_region_size; ++j) {
+        int index = i * dyn_region_size + j;
         if (peaks_[index] <= intensity_cutoff) {
           peaks_[index] = 0;
         }
+        else {
+        	region_peaks.push_back(make_pair(index, peaks_[index]));
+        }
+
         if (peaks_[index] > highest_intensity) {
           highest_intensity = peaks_[index];
           high_index = index;
@@ -160,13 +223,32 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         continue;
       }
       normalizer = 50.0 / highest_intensity;
-      for (int j = 0; j < region_size; ++j) {
-        int index = i * region_size + j;
+      for (int j = 0; j < dyn_region_size; ++j) {
+        int index = i * dyn_region_size + j;
         if (peaks_[index] != 0) {
           peaks_[index] *= normalizer;
         }
       }
+
+      // added by Yang
+      // sort region_peaks w.r.t the descending intensity
+      sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
+      // save the top samanda-regional-topk peaks per region
+      for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
+    	  if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
+    	  // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
+    	  // int peak_mzbin = region_peaks[peak_idx].first;
+  	      dyn_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
+      }
     }
+    sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    // sort( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() );
+    // dyn_filtered_peak_mzbins_.erase(unique( dyn_filtered_peak_mzbins_.begin(), dyn_filtered_peak_mzbins_.end() ), dyn_filtered_peak_mzbins_.end() );
+    // carp(CARP_DETAILED_DEBUG, "**********MS2Scan:%d \t smallest_mzbin:%d \t largest_mzbin:%d \t max_mzbin:%d \t dyn_peaks_mzbins:%s", spectrum.SpectrumNumber(), smallest_mzbin_, largest_mzbin_, max_mzbin_, StringUtils::Join(dyn_filtered_peak_mzbins_, ',').c_str() );
+
+
+    // carp(CARP_DETAILED_DEBUG, "Observed Spectrum mz range:[%d, %d] \t region_size: %d", smallest_mzbin_, largest_mzbin_, region_size );
+    // carp(CARP_DETAILED_DEBUG, "dyn_filtered_peak_mzbins: %d", dyn_filtered_peak_mzbins_.size() );
 
 #ifdef DEBUG
     if (debug) {

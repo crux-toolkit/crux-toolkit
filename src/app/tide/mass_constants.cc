@@ -4,6 +4,8 @@
 #include "header.pb.h"
 #include "stdio.h"
 
+#include "util/AminoAcidUtil.h"
+
 using namespace std;
 
 double const MassConstants::kFixedPointScalar = 1e5;
@@ -248,8 +250,6 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
   bin_offset_ = bin_offset;
   BIN_H2O = mass2bin(mono_h2o,1);
   BIN_NH3 = mass2bin(mono_nh3,1);
-
-  
 
   return true;
 }

@@ -775,9 +775,12 @@ string prefix_fileroot_to_name(const string& name) {
  * \returns the filepath 'output_dir'/'fileroot'.'filename' 
  */
 string make_file_path(
-  const string& filename ///< the name of the file
+  const string& filename, ///< the name of the file
+  const string& output_dir_to_overwrite //added by Yang
   ) {
   string output_directory = Params::GetString("output-dir");
+  if (!output_dir_to_overwrite.empty()) { output_directory = output_dir_to_overwrite; }
+
   string fileroot = Params::GetString("fileroot");
 
   ostringstream name_builder;

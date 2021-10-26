@@ -91,6 +91,16 @@ class Spectrum {
   int MaxCharge() const;
   double MaxPeakInRange( double min_range, double max_range ) const;
   
+  // added by Yang
+  int MS1SpectrumNum() const;
+  double IsoWindowLowerMZ() const;
+  double IsoWindowUpperMZ() const;
+  double MaxPeakMz() const;
+  vector<double> DescendingSortedPeakIntensity();
+
+  void UpdatePeakSupport(vector<bool>* peak_support_vec);
+  bool Is_supported(int index) const;
+
  private:
   int spectrum_number_;
   double rtime_;
@@ -99,6 +109,14 @@ class Spectrum {
 
   vector<double> peak_m_z_;
   vector<double> peak_intensity_;
+
+  // added by Yang
+  int ms1_spectrum_number_;
+  double iso_window_lower_mz_;
+  double iso_window_upper_mz_;
+  double obv_rt_;
+  vector<bool> peak_supported_; //used in denoising
+
 };
 
 class SpectrumCollection {
@@ -140,6 +158,11 @@ class SpectrumCollection {
 
   const vector<SpecCharge>* SpecCharges() const { return &spec_charges_; }
   vector<Spectrum*>* Spectra() { return &spectra_; }
+
+  // added by Yang
+  void SortByMS1SpectrumNum();
+  int FindHighestSpectrumNum() const;
+  void SetNormalizedObvRTime();
 
  private:
   void MakeSpecCharges();
