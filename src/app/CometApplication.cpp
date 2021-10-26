@@ -241,12 +241,12 @@ void CometApplication::setCometParameters(
   setInt("use_Z_ions");
   setInt("use_NL_ions");
   // Output
-  searchManager_.SetParam("output_sqtstream", "0", 0);
-  setInt("output_sqtstream");
-  setInt("output_sqtfile");
-  setInt("output_txtfile");
   setInt("output_pepxmlfile");
   setInt("output_percolatorfile");
+  setInt("output_sqtfile");
+  searchManager_.SetParam("output_sqtstream", "0", 0);
+  setInt("output_sqtstream");
+  setInt("output_txtfile");
   setInt("print_expect_score");
   setInt("num_output_lines");
   setInt("show_fragment_ions");
@@ -258,23 +258,23 @@ void CometApplication::setCometParameters(
   setInt("ms_level");
   setString("activation_method");
   // Misc. parameters
+  setInt("clip_nterm_methionine");
+  setString("decoy_prefix");
   setDoubleRange("digest_mass_range");
-  setInt("num_results");
-  setInt("skip_researching");
+  setInt("equal_I_and_L");
+  setDoubleVector("mass_offsets");
+  setInt("max_duplicate_proteins");
   setInt("max_fragment_charge");
   setInt("max_index_runtime");
   setInt("max_precursor_charge");
+  setInt("num_results");
   setInt("nucleotide_reading_frame");
-  setInt("clip_nterm_methionine");
-  setInt("spectrum_batch_size");
-  setString("decoy_prefix");
   setString("output_suffix");
   setInt("peff_verbose_output");
   setIntRange("peptide_length_range");
   setDoubleVector("precursor_NL_ions");
-  setInt("equal_I_and_L");
-  setDoubleVector("mass_offsets");
-  setInt("max_duplicate_proteins");
+  setInt("skip_researching");
+  setInt("spectrum_batch_size");
   // Spectral processing
   setInt("minimum_peaks");
   setDouble("minimum_intensity");
@@ -397,11 +397,11 @@ vector<string> CometApplication::getOptions() const {
     "use_Z_ions",
     "use_NL_ions",
     // Output
-    "output_sqtstream",
-    "output_sqtfile",
-    "output_txtfile",
     "output_pepxmlfile",
     "output_percolatorfile",
+    "output_sqtfile",
+    "output_sqtstream",
+    "output_txtfile",
     "print_expect_score",
     "num_output_lines",
     "show_fragment_ions",
@@ -413,23 +413,23 @@ vector<string> CometApplication::getOptions() const {
     "ms_level",
     "activation_method",
     // Misc. parameters
+    "clip_nterm_methionine",
+    "decoy_prefix",
     "digest_mass_range",
-    "num_results",
-    "skip_researching",
+    "equal_I_and_L",
+    "mass_offsets",
+    "max_duplicate_proteins",
     "max_fragment_charge",
     "max_index_runtime",
     "max_precursor_charge",
+    "num_results",
     "nucleotide_reading_frame",
-    "clip_nterm_methionine",
-    "spectrum_batch_size",
-    "decoy_prefix",
     "output_suffix",
     "peff_verbose_output",
     "peptide_length_range",
     "precursor_NL_ions",
-    "equal_I_and_L",
-    "mass_offsets",
-    "max_duplicate_proteins",
+    "skip_researching",
+    "spectrum_batch_size",
     // Spectral processing
     "minimum_peaks",
     "minimum_intensity",
@@ -455,7 +455,6 @@ vector<string> CometApplication::getOptions() const {
     "add_Cterm_protein",
     "add_Nterm_protein",
     "add_A_alanine",
-    "add_B_user_amino_acid",
     "add_C_cysteine",
     "add_D_aspartic_acid",
     "add_E_glutamic_acid",
@@ -463,12 +462,11 @@ vector<string> CometApplication::getOptions() const {
     "add_G_glycine",
     "add_H_histidine",
     "add_I_isoleucine",
-    "add_J_user_amino_acid",
     "add_K_lysine",
     "add_L_leucine",
     "add_M_methionine",
     "add_N_asparagine",
-    "add_O_ornithine",
+    "add_O_pyrrolysine",
     "add_P_proline",
     "add_Q_glutamine",
     "add_R_arginine",
@@ -477,8 +475,10 @@ vector<string> CometApplication::getOptions() const {
     "add_U_selenocysteine",
     "add_V_valine",
     "add_W_tryptophan",
-    "add_X_user_amino_acid",
     "add_Y_tyrosine",
+    "add_B_user_amino_acid",
+    "add_J_user_amino_acid",
+    "add_X_user_amino_acid",
     "add_Z_user_amino_acid",
     // param-medic
     "pm-min-precursor-mz",
