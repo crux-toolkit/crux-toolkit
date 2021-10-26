@@ -411,7 +411,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   return 0;
 }
 
-vector<int> TideSearchApplication::getNegativeIsotopeErrors() const {
+vector<int> TideSearchApplication::getNegativeIsotopeErrors() {
   string isotope_errors_string = Params::GetString("isotope-error");
   if (isotope_errors_string[0] == ',') {
     carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s)",
@@ -440,7 +440,7 @@ vector<int> TideSearchApplication::getNegativeIsotopeErrors() const {
   return negative_isotope_errors;
 }
 
-vector<TideSearchApplication::InputFile> TideSearchApplication::getInputFiles(
+vector<InputFile> TideSearchApplication::getInputFiles(
   const vector<string>& filepaths
 ) const {
   // Try to read all spectrum files as spectrumrecords, convert those that fail
@@ -665,8 +665,11 @@ void TideSearchApplication::search(void* threadarg) {
           sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
           int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
 
-          if (quantile_pos < 3)
-            quantile_pos = 3;
+          if (quantile_pos < 3) quantile_pos = 3;
+
+          // suggested by Attila for bug fix
+          if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
+
           quantile_score = scores[quantile_pos]+5.0; // Make sure scores positive
         }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
@@ -2116,23 +2119,16 @@ double TideSearchApplication::calcCombinedPval(
   //compute first term (p-values are completely dependent)
   double firstTerm = 0.0;
   for (int i = 0; i < intPartofM; i++) {
-    firstTerm += pow(lnpy, i) / double(factorial(i));
+    firstTerm += pow(lnpy, i) / double(MathUtil::factorial(i));
   }
   firstTerm = pow(p, y) * firstTerm;
 
   //compute second term (p-values are completely independent)
-  double secondTerm = pow(p, y) * realPartofM * pow(lnpy, intPartofM) / (double)factorial(intPartofM);
+  double secondTerm = pow(p, y) * realPartofM * pow(lnpy, intPartofM) / (double)MathUtil::factorial(intPartofM);
 
   return firstTerm + secondTerm;
 }
 
-int TideSearchApplication::factorial(int n) {
-  int product = 1;
-  for (int i = 1; i <= n; i++) {
-    product *= i;
-  }
-  return product;
-}
 /*
  * Local Variables:
  * mode: c

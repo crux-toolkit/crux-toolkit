@@ -12,6 +12,7 @@
 #include "spectrum.pb.h"
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
+#include "util/MathUtil.h"
 
 using namespace std;
 
@@ -28,6 +29,26 @@ enum _tide_search_lock {
 };
 
 typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
+
+
+struct InputFile {
+  std::string OriginalName;
+  std::string SpectrumRecords;
+  bool Keep;
+  InputFile(const std::string& name,
+            const std::string& spectrumrecords,
+            bool keep):
+    OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+};
+
+struct ScSortByMz {
+    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+    bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+        return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+				(y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
+    }
+    double precursor_window_;
+};
 
 class TideSearchApplication : public CruxApplication {
 private:
@@ -64,16 +85,6 @@ private:
 
  protected:
 
-  struct InputFile {
-    std::string OriginalName;
-    std::string SpectrumRecords;
-    bool Keep;
-    InputFile(const std::string& name,
-              const std::string& spectrumrecords,
-              bool keep):
-      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
-  };
-
   /**
   brief This variable is used with Cascade Search.
   This map contains a flag for each spectrum whether
@@ -89,7 +100,6 @@ private:
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
 
-  vector<int> getNegativeIsotopeErrors() const;
   vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
   static SpectrumCollection* loadSpectra(const std::string& file);
 
@@ -146,37 +156,10 @@ private:
     vector<int>* negative_isotope_errors
   );
 
-  void collectScoresCompiled(
-    ActivePeptideQueue* active_peptide_queue,
-    const Spectrum* spectrum,
-    const ObservedPeakSet& observed,
-    TideMatchSet::Arr2* match_arr,
-    int queue_size,
-    int charge
-  );
+
 
   void convertResults() const;
 
-  void computeWindow(
-    const SpectrumCollection::SpecCharge& sc,
-    WINDOW_TYPE_T window_type,
-    double precursor_window,
-    vector<int>* negative_isotope_errors,
-    vector<double>* out_min,
-    vector<double>* out_max,
-    double* min_range,
-    double* max_range
-  );
-
-  struct ScSortByMz {
-    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-    bool operator() (const SpectrumCollection::SpecCharge x,
-                     const SpectrumCollection::SpecCharge y) {
-      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
-             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-    }
-    double precursor_window_;
-  };
   double bin_width_;
   double bin_offset_;
 
@@ -217,6 +200,28 @@ private:
   int main(const vector<string>& input_files, const string input_index);
 
   static bool proteinLevelDecoys();
+
+  static vector<int> getNegativeIsotopeErrors();
+
+  static void computeWindow(
+      const SpectrumCollection::SpecCharge& sc,
+      WINDOW_TYPE_T window_type,
+      double precursor_window,
+      vector<int>* negative_isotope_errors,
+      vector<double>* out_min,
+      vector<double>* out_max,
+      double* min_range,
+      double* max_range
+    );
+
+  static void collectScoresCompiled(
+      ActivePeptideQueue* active_peptide_queue,
+      const Spectrum* spectrum,
+      const ObservedPeakSet& observed,
+      TideMatchSet::Arr2* match_arr,
+      int queue_size,
+      int charge
+    );
 
   /**
    * Returns the command name
@@ -363,8 +368,6 @@ private:
     double p,
     int numPval
   );
-
-  int factorial(int n);
 
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();

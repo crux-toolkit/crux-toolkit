@@ -153,7 +153,7 @@
 <parameter name="fragment-tolerance" value="0.02"/>
 <parameter name="evidence-granularity" value="25"/>
 <parameter name="isotope-error" value=""/>
-<parameter name="num-threads" value="0"/>
+<parameter name="num-threads" value="1"/>
 <parameter name="brief-output" value="false"/>
 <parameter name="decoy_search" value="0"/>
 <parameter name="peff_format" value="0"/>
@@ -405,6 +405,16 @@
 <parameter name="top_count" value="20"/>
 <parameter name="truncate_prot_names" value="0"/>
 <parameter name="e_value_depth" value="5000"/>
+<parameter name="predrt-files" value=""/>
+<parameter name="msamanda-regional-topk" value="10"/>
+<parameter name="coelution-oneside-scans" value="3"/>
+<parameter name="coelution-topk" value="1"/>
+<parameter name="prec-ppm" value="10"/>
+<parameter name="frag-ppm" value="10"/>
+<parameter name="unique-scannr" value="false"/>
+<parameter name="psm-filter" value="false"/>
+<parameter name="spectra-denoising" value="false"/>
+<parameter name="diameter-instrument" value="orbitrap"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>
