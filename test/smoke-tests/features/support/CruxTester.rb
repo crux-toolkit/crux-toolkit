@@ -96,11 +96,23 @@ class CruxTester
 
   def cmpFilesPython(expected, actual, precision)
     compRes = system("python", "./features/support/fileComparator.py", "-r", precision, expected, actual)
+
+    if compRes == false
+      file_content = File.read(expected)
+      writeObserved(file_content, expected, false, 1)
+    end
+
     return compRes
   end
 
   def cmpUnorderedFilesPython(expected, actual, precision)
     compRes = system("python", "./features/support/fileComparator.py", "-u", "-r", precision, expected, actual)
+
+    if compRes == false
+      file_content = File.read(expected)
+      writeObserved(file_content, expected, false, 1)
+    end
+
     return compRes
   end
 

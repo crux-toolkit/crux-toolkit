@@ -243,7 +243,7 @@ vector<double> Spectrum::CreateEvidenceVector(
     if (num_retained) {
       (*num_retained)++;
     }
-    if (maxIonMass < ionMass) {
+    if (maxIonMass < ionMass && ionIntens > 0) {
       maxIonMass = ionMass;
     }
     if (maxIonIntens < ionIntens) {
@@ -252,7 +252,7 @@ vector<double> Spectrum::CreateEvidenceVector(
   }
 
   // 10 bin intensity normalization 
-  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS);
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS) + 1;
   vector<double> intensObs(maxPrecurMass, 0);
   vector<int> intensRegion(maxPrecurMass, -1);
   for (int ion = 0; ion < numPeaks; ion++) {
@@ -304,17 +304,20 @@ vector<double> Spectrum::CreateEvidenceVector(
   for (vector<double>::const_iterator i = intensObs.begin(); i != intensObs.end(); i++) {
     partial_sums.push_back(total += *i);
   }
-  const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0 + 1.0);
+  const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0);
   for (int i = 0; i < maxPrecurMass; ++i) {
     int right = std::min(maxPrecurMass - 1, i + MAX_XCORR_OFFSET);
     int left = std::max(0, i - MAX_XCORR_OFFSET - 1);
-    intensObs[i] -= multiplier * (partial_sums[right] - partial_sums[left]);
+    intensObs[i] -= multiplier * (partial_sums[right] - partial_sums[left] - intensObs[i]);
   }
 
   bool flankingPeaks = Params::GetBool("use-flanking-peaks");
   bool nlPeaks = Params::GetBool("use-neutral-loss-peaks");
   int binFirst = MassConstants::mass2bin(30);
   int binLast = MassConstants::mass2bin(pepMassMonoMean - 47);
+  if (charge > 3){
+    charge = 3;
+  }
   vector<double> evidence(maxPrecurMass, 0);
   for (int i = binFirst; i <= binLast; i++) {
     // b ion
