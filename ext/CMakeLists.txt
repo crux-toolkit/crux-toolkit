@@ -239,9 +239,6 @@ ExternalProject_Add(
 
 # MSToolkit
 # Get MSToolkit source from Github
-# GIT_TAG rev83
-# GIT_TAG 229d3d328ca
-# GIT_TAG 4cb705d
 ExternalProject_Add(
   MSToolkit
   GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
@@ -332,7 +329,6 @@ endif (UNIX)
 
 # Kojak
 # Get Kojak source from GitHub
-# GIT_TAG c1acef0
 set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
 set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
