@@ -239,8 +239,10 @@ void CometApplication::setCometParameters(
   setInt("use_X_ions");
   setInt("use_Y_ions");
   setInt("use_Z_ions");
+  setInt("use_Z1_ions");
   setInt("use_NL_ions");
   // Output
+  setInt("output_mzidentmlfile");
   setInt("output_pepxmlfile");
   setInt("output_percolatorfile");
   setInt("output_sqtfile");
@@ -275,6 +277,9 @@ void CometApplication::setCometParameters(
   setDoubleVector("precursor_NL_ions");
   setInt("skip_researching");
   setInt("spectrum_batch_size");
+  setString("text_file_extension");
+  setInt("explicit_deltacn");
+  setInt( "old_mods_encoding");
   // Spectral processing
   setInt("minimum_peaks");
   setDouble("minimum_intensity");
@@ -395,8 +400,10 @@ vector<string> CometApplication::getOptions() const {
     "use_X_ions",
     "use_Y_ions",
     "use_Z_ions",
+    "use_Z1_ions",
     "use_NL_ions",
     // Output
+    "output_mzidentmlfile",
     "output_pepxmlfile",
     "output_percolatorfile",
     "output_sqtfile",
@@ -430,6 +437,9 @@ vector<string> CometApplication::getOptions() const {
     "precursor_NL_ions",
     "skip_researching",
     "spectrum_batch_size",
+    "text_file_extension",
+    "explicit_deltacn",
+    "old_mods_encoding",
     // Spectral processing
     "minimum_peaks",
     "minimum_intensity",

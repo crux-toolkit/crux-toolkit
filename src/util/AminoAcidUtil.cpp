@@ -21,7 +21,7 @@ string AminoAcidUtil::GetName(char c) {
     case 'L': return "leucine";
     case 'M': return "methionine";
     case 'N': return "asparagine";
-    case 'O': return "ornithine";
+    case 'O': return "pyrrolysine";
     case 'P': return "proline";
     case 'Q': return "glutamine";
     case 'R': return "arginine";

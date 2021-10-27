@@ -997,7 +997,13 @@ Params::Params() : finalized_(false) {
   InitIntParam("use_NL_ions", 1, 0, 1,
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "Available for comet.", true);
+  InitIntParam("use_Z1_ions", 0, 0, 1,
+    "Controls whether or not Z1-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
   /* Comet - Output */
+  InitIntParam("output_mzidentmlfile", 0, 0, 1,
+    "0=no, 1=yes  write mzIdentML file.",
+    "Available for comet.", true);
   InitIntParam("output_sqtstream", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
     "Available for comet.", true);
@@ -1041,7 +1047,7 @@ Params::Params() : finalized_(false) {
   InitIntParam("ms_level", 2, 2, 3,
     "MS level to analyze, valid are levels 2 or 3.",
     "Available for comet. ", true);
-  InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
+  InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD+SA|ETD|PQD|HCD|IRMPD",
     "Specifies which scan types are searched.",
     "Available for comet. ", true);
   /* Comet - Misc. parameters */
@@ -1078,11 +1084,22 @@ Params::Params() : finalized_(false) {
   InitIntParam("clip_nterm_methionine", 0, 0, 1,
     "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
     "Available for comet.", true);
+  InitIntParam("explicit_deltacn", 0, 0, 1,
+    "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide;\n"
+    "1=Comet deltaCn reported between the top two peptides.",
+    "Available for comet.", true);
+  InitIntParam("old_mods_encoding", 0, 0, 1,
+    "0=Comet will use mass based modification encodings;\n"
+    "1=Comet will use the old character based modification encodings.",
+    "Available for comet.", true);
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
     "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
     "Available for comet.", true);
   InitStringParam("decoy_prefix", "decoy_",
     "Specifies the prefix of the protein names that indicates a decoy.",
+    "Available for comet.", true);
+  InitStringParam("text_file_extension", "",
+    "Specifies the a custom extension for output text file.",
     "Available for comet.", true);
   InitStringParam("output_suffix", "",
     "Specifies the suffix string that is appended to the base output name "
@@ -2301,6 +2318,7 @@ void Params::Categorize() {
   items.insert("use_X_ions");
   items.insert("use_Y_ions");
   items.insert("use_Z_ions");
+  items.insert("use_Z1_ions");
   items.insert("use_NL_ions");
   items.insert("auto_fragment_bin_size");
   items.insert("fragment_bin_size");
@@ -2338,6 +2356,9 @@ void Params::Categorize() {
   items.insert("precursor_NL_ions");
   items.insert("skip_researching");
   items.insert("spectrum_batch_size");
+  items.insert("text_file_extension");
+  items.insert("explicit_deltacn");
+  items.insert("old_mods_encoding");
   AddCategory("Miscellaneous parameters", items);
 
   items.clear();
@@ -2438,6 +2459,7 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("output-dir");
   items.insert("output-file");
+  items.insert("output_mzidentmlfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
   items.insert("output_sqtstream");
