@@ -1,3 +1,7 @@
+# Please add any tests that have been added to this file to tide-search.feature
+# Note that if tide-search2.feature is run before tide-search2.feature, then
+# cucumber will fail due to Tide not dealing with ties well.
+
 Feature: tide-search
   tide-index will not be called and instead tide-search will be directly given a fasta file
     subsequent calls to tide-search
