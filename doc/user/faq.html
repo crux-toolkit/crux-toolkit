@@ -424,10 +424,20 @@
     <p align=center>binned mass = floor( ( original mass / <code>bin-width</code> ) + 1.0 - <code>bin-offset</code> )</p>
 
     <p>
-    The default values <code>bin-width</code>=1.0005079
-    and <code>bin-offset</code>=0.40 are suitable for most low-resolution
+    The default values <code>bin-width</code>=0.02
+    and <code>bin-offset</code>=0.40 are suitable for most high-resolution
     datasets.
     </p>
+
+    <li>
+    <b>For what settings of the score-function and mz-bin-width parameter
+    can I set exact-p-value=T?</b>
+	<ul>
+		<li>When the combined p-value score function is used (<code>--score-function=both</code>), <code>--mz-bin-width=1.0005079</code> and <code>--exact-p-value=T</code>.</li>
+		<li>When the XCorr score function is used (<code>--score-function=xcorr</code>), <code>--exact-p-value</code> can only be set to true when <code>--mz-bin-width=1.0005079</code>.</li>
+		<li>When the residue-evidence score function is used (<code>--score-function=residue-evidence</code>), <code>--exact-p-value</code> can only be set to true when <code>--mz-bin-width=1.0005079</code>. Note that high-resolution information in the residue-evidence score function is captured by <code>--fragment-tolerance</code>.</li>
+	</ul>
+    </li>
 
     <li>
     <b>How does Crux estimate the possible charge states of the peptides when the

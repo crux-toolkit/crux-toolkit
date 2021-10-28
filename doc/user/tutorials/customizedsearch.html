@@ -99,8 +99,7 @@
 
 		<pre>
 bash-3.2$ ~/proj/crux/trunk/src/c/crux tide-search
-FATAL: Error in command line. Error # 5
-The required argument &lt;tide spectra file&gt; is missing.
+FATAL: Expected at least 2 arguments, but found 0
 
 USAGE:
 
@@ -108,25 +107,48 @@ USAGE:
 
 REQUIRED ARGUMENTS:
 
-  &lt;tide spectra file&gt; The name of the file from which to parse the fragmentation spectra, in any of the file formats supported by ProteoWizard. Alternatively, the argument may be a binary spectrum file produced by a previous run of crux tide-search using the store-spectra parameter.
-  &lt;tide database index&gt; A directory containing a database index created by a previous run of crux tide-index.
+  &lt;tide spectra file&gt; The name of the file from which to parse the
+  fragmentation spectra, in any of the file formats supported by ProteoWizard.
+  Alternatively, the argument may be a binary spectrum file produced
+  by a previous run of crux tide-search using the store-spectra parameter.
+  Multiple files can be included on the command line (space delimited), prior to
+  the name of the database.
+  &lt;tide database&gt; Either a FASTA file or a directory containing a database index
+  created by a previous run of crux tide-index.
 
 OPTIONAL ARGUMENTS:
 
-  [--precursor-window &lt;double&gt;]
-     Search peptides within +/- 'precursor-window' of the spectrum mass. 
-     Definition of precursor window depends upon precursor-window-type.
-     Default=3.0.
-  [--precursor-window-type &lt;string&gt;]
-     Window type to use for selecting candidate peptides. 
-     &lt;string&gt;=mass|mz|ppm. Default=mass.
-  [--spectrum-min-mz &lt;double&gt;]
-     The lowest spectrum m/z to search. Default=0.0.
-  [--spectrum-max-mz &lt;double&gt;]
-     The highest spectrum m/z to search. Default=no maximum.
-  [--min-peaks &lt;int&gt;]
-     The minimum number of peaks a spectrum must have for it to be
-     searched. Default=20.
+  [--auto-mz-bin-width false|warn|fail]
+     Automatically estimate optimal value for the mz-bin-width parameter from
+     the spectra themselves. false=no estimation, warn=try to estimate but use
+     the default value in case of failure, fail=try to estimate and quit in case
+     of failure. Default = false.
+  [--auto-precursor-window false|warn|fail]
+     Automatically estimate optimal value for the precursor-window parameter
+     from the spectra themselves. false=no estimation, warn=try to estimate but
+     use the default value in case of failure, fail=try to estimate and quit in
+     case of failure. Default = false.
+  [--compute-sp T|F]
+     Compute the preliminary score Sp for all candidate peptides. Report this
+     score in the output, along with the corresponding rank, the number of
+     matched ions and the total number of ions. This option is recommended if
+     results are to be analyzed by Percolator.If sqt-output is enabled, then
+     compute-sp is automatically enabled and cannot be overridden. Note that the
+     Sp computation requires re-processing each observed spectrum, so turning on
+     this switch involves significant computational overhead. Default = false.
+  [--concat T|F]
+     When set to T, target and decoy search results are reported in a single
+     file, and only the top-scoring N matches (as specified via --top-match) are
+     reported for each spectrum, irrespective of whether the matches involve
+     target or decoy peptides. Default = false.
+  [--deisotope <float>]
+     Perform a simple deisotoping operation across each MS2 spectrum. For each
+     peak in an MS2 spectrum, consider lower m/z peaks. If the current peak
+     occurs where an expected peak would lie for any charge state less than the
+     charge state of the precursor, within mass tolerance, and if the current
+     peak is of lower abundance, then the peak is removed.  The value of this
+     parameter is the mass tolerance, in units of parts-per-million.  If set to
+     0, no deisotoping is performed. Default = 0.
 ...
 		</pre>
 
@@ -140,15 +162,15 @@ OPTIONAL ARGUMENTS:
 		</p>
 
 		<div class="code"><code>
-		$ crux tide-search --verbosity 40 sample.ms2 yeast.fasta</code>
+		$ crux tide-search --verbosity 40 demo.ms2 small-yeast.fasta</code>
 		</div>
 
 		<a name="file"></a>
 		<h3>Specifying options via a parameter file</h3>
 
 		<p>
-		The second option listed
-		above, <span class="out">--parameter-file</span>, is available for all
+		One of the options listed,
+		<span class="out">--parameter-file</span>, is available for all
 		Crux commands.  The parameter file allows multiple options to be
 		specified in a file.  All of the command line options can be put in a
 		parameter file, but the format is slightly different.  In the
