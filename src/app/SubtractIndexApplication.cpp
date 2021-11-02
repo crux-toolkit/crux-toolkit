@@ -65,9 +65,6 @@ int SubtractIndexApplication::main(int argc, char** argv) {
   DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader1.decoys();
   if (headerDecoyType != NO_DECOYS) {
     has_decoys = true;
-    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
-      TideSearchApplication::PROTEIN_LEVEL_DECOYS = true;
-    }
   }
 
   MassConstants::Init(&peptides_header1.peptides_header().mods(), 
