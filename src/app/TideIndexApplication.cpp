@@ -140,7 +140,8 @@ int TideIndexApplication::main(
   ofstream* out_target_decoy_list = NULL;
 
   if (Params::GetBool("peptide-list")) {
-     out_target_decoy_list = create_stream_in_path(make_file_path("tide-index.peptides.txt").c_str(), NULL, overwrite);
+     out_target_decoy_list = create_stream_in_path(make_file_path(
+      "tide-index.peptides.txt").c_str(), NULL, overwrite);
   }
   ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
     create_stream_in_path(make_file_path(
@@ -295,7 +296,8 @@ int TideIndexApplication::main(
 
       if ((pepmass_str.compare(curr_pepmass_str)) != 0) {
         if (peptide_td_pairs.size() > 0) {
-          processGroupedTargetDecoys(curr_pepmass_str, peptide_td_pairs, peptideToProteinMap, out_target_decoy_list, decoy_type);
+          processGroupedTargetDecoys(curr_pepmass_str, peptide_td_pairs,
+        	peptideToProteinMap, out_target_decoy_list, decoy_type);
           peptide_td_pairs.clear();
         }
         curr_pepmass_str = pepmass_str;
@@ -390,11 +392,12 @@ void TideIndexApplication::processGroupedTargetDecoys(
   vector<pair<string, string>> paired_target_decoys;
   deque<string> target_peptides, decoy_peptides;
 
-  for (map<string, vector<pair<string, bool>>>::iterator token_itr=token_peptide_td_pairs_map.begin(); token_itr!=token_peptide_td_pairs_map.end(); ++token_itr) {
+  for (map<string, vector<pair<string, bool>>>::iterator token_itr=token_peptide_td_pairs_map.begin();
+    token_itr!=token_peptide_td_pairs_map.end(); ++token_itr) {
     target_peptides.clear();
     decoy_peptides.clear();
 
-	// vector contains set of pairs that yield same peptide token
+    // vector contains set of pairs that yield same peptide token
     // first value in pair is a peptide peptide
     // bool in pair is whether peptide is a target or decoy
     vector<pair<string, bool>> local_peptide_td_pairs = token_itr->second;
