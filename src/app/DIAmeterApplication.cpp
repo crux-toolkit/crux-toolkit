@@ -71,6 +71,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   // Read peptides index file
   pb::Header peptides_header;
   HeadedRecordReader* peptide_reader = new HeadedRecordReader(peptides_file, &peptides_header);
+
   if ((peptides_header.file_type() != pb::Header::PEPTIDES) || !peptides_header.has_peptides_header()) { carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str()); }
 
   // Some search setup adoped from TideSearch which I don't fully understand
@@ -110,12 +111,14 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
     vector<InputFile> ms2_spectra_files = getInputFiles(input_files, 2);
 
     // Loop through spectrum files
-    for (pair<vector<InputFile>::const_iterator, vector<InputFile>::const_iterator> f(ms1_spectra_files.begin(), ms2_spectra_files.begin());
-     f.first != ms1_spectra_files.end() && f.second != ms2_spectra_files.end(); ++f.first, ++f.second) {
+    for (int file_idx=0; file_idx < input_files.size(); ++file_idx) {
+     string ms1_spectra_file = ms1_spectra_files.at(file_idx).SpectrumRecords;
+     string ms2_spectra_file = ms2_spectra_files.at(file_idx).SpectrumRecords;
+     string origin_file = ms2_spectra_files.at(file_idx).OriginalName;
 
-     string ms1_spectra_file = (f.first)->SpectrumRecords;
-     string ms2_spectra_file = (f.second)->SpectrumRecords;
-     string origin_file = (f.second)->OriginalName;
+     if (!peptide_reader) {
+    	 peptide_reader = new HeadedRecordReader(peptides_file, &peptides_header);
+     }
 
      // load MS1 and MS2 spectra
      map<int, boost::tuple<double*, double*, double*, int>> ms1scan_mz_intensity_rank_map;
@@ -328,12 +331,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
      ms1scan_slope_intercept_map.clear();
 
      delete active_peptide_queue;
+     delete peptide_reader;
+     peptide_reader = NULL;
     }
 
     // clean up
     if (output_file) { output_file->close(); delete output_file; }
   }
-  delete peptide_reader;
 
   // standardize the features
   if (!FileUtils::Exists(output_file_name_scaled_) /*|| Params::GetBool("overwrite")*/ ) {

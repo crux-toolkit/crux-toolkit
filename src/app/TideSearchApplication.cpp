@@ -279,9 +279,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   int decoysPerTarget = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
-    if (headerDecoyType == PROTEIN_REVERSE_DECOYS) {
-      PROTEIN_LEVEL_DECOYS = true;
-    }
   }
 
   MassConstants::Init(&pepHeader.mods(), 
