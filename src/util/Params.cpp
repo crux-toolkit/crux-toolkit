@@ -289,9 +289,7 @@ Params::Params() : finalized_(false) {
     "Available for tide-index.", true);
   InitBoolParam("peptide-list", false,
     "Create in the output directory a text file listing of all the peptides in the "
-    "database, along with their neutral masses, one per line. If decoys are generated, "
-    "then a second file will be created containing the decoy peptides. Decoys that also "
-    "appear in the target database are marked with an asterisk in a third column.",
+    "database, along with their corresponding decoy peptides, neutral masses and proteins, one per line.",
     "Available for tide-index.", true);
   InitIntParam("modsoutputter-threshold", 1000, 0, BILLION,
     "Maximum number of temporary files that would be opened by ModsOutputter "
@@ -696,7 +694,7 @@ Params::Params() : finalized_(false) {
     "Either a FASTA file or a directory containing a database index created by a previous "
     "run of crux tide-index.");
   // **** Tide options ****
-  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse|protein-reverse",
+  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse",
     "Include a decoy version of every peptide by shuffling or reversing the "
     "target sequence or protein. In shuffle or peptide-reverse mode, each peptide is "
     "either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in "
@@ -704,8 +702,7 @@ Params::Params() : finalized_(false) {
     "shuffled once. In peptide-reverse mode, palindromic peptides are shuffled. Also, if a "
     "shuffled peptide produces an overlap with the target or decoy database, then the "
     "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
-    "homopolymers will appear in both the target and decoy database. The protein-reverse "
-    "mode reverses the entire protein sequence, irrespective of the composite peptides.",
+    "homopolymers will appear in both the target and decoy database.",
     "Available for tide-index", true);
   InitStringParam("mods-spec", "C+57.02146",
     "[[nohtml:Expression for static and variable mass modifications to include. "
@@ -2104,7 +2101,7 @@ Params::Params() : finalized_(false) {
       "Eliminate MS2 peak if neither of the adjacent scans contains the same peak within a specified tolerance.",
       "It is used for DIAmeter", true);
 
-  InitStringParam("diameter-instrument", "orbitrap", "orbitrap|tof5600|tof6600|na",
+  InitStringParam("diameter-instrument", "na", "orbitrap|tof5600|tof6600|na",
     "Specify the instrument platform used to acquire the input spectra. "
     "This option selects among different sets of coefficient values for the scores computed by diameter. "
     "Specifically, the 'orbitrap' setting is equivalent to spectra-denoising=false, psm-filter=false, prec-ppm=10,frag-ppm=10; "

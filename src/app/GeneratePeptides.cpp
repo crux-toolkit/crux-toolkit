@@ -67,7 +67,6 @@ void GeneratePeptides::processFasta(
   int minLen = Params::GetInt("min-length");
   int maxLen = Params::GetInt("max-length");
   string decoyPrefix = Params::GetString("decoy-prefix");
-  bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
   bool peptideShuffle = decoyType == PEPTIDE_SHUFFLE_DECOYS;
   bool peptideReverse = decoyType == PEPTIDE_REVERSE_DECOYS;
 
@@ -89,13 +88,6 @@ void GeneratePeptides::processFasta(
     vector<CleavedPeptide> peptides =
       cleaveProtein(proteinSequence, enzyme, digest, missed, minLen, maxLen);
     peptideTotal += peptides.size();
-
-    // Write reversed protein to decoy FASTA, if protein reverse
-    if (decoyFasta && proteinReverse) {
-      reverse(proteinSequence.begin(), proteinSequence.end());
-      *decoyFasta << '>' << decoyPrefix << id << endl
-                  << proteinSequence << endl;
-    }
 
     // Iterate over all peptides from this protein
     for (vector<CleavedPeptide>::const_iterator i = peptides.begin();
@@ -207,9 +199,7 @@ void GeneratePeptides::processFasta(
 
   delete targetList;
 
-  if (proteinReverse && !decoyFastaPath.empty()) {
-    processFasta(decoyFastaPath, decoyList, "", NULL, NO_DECOYS);
-  } else if (decoyList) {
+  if (decoyList) {
     delete decoyList;
   }
 }
@@ -220,11 +210,6 @@ bool GeneratePeptides::canGenerateDecoyProteins() {
   // Can never write decoy proteins if not making decoys
   if (decoyFormat == "none") {
     return false;
-  }
-
-  // Can always write decoy proteins if making protein-level decoys
-  if (decoyFormat == "protein-reverse") {
-    return true;
   }
 
   // If making peptide-level decoys, we can only write decoy proteins if:
