@@ -26,7 +26,7 @@ const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
 const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
 
 DIAmeterApplication::DIAmeterApplication():
-  remove_index_(""), output_pin_(""), output_percolator_("") { /* do nothing */
+  remove_index_(""), output_pin_(""), output_percolator_(""), scan_gap_(0) { /* do nothing */
 }
 
 DIAmeterApplication::~DIAmeterApplication() {
@@ -124,9 +124,10 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
      map<int, boost::tuple<double*, double*, double*, int>> ms1scan_mz_intensity_rank_map;
      map<int, boost::tuple<double, double>> ms1scan_slope_intercept_map;
      loadMS1Spectra(ms1_spectra_file, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map);
-     carp(CARP_DEBUG, "new max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
-
      SpectrumCollection* spectra = loadSpectra(ms2_spectra_file);
+
+     carp(CARP_INFO, "new max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
+     if (scan_gap_ <= 0) { carp(CARP_FATAL, "Scan gap cannot be non-positive:%d", scan_gap_); }
 
      // insert the search code here and will split into a new function later
      double highest_ms2_mz = spectra->FindHighestMZ();
@@ -850,15 +851,12 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file,
 
   double accumulated_intensity_logrank = 0.0, accumulated_peaknum = 0.0, accumulated_intercept = 0.0, accumulated_intercept_cnt = 0;
   const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
-  vector<int> ms1_scans;
 
   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();sc < spec_charges->begin() + (spec_charges->size()); sc++) {
      Spectrum* spectrum = sc->spectrum;
      int ms1_scan_num = spectrum->MS1SpectrumNum();
      int peak_num = spectrum->Size();
      double noise_intensity_logrank = 0;
-
-     ms1_scans.push_back(ms1_scan_num);
 
      vector<double> sorted_intensity_vec = spectrum->DescendingSortedPeakIntensity();
      double* mz_arr = new double[peak_num];
@@ -908,18 +906,8 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file,
   }
   delete spectra;
 
-  // calculate the scan gap in cycle
-  if (ms1_scans.size() < 2) { carp(CARP_FATAL, "No MS1 scans! \t size:%f", ms1_scans.size()); }
-  sort(ms1_scans.begin(), ms1_scans.end());
-  scan_gap_ = ms1_scans[1] - ms1_scans[0];
-  if (scan_gap_ <= 0) { carp(CARP_FATAL, "Scan gap cannot be non-positive:%d", scan_gap_); }
-
-  // calculate the maximum ms1 scan number
-  max_ms1scan_ = ms1_scans[ms1_scans.size()-1];
-
   // calculate the average noise intensity logrank, which is used as default value when MS1 scan is empty.
   avg_noise_intensity_logrank_ =  accumulated_intensity_logrank / max(1.0, 1.0*spec_charges->size());
-  avg_ms1_peaknum_ = accumulated_peaknum / max(1.0, 1.0*spec_charges->size());
   avg_ms1_intercept_ = accumulated_intercept / max(1.0, accumulated_intercept_cnt);
 
 }
@@ -936,6 +924,37 @@ SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
    // Precursor-window is the half size of isolation window
    spectra->Sort<ScSortByMzDIA>(ScSortByMzDIA());
    spectra->SetNormalizedObvRTime();
+
+   // calculate the scan gap in cycle
+   vector<int> ms1_scans, ms2_scans;
+   const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+   for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();sc < spec_charges->begin() + (spec_charges->size()); sc++) {
+     Spectrum* spectrum = sc->spectrum;
+     int ms1_scan_num = spectrum->MS1SpectrumNum();
+     int ms2_scan_num = spectrum->SpectrumNumber();
+     ms1_scans.push_back(ms1_scan_num);
+     ms2_scans.push_back(ms2_scan_num);
+   }
+
+   if (scan_gap_ <= 0) {
+	 if (ms1_scans.size() >= 2) {
+	   sort(ms1_scans.begin(), ms1_scans.end());
+	   scan_gap_ = ms1_scans[1] - ms1_scans[0];
+	   max_ms1scan_ = ms1_scans[ms1_scans.size()-1];
+	   if (scan_gap_ <= 0) { carp(CARP_WARNING, "Scan gap inferred from MS1 is non-positive:%d", scan_gap_); }
+	 }
+   }
+
+   if (scan_gap_ <= 0) {
+	 if (ms2_scans.size() >= 2) {
+	   scan_gap_ = ms2_scans[1] - ms2_scans[0];
+	   if (scan_gap_ <= 0) { carp(CARP_FATAL, "Scan gap cannot be non-positive:%d", scan_gap_); }
+
+	   sort(ms2_scans.begin(), ms2_scans.end());
+	   max_ms1scan_ = ms2_scans[ms2_scans.size()-1];
+	 }
+   }
+
    return spectra;
 }
 
