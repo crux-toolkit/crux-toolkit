@@ -480,7 +480,7 @@ string PercolatorApplication::getDescription() const {
     "&quot;Efficient marginalization to compute protein posterior probabilities "
     "from shotgun mass spectrometry data.&quot;</a> <em>Journal of Proteome "
     "Research</em>. 9(10):5346-5357, 2010.</blockquote><p>Crux includes code "
-    "from <a href=\"http://per-colator.com/\">Percolator</a>. Crux Percolator "
+    "from <a href=\"http://percolator.ms\">Percolator</a>. Crux Percolator "
     "differs from the stand-alone version of Percolator in the following "
     "respects:</p><ul><li>In addition to the native Percolator XML file "
     "format, Crux Percolator supports additional input file formats (SQT, "
