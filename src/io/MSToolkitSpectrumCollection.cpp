@@ -11,7 +11,6 @@
 #include "parameter.h"
 #include "model/Spectrum.h"
 
-using namespace std;
 /**
  * Instantiates a new spectrum_collection object from a filename. 
  * Does not parse file. 

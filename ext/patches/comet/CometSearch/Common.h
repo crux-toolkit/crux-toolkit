@@ -56,7 +56,6 @@ typedef off64_t comet_fileoffset_t;
 
 using namespace std;
 
-#include "ThreadPool.h"
 #include "MSReader.h"
 #include "Spectrum.h"
 #include "MSObject.h"
@@ -69,7 +68,7 @@ using namespace std;
 #include <iostream>
 #endif
 
-#define comet_version   "2021.01 rev. 0"
+#define comet_version   "2019.01 rev. 5"
 #define copyright "(c) University of Washington"
 
 // Redefined how the bin offset is interpreted and applied.  The valid range for the offset is
