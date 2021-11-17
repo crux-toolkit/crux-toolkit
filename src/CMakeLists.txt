@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.6)
+cmake_policy(VERSION 3.6)
 
 use_cxx11()
 
@@ -419,15 +419,6 @@ if (WIN32 AND NOT CYGWIN)
     debug libboost_system-vc141-mt-gd
     debug libboost_thread-vc141-mt-gd
   )
-  if (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
-    # For some reason the 32-bit build also requires the BOOST regex library
-    SET(
-      BOOST_LIBRARIES
-      ${BOOST_LIBRARIES}
-      optimized libboost_regex-vc141-mt
-      debug libboost_regex-vc141-mt
-    )
-  endif (NOT CMAKE_GENERATOR MATCHES "^.*Win64$")
   target_link_libraries(
     crux
     bullseye
