@@ -1,3 +1,7 @@
+# Please add any tests that have been added to this file to tide-search2.feature
+# Note that if tide-search2.feature is run before tide-search2.feature, then
+# cucumber will fail due to Tide not dealing with ties well.
+
 Feature: tide-index / tide-search
   tide-index should create an index for all peptides in a fasta file, for use in
     subsequent calls to tide-search

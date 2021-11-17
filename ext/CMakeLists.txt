@@ -14,18 +14,10 @@ SET(ENV{CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_BINARY_DIR})
 SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 SET(USE_LATEST_PWIZ OFF CACHE BOOL "Use lastest version of ProteoWizard")
 
-if (UNIX AND BUILD_32)
-  SET(TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_SOURCE_DIR}/linux_i686.toolchain.cmake")
-else (UNIX AND BUILD_32)
-  SET(TOOLCHAIN "")
-endif (UNIX AND BUILD_32)
-
 if (WIN32 AND NOT CYGWIN)
   # If windows build we need to select 32/64 bit platform
   if (CMAKE_GENERATOR MATCHES "^.*Win64$")
     SET(MSBUILD_PLATFORM "x64")
-  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    SET(MSBUILD_PLATFORM "Win32")
   endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
 
   # On Windows we should build vendor libraries by default
@@ -136,7 +128,6 @@ else (UNIX)
     CONFIGURE_COMMAND ""
     BUILD_COMMAND
       ${CMAKE_COMMAND}
-        -DBUILD_32:BOOL=${BUILD_32}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
         -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
@@ -427,14 +418,6 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
       ${vendor_binaries}
       ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.Data.dll
       ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.RawFileReader.dll
-    )
-  else()
-    set(
-      # The 32-bit Windows buid needs these additional DLL
-      vendor_binaries
-      ${vendor_binaries}
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/Interop.DataExplorer.dll
-      ${CMAKE_CURRENT_BINARY_DIR}/lib/MSFileReader.XRawfile2.dll
     )
   endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
   install (FILES ${vendor_binaries} DESTINATION bin)

@@ -48,6 +48,14 @@ class TideIndexApplication : public CruxApplication {
 
   int main(const string& fasta, const string& index, string cmd_line = "");
 
+  void processGroupedTargetDecoys(
+    string pepmass_str,
+    vector<pair<string, bool>>& peptide_td_pairs,
+    std::map<string, vector<string>>& peptideToProteinMap,
+    ofstream* out_target_decoy_list,
+    DECOY_TYPE_T decoy_type
+  );
+
   /**
    * Returns the command name
    */
@@ -180,7 +188,8 @@ class TideIndexApplication : public CruxApplication {
     pb::Header& outProteinPbHeader,
     std::vector<TideIndexPeptide>& outPeptideHeap,
     std::vector<string*>& outProteinSequences,
-    std::ofstream* decoyFasta
+    std::ofstream* decoyFasta,
+    std::map<string, vector<string>>& peptideToProteinMap
   );
 
   static void writePeptidesAndAuxLocs(

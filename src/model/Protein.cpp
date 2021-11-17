@@ -595,10 +595,6 @@ void Protein::shuffle(
   case NO_DECOYS:
     return;
 
-  case PROTEIN_REVERSE_DECOYS:
-    reverse(sequence_, sequence_ + strlen(sequence_));
-    break;
-
   case PROTEIN_SHUFFLE_DECOYS:
     carp(CARP_DEBUG, "shuffling");
     shuffle_array(sequence_, strlen(sequence_));

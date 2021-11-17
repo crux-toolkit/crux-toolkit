@@ -46,11 +46,9 @@
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
        "Source" => "crux-4.1.Source.tar.gz",
-       "Linux32" => "crux-4.1.Linux.i686.zip",
        "Linux64" => "crux-4.1.Linux.x86_64.zip",
        "OSX" => "crux-4.1.Darwin.x86_64.zip",
        "Windows64" => "crux-4.1.Windows.AMD64.zip",
-       "Windows32" => "crux-4.1.Windows.i386.zip",
      );
      $directory = "crux-4.1/";
    }
@@ -60,11 +58,9 @@
       $version = chop(file_get_contents("daily/latest-build.txt"));
       $FileNameBaseArray = array(
         "Source" => "crux-4.1.$version.Source.tar.gz",
-        "Linux32" => "crux-4.1.$version.Linux.i686.zip",
         "Linux64" => "crux-4.1.$version.Linux.x86_64.zip",
         "OSX" => "crux-4.1.$version.Darwin.x86_64.zip",
         "Windows64" => "crux-4.1.$version.Windows.AMD64.zip",
-        "Windows32" => "crux-4.1.$version.Windows.i386.zip",
       );
       $directory = "daily/";
     }
