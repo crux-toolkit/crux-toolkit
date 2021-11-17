@@ -233,7 +233,7 @@ ExternalProject_Add(
 ExternalProject_Add(
   MSToolkit
   GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-  GIT_TAG 4cb705d
+  GIT_TAG 0077644
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -241,13 +241,18 @@ ExternalProject_Add(
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
   PATCH_COMMAND
-    COMMAND
-      unzip -o src/zlib1211.zip -d src
-    COMMAND
-      tar xvf src/expat-2.2.9.tar.gz -C src
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/include/MSReader.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/include/
+    COMMAND ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/MSReader.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
+    COMMAND ${CMAKE_COMMAND} -E copy
+       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/mzMLWriter.cpp
+       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/MSToolkit
   BUILD_IN_SOURCE 1
 )
 
@@ -258,7 +263,7 @@ if (UNIX)
   set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}
@@ -289,7 +294,7 @@ elseif (WIN32 AND NOT CYGWIN)
   set(LIBPATH "${CMAKE_CURRENT_BINARY_DIR}/lib;")
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
+    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/tags/release_2019015/
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}
@@ -325,8 +330,8 @@ set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
 ExternalProject_Add(
   kojak
-  GIT_TAG defa8c9
   GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
+  GIT_TAG c1acef0
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
