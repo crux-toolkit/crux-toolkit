@@ -19,6 +19,7 @@ include_directories(
   CometSearch/CometPreprocess.cpp 
   CometSearch/CometPostAnalysis.cpp 
   CometSearch/CometMassSpecUtils.cpp 
+  CometSearch/CometWriteMzIdentML.cpp
   CometSearch/CometWriteOut.cpp 
   CometSearch/CometWriteSqt.cpp 
   CometSearch/CometWritePepXML.cpp 
