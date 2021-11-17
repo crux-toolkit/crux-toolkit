@@ -96,10 +96,6 @@
 		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
 		On the download page click on the link "Linux [architecture]
 		Build (zipped)" to download them to your computer.
-		If your computer is running a 32-bit version of Linux select the
-		i686 version.
-		If your computer is running a 64-bit version of Linux select the
-		x86_64 version.
 		If a window pops
 		up, select the "Save" button.
 		To check that the file was
@@ -228,13 +224,6 @@
 		cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
 		</code>
     </div>
-    <p/>
-    To build a 32-bit version of Crux on a 64-bit machine use the <span
-    class=file>-DBUILD_32=ON</span> option for CMake:
-		<div class=code><code>
-		cmake -DBUILD_32=ON -DCMAKE_BUILD_TYPE=Release  .
-		</code>
-		</div>
 		</li>
 		<p/>
 		<li><b>Build and install</b>
