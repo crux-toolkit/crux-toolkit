@@ -110,8 +110,6 @@ DECOY_TYPE_T string_to_tide_decoy_type(const string& name) {
     return PEPTIDE_SHUFFLE_DECOYS;
   } else if (name == "peptide-reverse") {
     return PEPTIDE_REVERSE_DECOYS;
-  } else if (name == "protein-reverse") {
-    return PROTEIN_REVERSE_DECOYS;
   }
   carp(CARP_FATAL, "Invalid decoy type %s", name.c_str());
   return(INVALID_DECOY_TYPE); // Avoid compiler warning.

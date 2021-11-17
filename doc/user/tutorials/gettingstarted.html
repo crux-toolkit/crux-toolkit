@@ -62,7 +62,8 @@
 		<a name="env"></a>
 		<h3>Your environment</h3>
 		<p>For this tutorial, we'll assume you are working in a Linux/Unix
-		type shell (<a href="http://www.cygwin.com/">cygwin</a> is a good
+		type shell (Windows Subsystem for Linux or
+        <a href="http://www.cygwin.com/">cygwin</a> is a good
 		choice for Windows users) and already know some basic 
 		commands for changing directories, listing files, and other simple
 		tasks.  To successfully run the sample commands, you'll need to work from 
@@ -100,16 +101,19 @@
 		<p>The beginning of the file looks like this.
 		</p>
 		<pre>
-H       CreationDate    2/14/2007 6:19:18 PM
-H       Extractor       MakeMS2
-H       ExtractorVersion        1.0
-H       Comments        MakeMS2 written by Michael J. MacCoss, 2004
-H       ExtractorOptions        MS2/MS1
-S       10      10      636.34
-Z       2       1271.67
-187.4 12.5
-193.1 19.5
-194.3 13.7
+H   CreationDate Thu May 23 19:24:34 2019
+H   Extractor   ProteoWizard
+H   Extractor version   Xcalibur
+H   Source file demo.raw
+S   18  18  558.8295
+I   RTime   0.1156636
+I   BPI 61744.15
+I   BPM 178.2829
+I   TIC 261041.2
+Z   2   1116.652
+134.1264 7025.501
+145.5224 8164.68
+156.1784 7902.604
 		</pre>
 		<div class=note><em>NOTE: There are two kinds of optional lines which
 		may be included for each spectrum.  Lines beginning with </em><span
@@ -132,7 +136,7 @@ Z       2       1271.67
 		list of peaks for the spectrum.  The subsequent spectra in the file
 		repeat this pattern of <span class=file>S</span> line, <span
 		class=file>Z</span> line(s), and peak list.  <span
-		class=file>demo.ms2</span> contains 150 spectra.
+		class=file>demo.ms2</span> contains 71,631 spectra.
 		</p>
 
 		<a name="fasta"></a>
