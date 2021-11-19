@@ -21,7 +21,7 @@ string AminoAcidUtil::GetName(char c) {
     case 'L': return "leucine";
     case 'M': return "methionine";
     case 'N': return "asparagine";
-    case 'O': return "ornithine";
+    case 'O': return "pyrrolysine";
     case 'P': return "proline";
     case 'Q': return "glutamine";
     case 'R': return "arginine";
@@ -55,7 +55,7 @@ double AminoAcidUtil::GetMass(char c, bool monoisotopic) {
       case 'L': return 113.08406;
       case 'M': return 131.04049;
       case 'N': return 114.04293;
-      case 'O': return 114.07931;
+      case 'O': return 237.14772;
       case 'P': return  97.05276;
       case 'Q': return 128.05858;
       case 'R': return 156.10111;
@@ -85,7 +85,7 @@ double AminoAcidUtil::GetMass(char c, bool monoisotopic) {
       case 'L': return 113.1594;
       case 'M': return 131.1926;
       case 'N': return 114.1038;
-      case 'O': return 114.1472;
+      case 'O': return 237.2981;
       case 'P': return  97.1167;
       case 'Q': return 128.1307;
       case 'R': return 156.1875;
