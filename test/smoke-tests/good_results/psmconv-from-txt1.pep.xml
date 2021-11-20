@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="2021-02-24T21:27:57" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="2021-11-19T18:27:45" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -182,6 +182,8 @@
 <parameter name="use_Y_ions" value="1"/>
 <parameter name="use_Z_ions" value="0"/>
 <parameter name="use_NL_ions" value="1"/>
+<parameter name="use_Z1_ions" value="0"/>
+<parameter name="output_mzidentmlfile" value="0"/>
 <parameter name="output_sqtstream" value="0"/>
 <parameter name="output_sqtfile" value="0"/>
 <parameter name="output_txtfile" value="1"/>
@@ -204,8 +206,11 @@
 <parameter name="max_precursor_charge" value="6"/>
 <parameter name="nucleotide_reading_frame" value="0"/>
 <parameter name="clip_nterm_methionine" value="0"/>
+<parameter name="explicit_deltacn" value="0"/>
+<parameter name="old_mods_encoding" value="0"/>
 <parameter name="spectrum_batch_size" value="0"/>
 <parameter name="decoy_prefix" value="decoy_"/>
+<parameter name="text_file_extension" value=""/>
 <parameter name="output_suffix" value=""/>
 <parameter name="peptide_length_range" value="1 63"/>
 <parameter name="precursor_NL_ions" value=""/>
@@ -246,7 +251,7 @@
 <parameter name="add_L_leucine" value="0"/>
 <parameter name="add_M_methionine" value="0"/>
 <parameter name="add_N_asparagine" value="0"/>
-<parameter name="add_O_ornithine" value="0"/>
+<parameter name="add_O_pyrrolysine" value="0"/>
 <parameter name="add_P_proline" value="0"/>
 <parameter name="add_Q_glutamine" value="0"/>
 <parameter name="add_R_arginine" value="0"/>
@@ -414,7 +419,7 @@
 <parameter name="unique-scannr" value="false"/>
 <parameter name="psm-filter" value="false"/>
 <parameter name="spectra-denoising" value="false"/>
-<parameter name="diameter-instrument" value="orbitrap"/>
+<parameter name="diameter-instrument" value="na"/>
 </search_summary>
     <spectrum_query spectrum="demo.00035.00035.1" start_scan="35" end_scan="35" precursor_neutral_mass="708.0627" assumed_charge="1" index="1">
     <search_result>
