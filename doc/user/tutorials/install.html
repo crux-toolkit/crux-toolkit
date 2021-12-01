@@ -69,10 +69,7 @@
 
 		<a name="LINUX"></a>
 		<h3>Linux</h3>
-		<b>Note:</b> when typing the commands shown in these instructions
-		do not type the
-		leading <code>$</code> before each command; it indicates the
-		prompt. These instructions will refer to your home directory as
+		<b>Note:</b> These instructions refer to your home directory as
 		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
 		or you can use the fully qualified path to your home directory which
 		may be something like <code>/home/yourname/</code>.  Note that you can
@@ -86,9 +83,10 @@
     by running
 		<div class=code><code>
     ldd --version
-    </div>
+    </code></div>
 		<p/>
     </li>
+
 		<li><b>Download the files</b> 
 		<p/>
 		<span class=prog>Crux</span> is freely
@@ -102,7 +100,7 @@
 		transfered correctly, run this command
 
 		<div class=code><code>
-		$ md5sum <i>[downloaded file]</i></code>
+		md5sum <i>[downloaded file]</i></code>
 		</div>
 		<p/>
 		and compare the output to the "MD5 checksum" link next to the file you
@@ -123,7 +121,7 @@
 		to a convenient location and unpack the file with this command:
 
 		<div class=code><code>
-		$ unzip crux-x.xx-XXXX-GNU-Linux.zip</code>
+		unzip crux-x.xx-XXXX-GNU-Linux.zip</code>
 		</div>
 		<p/>
 		You should now have a new directory,
@@ -137,7 +135,8 @@
 		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
 		for notes on how to run the executables.
 		</ul>
-    <a name="src_build"/>
+
+    <a name="src_build"/></a>
 		<h3>Building Crux From Source on Linux</h3>
 		<ul>
 		<li><b>Prerequisites</b>
@@ -162,6 +161,7 @@
 		These will automatically be copied from the <span class=prog>Proteowizard</span>
 		and <span class=prog>Percolator</span>
 		repositories and statically linked into <span class=prog>crux</span>.
+    </li>
 
 		<li><b>Download the files</b> 
 		<p/>
@@ -172,9 +172,8 @@
 		and choose save to disk if prompted. 
 		To check that the file was
 		transferred correctly, run this command
-
 		<div class=code><code>
-		$ md5sum <i>[downloaded file]</i></code>
+		md5sum <i>[downloaded file]</i></code>
 		</div>
 		<p/>
 		and compare the output to the "MD5 checksum" link next to the file you
@@ -184,20 +183,23 @@
 		<span class=file>crux-x.xx.source.tar.gz</span>, 
 		where <span class=file>x.xx</span>
 		is replaced with the most current release version.
+    </li>
+
+    <p/>
 		<li><b>Unpack the files</b>
 		<p/>
 		Move the downloaded file to a
 		convenient location and unpack it with this command.
 
 		<div class=code>
-		$ tar -zxvf crux-x.xx.Source.tar.gz
+		tar -zxvf crux-x.xx.Source.tar.gz
 		</div>
 		A new directory named <span class=file>crux-x.xx.Source</span> will be
 		created and a long list of files will stream by as they are being put
 		into the new directory.
-		<p/>
 		</li>
 
+		<p/>
 		<li><b>Configure the build</b> 
 		<p/>
 		Move into the <span class=file>crux-x.xx.Source</span>
@@ -225,13 +227,14 @@
 		</code>
     </div>
 		</li>
+
 		<p/>
 		<li><b>Build and install</b>
 		<p/>
 		To complete the process, run these two commands.</li>
 		<div class=code><code>
-		$ make<br>
-		$ make install
+		make<br>
+		make install
 		</code>
 		</div>
 		<p/>
@@ -248,9 +251,7 @@
 		<span class=prog>Crux</span> requires OS X Yosemite or later.
 		<p/>
 		<b>Note:</b> 
-		when typing the commands shown in these instructions do not type the
-		leading <code>$</code> before each command; it indicates the
-		prompt. These instructions will refer to your home directory as
+		These instructions refer to your home directory as
 		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
 		or you can use the fully qualified path to your home directory which
 		may be something like <code>/home/yourname/</code>.  Note that you can
@@ -260,8 +261,11 @@
 		To install and use <code>crux</code> on OS X
 		you'll need to be familiar with the <span class=code>Terminal</span>
 		application.
+    </li>
+
 		<h3>Installing Pre-compiled Crux Binaries on OS X</h3>
 		<ul>
+    <p/>
 		<li><b>Download the files</b> 
 		<p/>
 		<span class=prog>Crux</span> is freely
@@ -275,7 +279,7 @@
 		transferred correctly, run this command
 
 		<div class=code><code>
-		$ md5 <i>[downloaded file]</i></code>
+		md5 <i>[downloaded file]</i></code>
 		</div>
 		<p/>
 		and compare the output to the "MD5 checksum" link next to the file you
@@ -294,7 +298,7 @@
 		to a convenient location and unpack the file with this command.
 
 		<div class=code><code>
-		$ unzip crux-x.xx.Darwin.x86_64.zip</code>
+		unzip crux-x.xx.Darwin.x86_64.zip</code>
 		</div>
 		<p/>
 		You should now have a new directory,
@@ -376,7 +380,7 @@
 		transferred correctly, run this command
 
 		<div class=code><code>
-		$ md5sum <i>[downloaded file]</i></code>
+		md5sum <i>[downloaded file]</i></code>
 		</div>
 		<p/>
 		and compare the output to the "MD5 checksum" link next to the file you
@@ -392,7 +396,7 @@
 		convenient location and unpack it with this command.
 
 		<div class=code>
-		$ tar -zxvf crux-x.xx.Source.tar.gz
+		tar -zxvf crux-x.xx.Source.tar.gz
 		</div>
 		A new directory named <span class=file>crux-x.xx.Source</span> will be
 		created and a long list of files will stream by as they are being put
@@ -432,8 +436,8 @@
 		<p/>
 		To complete the process, run these two commands.</li>
 		<div class=code><code>
-		$ make<br>
-		$ make install
+		make<br>
+		make install
 		</code>
 		</div>
 		<p/>
@@ -455,7 +459,7 @@
 		path.  For example,</p>
 
 		<div class=code><code>
-		$ <em>&lt;install directory&gt;</em>/bin/crux comet</code>
+		<em>&lt;install directory&gt;</em>/bin/crux comet</code>
 		</div>
 
 		<p>In this final step of the installation, we'll set things up so that
@@ -466,7 +470,7 @@
 		is in the current list with this command:
 
 		<div class=code><code>
-		$ echo $PATH</code><br>
+		echo $PATH</code><br>
 		</div>
 		<p>The value returned might look something like this:
 		<code>
@@ -483,7 +487,7 @@
 		actual location of your installation)</p> 
 
 		<div class=code><code>
-		$ export PATH=$PATH:&lt;install directory&gt;/bin</code>
+		export PATH=$PATH:&lt;install directory&gt;/bin</code>
 		</div>
 
 		<p>Try '<span class=code>echo $PATH</span>' again to see that the
@@ -493,7 +497,7 @@
 		names.  Try this.</p>
 
 		<div class=code><code>
-		$ crux comet</code>
+		crux comet</code>
 		</div>
 
 		<p>The change to <span class=code>$PATH</span> is only temporary.  As
@@ -656,7 +660,7 @@
 		cmake --build . --config Release --target ALL_BUILD
 		<br/>
 		cmake --build . --config Release --target INSTALL
-		</code>
+		</code></div>
 		<p/>
 		Once you've run the configuration step
 		you can also build and debug Crux from within the Visual Studio IDE.
@@ -706,7 +710,6 @@
 		<p>The value returned might look something like this:
 		<p/>
 		<div class=code><code>
-		<code>
 		C:\Windows;C:\Windows\system32;c:\Program Files\Microsoft Visual 
 		Studio 10.0\Common7\IDE\;c:\Program Files\Microsoft 
 		Visual Studio 10.0\VC\BIN;C:\Program Files\Common Files\Microsoft Shared\
