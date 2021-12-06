@@ -253,12 +253,14 @@ ExternalProject_Add(
 
 if (UNIX)
   # Get Comet source from SVN and build using a CMakeLists.txt file we created
+  #SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
   set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
   set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
   set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
   ExternalProject_Add(
     comet
-    SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
+    GIT_REPOSITORY https://github.com/UWPR/Comet/
+    GIT_TAG 1dc63b9
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}
@@ -271,18 +273,6 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/Common.h
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometWriteTxt.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/CometSearchManager.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearch/ThreadPool.h
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
