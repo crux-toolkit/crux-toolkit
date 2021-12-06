@@ -8,7 +8,7 @@ Scenario Outline: User runs comet
   And I pass the arguments --overwrite T --parameter-file <param_file> test_spectra/<spectra> test_databases/<fasta>
   When I run comet
   Then the return value should be 0
-  And crux-output/comet.target.txt should match good_results/<expected_output>
+  And crux-output/comet.txt should match good_results/<expected_output>
 
 Examples:
   |test_name         |param_file               |spectra                            |fasta                 |expected_output       |
