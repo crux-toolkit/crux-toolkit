@@ -207,24 +207,29 @@ string ParamMedicApplication::getName() const {
 
 string ParamMedicApplication::getDescription() const {
   return
-    "[[html:<p>]]Examine the spectra in a file to estimate the best precursor "
+    "[[nohtml:Examine the spectra in a file to estimate the best precursor "
     "and fragment error tolerances for database search and to infer "
     "the presence of various types of modifications, including stable-isotope "
     "labeling, isobaric labeling, tandem mass tags, and enrichment of "
-    "phosphorylated peptides.  For details on how param-medic works, see "
-    "these publications:</p><blockquote>Damon H. May, Kaipo Tamura, William "
-    "Stafford Noble. <a href=\"https://pubs.acs.org/doi/abs/10.1021/"
-    "acs.jproteome.7b00028\">\"Param-Medic: A tool for improving MS/MS "
-    "database search yield by optimizing parameter settings.\"</a> "
+    "phosphorylated peptides.]]"
+    "[[html:<p>Examine the spectra in a file to estimate the best precursor "
+    "and fragment error tolerances for database search and to infer "
+    "the presence of various types of modifications, including stable-isotope "
+    "labeling, isobaric labeling, tandem mass tags, and enrichment of "
+    "phosphorylated peptides.  For details on how param-medic works, "
+    "see these publications:</p><blockquote>Damon H. May, Kaipo Tamura, "
+    "William Stafford Noble. <a href=\"https://pubs.acs.org/doi/abs/10.1021/"
+    "acs.jproteome.7b00028\">&quot;Param-Medic: A tool for improving MS/MS "
+    "database search yield by optimizing parameter settings.&quot;</a> "
     "<em>Journal of Proteome Research</em>. 16(4):1817-1824, 2017.<br><br>"
     "Damon May, Kaipo Tamura, William Stafford Noble. <a href=\""
     "https://pubs.acs.org/doi/full/10.1021/acs.jproteome.8b00954\">"
-    "\"Detecting modifications in proteomics experiments with Param-Medic.\""
-    "</a> <em>Journal of Proteome Research</em>. 18(4):1902-1906, 2019."
-    "</blockquote>Note that you can access some of the functionality of "
-    "Param-Medic by using the <code>--auto-precursor-window</code> and "
-    "<code>--auto-mz-bin-width</code> options in <code>tide-search</code>."
-    "[[html:</p>]]";
+    "&quot;Detecting modifications in proteomics experiments with "
+    "Param-Medic.&quot;</a> <em>Journal of Proteome Research</em>. "
+    "18(4):1902-1906, 2019.</blockquote>Note that you can access some of the "
+    "functionality of Param-Medic by using the "
+    "<code>--auto-precursor-window</code> and <code>--auto-mz-bin-width</code>"
+    " options in <code>tide-search</code>.</p>]]";
 }
 
 bool ParamMedicApplication::hidden() const {
@@ -240,7 +245,6 @@ vector<string> ParamMedicApplication::getArgs() const {
 
 vector<string> ParamMedicApplication::getOptions() const {
   string arr[] = {
-    "verbosity",
     "spectrum-parser",
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",
@@ -253,7 +257,12 @@ vector<string> ParamMedicApplication::getOptions() const {
     "pm-pair-top-n-frag-peaks",
     "pm-min-common-frag-peaks",
     "pm-max-scan-separation",
-    "pm-min-peak-pairs"
+    "pm-min-peak-pairs",
+    "verbosity",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "parameter-file"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
