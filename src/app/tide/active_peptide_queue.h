@@ -116,7 +116,7 @@ class ActivePeptideQueue {
 
   // Workspace for computing theoretical peaks for a single peptide.
   // Gets reused for each new peptide.
-  ST_TheoreticalPeakSet theoretical_peak_set_;
+  TheoreticalPeakSetBYSparse theoretical_peak_set_;
   TheoreticalPeakSetBIons theoretical_b_peak_set_;
   
   // The active peptides. Lighter peptides are enqueued before heavy ones.

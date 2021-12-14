@@ -67,6 +67,7 @@ const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B = 8;
 */
 double MassConstants::BIN_H2O = 18;
 double MassConstants::BIN_NH3 = 17;
+double MassConstants::BIN_CO = 28;
 
 
 //default parameter settings, will be changed during parameter parsing
@@ -248,8 +249,9 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
 
   bin_width_ = bin_width;
   bin_offset_ = bin_offset;
-  BIN_H2O = mass2bin(mono_h2o,1);
-  BIN_NH3 = mass2bin(mono_nh3,1);
+  BIN_H2O = mass2bin(mono_h2o, 1);
+  BIN_NH3 = mass2bin(mono_nh3, 1);
+  BIN_CO = mass2bin(mono_co, 1);
 
   return true;
 }

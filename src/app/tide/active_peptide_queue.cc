@@ -20,7 +20,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        proteins)
   : reader_(reader),
     proteins_(proteins),
-    theoretical_peak_set_(2000),   // probably overkill, but no harm
+    theoretical_peak_set_(1000),   // probably overkill, but no harm
     theoretical_b_peak_set_(200),  // probably overkill, but no harm
     active_targets_(0), active_decoys_(0),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
@@ -288,7 +288,7 @@ int ActivePeptideQueue::CountAAFrequency(
   double** dAAFreqN,
   double** dAAFreqI,
   double** dAAFreqC,
-  int** dAAMass
+  int** iAAMass
 ) {
 
     unsigned int i = 0;
@@ -329,7 +329,7 @@ int ActivePeptideQueue::CountAAFrequency(
   }
 
   //calculate the unique amino acid masses
-  *dAAMass = new int[uiUniqueMasses];     //a vector for the unique (integerized) amino acid masses present in the sample
+  *iAAMass = new int[uiUniqueMasses];     //a vector for the unique (integerized) amino acid masses present in the sample
   *dAAFreqN = new double[uiUniqueMasses]; //a vector for the amino acid frequencies at the N-terminus
   *dAAFreqI = new double[uiUniqueMasses]; //a vector for the amino acid frequencies inside the peptide
   *dAAFreqC = new double[uiUniqueMasses]; //a vector for the amino acid frequencies at the C-terminus
@@ -339,7 +339,7 @@ int ActivePeptideQueue::CountAAFrequency(
       (*dAAFreqN)[cnt] = (double)nvAAMassCounterN[i] / cntTerm;
       (*dAAFreqI)[cnt] = (double)nvAAMassCounterI[i] / cntInside;
       (*dAAFreqC)[cnt] = (double)nvAAMassCounterC[i] / cntTerm;
-      (*dAAMass)[cnt] = i;
+      (*iAAMass)[cnt] = i;
       cnt++;
     }
   }
