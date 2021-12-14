@@ -106,7 +106,7 @@
 
 #include <iostream>
 #include <vector>
-#include "theoretical_peak_pair.h"
+#include "theoretical_peak_set.h"
 #include "max_mz.h"
 #include "mass_constants.h"
 
@@ -133,12 +133,6 @@ class ObservedPeakSet {
   ~ObservedPeakSet() { delete[] peaks_; delete[] raw_peaks_; delete[] cache_; }
 
   const int* GetCache() const { return cache_; } //TODO 261: access restriction?
-
-  // On-the-fly compilation takes the place of this call.
-  int DotProd(const TheoreticalPeakArr& theoretical);
-#ifdef DEBUG
-  int DebugDotProd(const TheoreticalPeakArr& theoretical);
-#endif
 
   void PreprocessSpectrum(const Spectrum& spectrum, int charge) {
     long int dummy1, dummy2, dummy3, dummy4;
@@ -182,7 +176,7 @@ class ObservedPeakSet {
                     vector< vector<double> >& residueEvidenceMatrix);
 
   // For debugging
-  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
+/*  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
     int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();
     for (int i = 0; i < end; ++i) {
       double peak = Peak(peak_type, i);
@@ -213,7 +207,7 @@ class ObservedPeakSet {
       if (peaks_[i] != 0)
         cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
   }
-
+*/
   // added by Yang
   int LargestMzbin() const { return largest_mzbin_; };
   int SmallestMzbin() const { return smallest_mzbin_; };
@@ -221,13 +215,6 @@ class ObservedPeakSet {
   vector<pair<int, double>>& StaticFilteredPeakTuples() { return sta_filtered_peak_tuples_; }
 
  private:
-  int& Peak(TheoreticalPeakType peak_type, int index) {
-    // Note the different order than for TheoreticalPeakPair's constructor.
-    // In context of this class, peak_type feels like the primary selector.
-    return cache_[TheoreticalPeakPair(index, peak_type).Code()];
-  }
-  void MakeInteger();
-  void ComputeCache();
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
                           int* intensRegion, int maxPrecurMass, int charge);
 

@@ -116,39 +116,14 @@ class TheoreticalPeakCompiler {
     return pos_; 
   }
 
-  // The following three functions assume peaks unsorted, and check that each peak
-  // doesn't point past end of cache.
+  // The following three functions assume peaks unsorted;
+  // It does not check that each peak doesn't point past 
+  // end of cache. Anymore. Modification included on 2021 Dec, by AKF
     
   void AddPositive(const TheoreticalPeakArr& peaks) {
     // Write an add instruction for each entry in peaks.
-    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
     for (int i = 0; i < peaks.size(); ++i)
-      if (peaks[i].Code() < end)
-        AddPositive(peaks[i].Code());
-  }
-
-  void AddPositive(const google::protobuf::RepeatedField<int>& peaks) {
-    // Write an add instruction for each entry in peaks.
-    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
-    int total = 0;
-    google::protobuf::RepeatedField<int>::const_iterator i = peaks.begin();
-    for (; i != peaks.end(); ++i) {
-      if ((total += *i) >= end)
-        break;
-      AddPositive(total);
-    }
-  }
-
-  void AddNegative(const google::protobuf::RepeatedField<int>& peaks) {
-    // Write a sub instruction for each entry in peaks.
-    int end = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
-    int total = 0;
-    google::protobuf::RepeatedField<int>::const_iterator i = peaks.begin();
-    for (; i != peaks.end(); ++i) {
-      if ((total += *i) >= end)
-        break;
-      AddNegative(total);
-    }
+      AddPositive(peaks[i]);
   }
 
   void Done() {
@@ -186,13 +161,13 @@ class TheoreticalPeakCompiler {
     pos_ += 4;
   }
 
-  void AddNegative(int peak) {
+/*  void AddNegative(int peak) {
     *((uint16_t*) pos_) = sub_from_eax_at_edx_plus;
     pos_ += 2;
     *((int*) pos_) = peak << 2; // Store 4 * the peak position.
     pos_ += 4;
   }
-
+*/
   static void AddJump(unsigned char* pos, unsigned char* whereto) {
     int diff = whereto - (pos + jmp_size);
     *pos++ = jmp_relative;

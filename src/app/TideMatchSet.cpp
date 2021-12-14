@@ -869,6 +869,8 @@ void TideMatchSet::gatherTargetsAndDecoys(
     if (concat || !peptide.IsDecoy()) {
       if (targetsOut.size() < gatherSize) {
         targetsOut.push_back(i);
+      } else {
+        break;
       }
     } else {
       int idx = peptide.DecoyIdx();
