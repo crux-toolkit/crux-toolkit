@@ -165,6 +165,10 @@ if (UNIX)
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
       -DWITHOUT_GTEST=ON
+    PATCH_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 else (UNIX)
@@ -180,6 +184,10 @@ else (UNIX)
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
       -DWITHOUT_GTEST=ON
+    PATCH_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 endif (UNIX)
