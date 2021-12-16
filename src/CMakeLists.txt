@@ -383,6 +383,8 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_identdata_examples
       libpwiz_data_identdata_version
       libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_core
       libpwiz_data_msdata_examples
       libpwiz_data_msdata_version
       libpwiz_data_proteome_examples
@@ -448,12 +450,12 @@ else()
   # UNIX SYSTEMS
   target_link_libraries(
     crux
-    bullseye
     crux-support
     tide-support
     cometsearch
     kojaksearch
     gflags
+    bullseye
     hardklor
     mstoolkitlite
     perclibrary
@@ -461,16 +463,15 @@ else()
     fido
     picked_protein
     protobuf
-    dl
-    m
-    pthread
-    pwiz_data_identdata
-    pwiz_data_identdata_version
-    pwiz_data_misc
     pwiz_data_msdata
     pwiz_data_msdata_mz5
     pwiz_data_msdata_version
+    pwiz_data_msdata_core
+    pwiz_data_identdata
+    pwiz_data_identdata_version
     pwiz_data_proteome
+    pwiz_data_proteome_version
+    pwiz_data_misc
     pwiz_data_common
     pwiz_utility_chemistry
     pwiz_utility_minimxml
@@ -482,6 +483,9 @@ else()
     boost_serialization
     boost_system
     boost_thread
+    dl
+    m
+    pthread
     hdf5pp
     hdf5
     ${RT_LIBRARY}
