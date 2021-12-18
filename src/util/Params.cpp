@@ -2129,6 +2129,10 @@ Params::Params() : finalized_(false) {
     "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
 
+  InitBoolParam("diameter-mode", false,
+      "Indicate if it's running DIAmeter.",
+      "It is used for DIAmeter", false);
+
   Categorize();
 }
 
