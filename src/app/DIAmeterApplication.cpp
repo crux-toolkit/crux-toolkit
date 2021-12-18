@@ -1178,6 +1178,7 @@ void DIAmeterApplication::processParams() {
   Params::Set("precursor-window-type", "mz");
   Params::Set("spectrum-parser", "pwiz");
   Params::Set("num-threads", 1);
+  Params::Set("diameter-mode", true);
 
   // these are makepin-specific param settings
   output_pin_ = "diameter.features.pin";
