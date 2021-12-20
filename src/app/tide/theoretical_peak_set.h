@@ -119,10 +119,10 @@ class TheoreticalPeakSetBYSparse {
   const TheoreticalPeakArr* GetPeaks() const { return peaks_; }
 
  private:
-   int* peak_mask = 0; //MaxBin::Global().BackgroundBinEnd()
-   int peak_mask_end = 0;
-   int cache_end = 0;
-   TheoreticalPeakArr peaks_[2];
+    int* peak_mask = 0; //MaxBin::Global().BackgroundBinEnd()
+    int peak_mask_end = 0;
+    int cache_end = 0;
+    TheoreticalPeakArr peaks_[2];
 };
 
 // This class is used to store theoretical b ions only

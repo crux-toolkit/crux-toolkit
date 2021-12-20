@@ -121,7 +121,7 @@ class ObservedPeakSet {
      double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
-	  raw_peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
+      raw_peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
 
     bin_width_  = bin_width;
@@ -153,16 +153,16 @@ class ObservedPeakSet {
                                    double precursorMass,
                                    int nAA,
                                    const vector<double>& aaMass,
-                                   double fragTol,int granularityScale,
+                                   double fragTol, int granularityScale,
                                    double nTermMass, double cTermMass,
                                    long int* num_range_skipped,
                                    long int* num_precursors_skipped,
                                    long int* num_isotopes_skipped,
                                    long int* num_retained,
                                    vector< vector<double> >& residueEvidenceMatrix);
-   // created by Andy Lin in Feb 2018
-   // help method for CreateResidueEvidenceMatrix
-   void addEvidToResEvMatrix(vector<double>& ionMass,
+// created by Andy Lin in Feb 2018
+// help method for CreateResidueEvidenceMatrix
+void addEvidToResEvMatrix(vector<double>& ionMass,
                     vector<int>& ionMassBin,
                     vector<double>& ionMasses,
                     vector<double>& ionIntens,
@@ -209,8 +209,8 @@ class ObservedPeakSet {
   }
 */
   // added by Yang
-  int LargestMzbin() const { return largest_mzbin_; };
-  int SmallestMzbin() const { return smallest_mzbin_; };
+  int LargestMzbin() const { return largest_mzbin_; }
+  int SmallestMzbin() const { return smallest_mzbin_; }
   vector<pair<int, double>>& DynamicFilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
   vector<pair<int, double>>& StaticFilteredPeakTuples() { return sta_filtered_peak_tuples_; }
 
