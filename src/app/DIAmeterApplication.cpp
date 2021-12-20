@@ -268,7 +268,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // Normalize the observed spectrum and compute the cache of frequently-needed
           // values for taking dot products with theoretical spectra.
           // TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
-          observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
+          observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained, true);
           int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
           int candidatePeptideStatusSize = candidatePeptideStatus->size();
           if (nCandPeptide == 0) { continue; }
@@ -492,8 +492,8 @@ void DIAmeterApplication::reportDIA(
 
   // calculate MS2 p-value
   map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> ms2pval_map;
-  computeMS2Pval(targets, peptides, observed, &ms2pval_map, true);
-  computeMS2Pval(decoys, peptides, observed, &ms2pval_map, true);
+  computeMS2Pval(targets, peptides, observed, &ms2pval_map);
+  computeMS2Pval(decoys, peptides, observed, &ms2pval_map);
 
   // calculate delta_cn and delta_lcn
   map<TideMatchSet::Arr::iterator, FLOAT_T> delta_cn_map;
@@ -646,14 +646,12 @@ void DIAmeterApplication::computeMS2Pval(
   const vector<TideMatchSet::Arr::iterator>& vec,
   const ActivePeptideQueue* peptides,
   ObservedPeakSet* observed,
-  map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
-  bool dynamic_filter
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map
 ) {
   int smallest_mzbin = observed->SmallestMzbin();
   int largest_mzbin = observed->LargestMzbin();
 
-  vector<pair<int, double>> filtered_peak_tuples = observed->StaticFilteredPeakTuples();
-  if (dynamic_filter) { filtered_peak_tuples = observed->DynamicFilteredPeakTuples(); }
+  vector<pair<int, double>> filtered_peak_tuples = observed->FilteredPeakTuples();
 
   double ms2_coverage = 1.0 * filtered_peak_tuples.size() / (largest_mzbin - smallest_mzbin + 1);
   double log_p = log(ms2_coverage);
@@ -1178,7 +1176,6 @@ void DIAmeterApplication::processParams() {
   Params::Set("precursor-window-type", "mz");
   Params::Set("spectrum-parser", "pwiz");
   Params::Set("num-threads", 1);
-  Params::Set("diameter-mode", true);
 
   // these are makepin-specific param settings
   output_pin_ = "diameter.features.pin";
