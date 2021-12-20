@@ -69,13 +69,12 @@ set(pwiz_build_args ${pwiz_build_args} link=static)
 set(pwiz_build_args ${pwiz_build_args} runtime-link=shared)
 
 if (${BUILD_TYPE} MATCHES "Debug")
-  set(pwiz_build_args ${pwiz_build_args} variant=debug)
+  set(pwiz_build_args ${pwiz_build_args} variant=debug libraries)
 else ()
-  set(pwiz_build_args ${pwiz_build_args} variant=release)
+  set(pwiz_build_args ${pwiz_build_args} variant=release libraries)
 endif (${BUILD_TYPE} MATCHES "Debug")
 
-set(pwiz_build_args ${pwiz_build_args} libraries)
-
+message("PWIZ BUILD COMMAND ${pwiz_build} ${pwiz_build_args}")
 execute_process(
   COMMAND ${pwiz_build} ${pwiz_build_args}
   RESULT_VARIABLE status
