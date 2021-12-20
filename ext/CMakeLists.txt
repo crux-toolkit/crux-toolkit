@@ -67,9 +67,15 @@ if (WIN32 AND NOT CYGWIN)
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost 
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
@@ -89,14 +95,9 @@ elseif (APPLE)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    PATCH_COMMAND
-      ${CMAKE_COMMAND}  -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/tar.jam
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries &&
-      ${CMAKE_COMMAND}  -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/WhittakerSmoother.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/analysis/common
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
     BUILD_COMMAND
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
@@ -109,15 +110,15 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
