@@ -283,7 +283,7 @@ void MassConstants::SetFixPt(double* mono_table, double* avg_table,
   for (int i = 0; i < 256; ++i) {
     if (mono_table[i] == 0) {
       mono_table[i] = avg_table[i]/* = aa_bin_1[i] = aa_bin_2[i]*/
-	= numeric_limits<double>::signaling_NaN();
+      = numeric_limits<double>::signaling_NaN();
       fixp_mono_table[i] = fixp_avg_table[i] = 0;
     } else {
       fixp_mono_table[i] = ToFixPt(mono_table[i]);
@@ -292,8 +292,7 @@ void MassConstants::SetFixPt(double* mono_table, double* avg_table,
   }
 }
 
-static bool CheckModification(const pb::Modification& mod,
-			      bool* repeats = NULL) {
+static bool CheckModification(const pb::Modification& mod, bool* repeats = NULL) {
   string aa_str = mod.amino_acids();
   if (aa_str.length() != 1)
     return false;

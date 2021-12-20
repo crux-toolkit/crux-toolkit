@@ -219,8 +219,7 @@ class Peptide {
 
   // added by Yang
   static double MassToMz(double mass, int charge) {
-	  return mass / (charge * 1.0) + MASS_PROTON;
-	  // return mass / (charge * 1.0) + MASS_H;
+    return mass / (charge * 1.0) + MASS_PROTON;
   }
   vector<int>& IonMzbins() { return ion_mzbins_; }
   vector<int>& BIonMzbins() { return b_ion_mzbins_; }

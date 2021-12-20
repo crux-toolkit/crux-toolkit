@@ -141,7 +141,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   // Check that combined p-value is with exact-p-value=T
   SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
   if (curScoreFunction == BOTH_SCORE && !exact_pval_search_) {
-    carp(CARP_FATAL,"--score-function 'both' must be run with exact-p-value=T");
+    carp(CARP_FATAL, "--score-function 'both' must be run with exact-p-value=T");
   }
 
   // TODO res-ev not implemented with flanking_peak, neutral_loss_peak,
@@ -149,21 +149,21 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
   bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
   if (use_flanking_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
-    carp(CARP_FATAL,"--score-function 'residue-evidence' with "
+    carp(CARP_FATAL, "--score-function 'residue-evidence' with "
                     "--use-flanking-peaks true is not implemented yet");
   }
   if (use_neutral_loss_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
-    carp(CARP_FATAL,"--score-function 'residue-evidence' with "
+    carp(CARP_FATAL, "--score-function 'residue-evidence' with "
                     "--use-neutral-loss-peaks 'true' is not implemented yet");
   }
   
   //Tailor score calibration does not support res-ev scores or refactored xcorrs //Added by AKF
   if (Params::GetBool("use-tailor-calibration") && exact_pval_search_ )
-    carp(CARP_FATAL,"--exact-p-value T is not implemented with Tailor score "
+    carp(CARP_FATAL, "--exact-p-value T is not implemented with Tailor score "
                     "calibration method");
 
   if (Params::GetBool("use-tailor-calibration") && curScoreFunction == RESIDUE_EVIDENCE_MATRIX )
-    carp(CARP_FATAL,"--score-function 'residue-evidence' is not implemented "
+    carp(CARP_FATAL, "--score-function 'residue-evidence' is not implemented "
                     "with Tailor score calibration method");
 
   // Check compute-sp parameter
@@ -653,7 +653,7 @@ void TideSearchApplication::search(void* threadarg) {
       } else {  //spectrum centric match report.
         //Implementation of the Tailor score calibration method, by AKF
         double quantile_score = 1.0;
-        if (Params::GetBool("use-tailor-calibration")){
+        if (Params::GetBool("use-tailor-calibration")) {
           vector<double> scores;
           double quantile_th = TAILOR_QUANTILE_TH;
           // Collect the scores for the score tail distribution
@@ -682,7 +682,7 @@ void TideSearchApplication::search(void* threadarg) {
             curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
             curScore.rank = it->second;
             //Added for tailor score calibration method by AKF
-            if (Params::GetBool("use-tailor-calibration")){
+            if (Params::GetBool("use-tailor-calibration")) {
               curScore.tailor = ((double)(it->first / XCORR_SCALING) + TAILOR_OFFSET) / quantile_score;
             }            
             match_arr.push_back(curScore);
@@ -771,7 +771,7 @@ void TideSearchApplication::search(void* threadarg) {
       vector< vector<int> > evidenceObs(nPepMassIntUniq, vector<int>(maxPrecurMassBin, 0));
       int* scoreOffsetObs = new int[nPepMassIntUniq];
       double** pValueScoreObs = new double*[nPepMassIntUniq];
-      int* intensArrayTheor = new int [maxPrecurMassBin]; // initialized later in loop
+      int* intensArrayTheor = new int[maxPrecurMassBin]; // initialized later in loop
       //END XCORR
 
       //RES-EV
@@ -780,7 +780,7 @@ void TideSearchApplication::search(void* threadarg) {
       //nAARes: number of amino acids
       //maxPrecurMassBin: max number of mass bins
       vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
-	      vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin, 0)));
+         vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin, 0)));
 
       //Stores the score offset needed calculating res-ev p-values
       vector<int> scoreResidueOffsetObs(maxPrecurMassBin, -1);
@@ -804,8 +804,7 @@ void TideSearchApplication::search(void* threadarg) {
       int cTermMassBin;
       double cTermMass;
       if (cterm_mod_table.static_mod_size() > 0) {
-        cTermMassBin = MassConstants::mass2bin(
-		      MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta());
+        cTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta());
         cTermMass = MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta();
       } else {
         cTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
@@ -839,7 +838,7 @@ void TideSearchApplication::search(void* threadarg) {
           // precursorMass is the neutral mass
           observed.CreateResidueEvidenceMatrix(*spectrum, charge, maxPrecurMassBin, precursorMass,
                                                nAARes, aaMassDouble, fragTol, granularityScale,
-                                               nTermMass, cTermMass,&num_range_skipped, 
+                                               nTermMass, cTermMass, &num_range_skipped, 
                                                &num_precursors_skipped, &num_isotopes_skipped, &num_retained,
                                                residueEvidenceMatrix[pe]);
           vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
@@ -901,7 +900,7 @@ void TideSearchApplication::search(void* threadarg) {
               intensArrayTheorResEv.push_back(*iter_uint);
             }
 
-            scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix,intensArrayTheorResEv,aaMassDouble,curPeptide);
+            scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix, intensArrayTheorResEv, aaMassDouble, curPeptide);
             resEvScores.push_back(scoreResidueEvidence);
 
             if (scoreResidueEvidence > 0) { // if > 0, set bool to true to create DP matrix
@@ -976,8 +975,8 @@ void TideSearchApplication::search(void* threadarg) {
         int row;
         int score_idx;        
         pValueDistLen += 1;
-        pValueDist = new double [pValueDistLen*2];
-        double *scoreCountBinAdjust = new double [pValueDistLen*2];
+        pValueDist = new double[pValueDistLen*2];
+        double *scoreCountBinAdjust = new double[pValueDistLen*2];
         memset(pValueDist, 0.0, sizeof(double)*pValueDistLen*2);
         memset(scoreCountBinAdjust, 0.0, sizeof(double)*pValueDistLen*2);
         
@@ -1021,20 +1020,20 @@ void TideSearchApplication::search(void* threadarg) {
       //Create dyanamic programming matrix if there is a res-ev score greater than 0
       //and if user specified as a score function either 'residue-evidence matrix' or 'both'
       if (curScoreFunction != XCORR_SCORE) {
-        for (pe=0 ; pe<nPepMassIntUniq ; pe++) {
+        for (pe=0 ; pe < nPepMassIntUniq ; pe++) {
           int curPepMassInt = pepMassIntUnique[pe];
           if (calcDPMatrix[curPepMassInt] == false) {
             continue;
           }
 
           vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
-          vector<int> maxColEvidence(curPepMassInt,0);
+          vector<int> maxColEvidence(curPepMassInt, 0);
 
           //maxColEvidence is edited by reference
-          int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix,maxColEvidence,curPepMassInt);
+          int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix, maxColEvidence, curPepMassInt);
           int maxNResidue = floor((double)curPepMassInt / 57.0);
 
-          std::sort(maxColEvidence.begin(),maxColEvidence.end(),greater<int>());
+          std::sort(maxColEvidence.begin(), maxColEvidence.end(), greater<int>());
           int maxScore = 0;
           for(int i = 0; i < maxNResidue; i++) { //maxColEvidence has been sorted
             maxScore += maxColEvidence[i];
@@ -1043,17 +1042,17 @@ void TideSearchApplication::search(void* threadarg) {
           int scoreOffset;
           vector<double> scoreResidueCount;
 
-          calcResidueScoreCount(nAARes,curPepMassInt,curResidueEvidenceMatrix,aaMassInt,
-                                dAAFreqN, dAAFreqI, dAAFreqC,nTermMassBin,cTermMassBin,
-                                minDeltaMass,maxDeltaMass,maxEvidence,maxScore,
-                                scoreResidueCount,scoreOffset);
+          calcResidueScoreCount(nAARes, curPepMassInt, curResidueEvidenceMatrix, aaMassInt,
+                                dAAFreqN, dAAFreqI, dAAFreqC, nTermMassBin, cTermMassBin,
+                                minDeltaMass, maxDeltaMass, maxEvidence, maxScore,
+                                scoreResidueCount, scoreOffset);
           scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
 
           double totalCount = 0;
-          for (int i=scoreOffset ; i<scoreResidueCount.size() ; i++) {
+          for (int i=scoreOffset ; i < scoreResidueCount.size() ; i++) {
             totalCount += scoreResidueCount[i];
           }
-          for (int i=scoreResidueCount.size()-2 ; i>-1; i--) {
+          for (int i=scoreResidueCount.size()-2 ; i > -1; i--) {
             scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
           }
           for (int i = 0; i < scoreResidueCount.size(); i++) {
@@ -1116,7 +1115,7 @@ void TideSearchApplication::search(void* threadarg) {
             double cPval = pValue_xcorr * pValue_resEv;
 
             double m = 1.2; // This value has been empircally determined
-            pValue_both = calcCombinedPval(m,cPval,2); //2 is the # of p-values that are combined
+            pValue_both = calcCombinedPval(m, cPval, 2); //2 is the # of p-values that are combined
           }
           //END BOTH_SCORE
 
@@ -1770,7 +1769,7 @@ int TideSearchApplication::calcScoreCount(
       delete dynProgArray[ma];
   for (ma = colFirst; ma < colLast; ma++) {
     dynProgArray[ma+maxDeltaMass ] = new double[nRow];
-    memset(dynProgArray[ma+maxDeltaMass],0.0, nRow*sizeof(double));
+    memset(dynProgArray[ma+maxDeltaMass], 0.0, nRow*sizeof(double));
     
     for (de = 0; de < nDeltaMass; de++) {
       deltaMassCol[de] = ma + aaMass[de];
@@ -1808,7 +1807,7 @@ int TideSearchApplication::calcScoreCount(
   delete [] scoreCountBinAdjust;
 
   return scoreOffsetObs;
- }
+}
 
 /*
  * Calculates counts of peptides with various residue evidence scores, given
@@ -1915,7 +1914,7 @@ void TideSearchApplication::calcResidueScoreCount (
   //set to zero now that score counts for first amino acid are in matrix
   dynProgArray[initCountRow][initCountCol] = 0.0;
 
-   //The following code was added by AKF to make the DP calculation faster
+//The following code was added by AKF to make the DP calculation faster
   int newCol;
   for (ma = initCountCol+1; ma < colLast; ++ma) {
     col = ma;  
@@ -2127,7 +2126,7 @@ int TideSearchApplication::calcResEvScore(
   vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
   for (int res = 0; res < pepLen - 1; res++) {
     double tmpAAMass = residueMasses[res];
-    int tmpAA = find(aaMassDouble.begin(),aaMassDouble.end(),tmpAAMass) - aaMassDouble.begin();
+    int tmpAA = find(aaMassDouble.begin(), aaMassDouble.end(), tmpAAMass) - aaMassDouble.begin();
     scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
   }
   return scoreResidueEvidence;

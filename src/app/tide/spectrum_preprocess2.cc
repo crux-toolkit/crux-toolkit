@@ -184,7 +184,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       // sort region_peaks w.r.t the descending intensity
       sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
       // save the top msamanda-regional-topk peaks per region
-      for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
+      for (int peak_idx=0; peak_idx < region_peaks.size(); ++peak_idx) {
         if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
         int peak_mzbin = region_peaks[peak_idx].first;
         sta_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
@@ -210,8 +210,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         int index = i * dyn_region_size + j;
         if (peaks_[index] <= intensity_cutoff) {
           peaks_[index] = 0;
-        }
-        else {
+        } else {
           region_peaks.push_back(make_pair(index, peaks_[index]));
         }
 
@@ -235,7 +234,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       // sort region_peaks w.r.t the descending intensity
       sort(region_peaks.begin(), region_peaks.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.second > right.second; });
       // save the top samanda-regional-topk peaks per region
-      for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
+      for (int peak_idx=0; peak_idx < region_peaks.size(); ++peak_idx) {
         if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
         // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
         // int peak_mzbin = region_peaks[peak_idx].first;
@@ -293,9 +292,11 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   }
   
 #ifdef DEBUG
-  if (debug)
+  if (debug) {
     ShowPeaks();
     ShowCache();
+  }
+
 #endif
 }
 
@@ -327,7 +328,7 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
       
       // Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
       double score = 0.0;
       for (int i = index; i < ionMasses.size(); i++) {
         if (newResMassBin != ionMassBin[i]) {
@@ -637,7 +638,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionIntens.push_back(0.0);
 
     reverse(ionMass.begin(), ionMass.end());
-    reverse(ionMassBin.begin(),ionMassBin.end());
+    reverse(ionMassBin.begin(), ionMassBin.end());
     reverse(ionIntens.begin(), ionIntens.end());
 
     addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,
