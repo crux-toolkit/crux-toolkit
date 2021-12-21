@@ -269,7 +269,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // values for taking dot products with theoretical spectra.
           // TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
           observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained, true);
-          int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
+          int nCandPeptide = active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range, candidatePeptideStatus, true);
           int candidatePeptideStatusSize = candidatePeptideStatus->size();
           if (nCandPeptide == 0) { continue; }
 
