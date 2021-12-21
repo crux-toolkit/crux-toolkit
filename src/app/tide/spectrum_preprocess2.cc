@@ -163,8 +163,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         if (peaks_[index] <= intensity_cutoff) {
           peaks_[index] = 0;
         }
-        else {
-        	region_peaks.push_back(make_pair(index, peaks_[index]));
+        else if (dia_mode) {
+          region_peaks.push_back(make_pair(index, peaks_[index]));
         }
 
         if (peaks_[index] > highest_intensity) {
@@ -192,10 +192,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
           if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
           // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
           // int peak_mzbin = region_peaks[peak_idx].first;
-  	      dyn_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
+          dyn_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
         }
       }
-
     }
     sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
 

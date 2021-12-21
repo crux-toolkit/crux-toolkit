@@ -48,11 +48,11 @@ ActivePeptideQueue::~ActivePeptideQueue() {
 
 // Compute the theoretical peaks of the peptide in the "back" of the queue
 // (i.e. the one most recently read from disk -- the heaviest).
-void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
+void ActivePeptideQueue::ComputeTheoreticalPeaksBack(bool dia_mode) {
   theoretical_peak_set_.Clear();
   Peptide* peptide = queue_.back();
   peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, current_pb_peptide_,
-                                   compiler_prog1_, compiler_prog2_);
+                                   compiler_prog1_, compiler_prog2_, dia_mode);
 }
 
 bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
@@ -67,7 +67,7 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
   return false;
 }
 
-int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus) {
+int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus, bool dia_mode) {
   int min_candidates = 0;  //Added for tailor score calibration method by AKF
   if (Params::GetBool("use-tailor-calibration")){
     min_candidates = 30;
@@ -114,7 +114,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   //Modified for tailor score calibration method by AKF
   if (queue_.empty() || queue_.back()->Mass() <= max_range || queue_.size() < min_candidates) {
     if (!queue_.empty()) {
-      ComputeTheoreticalPeaksBack();
+      ComputeTheoreticalPeaksBack(dia_mode);
     }
     while (!(done = reader_->Done())) {
       // read all peptides lighter than max_range
@@ -130,7 +130,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
       if (peptide->Mass() > max_range && queue_.size() > min_candidates) {
         break;
       }
-      ComputeTheoreticalPeaksBack();
+      ComputeTheoreticalPeaksBack(dia_mode);
     }
   }
   // by now, if not EOF, then the last (and only the last) enqueued
