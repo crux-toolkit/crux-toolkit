@@ -190,13 +190,13 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         // save the top samanda-regional-topk peaks per region
         for (int peak_idx=0; peak_idx<region_peaks.size(); ++peak_idx) {
           if (peak_idx >= Params::GetInt("msamanda-regional-topk")) { break; }
-          // carp(CARP_DETAILED_DEBUG, "Region:[%d, %d] \t total_peaks: %d \t Peak mzbin: %d \t intensity: %f", i * region_size, (i+1) * region_size, region_peaks.size(), region_peaks[peak_idx].first, region_peaks[peak_idx].second );
-          // int peak_mzbin = region_peaks[peak_idx].first;
           dyn_filtered_peak_tuples_.push_back(region_peaks[peak_idx]);
         }
       }
     }
-    sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    if (dia_mode) {
+      sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
+    }
 
 #ifdef DEBUG
     if (debug) {

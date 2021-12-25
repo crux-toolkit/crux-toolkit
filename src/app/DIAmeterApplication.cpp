@@ -356,18 +356,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
     diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
 
-  /*
-  // filter the edges by using cross-validation
-  if (!FileUtils::Exists(output_file_name_cv_) || Params::GetBool("overwrite") ) {
-    DIAmeterCVSelector diameterCVSelector(output_file_name_scaled_.c_str());
-    diameterCVSelector.loadData(output_file_name_cv_.c_str() );
-
-    double params[] = {0.2,0.4,0.8,1.6,3.2,6.4,12.8,25.6};
-    vector<double> paramRangeList (params, params + sizeof(params) / sizeof(params[0]));
-    diameterCVSelector.FoldFilter(output_file_name_cv_.c_str(), &paramRangeList);
-  }
-  */
-
   // generate .pin file by calling make-pin
   MakePinApplication pinApp;
   vector<string> paths_vec;
