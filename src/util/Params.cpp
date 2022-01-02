@@ -2129,6 +2129,19 @@ Params::Params() : finalized_(false) {
     "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
 
+  // phillip-specific
+  InitBoolParam("low-res-mode", false,
+    "use mzbin instead of ppm to extract MS1 or MS2 signals.",
+    "It is used for DIAmeter", true);
+
+  InitDoubleParam("max-mz-width-tokeep", 100, 0, 1000000,
+    "The m/z width threshold to filter the spectra",
+    "It is used for DIAmeter", true);
+
+  InitBoolParam("coelution-median", false,
+    "use median instead of the average top-k to calculate precursor fragment co-elution.",
+    "It is used for DIAmeter", true);
+
   Categorize();
 }
 

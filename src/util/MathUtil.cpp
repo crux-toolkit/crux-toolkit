@@ -182,6 +182,14 @@ int MathUtil::linearSearch(const std::vector<double>* data_vec, double query) {
 	return min_idx;
 }
 
+double MathUtil::Median(std::vector<double>* data_vec) {
+	if (data_vec == NULL || data_vec->size() <= 0) { return 0; }
+
+	sort(data_vec->begin(), data_vec->end());
+	if (data_vec->size() % 2 == 0){ return (data_vec->at(data_vec->size() / 2 - 1) + data_vec->at(data_vec->size() / 2)) / 2; }
+	else { return data_vec->at(data_vec->size() / 2); }
+}
+
 boost::tuple<double, double> MathUtil::fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values) {
 	if (x_values->size() <= 0 || x_values->size() != y_values->size()) { return boost::make_tuple(0, 0); }
 

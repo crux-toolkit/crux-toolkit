@@ -33,6 +33,8 @@ class MathUtil {
 
   static double gammaln(double xx);
 
+  static double Median(std::vector<double>* data_vec);
+
   template<typename T>
   static double Sum(const T& values) {
     double sum = 0;

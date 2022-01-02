@@ -89,14 +89,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_scaled_ = make_file_path("diameter.psm-features.txt");
   string output_file_name_filtered_ = make_file_path("diameter.psm-features.filtered.txt");
 
-  /*
-  if (Params::GetBool("psm-filter")) {
-    stringstream param_ss;
-    param_ss << "diameter-search.filtered." << getCoeffTag() << ".txt";
-    output_file_name_filtered_ = make_file_path(param_ss.str().c_str());
-  }
-  */
-
   // Extract all edge features
   if (!FileUtils::Exists(output_file_name_unsorted_) /*|| Params::GetBool("overwrite")*/ ) {
     carp(CARP_DEBUG, "Either file exists or it needs to be overwritten: %s", output_file_name_unsorted_.c_str());
@@ -122,8 +114,14 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
       // load MS1 and MS2 spectra
       map<int, boost::tuple<double*, double*, double*, int>> ms1scan_mz_intensity_rank_map;
+      map<int, boost::tuple<double*, double*>> ms1scan_intensity_rank_map;
       map<int, boost::tuple<double, double>> ms1scan_slope_intercept_map;
-      loadMS1Spectra(ms1_spectra_file, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map);
+
+      if (Params::GetInt("low-res-mode")) {
+        loadMS1SpectraLowRes(ms1_spectra_file, &ms1scan_intensity_rank_map, &ms1scan_slope_intercept_map);
+      } else {
+        loadMS1Spectra(ms1_spectra_file, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map);
+      }
       SpectrumCollection* spectra = loadSpectra(ms2_spectra_file);
 
       carp(CARP_INFO, "new max_ms1scan:%d \t scan_gap:%d \t avg_noise_intensity_logrank:%f", max_ms1scan_, scan_gap_, avg_noise_intensity_logrank_);
@@ -192,7 +190,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
         // cache the MS2 peaks specific to the current isolation window
         map<int, boost::tuple<double*, double*, int>> ms2scan_mz_intensity_map;
-        buildSpectraIndexFromIsoWindow(&spec_charge_chunk, &ms2scan_mz_intensity_map);
+        map<int, double*> ms2scan_intensity_map;
+
+        if (Params::GetInt("low-res-mode")) {
+          buildSpectraIndexFromIsoWindowLowRes(&spec_charge_chunk, &ms2scan_intensity_map);
+        } else {
+          buildSpectraIndexFromIsoWindow(&spec_charge_chunk, &ms2scan_mz_intensity_map);
+        }
 
         // the TTOF-specific denoising should occur in the for loop below
         for (int chunk_idx = 0; chunk_idx < spec_charge_chunk.size(); ++chunk_idx) {
@@ -263,7 +267,15 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           double min_range, max_range;
 
           carp(CARP_DETAILED_DEBUG, "MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t charge:%d", ms1_scan_num, scan_num, precursor_mz, charge);
-          computeWindowDIA(spec_charge_chunk.at(chunk_idx), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+          bool skip = computeWindowDIA(spec_charge_chunk.at(chunk_idx), &negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
+          if (skip) {
+            double iso_width = fabs(spec_charge_chunk.at(chunk_idx).spectrum->IsoWindowUpperMZ()-spec_charge_chunk.at(chunk_idx).spectrum->IsoWindowLowerMZ()) ;
+            carp(CARP_INFO, "^^^^Skip: MS1Scan:%d \t MS2Scan:%d \t precursor_mz:%f \t iso_width:%f", ms1_scan_num, scan_num, precursor_mz, iso_width);
+            delete min_mass;
+            delete max_mass;
+            delete candidatePeptideStatus;
+            continue;
+          }
 
           // Normalize the observed spectrum and compute the cache of frequently-needed
           // values for taking dot products with theoretical spectra.
@@ -298,13 +310,25 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
           TideMatchSet matches(&match_arr, highest_ms2_mz);
           if (!match_arr.empty()) {
-            reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins, locations,
+            if (Params::GetInt("low-res-mode")) {
+              reportDIALowRes(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins, locations,
+                &matches,
+                &observed,
+                &ms1scan_intensity_rank_map,
+                &ms1scan_slope_intercept_map,
+                &ms2scan_intensity_map,
+                &peptide_predrt_map);
+
+            } else {
+              reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins, locations,
                 &matches,
                 &observed,
                 &ms1scan_mz_intensity_rank_map,
                 &ms1scan_slope_intercept_map,
                 &ms2scan_mz_intensity_map,
                 &peptide_predrt_map);
+
+            }
           }
 
           delete min_mass;
@@ -313,9 +337,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
         }
 
         // clear up for next chunk
-        for (map<int, boost::tuple<double*, double*, int>>::const_iterator i = ms2scan_mz_intensity_map.begin(); i != ms2scan_mz_intensity_map.end(); i++) { delete[] (i->second).get<0>(); delete[] (i->second).get<1>(); }
-        ms2scan_mz_intensity_map.clear();
-
+        if (Params::GetInt("low-res-mode")) {
+          for (map<int, double*>::const_iterator i = ms2scan_intensity_map.begin(); i != ms2scan_intensity_map.end(); i++) { delete[] i->second; }
+          ms2scan_intensity_map.clear();
+        } else {
+          for (map<int, boost::tuple<double*, double*, int>>::const_iterator i = ms2scan_mz_intensity_map.begin(); i != ms2scan_mz_intensity_map.end(); i++) { delete[] (i->second).get<0>(); delete[] (i->second).get<1>(); }
+          ms2scan_mz_intensity_map.clear();
+        }
         spec_charge_chunk.clear();
       }
 
@@ -326,12 +354,21 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
      // clean up
      delete spectra;
 
-     for (map<int, boost::tuple<double*, double*, double*, int>>::const_iterator i = ms1scan_mz_intensity_rank_map.begin(); i != ms1scan_mz_intensity_rank_map.end(); i++) {
-       delete[] (i->second).get<0>();
-       delete[] (i->second).get<1>();
-       delete[] (i->second).get<2>();
+     if (Params::GetInt("low-res-mode")) {
+       for (map<int, boost::tuple<double*, double*>>::const_iterator i = ms1scan_intensity_rank_map.begin(); i != ms1scan_intensity_rank_map.end(); i++) {
+         delete[] (i->second).get<0>();
+         delete[] (i->second).get<1>();
+       }
+       ms1scan_intensity_rank_map.clear();
+     } else{
+       for (map<int, boost::tuple<double*, double*, double*, int>>::const_iterator i = ms1scan_mz_intensity_rank_map.begin(); i != ms1scan_mz_intensity_rank_map.end(); i++) {
+         delete[] (i->second).get<0>();
+         delete[] (i->second).get<1>();
+         delete[] (i->second).get<2>();
+       }
+       ms1scan_mz_intensity_rank_map.clear();
      }
-     ms1scan_mz_intensity_rank_map.clear();
+
      ms1scan_slope_intercept_map.clear();
 
      delete active_peptide_queue;
@@ -350,8 +387,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
     diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
   }
 
+  /*
   // filter the edges
-  if (!FileUtils::Exists(output_file_name_filtered_) /*|| Params::GetBool("overwrite")*/ ) {
+  if (!FileUtils::Exists(output_file_name_filtered_) || Params::GetBool("overwrite") ) {
     DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
     diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
   }
@@ -366,13 +404,6 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   PercolatorApplication percolatorApp;
   if(!FileUtils::Exists(output_percolator_)) { FileUtils::Mkdir(output_percolator_); }
   if (percolatorApp.main(make_file_path(output_pin_), output_percolator_) != 0) { carp(CARP_FATAL, "Percolator failed internally in DIAmeter."); }
-
-  /*
-  FileUtils::Remove(output_file_name_filtered_);
-  FileUtils::Remove(make_file_path(output_pin_));
-  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.peptides.txt"));
-  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.decoy.psms.txt"));
-  FileUtils::Remove(FileUtils::Join(output_percolator_, "percolator.target.psms.txt"));
   */
 
   return 0;
@@ -534,6 +565,157 @@ void DIAmeterApplication::reportDIA(
       peptide_predrt_map);
 }
 
+void DIAmeterApplication::reportDIALowRes(
+  ofstream* output_file,  // output file to write to
+  const string& spectrum_filename, // name of spectrum file
+  const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
+  const ActivePeptideQueue* peptides, // peptide queue
+  const ProteinVec& proteins, // proteins corresponding with peptides
+  const vector<const pb::AuxLocation*>& locations,  // auxiliary locations
+  TideMatchSet* matches, // object to manage PSMs
+  ObservedPeakSet* observed,
+  map<int, boost::tuple<double*, double*>>* ms1scan_intensity_rank_map,
+  map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
+  map<int, double*>* ms2scan_intensity_map,
+  map<string, double>* peptide_predrt_map
+) {
+  Spectrum* spectrum = sc.spectrum;
+  int charge = sc.charge;
+  int ms1_scan_num = spectrum->MS1SpectrumNum();
+  int ms2_scan_num = spectrum->SpectrumNumber();
+
+  // get top-n targets and decoys by the heap
+  vector<TideMatchSet::Arr::iterator> targets, decoys;
+  matches->gatherTargetsAndDecoys(peptides, proteins, targets, decoys, Params::GetInt("top-match"), 1, true);
+
+  // calculate precursor intensity logrank (bin-based)
+  double *intensity_arr = NULL, *intensity_rank_arr = NULL;
+  map<int, boost::tuple<double*, double*>>::iterator intensityIter = ms1scan_intensity_rank_map->find(ms1_scan_num);
+  if (intensityIter == ms1scan_intensity_rank_map->end()) {
+	  carp(CARP_DETAILED_DEBUG, "No intensity found in MS1 scan:%d !!!", ms1_scan_num);
+  } else {
+    intensity_arr = (intensityIter->second).get<0>();
+    intensity_rank_arr = (intensityIter->second).get<1>();
+  }
+
+  double slope_new = 0, intercept_new = avg_ms1_intercept_;
+  map<int, boost::tuple<double, double>>::iterator rankIter = ms1scan_slope_intercept_map->find(ms1_scan_num);
+  if (rankIter == ms1scan_slope_intercept_map->end()) {
+    carp(CARP_DETAILED_DEBUG, "No slope and intercept found in MS1 scan:%d !!!", ms1_scan_num);
+  } else {
+    slope_new = (rankIter->second).get<0>();
+    intercept_new = (rankIter->second).get<1>();
+  }
+  boost::tuple<double, double> slope_intercept_tp = boost::make_tuple(slope_new, intercept_new);
+
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> intensity_map;
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> logrank_map;
+  computePrecIntRankLowRes(targets, peptides, intensity_arr, intensity_rank_arr, slope_intercept_tp, &intensity_map, &logrank_map, charge);
+  computePrecIntRankLowRes(decoys, peptides, intensity_arr, intensity_rank_arr, slope_intercept_tp, &intensity_map, &logrank_map, charge);
+
+  // calculate precursor fragment co-elution
+  carp(CARP_DETAILED_DEBUG, "scan_gap:%d \t coelution-oneside-scans:%d", scan_gap_, Params::GetInt("coelution-oneside-scans") );
+  // extract the MS1 and MS2 scan numbers which constitute the local chromatogram
+  vector<int> valid_ms1scans, valid_ms2scans;
+  for (int offset = -Params::GetInt("coelution-oneside-scans"); offset <= Params::GetInt("coelution-oneside-scans"); ++offset) {
+    int candidate_ms1scan = ms1_scan_num + offset*scan_gap_;
+    int candidate_ms2scan = ms2_scan_num + offset*scan_gap_;
+    if (candidate_ms1scan < 1 || candidate_ms1scan > max_ms1scan_) { continue; }
+
+    valid_ms1scans.push_back(candidate_ms1scan);
+    valid_ms2scans.push_back(candidate_ms2scan);
+  }
+
+  // Loop through each corresponding ms1scan and ms2scan pair (ppm-based)
+  vector<boost::tuple<double*, double*>> intensity_arrs_vector;
+  for (pair<vector<int>::const_iterator, vector<int>::const_iterator> f(valid_ms1scans.begin(), valid_ms2scans.begin());
+    f.first != valid_ms1scans.end() && f.second != valid_ms2scans.end(); ++f.first, ++f.second) {
+
+    int curr_ms1scan = *(f.first);
+    int curr_ms2scan = *(f.second);
+
+    double *ms1_intensity_arr = NULL, *ms2_intensity_arr = NULL;
+
+    map<int, boost::tuple<double*, double*>>::iterator ms1_intensityIter = ms1scan_intensity_rank_map->find(curr_ms1scan);
+    if (ms1_intensityIter == ms1scan_intensity_rank_map->end()) {
+      carp(CARP_DETAILED_DEBUG, "No intensity found in MS1 scan:%d !!!", curr_ms1scan);
+    } else {
+      ms1_intensity_arr = (ms1_intensityIter->second).get<0>();
+    }
+
+    map<int, double*>::iterator ms2_intensityIter = ms2scan_intensity_map->find(curr_ms2scan);
+    if (ms2_intensityIter == ms2scan_intensity_map->end()) {
+      carp(CARP_DETAILED_DEBUG, "No intensity found in MS2 scan:%d !!!", curr_ms2scan);
+    } else {
+      ms2_intensity_arr = ms2_intensityIter->second;
+    }
+
+    if (ms1_intensity_arr != NULL && ms2_intensity_arr != NULL) {
+      intensity_arrs_vector.push_back(boost::make_tuple(ms1_intensity_arr, ms2_intensity_arr));
+    }
+  }
+
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>> coelute_map;
+  computePrecFragCoeluteLowRes(targets, peptides, &intensity_arrs_vector, &coelute_map, charge);
+  computePrecFragCoeluteLowRes(decoys, peptides, &intensity_arrs_vector, &coelute_map, charge);
+
+  // calculate MS2 p-value
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double>> ms2pval_map;
+  computeMS2Pval(targets, peptides, observed, &ms2pval_map);
+  computeMS2Pval(decoys, peptides, observed, &ms2pval_map);
+
+  // calculate delta_cn and delta_lcn
+  map<TideMatchSet::Arr::iterator, FLOAT_T> delta_cn_map;
+  map<TideMatchSet::Arr::iterator, FLOAT_T> delta_lcn_map;
+  TideMatchSet::computeDeltaCns(targets, &delta_cn_map, &delta_lcn_map);
+  TideMatchSet::computeDeltaCns(decoys, &delta_cn_map, &delta_lcn_map);
+
+  // calculate SpScore if necessary
+  map<TideMatchSet::Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
+  if (Params::GetBool("compute-sp")) {
+    SpScorer sp_scorer(proteins, *spectrum, charge, matches->max_mz_);
+    TideMatchSet::computeSpData(targets, &sp_map, &sp_scorer, peptides);
+    TideMatchSet::computeSpData(decoys, &sp_map, &sp_scorer, peptides);
+  }
+
+  matches->writeToFileDIA(output_file,
+      Params::GetInt("top-match"),
+      targets,
+      spectrum_filename,
+      spectrum,
+      charge,
+      peptides,
+      proteins,
+      locations,
+      &delta_cn_map,
+      &delta_lcn_map,
+      Params::GetBool("compute-sp")? &sp_map : NULL,
+      &intensity_map,
+      &logrank_map,
+      &coelute_map,
+      &ms2pval_map,
+      peptide_predrt_map);
+
+  matches->writeToFileDIA(output_file,
+      Params::GetInt("top-match"),
+      decoys,
+      spectrum_filename,
+      spectrum,
+      charge,
+      peptides,
+      proteins,
+      locations,
+      &delta_cn_map,
+      &delta_lcn_map,
+      Params::GetBool("compute-sp")? &sp_map : NULL,
+      &intensity_map,
+      &logrank_map,
+      &coelute_map,
+      &ms2pval_map,
+      peptide_predrt_map);
+}
+
+
 void DIAmeterApplication::computePrecFragCoelute(
   const vector<TideMatchSet::Arr::iterator>& vec,
   const ActivePeptideQueue* peptides,
@@ -617,9 +799,117 @@ void DIAmeterApplication::computePrecFragCoelute(
      sort(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), greater<double>());
 
      double ms1_mean = 0, ms2_mean = 0, ms1_ms2_mean = 0;
-     if (ms1_corrs.size() > 0) { ms1_corrs.resize(Params::GetInt("coelution-topk")); ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size(); }
-     if (ms2_corrs.size() > 0) { ms2_corrs.resize(Params::GetInt("coelution-topk")); ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size(); }
-     if (ms1_ms2_corrs.size() > 0) { ms1_ms2_corrs.resize(Params::GetInt("coelution-topk")); ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size(); }
+     if (ms1_corrs.size() > 0) {
+    	 ms1_corrs.resize(Params::GetInt("coelution-topk")); ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size();
+     }
+     if (ms2_corrs.size() > 0) {
+    	 if (Params::GetBool("coelution-median")) { ms2_mean = MathUtil::Median(&ms2_corrs); }
+    	 else { ms2_corrs.resize(Params::GetInt("coelution-topk")); ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size(); }
+     }
+     if (ms1_ms2_corrs.size() > 0) {
+    	 if (Params::GetBool("coelution-median")) { ms1_ms2_mean = MathUtil::Median(&ms1_ms2_corrs); }
+    	 else { ms1_ms2_corrs.resize(Params::GetInt("coelution-topk")); ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size(); }
+     }
+     coelute_map->insert(make_pair((*i), boost::make_tuple(ms1_mean, ms2_mean, ms1_ms2_mean)));
+
+     // clean up
+     for (int prec_offset = 0; prec_offset < ms1_chroms.size(); ++prec_offset ) { delete[] ms1_chroms.at(prec_offset); }
+     for (int frag_offset = 0; frag_offset < ms2_chroms.size(); ++frag_offset ) { delete[] ms2_chroms.at(frag_offset); }
+     ms1_chroms.clear();
+     ms2_chroms.clear();
+  }
+}
+
+void DIAmeterApplication::computePrecFragCoeluteLowRes(
+  const vector<TideMatchSet::Arr::iterator>& vec,
+  const ActivePeptideQueue* peptides,
+  vector<boost::tuple<double*, double*>>* intensity_arrs_vector,
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+  int charge
+) {
+  int coelute_size = intensity_arrs_vector->size();
+  vector<double> ms1_corrs, ms2_corrs, ms1_ms2_corrs;
+
+  for (vector<TideMatchSet::Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+     Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
+     // Precursor signals
+     double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
+     // Fragment signals
+     vector<double> ion_mzs = peptide.IonMzs();
+     // Precursor and fragment chromatograms
+     vector<double*> ms1_chroms, ms2_chroms;
+
+     // build Precursor chromatograms
+     for (int prec_offset = 0; prec_offset < 3; ++prec_offset ) {
+       double prec_mz = peptide_mz_m0 + 1.0*prec_offset/(charge * 1.0);
+       unsigned int prec_mzbin = MassConstants::mass2bin(prec_mz);
+
+       double* intensity_arr = new double[coelute_size];
+       fill_n(intensity_arr, coelute_size, 0);
+
+       for (int coelute_idx = 0; coelute_idx < coelute_size; ++coelute_idx ) {
+         boost::tuple<double*, double*> intensity_arrs = intensity_arrs_vector->at(coelute_idx);
+         double* ms1_intensity_arr = intensity_arrs.get<0>();
+         if (ms1_intensity_arr != NULL && prec_mzbin < max_ms1_mzbin_) { intensity_arr[coelute_idx] = ms1_intensity_arr[prec_mzbin]; }
+       }
+       ms1_chroms.push_back(intensity_arr);
+     }
+
+     // build Fragment chromatograms
+     for (int frag_offset = 0; frag_offset < ion_mzs.size(); ++frag_offset ) {
+       double frag_mz = ion_mzs.at(frag_offset);
+       unsigned int frag_mzbin = MassConstants::mass2bin(frag_mz);
+
+       double* intensity_arr = new double[coelute_size];
+       fill_n(intensity_arr, coelute_size, 0);
+
+       for (int coelute_idx = 0; coelute_idx < coelute_size; ++coelute_idx ) {
+         boost::tuple<double*, double*> intensity_arrs = intensity_arrs_vector->at(coelute_idx);
+         double* ms2_intensity_arr = intensity_arrs.get<1>();
+         if (ms2_intensity_arr != NULL && frag_mzbin < max_ms2_mzbin_) { intensity_arr[coelute_idx] = ms2_intensity_arr[frag_mzbin]; }
+       }
+       ms2_chroms.push_back(intensity_arr);
+     }
+
+     // calculate correlation among MS1
+     ms1_corrs.clear();
+     for (int i = 0; i < ms1_chroms.size(); ++i) {
+       for (int j = i+1; j < ms1_chroms.size(); ++j) {
+         ms1_corrs.push_back(MathUtil::NormalizedDotProduct(ms1_chroms.at(i), ms1_chroms.at(j), coelute_size));
+       }
+     }
+     sort(ms1_corrs.begin(), ms1_corrs.end(), greater<double>());
+
+     // calculate correlation among MS2
+     ms2_corrs.clear();
+     for (int i = 0; i < ms2_chroms.size(); ++i) {
+       for (int j = i+1; j < ms2_chroms.size(); ++j) {
+         ms2_corrs.push_back(MathUtil::NormalizedDotProduct(ms2_chroms.at(i), ms2_chroms.at(j), coelute_size));
+       }
+     }
+     sort(ms2_corrs.begin(), ms2_corrs.end(), greater<double>());
+
+     // calculate correlation among MS1 and MS2
+     ms1_ms2_corrs.clear();
+     for (int i = 0; i < 1; ++i) {
+       for (int j = 0; j < ms2_chroms.size(); ++j) {
+         ms1_ms2_corrs.push_back(MathUtil::NormalizedDotProduct(ms1_chroms.at(i), ms2_chroms.at(j), coelute_size));
+       }
+     }
+     sort(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), greater<double>());
+
+     double ms1_mean = 0, ms2_mean = 0, ms1_ms2_mean = 0;
+     if (ms1_corrs.size() > 0) {
+    	 ms1_corrs.resize(Params::GetInt("coelution-topk")); ms1_mean = std::accumulate(ms1_corrs.begin(), ms1_corrs.end(), 0.0) / ms1_corrs.size();
+     }
+     if (ms2_corrs.size() > 0) {
+    	 if (Params::GetBool("coelution-median")) { ms2_mean = MathUtil::Median(&ms2_corrs); }
+    	 else { ms2_corrs.resize(Params::GetInt("coelution-topk")); ms2_mean = std::accumulate(ms2_corrs.begin(), ms2_corrs.end(), 0.0) / ms2_corrs.size(); }
+     }
+     if (ms1_ms2_corrs.size() > 0) {
+    	 if (Params::GetBool("coelution-median")) { ms1_ms2_mean = MathUtil::Median(&ms1_ms2_corrs); }
+    	 else { ms1_ms2_corrs.resize(Params::GetInt("coelution-topk")); ms1_ms2_mean = std::accumulate(ms1_ms2_corrs.begin(), ms1_ms2_corrs.end(), 0.0) / ms1_ms2_corrs.size(); }
+     }
      coelute_map->insert(make_pair((*i), boost::make_tuple(ms1_mean, ms2_mean, ms1_ms2_mean)));
 
      // clean up
@@ -741,6 +1031,48 @@ void DIAmeterApplication::computePrecIntRank(
   }
 }
 
+void DIAmeterApplication::computePrecIntRankLowRes(
+  const vector<TideMatchSet::Arr::iterator>& vec,
+  const ActivePeptideQueue* peptides,
+  const double* intensity_arr,
+  const double* intensity_rank_arr,
+  boost::tuple<double, double> slope_intercept_tp,
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+  map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
+  int charge
+) {
+  double slope = slope_intercept_tp.get<0>();
+  double intercept = slope_intercept_tp.get<1>();
+
+  for (vector<TideMatchSet::Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
+    Peptide& peptide = *(peptides->GetPeptide((*i)->rank));
+    double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
+
+    unsigned int peptide_mzbin_m0 = MassConstants::mass2bin(peptide_mz_m0);
+    unsigned int peptide_mzbin_m1 = MassConstants::mass2bin(peptide_mz_m0 + 1.0/(charge * 1.0));
+    unsigned int peptide_mzbin_m2 = MassConstants::mass2bin(peptide_mz_m0 + 2.0/(charge * 1.0));
+
+    double intensity_rank_m0 = avg_noise_intensity_logrank_, intensity_rank_m1 = avg_noise_intensity_logrank_, intensity_rank_m2 = avg_noise_intensity_logrank_;
+    double intensity_m0 = 0, intensity_m1 = 0, intensity_m2 = 0;
+
+    if (intensity_arr != NULL && peptide_mzbin_m2 < max_ms1_mzbin_) {
+      intensity_m0 = intensity_arr[peptide_mzbin_m0];
+      intensity_m1 = intensity_arr[peptide_mzbin_m1];
+      intensity_m2 = intensity_arr[peptide_mzbin_m2];
+    }
+
+    if (intensity_rank_arr != NULL && peptide_mzbin_m2 < max_ms1_mzbin_) {
+      intensity_rank_m0 = intensity_rank_arr[peptide_mzbin_m0];
+      intensity_rank_m1 = intensity_rank_arr[peptide_mzbin_m1];
+      intensity_rank_m2 = intensity_rank_arr[peptide_mzbin_m2];
+    }
+
+    intensity_map->insert(make_pair((*i), boost::make_tuple(intensity_rank_m0, intensity_rank_m1, intensity_rank_m2)));
+    logrank_map->insert(make_pair((*i), boost::make_tuple(slope*log(1.0+intensity_m0)+intercept, slope*log(1.0+intensity_m1)+intercept, slope*log(1.0+intensity_m2)+intercept)));
+  }
+}
+
+
 vector<InputFile> DIAmeterApplication::getInputFiles(const vector<string>& filepaths, int ms_level) const {
   vector<InputFile> input_sr;
 
@@ -839,6 +1171,38 @@ void DIAmeterApplication::buildSpectraIndexFromIsoWindow(vector<SpectrumCollecti
   }
 }
 
+void DIAmeterApplication::buildSpectraIndexFromIsoWindowLowRes(vector<SpectrumCollection::SpecCharge>* spec_charge_chunk, map<int, double*>* ms2scan_intensity_map) {
+  max_ms2_mzbin_ = 0;
+  for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk->begin();sc < spec_charge_chunk->begin() + (spec_charge_chunk->size()); sc++) {
+    Spectrum* spectrum = sc->spectrum;
+    unsigned int tmp_peak_mzbin = MassConstants::mass2bin(spectrum->MaxPeakMz());
+    if (tmp_peak_mzbin > max_ms2_mzbin_) { max_ms2_mzbin_ = tmp_peak_mzbin; }
+  }
+  max_ms2_mzbin_ += 10;
+
+  for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charge_chunk->begin();sc < spec_charge_chunk->begin() + (spec_charge_chunk->size()); sc++) {
+    Spectrum* spectrum = sc->spectrum;
+    int scan_num = spectrum->SpectrumNumber();
+    int peak_num = spectrum->Size();
+
+    double* intensity_arr = new double[max_ms2_mzbin_];
+    fill_n(intensity_arr, max_ms2_mzbin_, 0);
+
+    for (int peak_idx=0; peak_idx < peak_num; ++peak_idx) {
+      unsigned int peak_mzbin = MassConstants::mass2bin(spectrum->M_Z(peak_idx));
+      double peak_intensity = spectrum->Intensity(peak_idx);
+
+      if (Params::GetBool("spectra-denoising") && !spectrum->Is_supported(peak_idx)) {
+        intensity_arr[peak_idx] = 0;
+      } else {
+    	  intensity_arr[peak_mzbin] = max(intensity_arr[peak_mzbin], peak_intensity);
+      }
+    }
+    (*ms2scan_intensity_map)[scan_num] = intensity_arr;
+  }
+}
+
+
 void DIAmeterApplication::loadMS1Spectra(const std::string& file,
   map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
   map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
@@ -907,6 +1271,83 @@ void DIAmeterApplication::loadMS1Spectra(const std::string& file,
   avg_ms1_intercept_ = accumulated_intercept / max(1.0, accumulated_intercept_cnt);
 }
 
+void DIAmeterApplication::loadMS1SpectraLowRes(const std::string& file,
+  map<int, boost::tuple<double*, double*>>* ms1scan_intensity_rank_map,
+  map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map
+) {
+  SpectrumCollection* spectra = loadSpectra(file);
+  double highest_mz = spectra->FindHighestMZ();
+  max_ms1_mzbin_ = MassConstants::mass2bin(highest_mz+10.0);
+
+  double accumulated_intensity_logrank = 0.0, accumulated_peaknum = 0.0, accumulated_intercept = 0.0, accumulated_intercept_cnt = 0;
+  const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+
+  for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();sc < spec_charges->begin() + (spec_charges->size()); sc++) {
+    Spectrum* spectrum = sc->spectrum;
+    int ms1_scan_num = spectrum->MS1SpectrumNum();
+    int peak_num = spectrum->Size();
+    double noise_intensity_logrank = 0;
+
+    vector<double> sorted_intensity_vec = spectrum->DescendingSortedPeakIntensity();
+    double* intensity_arr = new double[max_ms1_mzbin_];
+    double* intensity_rank_arr = new double[max_ms1_mzbin_];
+
+    fill_n(intensity_arr, max_ms1_mzbin_, 0);
+    fill_n(intensity_rank_arr, max_ms1_mzbin_, 10000);
+
+
+    for (int peak_idx = 0; peak_idx < peak_num; ++peak_idx) {
+      unsigned int peak_mzbin = MassConstants::mass2bin(spectrum->M_Z(peak_idx));
+      double peak_intensity = spectrum->Intensity(peak_idx);
+      double peak_intensity_logrank = log(1.0+std::count_if(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), [&](int val){ return val >= peak_intensity; }));
+
+      intensity_arr[peak_mzbin] = max(intensity_arr[peak_mzbin], peak_intensity);
+      intensity_rank_arr[peak_mzbin] = min(intensity_rank_arr[peak_mzbin], peak_intensity_logrank);
+      noise_intensity_logrank = max(noise_intensity_logrank, peak_intensity_logrank);
+    }
+
+    for (int peak_mzbin=0; peak_mzbin<max_ms1_mzbin_; ++peak_mzbin) {
+      intensity_rank_arr[peak_mzbin] = min(intensity_rank_arr[peak_mzbin], noise_intensity_logrank);
+    }
+
+    // fitting the linear regression of log intensity
+    int ignore_top = 20; int min_sample_size = 500;
+    int retain_cnt = min(min_sample_size, int((peak_num - ignore_top) * 0.2));
+    int ignore_bottom = max(0, int(peak_num-retain_cnt-ignore_top));
+
+    if (peak_num >= min_sample_size) {
+      vector<double> log_intensity_vec; vector<double> log_rank_vec;
+      for (int peak_idx = 0; peak_idx < peak_num; ++peak_idx) {
+        double log_intensity = log(1.0 + sorted_intensity_vec.at(peak_idx));
+        double log_rank = log(1.0 + peak_idx);
+
+        if ((peak_idx >= ignore_top) && (peak_idx < (peak_num - ignore_bottom))) {
+          log_intensity_vec.push_back(log_intensity);
+          log_rank_vec.push_back(log_rank);
+        }
+      }
+
+      if (log_intensity_vec.size() > 0) {
+        boost::tuple<double, double> slope_intercept_tp = MathUtil::fitLinearRegression(&log_intensity_vec, &log_rank_vec);
+        (*ms1scan_slope_intercept_map)[ms1_scan_num] = slope_intercept_tp;
+        accumulated_intercept += slope_intercept_tp.get<1>();
+        accumulated_intercept_cnt += 1;
+      }
+    }
+
+    accumulated_intensity_logrank += noise_intensity_logrank;
+    (*ms1scan_intensity_rank_map)[ms1_scan_num] = boost::make_tuple(intensity_arr, intensity_rank_arr);
+
+    accumulated_peaknum += peak_num;
+  }
+  delete spectra;
+
+  // calculate the average noise intensity logrank, which is used as default value when MS1 scan is empty.
+  avg_noise_intensity_logrank_ =  accumulated_intensity_logrank / max(1.0, 1.0*spec_charges->size());
+  avg_ms1_intercept_ = accumulated_intercept / max(1.0, accumulated_intercept_cnt);
+}
+
+
 SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
   SpectrumCollection* spectra = new SpectrumCollection();
   pb::Header spectrum_header;
@@ -953,7 +1394,7 @@ SpectrumCollection* DIAmeterApplication::loadSpectra(const std::string& file) {
   return spectra;
 }
 
-void DIAmeterApplication::computeWindowDIA(
+bool DIAmeterApplication::computeWindowDIA(
   const SpectrumCollection::SpecCharge& sc,
   vector<int>* negative_isotope_errors,
   vector<double>* out_min,
@@ -964,11 +1405,14 @@ void DIAmeterApplication::computeWindowDIA(
   double unit_dalton = BIN_WIDTH;
   double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
   double precursor_window = fabs(sc.spectrum->IsoWindowUpperMZ()-sc.spectrum->IsoWindowLowerMZ()) / 2;
+  bool skip = false;
 
   if (MathUtil::AlmostEqual(precursor_window, 0)) {
     precursor_window = avg_isowin_width_ / 2;
     carp(CARP_WARNING, "Input file does not specify window width. Inferring a fixed isolation window size of %f m/z.", precursor_window);
   }
+
+  if (precursor_window > Params::GetDouble("max-mz-width-tokeep")) { skip = true; }
 
   for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
     out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
@@ -976,6 +1420,7 @@ void DIAmeterApplication::computeWindowDIA(
   }
   *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*sc.charge;
   *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*sc.charge;
+  return skip;
 }
 
 double DIAmeterApplication::getTailorQuantile(TideMatchSet::Arr2* match_arr2) {
