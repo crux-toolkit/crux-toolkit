@@ -65,7 +65,7 @@ void Peptide::Show() {
 }
 
 template<class W>
-void Peptide::AddIons(W* workspace) {
+void Peptide::AddIons(W* workspace, bool dia_mode) {
   // Use workspace to assemble all B and Y ions. workspace will determine
   // which, if any, associated ions will be represented.
   double max_possible_peak = numeric_limits<double>::infinity();
@@ -77,15 +77,19 @@ void Peptide::AddIons(W* workspace) {
 
 
   // added by Yang
-  ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
+  if (dia_mode) {
+    ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
+  }
 
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
-    b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
-    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
-    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 1));
+    if (dia_mode) {
+      b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
+      ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
+      ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 1));
+    }
     total += aa_masses[i];
   }
 
@@ -93,9 +97,11 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
-    y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
-    ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
-    ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 1));
+    if (dia_mode) {
+      y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
+      ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
+      ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 1));
+    }
     total += aa_masses[i];
   }
 
@@ -104,9 +110,6 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 2);
-    // b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
-    // ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 2)));
-    // ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 2));
     total += aa_masses[i];
   }
 
@@ -114,22 +117,16 @@ void Peptide::AddIons(W* workspace) {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 2);
-    // y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
-    // ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 2)));
-    // ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 2));
     total += aa_masses[i];
   }
 
   // added by Yang
-  sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
-  sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
-  sort(ion_mzbins_.begin(), ion_mzbins_.end());
-  sort(ion_mzs_.begin(), ion_mzs_.end());
-
-  /*carp(CARP_DETAILED_DEBUG, "peptide:%s", Seq().c_str() );
-  for (int ion_idx=0; ion_idx<ion_mzbins_.size(); ++ion_idx) {
-	  carp(CARP_DETAILED_DEBUG, "ion mzbin:%d", ion_mzbins_[ion_idx] );
-  }*/
+  if (dia_mode) {
+    sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
+    sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
+    sort(ion_mzbins_.begin(), ion_mzbins_.end());
+    sort(ion_mzs_.begin(), ion_mzs_.end());
+  }
 
 }
 
@@ -197,8 +194,8 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 //	exit(1);  
 }
 
-void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) {
-  AddIons<TheoreticalPeakSet>(workspace);   // Generic workspace
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace, bool dia_mode) {
+  AddIons<TheoreticalPeakSet>(workspace, dia_mode);   // Generic workspace
 #ifdef DEBUG
   Show();
 #endif
@@ -214,9 +211,10 @@ void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const
 void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
                                       const pb::Peptide& pb_peptide,
                                       TheoreticalPeakCompiler* compiler_prog1,
-                                      TheoreticalPeakCompiler* compiler_prog2) {
+                                      TheoreticalPeakCompiler* compiler_prog2,
+                                      bool dia_mode) {
   // Search-time fast workspace
-  AddIons<ST_TheoreticalPeakSet>(workspace);
+  AddIons<ST_TheoreticalPeakSet>(workspace, dia_mode);
 
 #if 0
   TheoreticalPeakArr peaks[2];
