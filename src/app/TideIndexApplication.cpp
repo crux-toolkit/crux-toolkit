@@ -13,6 +13,12 @@
 #include "app/tide/records_to_vector-inl.h"
 #include "ParamMedicApplication.h"
 
+// Larry's code
+#include "parameter.h" 
+#include "io/DelimitedFileWriter.h"
+#include <bits/stdc++.h>
+// Larry's code ends here
+
 #include <regex>
 #include <assert.h>
 
@@ -623,6 +629,25 @@ void TideIndexApplication::fastaToPb(
 
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
+
+  // Larry's code
+  const char* filename = "pepTarget.txt";
+  remove(filename);
+  DelimitedFileWriter* defaultWriterPtr = new DelimitedFileWriter(filename);
+
+  std::vector<std::string> colNames;
+  colNames.push_back("Mass");
+  colNames.push_back("Length");
+  colNames.push_back("ProteinId");
+  colNames.push_back("ProteinPos");
+  colNames.push_back("Sequence");
+  colNames.push_back("isDecoy");
+  colNames.push_back("decoyIdx");
+
+  defaultWriterPtr->setColumnNames(colNames);
+  defaultWriterPtr->writeHeader();
+  // Larry's code ends here
+
   while (GeneratePeptides::getNextProtein(fastaStream, &proteinName, proteinSequence)) {
     outProteinSequences.push_back(proteinSequence);
     cleavedPeptideInfo.push_back(make_pair(
@@ -651,6 +676,18 @@ void TideIndexApplication::fastaToPb(
       // Add target to heap
       TideIndexPeptide pepTarget(pepMass, i->Length(), proteinSequence, curProtein, i->Position());
       outPeptideHeap.push_back(pepTarget);
+
+      // Larry's code 
+      defaultWriterPtr->setColumnCurrentRow(0, pepTarget.getMass(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(1, pepTarget.getLength(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(2, pepTarget.getProteinId(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(3, pepTarget.getProteinPos(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(4, pepTarget.getSequence(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(5, pepTarget.isDecoy(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(6, pepTarget.decoyIdx(), 10);// col, value, precision
+      defaultWriterPtr->writeRow();
+      // Larry's code ends here
+
       push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
       if (!allowDups && decoyType != NO_DECOYS) {
         const string* setTarget = &*(setTargets.insert(i->Sequence()).first);
@@ -670,6 +707,41 @@ void TideIndexApplication::fastaToPb(
     }
     proteinSequence = new string;
   }
+
+  
+  // Larry's code 
+    #ifdef _WIN32
+      std::cout << "Windows\n";
+      std::string cmd = "sort  -k 1,1n -k 5,5 -u " +   std::string(filename) + "> sortedPepTarget.txt";
+    #elif __linux__
+      std::cout << "Linux\n";
+      std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    #elif __unix__
+        std::cout << "Other unix OS\n";
+        std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    #elif __APPLE__
+        std::cout << "Apple OS\n";
+        std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    #else
+        std::cout << "Unidentified OS\n";
+        std::cout << "We don't support your OS";
+        std::string cmd = ""
+    #endif
+
+    // Convert string to const char * as system requires
+    // parameter of type const char *
+    const char *command = cmd.c_str();
+    int systemRet = system(command);
+    if(systemRet == -1){
+      // The system method failed
+      std::cout << "system call failed";
+    }
+  // Larry's code ends here
+
+  // Larry's code
+  delete defaultWriterPtr; // to close the file
+  defaultWriterPtr = NULL;
+  // Larry's code ends here
 
   delete proteinSequence;
   if (targetsGenerated == 0) {
