@@ -37,9 +37,13 @@ struct ScSortByMzDIA {
 
         double mass_x = (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_x) * x.charge;
         double mass_y = (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_y) * y.charge;
-        if (mass_x < mass_y) { return true; }
-        else if ((mass_x == mass_y) && (x.spectrum->SpectrumNumber() < y.spectrum->SpectrumNumber())) { return true; }
-        else { return false; }
+        if (mass_x < mass_y) {
+          return true;
+        } else if ((mass_x == mass_y) && (x.spectrum->SpectrumNumber() < y.spectrum->SpectrumNumber())) {
+          return true;
+        } else {
+          return false;
+        }
     }
 };
 
@@ -103,8 +107,7 @@ class DIAmeterApplication : public CruxApplication {
     const vector<TideMatchSet::Arr::iterator>& vec,
     const ActivePeptideQueue* peptides,
     ObservedPeakSet* observed,
-    map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
-    bool dynamic_filter = true
+    map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map
   );
 
   void computeWindowDIA(
@@ -118,7 +121,7 @@ class DIAmeterApplication : public CruxApplication {
 
   double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
-  void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins=200);
+  void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins = 200);
 
   double closestPPMValue(
     const double* mz_arr,

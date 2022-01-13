@@ -41,8 +41,8 @@ set -o xtrace
 ms2_file=../performance-tests/051708-worm-ASMS-10.ms2
 fasta_file=../performance-tests/worm+contaminants.fa
 
-#CRUX=../../src/crux
-CRUX=../../build.release/src/crux
+CRUX=../../src/crux
+#CRUX=../../build.release/src/crux
 
 # Avoid NFS overhead by using a scratch directory.
 scratch_dir=/scratch
