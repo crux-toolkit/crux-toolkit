@@ -42,16 +42,16 @@ struct InputFile {
 };
 
 struct ScSortByMz {
-    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-    bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
-        return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge < 
-          (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-    }
-    double precursor_window_;
+  explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+  bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
+  }
+  double precursor_window_;
 };
 
 class TideSearchApplication : public CruxApplication {
- private:
+  private:
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
   void getMassBin (

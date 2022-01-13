@@ -121,7 +121,6 @@ class ObservedPeakSet {
      double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
-      raw_peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
 
     bin_width_  = bin_width;
@@ -130,7 +129,7 @@ class ObservedPeakSet {
     FP_ = FP; //FP means flanking peaks
   }
 
-  ~ObservedPeakSet() { delete[] peaks_; delete[] raw_peaks_; delete[] cache_; }
+  ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
 
   const int* GetCache() const { return cache_; } //TODO 261: access restriction?
 
@@ -143,7 +142,8 @@ class ObservedPeakSet {
                           long int* num_range_skipped,
                           long int* num_precursors_skipped,
                           long int* num_isotopes_skipped,
-                          long int* num_retained);
+                          long int* num_retained,
+                          bool dia_mode = false);
 
   // created by Andy Lin 2/11/2016
   // Method for creating residue evidence matrix from Spectrum
@@ -209,10 +209,9 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   }
 */
   // added by Yang
-  int LargestMzbin() const { return largest_mzbin_; }
-  int SmallestMzbin() const { return smallest_mzbin_; }
-  vector<pair<int, double>>& DynamicFilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
-  vector<pair<int, double>>& StaticFilteredPeakTuples() { return sta_filtered_peak_tuples_; }
+  int LargestMzbin() const { return largest_mzbin_; };
+  int SmallestMzbin() const { return smallest_mzbin_; };
+  vector<pair<int, double>>& FilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
 
  private:
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
@@ -230,9 +229,8 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   int cache_end_;
 
   // added by Yang
-  vector<pair<int, double>> dyn_filtered_peak_tuples_, sta_filtered_peak_tuples_;
-  int largest_mzbin_, smallest_mzbin_, max_mzbin_;
-  double* raw_peaks_; // peaks_ without grass filtering, used in MS2 p-value of DIAmeter
+  vector<pair<int, double>> dyn_filtered_peak_tuples_;
+  int largest_mzbin_, smallest_mzbin_;
 
   friend class ObservedPeakTester;
 };

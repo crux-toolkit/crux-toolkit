@@ -171,12 +171,12 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace);
+  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
   void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace,
                                const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
-                               TheoreticalPeakCompiler* compiler_prog2);
-
+                               TheoreticalPeakCompiler* compiler_prog2,
+                               bool dia_mode = false);
   void ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const;
 
   // Return the appropriate program depending on the precursor charge.
@@ -228,7 +228,7 @@ class Peptide {
 
 
  private:
-  template<class W> void AddIons(W* workspace) ;
+  template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
   template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
