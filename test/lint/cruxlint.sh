@@ -31,4 +31,4 @@ done < "$include"
 while IFS='' read -r line || [[ -n "$line" ]]; do
     filter+="-$line,"
 done < "$exclude"
-$(python cpplint/cpplint.py "--root=$root" "--filter=$filter" $file_to_parse)
+$(python2 cpplint/cpplint.py "--root=$root" "--filter=$filter" $file_to_parse)
