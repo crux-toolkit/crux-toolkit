@@ -874,8 +874,6 @@ void TideMatchSet::gatherTargetsAndDecoys(
     if (concat || !peptide.IsDecoy()) {
       if (targetsOut.size() < gatherSize) {
         targetsOut.push_back(i);
-      } else {
-        break;
       }
     } else {
       int idx = peptide.DecoyIdx();
@@ -887,6 +885,9 @@ void TideMatchSet::gatherTargetsAndDecoys(
         j->second++;
         decoysOut.push_back(i);
       }
+    }
+    if ((concat && targetsOut.size() >= gatherSize) || (!concat && targetsOut.size() >= gatherSize && decoysOut.size() >= gatherSize)){
+      break;
     }
   }
 }
