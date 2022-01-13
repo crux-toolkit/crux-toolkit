@@ -66,13 +66,13 @@ class TheoreticalPeakSetBYSparse {
     peak_mask_end = MaxBin::Global().CacheBinEnd();
     cache_end = MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES;
     peak_mask = new int[peak_mask_end];
-    memset(peak_mask, 0,  sizeof(int)*peak_mask_end);    
+    memset(peak_mask, 0,  sizeof(int)*peak_mask_end);
   }
 
   virtual ~TheoreticalPeakSetBYSparse() {}
 
   void Clear() {
-    TheoreticalPeakArr::iterator itr;      
+    TheoreticalPeakArr::iterator itr; 
     int idx;
     for (itr = peaks_[0].begin(); itr != peaks_[0].end(); ++itr) {
         idx = int((*itr)/2);

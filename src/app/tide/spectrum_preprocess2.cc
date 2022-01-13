@@ -176,6 +176,12 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       if (highest_intensity == 0) {
         continue;
       }
+
+      // In the original implementation first the experimental peaks are normalized to the
+      // range between 0 and 50. Later in the Tide-Search, the double-valued experimental
+      // spectrum vector peaks_ is integerized and the experimental peak intensities are
+      // multiplied by a large integer: 500000. I have combined these two steps into one 
+      // calculation. hence 50*500000=25000000.0
       normalizer = 25000000.0 / highest_intensity;
       for (int j = 0; j < dyn_region_size; ++j) {
         int index = i * dyn_region_size + j;

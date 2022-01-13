@@ -1783,8 +1783,7 @@ int TideSearchApplication::calcScoreCount(
         if (col == colLast) { 
          evidenceRow = row;
           dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqC[de]; 
-        }
-        if (col < colLast) {
+        } else if (col < colLast) {
           evidenceRow = row + evidenceObs[col];
           dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqI[de]; 
         }
@@ -1930,8 +1929,7 @@ void TideSearchApplication::calcResidueScoreCount (
         if (newCol == colLast) {
           evidRow = row;
           dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqC[de];            
-        }
-        if (newCol < colLast) {
+        } else if (newCol < colLast) {
           evidRow = row + residueEvidenceMatrix[de][newCol];
           dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqI[de];
         }
