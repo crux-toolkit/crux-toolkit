@@ -26,6 +26,11 @@
 #include <io.h>
 #endif
 
+// Larry's code
+const char* filename;
+DelimitedFileWriter* defaultWriterPtr;
+// Larry's code ends here
+
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                                 const string& input_filename,
                                 const string& output_filename);
@@ -56,6 +61,25 @@ int TideIndexApplication::main(
   const string& index,
   string cmd_line
 ) {
+
+  // Larry's code
+  filename = "pepTarget.txt";
+  remove(filename);
+  defaultWriterPtr = new DelimitedFileWriter(filename);
+
+  std::vector<std::string> colNames;
+  colNames.push_back("Mass");
+  colNames.push_back("Length");
+  colNames.push_back("ProteinId");
+  colNames.push_back("ProteinPos");
+  colNames.push_back("Sequence");
+  colNames.push_back("isDecoy");
+  colNames.push_back("decoyIdx");
+
+  defaultWriterPtr->setColumnNames(colNames);
+  defaultWriterPtr->writeHeader();
+  // Larry's code ends here
+
   carp(CARP_INFO, "Running tide-index...");
 
   if (cmd_line.empty()) {
@@ -351,7 +375,13 @@ int TideIndexApplication::main(
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
 
+  // Larry's code 
+  delete defaultWriterPtr; // to close the file
+  defaultWriterPtr = NULL;
+  // Larry's code ends here
+
   return 0;
+
 }
 
 void TideIndexApplication::processGroupedTargetDecoys(
@@ -630,24 +660,6 @@ void TideIndexApplication::fastaToPb(
   // Iterate over all proteins in FASTA file
   unsigned int targetsGenerated = 0, decoysGenerated = 0;
 
-  // Larry's code
-  const char* filename = "pepTarget.txt";
-  remove(filename);
-  DelimitedFileWriter* defaultWriterPtr = new DelimitedFileWriter(filename);
-
-  std::vector<std::string> colNames;
-  colNames.push_back("Mass");
-  colNames.push_back("Length");
-  colNames.push_back("ProteinId");
-  colNames.push_back("ProteinPos");
-  colNames.push_back("Sequence");
-  colNames.push_back("isDecoy");
-  colNames.push_back("decoyIdx");
-
-  defaultWriterPtr->setColumnNames(colNames);
-  defaultWriterPtr->writeHeader();
-  // Larry's code ends here
-
   while (GeneratePeptides::getNextProtein(fastaStream, &proteinName, proteinSequence)) {
     outProteinSequences.push_back(proteinSequence);
     cleavedPeptideInfo.push_back(make_pair(
@@ -707,41 +719,6 @@ void TideIndexApplication::fastaToPb(
     }
     proteinSequence = new string;
   }
-
-  
-  // Larry's code 
-    #ifdef _WIN32
-      std::cout << "Windows\n";
-      std::string cmd = "sort  -k 1,1n -k 5,5 -u " +   std::string(filename) + "> sortedPepTarget.txt";
-    #elif __linux__
-      std::cout << "Linux\n";
-      std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
-    #elif __unix__
-        std::cout << "Other unix OS\n";
-        std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
-    #elif __APPLE__
-        std::cout << "Apple OS\n";
-        std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
-    #else
-        std::cout << "Unidentified OS\n";
-        std::cout << "We don't support your OS";
-        std::string cmd = ""
-    #endif
-
-    // Convert string to const char * as system requires
-    // parameter of type const char *
-    const char *command = cmd.c_str();
-    int systemRet = system(command);
-    if(systemRet == -1){
-      // The system method failed
-      std::cout << "system call failed";
-    }
-  // Larry's code ends here
-
-  // Larry's code
-  delete defaultWriterPtr; // to close the file
-  defaultWriterPtr = NULL;
-  // Larry's code ends here
 
   delete proteinSequence;
   if (targetsGenerated == 0) {
@@ -815,7 +792,37 @@ void TideIndexApplication::fastaToPb(
                     << decoyProtein << endl;
     }
   }
+  // Larry's code 
+  #ifdef _WIN32
+    std::cout << "Windows\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +   std::string(filename) + "> sortedPepTarget.txt";
+  #elif __linux__
+    std::cout << "Linux\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #elif __unix__
+    std::cout << "Other unix OS\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #elif __APPLE__
+    std::cout << "Apple OS\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #else
+    std::cout << "Unidentified OS\n";
+    std::cout << "We don't support your OS";
+    std::string cmd = ""
+  #endif
+
+    // Convert string to const char * as system requires
+    // parameter of type const char *
+  const char *command = cmd.c_str();
+  int systemRet = system(command);
+  if(systemRet == -1){
+    // The system method failed
+    std::cout << "system call failed";
+  }
+  // Larry's code ends here
 }
+
+
 
 void TideIndexApplication::writePeptidesAndAuxLocs(
   vector<TideIndexPeptide>& peptideHeap,
@@ -1229,7 +1236,6 @@ void TideIndexApplication::generateDecoys(
       }
     }
   }
-
   for (int i = 0; i < numDecoys; i++) {
     string* seq = decoySequences[i];
     carp(CARP_DETAILED_DEBUG, "Got decoy sequence %d: %s.", i, seq->c_str());
@@ -1241,11 +1247,23 @@ void TideIndexApplication::generateDecoys(
     // Add decoy to heap
     TideIndexPeptide pepDecoy(pepMass, setTarget.length(), seq, curProtein, (startLoc > 0) ? 1 : 0, i);
     outPeptideHeap.push_back(pepDecoy);
+
+    // Larry's code 
+    defaultWriterPtr->setColumnCurrentRow(0, pepDecoy.getMass(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(1, pepDecoy.getLength(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(2, pepDecoy.getProteinId(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(3, pepDecoy.getProteinPos(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(4, pepDecoy.getSequence(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(5, pepDecoy.isDecoy(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(6, pepDecoy.decoyIdx(), 10);// col, value, precision
+    defaultWriterPtr->writeRow();
+    // Larry's code ends here
+
     push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
   }
+
   decoysGenerated += decoySequences.size();
  }
-
 
 /*
 * Local Variables:
