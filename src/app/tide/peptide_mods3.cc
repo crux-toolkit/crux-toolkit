@@ -497,7 +497,7 @@ class ModsOutputterAlt : public IModsOutputter {
 
     while (resultMods.Next()) {
       resultMods.ModifyPeptide();
-      WritePeptide(peptide);
+      WritePeptide(peptide); 
       if (totalWritten_ % 10000 == 0) {
         carp(CARP_INFO, "Wrote %d peptides to temp files", totalWritten_);
       }
@@ -680,7 +680,7 @@ class ModsOutputterAlt : public IModsOutputter {
 
   void WritePeptide(const pb::Peptide* peptide) {
     const int factor = 50; // 50 mass range per file
-    RecordWriter* writer = GetTempWriter(int(peptide->mass()) / factor);
+    RecordWriter* writer = GetTempWriter(int(peptide->mass()) / factor); 
     if (!writer->Write(peptide)) {
       DeleteTempFiles();
       carp(CARP_FATAL, "I/O error writing modified peptide");
