@@ -42,49 +42,43 @@ if (WIN32 AND NOT CYGWIN)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_chrono-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_chrono-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
-      RESULT_VARIABLE status
-    )
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_date_time-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_date_time-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_chrono-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_filesystem-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_filesystem-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_filesystem-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_iostreams-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_iostreams-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_iostreams-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_nowide-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_nowide-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_nowide-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_program_options-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_program_options-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_program_options-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_system-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_system-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_system-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_thread-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_thread-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_thread-vc141-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
@@ -95,7 +89,7 @@ if (WIN32 AND NOT CYGWIN)
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
+        ${PREFIX}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/system/detail/error_code.ipp
         ${PREFIX}/include/boost/system/detail/error_code.ipp
       RESULT_VARIABLE status
     )
