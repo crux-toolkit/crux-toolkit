@@ -178,6 +178,13 @@ else (UNIX)
       -DCRUX=${CMAKE_CURRENT_SOURCE_DIR}/..
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
       -DWITHOUT_GTEST=ON
+    PATCH_COMMAND
+       COMMAND ${CMAKE_COMMAND} -E copy
+         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
+         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Globals.h.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 endif (UNIX)

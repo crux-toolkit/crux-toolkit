@@ -338,6 +338,7 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_identdata_version.lib
       libpwiz_data_misc.lib
       libpwiz_data_msdata.lib
+      libpwiz_data_msdata_core.lib
       libpwiz_data_msdata_examples.lib
       libpwiz_data_msdata_mz5.lib
       libpwiz_data_msdata_version.lib
@@ -402,7 +403,6 @@ if (WIN32 AND NOT CYGWIN)
   SET(
     BOOST_LIBRARIES
     optimized libboost_chrono-vc141-mt
-    optimized libboost_date_time-vc141-mt
     optimized libboost_filesystem-vc141-mt
     optimized libboost_iostreams-vc141-mt
     optimized libboost_nowide-vc141-mt
@@ -412,7 +412,6 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_thread-vc141-mt
     optimized libfreetype-vc141-mt-2_4
     debug libboost_chrono-vc141-mt-gd
-    debug libboost_date_time-vc141-mt
     debug libboost_filesystem-vc141-mt-gd
     debug libboost_iostreams-vc141-mt-gd
     debug libboost_nowide-vc141-mt-gd
