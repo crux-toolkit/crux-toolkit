@@ -271,39 +271,6 @@ int TideIndexApplication::main(
   bool need_mods = var_mod_table.Unique_delta_size() > 0;
 
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
-
-  // Larry's code
-  // Read File here
- 
-  ifstream sortedFile("sortedPepTarget.txt");
-  string line;
-  string delimeter = "\t";
-
-  while(getline(sortedFile, line)){
-    size_t pos = 0;
-    string token;
-    const char *data[6];
-    for(int i = 0; i < 6; i++){
-      token = line.substr(0, pos);
-      line.erase(0, pos + delimeter.length());
-      data[i] = token.c_str();
-    }
-   
-    double mass = atof(data[0]);
-    int length = atoi(data[1]);
-    int proteinId = atoi(data[2]);
-    int proteinPos = atoi(data[3]);
-    string tmp =  data[4];
-    const char* residues = tmp.c_str();  // points at protein sequence
-    int decoyIdx = atoi(data[5]); // -1 if not a decoy
-
-    TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
-    peptideHeap.push_back(pepTarget);
-  }
-  // remove(filename);
-  // remove("sortedPepTarget.txt");
-  
-  // Larry's code ends here
   
   writePeptidesAndAuxLocs(peptideHeap, basic_peptides, out_aux, header_no_mods);
   // Do some clean up
@@ -826,34 +793,7 @@ void TideIndexApplication::fastaToPb(
                     << decoyProtein << endl;
     }
   }
-  // Larry's code 
-  #ifdef _WIN32
-    std::cout << "Windows\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +   std::string(filename) + "> sortedPepTarget.txt";
-  #elif __linux__
-    std::cout << "Linux\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
-  #elif __unix__
-    std::cout << "Other unix OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
-  #elif __APPLE__
-    std::cout << "Apple OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
-  #else
-    std::cout << "Unidentified OS\n";
-    std::cout << "We don't support your OS";
-    std::string cmd = ""
-  #endif
 
-    // Convert string to const char * as system requires
-    // parameter of type const char *
-  const char *command = cmd.c_str();
-  int systemRet = system(command);
-  if(systemRet == -1){
-    // The system method failed
-    std::cout << "system call failed";
-  }
-  // Larry's code ends here
 }
 
 
@@ -864,6 +804,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   const string& auxLocsPbFile,
   pb::Header& pbHeader
 ) {
+
   // Check header
   if (pbHeader.source_size() != 1) {
     carp(CARP_FATAL, "pbHeader had a number of sources other than 1");
@@ -918,6 +859,69 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   auxLocsSource->mutable_header()->CopyFrom(pbHeader);
   HeadedRecordWriter auxLocWriter(auxLocsPbFile, auxLocsHeader);
 
+  // Larry's code 
+  #ifdef _WIN32
+    std::cout << "Windows\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +   std::string(filename) + "> sortedPepTarget.txt";
+  #elif __linux__
+    std::cout << "Linux\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #elif __unix__
+    std::cout << "Other unix OS\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #elif __APPLE__
+    std::cout << "Apple OS\n";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+  #else
+    std::cout << "Unidentified OS\n";
+    std::cout << "We don't support your OS";
+    std::string cmd = ""
+  #endif
+
+    // Convert string to const char * as system requires
+    // parameter of type const char *
+  const char *command = cmd.c_str();
+  int systemRet = system(command);
+  if(systemRet == -1){
+    // The system method failed
+    std::cout << "system call failed";
+  }
+  // Larry's code ends here
+
+  // Larry's code
+  // Read File here
+ 
+  ifstream sortedFile("sortedPepTarget.txt");
+  string line;
+  string delimeter = "\t";
+
+  while(getline(sortedFile, line)){
+    size_t pos = 0;
+    string token;
+    const char *data[6];
+    for(int i = 0; i < 6; i++){
+      token = line.substr(0, pos);
+      line.erase(0, pos + delimeter.length());
+      data[i] = token.c_str();
+    }
+   
+    double mass = atof(data[0]);
+    int length = atoi(data[1]);
+    int proteinId = atoi(data[2]);
+    int proteinPos = atoi(data[3]);
+    string tmp =  data[4];
+    const char* residues = tmp.c_str();  // points at protein sequence
+    int decoyIdx = atoi(data[5]); // -1 if not a decoy
+
+    TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
+    peptideHeap.push_back(pepTarget);
+  }
+  remove("pepTarget.txt");
+  remove("sortedPepTarget.txt");
+  
+  // Larry's code ends here
+
+
   pb::Peptide pbPeptide;
   pb::AuxLocation pbAuxLoc;
   int auxLocIdx = -1;
@@ -927,8 +931,9 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   int numDecoys = 0;
   int numDuplicateTargets = 0;
   int numDuplicateDecoys = 0;
-  sort_heap(peptideHeap.begin(), peptideHeap.end(),
-            greater<TideIndexPeptide>());
+
+  
+  
   while (!peptideHeap.empty()) {
     TideIndexPeptide curPeptide(peptideHeap.back());
     peptideHeap.pop_back();
