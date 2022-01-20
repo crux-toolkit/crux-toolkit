@@ -30,6 +30,8 @@
 // Larry's code
 const char* filename;
 DelimitedFileWriter* defaultWriterPtr;
+const char* sortedPeptideFile = "sortedPepTarget.txt";
+const char* peptideFile = "pepTarget.txt";
 // Larry's code ends here
 
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
@@ -64,7 +66,7 @@ int TideIndexApplication::main(
 ) {
 
   // Larry's code
-  filename = "pepTarget.txt";
+  filename = peptideFile;
   remove(filename);
   defaultWriterPtr = new DelimitedFileWriter(filename);
 
@@ -860,18 +862,19 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   HeadedRecordWriter auxLocWriter(auxLocsPbFile, auxLocsHeader);
 
   // Larry's code 
+  //  Added -r in order to allow reading from largest mass first
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +   std::string(filename) + "> sortedPepTarget.txt";
+    // std::string cmd = "sort -r  -k 1,1n -k 5,5 " +   std::string(filename) + "> " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+    // std::string cmd = "sort -r -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
+    // std::string cmd = "sort -r -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
@@ -888,12 +891,27 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   }
   // Larry's code ends here
 
-  // Larry's code
-  // Read File here
+
+  pb::Peptide pbPeptide;
+  pb::AuxLocation pbAuxLoc;
+  int auxLocIdx = -1;
+  int count = 0;
+  int numTargets = 0;
+  int numDecoys = 0;
+  int numDuplicateTargets = 0;
+  int numDuplicateDecoys = 0;
+
+   // Larry's code
+  // Read File here (Clean up this code later)
  
-  ifstream sortedFile("sortedPepTarget.txt");
+  ifstream sortedFile(sortedPeptideFile);
   string line;
+  string nextLine;
   string delimeter = "\t";
+
+  int numLines = 0;
+
+  //  Change this loop and make it work linearly
 
   while(getline(sortedFile, line)){
     size_t pos = 0;
@@ -913,66 +931,86 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     const char* residues = tmp.c_str();  // points at protein sequence
     int decoyIdx = atoi(data[5]); // -1 if not a decoy
 
-    TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
-    peptideHeap.push_back(pepTarget);
+    TideIndexPeptide curPepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
+
+    // Delete teh code below later
+    peptideHeap.push_back(curPepTarget);
+
+    int curLineNum = numLines;
+    // Create another loop here to loop over all lines in the file except the previous line
+    while(getline(sortedFile, nextLine)){
+      if(curLineNum >  numLines){
+
+        size_t pos = 0;
+        string token;
+        const char *data[6];
+        for(int i = 0; i < 6; i++){
+          token = nextLine.substr(0, pos);
+          nextLine.erase(0, pos + delimeter.length());
+          data[i] = token.c_str();
+        }
+            
+        double mass = atof(data[0]);
+        int length = atoi(data[1]);
+        int proteinId = atoi(data[2]);
+        int proteinPos = atoi(data[3]);
+        string tmp =  data[4];
+        const char* residues = tmp.c_str();  // points at protein sequence
+        int decoyIdx = atoi(data[5]); // -1 if not a decoy
+
+        TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
+        if(pepTarget == curPepTarget){
+          if (pepTarget.isDecoy()) {
+            numDuplicateDecoys++;
+          } else {
+            numDuplicateTargets++;
+          } 
+          carp(CARP_DEBUG, "Skipping duplicate %s.", curPepTarget.getSequence().c_str());
+          pb::Location* location = pbAuxLoc.add_location();
+          location->set_protein_id(pepTarget.getProteinId());
+          location->set_pos(pepTarget.getProteinPos());
+        }
+
+        getPbPeptide(count, curPepTarget, pbPeptide);
+        // Not all peptides have aux locations associated with them. Check to see
+        // if GetGroup added any locations to aux_location. If yes, only then
+        // assign the corresponding array index to the peptide and write it out.
+        if (pbAuxLoc.location_size() > 0) {
+          pbPeptide.set_aux_locations_index(++auxLocIdx);
+          auxLocWriter.Write(&pbAuxLoc);
+          pbAuxLoc.Clear();
+        }
+
+        // Write the peptide AFTER the aux_locations check, in case we added an
+        // aux_locations_index to the peptide.
+        peptideWriter.Write(&pbPeptide);
+
+        if (curPepTarget.isDecoy()) {
+          numDecoys++;
+        } else {
+          numTargets++;
+        }
+        if (++count % 100000 == 0) {
+          carp(CARP_INFO, "Wrote %d peptides", count);
+        }
+
+        curLineNum++;
+      }else{
+        curLineNum++;
+      }
+    }
+    numLines++;
+
   }
-  remove("pepTarget.txt");
-  remove("sortedPepTarget.txt");
-  
+
+  carp(CARP_DETAILED_INFO, "%d peptides in file", numLines);
+
+  // remove(peptideFile);
+  // remove(sortedPeptideFile);
+
+ 
   // Larry's code ends here
 
-
-  pb::Peptide pbPeptide;
-  pb::AuxLocation pbAuxLoc;
-  int auxLocIdx = -1;
-  carp(CARP_DETAILED_INFO, "%d peptides in heap", peptideHeap.size());
-  int count = 0;
-  int numTargets = 0;
-  int numDecoys = 0;
-  int numDuplicateTargets = 0;
-  int numDuplicateDecoys = 0;
-
-  
-  
-  while (!peptideHeap.empty()) {
-    TideIndexPeptide curPeptide(peptideHeap.back());
-    peptideHeap.pop_back();
-    // For duplicate peptides we only record the location
-    while (!peptideHeap.empty() && peptideHeap.back() == curPeptide) {
-      if (peptideHeap.back().isDecoy()) {
-        numDuplicateDecoys++;
-      } else {
-        numDuplicateTargets++;
-      }        
-      carp(CARP_DEBUG, "Skipping duplicate %s.", curPeptide.getSequence().c_str());
-      pb::Location* location = pbAuxLoc.add_location();
-      location->set_protein_id(peptideHeap.back().getProteinId());
-      location->set_pos(peptideHeap.back().getProteinPos());
-      peptideHeap.pop_back();
-    }
-    getPbPeptide(count, curPeptide, pbPeptide);
-    // Not all peptides have aux locations associated with them. Check to see
-    // if GetGroup added any locations to aux_location. If yes, only then
-    // assign the corresponding array index to the peptide and write it out.
-    if (pbAuxLoc.location_size() > 0) {
-      pbPeptide.set_aux_locations_index(++auxLocIdx);
-      auxLocWriter.Write(&pbAuxLoc);
-      pbAuxLoc.Clear();
-    }
-
-    // Write the peptide AFTER the aux_locations check, in case we added an
-    // aux_locations_index to the peptide.
-    peptideWriter.Write(&pbPeptide);
-
-    if (curPeptide.isDecoy()) {
-      numDecoys++;
-    } else {
-      numTargets++;
-    }
-    if (++count % 100000 == 0) {
-      carp(CARP_INFO, "Wrote %d peptides", count);
-    }
-  }
   carp(CARP_INFO, "Skipped %d duplicate targets and %d duplicate decoys.",
        numDuplicateTargets, numDuplicateDecoys);
   carp(CARP_INFO, "Wrote %d targets and %d decoys.", numTargets, numDecoys);
