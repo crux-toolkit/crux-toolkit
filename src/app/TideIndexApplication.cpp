@@ -17,6 +17,7 @@
 #include "parameter.h" 
 #include "io/DelimitedFileWriter.h"
 #include <bits/stdc++.h>
+#include <sstream>
 // Larry's code ends here
 
 #include <regex>
@@ -207,7 +208,7 @@ int TideIndexApplication::main(
 
   fastaToPb(cmd_line, enzyme_t, digestion, missed_cleavages, min_mass, max_mass,
             min_length, max_length, allowDups, mass_type, decoy_type, fasta, out_proteins,
-            proteinPbHeader, peptideHeap, proteinSequences, out_decoy_fasta, peptideToProteinMap);
+            proteinPbHeader,proteinSequences, out_decoy_fasta, peptideToProteinMap);// peptideHeap, proteinSequences, out_decoy_fasta, peptideToProteinMap);
 
   pb::Header header_with_mods;
 
@@ -271,6 +272,39 @@ int TideIndexApplication::main(
 
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
 
+  // Larry's code
+  // Read File here
+ 
+  ifstream sortedFile("sortedPepTarget.txt");
+  string line;
+  string delimeter = "\t";
+
+  while(getline(sortedFile, line)){
+    size_t pos = 0;
+    string token;
+    const char *data[6];
+    for(int i = 0; i < 6; i++){
+      token = line.substr(0, pos);
+      line.erase(0, pos + delimeter.length());
+      data[i] = token.c_str();
+    }
+   
+    double mass = atof(data[0]);
+    int length = atoi(data[1]);
+    int proteinId = atoi(data[2]);
+    int proteinPos = atoi(data[3]);
+    string tmp =  data[4];
+    const char* residues = tmp.c_str();  // points at protein sequence
+    int decoyIdx = atoi(data[5]); // -1 if not a decoy
+
+    TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
+    peptideHeap.push_back(pepTarget);
+  }
+  // remove(filename);
+  // remove("sortedPepTarget.txt");
+  
+  // Larry's code ends here
+  
   writePeptidesAndAuxLocs(peptideHeap, basic_peptides, out_aux, header_no_mods);
   // Do some clean up
   for (vector<string*>::iterator i = proteinSequences.begin();
@@ -627,7 +661,7 @@ void TideIndexApplication::fastaToPb(
   const string& fasta,
   const string& proteinPbFile,
   pb::Header& outProteinPbHeader,
-  vector<TideIndexPeptide>& outPeptideHeap,
+  // vector<TideIndexPeptide>& outPeptideHeap,
   vector<string*>& outProteinSequences,
   ofstream* decoyFasta,
   map<string, vector<string>>& peptideToProteinMap
@@ -644,7 +678,7 @@ void TideIndexApplication::fastaToPb(
   unsigned int invalidPepCnt = 0;
   unsigned int failedDecoyCnt = 0;
 
-  outPeptideHeap.clear();
+  // outPeptideHeap.clear();
   outProteinSequences.clear();
   peptideToProteinMap.clear();
 
@@ -687,7 +721,7 @@ void TideIndexApplication::fastaToPb(
       }
       // Add target to heap
       TideIndexPeptide pepTarget(pepMass, i->Length(), proteinSequence, curProtein, i->Position());
-      outPeptideHeap.push_back(pepTarget);
+      // outPeptideHeap.push_back(pepTarget);
 
       // Larry's code 
       defaultWriterPtr->setColumnCurrentRow(0, pepTarget.getMass(), 10);// col, value, precision
@@ -700,7 +734,7 @@ void TideIndexApplication::fastaToPb(
       defaultWriterPtr->writeRow();
       // Larry's code ends here
 
-      push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
+      // push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
       if (!allowDups && decoyType != NO_DECOYS) {
         const string* setTarget = &*(setTargets.insert(i->Sequence()).first);
         targetInfo.insert(make_pair(setTarget, TargetInfo(proteinInfo, i->Position(), pepMass)));
@@ -745,7 +779,7 @@ void TideIndexApplication::fastaToPb(
       FLOAT_T pepMass = targetLookup->second.mass;
       generateDecoys(numDecoys, *setTarget, targetToDecoy_local, &setTargets, &setDecoys, decoyType,
                      allowDups, failedDecoyCnt, decoysGenerated, curProtein, proteinInfo, startLoc,
-                     proteinWriter, pepMass, outPeptideHeap, outProteinSequences);
+                     proteinWriter, pepMass,outProteinSequences); //outPeptideHeap, outProteinSequences);
     }
   } else { // allow dups
     for (vector<pair<ProteinInfo, vector<PeptideInfo> > >::const_iterator i = cleavedPeptideInfo.begin();
@@ -760,7 +794,7 @@ void TideIndexApplication::fastaToPb(
         FLOAT_T pepMass = calcPepMassTide(&(*j), massType, &proteinInfo);
         generateDecoys(numDecoys, setTarget, targetToDecoy_local, NULL, NULL, decoyType, allowDups,
                        failedDecoyCnt, decoysGenerated, curProtein, proteinInfo, startLoc,
-                       proteinWriter, pepMass, outPeptideHeap, outProteinSequences);
+                       proteinWriter, pepMass,outProteinSequences); //outPeptideHeap, outProteinSequences);
       }
     }
   }
@@ -795,16 +829,16 @@ void TideIndexApplication::fastaToPb(
   // Larry's code 
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +   std::string(filename) + "> sortedPepTarget.txt";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +   std::string(filename) + "> sortedPepTarget.txt";
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
   #elif __unix__
     std::cout << "Other unix OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 -u " +  std::string(filename) + "> sortedPepTarget.txt;";
+    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> sortedPepTarget.txt;";
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
@@ -1180,7 +1214,7 @@ void TideIndexApplication::generateDecoys(
   const int startLoc,
   HeadedRecordWriter& proteinWriter,
   FLOAT_T pepMass,
-  vector<TideIndexPeptide>& outPeptideHeap,
+  // vector<TideIndexPeptide>& outPeptideHeap,
   vector<string*>& outProteinSequences
 ) {
   vector<string*> decoySequences;
@@ -1246,7 +1280,7 @@ void TideIndexApplication::generateDecoys(
     writeDecoyPbProtein(++curProtein, proteinInfo, *seq, startLoc, proteinWriter);
     // Add decoy to heap
     TideIndexPeptide pepDecoy(pepMass, setTarget.length(), seq, curProtein, (startLoc > 0) ? 1 : 0, i);
-    outPeptideHeap.push_back(pepDecoy);
+    // outPeptideHeap.push_back(pepDecoy);
 
     // Larry's code 
     defaultWriterPtr->setColumnCurrentRow(0, pepDecoy.getMass(), 10);// col, value, precision
@@ -1259,7 +1293,7 @@ void TideIndexApplication::generateDecoys(
     defaultWriterPtr->writeRow();
     // Larry's code ends here
 
-    push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
+    // push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
   }
 
   decoysGenerated += decoySequences.size();

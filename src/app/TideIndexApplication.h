@@ -113,6 +113,17 @@ class TideIndexApplication : public CruxApplication {
       }
       decoyIdx_ = decoyIdx;
     }
+    // Larry's code
+    TideIndexPeptide(double mass, int length,
+                     int proteinId, int proteinPos, const char* residues, int decoyIdx) {
+      mass_ = mass;
+      length_ = length;
+      proteinId_ = proteinId;
+      proteinPos_ = proteinPos;
+      residues_ = residues;
+      decoyIdx_ = decoyIdx;
+    }
+    // Larry's code ends here
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
       length_ = other.length_;
@@ -186,7 +197,7 @@ class TideIndexApplication : public CruxApplication {
     const std::string& fasta,
     const std::string& proteinPbFile,
     pb::Header& outProteinPbHeader,
-    std::vector<TideIndexPeptide>& outPeptideHeap,
+    // std::vector<TideIndexPeptide>& outPeptideHeap,
     std::vector<string*>& outProteinSequences,
     std::ofstream* decoyFasta,
     std::map<string, vector<string>>& peptideToProteinMap
@@ -252,7 +263,7 @@ class TideIndexApplication : public CruxApplication {
     const int startLoc,
     HeadedRecordWriter& proteinWriter,
     FLOAT_T pepMass,
-    vector<TideIndexPeptide>& outPeptideHeap,
+    // vector<TideIndexPeptide>& outPeptideHeap,
     vector<string*>& outProteinSequences
   );
 
