@@ -202,7 +202,6 @@ int TideIndexApplication::main(
   carp(CARP_INFO, "Reading %s and computing unmodified peptides...",
        fasta.c_str());
   pb::Header proteinPbHeader;
-  vector<TideIndexPeptide> peptideHeap;
   vector<string*> proteinSequences;
 
   // map of peptide sequence to N proteins
@@ -210,7 +209,7 @@ int TideIndexApplication::main(
 
   fastaToPb(cmd_line, enzyme_t, digestion, missed_cleavages, min_mass, max_mass,
             min_length, max_length, allowDups, mass_type, decoy_type, fasta, out_proteins,
-            proteinPbHeader,proteinSequences, out_decoy_fasta, peptideToProteinMap);// peptideHeap, proteinSequences, out_decoy_fasta, peptideToProteinMap);
+            proteinPbHeader,proteinSequences, out_decoy_fasta, peptideToProteinMap);
 
   pb::Header header_with_mods;
 
@@ -274,14 +273,13 @@ int TideIndexApplication::main(
 
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
   
-  writePeptidesAndAuxLocs(peptideHeap, basic_peptides, out_aux, header_no_mods);
+  writePeptidesAndAuxLocs(basic_peptides, out_aux, header_no_mods);
   // Do some clean up
   for (vector<string*>::iterator i = proteinSequences.begin();
        i != proteinSequences.end();
        ++i) {
     delete *i;
   }
-  vector<TideIndexPeptide>().swap(peptideHeap);
   ProteinVec proteins;
   if (!ReadRecordsToVector<pb::Protein>(&proteins, out_proteins)) {
     carp(CARP_FATAL, "Error reading proteins file");
@@ -630,7 +628,6 @@ void TideIndexApplication::fastaToPb(
   const string& fasta,
   const string& proteinPbFile,
   pb::Header& outProteinPbHeader,
-  // vector<TideIndexPeptide>& outPeptideHeap,
   vector<string*>& outProteinSequences,
   ofstream* decoyFasta,
   map<string, vector<string>>& peptideToProteinMap
@@ -647,7 +644,6 @@ void TideIndexApplication::fastaToPb(
   unsigned int invalidPepCnt = 0;
   unsigned int failedDecoyCnt = 0;
 
-  // outPeptideHeap.clear();
   outProteinSequences.clear();
   peptideToProteinMap.clear();
 
@@ -690,7 +686,6 @@ void TideIndexApplication::fastaToPb(
       }
       // Add target to heap
       TideIndexPeptide pepTarget(pepMass, i->Length(), proteinSequence, curProtein, i->Position());
-      // outPeptideHeap.push_back(pepTarget);
 
       // Larry's code 
       defaultWriterPtr->setColumnCurrentRow(0, pepTarget.getMass(), 10);// col, value, precision
@@ -703,7 +698,6 @@ void TideIndexApplication::fastaToPb(
       defaultWriterPtr->writeRow();
       // Larry's code ends here
 
-      // push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
       if (!allowDups && decoyType != NO_DECOYS) {
         const string* setTarget = &*(setTargets.insert(i->Sequence()).first);
         targetInfo.insert(make_pair(setTarget, TargetInfo(proteinInfo, i->Position(), pepMass)));
@@ -748,7 +742,7 @@ void TideIndexApplication::fastaToPb(
       FLOAT_T pepMass = targetLookup->second.mass;
       generateDecoys(numDecoys, *setTarget, targetToDecoy_local, &setTargets, &setDecoys, decoyType,
                      allowDups, failedDecoyCnt, decoysGenerated, curProtein, proteinInfo, startLoc,
-                     proteinWriter, pepMass,outProteinSequences); //outPeptideHeap, outProteinSequences);
+                     proteinWriter, pepMass, outProteinSequences);
     }
   } else { // allow dups
     for (vector<pair<ProteinInfo, vector<PeptideInfo> > >::const_iterator i = cleavedPeptideInfo.begin();
@@ -763,7 +757,7 @@ void TideIndexApplication::fastaToPb(
         FLOAT_T pepMass = calcPepMassTide(&(*j), massType, &proteinInfo);
         generateDecoys(numDecoys, setTarget, targetToDecoy_local, NULL, NULL, decoyType, allowDups,
                        failedDecoyCnt, decoysGenerated, curProtein, proteinInfo, startLoc,
-                       proteinWriter, pepMass,outProteinSequences); //outPeptideHeap, outProteinSequences);
+                       proteinWriter, pepMass,outProteinSequences);
       }
     }
   }
@@ -801,7 +795,6 @@ void TideIndexApplication::fastaToPb(
 
 
 void TideIndexApplication::writePeptidesAndAuxLocs(
-  vector<TideIndexPeptide>& peptideHeap,
   const string& peptidePbFile,
   const string& auxLocsPbFile,
   pb::Header& pbHeader
@@ -865,16 +858,16 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   //  Added -r in order to allow reading from largest mass first
   #ifdef _WIN32
     std::cout << "Windows\n";
-    // std::string cmd = "sort -r  -k 1,1n -k 5,5 " +   std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort  -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
-    // std::string cmd = "sort -r -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    // std::string cmd = "sort -r -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
@@ -890,7 +883,6 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     std::cout << "system call failed";
   }
   // Larry's code ends here
-
 
   pb::Peptide pbPeptide;
   pb::AuxLocation pbAuxLoc;
@@ -912,8 +904,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   int numLines = 0;
 
   //  Change this loop and make it work linearly
-
-  while(getline(sortedFile, line)){
+while(getline(sortedFile, line)){
     size_t pos = 0;
     string token;
     const char *data[6];
@@ -933,14 +924,11 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
 
     TideIndexPeptide curPepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
 
-    // Delete teh code below later
-    peptideHeap.push_back(curPepTarget);
-
     int curLineNum = numLines;
     // Create another loop here to loop over all lines in the file except the previous line
     while(getline(sortedFile, nextLine)){
       if(curLineNum >  numLines){
-
+        curLineNum++;
         size_t pos = 0;
         string token;
         const char *data[6];
@@ -969,44 +957,43 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
           pb::Location* location = pbAuxLoc.add_location();
           location->set_protein_id(pepTarget.getProteinId());
           location->set_pos(pepTarget.getProteinPos());
+        }else{
+            break;
         }
-
-        getPbPeptide(count, curPepTarget, pbPeptide);
-        // Not all peptides have aux locations associated with them. Check to see
-        // if GetGroup added any locations to aux_location. If yes, only then
-        // assign the corresponding array index to the peptide and write it out.
-        if (pbAuxLoc.location_size() > 0) {
-          pbPeptide.set_aux_locations_index(++auxLocIdx);
-          auxLocWriter.Write(&pbAuxLoc);
-          pbAuxLoc.Clear();
-        }
-
-        // Write the peptide AFTER the aux_locations check, in case we added an
-        // aux_locations_index to the peptide.
-        peptideWriter.Write(&pbPeptide);
-
-        if (curPepTarget.isDecoy()) {
-          numDecoys++;
-        } else {
-          numTargets++;
-        }
-        if (++count % 100000 == 0) {
-          carp(CARP_INFO, "Wrote %d peptides", count);
-        }
-
-        curLineNum++;
-      }else{
-        curLineNum++;
       }
     }
+    getPbPeptide(count, curPepTarget, pbPeptide);
+    // Not all peptides have aux locations associated with them. Check to see
+    // if GetGroup added any locations to aux_location. If yes, only then
+    // assign the corresponding array index to the peptide and write it out.
+    if (pbAuxLoc.location_size() > 0) {
+        pbPeptide.set_aux_locations_index(++auxLocIdx);
+        auxLocWriter.Write(&pbAuxLoc);
+        pbAuxLoc.Clear();
+    }
+
+    // Write the peptide AFTER the aux_locations check, in case we added an
+    // aux_locations_index to the peptide.
+    peptideWriter.Write(&pbPeptide);
+
+    if (curPepTarget.isDecoy()) {
+        numDecoys++;
+    } else {
+        numTargets++;
+    }
+    if (++count % 100000 == 0) {
+        carp(CARP_INFO, "Wrote %d peptides", count);
+    }
+
     numLines++;
 
   }
 
-  carp(CARP_DETAILED_INFO, "%d peptides in file", numLines);
+  carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
 
   // remove(peptideFile);
   // remove(sortedPeptideFile);
+
 
  
   // Larry's code ends here
@@ -1257,7 +1244,6 @@ void TideIndexApplication::generateDecoys(
   const int startLoc,
   HeadedRecordWriter& proteinWriter,
   FLOAT_T pepMass,
-  // vector<TideIndexPeptide>& outPeptideHeap,
   vector<string*>& outProteinSequences
 ) {
   vector<string*> decoySequences;
@@ -1323,7 +1309,6 @@ void TideIndexApplication::generateDecoys(
     writeDecoyPbProtein(++curProtein, proteinInfo, *seq, startLoc, proteinWriter);
     // Add decoy to heap
     TideIndexPeptide pepDecoy(pepMass, setTarget.length(), seq, curProtein, (startLoc > 0) ? 1 : 0, i);
-    // outPeptideHeap.push_back(pepDecoy);
 
     // Larry's code 
     defaultWriterPtr->setColumnCurrentRow(0, pepDecoy.getMass(), 10);// col, value, precision
@@ -1335,8 +1320,6 @@ void TideIndexApplication::generateDecoys(
     defaultWriterPtr->setColumnCurrentRow(6, pepDecoy.decoyIdx(), 10);// col, value, precision
     defaultWriterPtr->writeRow();
     // Larry's code ends here
-
-    // push_heap(outPeptideHeap.begin(), outPeptideHeap.end(), greater<TideIndexPeptide>());
   }
 
   decoysGenerated += decoySequences.size();
