@@ -197,14 +197,12 @@ class TideIndexApplication : public CruxApplication {
     const std::string& fasta,
     const std::string& proteinPbFile,
     pb::Header& outProteinPbHeader,
-    // std::vector<TideIndexPeptide>& outPeptideHeap,
     std::vector<string*>& outProteinSequences,
     std::ofstream* decoyFasta,
     std::map<string, vector<string>>& peptideToProteinMap
   );
 
   static void writePeptidesAndAuxLocs(
-    std::vector<TideIndexPeptide>& peptideHeap, // will be destroyed.
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
     pb::Header& pbHeader
@@ -263,7 +261,6 @@ class TideIndexApplication : public CruxApplication {
     const int startLoc,
     HeadedRecordWriter& proteinWriter,
     FLOAT_T pepMass,
-    // vector<TideIndexPeptide>& outPeptideHeap,
     vector<string*>& outProteinSequences
   );
 
