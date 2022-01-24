@@ -47,7 +47,7 @@ else (USE_LATEST_PWIZ)
   # Use tarball cached on our server
   set(
       PWIZ_SOURCE
-      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_19149_c172999.tar.bz2
+      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_22014_aadd392.tar.bz2
   )
 endif (USE_LATEST_PWIZ)
 
