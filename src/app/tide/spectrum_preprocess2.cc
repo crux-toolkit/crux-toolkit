@@ -219,11 +219,11 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   int largest_mz = min(max_mz_.BackgroundBinEnd(), largest_mzbin_ + MAX_XCORR_OFFSET+1);
   SubtractBackground(peaks_, largest_mz);
   
-  // The cache has been modified. It usde to keep track of the types of the 
-  // peaks as originall implemented by Benjamin Diament. This has been changed by AKF 
+  // The cache has been modified. It is used to keep track of the types of 
+  // peaks as originally implemented by Benjamin Diament. This has been changed by AKF 
   // in December 2021. Now the cache does not keep track of the experimental peak types,
   // because it is not needed for the scoring; however, omitting this information 
-  // can results 3 times faster in scoring.
+  // can result in 3 times faster scoring.
   
   cache_[0] = int(peaks_[0]);
   cache_[1] = int(peaks_[0]);
