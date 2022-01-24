@@ -27,7 +27,7 @@
 #include <vector>
 #include "raw_proteins.pb.h"
 #include "peptides.pb.h"
-#include "theoretical_peak_pair.h"
+#include "theoretical_peak_set.h"
 #include "fifo_alloc.h"
 #include "mod_coder.h"
 #include "sp_scorer.h"
@@ -38,16 +38,15 @@
 using namespace std;
 
 class FifoAllocator;
-class TheoreticalPeakSet;
+//class TheoreticalPeakSet;
 class TheoreticalPeakSetBIons;
 class SpScorer;
-
 
 // This is the TheoreticalPeakSet we are using at search time.  We may use a
 // different subclass  of TheoreticalPeakSet in a final version, pending more
 // tests. See Bugzilla #253.
 class TheoreticalPeakSetBYSparse;
-typedef TheoreticalPeakSetBYSparse ST_TheoreticalPeakSet; // ST="search time"
+//typedef TheoreticalPeakSetBYSparse ST_TheoreticalPeakSet; // ST="search time"
 // This is an alternative TheoreticalPeakSet
 // class TheoreticalPeakSetBYSparseOrdered;
 // typedef TheoreticalPeakSetBYSparseOrdered ST_TheoreticalPeakSet;
@@ -172,8 +171,8 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace, bool dia_mode = false);
-  void ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
+  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace,
                                const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
                                TheoreticalPeakCompiler* compiler_prog2,
@@ -220,8 +219,7 @@ class Peptide {
 
   // added by Yang
   static double MassToMz(double mass, int charge) {
-	  return mass / (charge * 1.0) + MASS_PROTON;
-	  // return mass / (charge * 1.0) + MASS_H;
+    return mass / (charge * 1.0) + MASS_PROTON;
   }
   vector<int>& IonMzbins() { return ion_mzbins_; }
   vector<int>& BIonMzbins() { return b_ion_mzbins_; }

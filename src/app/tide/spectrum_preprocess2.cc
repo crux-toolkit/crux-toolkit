@@ -77,8 +77,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   assert(MaxBin::Global().MaxBinEnd() > 0);
 
   max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
-  cache_end_ = MaxBin::Global().CacheBinEnd() * NUM_PEAK_TYPES;
+  cache_end_ = MaxBin::Global().CacheBinEnd();
   memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
+  memset(cache_, 0, sizeof(int) * cache_end_*NUM_PEAK_TYPES);
 
   // added by Yang
   largest_mzbin_ = 0;
@@ -151,7 +152,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     double intensity_cutoff = highest_intensity * 0.05;
     double normalizer = 0.0;
     int dyn_region_size = largest_mzbin_ / NUM_SPECTRUM_REGIONS + 1;
-
+    
     // dynamic regional peak selection for MS2Pval calculation (The original implementation)
     for (int i = 0; i < NUM_SPECTRUM_REGIONS; ++i) {
       vector<pair<int, double>> region_peaks;
@@ -175,7 +176,13 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       if (highest_intensity == 0) {
         continue;
       }
-      normalizer = 50.0 / highest_intensity;
+
+      // In the original implementation first the experimental peaks are normalized to the
+      // range between 0 and 50. Later in the Tide-Search, the double-valued experimental
+      // spectrum vector peaks_ is integerized and the experimental peak intensities are
+      // multiplied by a large integer: 500000. I have combined these two steps into one 
+      // calculation. hence 50*500000=25000000.0
+      normalizer = 25000000.0 / highest_intensity;
       for (int j = 0; j < dyn_region_size; ++j) {
         int index = i * dyn_region_size + j;
         if (peaks_[index] != 0) {
@@ -209,110 +216,44 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
 #endif
   }
-  SubtractBackground(peaks_, max_mz_.BackgroundBinEnd());
-
-#ifdef DEBUG
-  if (debug)
-    ShowPeaks();
-#endif
-  MakeInteger();
-  ComputeCache();
-#ifdef DEBUG
-  if (debug)
-    ShowCache();
-#endif
-}
-
-inline int round_to_int(double x) {
-  if (x >= 0)
-    return int(x + 0.5);
-  return int(x - 0.5);
-}
-
-void ObservedPeakSet::MakeInteger() {
-  // essentially cheap fixed-point arithmetic for peak intensities
-  for(int i = 0; i < max_mz_.BackgroundBinEnd(); i++)
-    Peak(PeakMain, i) = round_to_int(peaks_[i]*50000);
-}
-
-// See .h file. Computes and stores all transformations of the observed peak
-// set.
-void ObservedPeakSet::ComputeCache() {
-  for (int i = 0; i < max_mz_.BackgroundBinEnd(); ++i) {
-    // Instead of computing 10 * x, 25 * x, and 50 * x, we compute 2 *
-    // x, 5 * x and 10 * x. This results in dot products that are 5
-    // times too small, but the adjustments can be made at the last
-    // moment e.g. when results are displayed. These smaller
-    // multiplications allow us to use addition operations instead of
-    // multiplications.
-    int x = Peak(PeakMain, i);
-    int y = x+x;
-    Peak(LossPeak, i) = y;
-    int z = y+y+x;
-    Peak(FlankingPeak, i) = z;
-    Peak(PrimaryPeak, i) = z+z;
-  }
-
-  for (int i = max_mz_.BackgroundBinEnd() * NUM_PEAK_TYPES; i < cache_end_; ++i) {
-    cache_[i] = 0;
-  }
-
-  for (int i = 0; i < max_mz_.CacheBinEnd(); ++i) {
-    int flanks = Peak(PrimaryPeak, i);
+  int largest_mz = min(max_mz_.BackgroundBinEnd(), largest_mzbin_ + MAX_XCORR_OFFSET+1);
+  SubtractBackground(peaks_, largest_mz);
+  
+  // The cache has been modified. It is used to keep track of the types of 
+  // peaks as originally implemented by Benjamin Diament. This has been changed by AKF 
+  // in December 2021. Now the cache does not keep track of the experimental peak types,
+  // because it is not needed for the scoring; however, omitting this information 
+  // can result in 3 times faster scoring.
+  
+  cache_[0] = int(peaks_[0]);
+  cache_[1] = int(peaks_[0]);
+  double intensity;
+  int nh3_bin = int(MassConstants::BIN_NH3);
+  int h2o_bin = int(MassConstants::BIN_H2O);
+  int j;
+  largest_mz += h2o_bin;    // This is line is added to make this code equivalent
+  // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
+  for(int i = 1; i < largest_mz; ++i) {
+    j = i+i;
+    intensity = peaks_[i];
     if ( FP_ == true) {
-        if (i > 0) {
-          flanks += Peak(FlankingPeak, i-1);
-        }
-        if (i < max_mz_.CacheBinEnd() - 1) {
-          flanks += Peak(FlankingPeak, i+1);
-        }
+      intensity += 0.5*(peaks_[i-1] + peaks_[i+1]);
     }
-    int Y1 = flanks;
-    if ( NL_ == true) {
-        if (i > MassConstants::BIN_NH3) {
-          Y1 += Peak(LossPeak, i-MassConstants::BIN_NH3);
-        }
-        if (i > MassConstants::BIN_H2O) {
-          Y1 += Peak(LossPeak, i-MassConstants::BIN_H2O);
-        }
+    cache_[j+1] = int(intensity);
+    if ( NL_ == true && i > h2o_bin ) {
+      intensity += 0.2*(peaks_[i - nh3_bin] + peaks_[i - h2o_bin]);
     }
-    Peak(PeakCombinedY1, i) = Y1;
-    int B1 = Y1;
-    Peak(PeakCombinedB1, i) = B1;
-    Peak(PeakCombinedY2, i) = flanks;
-    Peak(PeakCombinedB2, i) = flanks;
+    cache_[j] = int(intensity);
   }
-}
+  
+#ifdef DEBUG
+  if (debug) {
+    ShowPeaks();
+    ShowCache();
+  }
 
-// This dot product is replaced by calls to on-the-fly compiled code.
-int ObservedPeakSet::DotProd(const TheoreticalPeakArr& theoretical) {
-  int total = 0;
-  TheoreticalPeakArr::const_iterator i = theoretical.begin();
-  for (; i != theoretical.end(); ++i) {
-    //if (i->Code() >= cache_end_)
-    //  break;
-    total += cache_[i->Code()];
-  }
-  return total;
-}
-
-#if 0
-int ObservedPeakSet::DebugDotProd(const TheoreticalPeakArr& theoretical) {
-  cout << "cache_end_=" << cache_end_ << endl;
-  int total = 0;
-  TheoreticalPeakArr::const_iterator i = theoretical.begin();
-  for (; i != theoretical.end(); ++i) {
-    cout << "DotProd Lookup(" << i->Bin() << "," << i->Type() << "):";
-    if (i->Code() >= cache_end_) {
-      cout << "code=" << i->Code() << "past cache_end_=" << cache_end_ << "; ignoring" << endl;
-      continue;
-    }
-    total += cache_[i->Code()];
-    cout << cache_[i->Code()] << "; total=" << total << endl;
-  }
-  return total;
-}
 #endif
+}
 
 // Written by Andy Lin in Feb 2018
 // Helper function for CreateResidueEvidenceMatrix
@@ -342,7 +283,7 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
       
       // Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(), ionMassBin.end(),newResMassBin) - ionMassBin.begin();
+      int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
       double score = 0.0;
       for (int i = index; i < ionMasses.size(); i++) {
         if (newResMassBin != ionMassBin[i]) {
@@ -652,7 +593,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
     ionIntens.push_back(0.0);
 
     reverse(ionMass.begin(), ionMass.end());
-    reverse(ionMassBin.begin(),ionMassBin.end());
+    reverse(ionMassBin.begin(), ionMassBin.end());
     reverse(ionIntens.begin(), ionIntens.end());
 
     addEvidToResEvMatrix(ionMass, ionMassBin, ionMasses, ionIntens, ionIntensitiesSort,

@@ -172,30 +172,17 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
   int pos_size = peaks[0].size();
   prog1_ = compiler_prog1->Init(pos_size, 0);
   compiler_prog1->AddPositive(peaks[0]);
-//  compiler_prog1->AddPositive(pb_peptide.peak1());
-//  compiler_prog1->AddNegative(pb_peptide.neg_peak1());
   compiler_prog1->Done();
 
   pos_size = peaks[0].size() + peaks[1].size();
   prog2_ = compiler_prog2->Init(pos_size, 0);
   compiler_prog2->AddPositive(peaks[0]);
   compiler_prog2->AddPositive(peaks[1]);
-//  compiler_prog2->AddPositive(pb_peptide.peak2());
-//  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
   compiler_prog2->Done();
-/*    cout << Seq() << endl;
-    for (int i = 0; i < peaks[0].size(); ++i)
-      cout << "Theoretical Peak[" << peaks[0][i].Bin() << "] = "
-           << peaks[0][i].Type() << endl;
-    for (int i = 0; i < peaks[1].size(); ++i)
-      cout << "Theoretical Peak[" << peaks[1][i].Bin() << "] = "
-           << peaks[1][i].Type() << endl;
-*/
-//	exit(1);  
 }
 
-void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace, bool dia_mode) {
-  AddIons<TheoreticalPeakSet>(workspace, dia_mode);   // Generic workspace
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
+  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);   // Generic workspace
 #ifdef DEBUG
   Show();
 #endif
@@ -208,13 +195,13 @@ void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const
 #endif
 }
 
-void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace,
                                       const pb::Peptide& pb_peptide,
                                       TheoreticalPeakCompiler* compiler_prog1,
                                       TheoreticalPeakCompiler* compiler_prog2,
                                       bool dia_mode) {
   // Search-time fast workspace
-  AddIons<ST_TheoreticalPeakSet>(workspace, dia_mode);
+  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);
 
 #if 0
   TheoreticalPeakArr peaks[2];

@@ -20,7 +20,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        proteins)
   : reader_(reader),
     proteins_(proteins),
-    theoretical_peak_set_(2000),   // probably overkill, but no harm
+    theoretical_peak_set_(1000),   // probably overkill, but no harm
     theoretical_b_peak_set_(200),  // probably overkill, but no harm
     active_targets_(0), active_decoys_(0),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
@@ -69,7 +69,7 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
 
 int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus, bool dia_mode) {
   int min_candidates = 0;  //Added for tailor score calibration method by AKF
-  if (Params::GetBool("use-tailor-calibration")){
+  if (Params::GetBool("use-tailor-calibration")) {
     min_candidates = 30;
   }
   //min_range and max_range have been introduced to fix a bug
@@ -146,18 +146,18 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   iter_ = queue_.begin();
   while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front()) {
     ++iter_;
-    if (Params::GetBool("use-tailor-calibration")){ //Added by AKF
+    if (Params::GetBool("use-tailor-calibration")) { //Added by AKF
       candidatePeptideStatus->push_back(false);  
     }
   }
   end_ = iter_;
-  if (Params::GetBool("use-tailor-calibration")){ //Added by AKF
+  if (Params::GetBool("use-tailor-calibration")) { //Added by AKF
     iter_ = queue_.begin();
   }
   int* isotope_idx = new int(0);
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
     if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
       ++active;
       candidatePeptideStatus->push_back(true);
@@ -176,7 +176,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     return 0;
   }
   //Added for tailor score calibration method by AKF
-  if (Params::GetBool("use-tailor-calibration")){
+  if (Params::GetBool("use-tailor-calibration")) {
     while (end_ != queue_.end()) {  //Added by AKF
       if ((*end_)->Prog(1) == NULL || candidatePeptideStatus->size() >= min_candidates-1) {
         break;
@@ -249,7 +249,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
 
   iter1_ = b_ion_queue_.begin();
   iter_ = queue_.begin();
-  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front() ){
+  while (iter_ != queue_.end() && (*iter_)->Mass() < min_mass->front() ) {
     ++iter_;
     ++iter1_;
   }
@@ -259,7 +259,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
   end1_ = iter1_;
   int active = 0;
   active_targets_ = active_decoys_ = 0;
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ){
+  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
     if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
       ++active;
       candidatePeptideStatus->push_back(true);
@@ -288,7 +288,7 @@ int ActivePeptideQueue::CountAAFrequency(
   double** dAAFreqN,
   double** dAAFreqI,
   double** dAAFreqC,
-  int** dAAMass
+  int** iAAMass
 ) {
 
     unsigned int i = 0;
@@ -329,7 +329,7 @@ int ActivePeptideQueue::CountAAFrequency(
   }
 
   //calculate the unique amino acid masses
-  *dAAMass = new int[uiUniqueMasses];     //a vector for the unique (integerized) amino acid masses present in the sample
+  *iAAMass = new int[uiUniqueMasses];     //a vector for the unique (integerized) amino acid masses present in the sample
   *dAAFreqN = new double[uiUniqueMasses]; //a vector for the amino acid frequencies at the N-terminus
   *dAAFreqI = new double[uiUniqueMasses]; //a vector for the amino acid frequencies inside the peptide
   *dAAFreqC = new double[uiUniqueMasses]; //a vector for the amino acid frequencies at the C-terminus
@@ -339,7 +339,7 @@ int ActivePeptideQueue::CountAAFrequency(
       (*dAAFreqN)[cnt] = (double)nvAAMassCounterN[i] / cntTerm;
       (*dAAFreqI)[cnt] = (double)nvAAMassCounterI[i] / cntInside;
       (*dAAFreqC)[cnt] = (double)nvAAMassCounterC[i] / cntTerm;
-      (*dAAMass)[cnt] = i;
+      (*iAAMass)[cnt] = i;
       cnt++;
     }
   }
@@ -366,10 +366,10 @@ int ActivePeptideQueue::CountAAFrequencyRes(
   unsigned int i = 0;
   unsigned int cntTerm = 0; //counter for terminal residues
   unsigned int cntInside = 0; //counter for internal residues
-  map<double,int> nMap; //Nterm residues
-  map<double,int> iMap; //internal residues
-  map<double,int> cMap; //Cterm residues
-  map<double,int> allMap; //all residues
+  map<double, int> nMap; //Nterm residues
+  map<double, int> iMap; //internal residues
+  map<double, int> cMap; //Cterm residues
+  map<double, int> allMap; //all residues
 
   while (!(reader_->Done())) { //read all peptides in index
     reader_->Read(&current_pb_peptide_);
@@ -416,7 +416,7 @@ int ActivePeptideQueue::CountAAFrequencyRes(
   }
 
   //determine the unique masses for all residues
-  for (map<double,int>::iterator it = allMap.begin(); it != allMap.end(); it++) {
+  for (map<double, int>::iterator it = allMap.begin(); it != allMap.end(); it++) {
     dAAMass.push_back(it->first);
   }
 
