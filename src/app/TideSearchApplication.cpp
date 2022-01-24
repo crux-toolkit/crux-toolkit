@@ -1780,14 +1780,14 @@ int TideSearchApplication::calcScoreCount(
       }
       for (de = 0; de < nDeltaMass; de++) {
         col = deltaMassCol[de];
-        if (col == colLast) { 
-         evidenceRow = row;
-          dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqC[de]; 
-        } else if (col < colLast) {
+        if (col < colLast) {
           evidenceRow = row + evidenceObs[col];
           dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqI[de]; 
+        } else if (col == colLast) { 
+          evidenceRow = row;
+          dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqC[de]; 
         }
-      }      
+      }
     }
     delete dynProgArray[ma];
   }
@@ -1926,13 +1926,13 @@ void TideSearchApplication::calcResidueScoreCount (
       }
       for (de = 0; de < nAa; de++) {
         newCol = aaMassCol[de];
-        if (newCol == colLast) {
-          evidRow = row;
-          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqC[de];            
-        } else if (newCol < colLast) {
+        if (newCol < colLast) {
           evidRow = row + residueEvidenceMatrix[de][newCol];
           dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqI[de];
-        }
+        } else if (newCol == colLast) {
+          evidRow = row;
+          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqC[de];            
+        } 
       }        
     }      
   } 
