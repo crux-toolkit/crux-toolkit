@@ -24,11 +24,11 @@ using namespace std;
 
 std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
 
+
 class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
   friend class DIAmeterApplication;
-
  public:
 
   /**
@@ -89,7 +89,6 @@ class TideIndexApplication : public CruxApplication {
   virtual COMMAND_T getCommand() const;
 
  protected:
-
   class TideIndexPeptide {
    private:
     double mass_;
@@ -120,7 +119,9 @@ class TideIndexApplication : public CruxApplication {
       length_ = length;
       proteinId_ = proteinId;
       proteinPos_ = proteinPos;
-      residues_ = residues;
+      char* a = new char[length]; 
+	  memcpy(a, residues, sizeof(char)*length);
+	  residues_ = a;
       decoyIdx_ = decoyIdx;
     }
     // Larry's code ends here
@@ -139,6 +140,9 @@ class TideIndexApplication : public CruxApplication {
     string getSequence() const { return string(residues_, length_); }
     bool isDecoy() const { return decoyIdx_ >= 0; }
     int decoyIdx() const { return decoyIdx_; }
+	void printpept(){
+		printf("%lf\t%s\t%d\n", mass_, residues_, decoyIdx_);
+	}
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -161,12 +165,15 @@ class TideIndexApplication : public CruxApplication {
     }
     friend bool operator ==(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
+		  // printf("mass\t%lf\t%lf\t%d\n", lhs.mass_, rhs.mass_, lhs.mass_ == rhs.mass_? 1:0);
+		  // printf("sequ\t%s\t%s\t%d\n", lhs.residues_, rhs.residues_, strncmp(lhs.residues_, rhs.residues_, lhs.length_));
+		  // printf("deco\t%d\t%d\t%d\n", lhs.decoyIdx_, rhs.decoyIdx_,lhs.decoyIdx_ == rhs.decoyIdx_? 1:0);
+		  // printf("leng\t%d\t%d\t%d\n", lhs.length_,  rhs.length_,  lhs.length_ == rhs.length_? 1 : 0);
       return (lhs.mass_ == rhs.mass_ && lhs.length_ == rhs.length_ &&
               strncmp(lhs.residues_, rhs.residues_, lhs.length_) == 0) &&
               lhs.decoyIdx_ == rhs.decoyIdx_;
     }
   };
-
   struct ProteinInfo {
     string name;
     const string* sequence;
@@ -265,6 +272,10 @@ class TideIndexApplication : public CruxApplication {
   );
 
   virtual void processParams();
+
+  // Larry's code
+  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile);
+  // Larry's code ends here
 };
 
 #endif

@@ -14,10 +14,8 @@
 #include "ParamMedicApplication.h"
 
 // Larry's code
-#include "parameter.h" 
-#include "io/DelimitedFileWriter.h"
-#include <bits/stdc++.h>
-#include <sstream>
+#include <boost/algorithm/string.hpp>
+#define BIGNUMBER 10000000000
 // Larry's code ends here
 
 #include <regex>
@@ -69,18 +67,19 @@ int TideIndexApplication::main(
   filename = peptideFile;
   remove(filename);
   defaultWriterPtr = new DelimitedFileWriter(filename);
+  defaultWriterPtr->setDelimiter(',');
 
-  std::vector<std::string> colNames;
-  colNames.push_back("Mass");
-  colNames.push_back("Length");
-  colNames.push_back("ProteinId");
-  colNames.push_back("ProteinPos");
-  colNames.push_back("Sequence");
-  colNames.push_back("isDecoy");
-  colNames.push_back("decoyIdx");
+  // std::vector<std::string> colNames;
+  // colNames.push_back("Mass");
+  // colNames.push_back("Length");
+  // colNames.push_back("ProteinId");
+  // colNames.push_back("ProteinPos");
+  // colNames.push_back("Sequence");
+  // colNames.push_back("isDecoy");
+  // colNames.push_back("decoyIdx");
 
-  defaultWriterPtr->setColumnNames(colNames);
-  defaultWriterPtr->writeHeader();
+  // defaultWriterPtr->setColumnNames(colNames);
+  // defaultWriterPtr->writeHeader();
   // Larry's code ends here
 
   carp(CARP_INFO, "Running tide-index...");
@@ -688,7 +687,7 @@ void TideIndexApplication::fastaToPb(
       TideIndexPeptide pepTarget(pepMass, i->Length(), proteinSequence, curProtein, i->Position());
 
       // Larry's code 
-      defaultWriterPtr->setColumnCurrentRow(0, pepTarget.getMass(), 10);// col, value, precision
+      defaultWriterPtr->setColumnCurrentRow(0, pepTarget.getMass()*BIGNUMBER, 0);// col, value, precision
       defaultWriterPtr->setColumnCurrentRow(1, pepTarget.getLength(), 10);// col, value, precision
       defaultWriterPtr->setColumnCurrentRow(2, pepTarget.getProteinId(), 10);// col, value, precision
       defaultWriterPtr->setColumnCurrentRow(3, pepTarget.getProteinPos(), 10);// col, value, precision
@@ -757,7 +756,7 @@ void TideIndexApplication::fastaToPb(
         FLOAT_T pepMass = calcPepMassTide(&(*j), massType, &proteinInfo);
         generateDecoys(numDecoys, setTarget, targetToDecoy_local, NULL, NULL, decoyType, allowDups,
                        failedDecoyCnt, decoysGenerated, curProtein, proteinInfo, startLoc,
-                       proteinWriter, pepMass,outProteinSequences);
+                       proteinWriter, pepMass, outProteinSequences);
       }
     }
   }
@@ -858,22 +857,21 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   //  Added -r in order to allow reading from largest mass first
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
-    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+   std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort -k 1,1n -k 5,5 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
     std::string cmd = ""
   #endif
-
     // Convert string to const char * as system requires
     // parameter of type const char *
   const char *command = cmd.c_str();
@@ -893,76 +891,57 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   int numDuplicateTargets = 0;
   int numDuplicateDecoys = 0;
 
-   // Larry's code
-  // Read File here (Clean up this code later)
- 
+  // Larry's code
+  
   ifstream sortedFile(sortedPeptideFile);
-  string line;
-  string nextLine;
-  string delimeter = "\t";
-
   int numLines = 0;
-
-  //  Change this loop and make it work linearly
-while(getline(sortedFile, line)){
-    size_t pos = 0;
-    string token;
-    const char *data[6];
-    for(int i = 0; i < 6; i++){
-      token = line.substr(0, pos);
-      line.erase(0, pos + delimeter.length());
-      data[i] = token.c_str();
-    }
-   
-    double mass = atof(data[0]);
-    int length = atoi(data[1]);
-    int proteinId = atoi(data[2]);
-    int proteinPos = atoi(data[3]);
-    string tmp =  data[4];
-    const char* residues = tmp.c_str();  // points at protein sequence
-    int decoyIdx = atoi(data[5]); // -1 if not a decoy
-
-    TideIndexPeptide curPepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
-
-    int curLineNum = numLines;
-    // Create another loop here to loop over all lines in the file except the previous line
-    while(getline(sortedFile, nextLine)){
-      if(curLineNum >  numLines){
-        curLineNum++;
-        size_t pos = 0;
-        string token;
-        const char *data[6];
-        for(int i = 0; i < 6; i++){
-          token = nextLine.substr(0, pos);
-          nextLine.erase(0, pos + delimeter.length());
-          data[i] = token.c_str();
-        }
-            
-        double mass = atof(data[0]);
-        int length = atoi(data[1]);
-        int proteinId = atoi(data[2]);
-        int proteinPos = atoi(data[3]);
-        string tmp =  data[4];
-        const char* residues = tmp.c_str();  // points at protein sequence
-        int decoyIdx = atoi(data[5]); // -1 if not a decoy
-
-        TideIndexPeptide pepTarget(mass, length, proteinId, proteinPos, residues, decoyIdx);
-        if(pepTarget == curPepTarget){
-          if (pepTarget.isDecoy()) {
-            numDuplicateDecoys++;
-          } else {
-            numDuplicateTargets++;
-          } 
-          carp(CARP_DEBUG, "Skipping duplicate %s.", curPepTarget.getSequence().c_str());
-          pb::Location* location = pbAuxLoc.add_location();
-          location->set_protein_id(pepTarget.getProteinId());
-          location->set_pos(pepTarget.getProteinPos());
-        }else{
-            break;
-        }
+  string line;
+  TideIndexPeptide* currentPeptide;
+  TideIndexPeptide* duplicatedPeptide;
+  
+  // ignore = getline(sortedFile, line);   //skip the header line
+  currentPeptide = getNextPeptide(sortedFile);  // get the first peptide
+  int cnt = 0;
+  
+  while (currentPeptide != nullptr) {
+    
+//    currentPeptide->printpept();
+    while (true) {
+	  
+      duplicatedPeptide = getNextPeptide(sortedFile);
+	  
+      if (duplicatedPeptide == nullptr) {
+        break;
+      }
+      if( (*duplicatedPeptide) == (*currentPeptide)){
+          // printf("current pept: \t");
+		  // currentPeptide->printpept();
+          // printf("duplicated, same,  pept: \t");
+  	      // duplicatedPeptide->printpept();
+		  // printf("seq_comparison:\t %s\t%s\n", currentPeptide->getSequence().c_str(), duplicatedPeptide->getSequence().c_str());
+		 
+		
+        if (duplicatedPeptide->isDecoy()) {
+          numDuplicateDecoys++;
+        } else {
+          numDuplicateTargets++;
+        } 
+        carp(CARP_DEBUG, "Skipping duplicate %s.", currentPeptide->getSequence().c_str());
+        pb::Location* location = pbAuxLoc.add_location();
+        location->set_protein_id(duplicatedPeptide->getProteinId());
+        location->set_pos(duplicatedPeptide->getProteinPos());
+        delete duplicatedPeptide;
+      } else {
+         // printf("duplicated, not the same,  pept: \t");
+  	     // duplicatedPeptide->printpept();
+         break;
       }
     }
-    getPbPeptide(count, curPepTarget, pbPeptide);
+	
+	// if (cnt++ > 100) 
+		// break;
+    
+    getPbPeptide(count, *currentPeptide, pbPeptide);
     // Not all peptides have aux locations associated with them. Check to see
     // if GetGroup added any locations to aux_location. If yes, only then
     // assign the corresponding array index to the peptide and write it out.
@@ -976,7 +955,7 @@ while(getline(sortedFile, line)){
     // aux_locations_index to the peptide.
     peptideWriter.Write(&pbPeptide);
 
-    if (curPepTarget.isDecoy()) {
+    if (currentPeptide->isDecoy()) {
         numDecoys++;
     } else {
         numTargets++;
@@ -984,13 +963,14 @@ while(getline(sortedFile, line)){
     if (++count % 100000 == 0) {
         carp(CARP_INFO, "Wrote %d peptides", count);
     }
-
+    
+    delete currentPeptide;
+	currentPeptide = duplicatedPeptide;
     numLines++;
-
   }
 
-  carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
 
+  carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
   // remove(peptideFile);
   // remove(sortedPeptideFile);
 
@@ -1311,7 +1291,7 @@ void TideIndexApplication::generateDecoys(
     TideIndexPeptide pepDecoy(pepMass, setTarget.length(), seq, curProtein, (startLoc > 0) ? 1 : 0, i);
 
     // Larry's code 
-    defaultWriterPtr->setColumnCurrentRow(0, pepDecoy.getMass(), 10);// col, value, precision
+    defaultWriterPtr->setColumnCurrentRow(0, pepDecoy.getMass()*BIGNUMBER, 0);// col, value, precision
     defaultWriterPtr->setColumnCurrentRow(1, pepDecoy.getLength(), 10);// col, value, precision
     defaultWriterPtr->setColumnCurrentRow(2, pepDecoy.getProteinId(), 10);// col, value, precision
     defaultWriterPtr->setColumnCurrentRow(3, pepDecoy.getProteinPos(), 10);// col, value, precision
@@ -1325,6 +1305,29 @@ void TideIndexApplication::generateDecoys(
   decoysGenerated += decoySequences.size();
  }
 
+// Larry's code
+TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifstream &sortedFile){
+  string line;
+  vector<std::string> strs;
+ 
+  if (getline(sortedFile, line)) {
+
+    boost::split(strs, line, boost::is_any_of(","));
+    
+    double mass = stod(strs[0])/BIGNUMBER;
+    int length = stoi(strs[1]);
+    int proteinId = stoi(strs[2]);
+    int proteinPos = stoi(strs[3]);
+    const char* residues = strs[4].c_str();  // points at protein sequence
+    int decoyIdx = stoi(strs[6]); // -1 if not a decoy	
+    TideIndexPeptide* pepTarget = new TideIndexPeptide(mass, length, proteinId, proteinPos, residues, decoyIdx);
+	
+    return pepTarget;
+  }else{
+    return nullptr;
+  }
+}
+// Larry's code ends here
 /*
 * Local Variables:
 * mode: c
