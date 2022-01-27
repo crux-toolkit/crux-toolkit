@@ -112,19 +112,6 @@ class TideIndexApplication : public CruxApplication {
       }
       decoyIdx_ = decoyIdx;
     }
-    // Larry's code
-    TideIndexPeptide(double mass, int length,
-                     int proteinId, int proteinPos, const char* residues, int decoyIdx) {
-      mass_ = mass;
-      length_ = length;
-      proteinId_ = proteinId;
-      proteinPos_ = proteinPos;
-      char* a = new char[length]; 
-	  memcpy(a, residues, sizeof(char)*length);
-	  residues_ = a;
-      decoyIdx_ = decoyIdx;
-    }
-    // Larry's code ends here
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
       length_ = other.length_;
@@ -140,9 +127,6 @@ class TideIndexApplication : public CruxApplication {
     string getSequence() const { return string(residues_, length_); }
     bool isDecoy() const { return decoyIdx_ >= 0; }
     int decoyIdx() const { return decoyIdx_; }
-	void printpept(){
-		printf("%lf\t%s\t%d\n", mass_, residues_, decoyIdx_);
-	}
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -165,10 +149,6 @@ class TideIndexApplication : public CruxApplication {
     }
     friend bool operator ==(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
-		  // printf("mass\t%lf\t%lf\t%d\n", lhs.mass_, rhs.mass_, lhs.mass_ == rhs.mass_? 1:0);
-		  // printf("sequ\t%s\t%s\t%d\n", lhs.residues_, rhs.residues_, strncmp(lhs.residues_, rhs.residues_, lhs.length_));
-		  // printf("deco\t%d\t%d\t%d\n", lhs.decoyIdx_, rhs.decoyIdx_,lhs.decoyIdx_ == rhs.decoyIdx_? 1:0);
-		  // printf("leng\t%d\t%d\t%d\n", lhs.length_,  rhs.length_,  lhs.length_ == rhs.length_? 1 : 0);
       return (lhs.mass_ == rhs.mass_ && lhs.length_ == rhs.length_ &&
               strncmp(lhs.residues_, rhs.residues_, lhs.length_) == 0) &&
               lhs.decoyIdx_ == rhs.decoyIdx_;
@@ -212,7 +192,8 @@ class TideIndexApplication : public CruxApplication {
   static void writePeptidesAndAuxLocs(
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
-    pb::Header& pbHeader
+    pb::Header& pbHeader,
+    std::vector<string*>& outProteinSequences
   );
 
   static FLOAT_T calcPepMassTide(
@@ -274,7 +255,7 @@ class TideIndexApplication : public CruxApplication {
   virtual void processParams();
 
   // Larry's code
-  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile);
+  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, std::vector<string*>& outProteinSequences);
   // Larry's code ends here
 };
 
