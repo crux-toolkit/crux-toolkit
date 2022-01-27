@@ -68,18 +68,6 @@ int TideIndexApplication::main(
   remove(filename);
   defaultWriterPtr = new DelimitedFileWriter(filename);
   defaultWriterPtr->setDelimiter(',');
-
-  // std::vector<std::string> colNames;
-  // colNames.push_back("Mass");
-  // colNames.push_back("Length");
-  // colNames.push_back("ProteinId");
-  // colNames.push_back("ProteinPos");
-  // colNames.push_back("Sequence");
-  // colNames.push_back("isDecoy");
-  // colNames.push_back("decoyIdx");
-
-  // defaultWriterPtr->setColumnNames(colNames);
-  // defaultWriterPtr->writeHeader();
   // Larry's code ends here
 
   carp(CARP_INFO, "Running tide-index...");
@@ -208,7 +196,7 @@ int TideIndexApplication::main(
 
   fastaToPb(cmd_line, enzyme_t, digestion, missed_cleavages, min_mass, max_mass,
             min_length, max_length, allowDups, mass_type, decoy_type, fasta, out_proteins,
-            proteinPbHeader,proteinSequences, out_decoy_fasta, peptideToProteinMap);
+            proteinPbHeader, proteinSequences, out_decoy_fasta, peptideToProteinMap);
 
   pb::Header header_with_mods;
 
@@ -272,7 +260,7 @@ int TideIndexApplication::main(
 
   string basic_peptides = need_mods ? modless_peptides : peakless_peptides;
   
-  writePeptidesAndAuxLocs(basic_peptides, out_aux, header_no_mods);
+  writePeptidesAndAuxLocs(basic_peptides, out_aux, header_no_mods, proteinSequences);
   // Do some clean up
   for (vector<string*>::iterator i = proteinSequences.begin();
        i != proteinSequences.end();
@@ -796,7 +784,8 @@ void TideIndexApplication::fastaToPb(
 void TideIndexApplication::writePeptidesAndAuxLocs(
   const string& peptidePbFile,
   const string& auxLocsPbFile,
-  pb::Header& pbHeader
+  pb::Header& pbHeader,
+  std::vector<string*>& outProteinSequences
 ) {
 
   // Check header
@@ -857,16 +846,16 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   //  Added -r in order to allow reading from largest mass first
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
     std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
-   std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
+   std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort -g -k1g,1 -k2n,2 -k5,5 -k6,6 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
@@ -899,27 +888,19 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   TideIndexPeptide* currentPeptide;
   TideIndexPeptide* duplicatedPeptide;
   
-  // ignore = getline(sortedFile, line);   //skip the header line
-  currentPeptide = getNextPeptide(sortedFile);  // get the first peptide
+  currentPeptide = getNextPeptide(sortedFile, outProteinSequences);  // get the first peptide
   int cnt = 0;
   
   while (currentPeptide != nullptr) {
     
-//    currentPeptide->printpept();
     while (true) {
 	  
-      duplicatedPeptide = getNextPeptide(sortedFile);
+      duplicatedPeptide = getNextPeptide(sortedFile, outProteinSequences);
 	  
       if (duplicatedPeptide == nullptr) {
         break;
       }
       if( (*duplicatedPeptide) == (*currentPeptide)){
-          // printf("current pept: \t");
-		  // currentPeptide->printpept();
-          // printf("duplicated, same,  pept: \t");
-  	      // duplicatedPeptide->printpept();
-		  // printf("seq_comparison:\t %s\t%s\n", currentPeptide->getSequence().c_str(), duplicatedPeptide->getSequence().c_str());
-		 
 		
         if (duplicatedPeptide->isDecoy()) {
           numDuplicateDecoys++;
@@ -932,14 +913,9 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
         location->set_pos(duplicatedPeptide->getProteinPos());
         delete duplicatedPeptide;
       } else {
-         // printf("duplicated, not the same,  pept: \t");
-  	     // duplicatedPeptide->printpept();
          break;
       }
     }
-	
-	// if (cnt++ > 100) 
-		// break;
     
     getPbPeptide(count, *currentPeptide, pbPeptide);
     // Not all peptides have aux locations associated with them. Check to see
@@ -965,17 +941,15 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     }
     
     delete currentPeptide;
-	currentPeptide = duplicatedPeptide;
+	  currentPeptide = duplicatedPeptide;
     numLines++;
   }
 
 
   carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
-  // remove(peptideFile);
-  // remove(sortedPeptideFile);
+  remove(peptideFile);
+  remove(sortedPeptideFile);
 
-
- 
   // Larry's code ends here
 
   carp(CARP_INFO, "Skipped %d duplicate targets and %d duplicate decoys.",
@@ -1306,7 +1280,7 @@ void TideIndexApplication::generateDecoys(
  }
 
 // Larry's code
-TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifstream &sortedFile){
+TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifstream &sortedFile, std::vector<string*>& outProteinSequences){
   string line;
   vector<std::string> strs;
  
@@ -1318,9 +1292,10 @@ TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifs
     int length = stoi(strs[1]);
     int proteinId = stoi(strs[2]);
     int proteinPos = stoi(strs[3]);
-    const char* residues = strs[4].c_str();  // points at protein sequence
     int decoyIdx = stoi(strs[6]); // -1 if not a decoy	
-    TideIndexPeptide* pepTarget = new TideIndexPeptide(mass, length, proteinId, proteinPos, residues, decoyIdx);
+
+    string* proteinSequence = outProteinSequences[proteinId];
+    TideIndexPeptide* pepTarget = new TideIndexPeptide(mass, length, proteinSequence, proteinId, proteinPos, decoyIdx);
 	
     return pepTarget;
   }else{
