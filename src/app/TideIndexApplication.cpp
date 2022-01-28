@@ -846,29 +846,32 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   //  Added -r in order to allow reading from largest mass first
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
-   std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
+   std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + "> " + sortedPeptideFile;
+    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
     std::string cmd = ""
   #endif
-    // Convert string to const char * as system requires
-    // parameter of type const char *
+
+  // Convert string to const char * as system requires
+  // parameter of type const char *
   const char *command = cmd.c_str();
   int systemRet = system(command);
   if(systemRet == -1){
     // The system method failed
-    std::cout << "system call failed";
+    std::cout << systemRet << "\n";
+    std::cout << "system call failed \n";
   }
+
   // Larry's code ends here
 
   pb::Peptide pbPeptide;
@@ -947,8 +950,8 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
 
 
   carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
-  remove(peptideFile);
-  remove(sortedPeptideFile);
+  // remove(peptideFile);
+  // remove(sortedPeptideFile);
 
   // Larry's code ends here
 
