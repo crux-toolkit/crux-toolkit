@@ -15,7 +15,9 @@
 
 // Larry's code
 #include <boost/algorithm/string.hpp>
+#include <boost/process.hpp>
 #define BIGNUMBER 10000000000
+namespace bp = boost::process;
 // Larry's code ends here
 
 #include <regex>
@@ -849,7 +851,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
+    std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " -o " + sortedPeptideFile;
   #elif __unix__
     std::cout << "Other unix OS\n";
    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
@@ -862,15 +864,22 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
     std::string cmd = ""
   #endif
 
-  // Convert string to const char * as system requires
-  // parameter of type const char *
-  const char *command = cmd.c_str();
-  int systemRet = system(command);
-  if(systemRet == -1){
-    // The system method failed
-    std::cout << systemRet << "\n";
-    std::cout << "system call failed \n";
-  }
+  bp::ipstream pipe_stream;
+  bp::child c(cmd, bp::std_out > pipe_stream);
+
+  std::string stream_line;
+  while(c.running()){
+    std::cout << "The sort command is still running please wait; \n";
+    while(std::getline(pipe_stream, stream_line) && !stream_line.empty())
+      std::cout << stream_line;
+  } 
+  
+  
+
+  c.wait(); //wait for the process to exit   
+  int systemRet = c.exit_code();
+  std::cout << "Child process exited with code: " << systemRet << "\n";
+
 
   // Larry's code ends here
 
@@ -887,7 +896,6 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   
   ifstream sortedFile(sortedPeptideFile);
   int numLines = 0;
-  string line;
   TideIndexPeptide* currentPeptide;
   TideIndexPeptide* duplicatedPeptide;
   
