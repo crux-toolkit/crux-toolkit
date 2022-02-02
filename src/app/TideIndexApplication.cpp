@@ -14,10 +14,11 @@
 #include "ParamMedicApplication.h"
 
 // Larry's code
+#include <chrono>
+#include <thread>
 #include <boost/algorithm/string.hpp>
-#include <boost/process.hpp>
 #define BIGNUMBER 10000000000
-namespace bp = boost::process;
+#define SLEEPTIME 60000
 // Larry's code ends here
 
 #include <regex>
@@ -28,7 +29,6 @@ namespace bp = boost::process;
 #endif
 
 // Larry's code
-const char* filename;
 DelimitedFileWriter* defaultWriterPtr;
 const char* sortedPeptideFile = "sortedPepTarget.txt";
 const char* peptideFile = "pepTarget.txt";
@@ -66,9 +66,8 @@ int TideIndexApplication::main(
 ) {
 
   // Larry's code
-  filename = peptideFile;
-  remove(filename);
-  defaultWriterPtr = new DelimitedFileWriter(filename);
+  remove(peptideFile);
+  defaultWriterPtr = new DelimitedFileWriter(peptideFile);
   defaultWriterPtr->setDelimiter(',');
   // Larry's code ends here
 
@@ -845,41 +844,33 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   HeadedRecordWriter auxLocWriter(auxLocsPbFile, auxLocsHeader);
 
   // Larry's code 
-  //  Added -r in order to allow reading from largest mass first
+  carp(CARP_INFO, "About to start sorting");
+  remove(sortedPeptideFile);
   #ifdef _WIN32
     std::cout << "Windows\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
+    std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile + " &";
   #elif __linux__
     std::cout << "Linux\n";
-    std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " -o " + sortedPeptideFile;
+    std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile + " &";
   #elif __unix__
     std::cout << "Other unix OS\n";
-   std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
+   std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile + " &";
   #elif __APPLE__
     std::cout << "Apple OS\n";
-    std::string cmd = "sort -t ',' -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(filename) + " > " + sortedPeptideFile;
+    std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile + " &";
   #else
     std::cout << "Unidentified OS\n";
     std::cout << "We don't support your OS";
     std::string cmd = ""
   #endif
 
-  bp::ipstream pipe_stream;
-  bp::child c(cmd, bp::std_out > pipe_stream);
-
-  std::string stream_line;
-  while(c.running()){
-    std::cout << "The sort command is still running please wait; \n";
-    while(std::getline(pipe_stream, stream_line) && !stream_line.empty())
-      std::cout << stream_line;
-  } 
   
-  
+  const char* command = cmd.c_str();
+  int systemResult = system(command); 
+  std::cout << "System call exited with code " << systemResult;
 
-  c.wait(); //wait for the process to exit   
-  int systemRet = c.exit_code();
-  std::cout << "Child process exited with code: " << systemRet << "\n";
-
+  std::chrono::milliseconds timespan(SLEEPTIME);
+  std::this_thread::sleep_for(timespan);
 
   // Larry's code ends here
 
@@ -893,8 +884,9 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
   int numDuplicateDecoys = 0;
 
   // Larry's code
-  
   ifstream sortedFile(sortedPeptideFile);
+  if(!sortedFile.good())
+    carp(CARP_FATAL, "Sorted file does not exist, something went wrong and the results may be invalid. Please try again");
   int numLines = 0;
   TideIndexPeptide* currentPeptide;
   TideIndexPeptide* duplicatedPeptide;
@@ -958,6 +950,7 @@ void TideIndexApplication::writePeptidesAndAuxLocs(
 
 
   carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
+  // remove("sort.log")
   // remove(peptideFile);
   // remove(sortedPeptideFile);
 
