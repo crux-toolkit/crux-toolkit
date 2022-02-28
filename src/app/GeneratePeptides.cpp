@@ -384,6 +384,195 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
 }
 
 /**
+ * Cleave protein sequence using specified enzyme and store results in vector
+ * Vector also contains start location of each peptide within the protein
+ */
+vector<GeneratePeptides::PeptideReference> GeneratePeptides::cleaveProtein(
+  const string* sequence, ///< Protein sequence to cleave
+  ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+  DIGEST_T digest,  ///< Digestion to use for cleavage
+  int missedCleavages,  ///< Maximum allowed missed cleavages
+  int minLength,  //< Min length of peptides to return
+  int maxLength  //< Max length of peptides to return
+) {
+  vector<PeptideReference> peptides;
+  // No enzyme
+  // Get all substrings min <= length <= max
+  if (enzyme == NO_ENZYME) {
+    for (int i = 0; i < sequence->length(); ++i) {
+      for (int j = minLength; i + j <= sequence->length() && j <= maxLength; ++j) {
+        peptides.push_back(PeptideReference(i, j));
+      }
+    }
+    return peptides;
+  }
+
+  size_t pepStart = 0, nextPepStart = 0;
+  int cleaveSites = 0;
+  for (int i = 0; i < sequence->length(); ++i) {
+    // Determine if this is a valid cleavage position
+    bool cleavePos = i != sequence->length() - 1 &&
+      ProteinPeptideIterator::validCleavagePosition(sequence->c_str() + i, enzyme);
+    if (digest == PARTIAL_DIGEST && i != sequence->length() - 1 && !cleavePos) {
+      // Partial digestion (not last AA or cleavage position), add this peptide
+//      peptides.push_back(CleavedPeptide(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+      peptides.push_back(PeptideReference(pepStart, i + 1 - pepStart));
+    } else if (cleavePos) {
+      // Cleavage position, add this peptide
+      peptides.push_back(PeptideReference(pepStart, i + 1 - pepStart));
+      if (Params::GetBool("clip-nterm-methionine") && sequence->at(0) == 'M' &&
+          pepStart == 0 && digest != PARTIAL_DIGEST) {
+        peptides.push_back(PeptideReference(1, i));
+      }
+      if (++cleaveSites == 1) {
+        // This is the first cleavage position, remember it
+        nextPepStart = i + 1;
+      }
+      if (digest == PARTIAL_DIGEST) {
+        // For partial digest, add peptides ending at this cleavage position
+        for (int j = pepStart + 1; j < nextPepStart; ++j) {
+          peptides.push_back(PeptideReference(j, i - j + 1));
+        }
+      }
+      if (cleaveSites > missedCleavages) {
+        // We have missed the allowed amount of cleavages
+        // Move iterator+pepStart to the first cleavage position
+        pepStart = nextPepStart;
+        i = pepStart - 1;
+        cleaveSites = 0;
+      }
+    } else if (i == sequence->length() - 1 &&
+               cleaveSites > 0 && cleaveSites <= missedCleavages) {
+      // Last AA in sequence and we haven't missed the allowed amount yet
+      // Add this peptide and move iterator+pepStart to first cleavage position
+      peptides.push_back(PeptideReference(pepStart, sequence->length()-pepStart));  //TODO: check if this is correct
+      if (digest == PARTIAL_DIGEST) {
+        // For partial digest, add peptides ending at last AA
+        for (int j = pepStart + 1; j < nextPepStart; ++j) {
+          peptides.push_back(PeptideReference(j, i - j + 1));
+        }
+      }
+      pepStart = nextPepStart;
+      i = pepStart - 1;
+      cleaveSites = 0;
+    }
+  }
+  //For peptides that do not have an internal cleavage 
+  if (Params::GetBool("clip-nterm-methionine") && sequence->at(0) == 'M' &&
+      pepStart == 0 && digest != PARTIAL_DIGEST) {
+    peptides.push_back(PeptideReference(1, sequence->length()-1));
+  }
+  // Add the last peptide
+  peptides.push_back(PeptideReference(nextPepStart, sequence->length()-nextPepStart));
+  if (digest == PARTIAL_DIGEST) {
+    // For partial digest, add peptides ending at last AA
+    for (int j = pepStart + 1; j < sequence->length(); ++j) {
+      peptides.push_back(PeptideReference(j, sequence->length()-j));
+    }
+  }
+  // Erase peptides that don't meet length requirement
+  for (vector<PeptideReference>::iterator i = peptides.begin(); i != peptides.end(); ) {
+    if ((*i).length_ < minLength || (*i).length_ > maxLength) {
+      i = peptides.erase(i);
+    } else {
+      ++i;
+    }
+  }
+  return peptides;
+}
+
+/**
+* Makes a decoy of indexes from the sequence
+* Returns false on failure, and decoyOut will be the same as seq.
+*/
+bool GeneratePeptides::makeDecoyIdx(
+  const string& seq,  ///< sequence to make decoy from
+  const set<string>& targetSeqs,  ///< targets to check against
+  const set<string>& decoySeqs,  ///< decoys to check against
+  bool shuffle, ///< shuffle (if false, reverse)
+  string& decoyOut ///< string to store decoy
+  // TODO Swicth to vector
+  // vector<int>& decoyOutIdx ///< vector to store indexes 
+){
+  string decoyOutIdx;
+  for(int i = 0; i < seq.length(); i++){
+    decoyOutIdx = decoyOutIdx  + std::to_string(i) + ",";
+  }
+  const string keepTerminal = Params::GetString("keep-terminal-aminos");
+  string decoyPre, decoyPost, decoyPreIdx, decoyPostIdx;
+  if (keepTerminal == "N") {
+    if (seq.length() <= 2) {
+      decoyOut = decoyOutIdx;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyPreIdx = decoyOutIdx[0];
+    decoyOut = seq.substr(1);
+    decoyOutIdx = decoyOutIdx.substr(1);
+  } else if (keepTerminal == "C") {
+    if (seq.length() <= 2) {
+      decoyOut = decoyOutIdx;
+      return false;
+    }
+    decoyPost = seq[seq.length() - 1];
+    decoyPostIdx = decoyOutIdx[decoyOutIdx.length() - 1];
+    decoyOut = seq.substr(0, seq.length() - 1);
+    decoyOutIdx = decoyOutIdx.substr(0, decoyOutIdx.length() - 1);
+    
+  } else if (keepTerminal == "NC") {
+    if (seq.length() <= 3) {
+      decoyOut = decoyOutIdx;
+      return false;
+    }
+    decoyPre = seq[0];
+    decoyPreIdx = decoyOutIdx[0];
+    decoyPost = seq[seq.length() - 1];
+    decoyPostIdx = decoyOutIdx[decoyOutIdx.length() - 1];
+    decoyOut = seq.substr(1, seq.length() - 2);
+    decoyOutIdx = decoyOutIdx.substr(1, seq.length() - 2);
+  
+  } else {
+    decoyOut = seq;
+    if (seq.length() <= 1) {
+      decoyOut = decoyOutIdx;
+      return false;
+    }
+  }
+
+  if (!shuffle) {
+    // Reverse
+    if (reversePeptide(decoyOut)) {
+      // Re-add n/c
+      string decoyCheck = decoyPre + decoyOut + decoyPost;
+      string decoyCheckIdx = decoyPreIdx + decoyOutIdx + decoyPostIdx;
+      // Check in sets
+      if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
+          decoySeqs.find(decoyCheck) == decoySeqs.end()) {
+        decoyOut = decoyCheckIdx;
+        return true;
+      }
+    }
+    carp(CARP_DEBUG, "Failed reversing %s, shuffling", seq.c_str());
+  }
+
+  // Shuffle
+  if (shufflePeptide(decoyOut)) {
+    // Re-add n/c
+    string decoyCheck = decoyPre + decoyOut + decoyPost;
+    string decoyCheckIdx = decoyPreIdx + decoyOutIdx + decoyPostIdx;
+    // Check in sets
+    if (targetSeqs.find(decoyCheck) == targetSeqs.end() &&
+        decoySeqs.find(decoyCheck) == decoySeqs.end()) {
+      decoyOut = decoyCheckIdx;
+      return true;
+    }
+  }
+
+  decoyOut = decoyOutIdx;
+  return false;
+}
+
+/**
  * Makes a decoy from the sequence.
  * Returns false on failure, and decoyOut will be the same as seq.
  */
