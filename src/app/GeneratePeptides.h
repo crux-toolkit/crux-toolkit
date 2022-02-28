@@ -2,6 +2,7 @@
 #define GENERATE_PEPTIDES_H
 
 #include <fstream>
+#include <vector>
 
 #include "CruxApplication.h"
 #include "model/Peptide.h"
@@ -40,6 +41,17 @@ class GeneratePeptides : public CruxApplication {
    private:
     unsigned int position_;
   };
+  
+  class PeptideReference {
+    public:
+	 PeptideReference (int pos, int length){
+       pos_ = pos;
+	   length_ = length;
+	 };
+	 int pos_;
+	 int length_;     
+  };
+  
 
   /**
    * Constructor
@@ -91,6 +103,14 @@ class GeneratePeptides : public CruxApplication {
     int minLength,  //< Min length of peptides to return
     int maxLength  //< Max length of peptides to return
   );
+  static std::vector<PeptideReference> cleaveProtein(
+    const std::string* sequence, ///< Protein sequence to cleave
+    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength  //< Max length of peptides to return
+  );
 
   /**
    * Makes a decoy from the sequence.
@@ -102,6 +122,19 @@ class GeneratePeptides : public CruxApplication {
     const std::set<std::string>& decoySeqs,  ///< decoys to check against
     bool shuffle, ///< shuffle (if false, reverse)
     std::string& decoyOut ///< string to store decoy
+  );
+
+  /**
+   * Makes a decoy from the sequence.
+   * Returns false on failure, and decoyOut will be the same as seq.
+   */
+  static bool makeDecoyIdx(
+    const std::string& seq,  ///< sequence to make decoy from
+    const std::set<std::string>& targetSeqs,  ///< targets to check against
+    const std::set<std::string>& decoySeqs,  ///< decoys to check against
+    bool shuffle, ///< shuffle (if false, reverse)
+    std::string& decoyOut ///< string to store decoy
+    // vector<int>& decoyOutIdx ///< vector to store indexes
   );
 
   /**

@@ -20,6 +20,10 @@
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
+// Larry's code
+#include "app/tide/mass_constants.h"
+// Larry's code ends here
+
 using namespace std;
 
 std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
@@ -91,7 +95,10 @@ class TideIndexApplication : public CruxApplication {
  protected:
   class TideIndexPeptide {
    private:
-    double mass_;
+    //  Although it seems counter-intuitive to have the mass as a FixPtr, 
+    //  this data type was chosen because, in most places where computation
+    //  was being done using the mass, it was done as a FixPtr.
+    FixPt mass_;
     int length_;
     int proteinId_;
     int proteinPos_;
@@ -99,7 +106,7 @@ class TideIndexApplication : public CruxApplication {
     int decoyIdx_; // -1 if not a decoy
    public:
     TideIndexPeptide() {}
-    TideIndexPeptide(double mass, int length, string* proteinSeq,
+    TideIndexPeptide(FixPt mass, int length, string* proteinSeq,
                      int proteinId, int proteinPos, int decoyIdx = -1) {
       mass_ = mass;
       length_ = length;
@@ -120,7 +127,10 @@ class TideIndexApplication : public CruxApplication {
       residues_ = other.residues_;
       decoyIdx_ = other.decoyIdx_;
     }
-    double getMass() const { return mass_; }
+    // It seems more intuitive for the mass to be a double hence getMass returns a double 
+    // instead of FixPtr. Also whenever getMass is called, a double is expected, this was done
+    // to ensure the code mentains the same structure as before.
+    double getMass() const { return MassConstants::ToDouble(mass_); } 
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
@@ -174,8 +184,8 @@ class TideIndexApplication : public CruxApplication {
     const ENZYME_T enzyme,
     const DIGEST_T digestion,
     int missedCleavages,
-    FLOAT_T minMass,
-    FLOAT_T maxMass,
+    double minMass,
+    double maxMass,
     int minLength,
     int maxLength,
     bool dups,
@@ -184,7 +194,8 @@ class TideIndexApplication : public CruxApplication {
     const std::string& fasta,
     const std::string& proteinPbFile,
     pb::Header& outProteinPbHeader,
-    std::vector<string*>& outProteinSequences,
+    // std::vector<string*>& outProteinSequences,
+    vector<ProteinInfo*>& outProteinInfo,
     std::ofstream* decoyFasta,
     std::map<string, vector<string>>& peptideToProteinMap
   );
@@ -193,13 +204,13 @@ class TideIndexApplication : public CruxApplication {
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
     pb::Header& pbHeader,
-    std::vector<string*>& outProteinSequences
+    std::vector<ProteinInfo*>& outProteinInfo
   );
 
-  static FLOAT_T calcPepMassTide(
-    const GeneratePeptides::CleavedPeptide* pep,
+  static FixPt calcPepMassTide(
+    const GeneratePeptides::PeptideReference* pep,
     MASS_TYPE_T massType,
-    const ProteinInfo* prot
+    const string* prot
   );
 
   static void writePbProtein(
@@ -255,7 +266,7 @@ class TideIndexApplication : public CruxApplication {
   virtual void processParams();
 
   // Larry's code
-  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, std::vector<string*>& outProteinSequences);
+  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, vector<ProteinInfo*>& outProteinInfo);
   // Larry's code ends here
 };
 
