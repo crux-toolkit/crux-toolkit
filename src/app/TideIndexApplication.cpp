@@ -309,7 +309,7 @@ int TideIndexApplication::main(
       std::cout << "Windows\n";
       std::string cmd = "sort -t, -k 1n,1  " +  std::string(peptideFile) + " -o " + sortedPeptideFile;
     #elif __linux__
-      std::string cmd = "sort -t, -k 1n,1 -k 2,2 -o " +  std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+      std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " +  std::string(sortedPeptideFile) + " " + std::string(peptideFile);
       int systemResult = system(cmd.c_str()); 
       if (systemResult != 0) 
         carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
@@ -487,7 +487,9 @@ int TideIndexApplication::main(
   }
   carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
   
+  // Release the memory allocated.
   peptide_list.clear();
+  peptide_list.swap(vector<TideIndexPeptide>());  
   
   carp(CARP_INFO, "Skipped %d duplicate targets.",
        numDuplicateTargets);
