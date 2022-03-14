@@ -106,7 +106,7 @@ class TideIndexApplication : public CruxApplication {
     int decoyIdx_; // -1 if not a decoy
    public:
     TideIndexPeptide() {}
-    TideIndexPeptide(FixPt mass, int length, string* proteinSeq,
+    TideIndexPeptide(FixPt mass, int length, const string* proteinSeq,
                      int proteinId, int proteinPos, int decoyIdx = -1) {
       mass_ = mass;
       length_ = length;
@@ -157,6 +157,25 @@ class TideIndexApplication : public CruxApplication {
       }
       return false;
     }
+    friend bool operator <(
+      const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
+      if (&lhs == &rhs) {
+        return false;
+      } else if (lhs.mass_ != rhs.mass_) {
+        return lhs.mass_ < rhs.mass_;
+      } else if (lhs.length_ != rhs.length_) {
+        return lhs.length_ < rhs.length_;
+      } else {
+        int strncmpResult = strncmp(lhs.residues_, rhs.residues_, lhs.length_);
+        if (strncmpResult != 0) {
+          return strncmpResult < 0;
+        }
+      }
+      if (lhs.decoyIdx_ != rhs.decoyIdx_) {
+        return lhs.decoyIdx_ < rhs.decoyIdx_;
+      }
+      return false;
+    }
     friend bool operator ==(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
       return (lhs.mass_ == rhs.mass_ && lhs.length_ == rhs.length_ &&
@@ -165,10 +184,10 @@ class TideIndexApplication : public CruxApplication {
     }
   };
   struct ProteinInfo {
-    string name;
-    const string* sequence;
-    ProteinInfo(const string& proteinName, const string* proteinSequence)
-      : name(proteinName), sequence(proteinSequence) {}
+    string header;
+    string sequence;
+    ProteinInfo(string& proteinHeader, string& proteinSequence)
+      : header(proteinHeader), sequence(proteinSequence) {}
   };
 
   struct TargetInfo {
@@ -180,7 +199,6 @@ class TideIndexApplication : public CruxApplication {
   };
 
   static void fastaToPb(
-    const std::string& commandLine,
     const ENZYME_T enzyme,
     const DIGEST_T digestion,
     int missedCleavages,
@@ -188,16 +206,11 @@ class TideIndexApplication : public CruxApplication {
     double maxMass,
     int minLength,
     int maxLength,
-    bool dups,
     MASS_TYPE_T massType,
-    DECOY_TYPE_T decoyType,
     const std::string& fasta,
-    const std::string& proteinPbFile,
-    pb::Header& outProteinPbHeader,
-    // std::vector<string*>& outProteinSequences,
     vector<ProteinInfo*>& outProteinInfo,
-    std::ofstream* decoyFasta,
-    std::map<string, vector<string>>& peptideToProteinMap
+	HeadedRecordWriter* proteinWriter,	
+	int& curProtein
   );
 
   static void writePeptidesAndAuxLocs(
@@ -208,12 +221,12 @@ class TideIndexApplication : public CruxApplication {
   );
 
   static FixPt calcPepMassTide(
-    const GeneratePeptides::PeptideReference* pep,
+    GeneratePeptides::PeptideReference* pep,
     MASS_TYPE_T massType,
-    const string* prot
+    string prot
   );
 
-  static void writePbProtein(
+  static pb::Protein* writePbProtein(
     HeadedRecordWriter& writer,
     int id,
     const std::string& name,
@@ -221,9 +234,9 @@ class TideIndexApplication : public CruxApplication {
     int targetPos = -1 // -1 if not a decoy
   );
 
-  static void writeDecoyPbProtein(
+  static pb::Protein* writeDecoyPbProtein(
     int id,
-    const ProteinInfo& targetProteinInfo,
+    const pb::Protein* protein,
     std::string decoyPeptideSequence,
     int startLoc,
     HeadedRecordWriter& proteinWriter
@@ -245,7 +258,7 @@ class TideIndexApplication : public CruxApplication {
    * Generates decoy for the target peptide, writes the decoy protein to pbProtein
    * and adds decoy to the heap.
    */
-  static void generateDecoys(
+/*  static void generateDecoys(
     int numDecoys,
     const string& setTarget,
     std::map< const string, std::vector<const string*> >& targetToDecoy,
@@ -262,11 +275,12 @@ class TideIndexApplication : public CruxApplication {
     FLOAT_T pepMass,
     vector<string*>& outProteinSequences
   );
-
+*/
+ 
   virtual void processParams();
 
   // Larry's code
-  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, vector<ProteinInfo*>& outProteinInfo);
+  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, ProteinVec& vProteinHeaderSequnce);
   // Larry's code ends here
 };
 

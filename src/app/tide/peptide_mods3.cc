@@ -107,12 +107,13 @@ class ModsOutputter : public IModsOutputter {
   }
 
   void InitCountsMapper() {
+	
     writers_.resize(numFiles_);
     if (numFiles_ > 100) {
       carp(CARP_INFO, "Opening %d files for modifications.", numFiles_);
     }
 
-    for (int i = 0; i < numFiles_; ++i) {
+    for (int i = 0; i < numFiles_; ++i) {		
       writers_[i] = new RecordWriter(GetTempName(tmpDir_, i), FLAGS_buf_size << 10);
       if (!writers_[i]->OK()) {
         // delete temporary files
@@ -134,6 +135,7 @@ class ModsOutputter : public IModsOutputter {
       }
       delta_by_file_[i] = total_delta;
     }
+	
   }
 
   void Output(pb::Peptide* peptide) {
@@ -759,7 +761,7 @@ class ModsOutputterAlt : public IModsOutputter {
   int64_t totalWritten_;
 };
 
-void AddMods(HeadedRecordReader* reader,
+unsigned long AddMods(HeadedRecordReader* reader,
              string out_file,
              string tmpDir,
              const pb::Header& header,
@@ -770,8 +772,7 @@ void AddMods(HeadedRecordReader* reader,
     tempTable.Init(header.peptides_header().mods());
     var_mod_table = &tempTable;
   }
-
-  CHECK(reader->OK());
+//  CHECK(reader->OK());
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
 
@@ -780,8 +781,8 @@ void AddMods(HeadedRecordReader* reader,
   IModsOutputter* outputter;
 
   if (outputOrig.NumFiles() <= FLAGS_modsoutputter_file_threshold) {
-    outputOrig.InitCountsMapper();
-    outputter = &outputOrig;
+     outputOrig.InitCountsMapper();
+     outputter = &outputOrig;
   } else {
     // Switch to alternate ModsOutputter if the regular one would open too many files
     carp(CARP_DEBUG, "Using alternate ModsOutputter, original version would open %d files",
@@ -794,7 +795,10 @@ void AddMods(HeadedRecordReader* reader,
     CHECK(reader->Read(&peptide));
     outputter->Output(&peptide);
   }
-  carp(CARP_INFO, "Created %d peptides.", outputter->Total());
+//  carp(CARP_INFO, "Created %d modified and unmodified target peptides.", outputter->Total());
   CHECK(reader->OK());
+  unsigned long peptide_num = outputter->Total();
+  return peptide_num;
+  
 }
 
