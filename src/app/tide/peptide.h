@@ -160,6 +160,14 @@ class Peptide {
 
   string SeqWithMods() const;
 
+  void DecodeMod(){
+    for (int i = 0; i < num_mods_; ++i) {
+      int index;
+      double delta;
+      MassConstants::DecodeMod(mods_[i], &index, &delta);
+    }
+  }
+
   // Compute and cache set of theoretical peaks using the provided workspace.
   // Workspace exists for efficiency: it can be reused by another Peptide
   // without reallocating memory. The pb_peptide should be the same as supplied

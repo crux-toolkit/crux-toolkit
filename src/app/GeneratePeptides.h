@@ -111,6 +111,14 @@ class GeneratePeptides : public CruxApplication {
     int minLength,  //< Min length of peptides to return
     int maxLength  //< Max length of peptides to return
   );
+  static std::vector<PeptideReference> cleaveProteinTideIndex(
+    std::string* sequence, ///< Protein sequence to cleave
+    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength  //< Max length of peptides to return
+  );
 
   /**
    * Makes a decoy from the sequence.
@@ -130,11 +138,8 @@ class GeneratePeptides : public CruxApplication {
    */
   static bool makeDecoyIdx(
     const std::string& seq,  ///< sequence to make decoy from
-    const std::set<std::string>& targetSeqs,  ///< targets to check against
-    const std::set<std::string>& decoySeqs,  ///< decoys to check against
     bool shuffle, ///< shuffle (if false, reverse)
-    std::string& decoyOut ///< string to store decoy
-    // vector<int>& decoyOutIdx ///< vector to store indexes
+    std::vector<int>& decoyOutIdx ///< vector to store indexes
   );
 
   /**
@@ -146,12 +151,20 @@ class GeneratePeptides : public CruxApplication {
     unsigned int maxShuffleAttempts = 6 ///< Maximum number of shuffle attempts
   );
 
+  static bool shufflePeptideIdx(
+    std::vector<int>& decoyIdx  ///< Peptide sequence to shuffle
+  );
+
   /**
    * Reverses the peptide sequence.
    * Returns false if no different sequence was generated
    */
   static bool reversePeptide(
     std::string& seq ///< Peptide sequence to reverse
+  );
+  
+  static bool reversePeptideIdx(
+    std::vector<int>& decoyIdx  ///< Peptide sequence to reverse
   );
 
   /**
