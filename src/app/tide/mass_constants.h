@@ -120,6 +120,12 @@ class MassConstants {
     mod_coder_.DecodeMod(code, aa_index, &unique_delta_index);
     *delta = unique_deltas_[unique_delta_index];
   }
+  static void DecodeMod(int code, int* aa_index, int* unique_delta_index) {
+    mod_coder_.DecodeMod(code, aa_index, unique_delta_index);
+  }
+  static int EncodeMod(int index, int unique_delta_index){
+	  return mod_coder_.EncodeMod(index, unique_delta_index);
+  }
   static unsigned int mass2bin(double mass, int charge = 1) {
 	// carp(CARP_DETAILED_DEBUG, "bin_width_:%f \t bin_offset_:%f", bin_width_, bin_offset_);
     return (unsigned int)((mass + (charge - 1)*MASS_PROTON)/(charge*bin_width_) + 1.0 - bin_offset_);
