@@ -244,7 +244,10 @@ int TideIndexApplication::main(
   unsigned long failedDecoyCnt = 0;
 
   unsigned long targetsGenerated = 0;
-  FILE* fp = fopen(peptideFile, "w");  // Peptides stored in this file to be sorted on disk.
+  FILE* fp;
+  if (sort_on_disk)
+    fp = fopen(peptideFile, "w");  // Peptides stored in this file to be sorted on disk.
+  
   int curProtein = -1;  
   pb::Header header_with_mods;
   
@@ -287,8 +290,8 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Processed %d protein sequences", curProtein+1);
     }
   }
-	 
-  fclose(fp);
+  if (sort_on_disk)
+    fclose(fp);
 
   if (targetsGenerated == 0) {
     carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
@@ -475,8 +478,8 @@ int TideIndexApplication::main(
       peptideWriter.Write(&pbPeptide);
 
       numTargets++;
-      if (++count % 100000 == 0) {
-        carp(CARP_INFO, "Wrote %d unique target peptides", count);
+      if (++count % 1000000 == 0) {
+        carp(CARP_INFO, "Wrote %u unique target peptides", count);
       }
       numLines++;
       if (sort_on_disk){      
@@ -581,6 +584,7 @@ int TideIndexApplication::main(
   string pepmass_str;
   string pos_str;
   string mod_str;
+  int mod_pos_offset;
   
   /* The trick to keep the sets target and decoy peptides disjunt is that:
   One does not need to keep all the unique target peptides in the memory 
@@ -595,7 +599,7 @@ int TideIndexApplication::main(
       *out_target_decoy_list  << "decoy(s)\t";
     *out_target_decoy_list  << "mass\tproteins" << std::endl;
   }
-  // Goes over the peptides from the protocol buffer and generate decoy peptides 
+  // Go over the (modified and unmodified) peptides from the protocol buffer and generate decoy peptides 
   bool done = false;
   
   while (!done) {
@@ -672,13 +676,16 @@ int TideIndexApplication::main(
             }	
             decoy_peptide_str_with_mods = decoy_peptide_str;
             // Add the modificaitons to the decoy:
+            mod_pos_offset = 0;
             for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
               mod_code = current_pb_peptide_.modifications(m);
 
               MassConstants::DecodeMod(mod_code, &index, &delta);
               decoy_index = decoy_peptide_idx[index];
               mod_str = '[' + StringUtils::ToString(delta, mod_precision) + ']';
-              decoy_peptide_str_with_mods.insert(decoy_index + 1, mod_str);
+              decoy_peptide_str_with_mods.insert(decoy_index + 1 + mod_pos_offset, mod_str);
+              mod_pos_offset += mod_str.length();
+              
             }
             // Check if this modified decoy peptide has not been generated yet.
             if (allowDups) {

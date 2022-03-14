@@ -247,7 +247,7 @@ runSearch("tide-res-ev", "tide-search",
 runSearch("comet", "comet", "", "%s.fa" % database,
           "comet/comet.txt",
           "xcorr score", "--score e-value")
-runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", "%s.fa" % database,
+runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", database,
           "tide-tailor/tide-search.txt",
           "xcorr score", "")
 
