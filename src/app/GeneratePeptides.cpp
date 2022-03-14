@@ -587,12 +587,13 @@ bool GeneratePeptides::makeDecoyIdx(
   const string& seq,  ///< sequence to make decoy from
   bool shuffle, ///< shuffle (if false, reverse)
   vector<int>& decoyOutIdx ///< vector to store indexes 
-){
+) {
   decoyOutIdx.clear();
   vector<int> decoyIdx;
-  int decoyPre, decoyPost = -1;
+  int decoyPre = -1;
+  int decoyPost = -1;
   
-  for(int i = 0; i < seq.length(); i++){
+  for(int i = 0; i < seq.length(); i++) {
     decoyIdx.push_back(i);
   }
   const string keepTerminal = Params::GetString("keep-terminal-aminos");
@@ -633,13 +634,14 @@ bool GeneratePeptides::makeDecoyIdx(
     shufflePeptideIdx(decoyIdx);
   }
   // Re-add n/c
-  if (decoyPre >= 0);
-	decoyOutIdx.push_back(decoyPre);
-  for (std::vector<int>::iterator itr = decoyIdx.begin(); itr != decoyIdx.end(); itr++){
-	decoyOutIdx.push_back(*itr);
+  if (decoyPre >= 0)
+	  decoyOutIdx.push_back(decoyPre);
+  
+  for (std::vector<int>::iterator itr = decoyIdx.begin(); itr != decoyIdx.end(); itr++) {
+	  decoyOutIdx.push_back(*itr);
   }
   if (decoyPost >= 0)
-	decoyOutIdx.push_back(decoyPost);
+	  decoyOutIdx.push_back(decoyPost);
 
   return true;
 }

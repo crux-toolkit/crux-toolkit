@@ -489,7 +489,7 @@ int TideIndexApplication::main(
   
   // Release the memory allocated.
   peptide_list.clear();
-  peptide_list.swap(vector<TideIndexPeptide>());  
+  peptide_list.resize(0);
   
   carp(CARP_INFO, "Skipped %d duplicate targets.",
        numDuplicateTargets);
@@ -661,6 +661,12 @@ int TideIndexApplication::main(
             decoy_peptide_str = target_peptide;
             
             // Create the decoy peptide sequence
+/*            FILE *fp = fopen("test.txt", "w");
+            for(int k = 0; k < decoy_peptide_idx.size(); ++k) {
+              fprintf(fp, "%d, %d, %s\n", k, decoy_peptide_idx[k], target_peptide.c_str());
+            }	
+            fclose(fp);
+  */
             for(int k = 0; k < decoy_peptide_idx.size(); ++k) {
               decoy_peptide_str[decoy_peptide_idx[k]] = target_peptide[k];
             }	
@@ -698,14 +704,16 @@ int TideIndexApplication::main(
 
           // Create a protocol buffer peptide object for the decoy peptide. Note that the decoy peptide may contain modifications.
           pb::Peptide decoy_current_pb_peptide_ = current_pb_peptide_;
-          decoy_current_pb_peptide_.clear_modifications();
-          for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
-            mod_code = current_pb_peptide_.modifications(m);
+          if (current_pb_peptide_.modifications_size() > 0) {
+            decoy_current_pb_peptide_.clear_modifications();
+            for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
+              mod_code = current_pb_peptide_.modifications(m);
 
-            MassConstants::DecodeMod(mod_code, &index, &unique_delta);
-            decoy_index = decoy_peptide_idx[index];
-            mod_code = MassConstants::EncodeMod(decoy_index, unique_delta);
-            decoy_current_pb_peptide_.add_modifications(mod_code);
+              MassConstants::DecodeMod(mod_code, &index, &unique_delta);
+              decoy_index = decoy_peptide_idx[index];
+              mod_code = MassConstants::EncodeMod(decoy_index, unique_delta);
+              decoy_current_pb_peptide_.add_modifications(mod_code);
+            }
           }
           decoy_current_pb_peptide_.set_id(numTargets + decoy_count++);
           decoy_current_pb_peptide_.clear_first_location();
@@ -723,7 +731,7 @@ int TideIndexApplication::main(
             first_decoy = false;
           }
           if (decoy_count % 1000000 == 0) {
-            carp(CARP_INFO, "Wrote %d decoy peptides", decoy_count);
+            carp(CARP_INFO, "Wrote %u decoy peptides", decoy_count);
           }          
         }
       }
@@ -745,6 +753,7 @@ int TideIndexApplication::main(
         }
         *out_target_decoy_list  <<'\t' << proteinNames << endl;
       }
+      
     }
     pb_peptides.clear();
     peptide_str_set.clear();
