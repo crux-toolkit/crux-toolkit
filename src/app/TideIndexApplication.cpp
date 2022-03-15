@@ -407,7 +407,7 @@ int TideIndexApplication::main(
     carp(CARP_FATAL, "No peptides were generated.");
 
   ifstream sortedFile(sortedPeptideFile);
-  int numLines = 0;
+  unsigned long numLines = 0;
   TideIndexPeptide* currentPeptide;
   TideIndexPeptide* duplicatedPeptide;
   // Filter peptides and keep the unique target peptides and gather the 
@@ -488,30 +488,32 @@ int TideIndexApplication::main(
       currentPeptide = duplicatedPeptide;
     }
   }
-  carp(CARP_DETAILED_INFO, "%i peptides in file", numLines);
+  carp(CARP_DETAILED_INFO, "%u peptides in file", numLines);
   
   // Release the memory allocated.
   peptide_list.clear();
-  peptide_list.resize(0);
+  vector<TideIndexPeptide> tmp;
+  peptide_list.swap(tmp);
+  // peptide_list = vector<TideIndexPeptide>();
   
   carp(CARP_INFO, "Skipped %d duplicate targets.",
        numDuplicateTargets);
   
-  carp(CARP_INFO, "Wrote %d unique target peptides.", numTargets);
-  
+  carp(CARP_INFO, "Generated %d unique target peptides.", numTargets);
+
+  peptidePbFile = modless_peptides;  
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
     numTargets = AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, vProteinHeaderSequence, &var_mod_table);
-    carp(CARP_INFO, "Created %d modified and unmodified target peptides.", numTargets);
+    carp(CARP_INFO, "Created %u modified and unmodified target peptides.", numTargets);
+    peptidePbFile = peakless_peptides;
   }
-
-  switch (numDecoys) {
-    case 0:
-      carp(CARP_INFO, "No decoy peptides will be generated");
-      break;
-    default:
+  
+  if (numDecoys > 0) {
       carp(CARP_INFO, "Generating %d decoy(s) per target peptide", numDecoys);
+  } else {
+      carp(CARP_INFO, "No decoy peptides will be generated");
   }
   //Reader for the peptides:
   pb::Header aaf_peptides_header;
@@ -665,28 +667,28 @@ int TideIndexApplication::main(
             decoy_peptide_str = target_peptide;
             
             // Create the decoy peptide sequence
-/*            FILE *fp = fopen("test.txt", "w");
-            for(int k = 0; k < decoy_peptide_idx.size(); ++k) {
-              fprintf(fp, "%d, %d, %s\n", k, decoy_peptide_idx[k], target_peptide.c_str());
-            }	
-            fclose(fp);
-  */
             for(int k = 0; k < decoy_peptide_idx.size(); ++k) {
               decoy_peptide_str[decoy_peptide_idx[k]] = target_peptide[k];
             }	
             decoy_peptide_str_with_mods = decoy_peptide_str;
             // Add the modificaitons to the decoy:
-            mod_pos_offset = 0;
-            for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
-              mod_code = current_pb_peptide_.modifications(m);
-
-              MassConstants::DecodeMod(mod_code, &index, &delta);
-              decoy_index = decoy_peptide_idx[index];
-              mod_str = '[' + StringUtils::ToString(delta, mod_precision) + ']';
-              decoy_peptide_str_with_mods.insert(decoy_index + 1 + mod_pos_offset, mod_str);
-              mod_pos_offset += mod_str.length();
-              
-            }
+            if (current_pb_peptide_.modifications_size() > 0){
+              mod_pos_offset = 0;
+              vector<double> deltas(decoy_peptide_str.length());
+              for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
+                mod_code = current_pb_peptide_.modifications(m);
+                MassConstants::DecodeMod(mod_code, &index, &delta);
+                decoy_index =  decoy_peptide_idx[index];
+                deltas[decoy_index] = delta;
+              }
+              for (int d = 0; d < deltas.size(); ++d){
+                if (deltas[d] == 0.0) continue;              
+                mod_str = '[' + StringUtils::ToString(deltas[d], mod_precision) + ']';
+                decoy_peptide_str_with_mods.insert(d + 1 + mod_pos_offset, mod_str);
+                mod_pos_offset += mod_str.length();
+                
+              }
+            }            
             // Check if this modified decoy peptide has not been generated yet.
             if (allowDups) {
               success = true;
