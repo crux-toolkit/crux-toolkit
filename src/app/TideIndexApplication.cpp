@@ -542,7 +542,7 @@ int TideIndexApplication::main(
   int protein_id;
   int mod_code;
   int decoy_index;
-  int index;
+  int mod_index;
   int unique_delta;
   double delta;
   unsigned long decoy_count = 0;
@@ -718,8 +718,8 @@ int TideIndexApplication::main(
             for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
               mod_code = current_pb_peptide_.modifications(m);
 
-              MassConstants::DecodeMod(mod_code, &index, &unique_delta);
-              decoy_index = decoy_peptide_idx[index];
+              MassConstants::DecodeMod(mod_code, &mod_index, &unique_delta);
+              decoy_index = decoy_peptide_idx[mod_index];
               mod_code = MassConstants::EncodeMod(decoy_index, unique_delta);
               decoy_current_pb_peptide_.add_modifications(mod_code);
             }
