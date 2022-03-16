@@ -309,21 +309,35 @@ int TideIndexApplication::main(
     
     remove(sortedPeptideFile);
     #ifdef _WIN32
-      std::cout << "Windows\n";
-      std::string cmd = "sort -t, -k 1n,1  " +  std::string(peptideFile) + " -o " + sortedPeptideFile;
+      std::cout << "Windows OS\n";
+	  std::string import_csv = "Import-Csv -Header Mass, Protein, A, B, C -Delimiter ',' " + std::string(peptideFile);
+	  std::string actual_sorting = "Select-Object { [int]$_.Mass }, Protein, A,B,C";
+	  std::string write_to_file = "ConvertTo-Csv -NoTypeInformation | Select-Object -Skip 1 | Set-Content -Path " + std::string(sortedPeptideFile);
+	  std::string cmd = "Powershell -Command \"" + import_csv + "|" + actual_sorting + "|" + write_to_file + "\"";
+	  int systemResult = system(cmd.c_str());
+	  if (systemResult != 0)
+		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __linux__
+	  std::cout << "Linux Based OS\n";
       std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " +  std::string(sortedPeptideFile) + " " + std::string(peptideFile);
       int systemResult = system(cmd.c_str()); 
       if (systemResult != 0) 
         carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __unix__
-      std::cout << "Other unix OS\n";
-     std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile;
+      std::cout << "Other UNIX OS\n";
+	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+	  int systemResult = system(cmd.c_str());
+	  if (systemResult != 0)
+		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __APPLE__
       std::cout << "Apple OS\n";
-      std::string cmd = "sort -t, -k 1n,1 -k 2,2 -k 5,5 -k 7,7 " +  std::string(peptideFile) + " -o " + sortedPeptideFile;
+	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+	  int systemResult = system(cmd.c_str());
+	  if (systemResult != 0)
+		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #else
       std::cout << "OS not supported";
+	  carp(CARP_FATAL, "OS not supported");
       std::string cmd = ""
     #endif
     // TODO Add code to check if sorted file exists, and if the size of the sorted file is the same as the pepTarget file 
@@ -677,8 +691,8 @@ int TideIndexApplication::main(
               vector<double> deltas(decoy_peptide_str.length());
               for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
                 mod_code = current_pb_peptide_.modifications(m);
-                MassConstants::DecodeMod(mod_code, &index, &delta);
-                decoy_index =  decoy_peptide_idx[index];
+                MassConstants::DecodeMod(mod_code, &mod_index, &delta);
+                decoy_index =  decoy_peptide_idx[mod_index];
                 deltas[decoy_index] = delta;
               }
               for (int d = 0; d < deltas.size(); ++d){
@@ -791,6 +805,9 @@ int TideIndexApplication::main(
   }
   */// Recover stderr
   cerr.rdbuf(old);
+  // The destructor is explicitly called in order to release the resource to enable deleting. 
+  // This was added to resolve the race condition issue which arises on windows.
+  aaf_peptide_reader.~HeadedRecordReader(); 
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   return 0;
@@ -1130,7 +1147,16 @@ TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifs
   vector<std::string> strs;
   if (getline(sortedFile, line)) {
 
-    boost::split(strs, line, boost::is_any_of(","));
+	#ifdef _WIN32
+	  // This extra code is added to remove redundant quotes in string.
+	  boost::split(strs, line, boost::is_any_of(","));
+	  for (int i = 0; i < strs.size(); i++) {
+		  strs[i].erase(remove(strs[i].begin(), strs[i].end(), '\"'), strs[i].end());
+	  }
+
+	#else
+	  boost::split(strs, line, boost::is_any_of(","));
+	#endif
     
     FixPt mass = stoul(strs[0]);
 	// string peptide sequence is skipped stoi(strs[1]);
