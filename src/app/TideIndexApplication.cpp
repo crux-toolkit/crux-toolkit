@@ -515,13 +515,12 @@ int TideIndexApplication::main(
   
   carp(CARP_INFO, "Generated %u unique target peptides.", numTargets);
 
-  peptidePbFile = modless_peptides;  
+   peptidePbFile = peakless_peptides;
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
     numTargets = AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, vProteinHeaderSequence, &var_mod_table);
     carp(CARP_INFO, "Created %u modified and unmodified target peptides.", numTargets);
-    peptidePbFile = peakless_peptides;
   }
   
   if (numDecoys > 0) {
@@ -531,7 +530,7 @@ int TideIndexApplication::main(
   }
   //Reader for the peptides:
   pb::Header aaf_peptides_header;
-  HeadedRecordReader aaf_peptide_reader(peptidePbFile, &aaf_peptides_header);
+  HeadedRecordReader *aaf_peptide_reader = new HeadedRecordReader(peptidePbFile, &aaf_peptides_header);
 
   if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
     !aaf_peptides_header.has_peptides_header()) {
@@ -540,7 +539,7 @@ int TideIndexApplication::main(
 
   FifoAllocator fifo_alloc_peptides_(FLAGS_fifo_page_size << 20);
   RecordReader* reader_;
-  reader_ = aaf_peptide_reader.Reader();
+  reader_ = aaf_peptide_reader->Reader();
   pb::Peptide current_pb_peptide_;
 
   MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
@@ -805,9 +804,9 @@ int TideIndexApplication::main(
   }
   */// Recover stderr
   cerr.rdbuf(old);
-  // The destructor is explicitly called in order to release the resource to enable deleting. 
+  
   // This was added to resolve the race condition issue which arises on windows.
-  aaf_peptide_reader.~HeadedRecordReader(); 
+  delete aaf_peptide_reader;
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   return 0;
