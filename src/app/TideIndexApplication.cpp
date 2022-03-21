@@ -298,9 +298,9 @@ int TideIndexApplication::main(
          fasta.c_str());
   }
   if (invalidPepCnt > 0) {
-    carp(CARP_INFO, "Ignoring %d peptide sequences containing unrecognized characters.", invalidPepCnt);
+    carp(CARP_INFO, "Ignoring %u peptide sequences containing unrecognized characters.", invalidPepCnt);
   }
-  carp(CARP_INFO, "Generated %d targets, including duplicates.", targetsGenerated);
+  carp(CARP_INFO, "Generated %u targets, including duplicates.", targetsGenerated);
 
   // Sort peptides
   carp(CARP_INFO, "Sorting peptides");
@@ -510,10 +510,10 @@ int TideIndexApplication::main(
   peptide_list.swap(tmp);
   // peptide_list = vector<TideIndexPeptide>();
   
-  carp(CARP_INFO, "Skipped %d duplicate targets.",
+  carp(CARP_INFO, "Skipped %u duplicate targets.",
        numDuplicateTargets);
   
-  carp(CARP_INFO, "Generated %d unique target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %u unique target peptides.", numTargets);
 
   peptidePbFile = modless_peptides;  
   if (need_mods) {
@@ -791,11 +791,11 @@ int TideIndexApplication::main(
     delete out_target_decoy_list;
   }  
     if (failedDecoyCnt > 0) {
-    carp(CARP_INFO, "Failed to generate decoys for %d low complexity peptides.", failedDecoyCnt);
+    carp(CARP_INFO, "Failed to generate decoys for %u low complexity peptides.", failedDecoyCnt);
   }
-  carp(CARP_INFO, "Generated %d target peptides.", numTargets);
-  carp(CARP_INFO, "Generated %d decoy peptides.", decoy_count);
-  carp(CARP_INFO, "Generated %d peptides in total.", numTargets+decoy_count);
+  carp(CARP_INFO, "Generated %u target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %u decoy peptides.", decoy_count);
+  carp(CARP_INFO, "Generated %u peptides in total.", numTargets+decoy_count);
     
   // Clean up
 /*  for (vector<const pb::Protein*>::iterator i = vProteinHeaderSequence.begin();
