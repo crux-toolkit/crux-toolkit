@@ -1,7 +1,7 @@
-project(hardklor)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(VERSION 3.15)
 
-cmake_minimum_required(VERSION 3.6)
-cmake_policy(VERSION 3.6)
+project(hardklor)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
@@ -21,6 +21,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     CRUX
     NOMINMAX
   )
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(
     DIRECTORY
