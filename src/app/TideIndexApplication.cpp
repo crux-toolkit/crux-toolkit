@@ -43,8 +43,8 @@
 
 
 // Larry's code
-const char* sortedPeptideFile = "sortedPepTarget.txt";
-const char* peptideFile = "pepTarget.txt";
+std::string sortedPeptideFile = "sortedPepTarget.txt";
+std::string peptideFile = "pepTarget.txt";
 DECLARE_int32(fifo_page_size);
 // Larry's code ends here
 
@@ -135,6 +135,8 @@ int TideIndexApplication::main(
   string auxLocsPbFile = FileUtils::Join(index, "auxlocs");
   string modless_peptides = out_peptides + ".nomods.tmp";
   string peakless_peptides = out_peptides + ".nopeaks.tmp";
+  string pathSortedPeptideFile = FileUtils::Join(index, sortedPeptideFile);
+  string pathPeptideFile = FileUtils::Join(index, peptideFile);
 
   if (create_output_directory(index.c_str(), overwrite) != 0) {
     carp(CARP_FATAL, "Error creating index directory");
@@ -148,6 +150,8 @@ int TideIndexApplication::main(
       FileUtils::Remove(auxLocsPbFile);
       FileUtils::Remove(modless_peptides);
       FileUtils::Remove(peakless_peptides);
+	  FileUtils::Remove(pathSortedPeptideFile);
+	  FileUtils::Remove(pathPeptideFile);
     } else {
       carp(CARP_FATAL, "Index file(s) already exist, use --overwrite T or a "
                        "different index name");
@@ -246,7 +250,7 @@ int TideIndexApplication::main(
   unsigned long targetsGenerated = 0;
   FILE* fp;
   if (sort_on_disk)
-    fp = fopen(peptideFile, "w");  // Peptides stored in this file to be sorted on disk.
+    fp = fopen(pathPeptideFile.c_str(), "w");  // Peptides stored in this file to be sorted on disk.
   
   int curProtein = -1;  
   pb::Header header_with_mods;
@@ -307,31 +311,31 @@ int TideIndexApplication::main(
   
   if (sort_on_disk) {
     
-    remove(sortedPeptideFile);
+    remove(pathSortedPeptideFile.c_str());
     #ifdef _WIN32
       std::cout << "Windows OS\n";
-	  std::string import_csv = "Import-Csv -Header Mass, Protein, A, B, C -Delimiter ',' " + std::string(peptideFile);
+	  std::string import_csv = "Import-Csv -Header Mass, Protein, A, B, C -Delimiter ',' " + std::string(pathPeptideFile);
 	  std::string actual_sorting = "Select-Object { [int]$_.Mass }, Protein, A,B,C";
-	  std::string write_to_file = "ConvertTo-Csv -NoTypeInformation | Select-Object -Skip 1 | Set-Content -Path " + std::string(sortedPeptideFile);
+	  std::string write_to_file = "ConvertTo-Csv -NoTypeInformation | Select-Object -Skip 1 | Set-Content -Path " + std::string(pathSortedPeptideFile);
 	  std::string cmd = "Powershell -Command \"" + import_csv + "|" + actual_sorting + "|" + write_to_file + "\"";
 	  int systemResult = system(cmd.c_str());
 	  if (systemResult != 0)
 		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __linux__
 	  std::cout << "Linux Based OS\n";
-      std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " +  std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+      std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " +  std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
       int systemResult = system(cmd.c_str()); 
       if (systemResult != 0) 
         carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __unix__
       std::cout << "Other UNIX OS\n";
-	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
 	  int systemResult = system(cmd.c_str());
 	  if (systemResult != 0)
 		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
     #elif __APPLE__
       std::cout << "Apple OS\n";
-	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(sortedPeptideFile) + " " + std::string(peptideFile);
+	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
 	  int systemResult = system(cmd.c_str());
 	  if (systemResult != 0)
 		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
@@ -420,7 +424,7 @@ int TideIndexApplication::main(
   if (!sort_on_disk && peptide_list.size() == 0)
     carp(CARP_FATAL, "No peptides were generated.");
 
-  ifstream sortedFile(sortedPeptideFile);
+  ifstream sortedFile(pathSortedPeptideFile);
   unsigned long numLines = 0;
   TideIndexPeptide* currentPeptide;
   TideIndexPeptide* duplicatedPeptide;
