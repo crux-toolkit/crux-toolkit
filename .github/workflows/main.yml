@@ -1,0 +1,59 @@
+name: build
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+  #DEVELOPER_DIR: /Applications/Xcode_10.1.app/Contents/Developer 
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest], windows-2019] , macos-latest]
+        container: ['']
+        include:
+          - os: ubuntu-latest
+            container: centos:centos7
+
+    steps:
+    - uses: actions/checkout@v2
+            
+    - if: matrix.container == 'centos:centos7'
+      name: Install prerequisites for Docker CentOS7
+      shell: bash
+      run: |
+        yum -y install epel-release
+        yum group install -y "Development Tools"
+        yum install -y cmake3 git subversion
+        ln -s /usr/bin/cmake3 /usr/bin/cmake
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+    
+    - name: Create Build Environment
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - if: matrix.os == 'windows-2016'
+      name: Configure CMake for Windows
+      shell: bash
+      run: |
+        cd ${{runner.workspace}}/build
+        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 15 2017 Win64"
+    - if: matrix.os == 'ubuntu-latest'
+      name: Configure CMake for Linux
+      shell: bash
+      run: |
+        cd ${{runner.workspace}}/build
+        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    - name: Build
+      shell: bash
+      run: |
+        cd ${{runner.workspace}}/build
+        cmake --build . --config $BUILD_TYPE
+    - name: Test
+      shell: bash
+      run: |
+        cd ${{runner.workspace}}/build
+        echo "This will run tests" #ctest -C $BUILD_TYPE
