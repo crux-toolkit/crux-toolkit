@@ -40,18 +40,26 @@ jobs:
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A x64
+        cmake -G "Visual Studio 16 2019" -A x64 $GITHUB_WORKSPACE  
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
         cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-    - name: Build
+    - if: matrix.os == 'ubuntu-latest || matrix.os == 'macos-latest'
+      name: Build on Linux and MacOS
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
         cmake --build . --config $BUILD_TYPE
+    - if: matrix.os == 'windows-2019'
+      name: Build on Windows
+      shell: bash
+      run: |
+        cd ${{runner.workspace}}/build
+        cmake --build . --config $BUILD_TYPE
+        
     - name: Test
       shell: bash
       run: |
