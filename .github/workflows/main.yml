@@ -35,13 +35,13 @@ jobs:
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
-    - if: matrix.os == 'windows-2016'
+    - if: matrix.os == 'windows-2019'
       name: Configure CMake for Windows
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 15 2017 Win64"
-    - if: matrix.os == 'ubuntu-latest'
+        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G "Visual Studio 16 2019" -A x64
+    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux
       shell: bash
       run: |
