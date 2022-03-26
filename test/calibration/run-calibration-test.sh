@@ -32,7 +32,7 @@ for score in xcorr residue-evidence both; do
        --score-function $score \
        --output-dir $score \
        --exact-p-value T \
-       --num-threads 8 \
+       --mz-bin-width 1.0005079 \
        ../performance-tests/051708-worm-ASMS-10.ms2 \
        $index
   fi
@@ -50,7 +50,7 @@ for score in xcorr residue-evidence both; do
     # Extract all the p-values.
     pvalues=$score/$peptide.pvalues.txt
     if [[ ! -e $pvalues ]]; then
-      $CRUX extract-columns --header F \
+      ./extract-column.py \
             $score/tide-search.$peptide.txt "$column" \
         > $pvalues
     fi

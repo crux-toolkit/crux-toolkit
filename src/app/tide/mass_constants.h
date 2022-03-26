@@ -67,6 +67,7 @@ class MassConstants {
   static const double Y;
   static double BIN_H2O;
   static double BIN_NH3;
+  static double BIN_CO;
 /*  static const double BIN_SHIFT_A_ION_CHG_1;
   static const double BIN_SHIFT_A_ION_CHG_2;
   static const double BIN_SHIFT_H2O_CHG_1;

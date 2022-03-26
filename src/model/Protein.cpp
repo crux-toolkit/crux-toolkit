@@ -156,8 +156,8 @@ bool Protein::toLight()
 Protein::~Protein() 
 {
   // FIXME what is the point of checking this?
-  if(!is_memmap_ && !is_light_){ 
-    if (sequence_ != NULL){
+  if (!is_memmap_ && !is_light_) {
+    if (sequence_ != NULL) {
       free(sequence_);
     }
   }
@@ -172,7 +172,7 @@ void Protein::print(
   )
 {
   // covnert to heavy protein
-  if(is_light_){
+  if (is_light_) {
     toHeavy();
   }
   int   sequence_index;
@@ -263,7 +263,7 @@ void Protein::serialize(
   )
 {
   // covnert to heavy protein
-  if(is_light_){
+  if (is_light_) {
     toHeavy();
   }
   
@@ -451,10 +451,10 @@ bool Protein::parseProteinFastaFile(
  * Find the beginning of the next sequence, and read the sequence ID
  * and the comment.
  */
-bool Protein::readTitleLine
-(FILE* fasta_file, ///< file to read -in
- char* name, ///< write protein name here -out
- char* description) ///< write description here -out
+bool Protein::readTitleLine(
+  FILE* fasta_file, ///< file to read -in
+  char* name, ///< write protein name here -out
+  char* description) ///< write description here -out
 {
   static char id_line[LONGEST_LINE];  // Line containing the ID and comment.
   int a_char;                         // The most recently read character.
@@ -480,7 +480,7 @@ bool Protein::readTitleLine
     int line_length;
     size_t buf_length = 0;
 
-    if((line_length =  getline(&new_line, &buf_length, fasta_file)) == -1){
+    if ((line_length = getline(&new_line, &buf_length, fasta_file)) == -1) {
       carp(CARP_FATAL, "Error reading Fasta file.\n");
     }
     strncpy(id_line, new_line, LONGEST_LINE-1);
@@ -509,13 +509,13 @@ bool Protein::readTitleLine
  *
  * Return: Was the sequence read completely?
  ****************************************************************************/
-bool Protein::readRawSequence
-  (FILE* fasta_file,   // Input Fasta file.
-   char* name,         // Sequence ID (used in error messages).
-   unsigned int   max_chars,    // Maximum number of allowed characters.
-   char* raw_sequence, // Pre-allocated sequence.
-   unsigned int* sequence_length // the sequence length -chris added
-   )
+bool Protein::readRawSequence(
+  FILE* fasta_file,   // Input Fasta file.
+  char* name,         // Sequence ID (used in error messages).
+  unsigned int   max_chars,    // Maximum number of allowed characters.
+  char* raw_sequence, // Pre-allocated sequence.
+  unsigned int* sequence_length // the sequence length -chris added
+  )
 {
   int a_char;
   unsigned int i_seq;
@@ -688,7 +688,7 @@ char* Protein::getSequencePointer(
   int offset
 )
 {
-  if(is_light_){
+  if (is_light_) {
     carp(CARP_FATAL, "Cannot get sequence pointer from light protein.");
   }
   return sequence_+offset;
@@ -852,18 +852,18 @@ bool Crux::protein_id_less_than(Protein* protein_one, Protein* protein_two){
  * between every cleavage site.
  */
 void Protein::peptideShuffleSequence(){
-  if( sequence_ == NULL ){
+  if (sequence_ == NULL ) {
     carp(CARP_WARNING, "Cannot shuffle a NULL sequence");
     return;
   }
-  if( length_ < 2 ){
+  if (length_ < 2 ) {
     return;
   }
  
   // get the digest rule
   ENZYME_T enzyme = GlobalParams::getEnzyme();
   // cases where peptide-shuffle is really protein shuffle
-  if( enzyme == NO_ENZYME 
+  if (enzyme == NO_ENZYME
       || GlobalParams::getDigestion() == NON_SPECIFIC_DIGEST){
     this->shuffle(PROTEIN_SHUFFLE_DECOYS);
     return;
@@ -873,9 +873,9 @@ void Protein::peptideShuffleSequence(){
   vector<int> cleave_after_here;
 
   // traverse the sequence to penultimate residue
-  for(size_t seq_offset = 0; seq_offset < length_ - 1; seq_offset++){
+  for (size_t seq_offset = 0; seq_offset < length_ - 1; seq_offset++) {
     // mark each valid location (mark x for cleavage between x and y)
-    if( ProteinPeptideIterator::validCleavagePosition(sequence_ + seq_offset, 
+    if (ProteinPeptideIterator::validCleavagePosition(sequence_ + seq_offset,
                                                       enzyme) ){
       cleave_after_here.push_back(seq_offset);
     }
@@ -885,7 +885,7 @@ void Protein::peptideShuffleSequence(){
   int start = 0; // shuffle between prot first residue and first site
   int end = -1;
   vector<int>::iterator next_position = cleave_after_here.begin();
-  for(; next_position != cleave_after_here.end(); ++next_position){
+  for (; next_position != cleave_after_here.end(); ++next_position) {
     end = *next_position;
     shuffleRegion(start, end);
     start = end + 1; // hold in place both sides of the cleavage site
@@ -893,7 +893,7 @@ void Protein::peptideShuffleSequence(){
 
   // shuffle end of sequence
   end = length_ - 1;
-  if( start < end ){
+  if (start < end ) {
     shuffleRegion(start, end);
   }
 }
@@ -905,11 +905,11 @@ void Protein::peptideShuffleSequence(){
  */
 void Protein::shuffleRegion(
   int start, ///< index of peptide start
-  int end){///< index of last residue in peptide
-
+  int end)
+{///< index of last residue in peptide
   int sub_seq_length = end - start - 1;
   char* buf = new char[sub_seq_length + 1];
-  if( sub_seq_length > 1 ){
+  if (sub_seq_length > 1) {
     carp(CARP_DETAILED_DEBUG, "Shuffle from %d to %d.", start+1, end);
 
     // store the sequence before shuffling not including the unmoved residues
@@ -922,12 +922,12 @@ void Protein::shuffleRegion(
     bool has_changed = strncmp(buf, sequence_ + start, sub_seq_length + 2);
     // try reshuffling up to three more times
     int count = 0;
-    while( (count < 3) && (has_changed == false)){
+    while ( (count < 3) && (has_changed == false)) {
       shuffle_array(sequence_ + start + 1, sub_seq_length);
       has_changed = strncmp(buf, sequence_ + start, sub_seq_length + 2);
       count++;
     }
-    if( !has_changed ){
+    if (!has_changed) {
         carp(CARP_WARNING, "Unable to generate a shuffled sequence "
              "different than the original for sequence %s of protein %s "
              "at position %d.", buf, id_.c_str(), start);
