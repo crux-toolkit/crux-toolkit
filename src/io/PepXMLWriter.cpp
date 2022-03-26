@@ -187,11 +187,31 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   int num_missed_cleavages = get_num_internal_cleavage(peptide_sequence,
                                                        enzyme_);
 
+  SCORER_TYPE_T rank_col;
+  if (ranks[PERCOLATOR_SCORE] >= 1) {
+    rank_col = PERCOLATOR_SCORE;
+  } else if (ranks[BOTH_PVALUE] >= 1) {
+    rank_col = BOTH_PVALUE;
+  } else if (ranks[RESIDUE_EVIDENCE_PVAL] >= 1) {
+    rank_col = RESIDUE_EVIDENCE_PVAL;
+  } else if (ranks[TIDE_SEARCH_EXACT_PVAL] >= 1) {
+    rank_col = TIDE_SEARCH_EXACT_PVAL;
+  } else if (ranks[XCORR] >= 1) {
+    rank_col = XCORR;
+  } else if (ranks[SP] >= 1) {
+    rank_col = SP;
+  }
+
   // print <search_hit> tag
+  // TODO need to confirm below is true
+  // ranks[SCORE] = -1 if column was not found in input file
+  // you can test this by commenting out a line in MatchFileReader::parse
+  // ranks[SCORE] = 0 if score is set in MatchFileReader.cpp::parseMatch
+  // without setting rank.
   fprintf(file_, "    <search_hit hit_rank=\"%i\" peptide=\"%s\" "
           "peptide_prev_aa=\"%c\" peptide_next_aa=\"%c\" protein=\"%s\" "
           "num_tot_proteins=\"%i\" ",
-          ranks[XCORR], // -1 if unavailable, uses xcorr rank otherwise
+          ranks[rank_col], // -1 if unavailable, uses xcorr rank otherwise
           peptide_sequence,
           flanking_aas_prev,
           flanking_aas_next,
