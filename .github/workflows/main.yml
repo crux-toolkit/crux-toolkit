@@ -12,7 +12,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [ubuntu-latest], windows-2019] , macos-latest]
+        os: [ubuntu-latest, windows-2019 , macos-latest]
         container: ['']
         include:
           - os: ubuntu-latest
