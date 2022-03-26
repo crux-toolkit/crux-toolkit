@@ -1,7 +1,7 @@
-project(bullseye)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(VERSION 3.15)
 
-cmake_minimum_required(VERSION 3.6)
-cmake_policy(VERSION 3.6)
+project(bullseye)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
@@ -16,14 +16,15 @@ if (WIN32 AND NOT Cygwin)
 endif (WIN32 AND NOT Cygwin)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set_property(
-      DIRECTORY
-      PROPERTY
-      COMPILE_DEFINITIONS
-      _CRT_SECURE_NO_WARNINGS
-      CRUX
-      SEARCH_ENABLED
-    )
+  set_property(
+    DIRECTORY
+    PROPERTY
+    COMPILE_DEFINITIONS
+    _CRT_SECURE_NO_WARNINGS
+    CRUX
+    SEARCH_ENABLED
+  )
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(
     DIRECTORY

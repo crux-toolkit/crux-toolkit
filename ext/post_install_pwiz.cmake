@@ -22,16 +22,8 @@ macro (check_status status_code)
 endmacro (check_status)
 
 if (WIN32 AND NOT CYGWIN)
-  # If windows build we need to select 32/64 bit platform
-  if (MSBUILD_PLATFORM STREQUAL "x64")
-    SET(BOOST_ARCH "x64")
-    SET(BOOST_ARCH_DIR "x64")
-  elseif (MSBUILD_PLATFORM STREQUAL "Win32")
-    SET(BOOST_ARCH "x32")
-    SET(BOOST_ARCH_DIR "x86")
-  else ()
-    message(FATAL_ERROR "${MSBUILD_PLATFORM}: Windows build architecture unknown.")
-  endif (MSBUILD_PLATFORM STREQUAL "x64")
+  SET(BOOST_ARCH "x64")
+  SET(BOOST_ARCH_DIR "x64")
   # Select between debug/release builds
   if (${BUILD_TYPE} MATCHES "Debug")
     SET(TYPE "-gd")
@@ -41,62 +33,50 @@ if (WIN32 AND NOT CYGWIN)
 
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_chrono-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_chrono-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_chrono-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_chrono-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_date_time-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_date_time-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_filesystem-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_filesystem-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_filesystem-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_filesystem-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_iostreams-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_iostreams-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_iostreams-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_iostreams-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_nowide-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_nowide-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_nowide-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_nowide-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_program_options-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_program_options-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_program_options-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_program_options-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_system-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_system-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_system-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_system-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
-      RESULT_VARIABLE status
-    )
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_thread-vc141-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_thread-vc141-mt${TYPE}-${BOOST_ARCH}-1_67.lib
+        ${PREFIX}/lib/libboost_thread-vc142-mt${TYPE}.lib
+        ${PREFIX}/lib/libboost_thread-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/${BOOST_ARCH_DIR}/timsdata.lib
         ${PREFIX}/lib/timsdata.lib
-      RESULT_VARIABLE status
-    )
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
-        ${PREFIX}/include/boost/system/detail/error_code.ipp
       RESULT_VARIABLE status
     )
 #  check_status(status)
