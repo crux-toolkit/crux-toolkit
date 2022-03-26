@@ -39,8 +39,8 @@ jobs:
       name: Configure CMake for Windows
       shell: cmd
       run: |
-        cd ${{runner.workspace}}/build
-        cmake -G "Visual Studio 16 2019" -A x64 $GITHUB_WORKSPACE  
+        cd %runner.workspace%/build
+        cmake -G "Visual Studio 16 2019" -A x64 %GITHUB_WORKSPAC%  
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux
       shell: bash
@@ -57,8 +57,8 @@ jobs:
       name: Build on Windows
       shell: cmd
       run: |
-        cd ${{runner.workspace}}\build
-        cmake --build . --config $BUILD_TYPE
+        cd %runner.workspace%%\build
+        cmake --build . --config %BUILD_TYPE%%
         
     - name: Test
       shell: bash
