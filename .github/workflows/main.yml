@@ -14,10 +14,10 @@ jobs:
       matrix:
         #os: [ubuntu-latest, windows-2019 , macos-latest]
         os: [windows-2019]
-        container: ['']
-        include:
-          - os: ubuntu-latest
-            container: centos:centos7
+#        container: ['']
+#        include:
+#          - os: ubuntu-latest
+#            container: centos:centos7
 
     steps:
     - uses: actions/checkout@v2
@@ -45,8 +45,8 @@ jobs:
       name: Configure CMake for Windows
       shell: bash
       run: |
-        cd ${{runner.workspace}}/build}}
-        cmake "${github_workspace}" -G "Visual Studio 16 2019" -A x64   
+        cd ${{runner.workspace}}
+        cmake "${RUNNER_WORKSPACE}" -G "Visual Studio 16 2019" -A x64   
         
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux
