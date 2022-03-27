@@ -53,7 +53,7 @@ jobs:
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        cmake ".." -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
         
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Build on Linux and MacOS
