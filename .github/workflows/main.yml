@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-latest, windows-2019 , macos-latest]
-        os: [windows-2019]
+        os: [ubuntu-latest]
 #        container: ['']
 #        include:
 #          - os: ubuntu-latest
