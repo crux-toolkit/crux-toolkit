@@ -60,7 +60,7 @@ jobs:
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        cmake --build . --config $BUILD_TYPE
+        make
         
     - if: matrix.os == 'windows-2019'
       name: Build on Windows
