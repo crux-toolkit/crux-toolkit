@@ -44,7 +44,7 @@ jobs:
       name: Configure CMake for Windows
       shell: bash
       run: |
-        cd ${{runner.workspace%/build}}
+        cd ${{runner.workspace}}/build}}
         cmake ${{GITHUB_WORKSPACE}} -G "Visual Studio 16 2019" -A x64   
         
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
