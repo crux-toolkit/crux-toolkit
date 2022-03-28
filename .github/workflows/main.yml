@@ -1,3 +1,9 @@
+#    os: [ubuntu-latest, windows-2019 , macos-latest]
+#        container: ['']
+#        include:
+#          - os: ubuntu-latest
+#            container: centos:centos7
+
 name: build
 
 on: [push]
@@ -13,14 +19,9 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         
-#    os: [ubuntu-latest, windows-2019 , macos-latest]
-#        container: ['']
-#        include:
-#          - os: ubuntu-latest
-#            container: centos:centos7
-
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
             
     - if: matrix.container == 'centos:centos7'
       name: Install prerequisites for Docker CentOS7
@@ -33,7 +34,7 @@ jobs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
     
-     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux and MacoS
       shell: bash
       run: |
