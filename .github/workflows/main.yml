@@ -4,7 +4,6 @@ on: [push]
 
 env:
   BUILD_TYPE: Release
-  #DEVELOPER_DIR: /Applications/Xcode_10.1.app/Contents/Developer 
 
 jobs:
   build:
@@ -12,8 +11,9 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        #os: [ubuntu-latest, windows-2019 , macos-latest]
         os: [ubuntu-latest]
+        
+#    os: [ubuntu-latest, windows-2019 , macos-latest]
 #        container: ['']
 #        include:
 #          - os: ubuntu-latest
