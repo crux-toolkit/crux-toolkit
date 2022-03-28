@@ -36,7 +36,9 @@ jobs:
     - name: Create Build Environment
       env:
         shell: bash
-        run: cmake -E make_directory "${{runner.workspace}}/build"
+        run: |
+          echo Creating "${{runner.workspace}}/build"
+          cmake -E make_directory "${{runner.workspace}}/build"
       
     - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux and MacoS
