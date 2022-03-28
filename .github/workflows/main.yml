@@ -35,40 +35,32 @@ jobs:
     
     - name: Create Build Environment
       env:
-        RUNNER_WORKSPACE: ${{ runner.workspace }}
-      working-directory: ${{ github.workspace }}
+        shell: bash
+        run: cmake -E make_directory "${{runner.workspace}}/build"
+      
+    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      name: Configure CMake for Linux and MacoS
       shell: bash
-      run: cmake -E make_directory "${RUNNER_WORKSPACE}/build"
-      
-      
+      run: |
+        cd "${{runner.workspace}}/build"
+        echo Configuring in $(pwd)
+        cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
     - if: matrix.os == 'windows-2019'
       name: Configure CMake for Windows
       shell: bash
       run: |
-        cd ${{runner.workspace}}
-        cmake "${RUNNER_WORKSPACE}" -G "Visual Studio 16 2019" -A x64   
+        cd "${{runner.workspace}}/build"
+        echo Configuring in $(pwd)
+        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64   
         
-    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-      name: Configure CMake for Linux
+    - name: Build on all platforms
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        cmake "${GITHUB_WORKSPACE}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-        
-    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-      name: Build on Linux and MacOS
-      shell: bash
-      run: |
-        cd ${{runner.workspace}}/build
-        make
-        
-    - if: matrix.os == 'windows-2019'
-      name: Build on Windows
-      shell: cmd
-      run: |
-        cd %runner.workspace%%\build
-        cmake --build . --config %BUILD_TYPE%%
-        
+        echo Building in $(pwd)
+        cmake --build . --config $BUILD_TYPE
+
     - name: Test
       shell: bash
       run: |
