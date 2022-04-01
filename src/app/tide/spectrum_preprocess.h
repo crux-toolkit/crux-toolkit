@@ -225,7 +225,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   double bin_width_;
   double bin_offset_;
 
-  MaxBin max_mz_;
+//  MaxBin max_mz_;
   int cache_end_;
 
   // added by Yang
