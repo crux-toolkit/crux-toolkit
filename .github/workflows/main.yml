@@ -17,7 +17,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [windows-2019]
         
     steps:
     - name: Checkout repository
