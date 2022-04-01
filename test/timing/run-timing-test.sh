@@ -83,11 +83,11 @@ for precursor in 3 10; do
     tide_params="--top-match 1"
 
     if [[ $precursor == 10 ]]; then
-	comet_precursor="--peptide_mass_units 2 --peptide_mass_tolerance 10"
-	tide_precursor="--precursor-window 10 --precursor-window-type ppm"
+        comet_precursor="--peptide_mass_units 2 --peptide_mass_tolerance 10"
+        tide_precursor="--precursor-window 10 --precursor-window-type ppm"
     else
-	comet_precursor=""
-	tide_precursor=""
+        comet_precursor="--peptide_mass_units 0 --peptide_mass_tolerance 3"
+        tide_precursor="--precursor-window 3 --precursor-window-type mass"
     fi
     
     for fragment in 1 02; do
