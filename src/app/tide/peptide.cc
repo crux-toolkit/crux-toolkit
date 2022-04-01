@@ -169,6 +169,21 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
                       const pb::Peptide& pb_peptide,
                       TheoreticalPeakCompiler* compiler_prog1,
                       TheoreticalPeakCompiler* compiler_prog2) {
+#ifdef CPP_SCORING
+  // Store the theoretical peak indeces for the peptide in a vector. 
+  int i;
+  peaks_0.reserve(peaks[0].size());
+  peaks_1.reserve(peaks[1].size());
+  
+  for (i = 0; i < peaks[0].size(); ++i) {
+    peaks_0.push_back(peaks[0][i]);
+  }
+  for (i = 0; i < peaks[1].size(); ++i) {
+    peaks_1.push_back(peaks[1][i]);
+  }
+  prog1_ = (void*)3;  //Mark the peptide that it contains theoretical peaks to score
+#else
+  // Create the Assembly code for scoring. 
   int pos_size = peaks[0].size();
   prog1_ = compiler_prog1->Init(pos_size, 0);
   compiler_prog1->AddPositive(peaks[0]);
@@ -179,6 +194,7 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
   compiler_prog2->AddPositive(peaks[0]);
   compiler_prog2->AddPositive(peaks[1]);
   compiler_prog2->Done();
+#endif
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
