@@ -55,7 +55,7 @@ jobs:
     - name: Build on all platforms
       shell: bash
       run: |
-        cd ${{runner.workspace}}/build
+        cd "${{runner.workspace}}/build"
         echo Building in $(pwd)
         cmake --build . --config $BUILD_TYPE
 
