@@ -17,11 +17,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [ubuntu-18.04]
-        include:
-          - runs-on: ubuntu-18.04
-            compiler: gcc
-            gcc: 7
+        os: [ubuntu-latest, macos-latest]
         
     steps:
     - name: Checkout repository
@@ -38,7 +34,7 @@ jobs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
     
-    - if: matrix.os == 'ubuntu-18.04' || matrix.os == 'macos-latest'
+    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
       name: Configure CMake for Linux and MacoS
       shell: bash
       run: |
