@@ -34,11 +34,21 @@ jobs:
         git config --global user.email "actions@github.com"
         git config --global user.name "GitHub Actions"
     
-    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+    - if: matrix.os == 'ubuntu-latest'
       name: Configure CMake for Linux and MacoS
       shell: bash
       run: |
         sudo apt-get install -y cucumber
+        cmake -E make_directory "${{runner.workspace}}/build"
+        cd "${{runner.workspace}}/build"
+        echo Configuring in $(pwd)
+        cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        
+    - if: matrix.os == 'macos-latest'
+      name: Configure CMake for  MacoS
+      shell: bash
+      run: |
+        brew install cucumber-ruby
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
