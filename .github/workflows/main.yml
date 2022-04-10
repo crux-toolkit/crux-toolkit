@@ -38,7 +38,7 @@ jobs:
       name: Configure CMake for Linux and MacoS
       shell: bash
       run: |
-        yum -y install cucumber
+        apt-get install -y cucumber
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
