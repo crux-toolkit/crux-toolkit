@@ -51,14 +51,14 @@ jobs:
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
-        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64   
+        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DINCLUDE_VENDOR_LIBRARIES=NO   
         
     - name: Build on all platforms
       shell: bash
       run: |
         cd "${{runner.workspace}}/build"
         echo Building in $(pwd)
-        cmake --build . --config $BUILD_TYPE -DINCLUDE_VENDOR_LIBRARIES=NO
+        cmake --build . --config $BUILD_TYPE 
 
     - name: Test
       shell: bash
