@@ -38,6 +38,7 @@ jobs:
       name: Configure CMake for Linux and MacoS
       shell: bash
       run: |
+        yum -y install cucumber
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
@@ -57,7 +58,7 @@ jobs:
       run: |
         cd "${{runner.workspace}}/build"
         echo Building in $(pwd)
-        cmake --build . --config $BUILD_TYPE
+        cmake --build . --config $BUILD_TYPE -DINCLUDE_VENDOR_LIBRARIES=NO
 
     - name: Test
       shell: bash
