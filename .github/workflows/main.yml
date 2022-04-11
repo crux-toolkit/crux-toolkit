@@ -75,7 +75,8 @@ jobs:
       name: Test
       shell: bash
       run: |
-        cd ${{runner.workspace}}/build
+        cd ${{runner.workspace}}/build/test
+        rm -rf smoke-tests
         cp -r ${{github.workspace}}/test/smoke-tests/ .
         cd smoke-tests
         cucumber
