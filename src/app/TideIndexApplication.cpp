@@ -813,7 +813,10 @@ int TideIndexApplication::main(
   cerr.rdbuf(old);
   
   // This was added to resolve the race condition issue which arises on windows.
-  // delete aaf_peptide_reader;
+  if (aaf_peptide_reader != NULL) {
+	aaf_peptide_reader.reset();
+  }
+  
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   return 0;
