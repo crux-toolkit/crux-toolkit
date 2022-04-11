@@ -70,8 +70,11 @@ jobs:
         echo Building in $(pwd)
         cmake --build . --config $BUILD_TYPE 
 
-    - name: Test
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test
       shell: bash
       run: |
         cd ${{runner.workspace}}/build
-        echo "This will run tests" #ctest -C $BUILD_TYPE
+        cp -r ${{github.workspace}}/test/smoke-tests/ .
+        cd smoke-tests
+        cucumber
