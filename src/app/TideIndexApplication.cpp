@@ -32,6 +32,7 @@
 #include "app/tide/records_to_vector-inl.h"
 #include "ParamMedicApplication.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include <regex>
 #include <assert.h>
@@ -534,7 +535,9 @@ int TideIndexApplication::main(
   }
   //Reader for the peptides:
   pb::Header aaf_peptides_header;
-  HeadedRecordReader *aaf_peptide_reader = new HeadedRecordReader(peptidePbFile, &aaf_peptides_header);
+  
+  boost::scoped_ptr<HeadedRecordReader> aaf_peptide_reader(new HeadedRecordReader(peptidePbFile, &aaf_peptides_header));
+  
 
   if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
     !aaf_peptides_header.has_peptides_header()) {
@@ -810,7 +813,7 @@ int TideIndexApplication::main(
   cerr.rdbuf(old);
   
   // This was added to resolve the race condition issue which arises on windows.
-  delete aaf_peptide_reader;
+  // delete aaf_peptide_reader;
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   return 0;
