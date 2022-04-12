@@ -35,7 +35,7 @@ jobs:
         git config --global user.name "GitHub Actions"
     
     - if: matrix.os == 'ubuntu-latest'
-      name: Configure CMake for Linux and MacoS
+      name: Configure CMake for Ubuntu
       shell: bash
       run: |
         sudo apt-get install -y cucumber
