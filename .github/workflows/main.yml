@@ -21,8 +21,10 @@ jobs:
         
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
-            
+    - uses: actions/checkout@v2
+    - uses: "actions/setup-python@v2"
+      with:
+        python-version: 3.6            
     - if: matrix.container == 'centos:centos7'
       name: Install prerequisites for Docker CentOS7
       shell: bash
