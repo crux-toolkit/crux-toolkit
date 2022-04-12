@@ -24,7 +24,11 @@ jobs:
     - uses: actions/checkout@v2
     - uses: "actions/setup-python@v2"
       with:
-        python-version: 3.6            
+        python-version: 3.6   
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip numpy
+        
     - if: matrix.container == 'centos:centos7'
       name: Install prerequisites for Docker CentOS7
       shell: bash
@@ -40,7 +44,6 @@ jobs:
       name: Configure CMake for Ubuntu
       shell: bash
       run: |
-        sudo apt-get install -y python-numpy
         sudo apt-get install -y cucumber
         sudo apt-get install -y ruby-rspec
         cmake -E make_directory "${{runner.workspace}}/build"
