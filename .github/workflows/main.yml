@@ -38,9 +38,9 @@ jobs:
       name: Configure CMake for Ubuntu
       shell: bash
       run: |
+        sudo apt-get install -y python-numpy
         sudo apt-get install -y cucumber
         sudo apt-get install -y ruby-rspec
-        sudo apt install -y python-numpy
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
