@@ -20,13 +20,14 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         
     steps:
-    - name: Checkout repository
     - uses: actions/checkout@v2
     - uses: "actions/setup-python@v2"
       with:
-        python-version: 3.6   
-    - name: Install dependencies
+        python-version: "3.6"   
+    - name: "Checkout repository"
       run: |
+        python -VV
+        python -m site
         python -m pip install --upgrade pip numpy
         
     - if: matrix.container == 'centos:centos7'
