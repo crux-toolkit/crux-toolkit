@@ -64,12 +64,13 @@ jobs:
 
     - if: matrix.os == 'windows-2019'
       name: Configure CMake for Windows
-      shell: bash
+      shell: cmd
       run: |
-        unzip -P iacceptthelicense ext\build\src\comet\extern\msfreader.zip -d dlls
+        cd "${{runner.workspace}}/build"
+        wget  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+        unzip -P iacceptthelicense Thermo.zip -d dlls
         FOR %%G IN (dlls\*.dll) DO regsvr32 /S %%G
         cmake -E make_directory "${{runner.workspace}}/build"
-        cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
         cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DINCLUDE_VENDOR_LIBRARIES=NO   
         
