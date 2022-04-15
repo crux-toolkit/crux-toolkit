@@ -66,6 +66,8 @@ jobs:
       name: Configure CMake for Windows
       shell: bash
       run: |
+        unzip -P iacceptthelicense extern/msfreader.zip -d dlls
+        FOR %%G IN (dlls\*.dll) DO regsvr32 /S %%G
         cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         echo Configuring in $(pwd)
