@@ -32,7 +32,6 @@
 #include "app/tide/records_to_vector-inl.h"
 #include "ParamMedicApplication.h"
 #include <boost/algorithm/string.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include <regex>
 #include <assert.h>
@@ -536,7 +535,7 @@ int TideIndexApplication::main(
   //Reader for the peptides:
   pb::Header aaf_peptides_header;
   
-  boost::scoped_ptr<HeadedRecordReader> aaf_peptide_reader(new HeadedRecordReader(peptidePbFile, &aaf_peptides_header));
+  HeadedRecordReader aaf_peptide_reader(peptidePbFile, &aaf_peptides_header);
   
 
   if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
@@ -546,7 +545,7 @@ int TideIndexApplication::main(
 
   FifoAllocator fifo_alloc_peptides_(FLAGS_fifo_page_size << 20);
   RecordReader* reader_;
-  reader_ = aaf_peptide_reader->Reader();
+  reader_ = aaf_peptide_reader.Reader();
   pb::Peptide current_pb_peptide_;
 
   MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
@@ -812,13 +811,18 @@ int TideIndexApplication::main(
   */// Recover stderr
   cerr.rdbuf(old);
   
-  // This was added to resolve the race condition issue which arises on windows.
-  if (aaf_peptide_reader != NULL) {
-	aaf_peptide_reader.reset();
-  }
-  
+ 
   FileUtils::Remove(modless_peptides);
-  FileUtils::Remove(peakless_peptides);
+  // This was added to resolve the race condition issue which arises on windows.
+  #ifdef _WIN32
+	std::cout << "Windows OS\n";
+	std::string cmd = "del " + peakless_peptides;
+	int systemResult = system(cmd.c_str());
+	if (systemResult != 0)
+		carp(CARP_INFO, "System sort failed, please delete the file (%s) manually : %i", peakless_peptides.c_str(), systemResult);
+  #else
+    FileUtils::Remove(peakless_peptides);
+  #endif
   return 0;
 
 }
