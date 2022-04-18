@@ -70,9 +70,12 @@ jobs:
         cd "${{runner.workspace}}/build"
         C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
         unzip -P iacceptthelicense Thermo.zip -d dlls
-        FOR %%G IN (dlls\Thermo\MSFileReader\*.dll) DO (
-        echo %%G
-        regsvr32 %%G)  
+        echo "XRawfile2_x64.dll"
+        regsvr32 dlls\Thermo\MSFileReader\XRawfile2_x64.dll
+        echo "fregistry_x64.dll"
+        regsvr32 dlls\Thermo\MSFileReader\fregistry_x64.dll
+        echo "Fileio_x64.dll.dll"
+        regsvr32 dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
         cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DINCLUDE_VENDOR_LIBRARIES=NO   
         
     - name: Build on all platforms
