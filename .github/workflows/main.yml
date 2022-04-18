@@ -67,7 +67,7 @@ jobs:
       shell: cmd
       run: |
         cd "${{runner.workspace}}/build"
-        wget  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+        C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
         unzip -P iacceptthelicense Thermo.zip -d dlls
         FOR %%G IN (dlls\*.dll) DO regsvr32 /S %%G
         cmake -E make_directory "${{runner.workspace}}/build"
