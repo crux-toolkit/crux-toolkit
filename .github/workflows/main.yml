@@ -66,11 +66,11 @@ jobs:
       name: Configure CMake for Windows
       shell: cmd
       run: |
+        cmake -E make_directory "${{runner.workspace}}/build"
         cd "${{runner.workspace}}/build"
         C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
         unzip -P iacceptthelicense Thermo.zip -d dlls
-        FOR %%G IN (dlls\*.dll) DO regsvr32 /S %%G
-        cmake -E make_directory "${{runner.workspace}}/build"
+        FOR %%G IN (dlls\*.dll) DO regsvr32 %%G  
         echo Configuring in $(pwd)
         cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DINCLUDE_VENDOR_LIBRARIES=NO   
         
