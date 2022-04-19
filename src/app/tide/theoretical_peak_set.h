@@ -91,7 +91,7 @@ class TheoreticalPeakSetBYSparse {
   void AddYIon(double mass, int charge) {
     assert(charge <= 2);
     int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MASS_PROTON, charge);
-    if (index_y >= 0 && index_y < peak_mask_end && !peak_mask[index_y]) {
+    if (index_y >= 0 && index_y < peak_mask_end-1 && !peak_mask[index_y]) {
       peak_mask[index_y] = 1;
       index_y += index_y;
       if (charge == 2) {
@@ -105,7 +105,7 @@ class TheoreticalPeakSetBYSparse {
   void AddBIon(double mass, int charge) {
     assert(charge <= 2);
     int index_b = MassConstants::mass2bin(mass + MassConstants::B + MASS_PROTON, charge);
-    if (index_b >= 0 && index_b < peak_mask_end && !peak_mask[index_b]) {
+    if (index_b >= 0 && index_b < peak_mask_end-1 && !peak_mask[index_b]) {
       peak_mask[index_b] = 1;
       index_b += index_b;
       if (charge == 2) {
@@ -119,7 +119,7 @@ class TheoreticalPeakSetBYSparse {
   const TheoreticalPeakArr* GetPeaks() const { return peaks_; }
 
  private:
-    int* peak_mask = 0; //MaxBin::Global().BackgroundBinEnd()
+    int* peak_mask = 0; //  MaxBin::Global().CacheBinEnd();
     int peak_mask_end = 0;
     int cache_end = 0;
     TheoreticalPeakArr peaks_[2];
