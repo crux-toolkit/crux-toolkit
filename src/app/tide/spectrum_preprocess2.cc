@@ -76,7 +76,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
 
   assert(MaxBin::Global().MaxBinEnd() > 0);
 
-  max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
+//  max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
   cache_end_ = MaxBin::Global().CacheBinEnd();
   memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
   memset(cache_, 0, sizeof(int) * cache_end_*NUM_PEAK_TYPES);
@@ -216,7 +216,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
 #endif
   }
-  int largest_mz = min(max_mz_.BackgroundBinEnd(), largest_mzbin_ + MAX_XCORR_OFFSET+1);
+  int largest_mz = min(MaxBin::Global().BackgroundBinEnd(), largest_mzbin_ + MAX_XCORR_OFFSET+1);
   SubtractBackground(peaks_, largest_mz);
   
   // The cache has been modified. It is used to keep track of the types of 
@@ -231,7 +231,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   int nh3_bin = int(MassConstants::BIN_NH3);
   int h2o_bin = int(MassConstants::BIN_H2O);
   int j;
-  largest_mz += h2o_bin;    // This is line is added to make this code equivalent
+  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
   // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
   for(int i = 1; i < largest_mz; ++i) {
     j = i+i;
@@ -245,7 +245,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     }
     cache_[j] = int(intensity);
   }
-  
+	  
 #ifdef DEBUG
   if (debug) {
     ShowPeaks();
