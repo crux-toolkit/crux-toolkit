@@ -639,44 +639,14 @@ void TideSearchApplication::search(void* threadarg) {
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
       TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
   
-#ifdef CPP_SCORING
-      //Scoring in C++		
-        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-        TideMatchSet::Arr2::iterator it = match_arr2.begin();
-        const int* cache = observed.GetCache();        
-        int cnt = 0;
-        for (; iter_ != active_peptide_queue->end_; ++iter_, ++it, ++cnt) {
-          unsigned int xcorr = 0;
-		  
-		  // Score with single charged theoretical peaks
-          for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_0.begin();
-            iter_uint != (*iter_)->peaks_0.end();
-            iter_uint++) {
-              xcorr += cache[*iter_uint];
-            }
-		  // Score with double charged theoretical peaks
-          if (charge > 2){
-            for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_1.begin();
-              iter_uint != (*iter_)->peaks_1.end();
-              iter_uint++) {
-                xcorr += cache[*iter_uint];
-              }
-          }
-          
-          it->first = xcorr;
-          it->second = candidatePeptideStatusSize - cnt;
-        } 
-        match_arr2.set_size(candidatePeptideStatusSize);
-        // End Scoring in C++
-#else
-        // Programs for taking the dot-product with the observed spectrum are laid
-        // out in memory managed by the active_peptide_queue, one program for each
-        // candidate peptide. The programs will store the results directly into
-        // match_arr. We now pass control to those programs.
-	
-        collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
-                              candidatePeptideStatusSize, charge);
-#endif
+
+      // Programs for taking the dot-product with the observed spectrum are laid
+      // out in memory managed by the active_peptide_queue, one program for each
+      // candidate peptide. The programs will store the results directly into
+      // match_arr. We now pass control to those programs.
+
+      collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
+                            candidatePeptideStatusSize, charge);
 
       // matches will arrange the results in a heap by score, return the top
       // few, and recover the association between counter and peptide. We output
@@ -1379,6 +1349,37 @@ void TideSearchApplication::collectScoresCompiled(
   int queue_size,
   int charge
 ) {
+#ifdef CPP_SCORING
+  //Scoring in C++		
+  deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
+  TideMatchSet::Arr2::iterator it = match_arr->begin();
+  const int* cache = observed.GetCache();        
+  int cnt = 0;
+  for (; iter_ != active_peptide_queue->end_; ++iter_, ++it, ++cnt) {
+    int xcorr = 0;
+
+    // Score with single charged theoretical peaks
+    for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_0.begin();
+      iter_uint != (*iter_)->peaks_0.end();
+      iter_uint++) {
+      xcorr += cache[*iter_uint];
+    }
+    // Score with double charged theoretical peaks
+    if (charge > 2){
+      for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_1.begin();
+        iter_uint != (*iter_)->peaks_1.end();
+        iter_uint++) {
+        xcorr += cache[*iter_uint];
+      }
+    }
+
+    it->first = xcorr;
+    it->second = queue_size - cnt;
+  } 
+  match_arr-> set_size(queue_size);
+  // End Scoring in C++
+#else
+	
   if (!active_peptide_queue->HasNext()) {
     return;
   }
@@ -1480,6 +1481,7 @@ void TideSearchApplication::collectScoresCompiled(
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
   match_arr->set_size(queue_size);
+#endif
 }
 #ifdef _WIN64
 #pragma optimize( "g", on )

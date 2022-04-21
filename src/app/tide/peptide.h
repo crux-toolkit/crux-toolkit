@@ -257,7 +257,6 @@ class Peptide {
 
   void* prog1_;
   void* prog2_;
-  
 
   // added by Yang
   vector<int> ion_mzbins_, b_ion_mzbins_, y_ion_mzbins_;

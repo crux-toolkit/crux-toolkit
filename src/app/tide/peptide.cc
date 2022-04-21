@@ -172,6 +172,8 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
 #ifdef CPP_SCORING
   // Store the theoretical peak indeces for the peptide in a vector. 
   int i;
+  peaks_0.clear();
+  peaks_1.clear();
   peaks_0.reserve(peaks[0].size());
   peaks_1.reserve(peaks[1].size());
   
