@@ -17,7 +17,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-2019]
+        os: [ubuntu-latest]
         
     steps:
     - uses: actions/checkout@v2
@@ -93,4 +93,4 @@ jobs:
         rm -rf smoke-tests
         cp -r ${{github.workspace}}/test/smoke-tests/ .
         cd smoke-tests
-        cucumber
+        cucumber -f html
