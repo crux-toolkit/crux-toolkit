@@ -93,4 +93,10 @@ jobs:
         rm -rf smoke-tests
         cp -r ${{github.workspace}}/test/smoke-tests/ .
         cd smoke-tests
-        cucumber -f html
+        cucumber -f html -o smoke-tests.html
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive smoke test results
+      uses: actions/upload-artifact@v3
+      with:
+          name: smoke-test-results
+          path: test/smoke-tests/smoke-tests.html
