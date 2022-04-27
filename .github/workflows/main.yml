@@ -14,7 +14,6 @@ env:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -90,6 +89,7 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
+        cmake -E make_directory "${{runner.workspace}}/build/test"
         cd ${{runner.workspace}}/build/test
         rm -rf smoke-tests
         cp -r ${{github.workspace}}/test/smoke-tests/ .
