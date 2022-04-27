@@ -101,4 +101,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: smoke-test-results
-        path: ${{runner.workspace}}/test/smoke-tests/smoke-tests.html
+        path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
