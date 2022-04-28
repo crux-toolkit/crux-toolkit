@@ -62,22 +62,22 @@ class PostProcessProtein : public Crux::Protein {
    * \returns the ith sequence
    */
   virtual char* getSequence(
-    int offset=0 ///< The offset (or sequence index) for the sequence
+    int offset = 0 ///< The offset (or sequence index) for the sequence
   );
 
   /**
    * \returns the ith sequence pointer
    */
   virtual char* getSequencePointer(
-    int offset=0 ///< The offset (or sequence index) for the sequence
+    int offset = 0 ///< The offset (or sequence index) for the sequence
   );
 
   char getNTermFlankingAA(
-    int offset=0 ///< The offset (or sequence index) for the AA
+    int offset = 0 ///< The offset (or sequence index) for the AA
   );
 
   char getCTermFlankingAA(
-    int offset=0 ///< The offset (or sequence index) for the AA
+    int offset = 0 ///< The offset (or sequence index) for the AA
   );
 
   /**

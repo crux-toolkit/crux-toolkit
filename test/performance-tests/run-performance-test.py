@@ -96,7 +96,7 @@ def createParameterFile(parameterFileName):
   parameterFile.write("mz-bin-width=1.0005079\n")
   parameterFile.write("fragment_bin_offset=0.68\n")
   parameterFile.write("fragment_bin_tol=1.0005079\n")
-
+  
   # Peptide mass range.
   parameterFile.write("min-mass=200\n")
   parameterFile.write("max-mass=7200\n")
@@ -143,7 +143,7 @@ def runSearch(outputDirectory, searchName, searchParam, database,
              % (CRUX, searchName, outputDirectory, parameterFileName, 
                 searchParam, ms2, database),
              psmFile)
-
+             
   confidenceFile = "%s/assign-confidence.target.txt" % outputDirectory
   runCommand("%s assign-confidence --output-dir %s %s %s" % 
              (CRUX, outputDirectory, confidenceParam, psmFile), confidenceFile)
@@ -231,7 +231,7 @@ createParameterFile(parameterFileName)
 # Create the index.
 runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
            % (CRUX, database, parameterFileName, database, database),
-           "%s/tide-index.peptides.target.txt" % database)
+           "%s/tide-index.peptides.txt" % database)
 
 # Run four searches (Comet, and Tide XCorr, XCorr p-value, and residue evidence p-value).
 runSearch("tide-xcorr", "tide-search", "", database,
@@ -245,9 +245,9 @@ runSearch("tide-res-ev", "tide-search",
           database, "tide-res-ev/tide-search.txt",
           "res-ev p-value", "--score \"res-ev p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
-          "comet/comet.target.txt",
+          "comet/comet.txt",
           "xcorr score", "--score e-value")
-runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", "%s.fa" % database,
+runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", database,
           "tide-tailor/tide-search.txt",
           "xcorr score", "")
 

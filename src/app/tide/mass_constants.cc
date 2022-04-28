@@ -67,6 +67,7 @@ const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B = 8;
 */
 double MassConstants::BIN_H2O = 18;
 double MassConstants::BIN_NH3 = 17;
+double MassConstants::BIN_CO = 28;
 
 
 //default parameter settings, will be changed during parameter parsing
@@ -248,8 +249,9 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
 
   bin_width_ = bin_width;
   bin_offset_ = bin_offset;
-  BIN_H2O = mass2bin(mono_h2o,1);
-  BIN_NH3 = mass2bin(mono_nh3,1);
+  BIN_H2O = mass2bin(mono_h2o, 1);
+  BIN_NH3 = mass2bin(mono_nh3, 1);
+  BIN_CO = mass2bin(mono_co, 1);
 
   return true;
 }
@@ -281,7 +283,7 @@ void MassConstants::SetFixPt(double* mono_table, double* avg_table,
   for (int i = 0; i < 256; ++i) {
     if (mono_table[i] == 0) {
       mono_table[i] = avg_table[i]/* = aa_bin_1[i] = aa_bin_2[i]*/
-	= numeric_limits<double>::signaling_NaN();
+      = numeric_limits<double>::signaling_NaN();
       fixp_mono_table[i] = fixp_avg_table[i] = 0;
     } else {
       fixp_mono_table[i] = ToFixPt(mono_table[i]);
@@ -290,8 +292,7 @@ void MassConstants::SetFixPt(double* mono_table, double* avg_table,
   }
 }
 
-static bool CheckModification(const pb::Modification& mod,
-			      bool* repeats = NULL) {
+static bool CheckModification(const pb::Modification& mod, bool* repeats = NULL) {
   string aa_str = mod.amino_acids();
   if (aa_str.length() != 1)
     return false;
