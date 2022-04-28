@@ -179,7 +179,7 @@ void ProteinMatchCollection::addMatch(
   Match* match ///< Match to add
   ){
 
-  //create a spectrum match.
+  // Create a spectrum match.
   Spectrum* spectrum = match->getSpectrum();
   SpectrumZState z_state = match->getZState();
   SpectrumMatch* spectrum_match = new SpectrumMatch(spectrum);
@@ -197,7 +197,7 @@ void ProteinMatchCollection::addMatch(
   Peptide* peptide = match->getPeptide();
   PeptideMatch* peptide_match = getPeptideMatch(peptide);
   
-  //add the spectrum match.
+  // Add the spectrum match.
   peptide_match->addSpectrumMatch(spectrum_match);
 
   for (int score_idx = (int)SP;

@@ -229,8 +229,24 @@ MatchCollection* MatchFileReader::parse() {
       match_collection->setHasDecoyIndexes(true);
     }
 
+    // TODO presumably we can do this once instead of one time per scan
+    MATCH_COLUMNS_T rank_col;
+    if (empty(PERCOLATOR_RANK_COL) == 1) {
+      rank_col = PERCOLATOR_RANK_COL;
+    } else if (empty(BOTH_PVALUE_RANK) == 1) {
+      rank_col = BOTH_PVALUE_RANK;
+    } else if (empty(RESIDUE_RANK_COL) == 1) {
+      rank_col = RESIDUE_RANK_COL;
+    } else if (empty(XCORR_RANK_COL) == 1) {
+      rank_col = XCORR_RANK_COL;
+    } else if (empty(SP_RANK_COL) == 1) {
+      rank_col = SP_RANK_COL;
+    } else {
+      carp(CARP_FATAL, "Input file does not contain any reconized rank column.");
+    }
+
     // parse match object
-    if (maxRank == 0 || getInteger(XCORR_RANK_COL) <= maxRank) {
+    if (maxRank == 0 || getInteger(rank_col) <= maxRank) {
       Crux::Match* match = parseMatch();
       if (match == NULL) {
         carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
@@ -305,6 +321,7 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(EXACT_PVALUE_COL)) {
     match->setScore(TIDE_SEARCH_EXACT_PVAL, getFloat(EXACT_PVALUE_COL));
     match->setScore(TIDE_SEARCH_REFACTORED_XCORR, getFloat(REFACTORED_SCORE_COL));
+    match->setRank(TIDE_SEARCH_EXACT_PVAL, getInteger(XCORR_RANK_COL));
   }
   if (!empty(RESIDUE_EVIDENCE_COL)) {
     match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));

@@ -1,6 +1,6 @@
-/***********************************************************************//**
- * \file parameter.cpp
- * FILE: parameter.cpp
+/**
+ *   \file parameter.cpp
+ *   FILE: parameter.cpp
  * AUTHOR: written by Tobias Mann, CRUXified by Chris Park
  * Missed-cleavage conversion: Kha Nguyen
  * \brief General parameter handling utilities. MUST declare ALL
@@ -86,7 +86,7 @@ bool string_to_param_type(const char*, PARAMETER_TYPE_T* );
  * Every option and its default value for every executable 
  * must be declared here
  */
-void initialize_parameters(void){
+void initialize_parameters(void) {
   /* initialize the list of mods */                           
   for (int mod_idx = 0; mod_idx < MAX_AA_MODS; mod_idx++) {
     //initialize_aa_mod(&list_of_mods[mod_idx], mod_idx);     
@@ -129,7 +129,7 @@ void initialize_parameters(void){
  * post_for_inclusion;
  *
  */
-void parse_custom_enzyme(const string& rule_str){
+void parse_custom_enzyme(const string& rule_str) {
   bool success = true;
   int len = rule_str.length();
   int idx = 0;
@@ -268,7 +268,7 @@ static const int PARAMETER_BUFFER = 10000;
  */
 void print_mods_parameter_file(ostream* param_file, 
                                const char* name,
-                               int (*mod_getter)(AA_MOD_T***)){
+                               int (*mod_getter)(AA_MOD_T***)) {
   // get mod description
   char comments[PARAMETER_BUFFER] = "";
   strcat_formatted(comments, "# ", Params::GetUsage(name).c_str());
@@ -278,17 +278,17 @@ void print_mods_parameter_file(ostream* param_file,
   // get list of mods to print
   AA_MOD_T** mod_list = NULL;
   int total_mods = (*mod_getter)(&mod_list);
-  for( int mod_idx = 0 ; mod_idx < total_mods; mod_idx++){
+  for( int mod_idx = 0 ; mod_idx < total_mods; mod_idx++) {
     float mass = mod_list[mod_idx]->getMassChange();
 
     // standard mods have the format mass:aa_list:max
-    if( strcmp(name, "mod") == 0 ){
+    if( strcmp(name, "mod") == 0 ) {
       int max = mod_list[mod_idx]->getMaxPerPeptide();
       bool* aas_modified = mod_list[mod_idx]->getAAList();
       char aa_str[PARAMETER_BUFFER] = "";
       char* aa_str_ptr = aa_str;
-      for(int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++){
-        if( aas_modified[aa_idx] == true ){
+      for(int aa_idx = 0; aa_idx < AA_LIST_LENGTH; aa_idx++) {
+        if( aas_modified[aa_idx] == true ) {
           sprintf(aa_str_ptr, "%c", (aa_idx + 'A'));
           aa_str_ptr++;
         }
@@ -307,7 +307,7 @@ void print_mods_parameter_file(ostream* param_file,
   }
 
   // if there were no mods, print placeholder
-  if( total_mods == 0 ){
+  if( total_mods == 0 ) {
     *param_file << Params::ProcessHtmlDocTags(comments) << name << "=NO MODS" << endl << endl;
   }
 }

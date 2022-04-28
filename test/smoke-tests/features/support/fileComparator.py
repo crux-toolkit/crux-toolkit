@@ -25,7 +25,7 @@ def compareSorted(dataExpected, dataActual, precision):
     for colName in dataExpected.columns:
         assertAndDie(dataExpected[colName].dtype == dataActual[colName].dtype, "data types do not match for column {0}".format(colName))
 
-        if dataExpected[colName].dtype == numpy.float:
+        if dataExpected[colName].dtype == float:
             roundExpected = roundColumnToDecDigits(dataExpected[colName], precision)
             roundActual = roundColumnToDecDigits(dataActual[colName], precision)
             #
@@ -43,7 +43,7 @@ class ComparableRow(object):
         self.row_data = row
         comp_data = []
         for val in row:
-            if "dtype" in dir(val) and val.dtype == numpy.float:
+            if "dtype" in dir(val) and val.dtype == float:
                 comp_data.append(self.roundToDecDigit(val, precision))
             else:
                 comp_data.append(val)
