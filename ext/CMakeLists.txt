@@ -173,7 +173,7 @@ if (UNIX)
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
-elseif (WIN32 AND NOT CYGWIN)
+else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     percolator
     GIT_REPOSITORY https://github.com/percolator/percolator.git
