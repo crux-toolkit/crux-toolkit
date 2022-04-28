@@ -95,6 +95,7 @@ jobs:
         cp -r ${{github.workspace}}/test/smoke-tests/ .
         cd smoke-tests
         cucumber -f html -o smoke-tests.html
+        cucumber features/percolator.feature:15
 
     - if: matrix.os == 'ubuntu-latest'
       name: Archive smoke test results
@@ -102,3 +103,9 @@ jobs:
       with:
         name: smoke-test-results
         path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive percolator resuilts
+      uses:  actions/upload-artifact@v3
+      with:
+        name: percolator-results
+        path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
