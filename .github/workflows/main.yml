@@ -75,7 +75,7 @@ jobs:
         regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
         echo "Fileio_x64.dll.dll"
         regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
-        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64    
+        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c   
         
     - name: Build on all platforms
       shell: bash
