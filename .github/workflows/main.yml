@@ -116,25 +116,22 @@ jobs:
       shell: bash
       run: |
         cd "${{runner.workspace}}/build"
-        git_hash=$(git rev-parse --short "$GITHUB_SHA")
         cmake --build . --config $BUILD_TYPE --target package
-        mv crux-4.1.Linux.x86_64.zip crux-4.1.${GIT_HASH_SHORT}.Linux.x86_64.zip
         cmake --build . --config $BUILD_TYPE --target package_source
-        mv crux-4.1.Source.tar.gz crux-4.1.${GITHUB_SHA}.Source.tar.gz
         
     - if: matrix.os == 'ubuntu-latest'
       name: Archive Ubuntu package
       uses: actions/upload-artifact@v3
       with:
         name: ubuntu-package
-        path: ${{runner.workspace}}/build/crux-4.1.${GIT_HASH_SHORT}.Linux.x86_64.zip
+        path: ${{runner.workspace}}/build/crux-4.1.Linux.x86_64.zip
         
     - if: matrix.os == 'ubuntu-latest'
       name: Archive source package
       uses: actions/upload-artifact@v3
       with:
         name: ubuntu-source
-        path: ${{runner.workspace}}/build/crux-4.1.${GITHUB_SHA}.Source.tar.gz
+        path: ${{runner.workspace}}/build/crux-4.1.Source.tar.gz
 
 
         
