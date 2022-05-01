@@ -1648,7 +1648,6 @@ vector<string> TideSearchApplication::getOptions() const {
     "fileroot",
     "isotope-error",
     "mass-precision",
-//    "min-precursor-charge",
     "max-precursor-charge",
     "min-peaks",
     "mod-precision",
