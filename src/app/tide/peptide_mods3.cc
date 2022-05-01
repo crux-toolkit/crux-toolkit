@@ -795,7 +795,7 @@ unsigned long AddMods(HeadedRecordReader* reader,
     CHECK(reader->Read(&peptide));
     outputter->Output(&peptide);
   }
-//  carp(CARP_INFO, "Created %d modified and unmodified target peptides.", outputter->Total());
+
   CHECK(reader->OK());
   unsigned long peptide_num = outputter->Total();
   return peptide_num;
