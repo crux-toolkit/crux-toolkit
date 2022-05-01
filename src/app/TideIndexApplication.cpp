@@ -145,7 +145,7 @@ int TideIndexApplication::main(
              FileUtils::Exists(out_peptides) ||
              FileUtils::Exists(auxLocsPbFile)) {
     if (overwrite) {
-      carp(CARP_DEBUG, "Cleaning old index file(s)");
+      carp(CARP_DEBUG, "Removing old index file(s)");
       FileUtils::Remove(out_proteins);
       FileUtils::Remove(out_peptides);
       FileUtils::Remove(auxLocsPbFile);
@@ -174,7 +174,7 @@ int TideIndexApplication::main(
   bool shuffle = decoy_type == PEPTIDE_SHUFFLE_DECOYS;  
   
   if (decoy_type != PEPTIDE_SHUFFLE_DECOYS && numDecoys > 1) {
-    carp(CARP_FATAL, "Cannot generate multiple decoys per target in non-shuffle decoy-format!");
+    carp(CARP_FATAL, "Cannot generate multiple decoys per target in non-shuffled decoy-format!");
   }
   
   // Set up output paths
@@ -351,17 +351,18 @@ int TideIndexApplication::main(
 		  uintmax_t sorted_peptide_file_size = boost::filesystem::file_size(pathSortedPeptideFile);
 		  uintmax_t unsorted_peptide_file_size = boost::filesystem::file_size(pathSortedPeptideFile);
 		  if (sorted_peptide_file_size != unsorted_peptide_file_size) {
-			  carp(CARP_FATAL, "Something went wrong whilst sorting, because sorted peptide file and peptide files have different sizes");
+			  carp(CARP_FATAL, "Something went wrong while sorting: original peptide file and sorted peptide file have different lengths.\
+				  \n Original file size is %i, but sorted file size is %i.", unsorted_peptide_file_size, sorted_peptide_file_size);
 		  }
 	  }else {
-		  carp(CARP_FATAL, "System sort failed to create the sorted petide file");
+		  carp(CARP_FATAL, "System sort failed to create the sorted peptide file");
 	  }
   } else {
     sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());    
   }
  
   // Prepare the protocol buffer for the peptides.  
-  carp(CARP_INFO, "Writting peptides");
+  carp(CARP_INFO, "Writing peptides");
 
   // pb::Header header_with_mods;
   pb::Header_PeptidesHeader& pep_header = *(header_with_mods.mutable_peptides_header());
@@ -416,8 +417,7 @@ int TideIndexApplication::main(
     carp(CARP_FATAL, "!header_no_mods->has_peptideHeapheader()");
   }
   const pb::Header_PeptidesHeader& settings = header_no_mods.peptides_header();
-  //if (!Peptide::SetMinMaxMassAndLength(settings)) {
-  //  carp(CARP_FATAL, "Error setting min/max mass/length");
+  
   if (!settings.has_enzyme() || settings.enzyme().empty()) {
     carp(CARP_FATAL, "Enzyme settings error");
   }
@@ -1077,7 +1077,7 @@ void TideIndexApplication::processParams() {
       }
     }
     if (files.empty()) {
-      carp(CARP_FATAL, "Spectra files must be specified with the 'auto-modifications-spectra' "
+      carp(CARP_FATAL, "Spectrum files must be specified with the 'auto-modifications-spectra' "
                        "parameter when 'auto-modifications' is enabled.");
     }
     vector<ParamMedic::RunAttributeResult> modsResult;
