@@ -39,6 +39,10 @@
 #include <functional>
 #include "fixed_cap_array.h"
 
+// Macro to switch between xcorr scoring implemented in Assembly or C++
+// This macro appears in TideSearchApplication.cpp, peptide.cc, and active_peptide_queue.cc
+#define CPP_SCORING 1
+
 using namespace std;
 typedef google::protobuf::RepeatedField<int>::const_iterator FieldIter;
 
