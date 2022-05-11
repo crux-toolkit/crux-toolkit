@@ -64,6 +64,9 @@ if (WIN32 AND NOT CYGWIN)
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
         COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
+        COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -153,6 +156,7 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
+set(PERCOLATOR_GIT_VERSION b49aea6)
 if (UNIX)
   ExternalProject_Add(
     percolator
@@ -192,12 +196,15 @@ else (WIN32 AND NOT CYGWIN)
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       COMMAND ${CMAKE_COMMAND} -E copy
-       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 endif (UNIX)
 
+#     COMMAND ${CMAKE_COMMAND} -E copy
+#       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Scores.cpp
+#       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
 if (UNIX)
   ExternalProject_Add(
     protobuf-3.19.4
