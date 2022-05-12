@@ -151,6 +151,7 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
+set(PERCOLATOR_GIT_VERSION b49aea6)
 if (UNIX)
   ExternalProject_Add(
     percolator
