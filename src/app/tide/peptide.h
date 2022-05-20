@@ -233,7 +233,10 @@ class Peptide {
   vector<int>& BIonMzbins() { return b_ion_mzbins_; }
   vector<int>& YIonMzbins() { return y_ion_mzbins_; }
   vector<double>& IonMzs() { return ion_mzs_; } // added for debug purpose
-
+  
+  vector<unsigned int> peaks_0;
+  vector<unsigned int> peaks_1;
+  
 
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
