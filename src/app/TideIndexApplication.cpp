@@ -404,7 +404,7 @@ int TideIndexApplication::main(
   
   // Check header
   if (header_no_mods.source_size() != 1) {
-    carp(CARP_FATAL, "header_no_mods had a number of sources other than 1");
+    carp(CARP_FATAL, "Some temporal files seem to be corrupted. Please remove the temporary folder and try again. If this persists please contact the developers.");
   }
   
   headerSource = header_no_mods.mutable_source(0);
@@ -414,7 +414,7 @@ int TideIndexApplication::main(
 
   // Now check other desired settings
   if (!header_no_mods.has_peptides_header()) {
-    carp(CARP_FATAL, "!header_no_mods->has_peptideHeapheader()");
+    carp(CARP_FATAL, "Some temporal files seem to be corrupted. Please remove the temporary folder and try again. If this persists please contact the developers.");
   }
   const pb::Header_PeptidesHeader& settings = header_no_mods.peptides_header();
   
@@ -489,7 +489,7 @@ int TideIndexApplication::main(
         }
         if (duplicatedPeptide->getMass() < currentPeptide->getMass()){  // Check if sorting worked properly.
           carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide->getMass(), duplicatedPeptide->getMass());
-          carp(CARP_FATAL, "Peptides are not sorted correctly. Sorting seems to be failed. Try again and check the free disk space.");
+          carp(CARP_FATAL, "Peptide sorting failed. Please check how much disk space you have available.");
         }
       }
 
@@ -517,7 +517,7 @@ int TideIndexApplication::main(
       currentPeptide = duplicatedPeptide;
     }
   }
-  carp(CARP_DETAILED_INFO, "%u peptides in file", numLines);
+  carp(CARP_INFO, "%u peptides in file", numLines);
   
   // Release the memory allocated.
   peptide_list.clear();
