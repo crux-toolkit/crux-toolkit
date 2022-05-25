@@ -419,7 +419,7 @@ int TideIndexApplication::main(
   const pb::Header_PeptidesHeader& settings = header_no_mods.peptides_header();
   
   if (!settings.has_enzyme() || settings.enzyme().empty()) {
-    carp(CARP_FATAL, "Enzyme settings error");
+    carp(CARP_FATAL, "No digestion enzyme specified. Please check your settings for the 'enzyme' and 'custom - enzyme' parameters.");
   }
 
   header_no_mods.set_file_type(pb::Header::PEPTIDES);
