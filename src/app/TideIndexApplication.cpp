@@ -404,7 +404,7 @@ int TideIndexApplication::main(
   
   // Check header
   if (header_no_mods.source_size() != 1) {
-    carp(CARP_FATAL, "Some temporal files seem to be corrupted. Please remove the temporary folder and try again. If this persists please contact the developers.");
+    carp(CARP_FATAL, "header_no_mods had a number of sources other than 1");
   }
   
   headerSource = header_no_mods.mutable_source(0);
@@ -414,12 +414,12 @@ int TideIndexApplication::main(
 
   // Now check other desired settings
   if (!header_no_mods.has_peptides_header()) {
-    carp(CARP_FATAL, "Some temporal files seem to be corrupted. Please remove the temporary folder and try again. If this persists please contact the developers.");
+    carp(CARP_FATAL, "!header_no_mods->has_peptideHeapheader()");
   }
   const pb::Header_PeptidesHeader& settings = header_no_mods.peptides_header();
   
   if (!settings.has_enzyme() || settings.enzyme().empty()) {
-    carp(CARP_FATAL, "No digestion enzyme specified. Please check your settings for the 'enzyme' and 'custom - enzyme' parameters.");
+    carp(CARP_FATAL, "Enzyme settings error");
   }
 
   header_no_mods.set_file_type(pb::Header::PEPTIDES);
@@ -489,7 +489,7 @@ int TideIndexApplication::main(
         }
         if (duplicatedPeptide->getMass() < currentPeptide->getMass()){  // Check if sorting worked properly.
           carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide->getMass(), duplicatedPeptide->getMass());
-          carp(CARP_FATAL, "Peptide sorting failed. Please check how much disk space you have available.");
+          carp(CARP_FATAL, "Peptides are not sorted correctly. Sorting seems to be failed. Try again and check the free disk space.");
         }
       }
 
@@ -517,7 +517,7 @@ int TideIndexApplication::main(
       currentPeptide = duplicatedPeptide;
     }
   }
-  carp(CARP_INFO, "%u peptides in file", numLines);
+  carp(CARP_DETAILED_INFO, "%u peptides in file", numLines);
   
   // Release the memory allocated.
   peptide_list.clear();
@@ -543,10 +543,17 @@ int TideIndexApplication::main(
   } else {
       carp(CARP_INFO, "No decoy peptides will be generated");
   }
+  unsigned long decoy_count = 0;
   
   // This was added to resolve the race condition issue which arises on windows.
   // Although not as elegant, this ensures that the object; aaf_peptide_reader will be out os scope allowing deleting of peakless_peptides file
-  if (true) {
+  if (numDecoys == 0 && out_target_decoy_list == NULL) {
+    if (rename(peptidePbFile.c_str(), out_peptides.c_str()) != 0)
+      carp(CARP_FATAL, "Error creating some temporary files");
+    else 
+      carp(CARP_INFO, "pepx file created successfully");
+    
+  } else {
 	  //Reader for the peptides:
 	  pb::Header aaf_peptides_header;
 
@@ -579,7 +586,6 @@ int TideIndexApplication::main(
 	  int mod_index;
 	  int unique_delta;
 	  double delta;
-	  unsigned long decoy_count = 0;
 	  double mass;
 	  pb::Protein* decoy_pd_protein;
 	  int generateAttemptsMax = 6;
@@ -601,9 +607,11 @@ int TideIndexApplication::main(
 
 	  // Read peptides protocol buffer file
 	  vector<const pb::AuxLocation*> locations;
-	  if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxLocsPbFile)) {
-		  carp(CARP_FATAL, "Error reading auxlocs file");
-	  }
+	  if (out_target_decoy_list) {    
+      if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxLocsPbFile)) {
+        carp(CARP_FATAL, "Error reading auxlocs file");
+      }
+    }
 	  int mass_precision = Params::GetInt("mass-precision");
 	  int mod_precision = Params::GetInt("mod-precision");
 
@@ -637,7 +645,12 @@ int TideIndexApplication::main(
 	  }
 	  // Go over the (modified and unmodified) peptides from the protocol buffer and generate decoy peptides 
 	  bool done = false;
-
+    
+    // The duplicated target peptides have already been filtered out, no need to check it again iff decoys are not gerenated.
+    if (numDecoys == 0) {
+      allowDups = true;
+    }
+    peptide_cnt = 0;
 	  while (!done) {
 		  while (!done) { // Gather peptides with the same mass if allowDups is false
 			  done = reader_->Done();
@@ -658,12 +671,13 @@ int TideIndexApplication::main(
 			  }
 			  pb_peptides.push_back(last_pb_peptide);
 		  }
-
-		  // Create a set with the unique peptides sequences. The peptides must have the same neutral mass.
-		  for (vector<pb::Peptide>::iterator pb_pept_itr = pb_peptides.begin(); pb_pept_itr != pb_peptides.end(); ++pb_pept_itr) {
-			  target_peptide_with_mods = getModifiedPeptideSeq(&(*pb_pept_itr), &vProteinHeaderSequence);
-			  peptide_str_set.insert(target_peptide_with_mods);
-		  }
+      if (numDecoys > 0) {
+        // Create a set with the unique peptides sequences. The peptides must have the same neutral mass.
+        for (vector<pb::Peptide>::iterator pb_pept_itr = pb_peptides.begin(); pb_pept_itr != pb_peptides.end(); ++pb_pept_itr) {
+          target_peptide_with_mods = getModifiedPeptideSeq(&(*pb_pept_itr), &vProteinHeaderSequence);
+          peptide_str_set.insert(target_peptide_with_mods);
+        }
+      }
 		  // For each peptide in the set: 
 		  // 1. store the target peptide in the index file, 
 		  // 2. generate decoy peptides and store them in the index file too.
@@ -774,9 +788,6 @@ int TideIndexApplication::main(
 						  *out_target_decoy_list << decoy_peptide_str_with_mods.c_str();
 						  first_decoy = false;
 					  }
-					  if (decoy_count % 1000000 == 0) {
-						  carp(CARP_INFO, "Wrote %u decoy peptides", decoy_count);
-					  }
 				  }
 			  }
 			  // Print 1) the peptide neutral mass, 2) protein header of origin and 3) the locations of the target peptides
@@ -797,7 +808,10 @@ int TideIndexApplication::main(
 				  }
 				  *out_target_decoy_list << '\t' << proteinNames << endl;
 			  }
-
+        ++peptide_cnt;
+        if (peptide_cnt % 10000000 == 0) {
+          carp(CARP_INFO, "Wrote %u peptides", peptide_cnt);
+        }
 		  }
 		  pb_peptides.clear();
 		  peptide_str_set.clear();
@@ -814,10 +828,10 @@ int TideIndexApplication::main(
 	  if (failedDecoyCnt > 0) {
 		  carp(CARP_INFO, "Failed to generate decoys for %u low complexity peptides.", failedDecoyCnt);
 	  }
-	  carp(CARP_INFO, "Generated %u target peptides.", numTargets);
-	  carp(CARP_INFO, "Generated %u decoy peptides.", decoy_count);
-	  carp(CARP_INFO, "Generated %u peptides in total.", numTargets + decoy_count);
   }
+  carp(CARP_INFO, "Generated %u target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %u decoy peptides.", decoy_count);
+  carp(CARP_INFO, "Generated %u peptides in total.", numTargets + decoy_count);
   
     
   // Clean up
