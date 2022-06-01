@@ -551,7 +551,7 @@ int TideIndexApplication::main(
     if (rename(peptidePbFile.c_str(), out_peptides.c_str()) != 0)
       carp(CARP_FATAL, "Error creating some temporary files");
     else 
-      carp(CARP_INFO, "pepx file created successfully");
+      carp(CARP_INFO, "pepix file created successfully");
     
   } else {
 	  //Reader for the peptides:
