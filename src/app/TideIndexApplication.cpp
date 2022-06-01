@@ -467,16 +467,16 @@ int TideIndexApplication::main(
           if (duplicatedPeptide == nullptr) {
             break;
           }
+          if (duplicatedPeptide->getMass() < currentPeptide->getMass()){  // Check if sorting worked properly.
+            carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide->getMass(), duplicatedPeptide->getMass());
+            carp(CARP_FATAL, "Peptides are not sorted correctly. Sorting seems to be failed. Try again and check the free disk space.");
+          }
         } else {
           if (peptide_cnt >= peptide_list.size()){
             duplicatedPeptide = NULL;
             break;
           }
           duplicatedPeptide = &(peptide_list[peptide_cnt++]);  // get a peptide  
-        }
-        if (duplicatedPeptide->getMass() < currentPeptide->getMass()){  // Check if sorting worked properly.
-          carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide->getMass(), duplicatedPeptide->getMass());
-          carp(CARP_FATAL, "Peptides are not sorted correctly. Sorting seems to be failed. Try again and check the free disk space.");
         }
         if( (*duplicatedPeptide) == (*currentPeptide)) {
 
