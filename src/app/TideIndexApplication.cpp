@@ -107,6 +107,11 @@ int TideIndexApplication::main(
   }
   bool sort_on_disk = (Params::GetString("sort") == string("disk"));
   
+  unsigned int memory_limit = 4; // RAM memory limit in GB to e used in in silico protein cleavage.
+  
+  memory_limit = memory_limit*1000000000/(sizeof(TideIndexPeptide)); //number of peptides stored in an array
+  // memory_limit = 10000; //number of peptides stored in an array
+  
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = Params::GetInt("missed-cleavages");
   DIGEST_T digestion = get_digest_type_parameter("digestion");
@@ -249,11 +254,12 @@ int TideIndexApplication::main(
   unsigned long failedDecoyCnt = 0;
 
   unsigned long targetsGenerated = 0;
-  FILE* fp;
+/*  FILE* fp;
   if (sort_on_disk)
     fp = fopen(pathPeptideFile.c_str(), "w");  // Peptides stored in this file to be sorted on disk.
-  
+*/  
   int curProtein = -1;  
+  unsigned int pept_file_idx = 0;
   pb::Header header_with_mods;
   
   vector<TideIndexPeptide> peptide_list;
@@ -283,10 +289,22 @@ int TideIndexApplication::main(
         // Skip to next peptide if not in mass range
         continue;
       }
-      if (sort_on_disk) {
-        fprintf(fp, "%u,%s,%d,%d,%d\n", (unsigned int)(pepMass), std::string(proteinSequence.data() + i->pos_, i->length_).c_str(), curProtein, i->pos_, i->length_);
-      } else {
-        peptide_list.push_back(TideIndexPeptide(pepMass, i->length_, &(pbProtein->residues()), curProtein, i->pos_, -1));
+      peptide_list.push_back(TideIndexPeptide(pepMass, i->length_, &(pbProtein->residues()), curProtein, i->pos_, -1));
+      
+      if (peptide_list.size() >= memory_limit){  //reached the memory limit. dump peptides to disk
+        // Peptides are being sorted ...
+        sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
+        
+        // ... and dumped in a binary file.
+        string pept_file = pathPeptideFile + to_string(pept_file_idx) + ".txt";
+
+        ++pept_file_idx;
+        
+        dump_peptides_to_binary_file(&peptide_list, pept_file);
+        peptide_list.clear();
+        vector<TideIndexPeptide> tmp;
+        peptide_list.swap(tmp);
+  
       }
       ++targetsGenerated;
 
@@ -295,9 +313,24 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Processed %d protein sequences", curProtein+1);
     }
   }
+  /*
   if (sort_on_disk)
     fclose(fp);
-
+*/
+  sort_on_disk = true;
+  if (pept_file_idx == 0) {  //Peptides fit in memory, no need to use disk
+    sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
+    sort_on_disk = false;
+  } else if (peptide_list.size() > 0){ // Some peptides have been already dump on disk, need to dump the remaining ones in peptide_list.
+    sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
+    string pept_file = pathPeptideFile + to_string(pept_file_idx) + ".txt";
+    ++pept_file_idx;
+    dump_peptides_to_binary_file(&peptide_list, pept_file);
+    peptide_list.clear();
+    vector<TideIndexPeptide> tmp;
+    peptide_list.swap(tmp);    
+  }
+    
   if (targetsGenerated == 0) {
     carp(CARP_FATAL, "No target sequences generated.  Is \'%s\' a FASTA file?",
          fasta.c_str());
@@ -306,7 +339,7 @@ int TideIndexApplication::main(
     carp(CARP_INFO, "Ignoring %u peptide sequences containing unrecognized characters.", invalidPepCnt);
   }
   carp(CARP_INFO, "Generated %u targets, including duplicates.", targetsGenerated);
-
+/*
   // Sort peptides
   carp(CARP_INFO, "Sorting peptides");
   
@@ -360,7 +393,7 @@ int TideIndexApplication::main(
   } else {
     sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());    
   }
- 
+*/ 
   // Prepare the protocol buffer for the peptides.  
   carp(CARP_INFO, "Writing peptides");
 
@@ -435,17 +468,55 @@ int TideIndexApplication::main(
   if (!sort_on_disk && peptide_list.size() == 0)
     carp(CARP_FATAL, "No peptides were generated.");
 
-  ifstream sortedFile(pathSortedPeptideFile);
   unsigned long numLines = 0;
-  TideIndexPeptide* currentPeptide;
-  TideIndexPeptide* duplicatedPeptide;
+  TideIndexPeptide currentPeptide;
+  TideIndexPeptide duplicatedPeptide;
+  TideIndexPeptide* pept_ptr;
   // Filter peptides and keep the unique target peptides and gather the 
   // location of the peptide in other protein sequences 
+  vector<FILE*> sortedFiles;
   if (sort_on_disk) {
-    currentPeptide = getNextPeptide(sortedFile, vProteinHeaderSequence);  // get the first peptide  
+    //open each file which contain sorted peptides, read the first peptide from each file and put them in a heap.
+    for (int i = 0; i < pept_file_idx; ++i){
+      string pept_file = pathPeptideFile + to_string(i) + ".txt";
+      FILE* fp = fopen(pept_file.c_str(), "rb");
+      sortedFiles.push_back(fp);
+      pept_ptr = readNextPeptide(fp, vProteinHeaderSequence, i);  // get the first peptide  
+      if (pept_ptr != nullptr) {
+        // printf("reading, current peptide mass: %lf, source, %d\n", pept_ptr->getMass(), pept_ptr->getSourceId());
+        peptide_list.push_back(*pept_ptr);
+        delete pept_ptr;
+      }
+    }
+    std::make_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+    currentPeptide = peptide_list.front();   
+    int sourceId = currentPeptide.getSourceId();          
+    // printf("new current peptide mass: %lf, source, %d\n", currentPeptide.getMass(), currentPeptide.getSourceId());
+    
+    pept_ptr = readNextPeptide(sortedFiles[sourceId], vProteinHeaderSequence, sourceId);  // get a peptide  
+    // printf("new, current peptide mass: %lf, source, %d\n", pept_ptr->getMass(), pept_ptr->getSourceId());
+
+    std::pop_heap (peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+    peptide_list.pop_back();   
+   
+    if (pept_ptr != nullptr) {
+      peptide_list.push_back(*pept_ptr);
+      push_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+      delete pept_ptr;            
+    }
+    // printf("current peptide mass: %lf\n", currentPeptide.getMass());
+    
+    
+    
+  /*  std::sort_heap(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
+    for (unsigned i=0; i<peptide_list.size(); i++)
+      printf("sort, current peptide mass: %lf, source, %d\n", peptide_list[i].getMass(), peptide_list[i].getSourceId());
+
+    */
   } else {
-    currentPeptide = &(peptide_list[peptide_cnt++]);  // get the first peptide  
+    currentPeptide = peptide_list[peptide_cnt++];  // get the first peptide  
   }
+  
   if (1==1) {  // This is needed because we need to destroy the peptideWriter and pbAuxLoc later. Ugly solution :/
     // Create the auxiliary locations header and writer
     pb::Header auxLocsHeader;
@@ -457,43 +528,56 @@ int TideIndexApplication::main(
     pb::AuxLocation pbAuxLoc;
     int auxLocIdx = -1;
     
-    HeadedRecordWriter peptideWriter(peptidePbFile, header_no_mods); // put header in outfile	  
-    while (currentPeptide != nullptr) {
-
+    HeadedRecordWriter peptideWriter(peptidePbFile, header_no_mods); // put header in outfile	
+    bool finished = false;    
+    while (!finished) {
+      // break;
       while (true) {
-
+        
         if (sort_on_disk) {
-          duplicatedPeptide = getNextPeptide(sortedFile, vProteinHeaderSequence);  // get a peptide  
-          if (duplicatedPeptide == nullptr) {
+          if (peptide_list.size() == 0){
+            finished = true;
             break;
           }
-          if (duplicatedPeptide->getMass() < currentPeptide->getMass()){  // Check if sorting worked properly.
-            carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide->getMass(), duplicatedPeptide->getMass());
+          // printf("current peptide mass: %lf\n", currentPeptide.getMass());
+          duplicatedPeptide = peptide_list.front();   
+          // printf("duplicated peptide mass: %lf\n", duplicatedPeptide.getMass());
+          std::pop_heap (peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+          peptide_list.pop_back();   
+          int sourceId = duplicatedPeptide.getSourceId();          
+          // printf("duplicated peptide sourceid : %d\n", sourceId);
+          pept_ptr = readNextPeptide(sortedFiles[sourceId], vProteinHeaderSequence, sourceId);  // get a peptide  
+          
+          if (pept_ptr != nullptr) {
+            peptide_list.push_back(*pept_ptr);
+            push_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+            // printf("queued peptide mass: %lf\n", pept_ptr->getMass());
+            delete pept_ptr;            
+          }
+          if (duplicatedPeptide.getMass() < currentPeptide.getMass()){  // Check if sorting worked properly.
+            carp(CARP_INFO, "peptide mass: %lf, subsequent peptide mass %lf", currentPeptide.getMass(), duplicatedPeptide.getMass());
             carp(CARP_FATAL, "Peptides are not sorted correctly. Sorting seems to be failed. Try again and check the free disk space.");
           }
         } else {
           if (peptide_cnt >= peptide_list.size()){
-            duplicatedPeptide = NULL;
+            finished = true;          
             break;
           }
-          duplicatedPeptide = &(peptide_list[peptide_cnt++]);  // get a peptide  
+          duplicatedPeptide = peptide_list[peptide_cnt++];  // get a peptide  
         }
-        if( (*duplicatedPeptide) == (*currentPeptide)) {
+        if( duplicatedPeptide == currentPeptide) {
 
           numDuplicateTargets++;
-          carp(CARP_DEBUG, "Skipping duplicate %s.", currentPeptide->getSequence().c_str());
+          carp(CARP_DEBUG, "Skipping duplicate %s.", currentPeptide.getSequence().c_str());
           pb::Location* location = pbAuxLoc.add_location();
-          location->set_protein_id(duplicatedPeptide->getProteinId());
-          location->set_pos(duplicatedPeptide->getProteinPos());
-          if (sort_on_disk){ 
-            delete duplicatedPeptide;
-          }
+          location->set_protein_id(duplicatedPeptide.getProteinId());
+          location->set_pos(duplicatedPeptide.getProteinPos());
         } else {
           break;
         }
       }
 
-      getPbPeptide(count, *currentPeptide, pbPeptide);
+      getPbPeptide(count, currentPeptide, pbPeptide);
       // Not all peptides have aux locations associated with them. Check to see
       // if GetGroup added any locations to aux_location. If yes, only then
       // assign the corresponding array index to the peptide and write it out.
@@ -505,15 +589,14 @@ int TideIndexApplication::main(
       // Write the peptide AFTER the aux_locations check, in case we added an
       // aux_locations_index to the peptide.
       peptideWriter.Write(&pbPeptide);
+      // printf("writing peptide mass: %lf\n", currentPeptide.getMass());
+      
 
       numTargets++;
       if (++count % 1000000 == 0) {
         carp(CARP_INFO, "Wrote %u unique target peptides", count);
       }
       numLines++;
-      if (sort_on_disk){      
-        delete currentPeptide;
-      }
       currentPeptide = duplicatedPeptide;
     }
   }
@@ -1178,8 +1261,37 @@ string getModifiedPeptideSeq(const pb::Peptide* peptide,
 }
 
 // Larry's code
-TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifstream &sortedFile, ProteinVec& vProteinHeaderSequence){
+TideIndexApplication::TideIndexPeptide* TideIndexApplication::readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequence, int sourceId){
   
+  FixPt pepMass;
+  int prot_id;
+  int pos;
+  int len;
+  int ret;
+  ret = fread(&pepMass, sizeof(FixPt), 1, fp);  
+  if (ret == 0)
+    return nullptr; 
+  ret = fread(&prot_id, sizeof(int), 1, fp);  
+  if (ret == 0)
+    return nullptr; 
+  ret = fread(&pos, sizeof(int), 1, fp);  
+  if (ret == 0)
+    return nullptr; 
+  ret = fread(&len, sizeof(int), 1, fp);  
+  if (ret == 0)
+    return nullptr; 
+  
+  int decoyIdx = -1; // -1 if not a decoy; There are no decoy peptides generated at this point
+
+  const string& proteinSequence = vProteinHeaderSequence[prot_id]->residues();
+  
+//  printf("%u,%s,%d,%d,%d\n", (unsigned int)(pepMass), std::string(proteinSequence.data() + i->pos_, i->length_).c_str(), curProtein, i->pos_, i->length_);
+
+  
+  TideIndexPeptide* pepTarget = new TideIndexPeptide(pepMass, len, &proteinSequence, prot_id, pos, decoyIdx, sourceId);
+  
+  return pepTarget;
+  /*
   string line;
   vector<std::string> strs;
   if (getline(sortedFile, line)) {
@@ -1210,7 +1322,45 @@ TideIndexApplication::TideIndexPeptide* TideIndexApplication::getNextPeptide(ifs
   }else{
     return nullptr;
   }
-  
+  */
+}
+
+void TideIndexApplication::dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file){
+        
+  FILE* fp = fopen(pept_file.c_str(), "wb");  // Peptides stored in this file to be sorted on disk.
+  FixPt pepMass;
+  int prot_id;
+  int len;
+  int pos;
+  int ret;
+  for (vector<TideIndexPeptide>::iterator pept_itr = peptide_list->begin(); pept_itr != peptide_list->end(); ++pept_itr){
+    pepMass = (*pept_itr).getFixPtMass();
+    prot_id = (*pept_itr).getProteinId();
+    len = (*pept_itr).getLength();
+    pos = (*pept_itr).getProteinPos();
+    
+    ret = fwrite(&pepMass, sizeof(FixPt), 1, fp);
+    if (ret == 0) {
+      carp(CARP_FATAL, "Error while writting to disk. ");
+    }
+    ret = fwrite(&prot_id, sizeof(int), 1, fp);
+    if (ret == 0) {
+      carp(CARP_FATAL, "Error while writting to disk. ");
+    }
+    ret = fwrite(&pos, sizeof(int), 1, fp);
+    if (ret == 0) {
+      carp(CARP_FATAL, "Error while writting to disk. ");
+    }
+    ret = fwrite(&len, sizeof(int), 1, fp);
+    if (ret == 0) {
+      carp(CARP_FATAL, "Error while writting to disk. ");
+    }
+    // for debugging
+    // string pept_str = (*pept_itr).getSequence();          
+    // fprintf(fp, "%u,%s,%d,%d,%d\n", (unsigned int)(pepMass), pept_str.c_str(), prot_id, pos, len);  
+  }   
+  fclose(fp);    
+
 }
 // Larry's code ends here
 /*
