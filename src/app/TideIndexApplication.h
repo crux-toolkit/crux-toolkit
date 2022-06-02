@@ -104,10 +104,11 @@ class TideIndexApplication : public CruxApplication {
     int proteinPos_;
     const char* residues_;  // points at protein sequence
     int decoyIdx_; // -1 if not a decoy
+    int sourceId_;
    public:
     TideIndexPeptide() {}
     TideIndexPeptide(FixPt mass, int length, const string* proteinSeq,
-                     int proteinId, int proteinPos, int decoyIdx = -1) {
+                     int proteinId, int proteinPos, int decoyIdx = -1, int sourceId = -1) {
       mass_ = mass;
       length_ = length;
       proteinId_ = proteinId;
@@ -118,6 +119,7 @@ class TideIndexApplication : public CruxApplication {
         residues_ = proteinSeq->data();
       }
       decoyIdx_ = decoyIdx;
+      sourceId_ = sourceId;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
@@ -126,17 +128,20 @@ class TideIndexApplication : public CruxApplication {
       proteinPos_ = other.proteinPos_;
       residues_ = other.residues_;
       decoyIdx_ = other.decoyIdx_;
+      sourceId_ = other.sourceId_;
     }
     // It seems more intuitive for the mass to be a double hence getMass returns a double 
     // instead of FixPtr. Also whenever getMass is called, a double is expected, this was done
     // to ensure the code mentains the same structure as before.
     double getMass() const { return MassConstants::ToDouble(mass_); } 
+    FixPt getFixPtMass() const { return mass_; } 
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
     string getSequence() const { return string(residues_, length_); }
     bool isDecoy() const { return decoyIdx_ >= 0; }
     int decoyIdx() const { return decoyIdx_; }
+    int getSourceId() const {return sourceId_; }
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -280,7 +285,8 @@ class TideIndexApplication : public CruxApplication {
   virtual void processParams();
 
   // Larry's code
-  static TideIndexPeptide* getNextPeptide(ifstream &sortedFile, ProteinVec& vProteinHeaderSequnce);
+  static TideIndexPeptide* readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequnce, int sourceId);
+  void dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file);
   // Larry's code ends here
 };
 
