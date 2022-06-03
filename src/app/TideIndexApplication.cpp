@@ -52,7 +52,7 @@ DECLARE_int32(fifo_page_size);
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                                 const string& input_filename,
                                 const string& output_filename);
-extern unsigned long AddMods(HeadedRecordReader* reader,
+extern unsigned long long AddMods(HeadedRecordReader* reader,
                     string out_file,
                     string tmpDir,                    
                     const pb::Header& header,
@@ -107,7 +107,7 @@ int TideIndexApplication::main(
   }
   bool sort_on_disk = (Params::GetString("sort") == string("disk"));
   
-  unsigned int memory_limit = 4; // RAM memory limit in GB to e used in in silico protein cleavage.
+  unsigned long long memory_limit = 4; // RAM memory limit in GB to e used in in silico protein cleavage.
   
   memory_limit = memory_limit*1000000000/(sizeof(TideIndexPeptide)); //number of peptides stored in an array
   // memory_limit = 10000; //number of peptides stored in an array
@@ -250,15 +250,15 @@ int TideIndexApplication::main(
    
   ifstream fastaStream(fasta.c_str(), ifstream::in);
 
-  unsigned long invalidPepCnt = 0;
-  unsigned long failedDecoyCnt = 0;
+  unsigned long long invalidPepCnt = 0;
+  unsigned long long failedDecoyCnt = 0;
 
-  unsigned long targetsGenerated = 0;
+  unsigned long long targetsGenerated = 0;
 /*  FILE* fp;
   if (sort_on_disk)
     fp = fopen(pathPeptideFile.c_str(), "w");  // Peptides stored in this file to be sorted on disk.
 */  
-  int curProtein = -1;  
+  long long curProtein = -1;  
   unsigned int pept_file_idx = 0;
   pb::Header header_with_mods;
   
@@ -310,7 +310,7 @@ int TideIndexApplication::main(
 
     }
     if ((curProtein+1) % 10000 == 0) {
-      carp(CARP_INFO, "Processed %d protein sequences", curProtein+1);
+      carp(CARP_INFO, "Processed %ld protein sequences", curProtein+1);
     }
   }
   /*
@@ -336,64 +336,10 @@ int TideIndexApplication::main(
          fasta.c_str());
   }
   if (invalidPepCnt > 0) {
-    carp(CARP_INFO, "Ignoring %u peptide sequences containing unrecognized characters.", invalidPepCnt);
+    carp(CARP_INFO, "Ignoring %lu peptide sequences containing unrecognized characters.", invalidPepCnt);
   }
-  carp(CARP_INFO, "Generated %u targets, including duplicates.", targetsGenerated);
-/*
-  // Sort peptides
-  carp(CARP_INFO, "Sorting peptides");
-  
-  if (sort_on_disk) {
-    
-    remove(pathSortedPeptideFile.c_str());
-    #ifdef _WIN32
-      std::cout << "Windows OS\n";
-	  std::string import_csv = "Import-Csv -Header Mass, Protein, A, B, C -Delimiter ',' " + std::string(pathPeptideFile);
-	  std::string actual_sorting = "Select-Object { [int]$_.Mass }, Protein, A,B,C";
-	  std::string write_to_file = "ConvertTo-Csv -NoTypeInformation | Select-Object -Skip 1 | Set-Content -Path " + std::string(pathSortedPeptideFile);
-	  std::string cmd = "Powershell -Command \"" + import_csv + "|" + actual_sorting + "|" + write_to_file + "\"";
-	  int systemResult = system(cmd.c_str());
-	  if (systemResult != 0)
-		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
-    #elif __linux__
-	  std::cout << "Linux Based OS\n";
-      std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " +  std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
-      int systemResult = system(cmd.c_str()); 
-      if (systemResult != 0) 
-        carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
-    #elif __unix__
-      std::cout << "Other UNIX OS\n";
-	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
-	  int systemResult = system(cmd.c_str());
-	  if (systemResult != 0)
-		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
-    #elif __APPLE__
-      std::cout << "Apple OS\n";
-	  std::string cmd = "sort  -t, -k 1n,1 -k 2,2 -o " + std::string(pathSortedPeptideFile) + " " + std::string(pathPeptideFile);
-	  int systemResult = system(cmd.c_str());
-	  if (systemResult != 0)
-		  carp(CARP_FATAL, "System sort failed, the call returned code: %i", systemResult);
-    #else
-      std::cout << "OS not supported";
-	  carp(CARP_FATAL, "OS not supported");
-	  std::string cmd = ""
-    #endif
-		 
-    bool is_exist = boost::filesystem::exists(pathSortedPeptideFile);
-	  if (is_exist) {
-		  uintmax_t sorted_peptide_file_size = boost::filesystem::file_size(pathSortedPeptideFile);
-		  uintmax_t unsorted_peptide_file_size = boost::filesystem::file_size(pathSortedPeptideFile);
-		  if (sorted_peptide_file_size != unsorted_peptide_file_size) {
-			  carp(CARP_FATAL, "Something went wrong while sorting: original peptide file and sorted peptide file have different lengths.\
-				  \n Original file size is %i, but sorted file size is %i.", unsorted_peptide_file_size, sorted_peptide_file_size);
-		  }
-	  }else {
-		  carp(CARP_FATAL, "System sort failed to create the sorted peptide file");
-	  }
-  } else {
-    sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());    
-  }
-*/ 
+  carp(CARP_INFO, "Generated %lu targets, including duplicates.", targetsGenerated);
+
   // Prepare the protocol buffer for the peptides.  
   carp(CARP_INFO, "Writing peptides");
 
@@ -460,15 +406,15 @@ int TideIndexApplication::main(
   header_no_mods.mutable_peptides_header()->set_decoys(decoy_type);
 
   pb::Peptide pbPeptide;
-  unsigned long count = 0;
-  unsigned long numTargets = 0;
-  unsigned long numDuplicateTargets = 0;
-  unsigned long peptide_cnt = 0;
+  unsigned long long count = 0;
+  unsigned long long numTargets = 0;
+  unsigned long long numDuplicateTargets = 0;
+  unsigned long long peptide_cnt = 0;
   
   if (!sort_on_disk && peptide_list.size() == 0)
     carp(CARP_FATAL, "No peptides were generated.");
 
-  unsigned long numLines = 0;
+  unsigned long long numLines = 0;
   TideIndexPeptide currentPeptide;
   TideIndexPeptide duplicatedPeptide;
   TideIndexPeptide* pept_ptr;
@@ -592,15 +538,15 @@ int TideIndexApplication::main(
       // printf("writing peptide mass: %lf\n", currentPeptide.getMass());
       
 
-      numTargets++;
+      ++numTargets;
       if (++count % 1000000 == 0) {
-        carp(CARP_INFO, "Wrote %u unique target peptides", count);
+        carp(CARP_INFO, "Wrote %lu unique target peptides", count);
       }
       numLines++;
       currentPeptide = duplicatedPeptide;
     }
   }
-  carp(CARP_DETAILED_INFO, "%u peptides in file", numLines);
+  carp(CARP_DETAILED_INFO, "%lu peptides in file", numLines);
   
   // Release the memory allocated.
   peptide_list.clear();
@@ -608,17 +554,17 @@ int TideIndexApplication::main(
   peptide_list.swap(tmp);
 
   
-  carp(CARP_INFO, "Skipped %u duplicate targets.",
+  carp(CARP_INFO, "Skipped %lu duplicate targets.",
        numDuplicateTargets);
   
-  carp(CARP_INFO, "Generated %u unique target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %lu unique target peptides.", numTargets);
 
    peptidePbFile = peakless_peptides;
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
     numTargets = AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, vProteinHeaderSequence, &var_mod_table);
-    carp(CARP_INFO, "Created %u modified and unmodified target peptides.", numTargets);
+    carp(CARP_INFO, "Created %lu modified and unmodified target peptides.", numTargets);
   }
   
   if (numDecoys > 0) {
@@ -626,15 +572,15 @@ int TideIndexApplication::main(
   } else {
       carp(CARP_INFO, "No decoy peptides will be generated");
   }
-  unsigned long decoy_count = 0;
+  unsigned long long decoy_count = 0;
   
   // This was added to resolve the race condition issue which arises on windows.
   // Although not as elegant, this ensures that the object; aaf_peptide_reader will be out os scope allowing deleting of peakless_peptides file
   if (numDecoys == 0 && out_target_decoy_list == NULL) {
     if (rename(peptidePbFile.c_str(), out_peptides.c_str()) != 0)
-      carp(CARP_FATAL, "Error creating some temporary files");
+      carp(CARP_FATAL, "Error creating index files");
     else 
-      carp(CARP_INFO, "pepix file created successfully");
+      carp(CARP_INFO, "Pepix file created successfully");
     
   } else {
 	  //Reader for the peptides:
@@ -893,7 +839,7 @@ int TideIndexApplication::main(
 			  }
         ++peptide_cnt;
         if (peptide_cnt % 10000000 == 0) {
-          carp(CARP_INFO, "Wrote %u peptides", peptide_cnt);
+          carp(CARP_INFO, "Wrote %lu peptides", peptide_cnt);
         }
 		  }
 		  pb_peptides.clear();
@@ -909,12 +855,12 @@ int TideIndexApplication::main(
 		  delete out_target_decoy_list;
 	  }
 	  if (failedDecoyCnt > 0) {
-		  carp(CARP_INFO, "Failed to generate decoys for %u low complexity peptides.", failedDecoyCnt);
+		  carp(CARP_INFO, "Failed to generate decoys for %lu low complexity peptides.", failedDecoyCnt);
 	  }
   }
-  carp(CARP_INFO, "Generated %u target peptides.", numTargets);
-  carp(CARP_INFO, "Generated %u decoy peptides.", decoy_count);
-  carp(CARP_INFO, "Generated %u peptides in total.", numTargets + decoy_count);
+  carp(CARP_INFO, "Generated %lu target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %lu decoy peptides.", decoy_count);
+  carp(CARP_INFO, "Generated %lu peptides in total.", numTargets + decoy_count);
   
     
   // Clean up

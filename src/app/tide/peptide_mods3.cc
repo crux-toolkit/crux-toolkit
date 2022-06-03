@@ -59,7 +59,7 @@ static string GetTempName(const string& tempDir, int filenum) {
 class IModsOutputter {
  public:
   virtual void Output(pb::Peptide* peptide) = 0;
-  virtual int64_t Total() const = 0;
+  virtual uint64_t Total() const = 0;
 };
 
 // Original class to generate modified peptides. Writes to temporary files
@@ -102,7 +102,7 @@ class ModsOutputter : public IModsOutputter {
     return numFiles_;
   }
 
-  int64_t Total() const {
+  uint64_t Total() const {
     return modPeptideCnt_;
   }
 
@@ -149,7 +149,7 @@ class ModsOutputter : public IModsOutputter {
  private:
   string tmpDir_;
   int numFiles_;
-  int64_t modPeptideCnt_;
+  uint64_t modPeptideCnt_;
 
   class PepReader {
    public:
@@ -507,7 +507,7 @@ class ModsOutputterAlt : public IModsOutputter {
   }
 
   // Return the total number of peptides written
-  int64_t Total() const { return totalWritten_; }
+  uint64_t Total() const { return totalWritten_; }
 
  private:
   class ResultMods {
@@ -726,7 +726,7 @@ class ModsOutputterAlt : public IModsOutputter {
       DeleteTempFile(i);
       carp(CARP_DEBUG, "Read %d peptides from temp file, sorting...", peptides.size());
       std::sort(peptides.begin(), peptides.end(), PbPeptideSort());
-      int64_t id = 0;
+      uint64_t id = 0;
       for (vector<pb::Peptide>::iterator j = peptides.begin(); j != peptides.end(); j++) {
         j->set_id(id++);
         writer_->Write(&*j);
@@ -758,10 +758,10 @@ class ModsOutputterAlt : public IModsOutputter {
   HeadedRecordWriter* writer_;
 
   map< int, pair<string, RecordWriter*> > tempFiles_; // id -> file, writer (ids must be in ascending order of mass)
-  int64_t totalWritten_;
+  uint64_t totalWritten_;
 };
 
-unsigned long AddMods(HeadedRecordReader* reader,
+unsigned long long AddMods(HeadedRecordReader* reader,
              string out_file,
              string tmpDir,
              const pb::Header& header,
@@ -797,7 +797,7 @@ unsigned long AddMods(HeadedRecordReader* reader,
   }
 
   CHECK(reader->OK());
-  unsigned long peptide_num = outputter->Total();
+  unsigned long long peptide_num = outputter->Total();
   return peptide_num;
   
 }
