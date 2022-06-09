@@ -105,20 +105,25 @@ jobs:
         path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
  
     - if: matrix.os == 'ubuntu-latest'
-      name: Archive percolator resuilts
+      name: Archive percolator results
       uses:  actions/upload-artifact@v3
       with:
         name: percolator-results
         path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
 
-    - if: matrix.os == 'ubuntu-latest'
-      name: Build package
+    - name: Build package
       shell: bash
       run: |
         cd "${{runner.workspace}}/build"
         cmake --build . --config $BUILD_TYPE --target package
+  
+    - if: matrix.os == 'ubuntu-latest'
+      name: Build source package
+      shell: bash
+      run: |
+        cd "${{runner.workspace}}/build"
         cmake --build . --config $BUILD_TYPE --target package_source
-        
+
     - if: matrix.os == 'ubuntu-latest'
       name: Archive Ubuntu package
       uses: actions/upload-artifact@v3
@@ -132,6 +137,20 @@ jobs:
       with:
         name: ubuntu-source
         path: ${{runner.workspace}}/build/crux-4.1.Source.tar.gz
+
+    - if: matrix.os == 'macos-latest'
+      name: Archive MacOS package
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-package
+        path: ${{runner.workspace}}/build/crux-4.1.Darwin.x86_64.zip
+        
+    - if: matrix.os == 'windows-2019'
+      name: Archive Windows package
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-package
+        path: ${{runner.workspace}}/build/crux-4.1.Windows.AMD64.zip 
 
 
         
