@@ -111,7 +111,8 @@ jobs:
         name: percolator-results
         path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
 
-    - name: Build package
+    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+      name: Build package
       shell: bash
       run: |
         cd "${{runner.workspace}}/build"
