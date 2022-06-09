@@ -24,7 +24,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     theoretical_b_peak_set_(200),  // probably overkill, but no harm
     active_targets_(0), active_decoys_(0),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
-    fifo_alloc_prog1_(FLAGS_fifo_page_size << 20),
+    fifo_alloc_prog1_(FLAGS_fifo_page_size << 20), 
     fifo_alloc_prog2_(FLAGS_fifo_page_size << 20) {
   CHECK(reader_->OK());
   compiler_prog1_ = new TheoreticalPeakCompiler(&fifo_alloc_prog1_);
@@ -93,8 +93,10 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   if (queue_.empty()) {
     //cerr << "Releasing All\n";
     fifo_alloc_peptides_.ReleaseAll();
+#ifndef CPP_SCORING
     fifo_alloc_prog1_.ReleaseAll();
     fifo_alloc_prog2_.ReleaseAll();
+#endif
     //cerr << "Prog1: ";
     //fifo_alloc_prog1_.Show();
     //cerr << "Prog2: ";
@@ -103,7 +105,9 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
     fifo_alloc_peptides_.Release(peptide);
+#ifndef CPP_SCORING	
     peptide->ReleaseFifo(&fifo_alloc_prog1_, &fifo_alloc_prog2_);
+#endif
   }
 
   // Enqueue all peptides that are not yet queued but are lighter than
@@ -125,6 +129,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
       }
       Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
+      assert(peptide != NULL);
       queue_.push_back(peptide);
       //Modified for tailor score calibration method by AKF
       if (peptide->Mass() > max_range && queue_.size() > min_candidates) {

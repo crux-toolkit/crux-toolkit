@@ -38,6 +38,14 @@ const double TideSearchApplication::XCORR_SCALING = 100000000.0;
  * tide/spectrum_preprocess2.cc). */
 const double TideSearchApplication::RESCALE_FACTOR = 20.0;
 
+/* There is a macro defined in ./tide/theoretical_peak_set.h and called CPP_SCORING
+ * which controls  whether the XCorr scoring should be executed by the original assembly code  
+ * defined in collectScoresCompiled implemented by Benjamin, or it should be executed by a plain C++ code. 
+ * The macro appears in active_peptide_queue.cc and peptide.cc. The code in  
+ * assembly is faster albeit is segfaults in multi-threading. See: 
+ * https://github.com/crux-toolkit/crux-toolkit/issues/407
+ */
+
 TideSearchApplication::TideSearchApplication():
   exact_pval_search_(false), remove_index_(""), spectrum_flag_(NULL) {
 }
@@ -630,11 +638,13 @@ void TideSearchApplication::search(void* threadarg) {
 
       int candidatePeptideStatusSize = candidatePeptideStatus->size();
       TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
+  
 
       // Programs for taking the dot-product with the observed spectrum are laid
       // out in memory managed by the active_peptide_queue, one program for each
       // candidate peptide. The programs will store the results directly into
       // match_arr. We now pass control to those programs.
+
       collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
                             candidatePeptideStatusSize, charge);
 
@@ -655,7 +665,6 @@ void TideSearchApplication::search(void* threadarg) {
         double quantile_score = 1.0;
         if (Params::GetBool("use-tailor-calibration")) {
           vector<double> scores;
-          double quantile_th = TAILOR_QUANTILE_TH;
           // Collect the scores for the score tail distribution
           for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
             it != match_arr2.end();
@@ -663,16 +672,16 @@ void TideSearchApplication::search(void* threadarg) {
             scores.push_back((double)(it->first / XCORR_SCALING));
           }
           sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
-          int quantile_pos = (int)(quantile_th*(double)scores.size()+0.5);
+          int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)scores.size()+0.5);
 
           if (quantile_pos < 3) quantile_pos = 3;
 
-          // suggested by Attila for bug fix
           if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
 
           quantile_score = scores[quantile_pos]+TAILOR_OFFSET; // Make sure scores positive
         }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
+
         for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
              it != match_arr2.end();
              ++it) {
@@ -690,12 +699,14 @@ void TideSearchApplication::search(void* threadarg) {
         }
 
         TideMatchSet matches(&match_arr, highest_mz);
+
         matches.exact_pval_search_ = exact_pval_search;
         matches.cur_score_function_ = curScoreFunction;
 
         matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
                        locations, compute_sp, true, locks_array[LOCK_RESULTS]);
+					   
       }  //end peptide_centric == false
     } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr p-val
 
@@ -1338,6 +1349,37 @@ void TideSearchApplication::collectScoresCompiled(
   int queue_size,
   int charge
 ) {
+#ifdef CPP_SCORING
+  //Scoring in C++		
+  deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
+  TideMatchSet::Arr2::iterator it = match_arr->begin();
+  const int* cache = observed.GetCache();        
+  int cnt = 0;
+  for (; iter_ != active_peptide_queue->end_; ++iter_, ++it, ++cnt) {
+    int xcorr = 0;
+
+    // Score with single charged theoretical peaks
+    for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_0.begin();
+      iter_uint != (*iter_)->peaks_0.end();
+      iter_uint++) {
+      xcorr += cache[*iter_uint];
+    }
+    // Score with double charged theoretical peaks
+    if (charge > 2){
+      for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_1.begin();
+        iter_uint != (*iter_)->peaks_1.end();
+        iter_uint++) {
+        xcorr += cache[*iter_uint];
+      }
+    }
+
+    it->first = xcorr;
+    it->second = queue_size - cnt;
+  } 
+  match_arr-> set_size(queue_size);
+  // End Scoring in C++
+#else
+	
   if (!active_peptide_queue->HasNext()) {
     return;
   }
@@ -1439,6 +1481,7 @@ void TideSearchApplication::collectScoresCompiled(
   // match_arr is filled by the compiled programs, not by calls to
   // push_back(). We have to set the final size explicitly.
   match_arr->set_size(queue_size);
+#endif
 }
 #ifdef _WIN64
 #pragma optimize( "g", on )

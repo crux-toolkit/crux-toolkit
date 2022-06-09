@@ -98,10 +98,11 @@ class CruxTester
     compRes = system("python", "./features/support/fileComparator.py", "-r", precision, expected, actual)
 
     if compRes == false
-      file_content = File.read(actual)
+      file_content = File.read(actual)       # Use this to keep original target results and report the actual output.
+      # file_content = File.read(expected)   # Use this to overwrite the original target results with the current results. Update the smoke-test.
       writeObserved(file_content, expected, false, 1)
     end
-
+    
     return compRes
   end
 
@@ -109,7 +110,8 @@ class CruxTester
     compRes = system("python", "./features/support/fileComparator.py", "-u", "-r", precision, expected, actual)
 
     if compRes == false
-      file_content = File.read(actual)
+      file_content = File.read(actual)       # Use this line to keep original target results, and report the actua output. 
+      # file_content = File.read(expected)   # Use this line to overwrite the original target results with the current results. Update the smoke-test
       writeObserved(file_content, expected, false, 1)
     end
 
