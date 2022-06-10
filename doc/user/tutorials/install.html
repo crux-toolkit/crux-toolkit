@@ -147,10 +147,9 @@
 		<li><code>gcc</code></li>
     <li><code>version 2.17 or later of the C runtime libraries</code></li>
 		<li><code>g++</code></li>
-		<li><code>cmake</code> (version 3.6 or later recommended)</li>
+		<li><code>cmake</code> (version 3.15 or later recommended)</li>
 		<li><code>make</code></li>
 		<li><code>git</code></li>
-		<li><code>svn</code></li>
 		</ul>
 		<p/>
 		Building <span class=prog>crux</span> also requires the
@@ -320,12 +319,10 @@
 		following software:
 		<ul>
 		<li><code>OS X Yosemite or later</code></li>
-		<li><code>XCode between 6.3.1 and 10.1 (inclusive)</code></li>
 		<li><code>XCode Command Line Tools</code></li>
-		<li><code>cmake</code> (version 3.6 or later recommended)</li>
+		<li><code>cmake</code> (version 3.15 or later recommended)</li>
 		<li><code>make</code></li>
 		<li><code>git</code></li>
-		<li><code>svn</code></li>
 		<li><code>gnutar</code> (Apple's version of tar is incompatible with GNU's
     version of tar)</li>
 		</ul>
@@ -361,9 +358,8 @@
 		The programs
 		<span class=prog>gnutar</span>,
 		<span class=prog>cmake</span>,
-		<span class=prog>git</span>,
 		and
-		<span class=prog>svn</span>
+		<span class=prog>git</span>,
 		can be installed from 
 		<a href="https://www.macports.org">MacPorts</a>
 		or 
@@ -518,12 +514,12 @@
 		on Windows you must have installed the following software:
 		<ul>
 		<li>
-		<a href="https://thermo.flexnetoperations.com/control/thmo/login">
-		<code>Thermo MSFileReader</code></a>
+		<a href="https://thermo.flexnetoperations.com/control/thmo/product?child_plneID=820577&ver=ARC">
+		<code>Thermo MSFileReader V3.0 SP3</code></a>
     </li>
 		<li>
 		<a href="https://www.microsoft.com/en-us/download/details.aspx?id=40784">
-		<code>Visual C++ 2017 Runtime Libraries</code></a>
+		<code>Visual Studio C++ 2019 Runtime Libraries</code></a>
     </li>
 		</ul>
 		<p/>
@@ -561,29 +557,30 @@
 		<ul>
 		<li><code>
 		<a
-		href="http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4">Microsoft
-		Visual C++ 2017</a></code></li>
+		href="https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes">Microsoft
+		Visual Studio C++ 2019</a></code></li>
 		<li><a
     href="http://www.cmake.org/cmake/resources/software.html"><code>CMake
-    (version 3.6 or later recommended)</code></a></li>
-		<li><a href="http://https://git-scm.com/download/win"><code>git</code></a></li>
-		<li><a href="http://sourceforge.net/projects/win32svn/"><code>svn</code></a></li>
+    (version 3.15 or later recommended)</code></a></li>
+		<li><a href="https://git-scm.com/download/win"><code>git</code></a></li>
+		<li><a
+    href="http://gnuwin32.sourceforge.net/packages/unzip.htm"><code>unzip</code></a></li>
 		<li><a href="https://eternallybored.org/misc/wget/"><code>Windows wget
     (version 1.20 or later)</code></a></li>
 		<li><a
-		href="https://thermo.flexnetoperations.com/control/thmo/login">
-		<code>Thermo MSFileReader</code></a> (This may be omitted if support for 
+		href="https://thermo.flexnetoperations.com/control/thmo/product?child_plneID=820577&ver=ARC">
+		<code>Thermo MSFileReader V3.0 SP3</code></a> (This may be omitted if support for 
 		vendor specific file formats is disabled.)</li>
 		</ul>
 		<p/>
-		<b>Other versions of Visual Studio will not be able to build Crux!</b>
-		You must have Visual Studio 2017.
-		Visual Studio 2017 Community Edition does work.
+		<b>Older versions of Visual Studio will not be able to build Crux!</b>
+		You must have Visual Studio 2019.
+		Visual Studio 2019 Community Edition does work.
 		<p/>
 		<span class=code>wget</span>,
-		<span class=code>git</span>,
+		<span class=code>unzip</span>,
     and
-		<span class=code>svn</span> 
+		<span class=code>git</span>,
     must be included in the execution PATH
 		for your system.
 		See the section <i>Setting the PATH on Windows</i> for more information.
@@ -622,8 +619,8 @@
 		<b>Open the command line development environment.</b>
 		<p/>
 		Under the "Start" button
-		open the "Visual Studio 2017" folder, then open the "Visual Studio Tools"
-		folder, and double-click on "x64 Native Tools Command Prompt for VS2017".
+		open the "Visual Studio 2019" folder, then open the "Visual Studio Tools"
+		folder, and double-click on "x64 Native Tools Command Prompt for VS2019".
 		This will launch a 
 		<span class=file>cmd</span> shell configured to use the 
 		Microsoft development tools.
@@ -636,13 +633,13 @@
 		Run the command
 		<div class=code><code>
 		cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio
-		15 Win64" .
+		16" -A X64 .
 		</code>
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
 		the location where you wish to install the <span class=prog>crux</span> programs. 
-		Note that, somewhat confusingly, Visual Studio 2017 is version 15.
+		Note that, somewhat confusingly, Visual Studio 2019 is version 16.
 		<p/>
 		If you wish to disable support for vendor specific file formats,
 		use this command instead
