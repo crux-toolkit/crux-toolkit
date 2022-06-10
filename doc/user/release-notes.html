@@ -56,7 +56,14 @@
 
 <h4>Minor changes</h4>
 <ul>
-  <li>01 May 2022: XCorr scoring implementing in C++. This resolves a longstanding bug in our multithreading code. 
+  <li>09 June 2022: Upgraded to ProteoWizard 3.0.22014 (commit aadd392). This
+  also upgrades to BOOST 1.67 which fixes a problem building Crux on current MacOS
+  systems.</li>
+  <li>Upgraded to Protocol Buffers 3.19.4</li>
+  <li>Upgraded to GFlags 2.2.2</li>
+  <li>09 June 2022: Added support for building using GitHub Actions.</li>
+  <li>01 May 2022: XCorr scoring implementing in C++. This resolves a
+  longstanding bug in our multithreading code. </li>
   <li>20 Jan 2022: The XCorr scoring, exact p-value, and ResEv in Tide-Search has been sped up. </li> 
   <li>10 Jan 2022: Fixed bug that resulted in rank=0 for search results in pepxml files (issue #521).</li>                       
   <li>16 Nov 2021: The preprocessing of the exact p-value method has been aligned to the preprocessing of the standard XCorr scoring. </li> 

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
-cmake_policy(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(VERSION 3.15)
 
 use_cxx11()
 
@@ -38,9 +38,9 @@ if (WIN32 AND NOT Cygwin)
     "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
   )
   SET(
-  CMAKE_EXE_LINKER_FLAGS_DEBUG 
-  "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
-)
+    CMAKE_EXE_LINKER_FLAGS_DEBUG 
+    "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
+  )
   #  Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
 
@@ -49,6 +49,11 @@ if (WIN32 AND NOT Cygwin)
     set(INCLUDE_VENDOR_LIBRARIES TRUE)
   endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
 
+  # On windows set static linking of runtime libraries
+  set(
+    CMAKE_MSVC_RUNTIME_LIBRARY 
+    "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+  )
 endif (WIN32 AND NOT Cygwin)
 
 link_directories(${CMAKE_BINARY_DIR}/app/bullseye)
@@ -61,17 +66,15 @@ link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
 if (WIN32 AND NOT Cygwin)
  # Needed for windows build of vendor libraries
-  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    link_directories(
-      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64
-      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64
-    )
-  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    link_directories(
-      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x86
-      ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x86
-    )
-  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
+  link_directories(
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64
+  )
+  SET(
+    CMAKE_SHARED_LINKER_FLAGS 
+    ${CMAKE_SHARED_LINKER_FLAGS} 
+    "/NODEFAULTLIBS:MSVCRT" 
+  )
 endif (WIN32 AND NOT Cygwin)
 
 set (
@@ -317,7 +320,6 @@ if (WIN32 AND NOT CYGWIN)
   if (INCLUDE_VENDOR_LIBRARIES)
     set (
       PWIZ_LIBRARIES
-      baf2sql_c.lib
       libhdf5.lib
       libhdf5pp.lib
       libpwiz_analysis_chromatogram_processing.lib
@@ -338,6 +340,7 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_identdata_version.lib
       libpwiz_data_misc.lib
       libpwiz_data_msdata.lib
+      libpwiz_data_msdata_core.lib
       libpwiz_data_msdata_examples.lib
       libpwiz_data_msdata_mz5.lib
       libpwiz_data_msdata_version.lib
@@ -375,6 +378,7 @@ if (WIN32 AND NOT CYGWIN)
       libsqlite3pp.lib
       libsvm
       libzlib
+      baf2sql_c
       timsdata
     )
   else (INCLUDE_VENDOR_LIBRARIES)
@@ -383,6 +387,8 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_identdata_examples
       libpwiz_data_identdata_version
       libpwiz_data_misc
+      libpwiz_data_msdata
+      libpwiz_data_msdata_core
       libpwiz_data_msdata_examples
       libpwiz_data_msdata_version
       libpwiz_data_proteome_examples
@@ -399,25 +405,23 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
   SET(
     BOOST_LIBRARIES
-    optimized libboost_chrono-vc141-mt
-    optimized libboost_date_time-vc141-mt
-    optimized libboost_filesystem-vc141-mt
-    optimized libboost_iostreams-vc141-mt
-    optimized libboost_nowide-vc141-mt
-    optimized libboost_program_options-vc141-mt
-    optimized libboost_serialization-vc141-mt
-    optimized libboost_system-vc141-mt
-    optimized libboost_thread-vc141-mt
-    optimized libfreetype-vc141-mt-2_4
-    debug libboost_chrono-vc141-mt-gd
-    debug libboost_date_time-vc141-mt
-    debug libboost_filesystem-vc141-mt-gd
-    debug libboost_iostreams-vc141-mt-gd
-    debug libboost_nowide-vc141-mt-gd
-    debug libboost_regex-vc141-mt
-    debug libboost_program_options-vc141-mt
-    debug libboost_system-vc141-mt-gd
-    debug libboost_thread-vc141-mt-gd
+    optimized libboost_chrono-vc142-mt
+    optimized libboost_filesystem-vc142-mt
+    optimized libboost_iostreams-vc142-mt
+    optimized libboost_nowide-vc142-mt
+    optimized libboost_program_options-vc142-mt
+    optimized libboost_serialization-vc142-mt
+    optimized libboost_system-vc142-mt
+    optimized libboost_thread-vc142-mt
+    optimized libfreetype-vc142-mt-2_4
+    debug libboost_chrono-vc142-mt-gd
+    debug libboost_filesystem-vc142-mt-gd
+    debug libboost_iostreams-vc142-mt-gd
+    debug libboost_nowide-vc142-mt-gd
+    debug libboost_regex-vc142-mt
+    debug libboost_program_options-vc142-mt
+    debug libboost_system-vc142-mt-gd
+    debug libboost_thread-vc142-mt-gd
   )
   target_link_libraries(
     crux
@@ -439,21 +443,21 @@ if (WIN32 AND NOT CYGWIN)
     ws2_32
     shlwapi
     ${BOOST_LIBRARIES}
-    debug libfreetype-vc141-mt-gd-2_4
-    optimized libgd-vc141-mt-2_1
-    debug libgd-vc141-mt-gd-2_1
+    debug libfreetype-vc142-mt-gd-2_4
+    optimized libgd-vc142-mt-2_1
+    debug libgd-vc142-mt-gd-2_1
     libpng
   )
 else()
   # UNIX SYSTEMS
   target_link_libraries(
     crux
-    bullseye
     crux-support
     tide-support
     cometsearch
     kojaksearch
     gflags
+    bullseye
     hardklor
     mstoolkitlite
     perclibrary
@@ -461,16 +465,15 @@ else()
     fido
     picked_protein
     protobuf
-    dl
-    m
-    pthread
-    pwiz_data_identdata
-    pwiz_data_identdata_version
-    pwiz_data_misc
     pwiz_data_msdata
     pwiz_data_msdata_mz5
     pwiz_data_msdata_version
+    pwiz_data_msdata_core
+    pwiz_data_identdata
+    pwiz_data_identdata_version
     pwiz_data_proteome
+    pwiz_data_proteome_version
+    pwiz_data_misc
     pwiz_data_common
     pwiz_utility_chemistry
     pwiz_utility_minimxml
@@ -482,6 +485,9 @@ else()
     boost_serialization
     boost_system
     boost_thread
+    dl
+    m
+    pthread
     hdf5pp
     hdf5
     ${RT_LIBRARY}
