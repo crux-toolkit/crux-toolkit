@@ -377,9 +377,7 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.UntU2.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CLFIO32.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CompassXtractMS.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/concrt140.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CRHAKEI2.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/DataReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/DualProbeInterfaceParametersCS.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Google.Protobuf.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/HSReadWrite.dll
@@ -389,7 +387,6 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/IOModuleQTFL.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassCalcWrapObject.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc140.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc90.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/mkl_sequential.dll
