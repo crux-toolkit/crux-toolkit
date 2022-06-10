@@ -111,8 +111,7 @@ jobs:
         name: percolator-results
         path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
 
-    - if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-      name: Build package
+    - name: Build package
       shell: bash
       run: |
         cd "${{runner.workspace}}/build"
@@ -151,7 +150,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: windows-package
-        path: ${{runner.workspace}}/build/crux-4.1.Windows.AMD64.zip 
+        path: ${{runner.workspace}}/build/crux-4.1.Windows.i386.zip 
 
 
         
