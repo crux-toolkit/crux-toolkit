@@ -111,6 +111,11 @@ jobs:
         name: percolator-results
         path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
 
+    - name: Get short git hash
+      shell: bash
+      run: |
+        git_hash=$(git rev-parse --short "$GITHUB_SHA")
+        
     - name: Build package
       shell: bash
       run: |
@@ -123,13 +128,13 @@ jobs:
       run: |
         cd "${{runner.workspace}}/build"
         cmake --build . --config $BUILD_TYPE --target package_source
-
+        cp ${{runner.workspace}}/build/crux-4.1.Linux.x86_64.zip ${{runner.workspace}}/build/crux-4.1.${{git_hash}}.Linux.x86_64.zip
     - if: matrix.os == 'ubuntu-latest'
       name: Archive Ubuntu package
       uses: actions/upload-artifact@v3
       with:
         name: ubuntu-package
-        path: ${{runner.workspace}}/build/crux-4.1.Linux.x86_64.zip
+        path: ${{runner.workspace}}/build/crux-4.1.${{git_hash}}.Linux.x86_64.zip
         
     - if: matrix.os == 'ubuntu-latest'
       name: Archive source package
