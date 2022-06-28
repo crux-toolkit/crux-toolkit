@@ -31,6 +31,7 @@ message Header {
     optional string filename = 1;
     optional Header header = 2; // either header or filetype should be given.
     optional string filetype = 3;
+    optional string decoy_prefix = 4;
   }
 
   message RawProteinsHeader {
