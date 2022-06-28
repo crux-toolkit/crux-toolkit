@@ -202,7 +202,7 @@ class TideIndexApplication : public CruxApplication {
     TargetInfo(const ProteinInfo& protein, int startLoc, FLOAT_T pepMass)
       : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
-
+/*
   static void fastaToPb(
     const ENZYME_T enzyme,
     const DIGEST_T digestion,
@@ -217,7 +217,7 @@ class TideIndexApplication : public CruxApplication {
 	HeadedRecordWriter* proteinWriter,	
 	int& curProtein
   );
-
+*/
   static void writePeptidesAndAuxLocs(
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
@@ -238,7 +238,7 @@ class TideIndexApplication : public CruxApplication {
     const std::string& residues,
     int targetPos = -1 // -1 if not a decoy
   );
-
+/*
   static pb::Protein* writeDecoyPbProtein(
     int id,
     const pb::Protein* protein,
@@ -246,7 +246,7 @@ class TideIndexApplication : public CruxApplication {
     int startLoc,
     HeadedRecordWriter& proteinWriter
   );
-
+*/
   static void getPbPeptide(
     int id,
     const TideIndexPeptide& peptide,

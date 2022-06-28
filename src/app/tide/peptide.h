@@ -65,7 +65,7 @@ class TheoreticalPeakCompiler;
 class Peptide {
  public:
 
-  // The proteins parameter is presumed to live in memory all the while the
+  // The proteins parameter is presumed to live in memory all the time while the
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
@@ -79,8 +79,16 @@ class Peptide {
     mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
     prog1_(NULL), prog2_(NULL) {
     // Set residues_ by pointing to the first occurrence in proteins.
-    residues_ = proteins[first_loc_protein_id_]->residues().data() 
-                    + first_loc_pos_;
+    if (peptide.has_decoy_sequence() == true){
+      decoy_seq_ = peptide.decoy_sequence();  // Make a copy of the string, because pb::Peptide will be reused.
+      residues_ = decoy_seq_.data();
+    } else {
+      residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                      + first_loc_pos_;
+    }
+    target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                      + first_loc_pos_;
+                      
     if (peptide.modifications_size() > 0) {
       num_mods_ = peptide.modifications_size();
       if (fifo_alloc) {
@@ -157,6 +165,7 @@ class Peptide {
   }
 
   string Seq() const { return string(residues_, Len()); } // For display
+  string TargetSeq() const { return string(target_residues_, Len()); } // For display
 
   string SeqWithMods() const;
 
@@ -259,9 +268,11 @@ class Peptide {
   bool has_aux_locations_index_;
   int aux_locations_index_;
   const char* residues_;
+  const char* target_residues_;
   int num_mods_;
   ModCoder::Mod* mods_;
   int decoyIdx_;
+  string decoy_seq_;
 
   void* prog1_;
   void* prog2_;
