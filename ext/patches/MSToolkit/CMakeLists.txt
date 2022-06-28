@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
 project(mstoolkit)
 # INCLUDE HEADER FILES IN SRC DIRECTORY
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include)
