@@ -124,7 +124,6 @@ int TideIndexApplication::main(
   }
 
   DECOY_TYPE_T decoy_type = get_tide_decoy_type_parameter("decoy-format");
-  string decoyPrefix = Params::GetString("decoy-prefix");  
 
   ofstream* out_target_decoy_list = NULL;  
   if (Params::GetBool("peptide-list")) {
@@ -234,6 +233,7 @@ int TideIndexApplication::main(
   pb::Header_Source* headerSource = proteinPbHeader.add_source();
   headerSource->set_filename(AbsPath(fasta));
   headerSource->set_filetype("fasta");
+  headerSource->set_decoy_prefix(Params::GetString("decoy-prefix"));
   HeadedRecordWriter proteinWriter(out_proteins, proteinPbHeader);
 
 
@@ -625,7 +625,7 @@ int TideIndexApplication::main(
 	  int unique_delta;
 	  double delta;
 	  double mass;
-	  pb::Protein* decoy_pd_protein;
+	  // pb::Protein* decoy_pd_protein;
 	  int generateAttemptsMax = 6;
 
 	  string target_peptide_with_mods;
@@ -716,11 +716,11 @@ int TideIndexApplication::main(
           peptide_str_set.insert(target_peptide_with_mods);
         }
       }
-		  // For each peptide in the set: 
-		  // 1. store the target peptide in the index file, 
-		  // 2. generate decoy peptides and store them in the index file too.
+		  // For each target peptide in the set: 
+		  // generate a set of "numDecoys" decoy peptides and add them to the protocol buffer. 
+      
 		  for (vector<pb::Peptide>::iterator pb_pept_itr = pb_peptides.begin(); pb_pept_itr != pb_peptides.end(); ++pb_pept_itr) {
-			  // Get the peptide and write it 
+			  // Get the peptide and write it to the protocol buffer to the disk 
 			  current_pb_peptide_ = (*pb_pept_itr);
 			  CHECK(writer.Write(&current_pb_peptide_));
 
@@ -741,7 +741,7 @@ int TideIndexApplication::main(
 				  string target_peptide = vProteinHeaderSequence[protein_id]->residues().substr(startLoc, current_pb_peptide_.length());
 				  string decoy_peptide_str_with_mods;
 
-				  //	Generate a decoy peptides:
+				  //	Generate a decoy peptide:
 				  protein = vProteinHeaderSequence[protein_id];
 				  for (int i = 0; i < numDecoys; ++i) {
 
@@ -752,12 +752,12 @@ int TideIndexApplication::main(
 						  GeneratePeptides::makeDecoyIdx(target_peptide, shuffle, decoy_peptide_idx);
 						  decoy_peptide_str = target_peptide;
 
-						  // Create the decoy peptide sequence
+						  // Create the decoy peptide sequence without modifications
 						  for (int k = 0; k < decoy_peptide_idx.size(); ++k) {
 							  decoy_peptide_str[decoy_peptide_idx[k]] = target_peptide[k];
 						  }
 						  decoy_peptide_str_with_mods = decoy_peptide_str;
-						  // Add the modificaitons to the decoy:
+						  // Add modificaitons to the decoy peptide string:
 						  if (current_pb_peptide_.modifications_size() > 0) {
 							  mod_pos_offset = 0;
 							  vector<double> deltas(decoy_peptide_str.length());
@@ -779,8 +779,8 @@ int TideIndexApplication::main(
 						  if (allowDups) {
 							  success = true;
 							  break;
-						  }
-						  else {
+						  } else {
+                // The decoy peptide string with modications can be found in the set of unique peptides?
 							  success = peptide_str_set.find(decoy_peptide_str_with_mods) == peptide_str_set.end();
 						  }
 						  if (success == true) {
@@ -796,7 +796,7 @@ int TideIndexApplication::main(
 					  }
 
 					  // According to the indeces create a decoy protein string,
-					  decoy_pd_protein = writeDecoyPbProtein(++curProtein, protein, decoy_peptide_str, startLoc, proteinWriter);
+//					  decoy_pd_protein = writeDecoyPbProtein(++curProtein, protein, decoy_peptide_str, startLoc, proteinWriter);
 
 					  // Create a protocol buffer peptide object for the decoy peptide. Note that the decoy peptide may contain modifications.
 					  pb::Peptide decoy_current_pb_peptide_ = current_pb_peptide_;
@@ -812,12 +812,14 @@ int TideIndexApplication::main(
 						  }
 					  }
 					  decoy_current_pb_peptide_.set_id(numTargets + decoy_count++);
-					  decoy_current_pb_peptide_.clear_first_location();
-					  decoy_current_pb_peptide_.mutable_first_location()->set_protein_id(curProtein);
-					  decoy_current_pb_peptide_.mutable_first_location()->set_pos((startLoc > 0) ? 1 : 0);
+//					  decoy_current_pb_peptide_.clear_first_location();
+//					  decoy_current_pb_peptide_.mutable_first_location()->set_protein_id(curProtein);
+//					  decoy_current_pb_peptide_.mutable_first_location()->set_pos((startLoc > 0) ? 1 : 0);
+            decoy_current_pb_peptide_.clear_decoy_sequence();
+            decoy_current_pb_peptide_.set_decoy_sequence(decoy_peptide_str);
 					  decoy_current_pb_peptide_.set_decoy_index(i);
 					  CHECK(writer.Write(&decoy_current_pb_peptide_));
-					  delete decoy_pd_protein;
+//					  delete decoy_pd_protein;
 
 					  //report the decoy peptide if needed.
 					  if (out_target_decoy_list) {
@@ -1058,6 +1060,7 @@ pb::Protein* TideIndexApplication::writePbProtein(
  * preceding amino acid, then nothing is prepended; but if there is no
  * succeeding amino acid, then a hyphen is appended.
  */
+ /*
 pb::Protein* TideIndexApplication::writeDecoyPbProtein(
   int id,
   const pb::Protein* protein,
@@ -1086,7 +1089,7 @@ pb::Protein* TideIndexApplication::writeDecoyPbProtein(
   return writePbProtein(proteinWriter, id, Params::GetString("decoy-prefix") + protein->name(),
                  decoyPeptideSequence, startLoc);
 }
-
+*/
 void TideIndexApplication::getPbPeptide(
   int id,
   const TideIndexPeptide& peptide,

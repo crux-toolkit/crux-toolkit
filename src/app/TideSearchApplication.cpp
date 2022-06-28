@@ -185,12 +185,24 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   ProteinVec proteins;
   carp(CARP_INFO, "Reading index %s", index.c_str());
+  
   // Read proteins index file
   pb::Header protein_header;
   if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins,
       proteins_file, &protein_header)) {
     carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
+  // There shouldn't be more than one header in the protein pb.
+  pb::Header_Source headerSource = protein_header.source(0);  
+  string decoy_prefix = "";
+  if (headerSource.has_decoy_prefix()){
+    decoy_prefix = headerSource.decoy_prefix();
+  } else {
+    carp(CARP_FATAL, "Error reading index files. The index files are of old "
+      "format. Please update your index files.");
+  }
+  TideMatchSet::decoy_prefix_ = decoy_prefix;
+  
   int64_t targetProteinCount = 0;
   for (ProteinVec::const_iterator i = proteins.begin(); i != proteins.end(); i++) {
     if (!(*i)->has_target_pos()) {
