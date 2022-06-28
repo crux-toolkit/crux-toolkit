@@ -562,7 +562,7 @@ int TideIndexApplication::main(
    peptidePbFile = peakless_peptides;
 
    if (sort_on_disk) {
-       //open each file which contain sorted peptides, read the first peptide from each file and put them in a heap.
+       //Delete intermediate peptarget files.
        for (int i = 0; i < pept_file_idx; ++i) {
            string pept_file = pathPeptideFile + to_string(i) + ".txt";
            FileUtils::Remove(pept_file);
