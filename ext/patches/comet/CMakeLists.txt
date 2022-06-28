@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
 project(cometsearch)
 # INCLUDE HEADER FILES IN SRC DIRECTORY
 include_directories(
@@ -11,7 +12,7 @@ include_directories(
 # COMPILE MSToolkit
 ###############################################################################
 
- set(
+set(
   COMETSEARCH
   CometSearch/Threading.cpp 
   CometSearch/CometInterfaces.cpp 

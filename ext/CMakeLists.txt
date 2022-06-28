@@ -15,11 +15,7 @@ SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 SET(USE_LATEST_PWIZ OFF CACHE BOOL "Use lastest version of ProteoWizard")
 
 if (WIN32 AND NOT CYGWIN)
-  # If windows build we need to select 32/64 bit platform
-  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    SET(MSBUILD_PLATFORM "x64")
-  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
-
+  SET(MSBUILD_PLATFORM "x64")
   # On Windows we should build vendor libraries by default
   if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
     set(INCLUDE_VENDOR_LIBRARIES TRUE)
@@ -47,7 +43,7 @@ else (USE_LATEST_PWIZ)
   # Use tarball cached on our server
   set(
       PWIZ_SOURCE
-      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_19149_c172999.tar.bz2
+      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_22014_aadd392.tar.bz2
   )
 endif (USE_LATEST_PWIZ)
 
@@ -67,9 +63,18 @@ if (WIN32 AND NOT CYGWIN)
           -DINCLUDE_VENDOR_LIBRARIES:BOOLEAN=${INCLUDE_VENDOR_LIBRARIES}
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost 
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
@@ -89,14 +94,9 @@ elseif (APPLE)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    PATCH_COMMAND
-      ${CMAKE_COMMAND}  -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/tar.jam
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries &&
-      ${CMAKE_COMMAND}  -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/WhittakerSmoother.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/analysis/common
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
     BUILD_COMMAND
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
@@ -109,15 +109,15 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -125,7 +125,12 @@ else (UNIX)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND 
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
+      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/
     BUILD_COMMAND
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
@@ -136,6 +141,9 @@ else (UNIX)
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -144,9 +152,6 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_67_0/boost/system/detail/error_code.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/system/detail
     BUILD_IN_SOURCE 1
   )
 endif (WIN32 AND NOT CYGWIN)
@@ -172,13 +177,14 @@ if (UNIX)
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
-else (UNIX)
+else (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
     percolator
     GIT_REPOSITORY https://github.com/percolator/percolator.git
     GIT_TAG ${PERCOLATOR_GIT_VERSION}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-    CMAKE_ARGS -DCMAKE_VERBOSE_MAKEFILE=ON
+    CMAKE_ARGS 
+      -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -187,17 +193,23 @@ else (UNIX)
       -DWITHOUT_GTEST=ON
     PATCH_COMMAND
       COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 endif (UNIX)
 
+#     COMMAND ${CMAKE_COMMAND} -E copy
+#       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Scores.cpp
+#       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
 if (UNIX)
   ExternalProject_Add(
-    protobuf-3.0.0
-    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
-    DOWNLOAD_NAME protobuf-cpp-3.0.0.tar.gz
+    protobuf-3.19.4
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protobuf-all-3.19.4.tar.gz
+    DOWNLOAD_NAME protobuf-cpp-3.19.4.tar.gz
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     SOURCE_SUBDIR cmake
     CMAKE_ARGS ${TOOLCHAIN_FILE}
@@ -209,9 +221,9 @@ if (UNIX)
  )
 elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
-    protobuf-3.0.0
-    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
-    DOWNLOAD_NAME protobuf-cpp-3.0.0.tar.gz
+    protobuf-3.19.4
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protobuf-all-3.19.4.tar.gz
+    DOWNLOAD_NAME protobuf-cpp-3.19.4.tar.gz
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     SOURCE_SUBDIR cmake
     CMAKE_ARGS
@@ -219,15 +231,24 @@ elseif (WIN32 AND NOT CYGWIN)
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+      -Dprotobuf_BUILD_TESTS=OFF
+      -Dprotobuf_WITH_ZLIB=OFF
       -Dprotobuf_MSVC_STATIC_RUNTIME=OFF
-    PATCH_COMMAND ""
+    PATCH_COMMAND
+      # There is a bug in the 3.19.4 release of protobuf that prevents it
+      # from honoring the protobuf_MSVC_STATIC_RUNTIME=OFF option,
+      # So for now we have to patch the CMakeLists.txt file.
+      # This should be fixed in the 3.20.0 release.
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf-3.19.4/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-3.19.4/cmake
   )
 endif (UNIX)
 
 ExternalProject_Add(
-  gflags-2.2.1
-  URL https://codeload.github.com/gflags/gflags/tar.gz/v2.2.1
-  DOWNLOAD_NAME gflags-2.2.1.tar.gz
+  gflags-2.2.2
+  URL https://codeload.github.com/gflags/gflags/tar.gz/v2.2.2
+  DOWNLOAD_NAME gflags-2.2.2.tar.gz
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -261,8 +282,7 @@ ExternalProject_Add(
 )
 
 if (UNIX)
-  # Get Comet source from SVN and build using a CMakeLists.txt file we created
-  #SVN_REPOSITORY svn://svn.code.sf.net/p/comet-ms/code/branches/release_2021010/
+  # Get Comet source from GitHub and build using a CMakeLists.txt file we created
   set(comet_cxx_flags ${CMAKE_CXX_FLAGS}\ -DCRUX)
   set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
   set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
@@ -299,21 +319,17 @@ elseif (WIN32 AND NOT CYGWIN)
       -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
       -DCMAKE_VERBOSE_MAKEFILE=ON
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
-    # Copy the Comet and MSToolkit include files and libraries to
-    # the desired directories.
-    PATCH_COMMAND
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
-    BUILD_IN_SOURCE 1
+      PATCH_COMMAND
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      BUILD_IN_SOURCE 1
   )
 endif (UNIX)
 
 # Kojak
-# Get Kojak source from GitHub
 set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
 set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
@@ -361,9 +377,7 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/BDal.CXt.Lc.UntU2.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CLFIO32.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CompassXtractMS.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/concrt140.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/CRHAKEI2.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/DataReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/DualProbeInterfaceParametersCS.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Google.Protobuf.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/HSReadWrite.dll
@@ -373,7 +387,6 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/IOModuleQTFL.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassCalcWrapObject.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MassSpecDataReader.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc140.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/mfc90.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/MIDAC.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/mkl_sequential.dll

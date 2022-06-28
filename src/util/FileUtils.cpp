@@ -1,5 +1,7 @@
 #include "FileUtils.h"
-#include "boost/filesystem.hpp"
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/filesystem.hpp>
+#undef BOOST_NO_CXX11_SCOPED_ENUMS
 #include <fstream>
 #include <stdexcept>
 

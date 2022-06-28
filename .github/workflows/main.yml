@@ -1,0 +1,162 @@
+#    os: [ubuntu-latest, windows-2019 , macos-latest]
+#        container: ['']
+#        include:
+#          - os: ubuntu-latest
+#            container: centos:centos7
+
+name: build
+
+on: [push]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-2019]
+        
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.6"   
+    - name: "Checkout repository"
+      run: |
+        python -VV
+        python -m site
+        python -m pip install --upgrade pip numpy pandas
+        
+    - if: matrix.container == 'centos:centos7'
+      name: Install prerequisites for Docker CentOS7
+      shell: bash
+      run: |
+        yum -y install epel-release
+        yum group install -y "Development Tools"
+        yum install -y cmake3 git subversion
+        ln -s /usr/bin/cmake3 /usr/bin/cmake
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+    
+    - if: matrix.os == 'ubuntu-latest'
+      name: Configure CMake for Ubuntu
+      shell: bash
+      run: |
+        sudo apt-get install -y cucumber
+        sudo apt-get install -y ruby-rspec
+        cmake -E make_directory "${{runner.workspace}}/build"
+        cd "${{runner.workspace}}/build"
+        echo Configuring in $(pwd)
+        cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        
+    - if: matrix.os == 'macos-latest'
+      name: Configure CMake for  MacoS
+      shell: bash
+      run: |
+        brew install cucumber-ruby
+        cmake -E make_directory "${{runner.workspace}}/build"
+        cd "${{runner.workspace}}/build"
+        echo Configuring in $(pwd)
+        cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - if: matrix.os == 'windows-2019'
+      name: Configure CMake for Windows
+      shell: cmd
+      run: |
+        cmake -E make_directory "${{runner.workspace}}/build"
+        cd "${{runner.workspace}}/build"
+        C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+        unzip -P iacceptthelicense Thermo.zip -d dlls
+        echo "XRawfile2_x64.dll"
+        regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
+        echo "fregistry_x64.dll"
+        regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
+        echo "Fileio_x64.dll.dll"
+        regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
+        cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c   
+        
+    - name: Build on all platforms
+      shell: bash
+      run: |
+        cd "${{runner.workspace}}/build"
+        echo Building in $(pwd)
+        cmake --build . --config $BUILD_TYPE 
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Test
+      shell: bash
+      continue-on-error: true
+      run: |
+        cmake -E make_directory "${{runner.workspace}}/build/test"
+        cd ${{runner.workspace}}/build/test
+        rm -rf smoke-tests
+        cp -r ${{github.workspace}}/test/smoke-tests/ .
+        cd smoke-tests
+        cucumber -f html -o smoke-tests.html
+        cucumber features/percolator.feature:15
+
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive smoke test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: smoke-test-results
+        path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+ 
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive percolator results
+      uses:  actions/upload-artifact@v3
+      with:
+        name: percolator-results
+        path: ${{runner.workspace}}/build/test/smoke-tests/crux-output/percolator.target.peptides.txt
+
+    - name: Get short git hash
+      shell: bash
+      run: |
+        git_hash=$(git rev-parse --short "$GITHUB_SHA")
+        
+    - name: Build package
+      shell: bash
+      run: |
+        cd "${{runner.workspace}}/build"
+        cmake --build . --config $BUILD_TYPE --target package
+  
+    - if: matrix.os == 'ubuntu-latest'
+      name: Build source package
+      shell: bash
+      run: |
+        cd "${{runner.workspace}}/build"
+        cmake --build . --config $BUILD_TYPE --target package_source
+        cp ${{runner.workspace}}/build/crux-4.1.Linux.x86_64.zip ${{runner.workspace}}/build/crux-4.1.$git_hash.Linux.x86_64.zip
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive Ubuntu package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ubuntu-package
+        path: ${{runner.workspace}}/build/crux-4.1.$git_hash.Linux.x86_64.zip
+        
+    - if: matrix.os == 'ubuntu-latest'
+      name: Archive source package
+      uses: actions/upload-artifact@v3
+      with:
+        name: ubuntu-source
+        path: ${{runner.workspace}}/build/crux-4.1.Source.tar.gz
+
+    - if: matrix.os == 'macos-latest'
+      name: Archive MacOS package
+      uses: actions/upload-artifact@v3
+      with:
+        name: macos-package
+        path: ${{runner.workspace}}/build/crux-4.1.Darwin.x86_64.zip
+        
+    - if: matrix.os == 'windows-2019'
+      name: Archive Windows package
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-package
+        path: ${{runner.workspace}}/build/crux-4.1.Windows.i386.zip 
+
+
+        
+        
