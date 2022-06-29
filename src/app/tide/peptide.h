@@ -102,6 +102,7 @@ class Peptide {
           score3_ = score3;
           charge_ = charge;
           d_cn_ = 0.0;
+          d_lcn_ = 0.0;          
           elution_score_ = 0.0;
       }
       spectrum_matches() {
@@ -111,6 +112,7 @@ class Peptide {
           score3_ = 0.0;
           charge_ = 0;
           d_cn_ = 0.0;
+          d_lcn_ = 0.0;
           elution_score_ = 0.0;
       }
       Spectrum* spectrum_;
@@ -119,6 +121,7 @@ class Peptide {
       int score3_;
       int charge_;
       double d_cn_;
+      double d_lcn_;
       double elution_score_;
       SpScorer::SpScoreData spData_;
 
