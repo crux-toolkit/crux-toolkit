@@ -271,6 +271,7 @@ vector<double> Peptide::getAAMasses() const {
 }
 
 // Probably defunct, uses old calling format.
+/*
 int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
   const void* prog = peptide->Prog(charge);
   int result;
@@ -283,3 +284,4 @@ int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
 #endif
   return result;
 }
+*/
