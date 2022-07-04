@@ -198,8 +198,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (headerSource.has_decoy_prefix()){
     decoy_prefix = headerSource.decoy_prefix();
   } else {
-    carp(CARP_FATAL, "Error reading index files. The index files are of old "
-      "format. Please update your index files.");
+    carp(CARP_INFO, "You are using old tide-index files. The format "
+                    "has changed, please update your index files.");
   }
   TideMatchSet::decoy_prefix_ = decoy_prefix;
   
