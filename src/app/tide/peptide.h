@@ -78,16 +78,24 @@ class Peptide {
     aux_locations_index_(peptide.aux_locations_index()),
     mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
     prog1_(NULL), prog2_(NULL) {
+      
+    // Here we make sure that tide-search is compatible with old and new tide-index protocol buffers.
     // Set residues_ by pointing to the first occurrence in proteins.
     if (peptide.has_decoy_sequence() == true){
       decoy_seq_ = peptide.decoy_sequence();  // Make a copy of the string, because pb::Peptide will be reused.
       residues_ = decoy_seq_.data();
+      target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                        + first_loc_pos_;
     } else {
       residues_ = proteins[first_loc_protein_id_]->residues().data() 
                       + first_loc_pos_;
+      if (IsDecoy()) {
+        target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                          + first_loc_pos_+len_+1;
+      } else {
+        target_residues_ = residues_;
+      }
     }
-    target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
-                      + first_loc_pos_;
                       
     if (peptide.modifications_size() > 0) {
       num_mods_ = peptide.modifications_size();
