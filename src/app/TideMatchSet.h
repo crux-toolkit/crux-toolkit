@@ -162,6 +162,7 @@ class TideMatchSet {
   static std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   static string CleavageType;
+  static string decoy_prefix_;
 
  protected:
   Arr* matches_;
@@ -257,7 +258,8 @@ class TideMatchSet {
    */
   static string getProteinName(
     const pb::Protein& protein,
-    int pos
+    int pos,
+    bool decoy
   );
 
   /**
