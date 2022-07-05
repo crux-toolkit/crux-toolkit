@@ -231,10 +231,10 @@ void TideMatchSet::writeToFile(
       *file << StringUtils::ToString(i->score1_, precision, true) << '\t';
     }
     //Added for tailor score calibration method by AKF
-    if (Params::GetBool("use-tailor-calibration")) {
+/*    if (Params::GetBool("use-tailor-calibration")) {
       *file << StringUtils::ToString(i->tailor, precision, true) << '\t';
     }    
-
+*/
     if (elution_window_ && !brief) {
       *file << i->elution_score_ << '\t';
     }
