@@ -2052,6 +2052,10 @@ Params::Params() : finalized_(false) {
     "spectrum. However, larger numbers also increase computation time. The "
     "recommended values are between 2000 and 10000",
     "Available for kojak", true);
+  InitDoubleParam("min_peptide_score", 0.0, -10.0, 10.0,
+    "Minimum peptide score used for Kojak analysis ",
+    "Available for kojak", true);
+    
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
