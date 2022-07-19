@@ -88,11 +88,11 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     vector<Peptide::spectrum_matches>().swap(peptide->spectrum_matches_array);
     // would delete peptide's underlying pb::Peptide;
     queue_.pop_front();
-//    delete peptide;
+    delete peptide;
   }
   if (queue_.empty()) {
     //cerr << "Releasing All\n";
-    fifo_alloc_peptides_.ReleaseAll();
+    //fifo_alloc_peptides_.ReleaseAll();
 #ifndef CPP_SCORING
     fifo_alloc_prog1_.ReleaseAll();
     fifo_alloc_prog2_.ReleaseAll();
@@ -103,8 +103,9 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     //fifo_alloc_prog2_.Show();
   } else {
     Peptide* peptide = queue_.front();
+    // delete peptide;
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide);
+    //fifo_alloc_peptides_.Release(peptide);
 #ifndef CPP_SCORING	
     peptide->ReleaseFifo(&fifo_alloc_prog1_, &fifo_alloc_prog2_);
 #endif
@@ -127,8 +128,9 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
         // we would delete current_pb_peptide_;
         continue; // skip peptides that fall below min_range
       }
-      Peptide* peptide = new(&fifo_alloc_peptides_)
-        Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
+      // Peptide* peptide = new(&fifo_alloc_peptides_)
+        // Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
+      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, NULL);
       assert(peptide != NULL);
       queue_.push_back(peptide);
       //Modified for tailor score calibration method by AKF
@@ -223,7 +225,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
   } else {
     Peptide* peptide = queue_.front();
     // Free all peptides up to, but not including peptide.
-    fifo_alloc_peptides_.Release(peptide);
+    // fifo_alloc_peptides_.Release(peptide);
   }
 
   // Enqueue all peptides that are not yet queued but are lighter than
