@@ -103,7 +103,7 @@ class GeneratePeptides : public CruxApplication {
     int minLength,  //< Min length of peptides to return
     int maxLength  //< Max length of peptides to return
   );
-  static std::vector<PeptideReference> cleaveProtein(
+/*  static std::vector<PeptideReference> cleaveProtein(
     const std::string* sequence, ///< Protein sequence to cleave
     ENZYME_T enzyme,  ///< Enzyme to use for cleavage
     DIGEST_T digest,  ///< Digestion to use for cleavage
@@ -111,6 +111,7 @@ class GeneratePeptides : public CruxApplication {
     int minLength,  //< Min length of peptides to return
     int maxLength  //< Max length of peptides to return
   );
+  */
   static std::vector<PeptideReference> cleaveProteinTideIndex(
     std::string* sequence, ///< Protein sequence to cleave
     ENZYME_T enzyme,  ///< Enzyme to use for cleavage

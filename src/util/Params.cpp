@@ -401,10 +401,8 @@ Params::Params() : finalized_(false) {
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",
     "Available for tide-index.", true);
-  InitStringParam("sort", "memory",
-    "The place where the peptide seuqneces are sorted and filtered. Available "
-    "options: \"memory\", \"disk\", \"auto\', where \"auto\" means that tide-index "
-    "tries to estimate whether the peptides would fit in the availalbe memory. ",
+  InitIntParam("memory-limit", 4, 2, BILLION, 
+    "The size of the memory in GB allowed to be used by tide-index. ",
     "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,

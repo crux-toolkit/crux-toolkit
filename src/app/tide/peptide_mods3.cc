@@ -501,7 +501,7 @@ class ModsOutputterAlt : public IModsOutputter {
       resultMods.ModifyPeptide();
       WritePeptide(peptide); 
       if (totalWritten_ % 10000 == 0) {
-        carp(CARP_INFO, "Wrote %d peptides to temp files", totalWritten_);
+        carp(CARP_DEBUG, "Wrote %lu peptides to temp files", totalWritten_);
       }
     }
   }

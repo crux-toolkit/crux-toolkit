@@ -42,12 +42,7 @@
 #endif
 #define CHECK(x) GOOGLE_CHECK(x)
 
-
-// Larry's code
-std::string sortedPeptideFile = "sortedPepTarget.txt";
 std::string peptideFile = "pepTarget.txt";
-DECLARE_int32(fifo_page_size);
-// Larry's code ends here
 
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                                 const string& input_filename,
@@ -105,12 +100,12 @@ int TideIndexApplication::main(
     carp(CARP_FATAL, "The value for 'min-mods' cannot be greater than the value "
                      "for 'max-mods'");
   }
-  bool sort_on_disk = (Params::GetString("sort") == string("disk"));
+  bool sort_on_disk;
   
-  unsigned long long memory_limit = 4; // RAM memory limit in GB to e used in in silico protein cleavage.
+  unsigned long long memory_limit = Params::GetInt("memory-limit"); //4; // RAM memory limit in GB to be used in in silico protein cleavage.
   
-  memory_limit = memory_limit*1000000000/(sizeof(TideIndexPeptide)); //number of peptides stored in an array
-  // memory_limit = 10000; //number of peptides stored in an array
+  memory_limit = memory_limit*1000000000/(sizeof(TideIndexPeptide)); //convert the memory limit to number of peptides.
+ 
   
   MASS_TYPE_T mass_type = (monoisotopic_precursor) ? MONO : AVERAGE;
   int missed_cleavages = Params::GetInt("missed-cleavages");
@@ -140,7 +135,6 @@ int TideIndexApplication::main(
   string auxLocsPbFile = FileUtils::Join(index, "auxlocs");
   string modless_peptides = out_peptides + ".nomods.tmp";
   string peakless_peptides = out_peptides + ".nopeaks.tmp";
-  string pathSortedPeptideFile = FileUtils::Join(index, sortedPeptideFile);
   string pathPeptideFile = FileUtils::Join(index, peptideFile);
 
   if (create_output_directory(index.c_str(), overwrite) != 0) {
@@ -155,8 +149,7 @@ int TideIndexApplication::main(
       FileUtils::Remove(auxLocsPbFile);
       FileUtils::Remove(modless_peptides);
       FileUtils::Remove(peakless_peptides);
-	  FileUtils::Remove(pathSortedPeptideFile);
-	  FileUtils::Remove(pathPeptideFile);
+	    FileUtils::Remove(pathPeptideFile);
     } else {
       carp(CARP_FATAL, "Index file(s) already exist, use --overwrite T or a "
                        "different index name");
@@ -187,7 +180,7 @@ int TideIndexApplication::main(
   }
 
  // Start tide-index
-  carp(CARP_INFO, "Reading %s and computing unmodified peptides...",
+  carp(CARP_INFO, "Reading %s and computing unmodified target peptides...",
        fasta.c_str());
 
 
@@ -237,8 +230,7 @@ int TideIndexApplication::main(
   HeadedRecordWriter proteinWriter(out_proteins, proteinPbHeader);
 
 
-  // Generate peptide sequences via in silico cleavage. This was in the fastaToPb function before
-    
+  // Generate peptide sequences via in silico cleavage.     
   // Container for the protein header and protein seuqnces.
   ProteinVec vProteinHeaderSequence;  
   
@@ -254,10 +246,7 @@ int TideIndexApplication::main(
   unsigned long long failedDecoyCnt = 0;
 
   unsigned long long targetsGenerated = 0;
-/*  FILE* fp;
-  if (sort_on_disk)
-    fp = fopen(pathPeptideFile.c_str(), "w");  // Peptides stored in this file to be sorted on disk.
-*/  
+
   long long curProtein = -1;  
   unsigned int pept_file_idx = 0;
   pb::Header header_with_mods;
@@ -313,12 +302,9 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Processed %ld protein sequences", curProtein+1);
     }
   }
-  /*
-  if (sort_on_disk)
-    fclose(fp);
-*/
+
   sort_on_disk = true;
-  if (pept_file_idx == 0) {  //Peptides fit in memory, no need to use disk
+  if (pept_file_idx == 0) {  //Peptides fit in memory, no need to use disk, sort them in place
     sort(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
     sort_on_disk = false;
   } else if (peptide_list.size() > 0){ // Some peptides have been already dump on disk, need to dump the remaining ones in peptide_list.
@@ -429,7 +415,6 @@ int TideIndexApplication::main(
       sortedFiles.push_back(fp);
       pept_ptr = readNextPeptide(fp, vProteinHeaderSequence, i);  // get the first peptide  
       if (pept_ptr != nullptr) {
-        // printf("reading, current peptide mass: %lf, source, %d\n", pept_ptr->getMass(), pept_ptr->getSourceId());
         peptide_list.push_back(*pept_ptr);
         delete pept_ptr;
       }
@@ -437,10 +422,8 @@ int TideIndexApplication::main(
     std::make_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
     currentPeptide = peptide_list.front();   
     int sourceId = currentPeptide.getSourceId();          
-    // printf("new current peptide mass: %lf, source, %d\n", currentPeptide.getMass(), currentPeptide.getSourceId());
     
     pept_ptr = readNextPeptide(sortedFiles[sourceId], vProteinHeaderSequence, sourceId);  // get a peptide  
-    // printf("new, current peptide mass: %lf, source, %d\n", pept_ptr->getMass(), pept_ptr->getSourceId());
 
     std::pop_heap (peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
     peptide_list.pop_back();   
@@ -450,15 +433,6 @@ int TideIndexApplication::main(
       push_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
       delete pept_ptr;            
     }
-    // printf("current peptide mass: %lf\n", currentPeptide.getMass());
-    
-    
-    
-  /*  std::sort_heap(peptide_list.begin(), peptide_list.end(), less<TideIndexPeptide>());
-    for (unsigned i=0; i<peptide_list.size(); i++)
-      printf("sort, current peptide mass: %lf, source, %d\n", peptide_list[i].getMass(), peptide_list[i].getSourceId());
-
-    */
   } else {
     currentPeptide = peptide_list[peptide_cnt++];  // get the first peptide  
   }
@@ -477,7 +451,6 @@ int TideIndexApplication::main(
     HeadedRecordWriter peptideWriter(peptidePbFile, header_no_mods); // put header in outfile	
     bool finished = false;    
     while (!finished) {
-      // break;
       while (true) {
         
         if (sort_on_disk) {
@@ -485,19 +458,15 @@ int TideIndexApplication::main(
             finished = true;
             break;
           }
-          // printf("current peptide mass: %lf\n", currentPeptide.getMass());
           duplicatedPeptide = peptide_list.front();   
-          // printf("duplicated peptide mass: %lf\n", duplicatedPeptide.getMass());
           std::pop_heap (peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
           peptide_list.pop_back();   
           int sourceId = duplicatedPeptide.getSourceId();          
-          // printf("duplicated peptide sourceid : %d\n", sourceId);
           pept_ptr = readNextPeptide(sortedFiles[sourceId], vProteinHeaderSequence, sourceId);  // get a peptide  
           
           if (pept_ptr != nullptr) {
             peptide_list.push_back(*pept_ptr);
             push_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
-            // printf("queued peptide mass: %lf\n", pept_ptr->getMass());
             delete pept_ptr;            
           }
           if (duplicatedPeptide.getMass() < currentPeptide.getMass()){  // Check if sorting worked properly.
@@ -534,9 +503,7 @@ int TideIndexApplication::main(
       }
       // Write the peptide AFTER the aux_locations check, in case we added an
       // aux_locations_index to the peptide.
-      peptideWriter.Write(&pbPeptide);
-      // printf("writing peptide mass: %lf\n", currentPeptide.getMass());
-      
+      peptideWriter.Write(&pbPeptide);     
 
       ++numTargets;
       if (++count % 1000000 == 0) {
@@ -559,15 +526,15 @@ int TideIndexApplication::main(
   
   carp(CARP_INFO, "Generated %lu unique target peptides.", numTargets);
 
-   peptidePbFile = peakless_peptides;
+  peptidePbFile = peakless_peptides;
 
-   if (sort_on_disk) {
-       //Delete intermediate peptarget files.
-       for (int i = 0; i < pept_file_idx; ++i) {
-           string pept_file = pathPeptideFile + to_string(i) + ".txt";
-           FileUtils::Remove(pept_file);
-       }
-   }
+  if (sort_on_disk) {
+    //Delete intermediate peptarget files.
+    for (int i = 0; i < pept_file_idx; ++i) {
+      string pept_file = pathPeptideFile + to_string(i) + ".txt";
+      FileUtils::Remove(pept_file);
+    }
+  }
 
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
@@ -597,13 +564,11 @@ int TideIndexApplication::main(
 
 	  HeadedRecordReader aaf_peptide_reader(peptidePbFile, &aaf_peptides_header);
 
-
 	  if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
 		  !aaf_peptides_header.has_peptides_header()) {
 		  carp(CARP_FATAL, "Error reading index (%s)", peptidePbFile.c_str());
 	  }
 
-	  FifoAllocator fifo_alloc_peptides_(FLAGS_fifo_page_size << 20);
 	  RecordReader* reader_;
 	  reader_ = aaf_peptide_reader.Reader();
 	  pb::Peptide current_pb_peptide_;
@@ -625,7 +590,6 @@ int TideIndexApplication::main(
 	  int unique_delta;
 	  double delta;
 	  double mass;
-	  // pb::Protein* decoy_pd_protein;
 	  int generateAttemptsMax = 6;
 
 	  string target_peptide_with_mods;
@@ -658,7 +622,7 @@ int TideIndexApplication::main(
 	  CHECK(writer.OK());
 	  string decoy_peptide_str;
 
-	  vector<pb::Peptide> pb_peptides; // Used
+	  vector<pb::Peptide> pb_peptides; 
 	  set<string> peptide_str_set;
 	  double last_mass = -1.0;
 	  pb::Peptide last_pb_peptide;
@@ -795,9 +759,6 @@ int TideIndexApplication::main(
 						  continue; // it could be a 'break;' too
 					  }
 
-					  // According to the indeces create a decoy protein string,
-//					  decoy_pd_protein = writeDecoyPbProtein(++curProtein, protein, decoy_peptide_str, startLoc, proteinWriter);
-
 					  // Create a protocol buffer peptide object for the decoy peptide. Note that the decoy peptide may contain modifications.
 					  pb::Peptide decoy_current_pb_peptide_ = current_pb_peptide_;
 					  if (current_pb_peptide_.modifications_size() > 0) {
@@ -805,21 +766,19 @@ int TideIndexApplication::main(
 						  for (int m = 0; m < current_pb_peptide_.modifications_size(); ++m) {
 							  mod_code = current_pb_peptide_.modifications(m);
 
-							  MassConstants::DecodeMod(mod_code, &mod_index, &unique_delta);
+							  // MassConstants::DecodeMod(mod_code, &mod_index, &unique_delta);
+							  var_mod_table.DecodeMod(mod_code, &mod_index, &unique_delta);
 							  decoy_index = decoy_peptide_idx[mod_index];
-							  mod_code = MassConstants::EncodeMod(decoy_index, unique_delta);
+							  // mod_code = MassConstants::EncodeMod(decoy_index, unique_delta);
+							  mod_code = var_mod_table.EncodeMod(decoy_index, unique_delta);
 							  decoy_current_pb_peptide_.add_modifications(mod_code);
 						  }
 					  }
 					  decoy_current_pb_peptide_.set_id(numTargets + decoy_count++);
-//					  decoy_current_pb_peptide_.clear_first_location();
-//					  decoy_current_pb_peptide_.mutable_first_location()->set_protein_id(curProtein);
-//					  decoy_current_pb_peptide_.mutable_first_location()->set_pos((startLoc > 0) ? 1 : 0);
             decoy_current_pb_peptide_.clear_decoy_sequence();
             decoy_current_pb_peptide_.set_decoy_sequence(decoy_peptide_str);
 					  decoy_current_pb_peptide_.set_decoy_index(i);
 					  CHECK(writer.Write(&decoy_current_pb_peptide_));
-//					  delete decoy_pd_protein;
 
 					  //report the decoy peptide if needed.
 					  if (out_target_decoy_list) {
@@ -873,22 +832,13 @@ int TideIndexApplication::main(
   carp(CARP_INFO, "Generated %lu decoy peptides.", decoy_count);
   carp(CARP_INFO, "Generated %lu peptides in total.", numTargets + decoy_count);
   
-    
-  // Clean up
-/*  for (vector<const pb::Protein*>::iterator i = vProteinHeaderSequence.begin();
-       i != vProteinHeaderSequence.end();
-       ++i) {
-    delete *i;
-  }
-  */// Recover stderr
+  // Recover stderr
   cerr.rdbuf(old);
-  
  
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   
   return 0;
-
 }
 
 string TideIndexApplication::getName() const {
@@ -943,6 +893,7 @@ vector<string> TideIndexApplication::getOptions() const {
     "max-length",
     "max-mass",
     "max-mods",
+    "memory-limit",
     "min-length",
     "min-mass",
     "min-mods",
@@ -959,7 +910,6 @@ vector<string> TideIndexApplication::getOptions() const {
     "parameter-file",
     "peptide-list",
     "seed",
-    "sort",
     "temp-dir",
     "verbosity"
   };
@@ -1049,47 +999,6 @@ pb::Protein* TideIndexApplication::writePbProtein(
   return p;
 }
 
-/*
- * This is a bit tricky. We are storing decoy peptide sequences as
- * "pseudo-proteins" in the protocol buffer.  To make this work, we
- * have to store some additional bits of information: the identity of
- * the preceding and following amino acids, as well as the identify of
- * the corresponding target sequence.  All of this information gets
- * appended together before getting put into the protocol buffer.
- * Note that the two termini are handled differently: if there is no
- * preceding amino acid, then nothing is prepended; but if there is no
- * succeeding amino acid, then a hyphen is appended.
- */
- /*
-pb::Protein* TideIndexApplication::writeDecoyPbProtein(
-  int id,
-  const pb::Protein* protein,
-  string decoyPeptideSequence,
-  int startLoc,
-  HeadedRecordWriter& proteinWriter
-) {
-  const string proteinSequence = protein->residues();
-  const int pepLen = decoyPeptideSequence.length();
-
-  // Add N term to decoySequence, if it exists
-  
-  if (startLoc > 0) {
-    decoyPeptideSequence.insert(0, 1, proteinSequence.at(startLoc - 1));
-  }
-  
-  // Add C term to decoySequence, if it exists, or hyphen otherwise.
-  size_t cTermLoc = startLoc + pepLen;
-  
-  decoyPeptideSequence.push_back((cTermLoc < proteinSequence.length()) ?
-    proteinSequence.at(cTermLoc) : '-');
-  
-  // Append original target sequence
-  decoyPeptideSequence.append(proteinSequence.substr(startLoc, pepLen));
-  
-  return writePbProtein(proteinWriter, id, Params::GetString("decoy-prefix") + protein->name(),
-                 decoyPeptideSequence, startLoc);
-}
-*/
 void TideIndexApplication::getPbPeptide(
   int id,
   const TideIndexPeptide& peptide,
@@ -1218,7 +1127,6 @@ string getModifiedPeptideSeq(const pb::Peptide* peptide,
   return pep_str;
 }
 
-// Larry's code
 TideIndexApplication::TideIndexPeptide* TideIndexApplication::readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequence, int sourceId){
   
   FixPt pepMass;
@@ -1242,45 +1150,10 @@ TideIndexApplication::TideIndexPeptide* TideIndexApplication::readNextPeptide(FI
   int decoyIdx = -1; // -1 if not a decoy; There are no decoy peptides generated at this point
 
   const string& proteinSequence = vProteinHeaderSequence[prot_id]->residues();
-  
-//  printf("%u,%s,%d,%d,%d\n", (unsigned int)(pepMass), std::string(proteinSequence.data() + i->pos_, i->length_).c_str(), curProtein, i->pos_, i->length_);
-
-  
+    
   TideIndexPeptide* pepTarget = new TideIndexPeptide(pepMass, len, &proteinSequence, prot_id, pos, decoyIdx, sourceId);
   
   return pepTarget;
-  /*
-  string line;
-  vector<std::string> strs;
-  if (getline(sortedFile, line)) {
-
-	#ifdef _WIN32
-	  // This extra code is added to remove redundant quotes in string.
-	  boost::split(strs, line, boost::is_any_of(","));
-	  for (int i = 0; i < strs.size(); i++) {
-		  strs[i].erase(remove(strs[i].begin(), strs[i].end(), '\"'), strs[i].end());
-	  }
-
-	#else
-	  boost::split(strs, line, boost::is_any_of(","));
-	#endif
-    
-    FixPt mass = stoul(strs[0]);
-	// string peptide sequence is skipped stoi(strs[1]);
-    int proteinId = stoi(strs[2]);
-    int proteinPos = stoi(strs[3]);
-    int length = stoi(strs[4]);
-    int decoyIdx = -1;//stoi(strs[6]); // -1 if not a decoy; There are no decoy peptides generated at this point
-
-    const string& proteinSequence = vProteinHeaderSequence[proteinId]->residues();
-    
-    TideIndexPeptide* pepTarget = new TideIndexPeptide(mass, length, &proteinSequence, proteinId, proteinPos, decoyIdx);
-	
-    return pepTarget;
-  }else{
-    return nullptr;
-  }
-  */
 }
 
 void TideIndexApplication::dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file){
@@ -1313,14 +1186,10 @@ void TideIndexApplication::dump_peptides_to_binary_file(vector<TideIndexPeptide>
     if (ret == 0) {
       carp(CARP_FATAL, "Error while writting to disk. ");
     }
-    // for debugging
-    // string pept_str = (*pept_itr).getSequence();          
-    // fprintf(fp, "%u,%s,%d,%d,%d\n", (unsigned int)(pepMass), pept_str.c_str(), prot_id, pos, len);  
   }   
   fclose(fp);    
 
 }
-// Larry's code ends here
 /*
 * Local Variables:
 * mode: c
