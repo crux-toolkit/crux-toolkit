@@ -21,6 +21,7 @@
 #include "io/PMCDelimitedFileWriter.h"
 #include "io/PMCPepXMLWriter.h"
 #include "io/PMCSQTWriter.h"
+#include "CruxApplication.h"
 
 
 using namespace std;
@@ -107,6 +108,15 @@ int PercolatorApplication::main(int argc, char** argv) {
       carp(CARP_INFO, "File conversion complete.");
     }
   }
+
+  // Note that 1 is the default value
+  // Note that Crux pipeline does not call Percolator via this function
+  if (Params::GetString("seed") != "1") {
+    carp(CARP_FATAL, "The --seed option is for the tide-index command. To set the "
+                     "random number generator seed in percolator, use the "
+                      "--percolator-seed option.");
+  }
+
   return main(input_pin);
 }
 
@@ -115,9 +125,16 @@ int PercolatorApplication::main(int argc, char** argv) {
  * \returns whether percolator was successful or not
  */
 int PercolatorApplication::main(
-  const string& input_pin, ///< file path of pin to process.
-  const std::string& output_dir_to_overwrite //added by Yang
+  const string& input_pin, // file path of pin to process.
+  const std::string& output_dir_to_overwrite, // added by Yang
+  const std::string& app_name // added by Andy
   ) {
+  if (app_name != "pipeline" && Params::GetString("seed") != "1") {
+    carp(CARP_FATAL, "The --seed option is for the tide-index command. To set the "
+                     "random number generator seed in percolator, use the "
+                     "--percolator-seed option.");
+  }
+
   /* build argument list */
   vector<string> perc_args_vec;
   perc_args_vec.push_back("percolator");
