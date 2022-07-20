@@ -285,7 +285,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     carp(CARP_FATAL, "Error reading index (%s)", auxlocs_file.c_str());
   }
   carp(CARP_DEBUG, "Read %d auxiliary locations.", locations.size());
-  carp(CARP_INFO, "Read %d auxiliary locations.", locations.size());
 
   // Read peptides index file
   pb::Header peptides_header;
@@ -299,7 +298,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
       !peptides_header.has_peptides_header()) {
     carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
   }
-  carp(CARP_INFO, "Read peptide_header.");  
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
   DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
@@ -307,7 +305,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (headerDecoyType != NO_DECOYS) {
     HAS_DECOYS = true;
   }
-  carp(CARP_INFO, "Init mass constants.");  
 
   MassConstants::Init(&pepHeader.mods(), 
       &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
@@ -347,7 +344,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   }
 
   vector<InputFile> sr = getInputFiles(input_files);
-  carp(CARP_INFO, "Reading spectrum files, etc.");  
 
   // Loop through spectrum files
   for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
