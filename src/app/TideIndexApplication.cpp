@@ -52,6 +52,8 @@ extern unsigned long long AddMods(HeadedRecordReader* reader,
                     string tmpDir,                    
                     const pb::Header& header,
                     const vector<const pb::Protein*>& proteins,
+                    vector<string>& temp_file_name,
+                    unsigned long long memory_limit,
                     VariableModTable* var_mod_table);
 DECLARE_int32(max_mods);
 DECLARE_int32(min_mods);
@@ -419,13 +421,15 @@ int TideIndexApplication::main(
         delete pept_ptr;
       }
     }
+    // Get the lightest peptide from the heap, and remove it from the heap
     std::make_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
     currentPeptide = peptide_list.front();   
     int sourceId = currentPeptide.getSourceId();          
     
+    // Read another peptide from the disk in order to replace currentPeptide
     pept_ptr = readNextPeptide(sortedFiles[sourceId], vProteinHeaderSequence, sourceId);  // get a peptide  
 
-    std::pop_heap (peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
+    std::pop_heap(peptide_list.begin(), peptide_list.end(), greater<TideIndexPeptide>());
     peptide_list.pop_back();   
    
     if (pept_ptr != nullptr) {
@@ -535,14 +539,15 @@ int TideIndexApplication::main(
       FileUtils::Remove(pept_file);
     }
   }
-
+  vector<string> mod_temp_file_names;
   if (need_mods) {
     carp(CARP_INFO, "Computing modified peptides...");
     HeadedRecordReader reader(modless_peptides, NULL, 1024 << 10); // 1024kb buffer
-    numTargets = AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, vProteinHeaderSequence, &var_mod_table);
+    numTargets = AddMods(&reader, peakless_peptides, Params::GetString("temp-dir"), header_with_mods, vProteinHeaderSequence, mod_temp_file_names, Params::GetInt("memory-limit"), &var_mod_table);
     carp(CARP_INFO, "Created %lu modified and unmodified target peptides.", numTargets);
+  } else {
+    mod_temp_file_names.push_back(peptidePbFile);
   }
-  
   if (numDecoys > 0) {
       carp(CARP_INFO, "Generating %d decoy(s) per target peptide", numDecoys);
   } else {
@@ -550,36 +555,14 @@ int TideIndexApplication::main(
   }
   unsigned long long decoy_count = 0;
   
-  // This was added to resolve the race condition issue which arises on windows.
-  // Although not as elegant, this ensures that the object; aaf_peptide_reader will be out os scope allowing deleting of peakless_peptides file
-  if (numDecoys == 0 && out_target_decoy_list == NULL) {
+  if (numDecoys == 0 && out_target_decoy_list == NULL && need_mods == false) {
     if (rename(peptidePbFile.c_str(), out_peptides.c_str()) != 0)
       carp(CARP_FATAL, "Error creating index files");
     else 
       carp(CARP_INFO, "Pepix file created successfully");
     
   } else {
-	  //Reader for the peptides:
-	  pb::Header aaf_peptides_header;
-
-	  HeadedRecordReader aaf_peptide_reader(peptidePbFile, &aaf_peptides_header);
-
-	  if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
-		  !aaf_peptides_header.has_peptides_header()) {
-		  carp(CARP_FATAL, "Error reading index (%s)", peptidePbFile.c_str());
-	  }
-
-	  RecordReader* reader_;
-	  reader_ = aaf_peptide_reader.Reader();
-	  pb::Peptide current_pb_peptide_;
-
-	  MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
-		  &aaf_peptides_header.peptides_header().nterm_mods(),
-		  &aaf_peptides_header.peptides_header().cterm_mods(),
-		  &aaf_peptides_header.peptides_header().nprotterm_mods(),
-		  &aaf_peptides_header.peptides_header().cprotterm_mods(),
-		  MassConstants::bin_width_, MassConstants::bin_offset_);
-
+    
 	  bool success;
 	  vector<int> decoy_peptide_idx;
 	  int startLoc;
@@ -600,11 +583,11 @@ int TideIndexApplication::main(
 	  pb::Header new_header;
 	  new_header.set_file_type(pb::Header::PEPTIDES);
 	  pb::Header_PeptidesHeader* subheader = new_header.mutable_peptides_header();
-	  subheader->CopyFrom(aaf_peptides_header.peptides_header());
+	  subheader->CopyFrom(header_with_mods.peptides_header());
 	  subheader->set_has_peaks(true);
 	  source = new_header.add_source();
-	  source->mutable_header()->CopyFrom(aaf_peptides_header);
-	  source->set_filename(AbsPath(peptidePbFile));
+	  source->mutable_header()->CopyFrom(header_with_mods);
+	  // source->set_filename(AbsPath(peptidePbFile));
 	  HeadedRecordWriter writer(out_peptides, new_header);
 
 	  // Read peptides protocol buffer file
@@ -617,15 +600,13 @@ int TideIndexApplication::main(
 	  int mass_precision = Params::GetInt("mass-precision");
 	  int mod_precision = Params::GetInt("mod-precision");
 
-
-	  CHECK(reader_->OK());
-	  CHECK(writer.OK());
+	  pb::Peptide current_pb_peptide_;
 	  string decoy_peptide_str;
-
 	  vector<pb::Peptide> pb_peptides; 
 	  set<string> peptide_str_set;
 	  double last_mass = -1.0;
 	  pb::Peptide last_pb_peptide;
+	  pb::Peptide temp_pb_peptide;
 	  const pb::Protein* protein;
 	  string pepmass_str;
 	  string pos_str;
@@ -652,13 +633,56 @@ int TideIndexApplication::main(
     if (numDecoys == 0) {
       allowDups = true;
     }
+    
+    // Prepare a queue (pool) to merge the modified peptide files
+    vector<pb::Peptide> pb_peptide_pool;
+    vector<RecordReader*> readers;
+    int source_id = 0;
+    
+    for (vector<string>::iterator i = mod_temp_file_names.begin(); i != mod_temp_file_names.end(); ++i) {
+      RecordReader* reader= new RecordReader(*i, 1024 << 10);
+  	  CHECK(reader->OK());
+      readers.push_back(reader);
+       if (!reader->Done()) {
+         reader->Read(&current_pb_peptide_);
+         CHECK(reader->OK());         
+         current_pb_peptide_.set_decoy_index(source_id);   //use this field to temporarily indicate the origin file of a peptide. 
+         pb_peptide_pool.push_back(current_pb_peptide_);
+       }
+      source_id++;
+      carp(CARP_DEBUG, "temp modification file %s", (*i).c_str());
+    }
+    // Get the lightest peptide from the heap to the front
+    std::make_heap(pb_peptide_pool.begin(), pb_peptide_pool.end(), PbPeptideSortGreater());
+    
+	  CHECK(writer.OK());
+    
     peptide_cnt = 0;
 	  while (!done) {
 		  while (!done) { // Gather peptides with the same mass if allowDups is false
-			  done = reader_->Done();
+      
+        // Check if there is still a peptide in the pool.
+			  if (pb_peptide_pool.size() == 0)
+          done = true;
 			  if (done == true)
 				  break;
-			  reader_->Read(&last_pb_peptide);
+        // Here we do the modified peptide merge.
+        // Get the peptide from the pool with the smallest mass
+        last_pb_peptide = pb_peptide_pool.front();  
+        std::pop_heap(pb_peptide_pool.begin(), pb_peptide_pool.end(), PbPeptideSortGreater());
+        pb_peptide_pool.pop_back();         
+        
+        // Load another peptide into the pool from the porotocol files.
+        source_id = last_pb_peptide.decoy_index();
+        if ( !readers[source_id]->Done() ) {
+          readers[source_id]->Read(&temp_pb_peptide);
+          CHECK(readers[source_id]->OK());
+          temp_pb_peptide.set_decoy_index(source_id);
+          pb_peptide_pool.push_back(temp_pb_peptide);
+          std::push_heap(pb_peptide_pool.begin(), pb_peptide_pool.end(), PbPeptideSortGreater());
+        }
+        last_pb_peptide.set_decoy_index(-1);  //restore the source id and use the decoy index as planned
+
 			  if (allowDups) {
 				  pb_peptides.push_back(last_pb_peptide);
 				  break;
@@ -809,7 +833,7 @@ int TideIndexApplication::main(
 			  }
         ++peptide_cnt;
         if (peptide_cnt % 10000000 == 0) {
-          carp(CARP_INFO, "Wrote %lu peptides", peptide_cnt);
+          carp(CARP_INFO, "Wrote %lu target and their corresponding decoy peptides", peptide_cnt);
         }
 		  }
 		  pb_peptides.clear();
@@ -819,6 +843,9 @@ int TideIndexApplication::main(
 			  last_mass = last_pb_peptide.mass();
 		  }
 	  }
+    for (vector<string>::iterator i = mod_temp_file_names.begin(); i != mod_temp_file_names.end(); ++i) {
+      unlink((*i).c_str());
+    }
 
 	  if (out_target_decoy_list) {
 		  out_target_decoy_list->close();
@@ -828,9 +855,9 @@ int TideIndexApplication::main(
 		  carp(CARP_INFO, "Failed to generate decoys for %lu low complexity peptides.", failedDecoyCnt);
 	  }
   }
-  carp(CARP_INFO, "Generated %lu target peptides.", numTargets);
+  carp(CARP_INFO, "Generated %lu target peptides.", peptide_cnt);
   carp(CARP_INFO, "Generated %lu decoy peptides.", decoy_count);
-  carp(CARP_INFO, "Generated %lu peptides in total.", numTargets + decoy_count);
+  carp(CARP_INFO, "Generated %lu peptides in total.", peptide_cnt + decoy_count);
   
   // Recover stderr
   cerr.rdbuf(old);
