@@ -2052,6 +2052,13 @@ Params::Params() : finalized_(false) {
     "spectrum. However, larger numbers also increase computation time. The "
     "recommended values are between 2000 and 10000",
     "Available for kojak", true);
+  InitDoubleParam("min_peptide_score", 0.1, -10.0, 10.0,
+    "The minimum peptide score threshold for the first (alpha) peptide during "
+    "crosslink analysis. During the first pass in the analysis, if the top "
+    "scoring alpha peptides do not exceed this threshold, they will not be "
+    "considered for pairing with a second (beta) peptide during the second "
+    "pass of the analysis. ",
+    "Available for kojak", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
 
