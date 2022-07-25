@@ -401,8 +401,8 @@ Params::Params() : finalized_(false) {
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",
     "Available for tide-index.", true);
-  InitIntParam("memory-limit", 4, 2, BILLION, 
-    "The size of the memory in GB allowed to be used by tide-index. ",
+  InitIntParam("memory-limit", 4, 1, BILLION, 
+    "The maximum amount of memory (i.e., RAM), in GB, to be used by tide-index.",
     "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
