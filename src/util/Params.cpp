@@ -310,7 +310,7 @@ Params::Params() : finalized_(false) {
     "Available for tide-search.", true);
   InitBoolParam("mzid-output", false,
     "Output an mzIdentML results file to the output directory.",
-    "Available for tide-search, percolator.", true);
+    "Available for tide-search.", true);
   InitBoolParam("pin-output", false,
     "Output a Percolator input (PIN) file to the output directory.",
     "Available for tide-search.", true);

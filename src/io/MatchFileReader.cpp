@@ -175,6 +175,7 @@ void MatchFileReader::getMatchColumnsPresent(
   }
 }
 
+// FIXME: Need to generalize this to work with Percolator files.
 MatchCollection* MatchFileReader::parse(
   const string& file_path,
   Database* database,
@@ -427,12 +428,12 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
     peptide->setMods(mods);
 
     if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
-      carp(CARP_ERROR, "Failed to parse peptide src.");
+      carp(CARP_ERROR, "Failed to parse peptide source.");
       delete peptide;
       return NULL;
     }
   } else {
-    carp(CARP_FATAL, "No peptide sequence (%s).", seq.c_str());
+    carp(CARP_FATAL, "No peptide sequence found.");
   }
   return peptide;
 }

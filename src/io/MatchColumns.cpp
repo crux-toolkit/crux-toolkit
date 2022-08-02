@@ -135,7 +135,14 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr 2",
   "protein id x",
   "index name",
-  "decoy index"
+  "decoy index",
+  // Percolator PIN columns.
+  "PSMId",
+  "score",
+  "q-value",
+  "posterior_error_prob",
+  "peptide",
+  "proteinIds"
 };
 
 /**

@@ -61,9 +61,8 @@ void PercolatorAdapter::deleteCollections() {
  * Adds PSM scores from Percolator objects into a ProteinMatchCollection
  */
 void PercolatorAdapter::processPsmScores(Scores& allScores) {
-  if ( !Params::GetBool("mzid-output") && !Params::GetBool("pepxml-output") ) {
-    return;
-  }
+  return; // Disable this function entirely.
+
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -179,9 +178,7 @@ void PercolatorAdapter::processPsmScores(Scores& allScores) {
  * Adds peptide scores from Percolator objects into a ProteinMatchCollection
  */
 void PercolatorAdapter::processPeptideScores(Scores& allScores) {
-  if ( !Params::GetBool("mzid-output") && !Params::GetBool("pepxml-output") ) {
-    return;
-  }
+  return; // Disable this function entirely.
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
@@ -217,9 +214,7 @@ void PercolatorAdapter::processPeptideScores(Scores& allScores) {
  * Adds protein scores from Percolator objects into a ProteinMatchCollection
  */
 void PercolatorAdapter::processProteinScores(ProteinProbEstimator* protEstimator) {
-  if ( !Params::GetBool("mzid-output") && !Params::GetBool("pepxml-output") ) {
-    return;
-  }
+  return; // Disable this function entirely.
   if (collection_ == NULL || decoy_collection_ == NULL) {
     return;
   }
