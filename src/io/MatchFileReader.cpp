@@ -208,8 +208,16 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    if (empty(PERCOLATOR_QVALUE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
+    } else {
+      match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(QVALUE_COL));
+    }
+    if (empty(PERCOLATOR_SCORE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    } else {
+      match_collection->setScoredType(PERCOLATOR_SCORE, !empty(SCORE_COL));
+    }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
@@ -406,13 +414,23 @@ Crux::Match* MatchFileReader::parseMatch() {
 Crux::Peptide* MatchFileReader::parsePeptide() {
   Crux::Peptide* peptide = NULL;
   string seq = getString(SEQUENCE_COL);
-  if (!seq.empty()) {
-    // In cases where the sequence is in X.seq.X format, parse out the seq part
-    if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
-      seq = seq.substr(2, seq.length() - 4);
-    }
+  bool is_percolator = false;
+  if (seq.empty()) {
+    seq = getString(PERC_PEPTIDE_COL);
+    is_percolator = true;
+  }
+  if (seq.empty()) {
+    carp(CARP_FATAL, "No peptide sequence found.");
+  }
 
-    peptide = new Crux::Peptide();
+  // In cases where the sequence is in X.seq.X format, parse out the seq part
+  if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
+    seq = seq.substr(2, seq.length() - 4);
+  }
+
+  peptide = new Crux::Peptide();
+
+  if (!is_percolator) {
     string unmodSeq = Crux::Peptide::unmodifySequence(seq);
     vector<Crux::Modification> mods;
 
@@ -432,9 +450,8 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
       delete peptide;
       return NULL;
     }
-  } else {
-    carp(CARP_FATAL, "No peptide sequence found.");
   }
+
   return peptide;
 }
 
