@@ -928,6 +928,11 @@ pb::Peptide* TideMatchSet::getPbPeptide(const Peptide& peptide) {
   if (peptide.HasAuxLocationsIndex()) {
     pb_peptide->set_aux_locations_index(peptide.AuxLocationsIndex());
   }
+  
+  if (peptide.IsDecoy()) {
+    pb_peptide->set_decoy_sequence(peptide.Seq());
+    pb_peptide->set_decoy_index(peptide.DecoyIdx());
+  }
 
   // Copy over all the modifications for this Peptide
   const ModCoder::Mod* mods;
