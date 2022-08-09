@@ -25,13 +25,16 @@ string Peptide::SeqWithMods() const {
   vector<char> buf(Len() + num_mods_ * 30 + 1);
   int residue_pos = 0;
   char* buf_pos = &(buf[0]);
+  string mod_str;
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
     while (residue_pos <= index)
       *buf_pos++ = residues_[residue_pos++];
-    buf_pos += sprintf(buf_pos, "[%s%.1f]", delta >= 0 ? "+" : "", delta);
+    mod_str = '[' + StringUtils::ToString(delta, mod_precision_) + ']';
+    // buf_pos += sprintf(buf_pos, "[%s%.1f]", delta >= 0 ? "+" : "", delta);
+    buf_pos += sprintf(buf_pos, mod_str.c_str());
   }
   while (residue_pos < Len())
     *buf_pos++ = residues_[residue_pos++];

@@ -28,6 +28,13 @@ using namespace std;
 
 std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
 
+struct PbPeptideSortGreater {
+  PbPeptideSortGreater() {}
+  inline bool operator() (const pb::Peptide& x, const pb::Peptide& y) {
+    return x.mass() > y.mass();
+  }
+};
+
 
 class TideIndexApplication : public CruxApplication {
 

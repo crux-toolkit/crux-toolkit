@@ -291,6 +291,7 @@ bool GeneratePeptides::getNextProtein(
  * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
  */
+
 vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
@@ -388,6 +389,7 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
  * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
  */
+ /*
 vector<GeneratePeptides::PeptideReference> GeneratePeptides::cleaveProtein(
   const string* sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
@@ -481,6 +483,7 @@ vector<GeneratePeptides::PeptideReference> GeneratePeptides::cleaveProtein(
   }
   return peptides;
 }
+*/
 /**
  * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
