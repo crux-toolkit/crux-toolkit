@@ -291,10 +291,6 @@ Params::Params() : finalized_(false) {
     "Create in the output directory a text file listing of all the peptides in the "
     "database, along with their corresponding decoy peptides, neutral masses and proteins, one per line.",
     "Available for tide-index.", true);
-  InitIntParam("modsoutputter-threshold", 1000, 0, BILLION,
-    "Maximum number of temporary files that would be opened by ModsOutputter "
-    "before switching to ModsOutputterAlt.",
-    "Available for tide-index.", false);
   // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",

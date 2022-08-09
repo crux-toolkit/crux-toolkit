@@ -31,6 +31,7 @@
 #include "fifo_alloc.h"
 #include "mod_coder.h"
 #include "sp_scorer.h"
+#include "util/Params.h"
 
 #include "spectrum_collection.h"
 //#include "TideMatchSet.h"
@@ -107,6 +108,7 @@ class Peptide {
       for (int i = 0; i < num_mods_; ++i)
         mods_[i] = ModCoder::Mod(peptide.modifications(i));
     }
+    mod_precision_ = Params::GetInt("mod-precision");    
   }
   class spectrum_matches {
    public:
@@ -284,6 +286,8 @@ class Peptide {
   ModCoder::Mod* mods_;
   int decoyIdx_;
   string decoy_seq_;
+  int mod_precision_;
+
 
   void* prog1_;
   void* prog2_;

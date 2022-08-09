@@ -37,9 +37,7 @@ DEFINE_int32(max_mods, 255,
   "Maximum number of modifications that can be applied to a single peptide.");
 DEFINE_int32(min_mods, 0,
   "Minimum number of modifications that can be applied to a single peptide.");
-DEFINE_int32(modsoutputter_file_threshold, 1000,
-  "Maximum number of temporary files that would be opened by ModsOutputter "
-  "before switching to ModsOutputterAlt.");
+
 
 static string GetTempName(const string& tempDir, int filenum) {
   char buf[64];
@@ -62,385 +60,6 @@ class IModsOutputter {
   virtual uint64_t Total() const = 0;
   virtual bool GetTempFileNames(vector<string>& filenames) = 0;
 };
-
-// Original class to generate modified peptides. Writes to temporary files
-// before merging them. As the number of possible modifications increases, the
-// number of required temporary files can grow extremely large.
-
-// class ModsOutputter : public IModsOutputter {
- // public:
-  // ModsOutputter(string tmpDir,
-                // const vector<const pb::Protein*>& proteins,
-                // VariableModTable* var_mod_table,
-                // HeadedRecordWriter* final_writer)
-    // : tmpDir_(tmpDir),
-      // modPeptideCnt_(0),
-      // proteins_(proteins),
-      // mod_table_(var_mod_table),
-      // max_counts_(*mod_table_->MaxCounts()),
-      // counts_mapper_vec_(max_counts_.size(), 0),
-      // final_writer_(final_writer),
-      // count_(0) {
-    // numFiles_ = 1;
-    // for (int i = 0; i < max_counts_.size(); ++i) {
-      // counts_mapper_vec_[i] = numFiles_;
-      // if (max_counts_[i] == 0)
-        // numFiles_ *= (max_counts_[i]+2);
-      // else
-        // numFiles_ *= (max_counts_[i]+1);
-    // }
-  // }
-
-  // ~ModsOutputter() {
-    // for (int i = 0; i < writers_.size(); ++i) {
-      // delete writers_[i];
-    // }
-    // if (modPeptideCnt_ > 0) {
-      // Merge();
-    // }
-  // }
-
-  // int NumFiles() const {
-    // return numFiles_;
-  // }
-
-  // uint64_t Total() const {
-    // return modPeptideCnt_;
-  // }
-
-  // void InitCountsMapper() {
-	
-    // writers_.resize(numFiles_);
-    // if (numFiles_ > 100) {
-      // carp(CARP_INFO, "Opening %d files for modifications.", numFiles_);
-    // }
-
-    // for (int i = 0; i < numFiles_; ++i) {		
-      // writers_[i] = new RecordWriter(GetTempName(tmpDir_, i), FLAGS_buf_size << 10);
-      // if (!writers_[i]->OK()) {
-        // // delete temporary files
-        // for (int j = 0; j < i; ++j)
-          // unlink(GetTempName(tmpDir_, j).c_str());
-        // CHECK(writers_[i]->OK());
-      // }
-    // }
-
-    // const vector<double>& deltas = *mod_table_->OriginalDeltas();
-    // delta_by_file_.resize(numFiles_);
-    // for (int i = 0; i < numFiles_; ++i) {
-      // double total_delta = 0;
-      // int x = i;
-      // for (int j = max_counts_.size() - 1; j >= 0; --j) {
-        // int digit = x / counts_mapper_vec_[j];
-        // x %= counts_mapper_vec_[j];
-        // total_delta += deltas[j] * digit;
-      // }
-      // delta_by_file_[i] = total_delta;
-    // }
-	
-  // }
-
-  // void Output(pb::Peptide* peptide) {
-    // peptide_ = peptide;
-    // const pb::Location& loc = peptide->first_location();
-    // residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
-    // vector<int> counts(max_counts_.size(), 0);
-    // OutputNtermMods(0, counts);
-  // }
-  
-  // bool GetTempFileNames(vector<string>& filenames){
-    // int num_files = writers_.size();
-    // for (int i = 0; i < num_files; ++i) {
-      // filenames.push_back(GetTempName(tmpDir_, i));
-    // }
-    // return true;
-  // }
-
- // private:
-  // string tmpDir_;
-  // int numFiles_;
-  // uint64_t modPeptideCnt_;
-
-  // class PepReader {
-   // public:
-    // PepReader(const string& filename)
-      // : reader_(filename, FLAGS_buf_size << 10) {
-      // CHECK(reader_.OK());
-    // }
-
-    // bool operator<(const PepReader& other) {
-      // double mass = current_.mass();
-      // double other_mass = other.current_.mass();
-      // if (mass < other_mass)
-        // return true;
-      // if (mass > other_mass)
-        // return false;
-      // return current_.id() < other.current_.id();
-    // }
-
-    // bool Advance() {
-      // if (reader_.Done())
-        // return false;
-      // reader_.Read(&current_);
-      // CHECK(reader_.OK());
-      // return true;
-    // }
-
-    // pb::Peptide* Current() { return &current_; }
-
-   // private:
-    // RecordReader reader_;
-    // pb::Peptide current_;
-  // };
-
-  // struct greater_pepreader : public binary_function<PepReader*, PepReader*, bool> {
-    // bool operator()(PepReader* x, PepReader* y) {
-      // return x != y && *y < *x;
-    // }
-  // };
-
-  // //terminal modifications count as a modification and hence
-  // //it is taken into account the modification limit.
-  // void OutputMods(int pos, vector<int>& counts) {
-    // if (TotalMods(counts) > FLAGS_max_mods) {
-      // return;
-    // }
-    // if (pos == peptide_->length()) {
-      // OutputCtermMods(pos-1, counts);
-    // } else {
-      // if (pos == peptide_->length()-1){
-        // OutputCtermMods(pos, counts);
-      // } else {
-        // char aa = residues_[pos];
-        // int num_poss = mod_table_->NumPoss(aa);
-        // for (int i = 0; i < num_poss; ++i) {
-          // int poss_max_ct = mod_table_->PossMaxCt(aa, i);
-          // if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
-            // ++counts[poss_max_ct];
-            // int delta_index = mod_table_->PossDeltIx(aa, i);
-            // peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-            // OutputMods(pos+1, counts);
-            // peptide_->mutable_modifications()->RemoveLast();
-            // --counts[poss_max_ct];
-          // }
-        // }
-        // // Having this call to OutputMods come last is, in fact, correct, but it's
-        // // tricky to see why. When modified peptides have equal mass, we want
-        // // modified positions toward the front of the peptide to appear before those
-        // // that come toward the end of the peptide. Having this call at the end
-        // // achieves that.
-        // OutputMods(pos+1, counts); // without further mods
-      // }
-    // }
-  // }
-
-  // void PlaceVariableNTermMod(int pos, char aa, mods_spec_type mod_spec, vector<int>& counts){
-    // int num_poss = mod_table_->NumPoss(aa, mod_spec);
-
-    // for (int i = 0; i < num_poss; ++i) {
-      // int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_spec);
-      // if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
-        // ++counts[poss_max_ct];
-        // int delta_index = mod_table_->PossDeltIx(aa, i, mod_spec);  
-        // peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-        // OutputMods(1, counts);
-        // peptide_->mutable_modifications()->RemoveLast();
-        // --counts[poss_max_ct];
-      // }
-    // }    
-  // }
-
-  // void OutputNtermMods(int pos, vector<int>& counts) {
-    // if (TotalMods(counts) > FLAGS_max_mods) {
-      // return;
-    // }
-    // bool any_term_modification = false;
-
-    // //add static N-terminal modifications
-    // //TODO: It looks like this code never runs. Static terminal mods are done 
-    // //through mass tables and they never make it into the possibles_ tables
-    // vector<char> aas{residues_[0], 'X'};
-    // for(auto aa = aas.begin(); aa < aas.end(); aa++){
-
-      // int num_poss = mod_table_->NumPoss(*aa, NTPEP);
-      // for (int i = 0; i < num_poss; ++i) {
-        // int poss_max_ct = mod_table_->PossMaxCt(*aa, i, NTPEP);
-        // if (max_counts_[poss_max_ct] == 0) {
-          // int delta_index = mod_table_->PossDeltIx(*aa, i, NTPEP);
-          // peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-          // OutputMods(1, counts);
-          // peptide_->mutable_modifications()->RemoveLast();
-          // any_term_modification = true;
-        // }
-      // }
-    // }
-
-    // if (!any_term_modification) {
-      // //if there were no static modificatinos add variable terminal modifications
-      // for(auto it = aas.begin(); it < aas.end(); it++){
-        // if(peptide_->first_location().pos() == 0){
-          // //this is protein N-terminal
-            // PlaceVariableNTermMod(pos, *it, NTPRO, counts);
-          // }
-        // PlaceVariableNTermMod(pos, *it, NTPEP, counts); //peptide terminal
-      // }
-      // OutputMods(0, counts);  //regular mods
-    // }
-  // }
-
-  // void PlaceCTermVariableMod(int pos, char aa, mods_spec_type mod_type, vector<int>& counts){
-      // int num_poss = mod_table_->NumPoss(aa, mod_type);
-      // for (int i = 0; i < num_poss; ++i) {
-        // int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_type);
-        // if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
-          // ++counts[poss_max_ct];
-          // int delta_index = mod_table_->PossDeltIx(aa, i, mod_type);
-          // peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-
-          // if (TotalMods(counts) >= FLAGS_min_mods) {
-            // peptide_->set_id(count_++);
-            // Write(counts);
-          // }
-
-          // peptide_->mutable_modifications()->RemoveLast();
-          // --counts[poss_max_ct];
-        // }
-      // }
-  // }
-
-  // void OutputCtermMods(int pos, vector<int>& counts) {
-    // int total = TotalMods(counts);
-    // if (total > FLAGS_max_mods) {
-      // return;
-    // } else if (total == FLAGS_max_mods) {
-      // if (total >= FLAGS_min_mods) {
-        // peptide_->set_id(count_++);
-        // Write(counts);
-      // }
-      // return;
-    // }
-
-    // bool any_term_modification = false;
-    // vector<char> aas{residues_[pos], 'X'};        //we are looking up mod definitions for the current residue or X
-    // for(auto aa = aas.begin(); aa < aas.end(); aa++){
-      // int num_poss = mod_table_->NumPoss(*aa, CTPEP);
-      // for (int i = 0; i < num_poss; ++i) {
-        // int poss_max_ct = mod_table_->PossMaxCt(*aa, i, CTPEP);
-        // if (max_counts_[poss_max_ct] == 0) {                          //this condition is never satisfied because max_counts_ is initialized 
-          // int delta_index = mod_table_->PossDeltIx(*aa, i, CTPEP);    //with the var mods table and var mods max count is always >0  
-          // peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-
-          // if (TotalMods(counts) >= FLAGS_min_mods) {
-            // peptide_->set_id(count_++);
-            // Write(counts);
-          // }
-          // peptide_->mutable_modifications()->RemoveLast();
-          // any_term_modification = true;
-        // }
-      // }
-    // }
-
-    // if (!any_term_modification) {
-      // //if there were no static modifications add amino acid mods
-      // char aa = residues_[pos];
-      // //add any matching regular mods first
-      // PlaceCTermVariableMod(pos, residues_[pos], MOD_SPEC, counts);
-
-      // //add variable c-terminal mods
-      // int prot_idx = peptide_->first_location().protein_id();
-      // auto prot_len = proteins_[prot_idx]->residues().length();
-
-      // for(auto aa = aas.begin(); aa < aas.end(); aa++) {
-        // //if this is protein's C_terminal
-        // if((peptide_->first_location().pos() + peptide_->length()) == prot_len)
-          // PlaceCTermVariableMod(pos, *aa, CTPRO, counts);
-        // PlaceCTermVariableMod(pos, *aa, CTPEP, counts);
-      // }
-
-      // if (TotalMods(counts) >= FLAGS_min_mods) {
-        // peptide_->set_id(count_++);
-        // Write(counts);
-      // }
-    // }
-  // }
-
-  // void Merge() {
-    // int num_files = writers_.size();
-    // vector<PepReader*> readers(num_files);
-    // for (int i = 0; i < num_files; ++i)
-      // readers[i] = new PepReader(GetTempName(tmpDir_, i));
-
-    // // initialize heap
-    // PepReader** heap_end = &(readers[0]) + num_files;
-    // for (PepReader** reader = &(readers[0]); reader < heap_end; ++reader)
-      // if (!(*reader)->Advance())
-        // swap(*reader--, *--heap_end);
-    // make_heap(&(readers[0]), heap_end, greater_pepreader());
-
-    // // do heap merge
-    // int id = 0;
-// #ifndef NDEBUG
-    // double last_mass = 0.0;
-// #endif
-    // while (heap_end > &(readers[0])) {
-      // pop_heap(&(readers[0]), heap_end, greater_pepreader());
-      // pb::Peptide* current = (*(heap_end-1))->Current();
-      // current->set_id(id++);
-// #ifndef NDEBUG
-      // assert(current->mass() >= last_mass);
-      // last_mass = current->mass();
-// #endif
-      // final_writer_->Write(current);
-      // CHECK(final_writer_->OK());
-      // if ((*(heap_end-1))->Advance()) {
-        // push_heap(&(readers[0]), heap_end, greater_pepreader());
-      // } else {
-        // --heap_end;
-      // }
-    // }
-
-    // // delete temporary files
-    // for (int i = 0; i < num_files; ++i) {
-      // delete readers[i];
-      // unlink(GetTempName(tmpDir_, i).c_str());
-    // }
-  // }
-
-  // int TotalMods(const vector<int>& counts) {
-    // return accumulate(counts.begin(), counts.end(), 0);
-  // }
-
-  // int DotProd(const vector<int>& counts) {
-    // int dot = 0;
-    // for (int i = 0; i < counts.size(); ++i)
-      // dot += counts_mapper_vec_[i] * counts[i];
-    // return dot;
-  // }
-
-  // RecordWriter* Write(const vector<int>& counts) {
-    // ++modPeptideCnt_;
-    // int index = DotProd(counts);
-    // double mass = peptide_->mass();
-    // peptide_->set_mass(delta_by_file_[index] + mass);
-    // if (!writers_[index]->Write(peptide_)) {
-      // carp(CARP_FATAL, "I/O error writing modifications");
-    // }
-    // peptide_->set_mass(mass);
-    // return writers_[index];
-  // }
-
-  // const vector<const pb::Protein*>& proteins_;
-  // VariableModTable* mod_table_;
-  // const vector<int>& max_counts_;
-  // vector<int> counts_mapper_vec_;
-  // vector<RecordWriter*> writers_;
-  // vector<double> delta_by_file_;
-  // HeadedRecordWriter* final_writer_;
-  // int count_;
-
-  // pb::Peptide* peptide_;
-  // const char* residues_;
-// };
 
 // Alternative class to generate modified peptides. Writes to temporary files
 // before merging them. Bins modified peptides by mass, then writes them to the
@@ -468,6 +87,18 @@ class ModsOutputterAlt : public IModsOutputter {
       }
       for (int i = 0; i < vmt->NumPoss(c, NTPEP); i++) {
         int deltIx = vmt->PossDeltIx(c, i, NTPEP);
+        int maxCt = maxCounts->at(deltIx);
+        modMaxCounts_[deltIx] = maxCt;
+        maxMods_ += maxCt;
+      }
+      for (int i = 0; i < vmt->NumPoss(c, NTPRO); i++) {
+        int deltIx = vmt->PossDeltIx(c, i, NTPRO);
+        int maxCt = maxCounts->at(deltIx);
+        modMaxCounts_[deltIx] = maxCt;
+        maxMods_ += maxCt;
+      }
+      for (int i = 0; i < vmt->NumPoss(c, CTPRO); i++) {
+        int deltIx = vmt->PossDeltIx(c, i, CTPRO);
         int maxCt = maxCounts->at(deltIx);
         modMaxCounts_[deltIx] = maxCt;
         maxMods_ += maxCt;
@@ -503,8 +134,8 @@ class ModsOutputterAlt : public IModsOutputter {
     while (resultMods.Next()) {
       resultMods.ModifyPeptide();
       WritePeptide(peptide); 
-      if (totalWritten_ % 10000 == 0) {
-        carp(CARP_DEBUG, "Wrote %lu peptides to temp files", totalWritten_);
+      if (totalWritten_ % 10000000 == 0) {
+        carp(CARP_INFO, "Wrote %lu peptides to temp files", totalWritten_);
       }
     }
   }
@@ -575,12 +206,20 @@ class ModsOutputterAlt : public IModsOutputter {
       string seq(proteins[loc.protein_id()]->residues().data() + loc.pos(), peptide->length());
       // generate possible mod index states
       modIndexStates_ = vector< vector<int> >(seq.length(), vector<int>());
+      int prot_len = proteins[loc.protein_id()]->residues().length();
       for (size_t i = 0; i < seq.length(); i++) {
         char aa = seq[i];
         if (i == 0) {
           int numPossNtPep = modTable->NumPoss(aa, NTPEP);
           for (int j = 0; j < numPossNtPep; j++) {
             int possDeltIx = modTable->PossDeltIx(aa, j, NTPEP);
+            modIndexStates_[i].push_back(possDeltIx);
+          }
+        }
+        if (i == 0 && loc.pos() == 0) {
+          int numPossNtPro = modTable->NumPoss(aa, NTPRO);
+          for (int j = 0; j < numPossNtPro; j++) {
+            int possDeltIx = modTable->PossDeltIx(aa, j, NTPRO);
             modIndexStates_[i].push_back(possDeltIx);
           }
         }
@@ -591,6 +230,19 @@ class ModsOutputterAlt : public IModsOutputter {
             modIndexStates_[i].push_back(possDeltIx);
           }
         }
+        if (i == seq.length() - 1 && i+loc.pos() == prot_len - 1) {
+          int numPossCtPep = modTable->NumPoss(aa, CTPRO);
+          for (int j = 0; j < numPossCtPep; j++) {
+            int possDeltIx = modTable->PossDeltIx(aa, j, CTPRO);
+            modIndexStates_[i].push_back(possDeltIx);
+          }
+        }
+
+        // for(auto aa = aas.begin(); aa < aas.end(); aa++) {
+          // //if this is protein's C_terminal
+          // if((peptide_->first_location().pos() + peptide_->length()) == prot_len)
+            // PlaceCTermVariableMod(pos, *aa, CTPRO, counts);
+        
         int numPoss = modTable->NumPoss(aa, MOD_SPEC);
         for (int j = 0; j < numPoss; j++) {
           int possDeltIx = modTable->PossDeltIx(aa, j, MOD_SPEC);
@@ -701,11 +353,12 @@ class ModsOutputterAlt : public IModsOutputter {
     if (!writer->OK()) {
       DeleteTempFiles();
       CHECK(writer->OK());
+      carp(CARP_FATAL, "Failed to create temp files for modified peptides. Check free disk space.");
     }
     return writer;
   }
 
-  // Combine all temp files into the final file
+  // Write peptides to disk
   void DumpPeptides() {
     
     if (pb_peptide_list_.size() == 0)
@@ -720,7 +373,7 @@ class ModsOutputterAlt : public IModsOutputter {
     for (vector<pb::Peptide>::iterator pept=pb_peptide_list_.begin(); pept != pb_peptide_list_.end(); ++pept) {
       if (!writer->Write(&(*pept))) {
         DeleteTempFiles();
-        carp(CARP_FATAL, "I/O error writing modified peptide");
+        carp(CARP_FATAL, "I/O error writing modified peptide. Check free disk space.");
       }
     }
     delete writer;
@@ -767,20 +420,10 @@ unsigned long long AddMods(HeadedRecordReader* reader,
   HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
   CHECK(writer.OK());
 
-//  ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, &writer);
-  memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide));
+  memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
   ModsOutputterAlt outputAlt(tmpDir, proteins, var_mod_table, &writer, memory_limit);
   IModsOutputter* outputter;
 
-/*  if (outputOrig.NumFiles() <= FLAGS_modsoutputter_file_threshold) {
-     outputOrig.InitCountsMapper();
-     outputter = &outputOrig;
-  } else {
-    // Switch to alternate ModsOutputter if the regular one would open too many files
-    carp(CARP_DEBUG, "Using alternate ModsOutputter, original version would open %d files",
-         outputOrig.NumFiles());
-  }
-  */
   outputter = &outputAlt;
 
   pb::Peptide peptide;
