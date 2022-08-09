@@ -57,7 +57,6 @@ extern unsigned long long AddMods(HeadedRecordReader* reader,
                     VariableModTable* var_mod_table);
 DECLARE_int32(max_mods);
 DECLARE_int32(min_mods);
-DECLARE_int32(modsoutputter_file_threshold);
 
 TideIndexApplication::TideIndexApplication() {
 }
@@ -96,7 +95,6 @@ int TideIndexApplication::main(
   bool monoisotopic_precursor = Params::GetString("isotopic-mass") != "average";
   FLAGS_max_mods = Params::GetInt("max-mods");
   FLAGS_min_mods = Params::GetInt("min-mods");
-  FLAGS_modsoutputter_file_threshold = Params::GetInt("modsoutputter-threshold");
   bool allowDups = Params::GetBool("allow-dups");
   if (FLAGS_min_mods > FLAGS_max_mods) {
     carp(CARP_FATAL, "The value for 'min-mods' cannot be greater than the value "
