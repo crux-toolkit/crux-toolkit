@@ -34,7 +34,7 @@ class CacheableMass {
    */
   virtual FLOAT_T calcMass(
     MASS_TYPE_T mass_type
-    )=0;
+    ) = 0;
 
 
   /*
@@ -54,8 +54,8 @@ class CacheableMass {
    */
   static void copy(
     CacheableMass* src, ///< Source 
-	CacheableMass* dest ///< Dest
-	);
+    CacheableMass* dest ///< Dest
+    );
  
 };
 

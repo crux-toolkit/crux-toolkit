@@ -411,6 +411,7 @@
 <parameter name="top_count" value="20"/>
 <parameter name="truncate_prot_names" value="0"/>
 <parameter name="e_value_depth" value="5000"/>
+<parameter name="min_peptide_score" value="0.1"/>
 <parameter name="predrt-files" value=""/>
 <parameter name="msamanda-regional-topk" value="10"/>
 <parameter name="coelution-oneside-scans" value="3"/>
