@@ -171,10 +171,10 @@ class Peptide {
   }
 
   // Allocation by FifoAllocator
-  void* operator new(size_t size, FifoAllocator* fifo_alloc) {
+/*  void* operator new(size_t size, FifoAllocator* fifo_alloc) {
     return fifo_alloc->New(size);
   }
-
+*/
   string Seq() const { return string(residues_, Len()); } // For display
   string TargetSeq() const { return string(target_residues_, Len()); } // For display
 
