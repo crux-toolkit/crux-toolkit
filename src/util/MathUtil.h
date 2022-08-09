@@ -19,7 +19,7 @@ class MathUtil {
   static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
 
   static double MaxInArr(double* arr_values, int size);
-  static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt=true);
+  static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt = true);
   static std::vector<double> linspace(double start, double end, int num);
 
   // find the closest match index from the data array to the query in O(log(n))

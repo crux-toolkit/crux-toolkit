@@ -70,24 +70,24 @@ class StringUtils {
   // added by Yang
   // Joins a vector of double into a single string separated by a delimiter, preserving the high precision
   static std::string JoinDoubleVec(std::vector<double>& values, const char delimiter ='\0') {
-	    std::stringstream ss;
-	    for (std::vector<double>::iterator i = values.begin(); i != values.end(); i++) {
-	      if (i != values.begin() && delimiter != '\0') { ss << delimiter; }
-	      ss << std::setprecision(10) << *i;
-	    }
-	    return ss.str();
+    std::stringstream ss;
+    for (std::vector<double>::iterator i = values.begin(); i != values.end(); i++) {
+      if (i != values.begin() && delimiter != '\0') { ss << delimiter; }
+      ss << std::setprecision(10) << *i;
+    }
+    return ss.str();
   }
 
   static std::string JoinDoubleArr(double* values, int size, const char delimiter ='\0') {
-	  if (values == NULL || size <= 0) { return std::string();; }
+    if (values == NULL || size <= 0) { return std::string();; }
 
-  	    std::stringstream ss;
-  	    for (int i=0; i<size; ++i) {
-  	    	if (i != 0 && delimiter != '\0') { ss << delimiter; }
-  	    	ss << std::setprecision(10) << values[i];
-  	    }
-  	    return ss.str();
+    std::stringstream ss;
+    for (int i=0; i < size; ++i) {
+      if (i != 0 && delimiter != '\0') { ss << delimiter; }
+        ss << std::setprecision(10) << values[i];
     }
+    return ss.str();
+  }
 
 
   // Split a string on a delimiter
