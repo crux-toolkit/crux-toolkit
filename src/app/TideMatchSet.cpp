@@ -56,6 +56,7 @@ void TideMatchSet::report(
   int charge;
   double score;
   double d_cn = 0.0;
+  double d_lcn = 0.0;  
   int nHit = peptide_->spectrum_matches_array.size();
 
   if (nHit < top_matches) {
@@ -73,10 +74,14 @@ void TideMatchSet::report(
 
   for (int cnt = 0; cnt < nHit; ++cnt) {
     d_cn = 0.0;
+    d_lcn = 0.0;    
     if (exact_pval_search_ == true) {
       score = peptide_->spectrum_matches_array[cnt].score1_;
       if (cnt < nHit-1) {
         d_cn = (double)((log10(peptide_->spectrum_matches_array[cnt+1].score1_)
+                       - log10(peptide_->spectrum_matches_array[cnt].score1_))
+                       /max((FLOAT_T)(-1*log10(peptide_->spectrum_matches_array[cnt].score1_)), FLOAT_T(1)));
+        d_lcn = (double)((log10(peptide_->spectrum_matches_array[nHit-1].score1_)
                        - log10(peptide_->spectrum_matches_array[cnt].score1_))
                        /max((FLOAT_T)(-1*log10(peptide_->spectrum_matches_array[cnt].score1_)), FLOAT_T(1)));
       }
@@ -86,10 +91,15 @@ void TideMatchSet::report(
         d_cn = (double)( score
                       - (double)(peptide_->spectrum_matches_array[cnt+1].score1_ / 100000000.0)
                       / (double)max((FLOAT_T)score , FLOAT_T(1)));
+        d_lcn = (double)( score
+                      - (double)(peptide_->spectrum_matches_array[nHit-1].score1_ / 100000000.0)
+                      / (double)max((FLOAT_T)score , FLOAT_T(1)));
+                      
       }
     }
     peptide_->spectrum_matches_array[cnt].score1_ = score;
     peptide_->spectrum_matches_array[cnt].d_cn_ = d_cn;
+    peptide_->spectrum_matches_array[cnt].d_lcn_ = d_lcn;    
     peptide_->spectrum_matches_array[cnt].score3_ = nHit;
   }
   //smoothing primary scores in the elution window, only in DIA mode.
@@ -202,7 +212,8 @@ void TideMatchSet::writeToFile(
         *file << StringUtils::ToString(spectrum->PrecursorMZ(), massPrecision) << '\t'
               << StringUtils::ToString((spectrum->PrecursorMZ() - MASS_PROTON) * i->charge_, massPrecision) << '\t'
               << StringUtils::ToString(peptide->Mass(), massPrecision) << '\t'
-              << i->d_cn_ << '\t';
+              << i->d_cn_ << '\t'
+              << i->d_lcn_ << '\t';              
         SpScorer::SpScoreData spData;
         if (compute_sp) {
           *file << i->spData_.sp_score << '\t'
@@ -219,7 +230,11 @@ void TideMatchSet::writeToFile(
     } else {
       *file << StringUtils::ToString(i->score1_, precision, true) << '\t';
     }
-
+    //Added for tailor score calibration method by AKF
+/*    if (Params::GetBool("use-tailor-calibration")) {
+      *file << StringUtils::ToString(i->tailor, precision, true) << '\t';
+    }    
+*/
     if (elution_window_ && !brief) {
       *file << i->elution_score_ << '\t';
     }
@@ -256,12 +271,11 @@ void TideMatchSet::writeToFile(
              
       if (peptide->IsDecoy() && !TideSearchApplication::proteinLevelDecoys()) {
         // write target sequence
-        const string& residues = protein->residues();
         *file << '\t'
-              << residues.substr(residues.length() - peptide->Len());
+              << peptide->TargetSeq();
       } else if (Params::GetBool("concat") && !TideSearchApplication::proteinLevelDecoys()) {
         *file << '\t'
-              << peptide->Seq();
+              << peptide->TargetSeq();
       }
     }
     *file << endl;
@@ -913,6 +927,11 @@ pb::Peptide* TideMatchSet::getPbPeptide(const Peptide& peptide) {
   pb_peptide->set_length(peptide.Len());
   if (peptide.HasAuxLocationsIndex()) {
     pb_peptide->set_aux_locations_index(peptide.AuxLocationsIndex());
+  }
+  
+  if (peptide.IsDecoy()) {
+    pb_peptide->set_decoy_sequence(peptide.Seq());
+    pb_peptide->set_decoy_index(peptide.DecoyIdx());
   }
 
   // Copy over all the modifications for this Peptide

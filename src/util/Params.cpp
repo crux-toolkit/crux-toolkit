@@ -291,10 +291,6 @@ Params::Params() : finalized_(false) {
     "Create in the output directory a text file listing of all the peptides in the "
     "database, along with their corresponding decoy peptides, neutral masses and proteins, one per line.",
     "Available for tide-index.", true);
-  InitIntParam("modsoutputter-threshold", 1000, 0, BILLION,
-    "Maximum number of temporary files that would be opened by ModsOutputter "
-    "before switching to ModsOutputterAlt.",
-    "Available for tide-index.", false);
   // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",
@@ -401,10 +397,8 @@ Params::Params() : finalized_(false) {
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",
     "Available for tide-index.", true);
-  InitStringParam("sort", "memory",
-    "The place where the peptide seuqneces are sorted and filtered. Available "
-    "options: \"memory\", \"disk\", \"auto\', where \"auto\" means that tide-index "
-    "tries to estimate whether the peptides would fit in the availalbe memory. ",
+  InitIntParam("memory-limit", 4, 1, BILLION, 
+    "The maximum amount of memory (i.e., RAM), in GB, to be used by tide-index.",
     "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
