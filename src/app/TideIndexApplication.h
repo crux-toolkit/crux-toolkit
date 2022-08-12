@@ -20,9 +20,8 @@
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
-// Larry's code
 #include "app/tide/mass_constants.h"
-// Larry's code ends here
+
 
 using namespace std;
 
@@ -209,22 +208,7 @@ class TideIndexApplication : public CruxApplication {
     TargetInfo(const ProteinInfo& protein, int startLoc, FLOAT_T pepMass)
       : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
-/*
-  static void fastaToPb(
-    const ENZYME_T enzyme,
-    const DIGEST_T digestion,
-    int missedCleavages,
-    double minMass,
-    double maxMass,
-    int minLength,
-    int maxLength,
-    MASS_TYPE_T massType,
-    const std::string& fasta,
-    vector<ProteinInfo*>& outProteinInfo,
-	HeadedRecordWriter* proteinWriter,	
-	int& curProtein
-  );
-*/
+
   static void writePeptidesAndAuxLocs(
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
@@ -245,15 +229,7 @@ class TideIndexApplication : public CruxApplication {
     const std::string& residues,
     int targetPos = -1 // -1 if not a decoy
   );
-/*
-  static pb::Protein* writeDecoyPbProtein(
-    int id,
-    const pb::Protein* protein,
-    std::string decoyPeptideSequence,
-    int startLoc,
-    HeadedRecordWriter& proteinWriter
-  );
-*/
+
   static void getPbPeptide(
     int id,
     const TideIndexPeptide& peptide,
@@ -265,36 +241,12 @@ class TideIndexApplication : public CruxApplication {
     int proteinPos,
     pb::AuxLocation& outAuxLoc
   );
-
-  /**
-   * Generates decoy for the target peptide, writes the decoy protein to pbProtein
-   * and adds decoy to the heap.
-   */
-/*  static void generateDecoys(
-    int numDecoys,
-    const string& setTarget,
-    std::map< const string, std::vector<const string*> >& targetToDecoy,
-    set<string>* setTargets,
-    set<string>* setDecoys,
-    DECOY_TYPE_T decoyType,
-    bool allowDups,
-    unsigned int& failedDecoyCnt,
-    unsigned int& decoysGenerated,
-    int& curProtein,
-    const ProteinInfo& proteinInfo,
-    const int startLoc,
-    HeadedRecordWriter& proteinWriter,
-    FLOAT_T pepMass,
-    vector<string*>& outProteinSequences
-  );
-*/
  
   virtual void processParams();
 
-  // Larry's code
+
   static TideIndexPeptide* readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequnce, int sourceId);
   void dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file);
-  // Larry's code ends here
 };
 
 #endif
