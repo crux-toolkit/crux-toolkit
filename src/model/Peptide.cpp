@@ -1137,6 +1137,35 @@ bool Peptide::lessThan(
   return (seq_one[pep_idx] < seq_two[pep_idx]);
 }
 
+bool Peptide::lessThanStr(
+  Peptide* peptide_one,
+  Peptide* peptide_two
+  ){
+  // find the shorter peptide
+  int short_len = 0;
+  if( peptide_one->length_ < peptide_two->length_ ){
+    short_len = peptide_one->length_;
+  } else {
+    short_len = peptide_two->length_;
+  }
+
+  char* seq_one = peptide_one->getSequence();
+  char* seq_two = peptide_two->getSequence();
+    
+  // stop comparing as soon as they differ
+  int pep_idx = 0;
+  for(pep_idx = 0; pep_idx < short_len; pep_idx++ ){
+      if(seq_one[pep_idx] != seq_two[pep_idx]){
+        break;
+      }
+  }
+ /* if( seq_one[pep_idx] == seq_two[pep_idx] ){
+    return (peptide_one->length_ < peptide_two->length_);
+  } 
+*/
+  return (seq_one[pep_idx] < seq_two[pep_idx]);
+}
+
 /* Public functions--Printing / parsing */
 
 /**

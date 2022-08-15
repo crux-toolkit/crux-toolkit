@@ -420,6 +420,10 @@ class Peptide {
     Peptide* peptide_one,
     Peptide* peptide_two
     );
+  static bool lessThanStr(
+    Peptide* peptide_one,
+    Peptide* peptide_two
+    );
 
   /**
    * \brief Builds a comma delimited string listing the 
