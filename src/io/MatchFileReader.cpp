@@ -208,15 +208,13 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
-    if (empty(PERCOLATOR_QVALUE_COL)) {
+    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(POUT_QVALUE_COL));
+    if (empty(POUT_QVALUE_COL)) {
       match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
-    } else {
-      match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(QVALUE_COL));
     }
-    if (empty(PERCOLATOR_SCORE_COL)) {
+    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(POUT_SCORE_COL));
+    if (empty(POUT_SCORE_COL)) {
       match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
-    } else {
-      match_collection->setScoredType(PERCOLATOR_SCORE, !empty(SCORE_COL));
     }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
@@ -353,12 +351,15 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(PERCOLATOR_QVALUE_COL)) {
     match->setScore(PERCOLATOR_QVALUE, getFloat(PERCOLATOR_QVALUE_COL));
+  } else if (!empty(POUT_QVALUE_COL)) {
+    match->setScore(PERCOLATOR_QVALUE, getFloat(POUT_QVALUE_COL));
   }
   if (!empty(PERCOLATOR_SCORE_COL)) {
     match->setScore(PERCOLATOR_SCORE, getFloat(PERCOLATOR_SCORE_COL));
     match->setRank(PERCOLATOR_SCORE, getInteger(PERCOLATOR_RANK_COL));
+  } else if (!empty(POUT_SCORE_COL)) {
+    match->setScore(PERCOLATOR_SCORE, getFloat(POUT_SCORE_COL));
   }
-
   if (!empty(BY_IONS_MATCHED_COL)) {
     match->setScore(BY_IONS_MATCHED, getInteger(BY_IONS_MATCHED_COL));
   }
@@ -416,7 +417,7 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
   string seq = getString(SEQUENCE_COL);
   bool is_percolator = false;
   if (seq.empty()) {
-    seq = getString(PERC_PEPTIDE_COL);
+    seq = getString(POUT_PERC_PEPTIDE_COL);
     is_percolator = true;
   }
   if (seq.empty()) {
@@ -430,26 +431,24 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 
   peptide = new Crux::Peptide();
 
-  if (!is_percolator) {
-    string unmodSeq = Crux::Peptide::unmodifySequence(seq);
-    vector<Crux::Modification> mods;
+  string unmodSeq = Crux::Peptide::unmodifySequence(seq);
+  vector<Crux::Modification> mods;
 
-    // Parse modifications column first! It has more details about modifications.
-    string modsString = getString(MODIFICATIONS_COL);
-    if (!modsString.empty()) {
-      mods = Crux::Modification::Parse(modsString, &unmodSeq);
-    } else {
-      Crux::Modification::FromSeq(seq, NULL, &mods);
-    }
+  // Parse modifications column first! It has more details about modifications.
+  string modsString = getString(MODIFICATIONS_COL);
+  if (!modsString.empty()) {
+    mods = Crux::Modification::Parse(modsString, &unmodSeq);
+  } else {
+    Crux::Modification::FromSeq(seq, NULL, &mods);
+  }
 
-    peptide->setUnmodifiedSequence(unmodSeq);
-    peptide->setMods(mods);
+  peptide->setUnmodifiedSequence(unmodSeq);
+  peptide->setMods(mods);
 
-    if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
-      carp(CARP_ERROR, "Failed to parse peptide source.");
-      delete peptide;
-      return NULL;
-    }
+  if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
+    carp(CARP_ERROR, "Failed to parse peptide source.");
+    delete peptide;
+    return NULL;
   }
 
   return peptide;

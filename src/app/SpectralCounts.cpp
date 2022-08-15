@@ -68,6 +68,7 @@ int SpectralCounts::main(int argc, char** argv) {
 
   // get a set of peptides
   getPeptideScores();
+  carp(CARP_INFO, "Got peptide socres");
   if (unique_mapping_) {
     makeUniqueMapping();
   }
@@ -489,7 +490,6 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
  */
 void SpectralCounts::getPeptideScores() {
   Crux::SpectrumCollection* spectra = NULL;
-
   // for SIN, parse out spectrum collection from ms2 fiel
   if( measure_ == MEASURE_SIN ) {
     spectra = SpectrumCollectionFactory::create(Params::GetString("input-ms2"));
@@ -529,7 +529,6 @@ void SpectralCounts::getPeptideScores() {
       peptide_scores_.insert(make_pair(peptide, 0.0));
     }
     peptide_scores_[peptide] += match_intensity;
-
   }
 
   if (measure_ == MEASURE_SIN) {
@@ -803,7 +802,7 @@ void SpectralCounts::writeRankedProteins() {
 bool SpectralCounts::sortRankedPeptides(
   const pair<FLOAT_T, Peptide*>& x,
   const pair<FLOAT_T, Peptide*>& y) {
-  return x.first != y.first ? x.first > y.first : !Peptide::lessThan(y.second, x.second);
+  return x.first != y.first ? x.first > y.first : !Peptide::lessThanStr(y.second, x.second);
 }
 
 bool SpectralCounts::sortRankedProteins(
