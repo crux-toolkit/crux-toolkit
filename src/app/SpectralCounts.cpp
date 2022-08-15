@@ -68,7 +68,6 @@ int SpectralCounts::main(int argc, char** argv) {
 
   // get a set of peptides
   getPeptideScores();
-  carp(CARP_INFO, "Got peptide socres");
   if (unique_mapping_) {
     makeUniqueMapping();
   }
@@ -802,7 +801,7 @@ void SpectralCounts::writeRankedProteins() {
 bool SpectralCounts::sortRankedPeptides(
   const pair<FLOAT_T, Peptide*>& x,
   const pair<FLOAT_T, Peptide*>& y) {
-  return x.first != y.first ? x.first > y.first : !Peptide::lessThanStr(y.second, x.second);
+  return x.first != y.first ? x.first > y.first : !Peptide::lessThan(y.second, x.second);
 }
 
 bool SpectralCounts::sortRankedProteins(
