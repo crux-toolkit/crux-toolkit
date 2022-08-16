@@ -56,11 +56,11 @@
 
 <h4>Minor changes</h4>
 <ul>
-  <li>XX Aug 2022: We have disabled Crux's parsing of Percolator
-  outputs. This means that the mz-id-output option is no longer
-  available and also that the columns in the output file produced by
-  Percolator have changed to match those produced by the standalone
-  version of Percolator.</li>
+  <li>15 Aug 2022: The percolator command no longer creates mzIdentML 
+  or PepXML output formats, and the tab-delimited text format produced 
+  by crux percolator now mimics that of the stand-alone version of 
+  Percolator. The crux spectral-counts and assign-confidence commands
+  have been updated to parse the new percolator output files. </li>
   <li>19 July 2022: Added min_peptide_score parameter to Kojak. </li>
   <li>09 June 2022: Upgraded to ProteoWizard 3.0.22014 (commit aadd392). This
   also upgrades to BOOST 1.67 which fixes a problem building Crux on current MacOS
