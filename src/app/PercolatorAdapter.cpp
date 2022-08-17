@@ -98,7 +98,7 @@ void PercolatorAdapter::processPsmScores(Scores& allScores) {
     PSMDescription* psm = score_itr->pPSM;
 
     int psm_file_idx = -1, psm_charge;
-    parsePSMId(psm->id_, psm_file_idx, psm_charge);
+    parsePSMId(psm->getId(), psm_file_idx, psm_charge);
 
     // Try to look up charge state in map
     int charge_state = -1;
@@ -478,7 +478,7 @@ void PercolatorAdapter::printScores(Scores* scores, int label, ostream& os) {
     }
 
     std::string flankingStr = "XX";
-    std::string seq = scoreIt->pPSM->peptide;
+    std::string seq = scoreIt->pPSM->getFullPeptideSequence();
     if (seq.length() >= 5 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
       flankingStr[0] = seq[0];
       flankingStr[1] = seq[seq.length() - 1];
