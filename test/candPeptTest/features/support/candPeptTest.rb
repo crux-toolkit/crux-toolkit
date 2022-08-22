@@ -94,7 +94,7 @@ class CandPeptTest
     while (row = file.gets)
       record = row.split("\t");
       next if (record.length() < 10);
-      @PSM = record[0]+record[1]+record[9]; 
+      @PSM = record[1]+record[2]+record[11]; 
       @Table1[@PSM] = 1;
       if (type == 0 && ( ((record[4].to_f-record[3].to_f)/record[4].to_f).abs*1000000 > mass*mass_diff_tol ) ) #mass tolerance type is ppm
         @Table1[@PSM] = 2;
@@ -110,7 +110,7 @@ class CandPeptTest
     file.close;
 
     #open and parse the second (COMET) file
-    file = File.new("crux-output/comet.target.txt", "r");
+    file = File.new("crux-output/comet.txt", "r");
     line = file.gets;  # drop the first header line
 #    line = file.gets;  # drop the first header line
     while (row = file.gets)
