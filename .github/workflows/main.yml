@@ -1,6 +1,9 @@
 name: build-crux-distributions
-
-on: [push]
+#
+on:
+  push:
+    branches: master
+  workflow_dispatch:
 
 env:
   BUILD_TYPE: Release
@@ -86,13 +89,14 @@ jobs:
       container: 'centos:centos7'
        
       steps:
-
         - name: Install prerequisites for Docker Centos 7
           shell: bash
           run: |
             yum -y update
             yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
             yum -y install epel-release 
+            yum -y install git
+            git --version
             yum -y install lbzip2
             yum -y install cmake3
             yum -y install centos-release-scl
@@ -102,8 +106,7 @@ jobs:
             yum -y install rh-ruby27
             yum -y install rh-ruby27-ruby-devel
             yum -y install gem
-            yum -y install rh-git218
-            scl enable devtoolset-8 rh-ruby27 rh-git218 'gcc --version'
+            scl enable devtoolset-8 rh-ruby27 'gcc --version'
             scl enable rh-python36 'python --version' 
             scl enable rh-python36 'python -m pip install --upgrade pip numpy pandas'
             scl enable rh-ruby27 'gem install cucumber rspec'
@@ -111,28 +114,38 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v3
 
-        - name: Add SHORT_SHA env property
+        - name: add-short-sha env property
           shell: bash
           run: |
-            scl enable rh-git218 "echo git_short_sha=`git rev-parse --short HEAD`  >> $GITHUB_ENV"
+            git config --global --add safe.directory /__w/crux-toolkit/crux-toolkit
+            echo git_short_sha=$(git rev-parse --short HEAD)  >> $GITHUB_ENV
             echo "${{github.workspace}}"
    
         - name: Configure and build on Centos
           shell: bash
           run: |
              echo $(pwd)
-             scl enable devtoolset-8 rh-git218 "cmake3  -DCMAKE_BUILD_TYPE=$BUILD_TYPE ."
-             scl enable devtoolset-8 rh-git218 "cmake3 --build . --config $BUILD_TYPE"  
+             ls doc/user/*.html
+             scl enable devtoolset-8 "cmake3  -DCMAKE_BUILD_TYPE=$BUILD_TYPE ."
+             scl enable devtoolset-8 "cmake3 --build . --config $BUILD_TYPE"  
+             
         - name: Test
           shell: bash
+          continue-on-error: true
           run: |
             cd test/smoke-tests
             scl enable rh-python36 rh-ruby27 'cucumber --publish-quiet --tags "not @ignore" -f html -o smoke-tests.html'
+            
         - name: Build binary and source packages
           shell: bash
           run: |
             cmake3 --build . --config $BUILD_TYPE --target package
             cmake3 --build . --config $BUILD_TYPE --target package_source
+            
+        - name: Create version file
+          shell: bash
+          run: |
+            echo ${{env.git_short_sha}} > doc/user/version.txt
   
         - name: Archive Centos 7 binary package
           uses: actions/upload-artifact@v3
@@ -151,4 +164,18 @@ jobs:
           with:
             name: smoke.html
             path: test/smoke-tests/smoke-tests.html
+            
+        - name: Push generated webpage to website repository (only from master branch)
+          if: github.ref == 'refs/heads/master'
+          uses: nkoppel/push-files-to-another-repository@v1.1.1
+          env:
+            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
+          with:
+             source-files: 'doc/user/*'
+             destination-username: 'crux-toolkit'
+             destination-repository: 'crux-toolkit.github.io'
+             destination-directory: '.'
+             commit-email: 'cegrant@uw.edu'
+    
+
           
