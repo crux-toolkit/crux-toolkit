@@ -2,8 +2,8 @@ name: build-crux-distributions
 #
 on:
   push:
+    branches: master
   workflow_dispatch:
-#    branches: master
 
 env:
   BUILD_TYPE: Release
@@ -141,6 +141,11 @@ jobs:
           run: |
             cmake3 --build . --config $BUILD_TYPE --target package
             cmake3 --build . --config $BUILD_TYPE --target package_source
+            
+        - name: Create version file
+          shell: bash
+          run: |
+            echo ${{env.git_short_sha}} > doc/user/version.txt
   
         - name: Archive Centos 7 binary package
           uses: actions/upload-artifact@v3
@@ -160,16 +165,17 @@ jobs:
             name: smoke.html
             path: test/smoke-tests/smoke-tests.html
             
-#        - name: Push generated webpage to another repository
-#          uses: nkoppel/push-files-to-another-repository@v1.1.1
-#          env:
-#           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
-#          with:
-#            source-files: 'doc/user/*'
-#            destination-username: 'CharlesEGrant'
-#            destination-repository: 'crux-toolkit.github.io'
-#            destination-directory: '.'
-#            commit-email: 'cegrant@uw.edu'
+        - name: Push generated webpage to website repository (only from master branch)
+          if: github.ref == 'refs/heads/master'
+          uses: nkoppel/push-files-to-another-repository@v1.1.1
+          env:
+            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
+          with:
+             source-files: 'doc/user/*'
+             destination-username: 'crux-toolkit'
+             destination-repository: 'crux-toolkit.github.io'
+             destination-directory: '.'
+             commit-email: 'cegrant@uw.edu'
     
 
           
