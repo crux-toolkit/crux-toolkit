@@ -4,7 +4,6 @@
  *****************************************************************************/
 #include "MakePinApplication.h"
 #include "PercolatorApplication.h"
-#include "PercolatorAdapter.h"
 #include "Caller.h"
 #include "util/Params.h"
 #include <string>
@@ -389,7 +388,7 @@ int PercolatorApplication::main(
   std::cerr.rdbuf(&buffer);
 
   /* Call percolatorMain */
-  PercolatorAdapter pCaller;
+  Caller pCaller;
   try {
     int retVal;
     if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front()) &&
