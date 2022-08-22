@@ -327,7 +327,6 @@ int ActivePeptideQueue::CountAAFrequency(
       // fifo_alloc_peptides_.ReleaseAll();
       delete peptide;
     }
-
   //calculate the unique masses
   unsigned int uiUniqueMasses = 0;
   for (i = 0; i < MaxModifiedAAMassBin; ++i) {

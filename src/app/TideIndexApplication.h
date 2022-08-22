@@ -20,15 +20,25 @@
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
+#include "app/tide/mass_constants.h"
+
+
 using namespace std;
 
 std::string getModifiedPeptideSeq(const pb::Peptide* peptide, const ProteinVec* proteins);
+
+struct PbPeptideSortGreater {
+  PbPeptideSortGreater() {}
+  inline bool operator() (const pb::Peptide& x, const pb::Peptide& y) {
+    return x.mass() > y.mass();
+  }
+};
+
 
 class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
   friend class DIAmeterApplication;
-
  public:
 
   /**
@@ -89,19 +99,22 @@ class TideIndexApplication : public CruxApplication {
   virtual COMMAND_T getCommand() const;
 
  protected:
-
   class TideIndexPeptide {
    private:
-    double mass_;
+    //  Although it seems counter-intuitive to have the mass as a FixPtr, 
+    //  this data type was chosen because, in most places where computation
+    //  was being done using the mass, it was done as a FixPtr.
+    FixPt mass_;
     int length_;
     int proteinId_;
     int proteinPos_;
     const char* residues_;  // points at protein sequence
     int decoyIdx_; // -1 if not a decoy
+    int sourceId_;
    public:
     TideIndexPeptide() {}
-    TideIndexPeptide(double mass, int length, string* proteinSeq,
-                     int proteinId, int proteinPos, int decoyIdx = -1) {
+    TideIndexPeptide(FixPt mass, int length, const string* proteinSeq,
+                     int proteinId, int proteinPos, int decoyIdx = -1, int sourceId = -1) {
       mass_ = mass;
       length_ = length;
       proteinId_ = proteinId;
@@ -112,6 +125,7 @@ class TideIndexApplication : public CruxApplication {
         residues_ = proteinSeq->data();
       }
       decoyIdx_ = decoyIdx;
+      sourceId_ = sourceId;
     }
     TideIndexPeptide(const TideIndexPeptide& other) {
       mass_ = other.mass_;
@@ -120,14 +134,20 @@ class TideIndexApplication : public CruxApplication {
       proteinPos_ = other.proteinPos_;
       residues_ = other.residues_;
       decoyIdx_ = other.decoyIdx_;
+      sourceId_ = other.sourceId_;
     }
-    double getMass() const { return mass_; }
+    // It seems more intuitive for the mass to be a double hence getMass returns a double 
+    // instead of FixPtr. Also whenever getMass is called, a double is expected, this was done
+    // to ensure the code mentains the same structure as before.
+    double getMass() const { return MassConstants::ToDouble(mass_); } 
+    FixPt getFixPtMass() const { return mass_; } 
     int getLength() const { return length_; }
     int getProteinId() const { return proteinId_; }
     int getProteinPos() const { return proteinPos_; }
     string getSequence() const { return string(residues_, length_); }
     bool isDecoy() const { return decoyIdx_ >= 0; }
     int decoyIdx() const { return decoyIdx_; }
+    int getSourceId() const {return sourceId_; }
 
     friend bool operator >(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
@@ -148,6 +168,25 @@ class TideIndexApplication : public CruxApplication {
       }
       return false;
     }
+    friend bool operator <(
+      const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
+      if (&lhs == &rhs) {
+        return false;
+      } else if (lhs.mass_ != rhs.mass_) {
+        return lhs.mass_ < rhs.mass_;
+      } else if (lhs.length_ != rhs.length_) {
+        return lhs.length_ < rhs.length_;
+      } else {
+        int strncmpResult = strncmp(lhs.residues_, rhs.residues_, lhs.length_);
+        if (strncmpResult != 0) {
+          return strncmpResult < 0;
+        }
+      }
+      if (lhs.decoyIdx_ != rhs.decoyIdx_) {
+        return lhs.decoyIdx_ < rhs.decoyIdx_;
+      }
+      return false;
+    }
     friend bool operator ==(
       const TideIndexPeptide& lhs, const TideIndexPeptide& rhs) {
       return (lhs.mass_ == rhs.mass_ && lhs.length_ == rhs.length_ &&
@@ -155,12 +194,11 @@ class TideIndexApplication : public CruxApplication {
               lhs.decoyIdx_ == rhs.decoyIdx_;
     }
   };
-
   struct ProteinInfo {
-    string name;
-    const string* sequence;
-    ProteinInfo(const string& proteinName, const string* proteinSequence)
-      : name(proteinName), sequence(proteinSequence) {}
+    string header;
+    string sequence;
+    ProteinInfo(string& proteinHeader, string& proteinSequence)
+      : header(proteinHeader), sequence(proteinSequence) {}
   };
 
   struct TargetInfo {
@@ -171,54 +209,25 @@ class TideIndexApplication : public CruxApplication {
       : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
 
-  static void fastaToPb(
-    const std::string& commandLine,
-    const ENZYME_T enzyme,
-    const DIGEST_T digestion,
-    int missedCleavages,
-    FLOAT_T minMass,
-    FLOAT_T maxMass,
-    int minLength,
-    int maxLength,
-    bool dups,
-    MASS_TYPE_T massType,
-    DECOY_TYPE_T decoyType,
-    const std::string& fasta,
-    const std::string& proteinPbFile,
-    pb::Header& outProteinPbHeader,
-    std::vector<TideIndexPeptide>& outPeptideHeap,
-    std::vector<string*>& outProteinSequences,
-    std::ofstream* decoyFasta,
-    std::map<string, vector<string>>& peptideToProteinMap
-  );
-
   static void writePeptidesAndAuxLocs(
-    std::vector<TideIndexPeptide>& peptideHeap, // will be destroyed.
     const std::string& peptidePbFile,
     const std::string& auxLocsPbFile,
-    pb::Header& pbHeader
+    pb::Header& pbHeader,
+    std::vector<ProteinInfo*>& outProteinInfo
   );
 
-  static FLOAT_T calcPepMassTide(
-    const GeneratePeptides::CleavedPeptide* pep,
+  static FixPt calcPepMassTide(
+    GeneratePeptides::PeptideReference* pep,
     MASS_TYPE_T massType,
-    const ProteinInfo* prot
+    string prot
   );
 
-  static void writePbProtein(
+  static pb::Protein* writePbProtein(
     HeadedRecordWriter& writer,
     int id,
     const std::string& name,
     const std::string& residues,
     int targetPos = -1 // -1 if not a decoy
-  );
-
-  static void writeDecoyPbProtein(
-    int id,
-    const ProteinInfo& targetProteinInfo,
-    std::string decoyPeptideSequence,
-    int startLoc,
-    HeadedRecordWriter& proteinWriter
   );
 
   static void getPbPeptide(
@@ -232,31 +241,12 @@ class TideIndexApplication : public CruxApplication {
     int proteinPos,
     pb::AuxLocation& outAuxLoc
   );
-
-  /**
-   * Generates decoy for the target peptide, writes the decoy protein to pbProtein
-   * and adds decoy to the heap.
-   */
-  static void generateDecoys(
-    int numDecoys,
-    const string& setTarget,
-    std::map< const string, std::vector<const string*> >& targetToDecoy,
-    set<string>* setTargets,
-    set<string>* setDecoys,
-    DECOY_TYPE_T decoyType,
-    bool allowDups,
-    unsigned int& failedDecoyCnt,
-    unsigned int& decoysGenerated,
-    int& curProtein,
-    const ProteinInfo& proteinInfo,
-    const int startLoc,
-    HeadedRecordWriter& proteinWriter,
-    FLOAT_T pepMass,
-    vector<TideIndexPeptide>& outPeptideHeap,
-    vector<string*>& outProteinSequences
-  );
-
+ 
   virtual void processParams();
+
+
+  static TideIndexPeptide* readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequnce, int sourceId);
+  void dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file);
 };
 
 #endif
