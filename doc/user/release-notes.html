@@ -56,6 +56,14 @@
 
 <h4>Minor changes</h4>
 <ul>
+  <li>22 Aug 2022: The scalability of tide-index has been improved to allow for creation 
+  of very large peptide databases. This is done by sorting and filtering the peptides on 
+  disk rather than in memory. A new parameter, --memory-limit, allows the user to specify
+  an upper bound on the memory (i.e. RAM) usage of tide-index. Note that this update 
+  required that the data structure used in Tide's index files has changed. It is therefore 
+  recommended that users' recreate old index files. Currently, indices in the old format
+  can still be used with tide-index, but this format may be deprecated in future releases 
+  of Crux.</li>
   <li>17 August 2022: Updated to percolator committ 1e82daa.</li>
   <li>27 July 2022: Fixed bug preventing percolator from running on Kojak output.</li>
   <li>19 July 2022: Added min_peptide_score parameter to Kojak. </li>
