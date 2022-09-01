@@ -1,5 +1,5 @@
 name: build-crux-distributions
-#
+ 
 on:
   push:
     branches: master
@@ -87,6 +87,7 @@ jobs:
   build-crux-on-centos-7:
       runs-on: 'ubuntu-latest'
       container: 'centos:centos7'
+      needs: build-macos-windows-distributions
        
       steps:
         - name: Install prerequisites for Docker Centos 7
@@ -131,7 +132,6 @@ jobs:
              
         - name: Test
           shell: bash
-          continue-on-error: true
           run: |
             cd test/smoke-tests
             scl enable rh-python36 rh-ruby27 'cucumber --publish-quiet --tags "not @ignore" -f html -o smoke-tests.html'
@@ -142,11 +142,6 @@ jobs:
             cmake3 --build . --config $BUILD_TYPE --target package
             cmake3 --build . --config $BUILD_TYPE --target package_source
             
-        - name: Create version file
-          shell: bash
-          run: |
-            echo ${{env.git_short_sha}} > doc/user/version.txt
-  
         - name: Archive Centos 7 binary package
           uses: actions/upload-artifact@v3
           with:
@@ -164,8 +159,13 @@ jobs:
           with:
             name: smoke.html
             path: test/smoke-tests/smoke-tests.html
+                 
+        - name: Create version file
+          shell: bash
+          run: |
+            echo ${{env.git_short_sha}} > doc/user/latest-build.txt
             
-        - name: Push generated webpage to website repository (only from master branch)
+        - name: Push modified webpages to website repository
           if: github.ref == 'refs/heads/master'
           uses: nkoppel/push-files-to-another-repository@v1.1.1
           env:
@@ -176,6 +176,17 @@ jobs:
              destination-repository: 'crux-toolkit.github.io'
              destination-directory: '.'
              commit-email: 'cegrant@uw.edu'
-    
-
-          
+             
+        - name: Copy version file to website repository
+          uses: dmnemec/copy_file_to_another_repo_action@main
+          env:
+             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
+          with:
+             source_file: 'doc/user/latest-build.txt'
+             destination_repo: 'crux-toolkit/crux-toolkit.github.io'
+             destination_branch: master
+             destination_folder: '.'
+             user_email: 'cegrant@uw.edu'
+             user_name: 'CharlesEGrant'
+             commit_message: 'Update version file for the web site' 
+  
