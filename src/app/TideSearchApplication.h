@@ -133,7 +133,6 @@ class TideSearchApplication : public CruxApplication {
     int min_scan,
     int max_scan,
     int min_peaks,
-    int search_charge,
     int top_matches,
     double highest_mz,
     ofstream* target_file,
@@ -272,7 +271,6 @@ class TideSearchApplication : public CruxApplication {
     int min_scan;
     int max_scan;
     int min_peaks;
-    int search_charge;
     int top_matches;
     double highest_mz;
     ofstream* target_file;
@@ -307,7 +305,7 @@ class TideSearchApplication : public CruxApplication {
             ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
             vector<const pb::AuxLocation*> locations_, double precursor_window_,
             WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
-            int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
+            int min_scan_, int max_scan_, int min_peaks_, int top_matches_,
             double highest_mz_, ofstream* target_file_,
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, int nAARes_,
@@ -320,7 +318,8 @@ class TideSearchApplication : public CruxApplication {
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
-            min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
+            // min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
+            min_peaks(min_peaks_), top_matches(top_matches_), highest_mz(highest_mz_),
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_),
             aaMass(aaMass_), nAARes(nAARes_), dAAFreqN(dAAFreqN_), dAAFreqI(dAAFreqI_), dAAFreqC(dAAFreqC_), dAAMass(dAAMass_),
