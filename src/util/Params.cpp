@@ -821,6 +821,9 @@ Params::Params() : finalized_(false) {
     "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
     "are not yet implemented for the res-ev score function.",
     "Available for tide-search.", true);
+  InitIntParam("min-precursor-charge", 1, 1, BILLION,
+    "The minimum charge state of a spectra to consider in search.",
+    "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",
     "Available for tide-search.", true);
@@ -2213,6 +2216,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("auto-precursor-window");
   items.insert("max-precursor-charge");
+  items.insert("min-precursor-charge");
   items.insert("precursor-window");
   items.insert("precursor-window-type");
   AddCategory("Precursor selection", items);

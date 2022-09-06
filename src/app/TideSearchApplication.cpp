@@ -99,20 +99,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   string proteins_file = FileUtils::Join(index, "protix");
   string auxlocs_file = FileUtils::Join(index, "auxlocs");
 
-  // Check spectrum-charge parameter
-  string charge_string = Params::GetString("spectrum-charge");
-  int charge_to_search;
-  if (charge_string == "all") {
-    carp(CARP_DEBUG, "Searching all charge states");
-    charge_to_search = 0;
-  } else {
-    charge_to_search = atoi(charge_string.c_str());
-    if (charge_to_search < 1 || charge_to_search > 6) {
-      carp(CARP_FATAL, "Invalid spectrum-charge value %s", charge_string.c_str());
-    }
-    carp(CARP_INFO, "Searching charge state %d", charge_to_search);
-  }
-
   // Check scan-number parameter
   string scan_range = Params::GetString("scan-number");
   int min_scan, max_scan;
@@ -387,7 +373,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
            locations, Params::GetDouble("precursor-window"),
            string_to_window_type(Params::GetString("precursor-window-type")),
            Params::GetDouble("spectrum-min-mz"), Params::GetDouble("spectrum-max-mz"),
-           min_scan, max_scan, Params::GetInt("min-peaks"), charge_to_search,
+           min_scan, max_scan, Params::GetInt("min-peaks"), 
            Params::GetInt("top-match"), spectra->FindHighestMZ(),
            target_file, decoy_file, compute_sp,
            nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
@@ -530,7 +516,6 @@ void TideSearchApplication::search(void* threadarg) {
   int min_scan = my_data->min_scan;
   int max_scan = my_data->max_scan;
   int min_peaks = my_data->min_peaks;
-  int search_charge = my_data->search_charge;
   int top_matches = my_data->top_matches;
   double highest_mz = my_data->highest_mz;
   ofstream* target_file = my_data->target_file;
@@ -569,6 +554,7 @@ void TideSearchApplication::search(void* threadarg) {
   bool use_neutral_loss_peaks = Params::GetBool("use-neutral-loss-peaks");
   bool use_flanking_peaks = Params::GetBool("use-flanking-peaks");
   int max_charge = Params::GetInt("max-precursor-charge");
+  int min_charge = Params::GetInt("min-precursor-charge");
   // Added by Andy Lin on 2/9/2016
   // Determines which score function to use for scoring PSMs and store in SCORE_FUNCTION enum
   SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
@@ -620,7 +606,7 @@ void TideSearchApplication::search(void* threadarg) {
     if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
         scan_num < min_scan || scan_num > max_scan ||
         spectrum->Size() < min_peaks ||
-        (search_charge != 0 && charge != search_charge) || charge > max_charge) {
+        charge > max_charge || charge < min_charge) {
       continue;
     }
     // The active peptide queue holds the candidate peptides for spectrum.
@@ -1250,7 +1236,6 @@ void TideSearchApplication::search(
   int min_scan,
   int max_scan,
   int min_peaks,
-  int search_charge,
   int top_matches,
   double highest_mz,
   ofstream* target_file,
@@ -1319,7 +1304,7 @@ void TideSearchApplication::search(
   for (int i= 0; i < NUM_THREADS; i++) {
       thread_data_array.push_back(thread_data(spectrum_filename, spec_charges, active_peptide_queue[i],
       proteins, locations, precursor_window, window_type, spectrum_min_mz,
-      spectrum_max_mz, min_scan, max_scan, min_peaks, search_charge, top_matches,
+      spectrum_max_mz, min_scan, max_scan, min_peaks, top_matches,
       highest_mz, target_file, decoy_file, compute_sp,
       i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
       nAARes, &dAAFreqN, &dAAFreqI, &dAAFreqC, &dAAMass,
@@ -1663,6 +1648,7 @@ vector<string> TideSearchApplication::getOptions() const {
     "isotope-error",
     "mass-precision",
     "max-precursor-charge",
+    "min-precursor-charge",
     "min-peaks",
     "mod-precision",
     "mz-bin-offset",
@@ -1698,7 +1684,6 @@ vector<string> TideSearchApplication::getOptions() const {
     "remove-precursor-tolerance",
     "scan-number",
     "skip-preprocessing",
-    "spectrum-charge",
     "spectrum-max-mz",
     "spectrum-min-mz",
     "spectrum-parser",
