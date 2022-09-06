@@ -126,10 +126,11 @@ int TideIndexApplication::main(
       "tide-index.peptides.txt").c_str(), NULL, overwrite);
   }
   
-  ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
+/*  TODO: Reocer the option to generate decoy protien fasta file.
+    ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
     create_stream_in_path(make_file_path(
       "tide-index.decoy.fasta").c_str(), NULL, overwrite) : NULL;
-    
+*/    
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");
   string auxLocsPbFile = FileUtils::Join(index, "auxlocs");
