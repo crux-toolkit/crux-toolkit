@@ -17,9 +17,32 @@
 We use
 <a href="https://github.com">GitHub</a>
 to host the
-<a href="https://github.com/crux-toolkit/crux-toolkit">Crux Git repository</a>
+<a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a>
 and the 
-<a href="crux-website.html">Crux website</a>.
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website repository</a>.
+Note that the Crux website repository is automatically updated with content from the 
+<code>doc/user</code> directory of the <code>Crux repository</code> as part of the Crux GitHub
+<a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/.github/workflows/main.yml">build action</a>.
+You generally shouldn't need to commit anything directly into the Crux website repository.
+<p/>
+We used to use TeamCity as our build system.
+This has been replaced by a <a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/.github/workflows/main.yml">GitHub Action</a> that automatically runs whenever a commit is made to the <code>master</code>
+branch of the Crux repository.
+Any other branch of the Crux repository that contains <code>.github/workflows/main.yml</code>
+can also run the build action manually using the GitHub website.
+One the GitHub website: 
+<ol>
+<li>Go to the Crux repository. 
+<li>Choose the branch you wish to work with.
+<li>Go to "Actions" for the repository.
+<li>In the left sidebar click on the "build-crux-distributions-workflow".
+<li>Click on the "Run workflow" button.
+</ol>
+Note: the Crux website and release distributions will not be updated when the build action is run
+on non-master branches.
+
+
+<p/>
 Kaipo Tamura, Charles Grant, and Bill Noble are the maintainers for the project.
 Contact one of them to be added as a developer on the project.
 We have a utility GitHub account with the user name <code>cruxtoolkit</code>.
