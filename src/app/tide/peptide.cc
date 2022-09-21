@@ -22,24 +22,29 @@ DEFINE_bool(dups_ok, false, "Don't remove duplicate peaks");
 #endif
 
 string Peptide::SeqWithMods() const {
-  vector<char> buf(Len() + num_mods_ * 30 + 1);
-  int residue_pos = 0;
-  char* buf_pos = &(buf[0]);
-  string mod_str;
-  for (int i = 0; i < num_mods_; ++i) {
-    int index;
-    double delta;
-    MassConstants::DecodeMod(mods_[i], &index, &delta);
-    while (residue_pos <= index)
-      *buf_pos++ = residues_[residue_pos++];
-    mod_str = '[' + StringUtils::ToString(delta, mod_precision_) + ']';
-    // buf_pos += sprintf(buf_pos, "[%s%.1f]", delta >= 0 ? "+" : "", delta);
-    buf_pos += sprintf(buf_pos, mod_str.c_str());
+  string seq_with_mods = string(residues_, Len());
+  
+  if (num_mods_ > 0) {
+    int mod_pos_offset = 0;
+    string mod_str;
+    vector<int> mod;
+    
+    for (int i = 0; i < num_mods_; ++i) {
+      mod.push_back(mods_[i]);
+    }
+    
+    sort(mod.begin(), mod.end());
+    
+    for (int i = 0; i < num_mods_; ++i) {
+      int index;
+      double delta;
+      MassConstants::DecodeMod(mod[i], &index, &delta);
+      mod_str = '[' + StringUtils::ToString(delta, mod_precision_) + ']';
+      seq_with_mods.insert(index + 1 + mod_pos_offset, mod_str);
+      mod_pos_offset += mod_str.length();
+    }
   }
-  while (residue_pos < Len())
-    *buf_pos++ = residues_[residue_pos++];
-  *buf_pos = '\0';
-  return &(buf[0]);
+  return seq_with_mods;  
 }
 
 void Peptide::Show() {

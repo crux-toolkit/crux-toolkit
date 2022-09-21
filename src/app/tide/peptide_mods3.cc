@@ -54,17 +54,12 @@ static string GetTempName(const string& tempDir, int filenum) {
 #endif
 }
 
-class IModsOutputter {
- public:
-  virtual void Output(pb::Peptide* peptide) = 0;
-  virtual uint64_t Total() const = 0;
-  virtual bool GetTempFileNames(vector<string>& filenames) = 0;
-};
-
 // Original class to generate modified peptides. Writes to temporary files
 // before merging them. As the number of possible modifications increases, the
 // number of required temporary files can grow extremely large.
-class ModsOutputter : public IModsOutputter {
+// This is a straigthforward, also naive implementation to combinatorially generate
+// all the modified peptides. It recursively includes variable PTMs.
+class ModsOutputter {//: public IModsOutputter {
  public:
   ModsOutputter(string tempDir,
                 const vector<const pb::Protein*>& proteins,
@@ -94,11 +89,10 @@ class ModsOutputter : public IModsOutputter {
 
   ~ModsOutputter() {
   }
-
+  // Return the total number of peptides written
   uint64_t Total() const { return totalWritten_; }
 
   void InitCountsMapper() {
- 
     const vector<double>& deltas = *mod_table_->OriginalDeltas();
     delta_by_file_.resize(numFiles_);
     for (int i = 0; i < numFiles_; ++i) {
@@ -121,6 +115,14 @@ class ModsOutputter : public IModsOutputter {
     OutputNtermMods(0, counts);
   }
 
+  bool GetTempFileNames(vector<string>& filenames){
+    DumpPeptides();
+    for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
+      filenames.push_back(*tf);
+    }
+    return true;
+  }
+
  private:
   string tempDir_;
   int numFiles_;
@@ -131,9 +133,21 @@ class ModsOutputter : public IModsOutputter {
   unsigned long long temp_file_cnt_;
   vector<string> temp_file_names_;
   uint64_t totalWritten_;
+  
+  const vector<const pb::Protein*>& proteins_;
+  VariableModTable* mod_table_;
+  const vector<int>& max_counts_;
+  vector<int> counts_mapper_vec_;
+  vector<RecordWriter*> writers_;
+  vector<double> delta_by_file_;
+  HeadedRecordWriter* final_writer_;
+  int count_;
 
-  //terminal modifications count as a modification and hence
-  //it is taken into account the modification limit.
+  pb::Peptide* peptide_;
+  const char* residues_;  
+
+  // Terminal modifications count as a modification and hence
+  // it is taken into account the modification limit.
   void OutputMods(int pos, vector<int>& counts) {
     if (TotalMods(counts) > FLAGS_max_mods) {
       return;
@@ -363,32 +377,13 @@ class ModsOutputter : public IModsOutputter {
     vector<pb::Peptide> tmp;
     pb_peptide_list_.swap(tmp);
   }
-  
-  bool GetTempFileNames(vector<string>& filenames){
-    DumpPeptides();
-    for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
-      filenames.push_back(*tf);
-    }
-    return true;
-  }
-  
+   
   void DeleteTempFiles() {
     for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
       unlink((*tf).c_str());
     }
   }
 
-  const vector<const pb::Protein*>& proteins_;
-  VariableModTable* mod_table_;
-  const vector<int>& max_counts_;
-  vector<int> counts_mapper_vec_;
-  vector<RecordWriter*> writers_;
-  vector<double> delta_by_file_;
-  HeadedRecordWriter* final_writer_;
-  int count_;
-
-  pb::Peptide* peptide_;
-  const char* residues_;
 };
 
 unsigned long long AddMods(HeadedRecordReader* reader,
@@ -406,19 +401,19 @@ unsigned long long AddMods(HeadedRecordReader* reader,
 
   memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
   ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, &writer, memory_limit);
-  IModsOutputter* outputter;
+//  IModsOutputter* outputter;
 
-  outputter = &outputOrig;
+//  outputter = &outputOrig;
 
   pb::Peptide peptide;
   while (!reader->Done()) {
     CHECK(reader->Read(&peptide));
-    outputter->Output(&peptide);
+    outputOrig.Output(&peptide);
   }
 
   CHECK(reader->OK());
-  unsigned long long peptide_num = outputter->Total();
-  outputter->GetTempFileNames(temp_file_name);
+  unsigned long long peptide_num = outputOrig.Total();
+  outputOrig.GetTempFileNames(temp_file_name);
   return peptide_num;
   
 }
