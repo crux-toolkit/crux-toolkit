@@ -156,7 +156,7 @@ def runSearch(outputDirectory, searchName, searchParam, database,
              % (CRUX, outputDirectory, psmFile), percolatorFile)
 
   qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
-  extractData(percolatorFile, "percolator q-value", qFile)
+  extractData(percolatorFile, "q-value", qFile)
 
   fourColFile = "%s/%s.target.four-col.txt" % (outputDirectory, searchName)
   dataset = pd.read_csv(psmFile, sep='\t')
