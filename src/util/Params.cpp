@@ -506,6 +506,9 @@ Params::Params() : finalized_(false) {
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all percolator", true);
+InitStringParam("protein-name-separator", ",",
+    "Determines the character to separate the protein IDs in the tab-delimited output format ",
+    "Available for all percolator", true);
   InitBoolParam("feature-file-out", false,
     "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]"
     "tab-delimited Percolator input (.pin) format[[html:</a>]]. The features will be "

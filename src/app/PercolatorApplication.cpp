@@ -201,6 +201,9 @@ int PercolatorApplication::main(
     // seed 0 causes segfault in percolator 
     ++seed_value;
   }
+  perc_args_vec.push_back("--protein-name-separator");
+  perc_args_vec.push_back(Params::GetString("protein-name-separator"));
+  
   perc_args_vec.push_back("--seed");
   perc_args_vec.push_back(StringUtils::ToString(seed_value));
 
@@ -520,6 +523,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "protein-enzyme",
     "protein-report-duplicates",
     "protein-report-fragments",
+    "protein-name-separator",
     "quick-validation",
     "search-input",
     "spectral-counting-fdr",
