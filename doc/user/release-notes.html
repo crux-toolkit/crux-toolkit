@@ -56,6 +56,12 @@
 
 <h4>Minor changes</h4>
 <ul>
+  <li>28 Sept 2022: Updated Assign-confidence to the new comet output. </li>
+  <li>28 Sept 2022: Updated performance and smoke tests </li>
+  <li>28 Sept 2022: Added option to tide-search to search spectra in a min- and max-precursor-charge range. </li>
+  <li>28 Sept 2022: Removed the option from tide-index to generate decoy protein fasta file.</li>
+  <li>28 Sept 2022: Fixed bug in tide index which prevented it generating terminal variable modifications.</li>
+  <li>28 Sept 2022: Fixed bug in tide index which slowed it down when generating many mods.</li>
   <li>22 Aug 2022: The scalability of tide-index has been improved to allow for creation 
   of very large peptide databases. This is done by sorting and filtering the peptides on 
   disk rather than in memory. A new parameter, --memory-limit, allows the user to specify

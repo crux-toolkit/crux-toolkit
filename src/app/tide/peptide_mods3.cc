@@ -54,282 +54,272 @@ static string GetTempName(const string& tempDir, int filenum) {
 #endif
 }
 
-class IModsOutputter {
+// Original class to generate modified peptides. Writes to temporary files
+// before merging them. As the number of possible modifications increases, the
+// number of required temporary files can grow extremely large.
+// This is a straigthforward, also naive implementation to combinatorially generate
+// all the modified peptides. It recursively includes variable PTMs.
+class ModsOutputter {//: public IModsOutputter {
  public:
-  virtual void Output(pb::Peptide* peptide) = 0;
-  virtual uint64_t Total() const = 0;
-  virtual bool GetTempFileNames(vector<string>& filenames) = 0;
-};
-
-// Alternative class to generate modified peptides. Writes to temporary files
-// before merging them. Bins modified peptides by mass, then writes them to the
-// temporary file associated with that bin; the number of temporary files
-// required is therefore bounded by the variance in peptide masses, rather than
-// the number of possible modifications.
-class ModsOutputterAlt : public IModsOutputter {
- public:
-  ModsOutputterAlt(string tmpDir,
-                   const vector<const pb::Protein*>& proteins,
-                   VariableModTable* vmt,
-                   HeadedRecordWriter* final_writer,
-                   unsigned long long memory_limit)
-    : tempDir_(tmpDir), proteins_(proteins), modTable_(vmt),
-      maxMods_(0), writer_(final_writer), totalWritten_(0), 
-      temp_file_cnt_(0), memory_limit_(memory_limit) {
-    modMaxCounts_.clear();
-    const vector<int>* maxCounts = vmt->MaxCounts();
-    for (char c = 'A'; c <= 'Z'; c++) {
-      for (int i = 0; i < vmt->NumPoss(c, MOD_SPEC); i++) {
-        int deltIx = vmt->PossDeltIx(c, i, MOD_SPEC);
-        int maxCt = maxCounts->at(deltIx);
-        modMaxCounts_[deltIx] = maxCt;
-        maxMods_ += maxCt;
-      }
-      for (int i = 0; i < vmt->NumPoss(c, NTPEP); i++) {
-        int deltIx = vmt->PossDeltIx(c, i, NTPEP);
-        int maxCt = maxCounts->at(deltIx);
-        modMaxCounts_[deltIx] = maxCt;
-        maxMods_ += maxCt;
-      }
-      for (int i = 0; i < vmt->NumPoss(c, NTPRO); i++) {
-        int deltIx = vmt->PossDeltIx(c, i, NTPRO);
-        int maxCt = maxCounts->at(deltIx);
-        modMaxCounts_[deltIx] = maxCt;
-        maxMods_ += maxCt;
-      }
-      for (int i = 0; i < vmt->NumPoss(c, CTPRO); i++) {
-        int deltIx = vmt->PossDeltIx(c, i, CTPRO);
-        int maxCt = maxCounts->at(deltIx);
-        modMaxCounts_[deltIx] = maxCt;
-        maxMods_ += maxCt;
-      }
-      for (int i = 0; i < vmt->NumPoss(c, CTPEP); i++) {
-        int deltIx = vmt->PossDeltIx(c, i, CTPEP);
-        int maxCt = maxCounts->at(deltIx);
-        modMaxCounts_[deltIx] = maxCt;
-        maxMods_ += maxCt;
-      }
+  ModsOutputter(string tempDir,
+                const vector<const pb::Protein*>& proteins,
+                VariableModTable* var_mod_table,
+                HeadedRecordWriter* final_writer,
+                unsigned long long memory_limit)
+    : tempDir_(tempDir),
+      modPeptideCnt_(0),
+      proteins_(proteins),
+      mod_table_(var_mod_table),
+      max_counts_(*mod_table_->MaxCounts()),
+      counts_mapper_vec_(max_counts_.size(), 0),
+      final_writer_(final_writer),
+      count_(0),
+      totalWritten_(0),
+      memory_limit_(memory_limit) {
+    numFiles_ = 1;
+    for (int i = 0; i < max_counts_.size(); ++i) {
+      counts_mapper_vec_[i] = numFiles_;
+      if (max_counts_[i] == 0)
+        numFiles_ *= (max_counts_[i]+2);
+      else
+        numFiles_ *= (max_counts_[i]+1);
     }
-    if (maxMods_ > FLAGS_max_mods) {
-      maxMods_ = FLAGS_max_mods;
-    }
+    InitCountsMapper();
   }
 
-  ~ModsOutputterAlt() {
+  ~ModsOutputter() {
   }
-
-  void Output(pb::Peptide* peptide) {
-    if (maxMods_ < 0) {
-      return;
-    } else if (FLAGS_min_mods < 1) {
-      WritePeptide(peptide); // write unmodified peptide
-    }
-    if (maxMods_ == 0) {
-      return;
-    }
-
-    ResultMods resultMods(modTable_, modMaxCounts_, maxMods_, peptide, proteins_);
-    double unmodifiedMass = peptide->mass();
-
-    while (resultMods.Next()) {
-      resultMods.ModifyPeptide();
-      WritePeptide(peptide); 
-      if (totalWritten_ % 10000000 == 0) {
-        carp(CARP_INFO, "Wrote %lu modified target peptides to temp files", totalWritten_);
-      }
-    }
-  }
-
   // Return the total number of peptides written
   uint64_t Total() const { return totalWritten_; }
 
+  void InitCountsMapper() {
+    const vector<double>& deltas = *mod_table_->OriginalDeltas();
+    delta_by_file_.resize(numFiles_);
+    for (int i = 0; i < numFiles_; ++i) {
+      double total_delta = 0;
+      int x = i;
+      for (int j = max_counts_.size() - 1; j >= 0; --j) {
+        int digit = x / counts_mapper_vec_[j];
+        x %= counts_mapper_vec_[j];
+        total_delta += deltas[j] * digit;
+      }
+      delta_by_file_[i] = total_delta;
+    }
+  }
+
+  void Output(pb::Peptide* peptide) {
+    peptide_ = peptide;
+    const pb::Location& loc = peptide->first_location();
+    residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
+    vector<int> counts(max_counts_.size(), 0);
+    OutputNtermMods(0, counts);
+  }
+
+  bool GetTempFileNames(vector<string>& filenames){
+    DumpPeptides();
+    for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
+      filenames.push_back(*tf);
+    }
+    return true;
+  }
+
  private:
+  string tempDir_;
+  int numFiles_;
+  int64_t modPeptideCnt_;
+  
   unsigned long long memory_limit_;
   vector<pb::Peptide> pb_peptide_list_;
   unsigned long long temp_file_cnt_;
   vector<string> temp_file_names_;
-  class ResultMods {
-   private:
-    class ModState { // mod state for a single residue
-     public:
-      ModState(vector<int>::const_iterator begin, vector<int>::const_iterator end)
-        : begin_(begin), end_(end), current_(begin) {}
-      vector<int>::const_iterator begin_, end_, current_;
-    };
+  uint64_t totalWritten_;
+  
+  const vector<const pb::Protein*>& proteins_;
+  VariableModTable* mod_table_;
+  const vector<int>& max_counts_;
+  vector<int> counts_mapper_vec_;
+  vector<RecordWriter*> writers_;
+  vector<double> delta_by_file_;
+  HeadedRecordWriter* final_writer_;
+  int count_;
 
-    bool NextCombination() {
-      do {
-        if (modifiedIndices_.Size() < FLAGS_min_mods) {
-          modifiedIndices_ = MathUtil::Combination(modifiedIndices_.N(), FLAGS_min_mods);
-        } else if (modifiedIndices_.HasNext()) {
-          modifiedIndices_.Next();
-        } else {
-          size_t newK = modifiedIndices_.Size() + 1;
-          if (newK > maxMods_ || newK > modifiedIndices_.N()) {
-            return false;
-          }
-          modifiedIndices_ = MathUtil::Combination(modifiedIndices_.N(), newK);
-        }
-        // check that all residues in this combination can be modified
-        bool valid = true;
-        const vector<size_t>& modIndices = modifiedIndices_.Values();
-        for (vector<size_t>::const_iterator i = modIndices.begin(); i != modIndices.end(); i++) {
-          if (modIndexStates_[*i].empty()) {
-            valid = false;
-            break;
-          }
-        }
-        if (valid) {
-          return true;
-        }
-      } while (true); // compiler doesn't optimize tail recursive call here
+  pb::Peptide* peptide_;
+  const char* residues_;  
+
+  // Terminal modifications count as a modification and hence
+  // it is taken into account the modification limit.
+  void OutputMods(int pos, vector<int>& counts) {
+    if (TotalMods(counts) > FLAGS_max_mods) {
+      return;
     }
-
-    const VariableModTable* modTable_;
-    const map<int, int>& modMaxCounts_;
-    int maxMods_;
-    pb::Peptide* peptide_;
-    double peptideUnmodifiedMass_;
-    vector< vector<int> > modIndexStates_;
-    vector<ModState> modStates_;
-
-    MathUtil::Combination modifiedIndices_;
-    bool needNewCombination_;
-
-   public:
-    ResultMods(const VariableModTable* modTable, const map<int, int>& modMaxCounts, int maxMods,
-      pb::Peptide* peptide, const vector<const pb::Protein*>& proteins)
-      : modTable_(modTable), modMaxCounts_(modMaxCounts), maxMods_(maxMods),
-        peptide_(peptide), peptideUnmodifiedMass_(peptide->mass()),
-        modifiedIndices_(MathUtil::Combination(peptide->length(), 0)), needNewCombination_(true) {
-      const pb::Location& loc = peptide->first_location();
-      string seq(proteins[loc.protein_id()]->residues().data() + loc.pos(), peptide->length());
-      // generate possible mod index states
-      modIndexStates_ = vector< vector<int> >(seq.length(), vector<int>());
-      int prot_len = proteins[loc.protein_id()]->residues().length();
-      for (size_t i = 0; i < seq.length(); i++) {
-        char aa = seq[i];
-        if (i == 0) {
-          int numPossNtPep = modTable->NumPoss(aa, NTPEP);
-          for (int j = 0; j < numPossNtPep; j++) {
-            int possDeltIx = modTable->PossDeltIx(aa, j, NTPEP);
-            modIndexStates_[i].push_back(possDeltIx);
+    if (pos == peptide_->length()) {
+      OutputCtermMods(pos-1, counts);
+    } else {
+      if (pos == peptide_->length()-1){
+        OutputCtermMods(pos, counts);
+      } else {
+        char aa = residues_[pos];
+        int num_poss = mod_table_->NumPoss(aa);
+        for (int i = 0; i < num_poss; ++i) {
+          int poss_max_ct = mod_table_->PossMaxCt(aa, i);
+          if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+            ++counts[poss_max_ct];
+            int delta_index = mod_table_->PossDeltIx(aa, i);
+            peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+            OutputMods(pos+1, counts);
+            peptide_->mutable_modifications()->RemoveLast();
+            --counts[poss_max_ct];
           }
         }
-        if (i == 0 && loc.pos() == 0) {
-          int numPossNtPro = modTable->NumPoss(aa, NTPRO);
-          for (int j = 0; j < numPossNtPro; j++) {
-            int possDeltIx = modTable->PossDeltIx(aa, j, NTPRO);
-            modIndexStates_[i].push_back(possDeltIx);
-          }
-        }
-        if (i == seq.length() - 1) {
-          int numPossCtPep = modTable->NumPoss(aa, CTPEP);
-          for (int j = 0; j < numPossCtPep; j++) {
-            int possDeltIx = modTable->PossDeltIx(aa, j, CTPEP);
-            modIndexStates_[i].push_back(possDeltIx);
-          }
-        }
-        if (i == seq.length() - 1 && i+loc.pos() == prot_len - 1) {
-          int numPossCtPep = modTable->NumPoss(aa, CTPRO);
-          for (int j = 0; j < numPossCtPep; j++) {
-            int possDeltIx = modTable->PossDeltIx(aa, j, CTPRO);
-            modIndexStates_[i].push_back(possDeltIx);
-          }
-        }
-
-        // for(auto aa = aas.begin(); aa < aas.end(); aa++) {
-          // //if this is protein's C_terminal
-          // if((peptide_->first_location().pos() + peptide_->length()) == prot_len)
-            // PlaceCTermVariableMod(pos, *aa, CTPRO, counts);
-        
-        int numPoss = modTable->NumPoss(aa, MOD_SPEC);
-        for (int j = 0; j < numPoss; j++) {
-          int possDeltIx = modTable->PossDeltIx(aa, j, MOD_SPEC);
-          modIndexStates_[i].push_back(possDeltIx);
-        }
+        // Having this call to OutputMods come last is, in fact, correct, but it's
+        // tricky to see why. When modified peptides have equal mass, we want
+        // modified positions toward the front of the peptide to appear before those
+        // that come toward the end of the peptide. Having this call at the end
+        // achieves that.
+        OutputMods(pos+1, counts); // without further mods
       }
+    }
+  }
 
-      // initialize mod state trackers
-      for (vector< vector<int> >::const_iterator i = modIndexStates_.begin();
-           i != modIndexStates_.end();
-           i++) {
-        modStates_.push_back(ModState(i->begin(), i->end()));
+  void PlaceVariableNTermMod(int pos, char aa, mods_spec_type mod_spec, vector<int>& counts){
+    int num_poss = mod_table_->NumPoss(aa, mod_spec);
+
+    for (int i = 0; i < num_poss; ++i) {
+      int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_spec);
+      if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+        ++counts[poss_max_ct];
+        int delta_index = mod_table_->PossDeltIx(aa, i, mod_spec);  
+        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+        OutputMods(1, counts);
+        peptide_->mutable_modifications()->RemoveLast();
+        --counts[poss_max_ct];
+      }
+    }    
+  }
+
+  void OutputNtermMods(int pos, vector<int>& counts) {
+    if (TotalMods(counts) > FLAGS_max_mods) {
+      return;
+    }
+    bool any_term_modification = false;
+
+    //add static N-terminal modifications
+    //TODO: It looks like this code never runs. Static terminal mods are done 
+    //through mass tables and they never make it into the possibles_ tables
+    vector<char> aas{residues_[0], 'X'};
+    for(auto aa = aas.begin(); aa < aas.end(); aa++){
+
+      int num_poss = mod_table_->NumPoss(*aa, NTPEP);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(*aa, i, NTPEP);
+        if (max_counts_[poss_max_ct] == 0) {
+          int delta_index = mod_table_->PossDeltIx(*aa, i, NTPEP);
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+          OutputMods(1, counts);
+          peptide_->mutable_modifications()->RemoveLast();
+          any_term_modification = true;
+        }
       }
     }
 
-    bool Next() {
-      do {
-        const vector<size_t>& modIndices = modifiedIndices_.Values();
-        // check if we need a new combination
-        if (needNewCombination_) {
-          if (!NextCombination()) {
-            return false;
+    if (!any_term_modification) {
+      //if there were no static modificatinos add variable terminal modifications
+      for(auto it = aas.begin(); it < aas.end(); it++){
+        if(peptide_->first_location().pos() == 0){
+          //this is protein N-terminal
+            PlaceVariableNTermMod(pos, *it, NTPRO, counts);
           }
-          needNewCombination_ = false;
-          // return first modified peptide for this combination
-          for (vector<size_t>::const_iterator i = modIndices.begin(); i != modIndices.end(); i++) {
-            ModState& modState = modStates_[*i];
-            modState.current_ = modState.begin_;
-          }
-          if (ValidIndividualLimits()) {
-            return true;
-          }
-        }
-        for (vector<size_t>::const_iterator i = modIndices.begin(); i != modIndices.end(); i++) {
-          ModState& modState = modStates_[*i];
-          if (++(modState.current_) != modState.end_) {
-            if (ValidIndividualLimits()) {
-              return true;
-            }
-          } else if (i < modIndices.end() - 1) {
-            modState.current_ = modState.begin_;
-          }
-        }
-        needNewCombination_ = true;
-      } while (true); // compiler doesn't optimize tail recursive call here
+        PlaceVariableNTermMod(pos, *it, NTPEP, counts); //peptide terminal
+      }
+      OutputMods(0, counts);  //regular mods
     }
+  }
 
-    bool ValidIndividualLimits() const {
-      map<int, int> curModCounts;
-      const vector<size_t>& modIndices = modifiedIndices_.Values();
-      for (vector<size_t>::const_iterator i = modIndices.begin(); i != modIndices.end(); i++) {
-        const ModState& modState = modStates_[*i];
-        int modIndex = *(modState.current_);
-        map<int, int>::iterator j = curModCounts.find(modIndex);
-        map<int, int>::const_iterator modLimit = modMaxCounts_.find(modIndex);
-        if (j == curModCounts.end()) {
-          curModCounts[modIndex] = 1;
-        } else {
-          if (++(j->second) > modLimit->second) {
-            return false;
+  void PlaceCTermVariableMod(int pos, char aa, mods_spec_type mod_type, vector<int>& counts){
+      int num_poss = mod_table_->NumPoss(aa, mod_type);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(aa, i, mod_type);
+        if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
+          ++counts[poss_max_ct];
+          int delta_index = mod_table_->PossDeltIx(aa, i, mod_type);
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+
+          if (TotalMods(counts) >= FLAGS_min_mods) {
+            peptide_->set_id(count_++);
+            Write(counts);
           }
+
+          peptide_->mutable_modifications()->RemoveLast();
+          --counts[poss_max_ct];
         }
       }
-      return true;
-    }
+  }
 
-    void ModifyPeptide() {
-      peptide_->clear_modifications();
-      double mass = peptideUnmodifiedMass_;
-      const vector<size_t>& modIndices = modifiedIndices_.Values();
-      for (vector<size_t>::const_iterator i = modIndices.begin(); i != modIndices.end(); i++) {
-        int curIndex = *(modStates_[*i].current_);
-        peptide_->add_modifications(modTable_->EncodeMod(*i, curIndex));
-        mass += modTable_->PossDelta(curIndex);
+  void OutputCtermMods(int pos, vector<int>& counts) {
+    int total = TotalMods(counts);
+    if (total > FLAGS_max_mods) {
+      return;
+    } else if (total == FLAGS_max_mods) {
+      if (total >= FLAGS_min_mods) {
+        peptide_->set_id(count_++);
+        Write(counts);
       }
-      peptide_->set_mass(mass);
+      return;
     }
-  };
 
-  static double PbPeptideMass(VariableModTable* modTable, const pb::Peptide& pep) {
-    int aaIndex, uniqueDeltaIndex;
-    double mass = pep.mass();
-    for (int i = 0; i < pep.modifications_size(); i++) {
-      modTable->DecodeMod(pep.modifications(i), &aaIndex, &uniqueDeltaIndex);
-      mass += modTable->PossDelta(uniqueDeltaIndex);
+    bool any_term_modification = false;
+    vector<char> aas{residues_[pos], 'X'};        //we are looking up mod definitions for the current residue or X
+    for(auto aa = aas.begin(); aa < aas.end(); aa++){
+      int num_poss = mod_table_->NumPoss(*aa, CTPEP);
+      for (int i = 0; i < num_poss; ++i) {
+        int poss_max_ct = mod_table_->PossMaxCt(*aa, i, CTPEP);
+        if (max_counts_[poss_max_ct] == 0) {                          //this condition is never satisfied because max_counts_ is initialized 
+          int delta_index = mod_table_->PossDeltIx(*aa, i, CTPEP);    //with the var mods table and var mods max count is always >0  
+          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+
+          if (TotalMods(counts) >= FLAGS_min_mods) {
+            peptide_->set_id(count_++);
+            Write(counts);
+          }
+          peptide_->mutable_modifications()->RemoveLast();
+          any_term_modification = true;
+        }
+      }
     }
-    return mass;
+
+    if (!any_term_modification) {
+      //if there were no static modifications add amino acid mods
+      char aa = residues_[pos];
+      //add any matching regular mods first
+      PlaceCTermVariableMod(pos, residues_[pos], MOD_SPEC, counts);
+
+      //add variable c-terminal mods
+      int prot_idx = peptide_->first_location().protein_id();
+      auto prot_len = proteins_[prot_idx]->residues().length();
+
+      for(auto aa = aas.begin(); aa < aas.end(); aa++) {
+        //if this is protein's C_terminal
+        if((peptide_->first_location().pos() + peptide_->length()) == prot_len)
+          PlaceCTermVariableMod(pos, *aa, CTPRO, counts);
+        PlaceCTermVariableMod(pos, *aa, CTPEP, counts);
+      }
+
+      if (TotalMods(counts) >= FLAGS_min_mods) {
+        peptide_->set_id(count_++);
+        Write(counts);
+      }
+    }
+  }
+
+  int TotalMods(const vector<int>& counts) {
+    return accumulate(counts.begin(), counts.end(), 0);
+  }
+
+  int DotProd(const vector<int>& counts) {
+    int dot = 0;
+    for (int i = 0; i < counts.size(); ++i)
+      dot += counts_mapper_vec_[i] * counts[i];
+    return dot;
   }
 
   struct PbPeptideSort {
@@ -339,10 +329,16 @@ class ModsOutputterAlt : public IModsOutputter {
     }
   };
 
-  void WritePeptide(const pb::Peptide* peptide) {
-    
-    pb_peptide_list_.push_back(*peptide);
+  void Write(const vector<int>& counts) {
+    int index = DotProd(counts);
+    double mass = peptide_->mass();
+    peptide_->set_mass(delta_by_file_[index] + mass);
+    pb_peptide_list_.push_back(*peptide_);
+    peptide_->set_mass(mass);
     ++totalWritten_;
+    if (totalWritten_ % 10000000 == 0) {
+      carp(CARP_INFO, "Wrote %lu modified target peptides to temp files", totalWritten_);
+    }    
     if (pb_peptide_list_.size() >= memory_limit_) {
       DumpPeptides();
     }
@@ -381,30 +377,13 @@ class ModsOutputterAlt : public IModsOutputter {
     vector<pb::Peptide> tmp;
     pb_peptide_list_.swap(tmp);
   }
-  
-  bool GetTempFileNames(vector<string>& filenames){
-    DumpPeptides();
-    for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
-      filenames.push_back(*tf);
-    }
-    return true;
-  }
-  
+   
   void DeleteTempFiles() {
     for (vector<string>::iterator tf = temp_file_names_.begin(); tf != temp_file_names_.end(); ++tf) { 
       unlink((*tf).c_str());
     }
   }
 
-  string tempDir_;
-  const vector<const pb::Protein*>& proteins_;
-  VariableModTable* modTable_;
-  map<int, int> modMaxCounts_;
-  int maxMods_;
-  HeadedRecordWriter* writer_;
-
-  map< int, pair<string, RecordWriter*> > tempFiles_; // id -> file, writer (ids must be in ascending order of mass)
-  uint64_t totalWritten_;
 };
 
 unsigned long long AddMods(HeadedRecordReader* reader,
@@ -421,20 +400,20 @@ unsigned long long AddMods(HeadedRecordReader* reader,
   CHECK(writer.OK());
 
   memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
-  ModsOutputterAlt outputAlt(tmpDir, proteins, var_mod_table, &writer, memory_limit);
-  IModsOutputter* outputter;
+  ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, &writer, memory_limit);
+//  IModsOutputter* outputter;
 
-  outputter = &outputAlt;
+//  outputter = &outputOrig;
 
   pb::Peptide peptide;
   while (!reader->Done()) {
     CHECK(reader->Read(&peptide));
-    outputter->Output(&peptide);
+    outputOrig.Output(&peptide);
   }
 
   CHECK(reader->OK());
-  unsigned long long peptide_num = outputter->Total();
-  outputter->GetTempFileNames(temp_file_name);
+  unsigned long long peptide_num = outputOrig.Total();
+  outputOrig.GetTempFileNames(temp_file_name);
   return peptide_num;
   
 }
