@@ -126,10 +126,11 @@ int TideIndexApplication::main(
       "tide-index.peptides.txt").c_str(), NULL, overwrite);
   }
   
-  ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
+/*  TODO: Recover the option to generate decoy protein fasta file.
+    ofstream* out_decoy_fasta = GeneratePeptides::canGenerateDecoyProteins() ?
     create_stream_in_path(make_file_path(
       "tide-index.decoy.fasta").c_str(), NULL, overwrite) : NULL;
-    
+*/    
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");
   string auxLocsPbFile = FileUtils::Join(index, "auxlocs");
@@ -751,6 +752,7 @@ int TideIndexApplication::main(
 
           //  Generate a decoy peptide:
           protein = vProteinHeaderSequence[protein_id];
+          int multiple_decoy_cnt = 0;
           for (int i = 0; i < numDecoys; ++i) {
 
             shuffle = decoy_type == PEPTIDE_SHUFFLE_DECOYS;
@@ -821,7 +823,7 @@ int TideIndexApplication::main(
             decoy_current_pb_peptide_.set_id(numTargets + decoy_count++);
             decoy_current_pb_peptide_.clear_decoy_sequence();
             decoy_current_pb_peptide_.set_decoy_sequence(decoy_peptide_str);
-            decoy_current_pb_peptide_.set_decoy_index(i);
+            decoy_current_pb_peptide_.set_decoy_index(multiple_decoy_cnt++);
             CHECK(writer.Write(&decoy_current_pb_peptide_));
 
             //report the decoy peptide if needed.
