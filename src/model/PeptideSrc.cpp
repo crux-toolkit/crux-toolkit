@@ -226,13 +226,30 @@ bool PeptideSrc::parseTabDelimited(
     carp(CARP_ERROR, "Cannot parse peptide src with NULL peptide.");
     return false;
   }
+  
+  string proteinStr;
+  string peptideStr;
+  
+  if (file.empty(PROTEIN_ID_COL)) {
+    proteinStr = file.getString(POUT_PROTEIN_IDS_COL);
+  } else {
+    proteinStr = file.getString(PROTEIN_ID_COL);
+  }
+  if (file.empty(SEQUENCE_COL)) {
+    peptideStr = file.getString(POUT_PERC_PEPTIDE_COL);
+  } else {
+    peptideStr = file.getString(SEQUENCE_COL);
+  }
+  if (peptideStr.length() > 4 && peptideStr[1] == '.' && peptideStr[peptideStr.length() - 2] == '.') {
+    peptideStr = peptideStr.substr(2, peptideStr.length() - 4);
+  }
+    
 
-  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s",
-       file.getString(PROTEIN_ID_COL).c_str());
+  carp(CARP_DETAILED_DEBUG,"Parsing id line:%s", proteinStr.c_str());
 
   //if the protein id field is empty, then we have to search the database...
-  if (file.empty(PROTEIN_ID_COL)) {
-    carp_once(CARP_WARNING, "empty protein id string in tab delimited file. "
+  if (proteinStr.empty()) {
+    carp_once(CARP_INFO, "empty protein id string in tab delimited file. "
                             "searching database to find proteins to match peptide "
                             "sequence");
 
@@ -259,7 +276,8 @@ bool PeptideSrc::parseTabDelimited(
     }
     return true;
   } else {
-    vector<string> protein_ids = StringUtils::Split(file.getString(PROTEIN_ID_COL), ',');
+    string proteinIds;
+    vector<string> protein_ids = StringUtils::Split(proteinStr, ',');
 
     if (protein_ids.empty()) {
       carp(CARP_ERROR, "No protein ids found!");
@@ -273,7 +291,7 @@ bool PeptideSrc::parseTabDelimited(
                 "Flanking amino acid count (%d) did not match protein count (%d) for protein %s.", 
                 flanking_aas.size(), 
                 protein_ids.size(),
-                file.getString(PROTEIN_ID_COL).c_str());
+                proteinStr.c_str());
       carp_once(CARP_DEBUG, "Only reporting error once; others may exist")
       while(flanking_aas.size() < protein_ids.size()) {
         flanking_aas.push_back("");
@@ -314,7 +332,7 @@ bool PeptideSrc::parseTabDelimited(
             parent_protein = MatchCollectionParser::getProtein(
               database, decoy_database, protein_id_string, is_decoy);
 
-            string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
+            string sequence = Peptide::unmodifySequence(peptideStr);
 
             if (parent_protein->isPostProcess()) {
               // Attempting to store protein_id location in start_idx_original of peptide src [Please check
@@ -342,7 +360,7 @@ bool PeptideSrc::parseTabDelimited(
         }
 
         //find the start index
-        string sequence = Peptide::unmodifySequence(file.getString(SEQUENCE_COL));
+        string sequence = Peptide::unmodifySequence(peptideStr);
 
         start_index = parent_protein->findStart(sequence, prev_aa, next_aa);
         if (start_index == -1) {
@@ -367,7 +385,7 @@ bool PeptideSrc::parseTabDelimited(
     }
   } // next peptide_src in file
 
-  carp(CARP_DETAILED_DEBUG, "Done parsing id line:%s", file.getString(PROTEIN_ID_COL).c_str());
+  carp(CARP_DETAILED_DEBUG, "Done parsing id line:%s", proteinStr.c_str());
 
   return true;
 }

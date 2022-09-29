@@ -4,7 +4,6 @@
  *****************************************************************************/
 #include "MakePinApplication.h"
 #include "PercolatorApplication.h"
-#include "PercolatorAdapter.h"
 #include "Caller.h"
 #include "util/Params.h"
 #include <string>
@@ -202,6 +201,9 @@ int PercolatorApplication::main(
     // seed 0 causes segfault in percolator 
     ++seed_value;
   }
+  perc_args_vec.push_back("--protein-name-separator");
+  perc_args_vec.push_back(Params::GetString("protein-name-separator"));
+  
   perc_args_vec.push_back("--seed");
   perc_args_vec.push_back(StringUtils::ToString(seed_value));
 
@@ -284,14 +286,6 @@ int PercolatorApplication::main(
   if (Params::GetBool("klammer")) {
     perc_args_vec.push_back("--klammer");
   }
-
-  /* --doc option disabled, need retention times in pin file
-  int doc_parameter = Params::GetInt("doc");
-  if(doc_parameter >= 0) {
-    perc_args_vec.push_back("--doc");
-    perc_args_vec.push_back(to_string(doc_parameter));
-  }
-  */
 
   // FIXME include schema as part of distribution and add option to turn on validation
   perc_args_vec.push_back("--no-schema-validation");
@@ -381,7 +375,6 @@ int PercolatorApplication::main(
   perc_args_vec.push_back(input_pin);
 
   /* build argv line */
-
   string perc_cmd;
   vector<const char*> perc_argv;
   for (vector<string>::const_iterator i = perc_args_vec.begin();
@@ -390,7 +383,6 @@ int PercolatorApplication::main(
     perc_argv.push_back(i->c_str());
     perc_cmd += " " + *i;
   }
-
   carp(CARP_DEBUG, "cmd:%s", perc_cmd.c_str());
   
   /* Re-route stdeer to log file. */
@@ -399,7 +391,7 @@ int PercolatorApplication::main(
   std::cerr.rdbuf(&buffer);
 
   /* Call percolatorMain */
-  PercolatorAdapter pCaller;
+  Caller pCaller;
   try {
     int retVal;
     if (pCaller.parseOptions(perc_args_vec.size(), (char**)&perc_argv.front()) &&
@@ -416,54 +408,7 @@ int PercolatorApplication::main(
   /* Recover stderr */
   std::cerr.rdbuf(old);
   
-  // If needed, put percolator score information into crux objects.
-  bool conversion_succeeded = true;
-  if ( Params::GetBool("mzid-output") || Params::GetBool("pepxml-output") ) {
-    carp(CARP_INFO, "Converting Percolator to Crux objects.");
-    ProteinMatchCollection* target_pmc = pCaller.getProteinMatchCollection();
-    ProteinMatchCollection* decoy_pmc = pCaller.getDecoyProteinMatchCollection();
-
-    // If conversion failed, don't write pepxml or mzid.
-    if (target_pmc == NULL || decoy_pmc == NULL) {
-      carp(CARP_WARNING, "Failed to translate Percolator to Crux objects.");
-      conversion_succeeded = false;
-      if ( Params::GetBool("mzid-output") ) {
-          carp(CARP_WARNING, "Not printing mzid file.");
-      }
-      if ( Params::GetBool("pepxml-output") ) {
-          carp(CARP_WARNING, "Not printing pepxml file.");
-      }
-
-    } else {
-
-      if (Params::GetBool("mzid-output")) {
-        MzIdentMLWriter mzid_writer, decoy_mzid_writer;
-        string mzid_path = make_file_path(getFileStem() + ".target.mzid", output_dir_to_overwrite);
-        mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
-        mzid_writer.addProteinMatches(target_pmc);
-        mzid_writer.closeFile();
-        mzid_path = make_file_path(getFileStem() + ".decoy.mzid", output_dir_to_overwrite);
-        decoy_mzid_writer.openFile(mzid_path, Params::GetBool("overwrite"));
-        decoy_mzid_writer.addProteinMatches(decoy_pmc);
-        decoy_mzid_writer.closeFile();
-      }
-  
-      // write pepxml
-      if (Params::GetBool("pepxml-output")) {
-        PMCPepXMLWriter pep_writer;
-        string pep_path = make_file_path(getFileStem() + ".target.pep.xml", output_dir_to_overwrite);
-        pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
-        pep_writer.write(target_pmc);
-        pep_writer.closeFile();
-        pep_path = make_file_path(getFileStem() + ".decoy.pep.xml", output_dir_to_overwrite);
-        pep_writer.openFile(pep_path.c_str(), Params::GetBool("overwrite"));
-        pep_writer.write(decoy_pmc);
-        pep_writer.closeFile();
-      }
-    }
-  }
-
-  if (!Params::GetBool("txt-output") && conversion_succeeded) {
+  if (!Params::GetBool("txt-output")) {
     FileUtils::Remove(output_target_peptides);
   }
 
@@ -578,6 +523,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "protein-enzyme",
     "protein-report-duplicates",
     "protein-report-fragments",
+    "protein-name-separator",
     "quick-validation",
     "search-input",
     "spectral-counting-fdr",

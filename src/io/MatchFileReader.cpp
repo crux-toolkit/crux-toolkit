@@ -175,6 +175,7 @@ void MatchFileReader::getMatchColumnsPresent(
   }
 }
 
+// FIXME: Need to generalize this to work with Percolator files.
 MatchCollection* MatchFileReader::parse(
   const string& file_path,
   Database* database,
@@ -207,8 +208,14 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(POUT_QVALUE_COL));
+    if (empty(POUT_QVALUE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
+    }
+    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(POUT_SCORE_COL));
+    if (empty(POUT_SCORE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
@@ -344,12 +351,15 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(PERCOLATOR_QVALUE_COL)) {
     match->setScore(PERCOLATOR_QVALUE, getFloat(PERCOLATOR_QVALUE_COL));
+  } else if (!empty(POUT_QVALUE_COL)) {
+    match->setScore(PERCOLATOR_QVALUE, getFloat(POUT_QVALUE_COL));
   }
   if (!empty(PERCOLATOR_SCORE_COL)) {
     match->setScore(PERCOLATOR_SCORE, getFloat(PERCOLATOR_SCORE_COL));
     match->setRank(PERCOLATOR_SCORE, getInteger(PERCOLATOR_RANK_COL));
+  } else if (!empty(POUT_SCORE_COL)) {
+    match->setScore(PERCOLATOR_SCORE, getFloat(POUT_SCORE_COL));
   }
-
   if (!empty(BY_IONS_MATCHED_COL)) {
     match->setScore(BY_IONS_MATCHED, getInteger(BY_IONS_MATCHED_COL));
   }
@@ -386,9 +396,6 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   match->setTargetExperimentSize(experimentSize);
   if (experimentSize == 0) {
-    carp_once(CARP_WARNING, "Matches/spectrum column not found ('%s' or '%s')",
-              get_column_header(DISTINCT_MATCHES_SPECTRUM_COL),
-              get_column_header(MATCHES_SPECTRUM_COL));
     match->setLnExperimentSize(0);
   } else {
     match->setLnExperimentSize(log((FLOAT_T) experimentSize));
@@ -405,35 +412,42 @@ Crux::Match* MatchFileReader::parseMatch() {
 Crux::Peptide* MatchFileReader::parsePeptide() {
   Crux::Peptide* peptide = NULL;
   string seq = getString(SEQUENCE_COL);
-  if (!seq.empty()) {
-    // In cases where the sequence is in X.seq.X format, parse out the seq part
-    if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
-      seq = seq.substr(2, seq.length() - 4);
-    }
-
-    peptide = new Crux::Peptide();
-    string unmodSeq = Crux::Peptide::unmodifySequence(seq);
-    vector<Crux::Modification> mods;
-
-    // Parse modifications column first! It has more details about modifications.
-    string modsString = getString(MODIFICATIONS_COL);
-    if (!modsString.empty()) {
-      mods = Crux::Modification::Parse(modsString, &unmodSeq);
-    } else {
-      Crux::Modification::FromSeq(seq, NULL, &mods);
-    }
-
-    peptide->setUnmodifiedSequence(unmodSeq);
-    peptide->setMods(mods);
-
-    if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
-      carp(CARP_ERROR, "Failed to parse peptide src.");
-      delete peptide;
-      return NULL;
-    }
-  } else {
-    carp(CARP_FATAL, "No peptide sequence (%s).", seq.c_str());
+  bool is_percolator = false;
+  if (seq.empty()) {
+    seq = getString(POUT_PERC_PEPTIDE_COL);
+    is_percolator = true;
   }
+  if (seq.empty()) {
+    carp(CARP_FATAL, "No peptide sequence found.");
+  }
+
+  // In cases where the sequence is in X.seq.X format, parse out the seq part
+  if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
+    seq = seq.substr(2, seq.length() - 4);
+  }
+
+  peptide = new Crux::Peptide();
+
+  string unmodSeq = Crux::Peptide::unmodifySequence(seq);
+  vector<Crux::Modification> mods;
+
+  // Parse modifications column first! It has more details about modifications.
+  string modsString = getString(MODIFICATIONS_COL);
+  if (!modsString.empty()) {
+    mods = Crux::Modification::Parse(modsString, &unmodSeq);
+  } else {
+    Crux::Modification::FromSeq(seq, NULL, &mods);
+  }
+
+  peptide->setUnmodifiedSequence(unmodSeq);
+  peptide->setMods(mods);
+
+  if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
+    carp(CARP_ERROR, "Failed to parse peptide source.");
+    delete peptide;
+    return NULL;
+  }
+
   return peptide;
 }
 
