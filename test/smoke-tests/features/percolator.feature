@@ -7,7 +7,7 @@ Scenario Outline: User runs percolator
   And I pass the arguments --overwrite T <args> <pin_file>
   When I run percolator
   Then the return value should be 0
-  And crux-output/<actual_output> should match good_results/<expected_output>
+  And All lines in crux-output/<actual_output> should be in good_results/<expected_output> with 5 digits precision
 
 Examples:
   |test_name        |args                            |pin_file                     |actual_output                 |expected_output                       |
