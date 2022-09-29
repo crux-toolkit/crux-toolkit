@@ -77,6 +77,7 @@
 <parameter name="fileroot" value=""/>
 <parameter name="output-dir" value="crux-output"/>
 <parameter name="temp-dir" value=""/>
+<parameter name="memory-limit" value="4"/>
 <parameter name="num-decoys-per-target" value="1"/>
 <parameter name="top-match" value="5"/>
 <parameter name="top-match-in" value="0"/>
@@ -147,6 +148,7 @@
 <parameter name="clip-nterm-methionine" value="false"/>
 <parameter name="allow-dups" value="false"/>
 <parameter name="use-neutral-loss-peaks" value="true"/>
+<parameter name="min-precursor-charge" value="1"/>
 <parameter name="max-precursor-charge" value="5"/>
 <parameter name="peptide-centric-search" value="false"/>
 <parameter name="skip-preprocessing" value="false"/>

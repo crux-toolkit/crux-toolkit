@@ -56,11 +56,26 @@
 
 <h4>Minor changes</h4>
 <ul>
-  <li>15 Aug 2022:  The percolator command no longer creates mzIdentML 
+  <li>15 Oct 2022:  The percolator command no longer creates mzIdentML 
   output, and the tab-delimited text format produced by crux percolator
   now mimics that of the stand-alone version of Percolator. The crux
   spectral-counts and assign-confidence commands have been updated 
-  to parse the new percolator output files. </li>
+  to parse the new percolator output files.Updated to percolator committ 879af86.</li>
+  <li>28 Sept 2022: Updated Assign-confidence to the new comet output. </li>
+  <li>28 Sept 2022: Updated performance and smoke tests </li>
+  <li>28 Sept 2022: Added option to tide-search to search spectra in a min- and max-precursor-charge range. </li>
+  <li>28 Sept 2022: Removed the option from tide-index to generate decoy protein fasta file.</li>
+  <li>28 Sept 2022: Fixed bug in tide index which prevented it generating terminal variable modifications.</li>
+  <li>28 Sept 2022: Fixed bug in tide index which slowed it down when generating many mods.</li>
+  <li>22 Aug 2022: The scalability of tide-index has been improved to allow for creation 
+  of very large peptide databases. This is done by sorting and filtering the peptides on 
+  disk rather than in memory. A new parameter, --memory-limit, allows the user to specify
+  an upper bound on the memory (i.e. RAM) usage of tide-index. Note that this update 
+  required that the data structure used in Tide's index files has changed. It is therefore 
+  recommended that users' recreate old index files. Currently, indices in the old format
+  can still be used with tide-index, but this format may be deprecated in future releases 
+  of Crux.</li>
+  <li>17 August 2022: Updated to percolator committ 1e82daa.</li>
   <li>27 July 2022: Fixed bug preventing percolator from running on Kojak output.</li>
   <li>19 July 2022: Added min_peptide_score parameter to Kojak. </li>
   <li>09 June 2022: Upgraded to ProteoWizard 3.0.22014 (commit aadd392). This
