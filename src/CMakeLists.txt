@@ -142,7 +142,6 @@ set (
   model/PeptideSrc.cpp
   io/PepXMLReader.cpp
   io/PepXMLWriter.cpp
-  app/PercolatorAdapter.cpp
   app/PercolatorApplication.cpp
   io/PinWriter.cpp
   app/Pipeline.cpp
