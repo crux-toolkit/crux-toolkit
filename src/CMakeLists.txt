@@ -238,7 +238,7 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	  COMPILE_DEFINITIONS
 	  _LARGEFILE_SOURCE
 	  _LARGEFILE64_SOURCE
-	  _BSD_SOURCE
+	  _DEFAULT_SOURCE
 	  _POSIX_C_SOURCE=199506L
 	  _FILE_OFFSET_BITS=64
 	  _GNU_SOURCE
@@ -428,6 +428,7 @@ if (WIN32 AND NOT CYGWIN)
     hardklor
     cometsearch
     kojaksearch
+    libneopepxmlparser.a
     perclibrary
     blas
     fido
@@ -455,6 +456,7 @@ else()
     tide-support
     cometsearch
     kojaksearch
+    libneopepxmlparser.a
     gflags
     bullseye
     hardklor
