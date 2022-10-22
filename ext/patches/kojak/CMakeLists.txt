@@ -5,6 +5,7 @@ project(kojak)
 include_directories(
   ${BASE_INCLUDE_PATH} 
   ${MSTOOLKIT_INCLUDE_PATH} 
+  ${NEOPEPXMLPARSER_INCLUDE_PATH} 
   ${HARDKLOR_INCLUDE_PATH}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -20,7 +21,6 @@ set(
   KAnalysis.cpp 
   KData.cpp 
   KDB.cpp 
-  KPrecursor.cpp 
   KSpectrum.cpp 
   KIons.cpp 
   KIonSet.cpp 
