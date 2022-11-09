@@ -604,7 +604,8 @@ int TideIndexApplication::main(
     pb::Peptide current_pb_peptide_;
     string decoy_peptide_str;
     vector<pb::Peptide> pb_peptides; 
-    set<string> peptide_str_set;
+    set<string> peptide_target_str_set;
+    vector<set<string>> peptide_decoy_str_set(numDecoys);
     double last_mass = -1.0;
     pb::Peptide last_pb_peptide;
     pb::Peptide temp_pb_peptide;
@@ -722,7 +723,7 @@ int TideIndexApplication::main(
         // Create a set with the unique peptides sequences. The peptides must have the same neutral mass.
         for (vector<pb::Peptide>::iterator pb_pept_itr = pb_peptides.begin(); pb_pept_itr != pb_peptides.end(); ++pb_pept_itr) {
           target_peptide_with_mods = getModifiedPeptideSeq(&(*pb_pept_itr), &vProteinHeaderSequence);
-          peptide_str_set.insert(target_peptide_with_mods);
+          peptide_target_str_set.insert(target_peptide_with_mods);
         }
       }
       // For each target peptide in the set: 
@@ -791,10 +792,12 @@ int TideIndexApplication::main(
                 break;
               } else {
                 // The decoy peptide string with modications can be found in the set of unique peptides?
-                success = peptide_str_set.find(decoy_peptide_str_with_mods) == peptide_str_set.end();
+                success = peptide_target_str_set.find(decoy_peptide_str_with_mods) == peptide_target_str_set.end(); 
+                if (success == true)
+                  success = peptide_decoy_str_set[i].find(decoy_peptide_str_with_mods) == peptide_decoy_str_set[i].end(); 
               }
               if (success == true) {
-                peptide_str_set.insert(decoy_peptide_str_with_mods);
+                peptide_decoy_str_set[i].insert(decoy_peptide_str_with_mods);
                 break;
               }
               shuffle = true; // Failed to generate decoy, so try shuffling in the next attempt.
@@ -859,7 +862,10 @@ int TideIndexApplication::main(
         }
       }
       pb_peptides.clear();
-      peptide_str_set.clear();
+      peptide_target_str_set.clear(); 
+      for (int i = 0; i < numDecoys; ++i)
+        peptide_decoy_str_set[i].clear();
+        
       if (!allowDups) {
         pb_peptides.push_back(last_pb_peptide);
         last_mass = last_pb_peptide.mass();

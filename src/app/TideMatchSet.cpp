@@ -911,7 +911,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
         decoysOut.push_back(i);
       }
     }
-    if ((concat && targetsOut.size() >= gatherSize) || (!concat && targetsOut.size() >= gatherSize && decoysOut.size() >= gatherSize)){
+    if ((concat && targetsOut.size() >= gatherSize) || (!concat && targetsOut.size() >= gatherSize && decoysOut.size() >= gatherSize*numDecoys)){
       break;
     }
   }
