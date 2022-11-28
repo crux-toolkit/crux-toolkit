@@ -445,21 +445,21 @@
     <ul>
       <br>
         When you build your peptide index using tide-index, you have
-        to specify the number of decoy databases to include.  For
-        instance, to build an index with five decoys per target from a
-        fasta file called <code>human.fasta</code>, you could do
-        this:<br>
+        to specify the number of decoy databases to include and you
+        have to set allow-dups to be T. For instance, to build an
+        index with five decoys per target from a fasta file
+        called <code>human.fasta</code>, you could do this:<br>
 
 <pre>
 crux tide-index --num-decoys-per-target 5 --allow-dups T human.fasta human
 </pre>
 
 <br>
-You could then search a file of spectra (<code>HepG2_f4.mzML</code>)
-using the <code>human</code> index like this:<br>
+Also, when you search a file of spectra (<code>HepG2_f4.mzML</code>)
+using the <code>human</code> index, you must specific concat=F:<br>
 
 <pre>
-  crux tide-search --use-tailor-calibration T HepG2_f4.mzML human
+  crux tide-search --use-tailor-calibration T --concat F HepG2_f4.mzML human
 </pre>
 
 <br>
