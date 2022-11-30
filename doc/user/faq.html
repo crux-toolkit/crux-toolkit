@@ -74,9 +74,10 @@
     peptides.</li>
     <li>
     Comet provides an option to report an E-value in addition to the raw
-    XCorr score, whereas Tide provides an option to report a p-value.  The
-    methods for computing these two statistical confidence measures are
-    quite different.</li>
+    XCorr score, whereas Tide provides options to report a variety of
+    different types of scores.  The methods for computing Tide's
+    various scores are described in the documentation
+    for <code>tide-index</code>.</li>
     <li>
     Some options are available only in Comet (various options related to
     different types of theoretical fragment ions, max_fragment_charge,
@@ -430,6 +431,61 @@
     </p>
 
     <li>
+    <b>How can I use the average target-decoy competition (aTDC)
+      procedure described in this paper?</b>
+      <blockquote>
+      Uri Keich, Kaipo Tamura, and William Stafford Noble.
+      <a href="https://pubs.acs.org/doi/10.1021/acs.jproteome.8b00802">"Averaging
+  strategy to reduce variability in target-decoy estimates of false
+  discovery rate."</a> <i>Journal of Proteome Research</i>,
+  18(2):585-593, 2019.
+      </blockquote>
+      </li>
+
+    <ul>
+      <br>
+        When you build your peptide index using tide-index, you have
+        to specify the number of decoy databases to include and you
+        have to set allow-dups to be T. It's also important that you
+        leave the decoy-format option at its default value of shuffle,
+        since if you reverse the peptides then all of the databases
+        would be identical.  For example, to build an
+        index with five decoys per target from a fasta file
+        called <code>human.fasta</code>, you could do this:<br>
+
+<pre>
+crux tide-index --num-decoys-per-target 5 --allow-dups T human.fasta human
+</pre>
+
+<br>
+Also, when you search a file of spectra (<code>HepG2_f4.mzML</code>)
+using the <code>human</code> index, you must specify concat=F:<br>
+
+<pre>
+  crux tide-search --use-tailor-calibration T --concat F HepG2_f4.mzML human
+</pre>
+
+<br>
+This command stores the search results in the default output directory
+(<code>crux-output</code>) in files
+called <code>tide-search.target.txt</code>
+and <code>tide-search.decoy.txt</code>. Notably, the decoy file will
+contain five times as many PSMs as the target file, with a column
+called "decoy index" to indicate which database the decoy comes from.
+Finally, you can run aTDC by calling <code>assign-confidence</code>.
+This command will use the "decoy index" column to do the necessary
+averaging over the decoy databases:<br>
+
+<pre>
+  crux assign-confidence --score "tailor score" crux-output/tide-search.target.txt
+</pre>
+<br>
+The final results are stored in a file
+called <code>crux-output/assign-confidence.target.psms.txt</code>.
+</ul>
+
+
+    <li>
     <b>For what settings of the score-function and mz-bin-width parameter
     can I set exact-p-value=T?</b>
 	<ul>
@@ -647,30 +703,6 @@
     <code>precursor-window-type</code> options.</p>
 
     <li>
-    <b>How can I run many jobs in parallel?</b></li>
-
-
-      <p>
-    In combination with GNU parallel, parallelization of Crux can be
-    achieved rather painlessly. For example, to run tide-search on a set
-    of spectrum files, you can just get your spectra files into a filelist:</p>
-
-    <pre>
-find . -name "*.mzXML" &gt; file.list
-    </pre>
-
-    <p>
-    Then, with a bit of bash magic, run parallel as follows (assuming
-    there are 100 files in file.list):</p>
-
-    <pre>
-parallel --xapply crux tide-search &lt;options&gt; --fileroot {1} {2} database.db ::: $(seq 1 100) ::: $(cat file.list)
-    </pre>
-
-      <p>
-        <i>Thanks to Ben Temperton for this answer.</i></p>
-
-    <li>
     <b>How can I search my isotopically labeled data with Tide or Comet?</b></li>
     <p>
     Isotopically labeled data is accommodated by specifying various static or
@@ -837,7 +869,8 @@ add_C_cysteine = 0.997035
     <b>How can I contribute to Crux?</b></li>
 
     <p>
-    Patches implementing new features can be emailed to the development
+    Patches implementing new features can submitted directly as pull
+    requests on github, or can be be emailed to the development
     team at crux-support@uw.edu for review and inclusion in subsequent
     releases of Crux.</p>
 
