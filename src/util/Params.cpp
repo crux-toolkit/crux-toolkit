@@ -410,7 +410,8 @@ Params::Params() : finalized_(false) {
     "with concat=F tide-search will output one target and n decoys. The "
     "resulting files can be used to run the \"average target-decoy "
     "competition\" method in assign-confidence. This parameter only applies "
-    "when decoy-format is shuffle.",
+    "when decoy-format=shuffle and should always be used in combination with "
+    "allow-dups=T.",
     "Available for tide-index.", true);
   InitBoolParam("decoy-p-values", false,
     "Store all decoy p-values in a file",
