@@ -358,7 +358,7 @@ set(neopepxmlparser_include_path ${CMAKE_BINARY_DIR}/ext/build/src/neopepxmlpars
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
 ExternalProject_Add(
   kojak
-  GIT_TAG Release-2.0.0alpha22
+  GIT_TAG 4307dfa
   GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
