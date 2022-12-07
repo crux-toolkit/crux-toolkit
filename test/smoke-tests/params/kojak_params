@@ -50,7 +50,6 @@ ion_series_C=false
 ion_series_X=false
 ion_series_Y=true
 ion_series_Z=false
-decoy_filter=DECOY_ 1
 kojak_isotope_error=1
 max_miscleavages=2
 max_peptide_mass=8000
