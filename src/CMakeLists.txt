@@ -428,7 +428,7 @@ if (WIN32 AND NOT CYGWIN)
     hardklor
     cometsearch
     kojaksearch
-    libneopepxmlparser.a
+    neopepxmlparser.lib
     perclibrary
     blas
     fido
@@ -503,4 +503,3 @@ install (
   DESTINATION
   bin
 )
-
