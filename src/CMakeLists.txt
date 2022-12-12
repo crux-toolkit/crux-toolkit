@@ -503,3 +503,4 @@ install (
   DESTINATION
   bin
 )
+
