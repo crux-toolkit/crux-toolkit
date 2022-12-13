@@ -263,7 +263,7 @@ ExternalProject_Add(
 ExternalProject_Add(
   MSToolkit
   GIT_REPOSITORY https://github.com/mhoopmann/mstoolkit.git
-  GIT_TAG 4cb705d
+  GIT_TAG 20e99ce
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
@@ -329,19 +329,43 @@ elseif (WIN32 AND NOT CYGWIN)
   )
 endif (UNIX)
 
+# NeoPepXMLParser 
+set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
+set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+ExternalProject_Add(
+  neopepxmlparser
+  GIT_TAG e89f166
+  GIT_REPOSITORY https://github.com/mhoopmann/NeoPepXMLParser.git
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+  CMAKE_ARGS ${TOOLCHAIN_FILE}
+    -DBASE_INCLUDE_PATH=${base_include_path}
+    -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
+    -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+PATCH_COMMAND
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/NeoPepXMLParser/CMakeLists.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/neopepxmlparser/
+  BUILD_IN_SOURCE 1
+)
+
 # Kojak
 set(base_include_path ${CMAKE_BINARY_DIR}/ext/include)
 set(mstoolkit_include_path ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+set(neopepxmlparser_include_path ${CMAKE_BINARY_DIR}/ext/build/src/neopepxmlparser)
 set(hardklor_include_path ${CMAKE_SOURCE_DIR}/src/app/hardklor)
 ExternalProject_Add(
   kojak
-  GIT_TAG defa8c9
+  GIT_TAG 4307dfa
   GIT_REPOSITORY https://github.com/mhoopmann/kojak.git
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
     -DMSTOOLKIT_INCLUDE_PATH=${mstoolkit_include_path}
     -DHARDKLOR_INCLUDE_PATH=${hardklor_include_path}
+    -DNEOPEPXMLPARSER_INCLUDE_PATH=${neopepxmlparser_include_path}
     -DCMAKE_VERBOSE_MAKEFILE=ON
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
