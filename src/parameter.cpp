@@ -113,6 +113,7 @@ void initialize_parameters(void) {
   comet_enzyme_info_lines_.push_back("8.  Glu_C\t\t\t\t1      DE           P");
   comet_enzyme_info_lines_.push_back("9.  PepsinA\t\t\t\t1      FL           P");
   comet_enzyme_info_lines_.push_back("10. Chymotrypsin\t\t\t1      FWYL         P");
+  comet_enzyme_info_lines_.push_back("11. No_cut\t\t\t1      @         @");
 }
 
 /**
