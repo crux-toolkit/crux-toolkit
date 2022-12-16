@@ -458,7 +458,7 @@ Params::Params() : finalized_(false) {
     "case, the amino acid would be reported as D[16] with 'mod-only', D[131] with 'total', "
     "and D[14,2] with 'separate'.",
     "Available for generate-peptides.", true);
-  InitIntParam("mod-precision", 2, 0, 20,//arbitrary
+  InitIntParam("mod-precision", 4, 0, 20,//arbitrary
     "Set the precision for modifications as written to .txt files.",
     "Also changes mods written to parameter file. By default, this "
     "value is set equal to the maximum modification precision in the "
