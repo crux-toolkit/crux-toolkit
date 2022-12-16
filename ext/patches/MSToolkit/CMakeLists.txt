@@ -52,7 +52,7 @@ set(
   ${MZIMLTOOLS_PATH}/CAnalysisData.cpp
   ${MZIMLTOOLS_PATH}/CAnalysisParams.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisProtocolCollection.cpp
-  ${MZIMLTOOLS_PATH}/CAnalysisSampleCollection.cpp
+  ${MZIMLTOOLS_PATH}/CAnalysisSampleCollection.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisSoftware.cpp 
   ${MZIMLTOOLS_PATH}/CAnalysisSoftwareList.cpp 
   ${MZIMLTOOLS_PATH}/CAuditCollection.cpp 
@@ -66,7 +66,6 @@ set(
   ${MZIMLTOOLS_PATH}/CEnzyme.cpp 
   ${MZIMLTOOLS_PATH}/CEnzymeName.cpp 
   ${MZIMLTOOLS_PATH}/CEnzymes.cpp
-  ${MZIMLTOOLS_PATH}/CExclude.cpp
   ${MZIMLTOOLS_PATH}/CFileFormat.cpp 
   ${MZIMLTOOLS_PATH}/CFilter.cpp 
   ${MZIMLTOOLS_PATH}/CFilterType.cpp 
@@ -74,6 +73,7 @@ set(
   ${MZIMLTOOLS_PATH}/CFragmentation.cpp 
   ${MZIMLTOOLS_PATH}/CFragmentationTable.cpp 
   ${MZIMLTOOLS_PATH}/CFragmentTolerance.cpp 
+  ${MZIMLTOOLS_PATH}/CExclude.cpp 
   ${MZIMLTOOLS_PATH}/CInclude.cpp 
   ${MZIMLTOOLS_PATH}/CInputs.cpp 
   ${MZIMLTOOLS_PATH}/CIonType.cpp
@@ -114,7 +114,7 @@ set(
   ${MZIMLTOOLS_PATH}/CSpectrumIdentificationList.cpp 
   ${MZIMLTOOLS_PATH}/CSpectrumIdentificationProtocol.cpp 
   ${MZIMLTOOLS_PATH}/CSpectrumIdentificationResult.cpp
-  ${MZIMLTOOLS_PATH}/CSubSample.cpp
+  ${MZIMLTOOLS_PATH}/CSubSample.cpp 
   ${MZIMLTOOLS_PATH}/CThreshold.cpp
 )
 set(
