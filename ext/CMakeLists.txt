@@ -289,7 +289,7 @@ if (UNIX)
   ExternalProject_Add(
     comet
     GIT_REPOSITORY https://github.com/UWPR/Comet/
-    GIT_TAG 3c62af2
+    GIT_TAG v2022.01.2
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DBASE_INCLUDE_PATH=${base_include_path}

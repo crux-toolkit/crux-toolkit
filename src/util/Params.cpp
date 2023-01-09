@@ -944,8 +944,10 @@ InitStringParam("protein-name-separator", ",",
   InitIntParam("precursor_tolerance_type", 0, 0, 1,
     "0=singly charged peptide mass, 1=precursor m/z.",
     "Available for comet.", true);
-  InitIntParam("isotope_error", 0, 0, 2,
-    "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2=-8/-4/0/4/8 (for +4/+8 labeling).",
+  InitIntParam("isotope_error", 0, 0, 5,
+    "0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, " 
+    "4=--8/-4/0/4/8 (for +4/+8 labeling), "
+    "5=-1/0/1/2/3.",
     "Available for comet.", true);
   /* Comet - Search enzyme */
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
@@ -1088,11 +1090,11 @@ InitStringParam("protein-name-separator", ",",
     "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
     "Available for comet.", true);
   InitIntParam("explicit_deltacn", 0, 0, 1,
-    "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide;\n"
+    "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide, "
     "1=Comet deltaCn reported between the top two peptides.",
     "Available for comet.", true);
   InitIntParam("old_mods_encoding", 0, 0, 1,
-    "0=Comet will use mass based modification encodings;\n"
+    "0=Comet will use mass based modification encodings, "
     "1=Comet will use the old character based modification encodings.",
     "Available for comet.", true);
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
