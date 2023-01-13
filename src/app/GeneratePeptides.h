@@ -2,6 +2,7 @@
 #define GENERATE_PEPTIDES_H
 
 #include <fstream>
+#include <vector>
 
 #include "CruxApplication.h"
 #include "model/Peptide.h"
@@ -40,6 +41,17 @@ class GeneratePeptides : public CruxApplication {
    private:
     unsigned int position_;
   };
+  
+  class PeptideReference {
+    public:
+	 PeptideReference (int pos, int length){
+       pos_ = pos;
+	   length_ = length;
+	 };
+	 int pos_;
+	 int length_;     
+  };
+  
 
   /**
    * Constructor
@@ -92,6 +104,15 @@ class GeneratePeptides : public CruxApplication {
     int maxLength  //< Max length of peptides to return
   );
 
+  static std::vector<PeptideReference> cleaveProteinTideIndex(
+    std::string* sequence, ///< Protein sequence to cleave
+    ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+    DIGEST_T digest,  ///< Digestion to use for cleavage
+    int missedCleavages,  ///< Maximum allowed missed cleavages
+    int minLength,  //< Min length of peptides to return
+    int maxLength  //< Max length of peptides to return
+  );
+
   /**
    * Makes a decoy from the sequence.
    * Returns false on failure, and decoyOut will be the same as seq.
@@ -105,6 +126,16 @@ class GeneratePeptides : public CruxApplication {
   );
 
   /**
+   * Makes a decoy from the sequence.
+   * Returns false on failure, and decoyOut will be the same as seq.
+   */
+  static bool makeDecoyIdx(
+    const std::string& seq,  ///< sequence to make decoy from
+    bool shuffle, ///< shuffle (if false, reverse)
+    std::vector<int>& decoyOutIdx ///< vector to store indexes
+  );
+
+  /**
    * Shuffles the peptide sequence.
    * Returns false if no different sequence was generated
    */
@@ -113,12 +144,20 @@ class GeneratePeptides : public CruxApplication {
     unsigned int maxShuffleAttempts = 6 ///< Maximum number of shuffle attempts
   );
 
+  static bool shufflePeptideIdx(
+    std::vector<int>& decoyIdx  ///< Peptide sequence to shuffle
+  );
+
   /**
    * Reverses the peptide sequence.
    * Returns false if no different sequence was generated
    */
   static bool reversePeptide(
     std::string& seq ///< Peptide sequence to reverse
+  );
+  
+  static bool reversePeptideIdx(
+    std::vector<int>& decoyIdx  ///< Peptide sequence to reverse
   );
 
   /**

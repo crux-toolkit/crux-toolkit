@@ -175,6 +175,7 @@ void MatchFileReader::getMatchColumnsPresent(
   }
 }
 
+// FIXME: Need to generalize this to work with Percolator files.
 MatchCollection* MatchFileReader::parse(
   const string& file_path,
   Database* database,
@@ -207,17 +208,52 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
     match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
-    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(POUT_QVALUE_COL));
+    if (empty(POUT_QVALUE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
+    }
+    match_collection->setScoredType(PERCOLATOR_SCORE, !empty(POUT_SCORE_COL));
+    if (empty(POUT_SCORE_COL)) {
+      match_collection->setScoredType(PERCOLATOR_SCORE, !empty(PERCOLATOR_SCORE_COL));
+    }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
+
+    // DIAmeter related, added by Yang
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M1, !empty(PRECURSOR_INTENSITY_RANK_M1_COL));
+    match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M2, !empty(PRECURSOR_INTENSITY_RANK_M2_COL));
+    match_collection->setScoredType(RT_DIFF, !empty(RT_DIFF_COL));
+    match_collection->setScoredType(DYN_FRAGMENT_PVALUE, !empty(DYN_FRAGMENT_PVALUE_COL));
+    match_collection->setScoredType(STA_FRAGMENT_PVALUE, !empty(STA_FRAGMENT_PVALUE_COL));
+    match_collection->setScoredType(COELUTE_MS1, !empty(COELUTE_MS1_COL));
+    match_collection->setScoredType(COELUTE_MS2, !empty(COELUTE_MS2_COL));
+    match_collection->setScoredType(COELUTE_MS1_MS2, !empty(COELUTE_MS1_MS2_COL));
+    match_collection->setScoredType(ENSEMBLE_SCORE, !empty(ENSEMBLE_SCORE_COL));
+
     if (!empty(DECOY_INDEX_COL)) {
       match_collection->setHasDecoyIndexes(true);
     }
 
+    // TODO presumably we can do this once instead of one time per scan
+    MATCH_COLUMNS_T rank_col;
+    if (empty(PERCOLATOR_RANK_COL) == 1) {
+      rank_col = PERCOLATOR_RANK_COL;
+    } else if (empty(BOTH_PVALUE_RANK) == 1) {
+      rank_col = BOTH_PVALUE_RANK;
+    } else if (empty(RESIDUE_RANK_COL) == 1) {
+      rank_col = RESIDUE_RANK_COL;
+    } else if (empty(XCORR_RANK_COL) == 1) {
+      rank_col = XCORR_RANK_COL;
+    } else if (empty(SP_RANK_COL) == 1) {
+      rank_col = SP_RANK_COL;
+    } else {
+      carp(CARP_FATAL, "Input file does not contain any reconized rank column.");
+    }
+
     // parse match object
-    if (maxRank == 0 || getInteger(XCORR_RANK_COL) <= maxRank) {
+    if (maxRank == 0 || getInteger(rank_col) <= maxRank) {
       Crux::Match* match = parseMatch();
       if (match == NULL) {
         carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
@@ -292,6 +328,7 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(EXACT_PVALUE_COL)) {
     match->setScore(TIDE_SEARCH_EXACT_PVAL, getFloat(EXACT_PVALUE_COL));
     match->setScore(TIDE_SEARCH_REFACTORED_XCORR, getFloat(REFACTORED_SCORE_COL));
+    match->setRank(TIDE_SEARCH_EXACT_PVAL, getInteger(XCORR_RANK_COL));
   }
   if (!empty(RESIDUE_EVIDENCE_COL)) {
     match->setScore(RESIDUE_EVIDENCE_SCORE, getFloat(RESIDUE_EVIDENCE_COL));
@@ -314,12 +351,15 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(PERCOLATOR_QVALUE_COL)) {
     match->setScore(PERCOLATOR_QVALUE, getFloat(PERCOLATOR_QVALUE_COL));
+  } else if (!empty(POUT_QVALUE_COL)) {
+    match->setScore(PERCOLATOR_QVALUE, getFloat(POUT_QVALUE_COL));
   }
   if (!empty(PERCOLATOR_SCORE_COL)) {
     match->setScore(PERCOLATOR_SCORE, getFloat(PERCOLATOR_SCORE_COL));
     match->setRank(PERCOLATOR_SCORE, getInteger(PERCOLATOR_RANK_COL));
+  } else if (!empty(POUT_SCORE_COL)) {
+    match->setScore(PERCOLATOR_SCORE, getFloat(POUT_SCORE_COL));
   }
-
   if (!empty(BY_IONS_MATCHED_COL)) {
     match->setScore(BY_IONS_MATCHED, getInteger(BY_IONS_MATCHED_COL));
   }
@@ -334,6 +374,19 @@ Crux::Match* MatchFileReader::parseMatch() {
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
 
+  // DIAmeter related, added by Yang
+  if (!empty(PRECURSOR_INTENSITY_RANK_M0_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M0, getFloat(PRECURSOR_INTENSITY_RANK_M0_COL)); }
+  if (!empty(PRECURSOR_INTENSITY_RANK_M1_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M1, getFloat(PRECURSOR_INTENSITY_RANK_M1_COL)); }
+  if (!empty(PRECURSOR_INTENSITY_RANK_M2_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M2, getFloat(PRECURSOR_INTENSITY_RANK_M2_COL)); }
+  if (!empty(RT_DIFF_COL)) { match->setScore(RT_DIFF, getFloat(RT_DIFF_COL)); }
+  if (!empty(DYN_FRAGMENT_PVALUE_COL)) { match->setScore(DYN_FRAGMENT_PVALUE, getFloat(DYN_FRAGMENT_PVALUE_COL)); }
+  if (!empty(STA_FRAGMENT_PVALUE_COL)) { match->setScore(STA_FRAGMENT_PVALUE, getFloat(STA_FRAGMENT_PVALUE_COL)); }
+  if (!empty(COELUTE_MS1_COL)) { match->setScore(COELUTE_MS1, getFloat(COELUTE_MS1_COL)); }
+  if (!empty(COELUTE_MS2_COL)) { match->setScore(COELUTE_MS2, getFloat(COELUTE_MS2_COL)); }
+  if (!empty(COELUTE_MS1_MS2_COL)) { match->setScore(COELUTE_MS1_MS2, getFloat(COELUTE_MS1_MS2_COL)); }
+  if (!empty(ENSEMBLE_SCORE_COL)) { match->setScore(ENSEMBLE_SCORE, getFloat(ENSEMBLE_SCORE_COL)); }
+
+
   // get experiment size
   int experimentSize = 0;
   if (!empty(DISTINCT_MATCHES_SPECTRUM_COL)) {
@@ -343,9 +396,6 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   match->setTargetExperimentSize(experimentSize);
   if (experimentSize == 0) {
-    carp_once(CARP_WARNING, "Matches/spectrum column not found ('%s' or '%s')",
-              get_column_header(DISTINCT_MATCHES_SPECTRUM_COL),
-              get_column_header(MATCHES_SPECTRUM_COL));
     match->setLnExperimentSize(0);
   } else {
     match->setLnExperimentSize(log((FLOAT_T) experimentSize));
@@ -362,35 +412,42 @@ Crux::Match* MatchFileReader::parseMatch() {
 Crux::Peptide* MatchFileReader::parsePeptide() {
   Crux::Peptide* peptide = NULL;
   string seq = getString(SEQUENCE_COL);
-  if (!seq.empty()) {
-    // In cases where the sequence is in X.seq.X format, parse out the seq part
-    if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
-      seq = seq.substr(2, seq.length() - 4);
-    }
-
-    peptide = new Crux::Peptide();
-    string unmodSeq = Crux::Peptide::unmodifySequence(seq);
-    vector<Crux::Modification> mods;
-
-    // Parse modifications column first! It has more details about modifications.
-    string modsString = getString(MODIFICATIONS_COL);
-    if (!modsString.empty()) {
-      mods = Crux::Modification::Parse(modsString, &unmodSeq);
-    } else {
-      Crux::Modification::FromSeq(seq, NULL, &mods);
-    }
-
-    peptide->setUnmodifiedSequence(unmodSeq);
-    peptide->setMods(mods);
-
-    if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
-      carp(CARP_ERROR, "Failed to parse peptide src.");
-      delete peptide;
-      return NULL;
-    }
-  } else {
-    carp(CARP_FATAL, "No peptide sequence (%s).", seq.c_str());
+  bool is_percolator = false;
+  if (seq.empty()) {
+    seq = getString(POUT_PERC_PEPTIDE_COL);
+    is_percolator = true;
   }
+  if (seq.empty()) {
+    carp(CARP_FATAL, "No peptide sequence found.");
+  }
+
+  // In cases where the sequence is in X.seq.X format, parse out the seq part
+  if (seq.length() > 4 && seq[1] == '.' && seq[seq.length() - 2] == '.') {
+    seq = seq.substr(2, seq.length() - 4);
+  }
+
+  peptide = new Crux::Peptide();
+
+  string unmodSeq = Crux::Peptide::unmodifySequence(seq);
+  vector<Crux::Modification> mods;
+
+  // Parse modifications column first! It has more details about modifications.
+  string modsString = getString(MODIFICATIONS_COL);
+  if (!modsString.empty()) {
+    mods = Crux::Modification::Parse(modsString, &unmodSeq);
+  } else {
+    Crux::Modification::FromSeq(seq, NULL, &mods);
+  }
+
+  peptide->setUnmodifiedSequence(unmodSeq);
+  peptide->setMods(mods);
+
+  if (!PeptideSrc::parseTabDelimited(peptide, *this, database_, decoy_database_)) {
+    carp(CARP_ERROR, "Failed to parse peptide source.");
+    delete peptide;
+    return NULL;
+  }
+
   return peptide;
 }
 

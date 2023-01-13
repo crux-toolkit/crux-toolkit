@@ -226,7 +226,7 @@ window.onload = function () {
                 .style("font-size", "10px")
                 .text("Crux runs (in 1,000)");            
             
-            legend_data = [['tide-search', colors[0]], ['others', colors[1]]];
+            legend_data = [['tide-search', colors[1]], ['others', colors[0]]];
             var legend = d3.select('svg')
                 .append("g")
                 .selectAll("g")
@@ -406,6 +406,13 @@ window.onload = function () {
 			<td>
 			Search a collection of spectra against a sequence database, finding
 			cross-linked peptide matches.</td></tr>
+
+			<tr>
+			<td>
+			<a href="commands/diameter.html">diameter</a></td>
+			<td>
+			Identify peptide sequences fromm data-independent acquisition
+      mass spectrometry data without requiring a spectral library</td></tr>
 
 			<tr>
 			<td>

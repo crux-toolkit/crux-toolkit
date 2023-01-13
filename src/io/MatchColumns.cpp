@@ -61,6 +61,16 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "e-value",
   "smoothed p-value",
   "distinct matches/peptide",
+  "precursor intensity logrank M0", // added by Yang
+  "precursor intensity logrank M1", // added by Yang
+  "precursor intensity logrank M2", // added by Yang
+  "rt-diff", // added by Yang
+  "dynamic fragment p-value", // added by Yang
+  "static fragment p-value", // added by Yang
+  "precursor coelution", // added by Yang
+  "fragment coelution", // added by Yang
+  "precursor fragment coelution", // added by Yang
+  "ensemble score", // added by Yang
 #ifdef NEW_COLUMNS
   "decoy PSM q-value",
   "decoy peptide q-value",      // NEW
@@ -125,7 +135,14 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "xcorr 2",
   "protein id x",
   "index name",
-  "decoy index"
+  "decoy index",
+  // Percolator PIN columns.
+  "PSMId",
+  "score",
+  "q-value",
+  "posterior_error_prob",
+  "peptide",
+  "proteinIds"
 };
 
 /**

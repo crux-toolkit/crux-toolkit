@@ -106,7 +106,7 @@
 
 #include <iostream>
 #include <vector>
-#include "theoretical_peak_pair.h"
+#include "theoretical_peak_set.h"
 #include "max_mz.h"
 #include "mass_constants.h"
 
@@ -118,7 +118,7 @@ class ObservedPeakSet {
  public:
 
   ObservedPeakSet(double bin_width = MassConstants::bin_width_,
-     double bin_offset = MassConstants::bin_width_,
+     double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
     : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
     cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
@@ -133,12 +133,6 @@ class ObservedPeakSet {
 
   const int* GetCache() const { return cache_; } //TODO 261: access restriction?
 
-  // On-the-fly compilation takes the place of this call.
-  int DotProd(const TheoreticalPeakArr& theoretical);
-#ifdef DEBUG
-  int DebugDotProd(const TheoreticalPeakArr& theoretical);
-#endif
-
   void PreprocessSpectrum(const Spectrum& spectrum, int charge) {
     long int dummy1, dummy2, dummy3, dummy4;
     PreprocessSpectrum(spectrum, charge, &dummy1, &dummy2, &dummy3, &dummy4);
@@ -148,7 +142,8 @@ class ObservedPeakSet {
                           long int* num_range_skipped,
                           long int* num_precursors_skipped,
                           long int* num_isotopes_skipped,
-                          long int* num_retained);
+                          long int* num_retained,
+                          bool dia_mode = false);
 
   // created by Andy Lin 2/11/2016
   // Method for creating residue evidence matrix from Spectrum
@@ -158,16 +153,16 @@ class ObservedPeakSet {
                                    double precursorMass,
                                    int nAA,
                                    const vector<double>& aaMass,
-                                   double fragTol,int granularityScale,
+                                   double fragTol, int granularityScale,
                                    double nTermMass, double cTermMass,
                                    long int* num_range_skipped,
                                    long int* num_precursors_skipped,
                                    long int* num_isotopes_skipped,
                                    long int* num_retained,
                                    vector< vector<double> >& residueEvidenceMatrix);
-   // created by Andy Lin in Feb 2018
-   // help method for CreateResidueEvidenceMatrix
-   void addEvidToResEvMatrix(vector<double>& ionMass,
+// created by Andy Lin in Feb 2018
+// help method for CreateResidueEvidenceMatrix
+void addEvidToResEvMatrix(vector<double>& ionMass,
                     vector<int>& ionMassBin,
                     vector<double>& ionMasses,
                     vector<double>& ionIntens,
@@ -181,7 +176,7 @@ class ObservedPeakSet {
                     vector< vector<double> >& residueEvidenceMatrix);
 
   // For debugging
-  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
+/*  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
     int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();
     for (int i = 0; i < end; ++i) {
       double peak = Peak(peak_type, i);
@@ -212,15 +207,13 @@ class ObservedPeakSet {
       if (peaks_[i] != 0)
         cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
   }
+*/
+  // added by Yang
+  int LargestMzbin() const { return largest_mzbin_; };
+  int SmallestMzbin() const { return smallest_mzbin_; };
+  vector<pair<int, double>>& FilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
 
  private:
-  int& Peak(TheoreticalPeakType peak_type, int index) {
-    // Note the different order than for TheoreticalPeakPair's constructor.
-    // In context of this class, peak_type feels like the primary selector.
-    return cache_[TheoreticalPeakPair(index, peak_type).Code()];
-  }
-  void MakeInteger();
-  void ComputeCache();
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
                           int* intensRegion, int maxPrecurMass, int charge);
 
@@ -232,8 +225,12 @@ class ObservedPeakSet {
   double bin_width_;
   double bin_offset_;
 
-  MaxBin max_mz_;
+//  MaxBin max_mz_;
   int cache_end_;
+
+  // added by Yang
+  vector<pair<int, double>> dyn_filtered_peak_tuples_;
+  int largest_mzbin_, smallest_mzbin_;
 
   friend class ObservedPeakTester;
 };

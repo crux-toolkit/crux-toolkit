@@ -5,6 +5,7 @@
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/StringUtils.h"
+#include <iostream>
 
 using namespace std;
 
@@ -67,7 +68,6 @@ void GeneratePeptides::processFasta(
   int minLen = Params::GetInt("min-length");
   int maxLen = Params::GetInt("max-length");
   string decoyPrefix = Params::GetString("decoy-prefix");
-  bool proteinReverse = decoyType == PROTEIN_REVERSE_DECOYS;
   bool peptideShuffle = decoyType == PEPTIDE_SHUFFLE_DECOYS;
   bool peptideReverse = decoyType == PEPTIDE_REVERSE_DECOYS;
 
@@ -89,13 +89,6 @@ void GeneratePeptides::processFasta(
     vector<CleavedPeptide> peptides =
       cleaveProtein(proteinSequence, enzyme, digest, missed, minLen, maxLen);
     peptideTotal += peptides.size();
-
-    // Write reversed protein to decoy FASTA, if protein reverse
-    if (decoyFasta && proteinReverse) {
-      reverse(proteinSequence.begin(), proteinSequence.end());
-      *decoyFasta << '>' << decoyPrefix << id << endl
-                  << proteinSequence << endl;
-    }
 
     // Iterate over all peptides from this protein
     for (vector<CleavedPeptide>::const_iterator i = peptides.begin();
@@ -207,9 +200,7 @@ void GeneratePeptides::processFasta(
 
   delete targetList;
 
-  if (proteinReverse && !decoyFastaPath.empty()) {
-    processFasta(decoyFastaPath, decoyList, "", NULL, NO_DECOYS);
-  } else if (decoyList) {
+  if (decoyList) {
     delete decoyList;
   }
 }
@@ -220,11 +211,6 @@ bool GeneratePeptides::canGenerateDecoyProteins() {
   // Can never write decoy proteins if not making decoys
   if (decoyFormat == "none") {
     return false;
-  }
-
-  // Can always write decoy proteins if making protein-level decoys
-  if (decoyFormat == "protein-reverse") {
-    return true;
   }
 
   // If making peptide-level decoys, we can only write decoy proteins if:
@@ -305,6 +291,7 @@ bool GeneratePeptides::getNextProtein(
  * Cleave protein sequence using specified enzyme and store results in vector
  * Vector also contains start location of each peptide within the protein
  */
+
 vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
   const string& sequence, ///< Protein sequence to cleave
   ENZYME_T enzyme,  ///< Enzyme to use for cleavage
@@ -396,6 +383,171 @@ vector<GeneratePeptides::CleavedPeptide> GeneratePeptides::cleaveProtein(
     }
   }
   return peptides;
+}
+
+/**
+ * Cleave protein sequence using specified enzyme and store results in vector
+ * Vector also contains start location of each peptide within the protein
+ */
+vector<GeneratePeptides::PeptideReference> GeneratePeptides::cleaveProteinTideIndex(
+  std::string* sequence, ///< Protein sequence to cleave
+  ENZYME_T enzyme,  ///< Enzyme to use for cleavage
+  DIGEST_T digest,  ///< Digestion to use for cleavage
+  int missedCleavages,  ///< Maximum allowed missed cleavages
+  int minLength,  //< Min length of peptides to return
+  int maxLength  //< Max length of peptides to return
+) {
+  vector<PeptideReference> peptides;
+  // No enzyme
+  // Get all substrings min <= length <= max
+  if (enzyme == NO_ENZYME) {
+    for (int i = 0; i < sequence->length(); ++i) {
+      for (int j = minLength; i + j <= sequence->length() && j <= maxLength; ++j) {
+        peptides.push_back(PeptideReference(i, j));
+      }
+    }
+    return peptides;
+  }
+
+  size_t pepStart = 0, nextPepStart = 0;
+  int cleaveSites = 0;
+  for (int i = 0; i < sequence->length(); ++i) {
+    // Determine if this is a valid cleavage position
+    bool cleavePos = i != sequence->length() - 1 &&
+      ProteinPeptideIterator::validCleavagePosition(sequence->c_str() + i, enzyme);
+    if (digest == PARTIAL_DIGEST && i != sequence->length() - 1 && !cleavePos) {
+      // Partial digestion (not last AA or cleavage position), add this peptide
+//      peptides.push_back(CleavedPeptide(sequence.substr(pepStart, i + 1 - pepStart), pepStart));
+      peptides.push_back(PeptideReference(pepStart, i + 1 - pepStart));
+    } else if (cleavePos) {
+      // Cleavage position, add this peptide
+      peptides.push_back(PeptideReference(pepStart, i + 1 - pepStart));
+      if (Params::GetBool("clip-nterm-methionine") && sequence->at(0) == 'M' &&
+          pepStart == 0 && digest != PARTIAL_DIGEST) {
+        peptides.push_back(PeptideReference(1, i));
+      }
+      if (++cleaveSites == 1) {
+        // This is the first cleavage position, remember it
+        nextPepStart = i + 1;
+      }
+      if (digest == PARTIAL_DIGEST) {
+        // For partial digest, add peptides ending at this cleavage position
+        for (int j = pepStart + 1; j < nextPepStart; ++j) {
+          peptides.push_back(PeptideReference(j, i - j + 1));
+        }
+      }
+      if (cleaveSites > missedCleavages) {
+        // We have missed the allowed amount of cleavages
+        // Move iterator+pepStart to the first cleavage position
+        pepStart = nextPepStart;
+        i = pepStart - 1;
+        cleaveSites = 0;
+      }
+    } else if (i == sequence->length() - 1 &&
+               cleaveSites > 0 && cleaveSites <= missedCleavages) {
+      // Last AA in sequence and we haven't missed the allowed amount yet
+      // Add this peptide and move iterator+pepStart to first cleavage position
+      peptides.push_back(PeptideReference(pepStart, sequence->length()-pepStart));  //TODO: check if this is correct
+      if (digest == PARTIAL_DIGEST) {
+        // For partial digest, add peptides ending at last AA
+        for (int j = pepStart + 1; j < nextPepStart; ++j) {
+          peptides.push_back(PeptideReference(j, i - j + 1));
+        }
+      }
+      pepStart = nextPepStart;
+      i = pepStart - 1;
+      cleaveSites = 0;
+    }
+  }
+  //For peptides that do not have an internal cleavage 
+  if (Params::GetBool("clip-nterm-methionine") && sequence->at(0) == 'M' &&
+      pepStart == 0 && digest != PARTIAL_DIGEST) {
+    peptides.push_back(PeptideReference(1, sequence->length()-1));
+  }
+  // Add the last peptide
+  peptides.push_back(PeptideReference(nextPepStart, sequence->length()-nextPepStart));
+  if (digest == PARTIAL_DIGEST) {
+    // For partial digest, add peptides ending at last AA
+    for (int j = pepStart + 1; j < sequence->length(); ++j) {
+      peptides.push_back(PeptideReference(j, sequence->length()-j));
+    }
+  }
+  // Erase peptides that don't meet length requirement
+  for (vector<PeptideReference>::iterator i = peptides.begin(); i != peptides.end(); ) {
+    if ((*i).length_ < minLength || (*i).length_ > maxLength) {
+      i = peptides.erase(i);
+    } else {
+      ++i;
+    }
+  }
+  return peptides;
+}
+
+/**
+* Makes a decoy of indexes from the sequence
+* Returns false on failure, and decoyOut will be the same as seq.
+*/
+bool GeneratePeptides::makeDecoyIdx(
+  const string& seq,  ///< sequence to make decoy from
+  bool shuffle, ///< shuffle (if false, reverse)
+  vector<int>& decoyOutIdx ///< vector to store indexes 
+) {
+  decoyOutIdx.clear();
+  vector<int> decoyIdx;
+  int decoyPre = -1;
+  int decoyPost = -1;
+  
+  for(int i = 0; i < seq.length(); i++) {
+    decoyIdx.push_back(i);
+  }
+  const string keepTerminal = Params::GetString("keep-terminal-aminos");
+  if (keepTerminal == "N") {
+    if (seq.length() <= 2) {
+      decoyOutIdx = decoyIdx;
+      return false;
+    }
+    decoyPre = decoyIdx[0];
+    decoyIdx = std::vector<int>(decoyIdx.begin() + 1, decoyIdx.end());
+  } else if (keepTerminal == "C") {
+    if (seq.length() <= 2) {
+      decoyOutIdx = decoyIdx;
+      return false;
+    }
+    decoyPost = decoyIdx.back();
+    decoyIdx = std::vector<int>(decoyIdx.begin(), decoyIdx.end()-1);
+  } else if (keepTerminal == "NC") {
+    if (seq.length() <= 3) {
+      decoyOutIdx = decoyIdx;
+      return false;
+    }
+    decoyPre = decoyIdx[0];
+    decoyPost = decoyIdx.back();
+    decoyIdx = std::vector<int>(decoyIdx.begin() + 1, decoyIdx.end() - 1);
+	
+  } else {
+    decoyOutIdx = decoyIdx;
+    if (seq.length() <= 1) {
+      return false;
+    }
+  }
+
+  if (!shuffle) {
+    // Reverse
+    reversePeptideIdx(decoyIdx);
+  } else {  // Shuffle
+    shufflePeptideIdx(decoyIdx);
+  }
+  // Re-add n/c
+  if (decoyPre >= 0)
+	  decoyOutIdx.push_back(decoyPre);
+  
+  for (std::vector<int>::iterator itr = decoyIdx.begin(); itr != decoyIdx.end(); itr++) {
+	  decoyOutIdx.push_back(*itr);
+  }
+  if (decoyPost >= 0)
+	  decoyOutIdx.push_back(decoyPost);
+
+  return true;
 }
 
 /**
@@ -511,6 +663,29 @@ bool GeneratePeptides::reversePeptide(
   string originalSeq(seq);
   reverse(seq.begin(), seq.end());
   return seq != originalSeq;
+}
+
+bool GeneratePeptides::shufflePeptideIdx(
+  vector<int>& decoyIdx ///< Peptide sequence to shuffle
+) {
+  switch (decoyIdx.size()) {
+  case 0:
+  case 1:
+    return false;
+  case 2: {
+    reverse(decoyIdx.begin(), decoyIdx.end());
+    return true;
+  }
+  }
+  random_shuffle(decoyIdx.begin(), decoyIdx.end(), myrandom_limit);
+  return true;
+}
+
+bool GeneratePeptides::reversePeptideIdx(
+  vector<int>& decoyIdx ///< Peptide sequence to reverse
+) {
+  reverse(decoyIdx.begin(), decoyIdx.end());
+  return true;
 }
 
 string GeneratePeptides::getName() const {

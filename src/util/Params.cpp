@@ -252,7 +252,7 @@ Params::Params() : finalized_(false) {
     "type, the spectrum precursor m+h value is converted to mass, and the window is defined "
     "as that mass +/- precursor-window. If the m+h value is not available, then the mass is "
     "calculated from the precursor m/z and provided charge. The peptide mass is computed as "
-    "the sum of the average amino acid masses plus 18 Da for the terminal OH group. The mz "
+    "the sum of the monoisotopic amino acid masses plus 18 Da for the terminal OH group. The mz "
     "window-type calculates the window as spectrum precursor m/z +/- precursor-window and "
     "then converts the resulting m/z range to the peptide mass range using the precursor "
     "charge. For the parts-per-million (ppm) window-type, the spectrum mass is calculated as "
@@ -289,14 +289,8 @@ Params::Params() : finalized_(false) {
     "Available for tide-index.", true);
   InitBoolParam("peptide-list", false,
     "Create in the output directory a text file listing of all the peptides in the "
-    "database, along with their neutral masses, one per line. If decoys are generated, "
-    "then a second file will be created containing the decoy peptides. Decoys that also "
-    "appear in the target database are marked with an asterisk in a third column.",
+    "database, along with their corresponding decoy peptides, neutral masses and proteins, one per line.",
     "Available for tide-index.", true);
-  InitIntParam("modsoutputter-threshold", 1000, 0, BILLION,
-    "Maximum number of temporary files that would be opened by ModsOutputter "
-    "before switching to ModsOutputterAlt.",
-    "Available for tide-index.", false);
   // print-processed-spectra option
   InitStringParam("stop-after", "xcorr", "remove-precursor|square-root|"
     "remove-grass|ten-bin|xcorr",
@@ -312,7 +306,7 @@ Params::Params() : finalized_(false) {
     "Available for tide-search.", true);
   InitBoolParam("mzid-output", false,
     "Output an mzIdentML results file to the output directory.",
-    "Available for tide-search, percolator.", true);
+    "Available for tide-search.", true);
   InitBoolParam("pin-output", false,
     "Output a Percolator input (PIN) file to the output directory.",
     "Available for tide-search.", true);
@@ -403,6 +397,9 @@ Params::Params() : finalized_(false) {
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",
     "Available for tide-index.", true);
+  InitIntParam("memory-limit", 4, 1, BILLION, 
+    "The maximum amount of memory (i.e., RAM), in GB, to be used by tide-index.",
+    "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"
@@ -413,7 +410,8 @@ Params::Params() : finalized_(false) {
     "with concat=F tide-search will output one target and n decoys. The "
     "resulting files can be used to run the \"average target-decoy "
     "competition\" method in assign-confidence. This parameter only applies "
-    "when decoy-format is shuffle.",
+    "when decoy-format=shuffle and should always be used in combination with "
+    "allow-dups=T.",
     "Available for tide-index.", true);
   InitBoolParam("decoy-p-values", false,
     "Store all decoy p-values in a file",
@@ -460,7 +458,7 @@ Params::Params() : finalized_(false) {
     "case, the amino acid would be reported as D[16] with 'mod-only', D[131] with 'total', "
     "and D[14,2] with 'separate'.",
     "Available for generate-peptides.", true);
-  InitIntParam("mod-precision", 2, 0, 20,//arbitrary
+  InitIntParam("mod-precision", 4, 0, 20,//arbitrary
     "Set the precision for modifications as written to .txt files.",
     "Also changes mods written to parameter file. By default, this "
     "value is set equal to the maximum modification precision in the "
@@ -507,6 +505,9 @@ Params::Params() : finalized_(false) {
   InitStringParam("percolator-seed", "1",
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
+    "Available for all percolator", true);
+InitStringParam("protein-name-separator", ",",
+    "Determines the character to separate the protein IDs in the tab-delimited output format ",
     "Available for all percolator", true);
   InitBoolParam("feature-file-out", false,
     "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]"
@@ -696,7 +697,7 @@ Params::Params() : finalized_(false) {
     "Either a FASTA file or a directory containing a database index created by a previous "
     "run of crux tide-index.");
   // **** Tide options ****
-  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse|protein-reverse",
+  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse",
     "Include a decoy version of every peptide by shuffling or reversing the "
     "target sequence or protein. In shuffle or peptide-reverse mode, each peptide is "
     "either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in "
@@ -704,8 +705,7 @@ Params::Params() : finalized_(false) {
     "shuffled once. In peptide-reverse mode, palindromic peptides are shuffled. Also, if a "
     "shuffled peptide produces an overlap with the target or decoy database, then the "
     "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
-    "homopolymers will appear in both the target and decoy database. The protein-reverse "
-    "mode reverses the entire protein sequence, irrespective of the composite peptides.",
+    "homopolymers will appear in both the target and decoy database.",
     "Available for tide-index", true);
   InitStringParam("mods-spec", "C+57.02146",
     "[[nohtml:Expression for static and variable mass modifications to include. "
@@ -777,7 +777,7 @@ Params::Params() : finalized_(false) {
   //Added for tailor score calibration method by AKF
   InitBoolParam("use-tailor-calibration", false,
     "Fast, but heuristic PSM score calibration[[html: as described in "
-    "<a href=\"\">TBA</a>]].",
+    "<a href=\"https://pubmed.ncbi.nlm.nih.gov/32175744/\">this article</a>]].",
     "Available for tide-search", true);    
   InitStringParam("store-index", "",
     "When providing a FASTA file as the index, the generated binary index will be stored at "
@@ -825,6 +825,9 @@ Params::Params() : finalized_(false) {
     "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
     "are not yet implemented for the res-ev score function.",
     "Available for tide-search.", true);
+  InitIntParam("min-precursor-charge", 1, 1, BILLION,
+    "The minimum charge state of a spectra to consider in search.",
+    "Available for tide-search.", true);
   InitIntParam("max-precursor-charge", 5, 1, BILLION,
     "The maximum charge state of a spectra to consider in search.",
     "Available for tide-search.", true);
@@ -847,7 +850,7 @@ Params::Params() : finalized_(false) {
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", true);
-  InitStringParam("score-function", "xcorr","xcorr|residue-evidence|both",
+  InitStringParam("score-function", "xcorr", "xcorr|residue-evidence|both",
     "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; "
     "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
     "both scores. The latter requires that exact-p-value=T.",
@@ -860,7 +863,7 @@ Params::Params() : finalized_(false) {
     "This parameter controls the granularity of the entries in the dynamic programming matrix used in residue-evidence scoring."
     "Smaller values make the program run faster but give less accurate p-values; "
     "larger values make the program run more slowly but give more accurate p-values.",
-    "Available for tide-search",true);
+    "Available for tide-search", true);
   InitStringParam("isotope-error", "",
                   "List of positive, non-zero integers.",
                   "Isotope errors to include. "
@@ -871,7 +874,8 @@ Params::Params() : finalized_(false) {
                "0=poll CPU to set num threads; else specify num threads directly.",
                "Available for tide-search tab-delimited files only.", true);
   InitBoolParam("brief-output", false,
-    "Output in tab-delimited text only the file name, scan number, charge, score and peptide.",
+    "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
+    "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
     "Available for tide-search", true);
   /*
    * Comet parameters
@@ -940,8 +944,10 @@ Params::Params() : finalized_(false) {
   InitIntParam("precursor_tolerance_type", 0, 0, 1,
     "0=singly charged peptide mass, 1=precursor m/z.",
     "Available for comet.", true);
-  InitIntParam("isotope_error", 0, 0, 2,
-    "0=off, 1=on -1/0/1/2/3 (standard C13 error), 2=-8/-4/0/4/8 (for +4/+8 labeling).",
+  InitIntParam("isotope_error", 0, 0, 5,
+    "0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, " 
+    "4=--8/-4/0/4/8 (for +4/+8 labeling), "
+    "5=-1/0/1/2/3.",
     "Available for comet.", true);
   /* Comet - Search enzyme */
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
@@ -996,7 +1002,13 @@ Params::Params() : finalized_(false) {
   InitIntParam("use_NL_ions", 1, 0, 1,
     "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
     "Available for comet.", true);
+  InitIntParam("use_Z1_ions", 0, 0, 1,
+    "Controls whether or not Z1-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
   /* Comet - Output */
+  InitIntParam("output_mzidentmlfile", 0, 0, 1,
+    "0=no, 1=yes  write mzIdentML file.",
+    "Available for comet.", true);
   InitIntParam("output_sqtstream", 0, 0, 1,
     "0=no, 1=yes  write sqt file.",
     "Available for comet.", true);
@@ -1040,7 +1052,7 @@ Params::Params() : finalized_(false) {
   InitIntParam("ms_level", 2, 2, 3,
     "MS level to analyze, valid are levels 2 or 3.",
     "Available for comet. ", true);
-  InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD|PQD|HCD|IRMPD",
+  InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD+SA|ETD|PQD|HCD|IRMPD",
     "Specifies which scan types are searched.",
     "Available for comet. ", true);
   /* Comet - Misc. parameters */
@@ -1077,11 +1089,22 @@ Params::Params() : finalized_(false) {
   InitIntParam("clip_nterm_methionine", 0, 0, 1,
     "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
     "Available for comet.", true);
+  InitIntParam("explicit_deltacn", 0, 0, 1,
+    "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide, "
+    "1=Comet deltaCn reported between the top two peptides.",
+    "Available for comet.", true);
+  InitIntParam("old_mods_encoding", 0, 0, 1,
+    "0=Comet will use mass based modification encodings, "
+    "1=Comet will use the old character based modification encodings.",
+    "Available for comet.", true);
   InitIntParam("spectrum_batch_size", 0, 0, BILLION,
     "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
     "Available for comet.", true);
   InitStringParam("decoy_prefix", "decoy_",
     "Specifies the prefix of the protein names that indicates a decoy.",
+    "Available for comet.", true);
+  InitStringParam("text_file_extension", "",
+    "Specifies the a custom extension for output text file.",
     "Available for comet.", true);
   InitStringParam("output_suffix", "",
     "Specifies the suffix string that is appended to the base output name "
@@ -1205,7 +1228,9 @@ Params::Params() : finalized_(false) {
     "Available for comet.", true);
   for (char c = 'A'; c <= 'Z'; c++) {
     InitDoubleParam(CometApplication::staticModParam(c),
-                    c != 'C' ? 0 : CYSTEINE_DEFAULT, 0, BILLION,
+                    c != 'C' ? 0 : CYSTEINE_DEFAULT, 
+                    -std::numeric_limits<double>::max(), 
+                    std::numeric_limits<double>::max(),
                     "Specify a static modification to the residue " + string(1, c) + ".",
                     "Available for comet.", true);
   }
@@ -1283,10 +1308,10 @@ Params::Params() : finalized_(false) {
   InitArgParam("database-series",
     "A comma-separated list of databases, each generated by tide-index. "
     "Cascade-search will search the given spectra against these databases in the given order.");
-  InitIntParam("cascade-termination",20,0,BILLION,
+  InitIntParam("cascade-termination", 20, 0, BILLION,
     "The minimum number of accepted PSMs required for cascade-search to continue to the "
     "next database in the given series",
-    "Used by cascade-search.",false);
+    "Used by cascade-search.", false);
   /*Subtract-index parameters*/
   InitArgParam("tide index 1", "A peptide index produced using tide-index");
   InitArgParam("tide index 2", "A second peptide index, to be subtracted from the first index.");
@@ -1747,12 +1772,12 @@ Params::Params() : finalized_(false) {
     "and quit in case of failure.",
     "Available for kojak.", true);
   InitArgParam("protein database",
-   "The name of the fasta file containing the amino acid protein sequences to "
-   "be searched. Kojak can generate decoy sequences internally, or they may "
-   "be in this file (see the <code>decoy_filter</code> option for details). It is "
-   "recommended to include the full path in the name of the file.");
+    "The name of the fasta file containing the amino acid protein sequences to "
+    "be searched. Kojak can generate decoy sequences internally, or they may "
+    "be in this file (see the <code>decoy_filter</code> option for details). It is "
+    "recommended to include the full path in the name of the file.");
   InitIntParam("threads", 0,
-   "Number of threads to use when searching spectra. A value of 0 will "
+    "Number of threads to use when searching spectra. A value of 0 will "
     "automatically match the number of threads to the number of processing "
     "cores on the computer. Additionally, negative numbers can be used to "
     "specify threads equal to all but that number of cores.",
@@ -2035,8 +2060,89 @@ Params::Params() : finalized_(false) {
     "spectrum. However, larger numbers also increase computation time. The "
     "recommended values are between 2000 and 10000",
     "Available for kojak", true);
+  InitDoubleParam("min_peptide_score", 0.1, -10.0, 10.0,
+    "The minimum peptide score threshold for the first (alpha) peptide during "
+    "crosslink analysis. During the first pass in the analysis, if the top "
+    "scoring alpha peptides do not exceed this threshold, they will not be "
+    "considered for pairing with a second (beta) peptide during the second "
+    "pass of the analysis. ",
+    "Available for kojak", true);
 
   InitBoolParam("no-analytics", false, "Don't post data to Google Analytics.", "", false);
+
+  // added by Yang
+  /* DIAmeter-related options */
+  InitStringParam("predrt-files", "",
+    "The name of file from which to parse the predicted retention time of each peptide in the database. "
+    "The file is tab-delimited where the first column is peptide and the second column is the predicted rt information. "
+    "The rt prediction doesn't require normalization beforehand. "
+    "If the peptide in the database is missing in the prediction, its predicted value will be imputed by the median of all predicted values.",
+    "It is optional but recommended for DIAmeter. It can be easily generated by DeepRT or any off-the-shelf "
+    "RT prediction tools by feeding in the peptide-list generated by tide-index", true);
+
+  InitIntParam("msamanda-regional-topk", 10, 1, 1000000,
+    "Analogous to the peak-picking in MS Amanda, the m/z range is divided into 10 equal length segments, "
+    "and in each segment, the k most intense peaks are preserved.",
+    "It is used for DIAmeter", true);
+
+  InitIntParam("coelution-oneside-scans", 3, 1, 100,
+    "(2*coelution-oneside-scans+1) scans will be used to construct the chromatogram for coelution correlation analysis",
+    "It is used for DIAmeter", true);
+
+  InitIntParam("coelution-topk", 1, 1, 10,
+    "The number of topk values to consider to calculate precursor fragment co-elution",
+    "It is used for DIAmeter", true);
+
+  InitDoubleParam("coeff-precursor", 1.0, 0, 100,
+    "The coefficient to balance the precursor intensity rank feature in calculating the aggregated score",
+    "It is used for DIAmeter", false);
+
+  InitDoubleParam("coeff-fragment", 1.0, 0, 100,
+    "The coefficient to balance the fragment matching p-value feature in calculating the aggregated score",
+    "It is used for DIAmeter", false);
+
+  InitDoubleParam("coeff-rtdiff", 1.0, 0, 100,
+    "The coefficient to balance the retention time difference feature in calculating the aggregated score",
+    "It is used for DIAmeter", false);
+
+  InitDoubleParam("coeff-elution", 1.0, 0, 100,
+    "The coefficient to balance the precursor and fragment co-elution feature in calculating the aggregated score",
+    "It is used for DIAmeter", false);
+
+  InitStringParam("coeff-tag", "",
+    "The tag to encode the information about coefficients",
+    "It is optional but recommended for DIAmeter. If not provided, DIAmeter will automatically generate on combining all coefficients.", false);
+
+  InitIntParam("prec-ppm", 10, 1, 1000000,
+    "Tolerance used for matching precursors to spectra. "
+    "Peptides must be within +/- ‘precursor-ppm’ parts-per-million (ppm) of the spectrum precursor m/z",
+    "It is used for DIAmeter. Default = 10 (orbitrap) and =30 (triptof)", true);
+
+  InitIntParam("frag-ppm", 10, 1, 1000000,
+    "Tolerance used for matching fragment ions to spectrum peaks. "
+    "Fragment ions must be within +/- 'fragment-ppm' of the spectrum peak value.",
+    "It is used for DIAmeter. Default = 10 (orbitrap) and =30 (triptof)", true);
+
+  InitBoolParam("unique-scannr", false,
+    "Make the ScanNr of each PSM unique in the .pin file.",
+    "It is used for make-pin", true);
+
+  InitBoolParam("psm-filter", false,
+    "Filter the PSM by the ensemble score.",
+    "It is used for DIAmeter", true);
+
+  InitBoolParam("spectra-denoising", false,
+      "Eliminate MS2 peak if neither of the adjacent scans contains the same peak within a specified tolerance.",
+      "It is used for DIAmeter", true);
+
+  InitStringParam("diameter-instrument", "na", "orbitrap|tof5600|tof6600|na",
+    "Specify the instrument platform used to acquire the input spectra. "
+    "This option selects among different sets of coefficient values for the scores computed by diameter. "
+    "Specifically, the 'orbitrap' setting is equivalent to spectra-denoising=false, psm-filter=false, prec-ppm=10,frag-ppm=10; "
+    "the 'tof5600' is equivalent to spectra-denoising=true, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=3.2, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0.2; "
+    "the 'tof6600' is equivalent to spectra-denoising=false, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=25.6, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0. "
+    "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
+    "It is used for DIAmeter", true);
 
   Categorize();
 }
@@ -2116,6 +2222,7 @@ void Params::Categorize() {
   items.clear();
   items.insert("auto-precursor-window");
   items.insert("max-precursor-charge");
+  items.insert("min-precursor-charge");
   items.insert("precursor-window");
   items.insert("precursor-window-type");
   AddCategory("Precursor selection", items);
@@ -2224,6 +2331,7 @@ void Params::Categorize() {
   items.insert("use_X_ions");
   items.insert("use_Y_ions");
   items.insert("use_Z_ions");
+  items.insert("use_Z1_ions");
   items.insert("use_NL_ions");
   items.insert("auto_fragment_bin_size");
   items.insert("fragment_bin_size");
@@ -2261,6 +2369,9 @@ void Params::Categorize() {
   items.insert("precursor_NL_ions");
   items.insert("skip_researching");
   items.insert("spectrum_batch_size");
+  items.insert("text_file_extension");
+  items.insert("explicit_deltacn");
+  items.insert("old_mods_encoding");
   AddCategory("Miscellaneous parameters", items);
 
   items.clear();
@@ -2361,6 +2472,7 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("output-dir");
   items.insert("output-file");
+  items.insert("output_mzidentmlfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
   items.insert("output_sqtstream");

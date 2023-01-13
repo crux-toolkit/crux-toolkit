@@ -27,10 +27,11 @@
 #include <vector>
 #include "raw_proteins.pb.h"
 #include "peptides.pb.h"
-#include "theoretical_peak_pair.h"
+#include "theoretical_peak_set.h"
 #include "fifo_alloc.h"
 #include "mod_coder.h"
 #include "sp_scorer.h"
+#include "util/Params.h"
 
 #include "spectrum_collection.h"
 //#include "TideMatchSet.h"
@@ -38,16 +39,15 @@
 using namespace std;
 
 class FifoAllocator;
-class TheoreticalPeakSet;
+//class TheoreticalPeakSet;
 class TheoreticalPeakSetBIons;
 class SpScorer;
-
 
 // This is the TheoreticalPeakSet we are using at search time.  We may use a
 // different subclass  of TheoreticalPeakSet in a final version, pending more
 // tests. See Bugzilla #253.
 class TheoreticalPeakSetBYSparse;
-typedef TheoreticalPeakSetBYSparse ST_TheoreticalPeakSet; // ST="search time"
+//typedef TheoreticalPeakSetBYSparse ST_TheoreticalPeakSet; // ST="search time"
 // This is an alternative TheoreticalPeakSet
 // class TheoreticalPeakSetBYSparseOrdered;
 // typedef TheoreticalPeakSetBYSparseOrdered ST_TheoreticalPeakSet;
@@ -66,7 +66,7 @@ class TheoreticalPeakCompiler;
 class Peptide {
  public:
 
-  // The proteins parameter is presumed to live in memory all the while the
+  // The proteins parameter is presumed to live in memory all the time while the
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
@@ -79,9 +79,25 @@ class Peptide {
     aux_locations_index_(peptide.aux_locations_index()),
     mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
     prog1_(NULL), prog2_(NULL) {
+      
+    // Here we make sure that tide-search is compatible with old and new tide-index protocol buffers.
     // Set residues_ by pointing to the first occurrence in proteins.
-    residues_ = proteins[first_loc_protein_id_]->residues().data() 
-                    + first_loc_pos_;
+    if (peptide.has_decoy_sequence() == true){  //new tide-index format
+      decoy_seq_ = peptide.decoy_sequence();  // Make a copy of the string, because pb::Peptide will be reused.
+      residues_ = decoy_seq_.data();
+      target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                        + first_loc_pos_;
+    } else {  //old tide-index format
+      residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                      + first_loc_pos_;
+      if (IsDecoy()) {
+        target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+                          + first_loc_pos_+len_+1;
+      } else {
+        target_residues_ = residues_;
+      }
+    }
+                      
     if (peptide.modifications_size() > 0) {
       num_mods_ = peptide.modifications_size();
       if (fifo_alloc) {
@@ -92,6 +108,7 @@ class Peptide {
       for (int i = 0; i < num_mods_; ++i)
         mods_[i] = ModCoder::Mod(peptide.modifications(i));
     }
+    mod_precision_ = Params::GetInt("mod-precision");    
   }
   class spectrum_matches {
    public:
@@ -103,6 +120,7 @@ class Peptide {
           score3_ = score3;
           charge_ = charge;
           d_cn_ = 0.0;
+          d_lcn_ = 0.0;          
           elution_score_ = 0.0;
       }
       spectrum_matches() {
@@ -112,6 +130,7 @@ class Peptide {
           score3_ = 0.0;
           charge_ = 0;
           d_cn_ = 0.0;
+          d_lcn_ = 0.0;
           elution_score_ = 0.0;
       }
       Spectrum* spectrum_;
@@ -120,6 +139,7 @@ class Peptide {
       int score3_;
       int charge_;
       double d_cn_;
+      double d_lcn_;
       double elution_score_;
       SpScorer::SpScoreData spData_;
 
@@ -153,13 +173,22 @@ class Peptide {
   }
 
   // Allocation by FifoAllocator
-  void* operator new(size_t size, FifoAllocator* fifo_alloc) {
+/*  void* operator new(size_t size, FifoAllocator* fifo_alloc) {
     return fifo_alloc->New(size);
   }
-
+*/
   string Seq() const { return string(residues_, Len()); } // For display
+  string TargetSeq() const { return string(target_residues_, Len()); } // For display
 
   string SeqWithMods() const;
+
+  void DecodeMod(){
+    for (int i = 0; i < num_mods_; ++i) {
+      int index;
+      double delta;
+      MassConstants::DecodeMod(mods_[i], &index, &delta);
+    }
+  }
 
   // Compute and cache set of theoretical peaks using the provided workspace.
   // Workspace exists for efficiency: it can be reused by another Peptide
@@ -172,11 +201,12 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const;
-  void ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
+  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace,
                                const pb::Peptide& pb_peptide,
                                TheoreticalPeakCompiler* compiler_prog1,
-                               TheoreticalPeakCompiler* compiler_prog2);
+                               TheoreticalPeakCompiler* compiler_prog2,
+                               bool dia_mode = false);
   void ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const;
 
   // Return the appropriate program depending on the precursor charge.
@@ -217,8 +247,21 @@ class Peptide {
   int DecoyIdx() const { return decoyIdx_; }
   vector<double> getAAMasses() const;
 
+  // added by Yang
+  static double MassToMz(double mass, int charge) {
+    return mass / (charge * 1.0) + MASS_PROTON;
+  }
+  vector<int>& IonMzbins() { return ion_mzbins_; }
+  vector<int>& BIonMzbins() { return b_ion_mzbins_; }
+  vector<int>& YIonMzbins() { return y_ion_mzbins_; }
+  vector<double>& IonMzs() { return ion_mzs_; } // added for debug purpose
+  
+  vector<unsigned int> peaks_0;
+  vector<unsigned int> peaks_1;
+  
+
  private:
-  template<class W> void AddIons(W* workspace) const;
+  template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
   template<class W> void AddBIonsOnly(W* workspace) const;
 
   void Compile(const TheoreticalPeakArr* peaks,
@@ -238,12 +281,20 @@ class Peptide {
   bool has_aux_locations_index_;
   int aux_locations_index_;
   const char* residues_;
+  const char* target_residues_;
   int num_mods_;
   ModCoder::Mod* mods_;
   int decoyIdx_;
+  string decoy_seq_;
+  int mod_precision_;
+
 
   void* prog1_;
   void* prog2_;
+
+  // added by Yang
+  vector<int> ion_mzbins_, b_ion_mzbins_, y_ion_mzbins_;
+  vector<double> ion_mzs_; // added for debug purpose
 };
 
 #endif // PEPTIDE_H

@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
 project(kojak)
 # INCLUDE HEADER FILES IN SRC DIRECTORY
 include_directories(
   ${BASE_INCLUDE_PATH} 
   ${MSTOOLKIT_INCLUDE_PATH} 
+  ${NEOPEPXMLPARSER_INCLUDE_PATH} 
   ${HARDKLOR_INCLUDE_PATH}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -19,7 +21,6 @@ set(
   KAnalysis.cpp 
   KData.cpp 
   KDB.cpp 
-  KPrecursor.cpp 
   KSpectrum.cpp 
   KIons.cpp 
   KIonSet.cpp 

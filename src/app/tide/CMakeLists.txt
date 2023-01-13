@@ -1,24 +1,29 @@
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(VERSION 3.15)
 
 ###### Set up include and link directories  ######
 if (WIN32 AND NOT CYGWIN)
-include_directories(
-  ${CMAKE_SOURCE_DIR}/src
-  ${CMAKE_BINARY_DIR}/ext/include
-  ${CMAKE_CURRENT_BINARY_DIR}/protoobj
-  ${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src
-  ${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows
-  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0
-  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
-)
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/ext/include
+    ${CMAKE_CURRENT_BINARY_DIR}/protoobj
+    ${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src
+    ${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_76_0
+    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
+  )
+  # On windows set static linking of runtime libraries
+  set(
+    CMAKE_MSVC_RUNTIME_LIBRARY 
+    "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+  )
 else (WIN32 AND NOT CYGWIN)
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_BINARY_DIR}/ext/include
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
   ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src
-  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0
+  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_76_0
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
 endif (WIN32 AND NOT CYGWIN)

@@ -144,7 +144,8 @@ std::string prefix_fileroot_to_name(const std::string& name);
  * \returns the filepath 'output_dir'/'fileroot'.'filename' 
  */
 std::string make_file_path(
-  const std::string& filename ///< the name of the file
+  const std::string& filename, ///< the name of the file
+  const std::string& output_dir_to_overwrite = "" //added by Yang
   );
 
 

@@ -38,12 +38,12 @@ class ActivePeptideQueue {
   bool isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx);
   
   // See above for usage and .cc for implementation details.
-  int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus);
+  int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus, bool dia_mode = false);
   int SetActiveRangeBIons(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range, vector<bool>* candidatePeptideStatus);
 
   bool HasNext() const { return iter_ != end_; }
   Peptide* NextPeptide() { return *iter_; }
-  const Peptide* GetPeptide(int back_index) const {
+  Peptide* GetPeptide(int back_index) const {
     return peptide_centric_ ? current_peptide_ : *(end_ - back_index);
   }
   void SetBinSize(double binWidth, double binOffset) {
@@ -105,7 +105,7 @@ class ActivePeptideQueue {
   // IMPLEMENTATION DETAILS
 
   // See .cc file.
-  void ComputeTheoreticalPeaksBack();
+  void ComputeTheoreticalPeaksBack(bool dia_mode = false);
   void ComputeBTheoreticalPeaksBack();
 
   RecordReader* reader_;
@@ -116,7 +116,7 @@ class ActivePeptideQueue {
 
   // Workspace for computing theoretical peaks for a single peptide.
   // Gets reused for each new peptide.
-  ST_TheoreticalPeakSet theoretical_peak_set_;
+  TheoreticalPeakSetBYSparse theoretical_peak_set_;
   TheoreticalPeakSetBIons theoretical_b_peak_set_;
   
   // The active peptides. Lighter peptides are enqueued before heavy ones.

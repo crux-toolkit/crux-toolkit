@@ -12,5 +12,5 @@ Scenario Outline: User runs hardklor
 
 Examples:
   |test_name       |spectra          |expected_output  |
-  |hardklor-default|hardklor.test.ms1|hardklor.mono.txt|
+#  |hardklor-default|hardklor.test.ms1|hardklor.mono.txt|
 

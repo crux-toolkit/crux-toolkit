@@ -12,16 +12,24 @@ targets for compiling or running various tests.</p>
 <h3>Smoke tests</h3>
 
 <p>
-These tests should be run before any update is committed to SVN.  Note
+These tests should be run before any code changes are merged into master.  Note
 that you do have to run them on a 64-bit machine using 64-bit versions
 of crux. You also need to run the tests with a version of crux
 compiled in release mode (<code>cmake -DCMAKE_BUILD_TYPE=Release
 .</code>).  This is because the existing test result files were built
 on a 64-bit machine in release mode.</p> 
+<i>(Note) The smoke tests are done by running crux with a known set of parameters and
+  comparing the results to an expected output file. Due to the floating
+  math algorithms difference between different OS and hardware platforms the test outputs might still
+  contain minor differences in numeric values that can trigger test failures.
+</i>
 
 <p>
 To run the tests, <a href="https://cukes.info/">Cucumber</a>, 
-<a href="https://www.ruby-lang.org/en/">Ruby</a>, and 
+<a href="https://www.ruby-lang.org/en/">Ruby</a>, 
+<a href="https://www.python.org/">Python</a>,
+<a href="https://pandas.pydata.org/">pandas</a>
+and 
 <a href="https://github.com/rspec/rspec-expectations">rspec</a> must be
 installed. GSIT has made Cucumber available as a module, so running "module
 load cucumber/latest" will work. Instructions for installing Cucumber
@@ -202,6 +210,14 @@ p-value produced by <code>crux search-for-matches</code> are uniformly
 distributed when the input database is shuffled.  A full description
 is
 available <a href="../../test/calibration/calibration.html">here</a>.</p>
+
+<h3>Candidate Peptide tests</h3>
+
+<p>
+These tests ensures that Comet and Tide calculates the exact same candidate 
+peptides while searching. This test is based on cucumber and it requires the 
+same modules/libs as the smoke tests. This test can be carried out similarly 
+to the smoke-tests. To run just type: <code>cucumber</code> in the command line.
 
 </body>
 </html>

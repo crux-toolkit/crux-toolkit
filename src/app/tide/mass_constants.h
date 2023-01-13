@@ -67,6 +67,7 @@ class MassConstants {
   static const double Y;
   static double BIN_H2O;
   static double BIN_NH3;
+  static double BIN_CO;
 /*  static const double BIN_SHIFT_A_ION_CHG_1;
   static const double BIN_SHIFT_A_ION_CHG_2;
   static const double BIN_SHIFT_H2O_CHG_1;
@@ -125,6 +126,11 @@ class MassConstants {
   static double bin2mass(int bin, int charge = 1) {
     return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*MASS_PROTON;
   }
+
+  // added by Yang
+  /*static unsigned int mz2bin(double mz) {
+	  return (unsigned int)((mz/bin_width_) + 1.0 - bin_offset_);
+  }*/
 
   static double bin_width_;
   static double bin_offset_;

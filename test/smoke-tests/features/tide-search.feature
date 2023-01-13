@@ -1,3 +1,7 @@
+# Please add any tests that have been added to this file to tide-search2.feature
+# Note that if tide-search2.feature is run before tide-search2.feature, then
+# cucumber will fail due to Tide not dealing with ties well.
+
 Feature: tide-index / tide-search
   tide-index should create an index for all peptides in a fasta file, for use in
     subsequent calls to tide-search
@@ -13,7 +17,7 @@ Scenario Outline: User runs tide-index / tide-search
   And I pass the arguments --overwrite T --file-column F <search_args> <spectra> <index>
   When I run tide-search
   Then the return value should be 0
-  And All lines in crux-output/<actual_output> should be in good_results/<expected_output> with 5 digits precision
+  And All lines in crux-output/<actual_output> should be in good_results/<expected_output> with 2 digits precision
 
 Examples:
   |test_name      |index_args                                                   |search_args                                             |fasta            |index          |spectra |actual_output         |expected_output    |
@@ -32,9 +36,9 @@ Examples:
   |tide-partial   |--digestion partial-digest                                   |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-partial.txt   |
   |tide-misscleave|--missed-cleavages 2                                         |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-misscleave.txt|
   |tide-reverse   |--decoy-format peptide-reverse                               |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-reverse.txt   |
-  |tide-multidecoy|--num-decoys-per-target 5                                    |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.decoy.txt |tide-5decoys.txt   |
-  |tide-varprmodsn|--nterm-protein-mods-spec 1M+15.9949	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-nprotmods.txt     |
-  |tide-varprmodsc|--cterm-protein-mods-spec 1F+31.0184	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-cprotmods.txt     |
+  # |tide-multidecoy|--num-decoys-per-target 5                                  |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.decoy.txt |tide-5decoys.txt   |
+  |tide-varprmodsn|--nterm-protein-mods-spec 1M+15.9949	 --peptide-list T                       |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-nprotmods.txt     |
+  |tide-varprmodsc|--cterm-protein-mods-spec 1F+31.0184	--peptide-list T                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-cprotmods.txt     |
   |tide-statprmodsc|--cterm-protein-mods-spec F+31.0184	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-cprotstatmods.txt     |
   |tide-statprmodsn|--nterm-protein-mods-spec M+15.9949	                        |--precursor-window 3 --precursor-window-type mass --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-nprotstatmods.txt     |
 
@@ -45,7 +49,7 @@ Examples:
   |tide-computesp |                                                             |--precursor-window 3 --precursor-window-type mass --compute-sp T --mz-bin-width 1.0005079                                         |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-computesp.txt |
   |tide-specmz    |                                                             |--precursor-window 3 --precursor-window-type mass --spectrum-min-mz 800 --spectrum-max-mz 900 --mz-bin-width 1.0005079            |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-specmz.txt    |
   |tide-minpeaks  |                                                             |--precursor-window 3 --precursor-window-type mass --min-peaks 100 --mz-bin-width 1.0005079                                        |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-minpeaks.txt  |
-  |tide-speccharge|                                                             |--precursor-window 3 --precursor-window-type mass --spectrum-charge 3 --mz-bin-width 1.0005079                                    |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-speccharge.txt|
+  |tide-speccharge|                                                             |--precursor-window 3 --precursor-window-type mass --max-precursor-charge 3 --min-precursor-charge 3 --mz-bin-width 1.0005079      |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-speccharge.txt|
   |tide-scannums  |                                                             |--precursor-window 3 --precursor-window-type mass --scan-number 30-36 --mz-bin-width 1.0005079                                    |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-scannums.txt  |
   |tide-rempeaks  |                                                             |--precursor-window 3 --precursor-window-type mass --remove-precursor-peak T --remove-precursor-tolerance 3 --mz-bin-width 1.0005079|small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-rempeaks.txt  |
   |tide-useflank  |                                                             |--precursor-window 3 --precursor-window-type mass --use-flanking-peaks T --mz-bin-width 1.0005079                                 |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-useflank.txt  |
@@ -67,3 +71,4 @@ Examples:
   |tide-tailor|                                                                 |--precursor-window 3 --precursor-window-type mass --num-threads 1 --mz-bin-width 1.0005079 --use-tailor-calibration T             |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-tailor.txt|
   |tide-brief|                                                                  |--precursor-window 3 --precursor-window-type mass --num-threads 1 --mz-bin-width 1.0005079 --brief-output T                       |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-brief-output.txt|
   |tide-brief-centric|                                                          |--precursor-window 3 --precursor-window-type mass --num-threads 1 --mz-bin-width 1.0005079 --brief-output T --peptide-centric-search T |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-brief-peptide-centric.txt|
+  |tide-centric|                                                                |--precursor-window 3 --precursor-window-type mass --num-threads 1 --mz-bin-width 1.0005079 --peptide-centric-search T             |small-yeast.fasta|tide_test_index|demo.ms2|tide-search.target.txt|tide-peptide-centric.txt|

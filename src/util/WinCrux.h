@@ -23,7 +23,6 @@
 #define getcwd _getcwd
 #define mkdir(a, b) _mkdir(a)
 #define mkstemp _mktemp_s
-#define snprintf _snprintf
 
 #undef NO_ERROR
 // Turn off Microsoft min and max macros

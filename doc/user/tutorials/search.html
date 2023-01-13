@@ -77,17 +77,23 @@
 		While generating the peptide index, you will see output like this:</p>
 
 		<pre>
-INFO: CPU: pyrrolysine.gs.washington.edu
-INFO: Crux version: 2.1
-INFO: Fri Feb  5 11:24:02 PST 2016
-COMMAND LINE: ./crux tide-index small-yeast.fasta yeast-index
+INFO: Writing results to output directory 'crux-output'.
+INFO: CPU: guanine.gs.washington.edu
+INFO: Crux version: 4.0-ad795d65-2021-08-23
+INFO: Tue Sep 14 20:43:36 PDT 2021
+INFO: Beginning tide-index.
 INFO: Running tide-index...
 INFO: Writing results to output directory 'yeast-index'.
 INFO: Reading small-yeast.fasta and computing unmodified peptides...
+INFO: Generated 1735 targets, including duplicates.
+INFO: Generated 1735 decoys.
 INFO: Writing decoy fasta...
+INFO: Generating 1 decoy per target
 INFO: Reading proteins
+INFO: Skipped 0 duplicate targets and 0 duplicate decoys.
+INFO: Wrote 1735 targets and 1735 decoys.
 INFO: Precomputing theoretical spectra...
-INFO: Elapsed time: 0.0973 s
+INFO: Elapsed time: 0.102 s
 INFO: Finished crux tide-index.
 INFO: Return Code:0
 		</pre>
@@ -114,25 +120,37 @@ INFO: Return Code:0
 		Now you can run this command:</p></li>
 
 		<div class=code>
-		<li><code>$ crux tide-search --compute-sp T demo.ms2 yeast-index</code>
+		<li><code>$ crux tide-search demo.ms2 yeast-index</code>
 		</div>
 
 		<p>While the search is running, you will see output like this:</p>
 
 		<pre>
-INFO: CPU: pyrrolysine.gs.washington.edu
-INFO: Crux version: 2.1
-INFO: Fri Feb  5 11:24:23 PST 2016
-COMMAND LINE: ./crux tide-search --compute-sp T demo.ms2 yeast-index
+INFO: Writing results to output directory 'crux-output'.
+INFO: CPU: guanine.gs.washington.edu
+INFO: Crux version: 4.1-6d021498-2021-10-19
+INFO: Wed Oct 27 18:37:40 PDT 2021
+INFO: Beginning tide-search.
 INFO: Running tide-search...
-INFO: Reading index yeast-index
+INFO: Number of Threads: 1
+INFO: Reading index yeast-index/
+INFO: Read 56 target proteins
 INFO: Converting demo.ms2 to spectrumrecords format
-INFO: Reading spectra file crux-output/demo.ms2.spectrumrecords.tmp
-INFO: Sorting spectra
-INFO: Running search
-INFO: Time per spectrum-charge combination: 0.002318 s.
-INFO: Average number of candidates per spectrum-charge combination: 15.204820 
-INFO: Elapsed time: 0.389 s
+INFO: Elapsed time starting conversion: 0.0616 s
+INFO: Converting ms_level 2 ...
+INFO: Reading spectrum file crux-output/demo.ms2.spectrumrecords.tmp.
+INFO: Read 7535 spectra.
+INFO: Starting search.
+INFO: 1000 spectrum-charge combinations searched, 13% complete
+INFO: 2000 spectrum-charge combinations searched, 27% complete
+...
+INFO: 6000 spectrum-charge combinations searched, 80% complete
+INFO: 7000 spectrum-charge combinations searched, 93% complete
+INFO: [Thread 0]: Deleted 0 precursor, 0 isotope and 0 out-of-range peaks.
+INFO: [Thread 0]: Retained 100% of peaks.
+INFO: Time per spectrum-charge combination: 0.003292 s.
+INFO: Average number of candidates per spectrum-charge combination: 1.065428
+INFO: Elapsed time: 24.8 s
 INFO: Finished crux tide-search.
 INFO: Return Code:0
 		</pre>
@@ -166,39 +184,28 @@ INFO: Return Code:0
 		  Note that the peptide-spectrum matches (PSMs) in the
 		  tide-search.target.txt are sorted by the precursor m/z value
 		  associated with the spectrum. If you want to see which PSMs got the
-		  highest XCorr scores, you can do so like this:</p>
+		  highest XCorr scores, you can sort the file using tools such as Python and Excel.</p>
 
-		<div class=code>
-		<li><code>$ crux sort-by-column --column-type real --ascending T crux-output/tide-search.target.txt "xcorr score" > crux-output/tide-search.target.sort.txt</code>
-		</div>
-
-		<p>
-		  The first lines of the resulting sorted output file should look like this:</p>
+		<p>The first lines of the resulting sorted output file should look like this:</p>
 
 		<table class="searchtable">
-		<td><b>file</b></td><td><b>scan</b></td><td><b>charge</b></td><td><b>spectrum precursor m/z</b></td><td><b>spectrum neutral mass</b></td><td><b>peptide mass</b></td><td><b>delta_cn</b></td><td><b>sp score</b></td><td><b>sp rank</b></td><td><b>xcorr score</b></td><td><b>xcorr rank</b></td><td><b>b/y ions matched</b></td><td><b>b/y ions total</b></td><td><b>distinct matches/spectrum</b></td><td><b>sequence</b></td><td><b>cleavage type</b></td><td><b>protein id</b></td><td><b>flanking aa</b></td></tr>
-		<tr>
-		<td>demo.ms2</td><td>85</td><td>3</td><td>497.618</td><td>1489.83</td><td>1488.82</td><td>0.936932</td><td>2430.56</td><td>1</td><td>5.20757</td><td>1</td><td>27</td><td>48</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W(27)</td><td>RN</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>118</td><td>3</td><td>1031.94</td><td>3092.8</td><td>3093.41</td><td>0.949698</td><td>2383.16</td><td>1</td><td>4.76204</td><td>1</td><td>44</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>156</td><td>3</td><td>1032.44</td><td>3094.3</td><td>3093.41</td><td>0.938358</td><td>1929.77</td><td>1</td><td>4.7476</td><td>1</td><td>43</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>18</td><td>3</td><td>1032.4</td><td>3094.18</td><td>3093.41</td><td>0.902056</td><td>1732.23</td><td>1</td><td>4.48933</td><td>1</td><td>40</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>11</td><td>2</td><td>745.269</td><td>1488.52</td><td>1488.82</td><td>0.822851</td><td>2816.6</td><td>1</td><td>4.44855</td><td>1</td><td>21</td><td>24</td><td>4</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W(27)</td><td>RN</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>53</td><td>2</td><td>745.749</td><td>1489.48</td><td>1488.82</td><td>0.935648</td><td>2797.78</td><td>1</td><td>4.39828</td><td>1</td><td>21</td><td>24</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W(27)</td><td>RN</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>38</td><td>3</td><td>1032.39</td><td>3094.15</td><td>3093.41</td><td>0.975741</td><td>1460.28</td><td>1</td><td>4.39627</td><td>1</td><td>37</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>42</td><td>3</td><td>1032.26</td><td>3093.76</td><td>3093.41</td><td>1.0216</td><td>1509.47</td><td>1</td><td>4.35676</td><td>1</td><td>38</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>111</td><td>3</td><td>1033.02</td><td>3096.04</td><td>3093.41</td><td>0.952727</td><td>1366.71</td><td>1</td><td>4.3498</td><td>1</td><td>36</td><td>108</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C(500)</td><td>KD</td></tr>
-		<tr>
-		<td>demo.ms2</td><td>62</td><td>2</td><td>745.859</td><td>1489.7</td><td>1488.82</td><td>0.913711</td><td>2766.65</td><td>1</td><td>4.34057</td><td>1</td><td>21</td><td>24</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W(27)</td><td>RN</td></tr>
-		</table>
+		<td><b>file</b></td><td><b>scan</b></td><td><b>charge</b></td><td><b>spectrum precursor m/z</b></td><td><b>spectrum neutral mass</b></td><td><b>peptide mass</b></td><td><b>delta_cn</b></td><td><b>delta_lcn</b></td><td><b>xcorr score</b></td><td><b>xcorr rank</b></td><td><b>distinct matches/spectrum</b></td><td><b>sequence</b></td><td><b>modifications</b></td><td><b>cleavage type</b></td><td><b>protein id</b></td><td><b>flanking aa</b></td><td><b>target/decoy</b></td></tr>
 
+		<tr>
+		<td>demo.ms2</td><td>60135</td><td>3</td><td>1057.8792</td><td>3170.6156</td><td>3170.6106</td><td>0</td><td>0</td><td>6.69412756</td><td>1</td><td>1</td><td>IALSRPNVEVVALNDPFITNDYAAYMFK</td><td></td><td>trypsin-full-digest</td><td>YGR192C(19)</td><td>RY</td><td>target</td></tr>
+
+		<tr>
+		<td>demo.ms2</td><td>60355</td><td>4</td><td>838.1677</td><td>3348.6418</td><td>3348.6411</td><td>0</td><td>0</td><td>6.36378858</td><td>1</td><td>1</td><td>HEIASEVASFLNGNIIEHDVPEHFFGELAK</td><td></td><td>trypsin-full-digest</td><td>YLR249W(27)</td><td>RG</td><td>target</td></tr>
+
+		<tr>
+		<td>demo.ms</td><td>257701</td><td>3</td><td>1190.5835</td><td>3568.7287</t><td>3568.7202</td><td>0</td><td>0</td><td>6.23474788</td><td>1</td><td>1</td><td>GVLGYTEDAVVSSDFLGDSHSSIFDASAGIQLSPK</td><td></td><td>trypsin-full-digest</td><td>YGR192C(270)</td><td>KF</td><td>target</td></tr>
+
+		<tr>
+		<td>demo.ms2</td><td>46517</td><td>3</td><td>739.3639</td><td>2215.0698</td><td>2215.0659</td><td>0</td><td>0</td><td>6.11194706</td><td>1</td><td>1</td><td>HELSSLADVYINDAFGTAHR</td><td></td><td>trypsin-full-digest</td><td>YCR012W(150)</td><td>RA</td><td>target</td></tr>
+
+		<tr>
+		<td>demo.ms2</td><td>75478</td><td>3</td><td>975.1579</td><td>2922.4519</td><td>2922.4465</td><td>0</td><td>0</td><td>5.96129632</td><td>1</td><td>1</td><td>NMITGTSQADCAILIIAGGVGEFEAGISK</td><td>11_S_57.02</td><td>trypsin-full-digest</td><td>YBR118W(101)</td><td>KD</td><td>target</td></tr>
+		</table>
 
 		<p>
 		The final step is to post-process the search results using Percolator.
@@ -219,78 +226,81 @@ INFO: Return Code:0
 		</p>
 
 		<pre>
-INFO: CPU: pyrrolysine.gs.washington.edu
-INFO: Crux version: 3.1-ccddffef5395314ce3a224ad5b34167229341653
-INFO: Tue Dec 12 15:47:13 PST 2017
-COMMAND LINE: ./crux percolator --test-fdr 0.1 crux-output/tide-search.target.txt
+INFO: CPU: guanine.gs.washington.edu
+INFO: Crux version: 4.1-6d021498-2021-10-19
+INFO: Wed Oct 27 18:56:07 PDT 2021
 INFO: Beginning percolator.
-INFO: Reading file crux-output/tide-search.target.txt
 INFO: Converting input to pin format.
 INFO: Parsing crux-output/tide-search.target.txt
 INFO: Assigning index 0 to demo.ms2.
 INFO: Parsing crux-output/tide-search.decoy.txt
-INFO: There are 690 target matches and 690 decoys
-INFO: Maximum observed charge is 3.
+INFO: There are 4014 target matches and 4014 decoys
+INFO: Maximum observed charge is 5.
 INFO: File conversion complete.
-INFO: Percolator version 3.01.nightly-22-2f4e2a6, Build Date Nov 22 2017 10:07:29
+INFO: Percolator version 3.05.nightly-137-e806a0c5, Build Date Aug 17 2021 11:04:02
 INFO: Copyright (c) 2006-9 University of Washington. All rights reserved.
 INFO: Written by Lukas Käll (lukall@u.washington.edu) in the
 INFO: Department of Genome Sciences at the University of Washington.
 INFO: Issued command:
 INFO: percolator --results-peptides crux-output/percolator.target.peptides.txt --decoy-results-peptides crux-output/percolator.decoy.peptides.txt --results-psms crux-output/percolator.target.psms.txt --decoy-results-psms crux-output/percolator.decoy.psms.txt --verbose 2 --protein-decoy-pattern decoy_ --seed 1 --subset-max-train 0 --trainFDR 0.01 --testFDR 0.1 --maxiter 10 --search-input auto --no-schema-validation --protein-enzyme trypsin --post-processing-tdc crux-output/make-pin.pin
-INFO: Started Tue Dec 12 15:47:13 2017
+INFO: Started Wed Oct 27 18:56:08 2021
+INFO:  on guanine.gs.washington.edu
 INFO: Hyperparameters: selectionFdr=0.01, Cpos=0, Cneg=0, maxNiter=10
 INFO: Reading tab-delimited input from datafile crux-output/make-pin.pin
 INFO: Features:
-INFO: lnrSp deltLCn deltCn XCorr Sp IonFrac PepLen Charge1 Charge2 Charge3 enzN enzC enzInt lnNumDSP dM absdM 
-INFO: Found 1380 PSMs
+INFO: deltLCn deltCn XCorr PepLen Charge1 Charge2 Charge3 Charge4 Charge5 enzN enzC enzInt lnNumDSP dM absdM
+INFO: Found 8028 PSMs
 INFO: Separate target and decoy search inputs detected, using target-decoy competition on Percolator scores.
-INFO: Train/test set contains 690 positives and 690 negatives, size ratio=1 and pi0=1
+INFO: Train/test set contains 4014 positives and 4014 negatives, size ratio=1 and pi0=1
 INFO: Selecting Cpos by cross-validation.
 INFO: Selecting Cneg by cross-validation.
-INFO: Split 1:	Selected feature 2 as initial search direction. Could separate 44 training set positives in that direction.
-INFO: Split 2:	Selected feature 5 as initial search direction. Could separate 41 training set positives in that direction.
-INFO: Split 3:	Selected feature 2 as initial search direction. Could separate 32 training set positives in that direction.
-INFO: Found 39 test set positives with q<0.1 in initial direction
-INFO: Reading in data and feature calculation took 0.077138 cpu seconds or 0 seconds wall clock time.
-INFO: ---Training with Cpos selected by cross validation, Cneg selected by cross validation, fdr=0.01
-INFO: Iteration 1:	Estimated 71 PSMs with q<0.1
-INFO: Iteration 2:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 3:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 4:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 5:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 6:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 7:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 8:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 9:	Estimated 73 PSMs with q<0.1
-INFO: Iteration 10:	Estimated 73 PSMs with q<0.1
+INFO: Split 1:  Selected feature 3 as initial direction. Could separate 264 training set positives with q<0.01 in that direction.
+INFO: Split 2:  Selected feature 3 as initial direction. Could separate 286 training set positives with q<0.01 in that direction.
+INFO: Split 3:  Selected feature 3 as initial direction. Could separate 313 training set positives with q<0.01 in that direction.
+INFO: Found 489 test set positives with q<0.1 in initial direction
+INFO: Reading in data and feature calculation took 0.2100 cpu seconds or 0 seconds wall clock time.
+INFO: ---Training with Cpos selected by cross validation, Cneg selected by cross validation, initial_fdr=0.01, fdr=0.01
+INFO: Iteration 1:      Estimated 497 PSMs with q<0.1
+INFO: Iteration 2:      Estimated 498 PSMs with q<0.1
+INFO: Iteration 3:      Estimated 497 PSMs with q<0.1
+INFO: Iteration 4:      Estimated 495 PSMs with q<0.1
+INFO: Iteration 5:      Estimated 499 PSMs with q<0.1
+INFO: Iteration 6:      Estimated 500 PSMs with q<0.1
+INFO: Iteration 7:      Estimated 499 PSMs with q<0.1
+INFO: Iteration 8:      Estimated 500 PSMs with q<0.1
+INFO: Iteration 9:      Estimated 499 PSMs with q<0.1
+INFO: Iteration 10:     Estimated 500 PSMs with q<0.1
 INFO: Learned normalized SVM weights for the 3 cross-validation splits:
-INFO:  Split1	 Split2	 Split3	FeatureName
-INFO:  0.3140	 0.0590	 0.2375	lnrSp
-INFO:  0.1862	-0.1121	 0.1878	deltLCn
-INFO:  0.1340	 0.0416	 0.3738	deltCn
-INFO:  0.0642	 0.3209	 0.6567	XCorr
-INFO:  0.7780	 0.3290	 1.2113	Sp
-INFO:  0.2765	 0.0558	-0.4342	IonFrac
-INFO:  0.3376	 0.0918	 0.3700	PepLen
-INFO:  0.0230	 0.0536	 0.1603	Charge1
-INFO:  0.1090	 0.0586	 0.3298	Charge2
-INFO: -0.1604	-0.1274	-0.5759	Charge3
-INFO:  0.0000	 0.0000	 0.0000	enzN
-INFO:  0.0000	 0.0000	 0.0000	enzC
-INFO: -0.0195	-0.0015	 0.0231	enzInt
-INFO:  0.1450	 0.0298	 0.6177	lnNumDSP
-INFO: -0.1984	-0.0750	-0.2956	dM
-INFO: -0.1965	-0.0327	-0.1631	absdM
-INFO: -1.5185	-1.1520	-2.0882	m0
-INFO: Found 54 test set PSMs with q<0.1.
-INFO: Selected best-scoring PSM per scan+expMass (target-decoy competition): 104 target PSMs and 62 decoy PSMs.
+INFO:  Split1    Split2  Split3 FeatureName
+INFO: -0.2393    0.1490 -0.9274 deltLCn
+INFO:  0.1964    0.0398  0.9062 deltCn
+INFO:  1.7107    2.0151  3.3339 XCorr
+INFO:  0.1113   -0.5086 -0.7459 PepLen
+INFO:  0.0000    0.0000  0.0000 Charge1
+INFO: -0.0370   -0.1876 -0.5067 Charge2
+INFO:  0.0155    0.1021  0.3208 Charge3
+INFO:  0.0561    0.2259  0.5142 Charge4
+INFO:  0.0188    0.0916  0.1388 Charge5
+INFO:  0.0000    0.0000  0.0000 enzN
+INFO:  0.0000    0.0000  0.0000 enzC
+INFO: -0.0209   -0.0580 -0.0997 enzInt
+INFO:  0.2998   -0.3144  0.6631 lnNumDSP
+INFO: -0.0458    0.1445 -0.3350 dM
+INFO:  0.1462    0.7423  0.8114 absdM
+INFO: -2.1264   -3.3482 -5.0740 m0
+INFO: Found 499 test set PSMs with q<0.1.
+INFO: Selected best-scoring PSM per scan+expMass (target-decoy competition): 1787 target PSMs and 1168 decoy PSMs.
+INFO: Multiple instantiations of Normalizer
+INFO: Multiple instantiations of Normalizer
+INFO: Multiple instantiations of Normalizer
 INFO: Tossing out "redundant" PSMs keeping only the best scoring PSM for each unique peptide.
 INFO: Calculating q values.
-INFO: Final list yields 0 target peptides with q<0.1.
+INFO: Final list yields 362 target peptides with q<0.1.
 INFO: Calculating posterior error probabilities (PEPs).
-INFO: Processing took 3.472 cpu seconds or 3 seconds wall clock time.
-INFO: Elapsed time: 3.35 s
+INFO: Processing took 5.5800 cpu seconds or 4 seconds wall clock time.
+INFO: Multiple instantiations of Normalizer
+INFO: Multiple instantiations of Normalizer
+INFO: Elapsed time: 4.9 s
 INFO: Finished crux percolator.
 INFO: Return Code:0
 		</pre>
@@ -333,41 +343,28 @@ INFO: Return Code:0
 
 		<p>
 		  As before, you might want to sort the Percolator output files, this
-		  time by the "percolator score" column:</p>
-
-
-		<li>
-		<div class=code><code>
-		$ crux sort-by-column --column-type real --ascending T crux-output/percolator.target.psms.txt "percolator score" > crux-output/percolator.target.psms.sort.txt
-		</code>
-		</div>
+		  time by the "percolator score" column.</p>
 
 		<p>
 		The beginning of the resulting percolator.target.psms.sort.txt file will look like
 		this:</p>
 
 		<table class="searchtable">
-		<td><b>file</b></td><td><b>file_idx</b></td><td><b>scan</b></td><td><b>charge</b></td><td><b>spectrum precursor m/z</b></td><td><b>spectrum neutral mass</b></td><td><b>peptide mass</b></td><td><b>percolator score</b></td><td><b>percolator rank</b></td><td><b>percolator q-value</b></td><td><b>total matches/spectrum</b></td><td><b>sequence</b></td><td><b>cleavage type</b></td><td><b>protein id</b></td><td><b>flanking aa</b></td></tr>
+		<td><b>file_idx</b></td><td><b>scan</b></td><td><b>charge</b></td><td><b>spectrum precursor m/z</b></td><td><b>spectrum neutral mass</b></td><td><b>peptide mass</b></td><td><b>percolator score</b></td><td><b>percolator q-value</b></td><td><b>percolator PEP</b></td><td><b>distinct matches/spectrum</b></td><td><b>sequence</b></td><td><b>protein id</b></td><td><b>flanking aa</b></td></tr>
 		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>118</td><td>3</td><td>1031.9407</td><td>3092.8000</td><td>3095.2366</td><td>8.6190662</td><td>1</td><td>0</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C</td><td>KD</td></tr>
+		<td>0</td><td>57701</td><td>3</td><td>1190.5835</td><td>3568.7287</td><td>3568.7209</td><td>3.22302477</td><td>0.002617801</td><td>5.1679258e-07</td><td>1</td><td>GVLGYTEDAVVSSDFLGDSHSSIFDASAGIQLSPK</td><td>YGR192C</td><td>KF</td></tr>
+
 		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>26</td><td>2</td><td>692.3773</td><td>1382.7400</td><td>1382.4467</td><td>7.0481362</td><td>2</td><td>0</td><td>6</td><td>TASEFDSAIAQDK</td><td>trypsin-full-digest</td><td>YLR043C</td><td>KL</td></tr>
+		<td>0</td><td>28906</td><td>3</td><td>731.0363</td><td>2190.0869</td><td>2190.0817</td><td>3.05633388</td><td>0.002617801</td><td>9.7863355e-07</td><td>2</td><td>HLVHEVTSPQAFEGLENAGR</td><td>YGL009C</td><td>RK</td></tr>
+
 		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>53</td><td>2</td><td>745.7473</td><td>1489.4800</td><td>1489.7318</td><td>6.7469611</td><td>3</td><td>0</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W</td><td>RN</td></tr>
+		<td>0</td><td>60831</td><td>4</td><td>838.1685</td><td>3348.6450</td><td>3348.6414</td><td>3.01509804</td><td>0.002617801</td><td>1.1460915e-06</td><td>1</td><td>HEIASEVASFLNGNIIEHDVPEHFFGELAK</td><td>YLR249W</td><td>RG</td></tr>
+
 		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>62</td><td>2</td><td>745.8572</td><td>1489.7000</td><td>1489.7318</td><td>6.6489625</td><td>4</td><td>0</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W</td><td>RN</td></tr>
+		<td>0</td><td>22958</td><td>3</td><td>520.9552</td><td>1559.8437</td><td>1559.8420</td><td>2.99335675</td><td>0.002617801</td><td>1.2456261e-06</td><td>1</td><td>SHINVVVIGHVDSGK</td><td>YBR118W</td><td>KS</td></tr>
+
 		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>146</td><td>2</td><td>692.6772</td><td>1383.3400</td><td>1382.4467</td><td>6.6027999</td><td>5</td><td>0</td><td>5</td><td>TASEFDSAIAQDK</td><td>trypsin-full-digest</td><td>YLR043C</td><td>KL</td></tr>
-		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>131</td><td>2</td><td>745.8473</td><td>1489.6801</td><td>1489.7318</td><td>6.5627294</td><td>6</td><td>0</td><td>3</td><td>NFLETVELQVGLK</td><td>trypsin-full-digest</td><td>YGL135W</td><td>RN</td></tr>
-		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>50</td><td>2</td><td>651.2873</td><td>1300.5601</td><td>1301.4160</td><td>6.3757763</td><td>7</td><td>0</td><td>10</td><td>LDVDELGDVAQK</td><td>trypsin-full-digest</td><td>YLR043C</td><td>KN</td></tr>
-		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>42</td><td>3</td><td>1032.2606</td><td>3093.7600</td><td>3095.2366</td><td>5.8047724</td><td>8</td><td>0</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C</td><td>KD</td></tr>
-		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>90</td><td>3</td><td>1032.0006</td><td>3092.9800</td><td>3095.2366</td><td>5.4775882</td><td>9</td><td>0</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C</td><td>KD</td></tr>
-		<tr>
-		<td>crux-output/tide-search.target.txt</td><td>1</td><td>111</td><td>3</td><td>1033.0206</td><td>3096.0400</td><td>3095.2366</td><td>5.4364419</td><td>10</td><td>0</td><td>2</td><td>ELESAAYDHAEPVQPEDAPQDIANDELK</td><td>trypsin-full-digest</td><td>YGL009C</td><td>KD</td></tr>
+		<td>0</td><td>28872</td><td>4</td><td>548.5290</td><td>2190.0869</td><td>2190.0817</td><td>2.98298458</td><td>0.002617801</td><td>1.2961123e-06</td><td>2</td><td>HLVHEVTSPQAFEGLENAGR</td><td>YGL009C</td><td>RK</td></tr>
 		</table>
 
 		<p>
@@ -376,7 +373,7 @@ INFO: Return Code:0
 		confidence estimate is reported as a "percolator q-value," interpreted
 		as the minimal false discovery rate threshold at which this match is
 		deemed significant.  In the list above, all of the matches have
-		q-values of 0, meaning that they are highly significant.
+		q-values of <0.002, meaning that they are highly significant.
 		The meanings of the remaining columns are
 		described <a href="../file-formats/txt-format.html">here</a>.  Note that when you run
 		Percolator on your own computer, the results may be somewhat

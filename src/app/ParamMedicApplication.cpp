@@ -207,8 +207,29 @@ string ParamMedicApplication::getName() const {
 
 string ParamMedicApplication::getDescription() const {
   return
-    "[[html:<p>]]Examine the spectra in a file to estimate the best precursor "
-    "and fragment error tolerances for database search.[[html:</p>]]";
+    "[[nohtml:Examine the spectra in a file to estimate the best precursor "
+    "and fragment error tolerances for database search and to infer "
+    "the presence of various types of modifications, including stable-isotope "
+    "labeling, isobaric labeling, tandem mass tags, and enrichment of "
+    "phosphorylated peptides.]]"
+    "[[html:<p>Examine the spectra in a file to estimate the best precursor "
+    "and fragment error tolerances for database search and to infer "
+    "the presence of various types of modifications, including stable-isotope "
+    "labeling, isobaric labeling, tandem mass tags, and enrichment of "
+    "phosphorylated peptides.  For details on how param-medic works, "
+    "see these publications:</p><blockquote>Damon H. May, Kaipo Tamura, "
+    "William Stafford Noble. <a href=\"https://pubs.acs.org/doi/abs/10.1021/"
+    "acs.jproteome.7b00028\">&quot;Param-Medic: A tool for improving MS/MS "
+    "database search yield by optimizing parameter settings.&quot;</a> "
+    "<em>Journal of Proteome Research</em>. 16(4):1817-1824, 2017.<br><br>"
+    "Damon May, Kaipo Tamura, William Stafford Noble. <a href=\""
+    "https://pubs.acs.org/doi/full/10.1021/acs.jproteome.8b00954\">"
+    "&quot;Detecting modifications in proteomics experiments with "
+    "Param-Medic.&quot;</a> <em>Journal of Proteome Research</em>. "
+    "18(4):1902-1906, 2019.</blockquote>Note that you can access some of the "
+    "functionality of Param-Medic by using the "
+    "<code>--auto-precursor-window</code> and <code>--auto-mz-bin-width</code>"
+    " options in <code>tide-search</code>.</p>]]";
 }
 
 bool ParamMedicApplication::hidden() const {
@@ -224,7 +245,6 @@ vector<string> ParamMedicApplication::getArgs() const {
 
 vector<string> ParamMedicApplication::getOptions() const {
   string arr[] = {
-    "verbosity",
     "spectrum-parser",
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",
@@ -237,17 +257,34 @@ vector<string> ParamMedicApplication::getOptions() const {
     "pm-pair-top-n-frag-peaks",
     "pm-min-common-frag-peaks",
     "pm-max-scan-separation",
-    "pm-min-peak-pairs"
+    "pm-min-peak-pairs",
+    "verbosity",
+    "fileroot",
+    "output-dir",
+    "overwrite",
+    "parameter-file"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
 vector< pair<string, string> > ParamMedicApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("stdout",
-    "the estimated parameter values for precursor mass tolerance (in ppm) and "
-    "fragment bin size (in Th), as well as the standard deviations of the "
-    "estimated error distributions for precursor and fragment masses."));
+  outputs.push_back(make_pair("param-medic.txt",
+    "a tab-delimited text file containing the estimated parameter values for "
+    "precursor mass tolerance (and corresponding standard deviation), "
+    "fragment bin size (and standard deviation), as well "
+    "as the presence or absence of various modification types (4Da, 6Da, 8Da "
+    "and 10Da SILAC, 4plex and 8plex iTRAQ, 2plex, 6plex and 10plex TMT, "
+    "and phosphorylation).  For each modification type, a Boolean is reported "
+    "along with a statistic indicating how confident the inference is."));
+  outputs.push_back(make_pair("param-medic.params.txt",
+    "a file containing the name and value of all parameters/options for the "
+    "current operation. Not all parameters in the file may have been used in "
+    "the operation. The resulting file can be used with the --parameter-file "
+    "option for other Crux programs."));
+  outputs.push_back(make_pair("param-medic.log.txt",
+    "a log file containing a copy of all messages that were printed to the "
+    "screen during execution."));
   return outputs;
 }
 

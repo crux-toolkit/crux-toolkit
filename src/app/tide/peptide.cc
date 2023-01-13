@@ -10,6 +10,7 @@
 #include "theoretical_peak_set.h"
 #include "peptide.h"
 #include "compiler.h"
+#include "util/StringUtils.h"
 
 #ifdef DEBUG
 DEFINE_int32(debug_peptide_id, -1, "Peptide id to debug.");
@@ -21,21 +22,29 @@ DEFINE_bool(dups_ok, false, "Don't remove duplicate peaks");
 #endif
 
 string Peptide::SeqWithMods() const {
-  vector<char> buf(Len() + num_mods_ * 30 + 1);
-  int residue_pos = 0;
-  char* buf_pos = &(buf[0]);
-  for (int i = 0; i < num_mods_; ++i) {
-    int index;
-    double delta;
-    MassConstants::DecodeMod(mods_[i], &index, &delta);
-    while (residue_pos <= index)
-      *buf_pos++ = residues_[residue_pos++];
-    buf_pos += sprintf(buf_pos, "[%s%.1f]", delta >= 0 ? "+" : "", delta);
+  string seq_with_mods = string(residues_, Len());
+  
+  if (num_mods_ > 0) {
+    int mod_pos_offset = 0;
+    string mod_str;
+    vector<int> mod;
+    
+    for (int i = 0; i < num_mods_; ++i) {
+      mod.push_back(mods_[i]);
+    }
+    
+    sort(mod.begin(), mod.end());
+    
+    for (int i = 0; i < num_mods_; ++i) {
+      int index;
+      double delta;
+      MassConstants::DecodeMod(mod[i], &index, &delta);
+      mod_str = '[' + StringUtils::ToString(delta, mod_precision_) + ']';
+      seq_with_mods.insert(index + 1 + mod_pos_offset, mod_str);
+      mod_pos_offset += mod_str.length();
+    }
   }
-  while (residue_pos < Len())
-    *buf_pos++ = residues_[residue_pos++];
-  *buf_pos = '\0';
-  return &(buf[0]);
+  return seq_with_mods;  
 }
 
 void Peptide::Show() {
@@ -64,7 +73,7 @@ void Peptide::Show() {
 }
 
 template<class W>
-void Peptide::AddIons(W* workspace) const {
+void Peptide::AddIons(W* workspace, bool dia_mode) {
   // Use workspace to assemble all B and Y ions. workspace will determine
   // which, if any, associated ions will be represented.
   double max_possible_peak = numeric_limits<double>::infinity();
@@ -72,11 +81,23 @@ void Peptide::AddIons(W* workspace) const {
     max_possible_peak = MaxBin::Global().CacheBinEnd();
 
   vector<double> aa_masses = getAAMasses();
+  // carp(CARP_DETAILED_DEBUG, "**********aa_masses:%s", StringUtils::JoinDoubleVec(aa_masses, ',').c_str() );
+
+
+  // added by Yang
+  if (dia_mode) {
+    ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
+  }
 
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
     workspace->AddBIon(total, 1);
+    if (dia_mode) {
+      b_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
+      ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::B, 1)));
+      ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::B, 1));
+    }
     total += aa_masses[i];
   }
 
@@ -84,6 +105,11 @@ void Peptide::AddIons(W* workspace) const {
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
     workspace->AddYIon(total, 1);
+    if (dia_mode) {
+      y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
+      ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
+      ion_mzs_.push_back(Peptide::MassToMz(total + MassConstants::Y, 1));
+    }
     total += aa_masses[i];
   }
 
@@ -101,6 +127,15 @@ void Peptide::AddIons(W* workspace) const {
     workspace->AddYIon(total, 2);
     total += aa_masses[i];
   }
+
+  // added by Yang
+  if (dia_mode) {
+    sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
+    sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
+    sort(ion_mzbins_.begin(), ion_mzbins_.end());
+    sort(ion_mzs_.begin(), ion_mzs_.end());
+  }
+
 }
 
 template<class W>
@@ -142,33 +177,38 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks,
                       const pb::Peptide& pb_peptide,
                       TheoreticalPeakCompiler* compiler_prog1,
                       TheoreticalPeakCompiler* compiler_prog2) {
+#ifdef CPP_SCORING
+  // Store the theoretical peak indeces for the peptide in a vector. 
+  int i;
+  peaks_0.clear();
+  peaks_1.clear();
+  peaks_0.reserve(peaks[0].size());
+  peaks_1.reserve(peaks[1].size());
+  
+  for (i = 0; i < peaks[0].size(); ++i) {
+    peaks_0.push_back(peaks[0][i]);
+  }
+  for (i = 0; i < peaks[1].size(); ++i) {
+    peaks_1.push_back(peaks[1][i]);
+  }
+  prog1_ = (void*)3;  //Mark the peptide that it contains theoretical peaks to score
+#else
+  // Create the Assembly code for scoring. 
   int pos_size = peaks[0].size();
   prog1_ = compiler_prog1->Init(pos_size, 0);
   compiler_prog1->AddPositive(peaks[0]);
-//  compiler_prog1->AddPositive(pb_peptide.peak1());
-//  compiler_prog1->AddNegative(pb_peptide.neg_peak1());
   compiler_prog1->Done();
 
   pos_size = peaks[0].size() + peaks[1].size();
   prog2_ = compiler_prog2->Init(pos_size, 0);
   compiler_prog2->AddPositive(peaks[0]);
   compiler_prog2->AddPositive(peaks[1]);
-//  compiler_prog2->AddPositive(pb_peptide.peak2());
-//  compiler_prog2->AddNegative(pb_peptide.neg_peak2());
   compiler_prog2->Done();
-/*    cout << Seq() << endl;
-    for (int i = 0; i < peaks[0].size(); ++i)
-      cout << "Theoretical Peak[" << peaks[0][i].Bin() << "] = "
-           << peaks[0][i].Type() << endl;
-    for (int i = 0; i < peaks[1].size(); ++i)
-      cout << "Theoretical Peak[" << peaks[1][i].Bin() << "] = "
-           << peaks[1][i].Type() << endl;
-*/
-//	exit(1);  
+#endif
 }
 
-void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSet* workspace) const {
-  AddIons<TheoreticalPeakSet>(workspace);   // Generic workspace
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
+  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);   // Generic workspace
 #ifdef DEBUG
   Show();
 #endif
@@ -181,12 +221,13 @@ void Peptide::ComputeBTheoreticalPeaks(TheoreticalPeakSetBIons* workspace) const
 #endif
 }
 
-void Peptide::ComputeTheoreticalPeaks(ST_TheoreticalPeakSet* workspace,
+void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace,
                                       const pb::Peptide& pb_peptide,
                                       TheoreticalPeakCompiler* compiler_prog1,
-                                      TheoreticalPeakCompiler* compiler_prog2) {
+                                      TheoreticalPeakCompiler* compiler_prog2,
+                                      bool dia_mode) {
   // Search-time fast workspace
-  AddIons<ST_TheoreticalPeakSet>(workspace);
+  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);
 
 #if 0
   TheoreticalPeakArr peaks[2];
@@ -226,16 +267,19 @@ vector<double> Peptide::getAAMasses() const {
       masses_charge[i] = MassConstants::mono_table[*residue];
     }
   }
+
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
     MassConstants::DecodeMod(mods_[i], &index, &delta);
     masses_charge[index] += delta;
   }
+
   return masses_charge;
 }
 
 // Probably defunct, uses old calling format.
+/*
 int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
   const void* prog = peptide->Prog(charge);
   int result;
@@ -248,3 +292,4 @@ int NoInlineDotProd(Peptide* peptide, const int* cache, int charge) {
 #endif
   return result;
 }
+*/

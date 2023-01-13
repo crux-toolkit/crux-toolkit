@@ -6,10 +6,32 @@
 #include <sstream>
 #include <vector>
 
+#include "boost/tuple/tuple.hpp"
+
 class MathUtil {
  public:
   static double Round(double x, int decimals = 0);
-  static bool AlmostEqual(double x, double y, int precision);
+  static bool AlmostEqual(double x, double y, int precision = 6);
+
+  // added by Yang
+  static int factorial(int n);
+  static double LogNChooseK(int n, int k);
+  static double LogSumExp(std::vector<double>* log_values); // en.wikipedia.org/wiki/LogSumExp
+
+  static double MaxInArr(double* arr_values, int size);
+  static double NormalizedDotProduct(double* src_values, double* tgt_values, int size, bool take_sqrt = true);
+  static std::vector<double> linspace(double start, double end, int num);
+
+  // find the closest match index from the data array to the query in O(log(n))
+  static int binarySearch(const double* data_arr, int data_size, double query);
+  static int binarySearch(const std::vector<double>* data_vec, double query);
+  // find the closest match index from the data array to the query in O(n), as a sanity check
+  static int linearSearch(const double* data_arr, int data_size, double query);
+  static int linearSearch(const std::vector<double>* data_vec, double query);
+  // fit linear regression
+  static boost::tuple<double, double> fitLinearRegression(std::vector<double>* x_values, std::vector<double>* y_values);
+
+  static double gammaln(double xx);
 
   template<typename T>
   static double Sum(const T& values) {
