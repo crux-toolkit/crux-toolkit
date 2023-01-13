@@ -14,7 +14,7 @@ jobs:
       - name: Check that release notes have been updated
         shell: bash
         run: |
-          content=$(git diff origin/master -- doc/user/release-notes.html)
+          content=$(git diff -b origin/master -- doc/user/release-notes.html)
           if [[ ! $content ]]; then
               echo "Please update the release notes (doc/user/release-notes.html)."
               exit 1
