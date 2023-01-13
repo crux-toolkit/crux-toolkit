@@ -1,0 +1,21 @@
+name: Check release notes
+
+on: [pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check that release notes have been updated
+        shell: bash
+        run: |
+          content=$(git diff -b origin/master -- doc/user/release-notes.html)
+          if [[ ! $content ]]; then
+              echo "Please update the release notes (doc/user/release-notes.html)."
+              exit 1
+          fi
