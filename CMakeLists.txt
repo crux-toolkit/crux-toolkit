@@ -1,14 +1,9 @@
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
 project(crux)
-cmake_minimum_required(VERSION 2.8.4)
-cmake_policy(VERSION 2.8.4)
 
-if (BUILD_32)
-  message("-- 32 bit build selected")
-endif(BUILD_32)
-
-
-set (CRUX_VERSION_MAJOR "3")
-set (CRUX_VERSION_MINOR "2")
+set (CRUX_VERSION_MAJOR "4")
+set (CRUX_VERSION_MINOR "1")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -55,7 +50,7 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/MSToolkit
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/kojak
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/boost
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags-2.1.2
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/gflags-2.2.2
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/google
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/pwiz
   COMMAND ${CMAKE_COMMAND} -E remove_directory ext/include/xercesc
@@ -112,13 +107,17 @@ add_dependencies(crux-support kojak)
 add_dependencies(crux-support percolator)
 add_dependencies(crux-support tide-support)
 add_dependencies(hardklor MSToolkit)
+add_dependencies(hardklor ProteoWizard)
+add_dependencies(kojak neopepxmlparser)
 add_dependencies(kojak hardklor)
+add_dependencies(kojak MSToolkit)
+add_dependencies(neopepxmlparser MSToolkit)
 add_dependencies(percolator MSToolkit)
 add_dependencies(percolator ProteoWizard)
-add_dependencies(tide-support gflags-2.2.1)
+add_dependencies(tide-support gflags-2.2.2)
 add_dependencies(tide-support MSToolkit)
 add_dependencies(tide-support ProteoWizard)
-add_dependencies(tide-support protobuf-3.0.0)
+add_dependencies(tide-support protobuf-3.19.4)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

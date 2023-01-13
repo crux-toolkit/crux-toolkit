@@ -32,6 +32,7 @@
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
+#include "DIAmeterApplication.h"
 
 using namespace std;
 
@@ -65,6 +66,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new SubtractIndexApplication());
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
+  apps.add(new DIAmeterApplication());
   
   string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {

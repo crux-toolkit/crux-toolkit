@@ -69,40 +69,43 @@
 		</p>
 
 		<pre>
+INFO: CPU: guanine.gs.washington.edu
+INFO: Crux version: 4.0-ad795d65-2021-08-23
+INFO: Tue Sep 14 21:35:02 PDT 2021
 INFO: Beginning spectral-counts.
 INFO: Total proteins found: 56
 INFO: Assigning index 0 to ./crux-output/percolator.target.psms.txt.
-INFO: Number of matches:109
-INFO: Number of matches passed the threshold 61
-INFO: Number of peptides 15
-INFO: Number of proteins 13
-		</pre>
-
-		<p>When the command is finished, it will print</p>
-		<pre>
-INFO: Elapsed time: 0.0122 s
+INFO: Number of matches:9134
+INFO: Number of matches passed the threshold 1515
+INFO: Number of peptides 758
+INFO: Number of proteins 54
+INFO: Elapsed time: 0.263 s
 INFO: Finished crux spectral-counts.
+INFO: Return Code:0
 		</pre>
 
 		<p>
-		Within the <code>crux-output</code> directory, there will be three new files:
+		The <span class=file>crux-output</span> directory will now contain three new files:</p>
+		<ol>
+
 		<li>spectral-counts.target.txt &ndash; tab-delimited file containing the <code>spectral-counts</code> results</li>
-		<li>spectral-counts.params.txt &ndash; the parameters used for running <code>spectral-counts</code></li>
-		<li>spectral-counts.log.txt &ndash; the log output of <code>spectral-counts</code></li>
+		<li>spectral-counts.params.txt &ndash; parameter file</li>
+		<li>spectral-counts.log.txt &ndash; log file.</li>
+
+		</ol>
 		</p>
 
 		<p>The spectral-counts.target.txt file will look something like:<br>
 		<pre>
-protein id 	NSAF
-YLR043C 	0.61643416
-YGL135W 	0.17810018
-YEL027W 	0.10352074
-YGL009C 	0.035437137
-YLR185W 	0.031369921
-YJR069C 	0.014012959
-YGR192C 	0.0083149187
-YMR235C 	0.0067826854
-YBR118W 	0.0060274079
+protein id	NSAF
+YGR192C	0.14454275
+YCR012W	0.07278429
+YBR118W	0.070475481
+YLL024C	0.045148738
+YOR063W	0.045023989
+YDR064W	0.039725326
+YLR043C	0.027732428
+YLR249W	0.027634142
 		</pre>
 
 		<p>

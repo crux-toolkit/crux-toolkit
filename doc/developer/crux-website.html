@@ -16,63 +16,90 @@
 <h2>Managing the Crux Web Site</h2>
 The 
 <a href="http://crux.ms">Crux web site</a> 
-is hosted on 
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">GitHub</a>, 
-except for the downloadable releases of
-the software which are stored on the 
-<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
-<p/>
-The content for the web site is stored in the <span class="code">doc/user</span>
-directory of the
-<a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a>.
-The build target <span class="code">Deploy documenation to website</span>
-on our 
-<a href="crux-teamcity.html">TeamCity</a> server copies the content
-from the
-<a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a>
-to the
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
-repository</a>.
-GitHub automatically serves the content of the
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
-repository</a>
-as <a href="http://crux.ms">http://crux.ms</a>.
-The association of the 
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
-repostory</a>
-with
-<a href="http://crux.ms">http://crux.ms</a> can be managed in the
-<span class="code">GitHub Pages</span> section of
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io/settings">settings</a> 
-for the
-<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux website
-repository</a>.
-More information about GitHub support for project web sites can be found
-<a href="https://pages.github.com">here</a>.
-<p/>
-The build target <span class="code">Deploy successful build to website</span>
-on our 
-<a href="crux-teamcity.html">TeamCity</a> server copies the software
-distribution files from the
-<a href="crux-teamcity.html">TeamCity</a> server to the
-<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
-When users agree to the licensing terms, and click on one of the download
-buttons on the
-<a href="http://crux.ms/download.html">Crux Downloads</a> page,
-it will activate the PHP script in
-<span class="code">/noble/www/htdocs/crux-downloads/download.php</span>
-on the
-<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>. 
-This script will initiate the download of the distribution file for the chosen
-architecture onto the user's machine.
-Each formal release of Crux will have it's own directory under
-<span class="code">/noble/www/htdocs/crux-downloads</span>.
-The daily builds will be placed under
-<span class="code">/noble/www/htdocs/crux-downloads/daily</span>.
-<p/>
-<p/>
-The <a href="http://crux.ms">crux.ms</a> domain name is registered by Charles with
+(<code>https://crux.ms</code>)
+is hosted on GitHub 
+using the GitHub <a href="https://pages.github.com">Pages</a> facility.
+The <code>crux.ms</code> domain name is registered by Charles with
 <a href="http://networksolutions.com">Network Soluions</a>.
 Talk to Charles if you need changes or have questions.
+<p/>
+The source for the Crux web site is kept in the <code>doc/user</code> sub-directory
+of the <a href="https://github.com/crux-toolkit/crux-toolkit">Crux repository</a> 
+(<code>https://github.com/crux-toolkit/crux-toolkit</code>).
+The <a href="https://pages.github.com">Pages</a> facility is unable to
+root the site in a sub-directory, so the web site is published from a separate 
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io">Crux web site repository</a>
+(<code>https://github.com/crux-toolkit/crux-toolkit.github.io</code></code>)
+which contains only the <code>user/doc</code> tree from the main repository. 
+Whenever the master branch of the Crux repository is updated, 
+a 
+<a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/.github/workflows/main.yml">GitHub action</a> 
+performs a build on all platforms,
+and tests the Centos7 build to make sure the smoke test pass.
+If all platforms build, and the smoke tests pass, all the files
+under <code>doc/user</code> will be copied from the 
+Crux repository to the Crux web site repository.
+An additional file, 
+<a href="https://github.com/crux-toolkit/crux-toolkit.github.io/blob/master/latest-build.txt"><code>latest-build.txt</code></a>,
+will be updated with the short version of the Git hash for the succesful commit.
+The <a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/.github/workflows/main.yml">GitHub action</a> 
+makes use of a 
+<a href="https://github.com/crux-toolkit/crux-toolkit/settings/secrets/actions">secret named DOC_UPDATE_KEY</a> 
+associated with the  Crux repository.
+The secret has to contain a personal access token, generated with rights to read the repository and run actions.
+Currently this token is provided by Charles.
+<p/>
+Downloadable releases of
+the Crux software are stored separately, on the 
+<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>
+(<code>http://noble.gs.washington.edu/crux-downloads</code>). 
+The Noble lab web server is hosted on <code>noble-web</code>.
+Major releases are stored in 
+<code>/noble/www/htdocs/crux-downloads</code>. 
+Intermediate releases are stored in
+<code>/noble/www/htdocs/crux-downloads/daily</code>. 
+On the <a href="http://crux.ms/download.html">Crux download page</a>
+the two download buttons will post to a
+<a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/doc/user/download/download.php"i>PHP script</a>.
+This PHP script is hosted on the 
+<a href="http://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>
+in <code>/noble/www/htdocs/crux-downloads/daily</code>. 
+It reads the the short version of the Git hash for the latest succesful build
+from the file <code>latest-build.txt</code>.
+.
+<p/>
+The script <a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/scripts/download-latest-crux-artifact.sh">
+<code>scripts/download-latest-crux-artifact.sh</code>
+</a>
+checks the Crux repository and if a new build has been successful, 
+copies the distribution artifacts from the Crux Repository
+to <code>/noble/www/htdocs/crux-downloads/daily</code>. 
+The existence of a new build is checked by downloading a copy of <code>latest-build.txt</code> from the Crux web repository, 
+and comparing its contents to the copy in <code>/noble/www/htdocs/crux-downloads/daily</code> on <code>noble-web</code>.
+The <a href="https://cli.github.com">gh command line tool</a> is used 
+to download the artifacts for the latest successful build which are then copied to
+<code>/noble/www/htdocs/crux-downloads/daily</code>.
+
+This script is invoked once an hour by a <a href="https://en.wikipedia.org/wiki/Cron"><code>cron job</code></a>.
+The <code>cron job</code> is currently controled by Charles.
+A log file listing activity for the update can be found in
+<code>/noble/www/htdocs/crux-downloads/daily/crux-update.log</code>
+<p/>
+<hr/>
+
+<h2>Google Analytics</h2>
+
+<p>
+Crux uses Google Analytics to track user commands. A summary of these
+counts are updated regularly to the main Crux web page. To see
+details, go to
+the <a href="https://analytics.google.com/analytics/web/">Google
+Analytics page</a>, making sure you use the correct Google account. In
+the menu on the left select Customisation/Custom Reports and click on
+the Usage by App report link. This brings you to the crux commands
+report. There is a date interval selection control in the upper-right
+corner. The table with the commands breakdown has totals in the header
+row.</p>
+
 </body>
 </html>

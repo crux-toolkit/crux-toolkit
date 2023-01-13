@@ -449,6 +449,9 @@ vector<Modification> Modification::Parse(const string& modString, const string* 
   vector<Modification> mods;
   vector<string> all = StringUtils::Split(modString, ',');
   for (vector<string>::const_iterator i = all.begin(); i != all.end(); i++) {
+    if (*i == "-") {
+      continue;
+    }
     try {
       mods.push_back(ParseOne(StringUtils::Trim(*i), unmodifiedSequence));
     } catch (runtime_error& e) {

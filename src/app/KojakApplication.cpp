@@ -61,6 +61,8 @@ int KojakApplication::main(const vector<string>& input_files) {
   str_params.push_back("e_value_depth");
   str_params.push_back("truncate_prot_names");
   str_params.push_back("fragment_bin_offset");
+  str_params.push_back("min_peptide_score");
+  
 
   // Vector for boolean parameters, which must be converted to 0/1 strings
   std::vector<std::string> bool_params;
@@ -283,6 +285,7 @@ vector<string> KojakApplication::getOptions() const {
    "max_miscleavages",
    "max_peptide_mass",
    "min_peptide_mass",
+   "min_peptide_score",
    "min_spectrum_peaks",
    "max_spectrum_peaks",
    "ppm_tolerance_pre",

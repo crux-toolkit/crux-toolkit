@@ -10,13 +10,13 @@ set.  The data set consists of 7243 spectra, of which 160 are 1+, 7083
 are 2+ and 7055 are 3+.  Thus, there are a total of 14298 searches to
 be performed.  The database is comprised of 23,932 proteins and 10.5
 million amino acids, including <i>C. elegans</i> proteins plus some
-common contaminants.  The test runs three different searches (comet,
-and tide-search with and without exact p-values) using a 3.0 Da
+common contaminants.  The test runs five different searches (comet,
+and tide-search with four different score functions) using a 3.0 Da
 precursor mass window, reversed peptide decoys and a fully tryptic
-digest.  The searches are followed up by analysis via four different
-post-processors: assign-confidence, percolator, q-ranker and barista.
-The performance of each method is summarized in a plot showing the
-number of spectra identified as a function of q-value threshold.</p>
+digest.  The searches are followed up by analysis via two different
+post-processors: assign-confidence and percolator.  The performance of
+each method is summarized in a plot showing the number of spectra
+identified as a function of q-value threshold.</p>
 
 <p>
 You can execute the test by running the
@@ -24,7 +24,7 @@ script <code>run-performance-test.sh</code> in this directory or the
 command <code>make performance-test</code> in the parent directory.
 Assuming that you have gnuplot installed, then your plots should show
 up in the right-hand set of plots below. First, we separate the
-twelve sets of results by search method:</p>
+results by search method:</p>
 
 <center>
 <table>
@@ -72,14 +72,6 @@ method:</p>
 <tr>
 <td><img src="stored-plots/percolator.png"></td>
 <td><img src="plots/percolator.png"></td>
-</tr>
-<tr>
-<td><img src="stored-plots/q-ranker.png"></td>
-<td><img src="plots/q-ranker.png"></td>
-</tr>
-<tr>
-<td><img src="stored-plots/barista.png"></td>
-<td><img src="plots/barista.png"></td>
 </tr>
 </table>
 </center>

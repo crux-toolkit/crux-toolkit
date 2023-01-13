@@ -8,6 +8,7 @@
 #include "util/Params.h"
 #include "util/StringUtils.h"
 #include "TideSearchApplication.h"
+#include "TideIndexApplication.h"
 #include "CometApplication.h"
 
 using namespace std;
@@ -235,7 +236,7 @@ int PipelineApplication::runPostProcessor(
     }
     carp(CARP_INFO, "Finished make-pin.");
   }
-  return ((PercolatorApplication*)app)->main(pin);
+  return ((PercolatorApplication*)app)->main(pin, "", "pipeline");
 }
 
 string PipelineApplication::getName() const {
@@ -278,6 +279,7 @@ vector<string> PipelineApplication::getOptions() const {
   vector<string> options(arr, arr + sizeof(arr) / sizeof(string));
 
   addOptionsFrom<CruxBullseyeApplication>(&options);
+  addOptionsFrom<TideIndexApplication>(&options);
   addOptionsFrom<TideSearchApplication>(&options);
   addOptionsFrom<CometApplication>(&options);
   addOptionsFrom<PercolatorApplication>(&options);

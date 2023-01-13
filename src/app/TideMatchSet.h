@@ -1,7 +1,7 @@
 #ifndef TIDE_MATCH_SET_H
 #define TIDE_MATCH_SET_H
 
-#define  NO_BOOST_DATE_TIME_INLINE
+#define  BOOST_DATE_TIME_NO_LIB
 #include <boost/thread.hpp>
 #include <vector>
 #include "raw_proteins.pb.h"
@@ -25,6 +25,7 @@ class TideMatchSet {
   bool exact_pval_search_;
   int elution_window_;
   SCORE_FUNCTION_T cur_score_function_;
+  double max_mz_;
 
   typedef pair<int, int> Pair2;
   typedef FixedCapacityArray<Pair2> Arr2;
@@ -40,6 +41,13 @@ class TideMatchSet {
     double combinedPval;
     int rank;
     double tailor;  //Added by AKF    
+
+    /*// added by Yang
+    double prec_intensity_logrank;
+    double rt_diff;
+    double frag_pval;
+    double prec_frag_coelu;
+    double ensemble_score;*/
   };
   typedef FixedCapacityArray<Scores> Arr;
 
@@ -87,7 +95,7 @@ class TideMatchSet {
     const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
     bool highScoreBest, //< indicates semantics of score magnitude
-    boost::mutex * rwlock
+    boost::mutex * rwlock = NULL
   );
 
   static void colPrint(
@@ -100,19 +108,66 @@ class TideMatchSet {
     ofstream* file,
     bool decoyFile,
     bool multiDecoy,
-    bool sp
+    bool compute_sp
+  );
+
+  // added by Yang
+  static void writeHeadersDIA(ofstream* file, bool compute_sp);
+
+  void writeToFileDIA(
+    ofstream* file,
+    int top_n,
+    const vector<Arr::iterator>& vec,
+    const string& spectrum_filename,
+    const Spectrum* spectrum,
+    int charge,
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    const vector<const pb::AuxLocation*>& locations,
+    const map<Arr::iterator, FLOAT_T>* delta_cn_map,
+    const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
+    const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
+    const map<Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+    const map<Arr::iterator, boost::tuple<double, double>>* ms2pval_map,
+    map<string, double>* peptide_predrt_map
+  );
+
+
+  void gatherTargetsAndDecoys(
+    const ActivePeptideQueue* peptides,
+    const ProteinVec& proteins,
+    vector<Arr::iterator>& targetsOut,
+    vector<Arr::iterator>& decoysOut,
+    int top_n,
+    int numDecoys,
+    bool highScoreBest // indicates semantics of score magnitude
+  );
+
+  static void computeDeltaCns(
+    const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
+    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
+    map<Arr::iterator, FLOAT_T>* delta_lcn_map
+  );
+
+  static void computeSpData(
+    const vector<Arr::iterator>& vec,
+    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
+    SpScorer* sp_scorer,
+    const ActivePeptideQueue* peptides
   );
 
   static void initModMap(const pb::ModTable& modTable, ModPosition position);
   static std::vector<Crux::Modification> getMods(const Peptide* peptide);
 
   static string CleavageType;
+  static string decoy_prefix_;
 
  protected:
   Arr* matches_;
   Arr2* matches2_;
   Peptide* peptide_;
-  double max_mz_;
 
   // For allocation
   static char match_collection_loc_[sizeof(MatchCollection)];
@@ -191,16 +246,6 @@ class TideMatchSet {
 
   Crux::Peptide getCruxPeptide(const Peptide* peptide);
 
-  void gatherTargetsAndDecoys(
-    const ActivePeptideQueue* peptides,
-    const ProteinVec& proteins,
-    vector<Arr::iterator>& targetsOut,
-    vector<Arr::iterator>& decoysOut,
-    int top_n,
-    int numDecoys,
-    bool highScoreBest // indicates semantics of score magnitude
-  );
-
   /**
    * Create a pb peptide from Tide peptide
    */
@@ -213,7 +258,8 @@ class TideMatchSet {
    */
   static string getProteinName(
     const pb::Protein& protein,
-    int pos
+    int pos,
+    bool decoy
   );
 
   /**
@@ -227,18 +273,6 @@ class TideMatchSet {
     string* out_c ///< out parameter for c flank
   );
 
-  static void computeDeltaCns(
-    const vector<Arr::iterator>& vec, // xcorr*100000000.0, high to low
-    map<Arr::iterator, FLOAT_T>* delta_cn_map, // map to add delta cn scores to
-    map<Arr::iterator, FLOAT_T>* delta_lcn_map
-  );
-
-  static void computeSpData(
-    const vector<Arr::iterator>& vec,
-    map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_rank_map,
-    SpScorer* sp_scorer,
-    const ActivePeptideQueue* peptides
-  );
 
   struct spGreater {
     inline bool operator() (const pair<Arr::iterator, SpScorer::SpScoreData>& lhs,

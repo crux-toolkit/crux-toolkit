@@ -22,6 +22,7 @@
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
+#include "util/MathUtil.h"
 #include "MassHandler.h"
 #include <boost/foreach.hpp>
 
@@ -63,8 +64,32 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("lnNumDSP", false));
   features_.push_back(make_pair("dM", true));
   features_.push_back(make_pair("absdM", true));
+
+  // DIAmeter related, added by Yang
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) {
+     features_.push_back(make_pair("PrecursorIntRankM0", true));
+     features_.push_back(make_pair("PrecursorIntRankM1", true));
+     features_.push_back(make_pair("PrecursorIntRankM2", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) {
+	 features_.push_back(make_pair("DynFragPVal", true));
+	 features_.push_back(make_pair("StaFragPVal", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) {
+	 features_.push_back(make_pair("RTDiff", true));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) {
+	 features_.push_back(make_pair("CoeluteMS1", true));
+	 features_.push_back(make_pair("CoeluteMS2", true));
+	 features_.push_back(make_pair("CoeluteMS1MS2", true));
+  }
+  features_.push_back(make_pair("EnsembleScore", true));
+
+
   features_.push_back(make_pair("Peptide", true));
   features_.push_back(make_pair("Proteins", true));
+
+  scannr_cnt_ = 0;
 }
 
 PinWriter::~PinWriter() { 
@@ -120,6 +145,8 @@ void PinWriter::write(
   const vector<MatchCollection*>& decoys,
   int top_rank
 ) {
+  // added by Yang
+
   vector<MatchCollection*> collections(1, target_collection);
   collections.insert(collections.end(), decoys.begin(), decoys.end());
   for (vector<MatchCollection*>::iterator i = collections.begin();
@@ -157,6 +184,28 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("NegLog10ResEvPValue", combine_p);
   setEnabledStatus("NegLog10CombinePValue", combine_p);
   setEnabledStatus("TailorScore", tailor);
+
+  // DIAmeter related, added by Yang
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) {
+     setEnabledStatus("PrecursorIntRankM0", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M0));
+     setEnabledStatus("PrecursorIntRankM1", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M1));
+     setEnabledStatus("PrecursorIntRankM2", collection->getScoredType(PRECURSOR_INTENSITY_RANK_M2));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) {
+     setEnabledStatus("DynFragPVal", collection->getScoredType(DYN_FRAGMENT_PVALUE));
+     setEnabledStatus("StaFragPVal", collection->getScoredType(STA_FRAGMENT_PVALUE));
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) {
+     setEnabledStatus("RTDiff", collection->getScoredType(RT_DIFF));
+
+  }
+  if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) {
+     setEnabledStatus("CoeluteMS1", collection->getScoredType(COELUTE_MS1));
+     setEnabledStatus("CoeluteMS2", collection->getScoredType(COELUTE_MS2));
+     setEnabledStatus("CoeluteMS1MS2", collection->getScoredType(COELUTE_MS1_MS2));
+  }
+  setEnabledStatus("EnsembleScore", collection->getScoredType(ENSEMBLE_SCORE));
+
 
   int max_charge = 0;
   for (MatchIterator i = MatchIterator(collection); i.hasNext();) {
@@ -214,7 +263,10 @@ void PinWriter::printPSM(
     } else if (feature == "Label") {
       fields.push_back(match->getNullPeptide() ? "-1" : "1");
     } else if (feature == "ScanNr") {
-      fields.push_back(StringUtils::ToString(spectrum->getFirstScan()));
+      // modified by Yang
+      if (Params::GetBool("unique-scannr")) { fields.push_back(StringUtils::ToString(++scannr_cnt_)); }
+      else { fields.push_back(StringUtils::ToString(spectrum->getFirstScan()));  }
+
     } else if (feature == "ExpMass") {
       fields.push_back(StringUtils::ToString(obsMass, mass_precision_));
     } else if (feature == "CalcMass") {
@@ -281,7 +333,20 @@ void PinWriter::printPSM(
       fields.push_back(getPeptide(peptide));
     } else if (feature == "Proteins") {
       fields.push_back(StringUtils::Join(peptide->getProteinIds(), '\t'));
-    } else {
+    }
+    // DIAmeter related, added by Yang
+    else if (feature == "PrecursorIntRankM0" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }
+    else if (feature == "PrecursorIntRankM1" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M1))); }
+    else if (feature == "PrecursorIntRankM2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M2))); }
+    else if (feature == "RTDiff" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(RT_DIFF))); }
+    else if (feature == "DynFragPVal" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(DYN_FRAGMENT_PVALUE))); }
+    else if (feature == "StaFragPVal" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-fragment"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(STA_FRAGMENT_PVALUE))); }
+    else if (feature == "CoeluteMS1" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1))); }
+    else if (feature == "CoeluteMS2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS2))); }
+    else if (feature == "CoeluteMS1MS2" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(COELUTE_MS1_MS2))); }
+    else if (feature == "EnsembleScore") { fields.push_back(StringUtils::ToString(match->getScore(ENSEMBLE_SCORE))); }
+
+    else {
       carp(CARP_FATAL, "Unknown feature: '%s'", feature.c_str());
     }
   }

@@ -12,6 +12,7 @@
 #include "spectrum.pb.h"
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
+#include "util/MathUtil.h"
 
 using namespace std;
 
@@ -29,8 +30,28 @@ enum _tide_search_lock {
 
 typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
 
+
+struct InputFile {
+  std::string OriginalName;
+  std::string SpectrumRecords;
+  bool Keep;
+  InputFile(const std::string& name,
+            const std::string& spectrumrecords,
+            bool keep):
+    OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+};
+
+struct ScSortByMz {
+  explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
+  bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
+      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
+             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
+  }
+  double precursor_window_;
+};
+
 class TideSearchApplication : public CruxApplication {
-private:
+  private:
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
   void getMassBin (
@@ -64,16 +85,6 @@ private:
 
  protected:
 
-  struct InputFile {
-    std::string OriginalName;
-    std::string SpectrumRecords;
-    bool Keep;
-    InputFile(const std::string& name,
-              const std::string& spectrumrecords,
-              bool keep):
-      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
-  };
-
   /**
   brief This variable is used with Cascade Search.
   This map contains a flag for each spectrum whether
@@ -89,7 +100,6 @@ private:
   static bool HAS_DECOYS;
   static bool PROTEIN_LEVEL_DECOYS;
 
-  vector<int> getNegativeIsotopeErrors() const;
   vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
   static SpectrumCollection* loadSpectra(const std::string& file);
 
@@ -123,7 +133,6 @@ private:
     int min_scan,
     int max_scan,
     int min_peaks,
-    int search_charge,
     int top_matches,
     double highest_mz,
     ofstream* target_file,
@@ -146,38 +155,10 @@ private:
     vector<int>* negative_isotope_errors
   );
 
-  void collectScoresCompiled(
-    ActivePeptideQueue* active_peptide_queue,
-    const Spectrum* spectrum,
-    const ObservedPeakSet& observed,
-    TideMatchSet::Arr2* match_arr,
-    int queue_size,
-    int charge
-  );
+
 
   void convertResults() const;
 
-  void computeWindow(
-    const SpectrumCollection::SpecCharge& sc,
-    WINDOW_TYPE_T window_type,
-    double precursor_window,
-    int max_charge,
-    vector<int>* negative_isotope_errors,
-    vector<double>* out_min,
-    vector<double>* out_max,
-    double* min_range,
-    double* max_range
-  );
-
-  struct ScSortByMz {
-    explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-    bool operator() (const SpectrumCollection::SpecCharge x,
-                     const SpectrumCollection::SpecCharge y) {
-      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
-             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-    }
-    double precursor_window_;
-  };
   double bin_width_;
   double bin_offset_;
 
@@ -218,6 +199,28 @@ private:
   int main(const vector<string>& input_files, const string input_index);
 
   static bool proteinLevelDecoys();
+
+  static vector<int> getNegativeIsotopeErrors();
+
+  static void computeWindow(
+      const SpectrumCollection::SpecCharge& sc,
+      WINDOW_TYPE_T window_type,
+      double precursor_window,
+      vector<int>* negative_isotope_errors,
+      vector<double>* out_min,
+      vector<double>* out_max,
+      double* min_range,
+      double* max_range
+    );
+
+  static void collectScoresCompiled(
+      ActivePeptideQueue* active_peptide_queue,
+      const Spectrum* spectrum,
+      const ObservedPeakSet& observed,
+      TideMatchSet::Arr2* match_arr,
+      int queue_size,
+      int charge
+    );
 
   /**
    * Returns the command name
@@ -268,7 +271,6 @@ private:
     int min_scan;
     int max_scan;
     int min_peaks;
-    int search_charge;
     int top_matches;
     double highest_mz;
     ofstream* target_file;
@@ -296,14 +298,14 @@ private:
     bool exact_pval_search;
     map<pair<string, unsigned int>, bool>* spectrum_flag;
     int* sc_index;
-    int* total_candidate_peptides;
+    long* total_candidate_peptides;
     vector<int>* negative_isotope_errors;
 
     thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
             ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
             vector<const pb::AuxLocation*> locations_, double precursor_window_,
             WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
-            int min_scan_, int max_scan_, int min_peaks_, int search_charge_, int top_matches_,
+            int min_scan_, int max_scan_, int min_peaks_, int top_matches_,
             double highest_mz_, ofstream* target_file_,
             ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
             double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, int nAARes_,
@@ -311,12 +313,12 @@ private:
             const vector<double>* dAAFreqC_, const vector<double>* dAAMass_,
             const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_, const int decoysPerTarget_,
             vector<boost::mutex*> locks_array_, double bin_width_, double bin_offset_, bool exact_pval_search_,
-            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, int* total_candidate_peptides_,
+            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, long* total_candidate_peptides_,
             vector<int>* negative_isotope_errors_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
             proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
-            min_peaks(min_peaks_), search_charge(search_charge_), top_matches(top_matches_), highest_mz(highest_mz_),
+            min_peaks(min_peaks_), top_matches(top_matches_), highest_mz(highest_mz_),
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
             thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_),
             aaMass(aaMass_), nAARes(nAARes_), dAAFreqN(dAAFreqN_), dAAFreqI(dAAFreqI_), dAAFreqC(dAAFreqC_), dAAMass(dAAMass_),
@@ -364,8 +366,6 @@ private:
     double p,
     int numPval
   );
-
-  int factorial(int n);
 
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   virtual void processParams();

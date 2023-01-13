@@ -42,6 +42,16 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
     peak_m_z_.push_back(total / m_z_denom);
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }
+
+  // added by Yang
+  ms1_spectrum_number_ = spec.ms1_spectrum_number();
+  iso_window_lower_mz_ = spec.iso_window_lower_mz();
+  iso_window_upper_mz_ = spec.iso_window_upper_mz();
+
+  // carp(CARP_DETAILED_DEBUG, "spectrum_number_:%d \t ms1_spectrum_number_:%d", spectrum_number_, ms1_spectrum_number_);
+  // carp(CARP_DETAILED_DEBUG, "precursor_m_z_:%f \t iso_window:[%f, %f]", precursor_m_z_, iso_window_lower_mz_, iso_window_upper_mz_);
+  // carp(CARP_DETAILED_DEBUG, "numChargeStates:%d \t maxCharge:%d", NumChargeStates(), MaxCharge());
+
 }
 
 // A spectrum can have multiple precursor charges assigned.  This
@@ -115,6 +125,12 @@ void Spectrum::FillPB(pb::Spectrum* spec) {
     last = val;
     spec->add_peak_intensity(uint64(peak_intensity_[i]*intensity_denom + 0.5));
   }
+
+  // added by Yang
+  spec->set_ms1_spectrum_number(ms1_spectrum_number_);
+  spec->set_iso_window_lower_mz(iso_window_lower_mz_);
+  spec->set_iso_window_upper_mz(iso_window_upper_mz_);
+
 }
 
 void Spectrum::SortIfNecessary() {
@@ -227,7 +243,7 @@ vector<double> Spectrum::CreateEvidenceVector(
     if (num_retained) {
       (*num_retained)++;
     }
-    if (maxIonMass < ionMass) {
+    if (maxIonMass < ionMass && ionIntens > 0) {
       maxIonMass = ionMass;
     }
     if (maxIonIntens < ionIntens) {
@@ -236,7 +252,7 @@ vector<double> Spectrum::CreateEvidenceVector(
   }
 
   // 10 bin intensity normalization 
-  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS);
+  int regionSelector = (int)floor(MassConstants::mass2bin(maxIonMass) / (double)NUM_SPECTRUM_REGIONS) + 1;
   vector<double> intensObs(maxPrecurMass, 0);
   vector<int> intensRegion(maxPrecurMass, -1);
   for (int ion = 0; ion < numPeaks; ion++) {
@@ -288,17 +304,20 @@ vector<double> Spectrum::CreateEvidenceVector(
   for (vector<double>::const_iterator i = intensObs.begin(); i != intensObs.end(); i++) {
     partial_sums.push_back(total += *i);
   }
-  const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0 + 1.0);
+  const double multiplier = 1.0 / (MAX_XCORR_OFFSET * 2.0);
   for (int i = 0; i < maxPrecurMass; ++i) {
     int right = std::min(maxPrecurMass - 1, i + MAX_XCORR_OFFSET);
     int left = std::max(0, i - MAX_XCORR_OFFSET - 1);
-    intensObs[i] -= multiplier * (partial_sums[right] - partial_sums[left]);
+    intensObs[i] -= multiplier * (partial_sums[right] - partial_sums[left] - intensObs[i]);
   }
 
   bool flankingPeaks = Params::GetBool("use-flanking-peaks");
   bool nlPeaks = Params::GetBool("use-neutral-loss-peaks");
   int binFirst = MassConstants::mass2bin(30);
   int binLast = MassConstants::mass2bin(pepMassMonoMean - 47);
+  if (charge > 3){
+    charge = 3;
+  }
   vector<double> evidence(maxPrecurMass, 0);
   for (int i = binFirst; i <= binLast; i++) {
     // b ion
@@ -389,6 +408,77 @@ vector<int> Spectrum::CreateEvidenceVectorDiscretized(
   }
   return discretized;
 }
+
+/// added by Yang
+int Spectrum::MS1SpectrumNum() const { return ms1_spectrum_number_; }
+
+double Spectrum::IsoWindowLowerMZ() const { return iso_window_lower_mz_; }
+
+double Spectrum::IsoWindowUpperMZ() const { return iso_window_upper_mz_; }
+
+double Spectrum::MaxPeakMz() const { return *max_element(peak_m_z_.begin(), peak_m_z_.end()); }
+
+void Spectrum::UpdatePeakSupport(vector<bool>* peak_support_vec) {
+  if (peak_support_vec->size() != Size()) { carp(CARP_FATAL, "peak_support_vec size mismatch!"); }
+  peak_supported_.clear();
+
+  int supported_cnt = 0;
+  for (int peak_idx=0; peak_idx<peak_support_vec->size(); ++peak_idx) {
+    peak_supported_.push_back(peak_support_vec->at(peak_idx));
+  }
+  carp(CARP_DETAILED_DEBUG, "peak_support_vec size=%d \t supported_cnt=%d", peak_supported_.size(), supported_cnt);
+}
+
+bool Spectrum::Is_supported(int index) const {
+  if (index >= peak_supported_.size()) { return true; }
+  return peak_supported_[index];
+}
+
+
+vector<double> Spectrum::DescendingSortedPeakIntensity() {
+  vector<double> sorted_intensity_vec(peak_intensity_);
+  std::sort(sorted_intensity_vec.begin(), sorted_intensity_vec.end(), greater<double>());
+  return sorted_intensity_vec;
+}
+
+
+void SpectrumCollection::SortByMS1SpectrumNum() {
+  // This is for MS1 spectra only!
+  // Adopt MakeSpecCharges() with following changes:
+  // (1) We don't actually need neutral_mass, by which spec_charges_ is sorted
+  // (2) We re-purpose the neutral_mass with ms1_spectrum_number_
+  // (3) Fix charge as 1, which is useless.
+
+  int spectrum_index = 0;
+  vector<Spectrum*>::iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    int ms1_scan = (*i)->MS1SpectrumNum();
+    spec_charges_.push_back(SpecCharge(ms1_scan, 1, *i, spectrum_index));
+    spectrum_index++;
+  }
+  sort(spec_charges_.begin(), spec_charges_.end());
+}
+
+int SpectrumCollection::FindHighestSpectrumNum() const {
+  // Return the maximum MS2 scan number seen across all input spectra.
+  int highest_scannum = 0;
+  vector<Spectrum*>::const_iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    int curr_scannum = (*i)->SpectrumNumber();
+    if (curr_scannum > highest_scannum) { highest_scannum = curr_scannum; }
+  }
+  return highest_scannum;
+}
+
+void SpectrumCollection::SetNormalizedObvRTime() {
+  double highest_scannum = FindHighestSpectrumNum() * 1.0;
+
+  vector<Spectrum*>::const_iterator i = spectra_.begin();
+  for (; i != spectra_.end(); ++i) {
+    (*i)->SetRTime(1.0 * (*i)->SpectrumNumber() / highest_scannum);
+  }
+}
+
 
 void SpectrumCollection::ReadMS(istream& in, bool ms1) {
   // Parse MS2 file format.

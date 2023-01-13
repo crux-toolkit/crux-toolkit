@@ -41,6 +41,8 @@ message Peptide {
   
   optional int32 aux_locations_index = 10; // Array index into AuxLocation
   optional int32 decoy_index = 11;
+  optional string decoy_sequence = 12;   // Stores the decoy peptide sequence. 
+  // The location, position, and length points to the original target peptide.
 }
 
 message AuxLocation {

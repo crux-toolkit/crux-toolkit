@@ -14,7 +14,6 @@
 #include "Peak.h"
 
 #include "MSToolkit/Spectrum.h"
-#define  NO_BOOST_DATE_TIME_INLINE
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
 #include "SpectrumZState.h"
 
@@ -66,6 +65,12 @@ class Spectrum{
   bool             has_mz_peak_array_; ///< Is the mz_peak_array populated.
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
   bool             charge_state_assigned_;
+
+  // added by Yang
+  FLOAT_T iso_window_lower_mz_;
+  FLOAT_T iso_window_upper_mz_;
+  int ms1_scan_;
+
 
   // constants
   /**
@@ -130,6 +135,14 @@ class Spectrum{
 
   std::vector<Peak> getPeaks() const;
 
+
+  // added by Yang
+  void setMS1Scan(int ms1scan);
+  int getMS1Scan() const;
+  FLOAT_T getIsoWindowLowerMZ() const;
+  FLOAT_T getIsoWindowUpperMZ() const;
+  bool assignZStateDIA();
+
   /**
    * Prints a spectrum object to file.
    */
@@ -168,7 +181,8 @@ class Spectrum{
   bool parsePwizSpecInfo(
     const pwiz::msdata::SpectrumPtr& pwiz_spectrum,
     int firstScan,
-    int lastScan
+    int lastScan,
+    bool dia_mode = false
   );
   
   /**

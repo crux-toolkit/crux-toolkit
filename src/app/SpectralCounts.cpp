@@ -489,7 +489,6 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
  */
 void SpectralCounts::getPeptideScores() {
   Crux::SpectrumCollection* spectra = NULL;
-
   // for SIN, parse out spectrum collection from ms2 fiel
   if( measure_ == MEASURE_SIN ) {
     spectra = SpectrumCollectionFactory::create(Params::GetString("input-ms2"));
@@ -529,7 +528,6 @@ void SpectralCounts::getPeptideScores() {
       peptide_scores_.insert(make_pair(peptide, 0.0));
     }
     peptide_scores_[peptide] += match_intensity;
-
   }
 
   if (measure_ == MEASURE_SIN) {
