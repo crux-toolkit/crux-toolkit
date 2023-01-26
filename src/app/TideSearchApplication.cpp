@@ -160,6 +160,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     carp(CARP_FATAL, "--score-function 'residue-evidence' is not implemented "
                     "with Tailor score calibration method");
 
+  if (Params::GetBool("use-tailor-calibration") && Params::GetBool("peptide-centric-search") )
+    carp(CARP_FATAL, "--peptide-centric-search is not implemented "
+                    "with Tailor score calibration method");
+
   // Check compute-sp parameter
   bool compute_sp = Params::GetBool("compute-sp");
   if (Params::GetBool("sqt-output") && !compute_sp) {
