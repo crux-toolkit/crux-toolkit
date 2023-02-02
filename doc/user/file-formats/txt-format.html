@@ -93,19 +93,6 @@
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
-		<td>fileidx</td>
-		<td>The integer index of the file containing the scan.</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		</tr>
-
 		<tr bgcolor="#DEDEDE">
 		<td>scan</td>
 		<td>The identifying number of each scan.</td>
@@ -113,8 +100,8 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -126,8 +113,8 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -139,8 +126,8 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -154,8 +141,8 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -170,8 +157,8 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -378,45 +365,6 @@
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
-		<td>percolator score</td>
-		<td>The discriminant score assigned by percolator.</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&nbsp;</td>
-		</tr>
-
-		<tr>
-		<td>percolator q-value</td>
-		<td>The q-value assigned by percolator.</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&nbsp;</td>
-		</tr>
-
-		<tr bgcolor="#DEDEDE">
-		<td>percolator PEP</td>
-		<td>The posterior error probability assigned by percolator.</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&nbsp;</td>
-		</tr>
-
 		<tr>
 		<td>b/y ions matched</td>
 		<td>The number of b-ions and y-ions in the peptide that have a
@@ -453,7 +401,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -468,7 +416,7 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -476,20 +424,22 @@
 
 		<tr>
 		<td>sequence</td>
-		<td>The peptide sequence, not including any modifications.</td>
+		<td>The peptide sequence.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>modified sequence</td>
-		<td>The peptide sequence, with modifications included.</td>
+		<td>sequence</td>
+		<td>The peptide sequence. Modifications are indicated
+		by a number in square brackets immediately following
+		the modified amino acid.</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -502,8 +452,8 @@
 
 		<tr>
 		<td>modifications</td>
-        <!-- This description needs to be expanded considerably.  -->
-		<td>Variable modifications applied to the sequence.</td>
+		<td>Variable modifications applied to the sequence.
+		</td>
 		<td></td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -574,6 +524,89 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>PSMId</td>
+		<td>Identifier of this peptide-spectrum match.  If
+		the PIN file was created by Crux, then the ID will be
+		of the form target_0_8000_2_1, where the components
+		are "target" or "decoy," the file index, scan number,
+		charge, and PSM rank.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>score</td>
+		<td>The discriminant score assigned by percolator.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>q-value</td>
+		<td>The q-value assigned by percolator.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>posterior_error_prob</td>
+		<td>The posterior error probability assigned by percolator.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>peptide</td>
+		<td>The peptide sequence.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>proteinIds</td>
+		<td>A comma-separated list of proteins in which this peptide
+		appears.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
