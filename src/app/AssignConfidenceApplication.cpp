@@ -609,7 +609,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       vector< vector<FLOAT_T> > decoy_scores;
       AtdcScoreSet::getScores(target_matches, decoy_matches, score_type, ascending, target_scores, decoy_scores);
       qvalues = AtdcScoreSet(target_scores, decoy_scores, ascending).fdps();
-      convert_fdr_to_qvalue(qvalues);
+      convert_fdr_to_qvalue(qvalues, true);
       break;
     }
   case PEPTIDE_LEVEL_METHOD:
@@ -776,17 +776,31 @@ void AssignConfidenceApplication::identify_best_psm_per_peptide(
  * lowest to highest, sorted according to the underlying score.
  */
 void AssignConfidenceApplication::convert_fdr_to_qvalue(
-  vector<FLOAT_T>& qvalues ///< Come in as FDRs, go out as q-values.
+  vector<FLOAT_T>& qvalues, ///< Come in as FDRs, go out as q-values.
+  bool ascending
 ) {
-  FLOAT_T prev_fdr = qvalues[qvalues.size() - 1];
-  for (int idx = qvalues.size() - 2; idx >= 0; idx--) {
-    carp(CARP_DETAILED_DEBUG, "fdr[%i] = %.10f", idx, qvalues[idx]);
-    FLOAT_T this_fdr = qvalues[idx];
-    if (prev_fdr < this_fdr) {
-      qvalues[idx] = prev_fdr;
+  if (ascending == true) {  // used in TDC
+    FLOAT_T prev_fdr = qvalues[qvalues.size() - 1];
+    for (int idx = qvalues.size() - 2; idx >= 0; idx--) {
+      carp(CARP_DETAILED_DEBUG, "fdr[%i] = %.10f", idx, qvalues[idx]);
+      FLOAT_T this_fdr = qvalues[idx];
+      if (prev_fdr < this_fdr) {
+        qvalues[idx] = prev_fdr;
+      }
+      prev_fdr = qvalues[idx];
+      carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.10f", idx, qvalues[idx]);
     }
-    prev_fdr = qvalues[idx];
-    carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.10f", idx, qvalues[idx]);
+  } else { //ascending == false, used in Mix-Max
+    FLOAT_T prev_fdr = 1.0;
+    for (int idx = 0; idx < qvalues.size(); ++idx) {
+      carp(CARP_DETAILED_DEBUG, "fdr[%i] = %.10f", idx, qvalues[idx]);
+      FLOAT_T this_fdr = qvalues[idx];
+      if (prev_fdr < this_fdr) {
+        qvalues[idx] = prev_fdr;
+      }
+      prev_fdr = qvalues[idx];
+      carp(CARP_DETAILED_DEBUG, "qvalue[%i] = %.10f", idx, qvalues[idx]);
+    }
   }
 }
 
@@ -1122,7 +1136,7 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_tdc(
   }
   
   // Convert the FDRs into q-values.
-  convert_fdr_to_qvalue(qvalues);
+  convert_fdr_to_qvalue(qvalues, true);
 
   return qvalues;
 }
@@ -1230,13 +1244,14 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
     fdrmod[i] = qvalue > 1.0 ? 1.0 : qvalue;    
   }
   // Convert the FDRs into q-values.
-  double prev_fdr = 1;
-  for (int i = 0; i < num_targets; ++i) { 
-    if (prev_fdr < fdrmod[i]) {
-      fdrmod[i] = prev_fdr;
-    }
-    prev_fdr = fdrmod[i];
-  }
+  convert_fdr_to_qvalue(fdrmod, false);
+  // double prev_fdr = 1;
+  // for (int i = 0; i < num_targets; ++i) { 
+    // if (prev_fdr < fdrmod[i]) {
+      // fdrmod[i] = prev_fdr;
+    // }
+    // prev_fdr = fdrmod[i];
+  // }
   return fdrmod;
 }
 
