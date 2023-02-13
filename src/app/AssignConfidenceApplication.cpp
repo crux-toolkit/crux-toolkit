@@ -1219,7 +1219,6 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   int n_w_ge_w = 0;
   double qvalue;
   double cnt_z, cnt_w;
-  // double prev_fdr = 1;
 
   for (int i = num_targets - 1; i >= 0; --i) {
     while (j >= 0 && (ascending ? 
@@ -1245,13 +1244,6 @@ vector<FLOAT_T> AssignConfidenceApplication::compute_decoy_qvalues_mixmax(
   }
   // Convert the FDRs into q-values.
   convert_fdr_to_qvalue(fdrmod, false);
-  // double prev_fdr = 1;
-  // for (int i = 0; i < num_targets; ++i) { 
-    // if (prev_fdr < fdrmod[i]) {
-      // fdrmod[i] = prev_fdr;
-    // }
-    // prev_fdr = fdrmod[i];
-  // }
   return fdrmod;
 }
 
