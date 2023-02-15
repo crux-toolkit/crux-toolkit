@@ -64,9 +64,8 @@ class ActivePeptideQueue {
   int ActiveDecoys() const { return active_decoys_; }
 
   void ReportPeptideHits(Peptide* peptide);
-  void SetOutputs(OutputFiles* output_files, const vector<const pb::AuxLocation*>* locations, int top_matches,
+  void SetOutputs(OutputFiles* output_files, int top_matches,
                   bool compute_sp, ofstream* target_file, ofstream* decoy_file, double highest_mz) {
-      locations_ = locations;
       output_files_ = output_files;
       top_matches_ = top_matches;
       compute_sp_ = compute_sp;
@@ -88,7 +87,6 @@ class ActivePeptideQueue {
   
 //  const ProteinVec& proteins_;
  private:
-  const vector<const pb::AuxLocation*>* locations_;
   OutputFiles* output_files_;
   int top_matches_;
   bool compute_sp_;

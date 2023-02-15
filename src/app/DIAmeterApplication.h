@@ -73,7 +73,6 @@ class DIAmeterApplication : public CruxApplication {
     const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
     const ActivePeptideQueue* peptides, // peptide queue
     const ProteinVec& proteins, // proteins corresponding with peptides
-    const vector<const pb::AuxLocation*>& locations,  // auxiliary locations
     TideMatchSet* matches, // object to manage PSMs
     ObservedPeakSet* observed,
     map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
