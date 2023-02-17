@@ -301,7 +301,7 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Processed %ld protein sequences", curProtein+1);
     }
   }
-  carp(CARP_INFO, "Digested %ld protein sequences in total.", curProtein+1);
+  carp(CARP_INFO, "Cleaved %ld protein sequences in total.", curProtein+1);
 
   sort_on_disk = true;
   if (pept_file_idx == 0) {  //Peptides fit in memory, no need to use disk, sort them in place
