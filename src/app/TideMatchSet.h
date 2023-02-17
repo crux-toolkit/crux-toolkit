@@ -241,34 +241,6 @@ class TideMatchSet {
 
   Crux::Peptide getCruxPeptide(const Peptide* peptide);
 
-  /**
-   * Create a pb peptide from Tide peptide
-   */
-  static pb::Peptide* getPbPeptide(
-    const Peptide& peptide
-  );
-
-  /**
-   * Gets the protein name with the index appended.
-   */
- /* static string getProteinName(
-    const pb::Protein& protein,
-    int pos,
-    bool decoy
-  );
-*/
-  /**
-   * Gets the flanking AAs for a Tide peptide sequence
-   */
-  /*static void getFlankingAAs(
-    const Peptide* peptide, ///< Tide peptide to get flanking AAs for
-    const pb::Protein* protein, ///< Tide protein for the peptide
-    int pos,  ///< location of peptide within protein
-    string* out_n,  ///< out parameter for n flank
-    string* out_c ///< out parameter for c flank
-  );
-*/
-
   struct spGreater {
     inline bool operator() (const pair<Arr::iterator, SpScorer::SpScoreData>& lhs,
                             const pair<Arr::iterator, SpScorer::SpScoreData>& rhs) {

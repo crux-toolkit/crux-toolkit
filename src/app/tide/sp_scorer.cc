@@ -7,9 +7,9 @@
 #include "sp_scorer.h"
 #include "peptide.h"
 
-SpScorer::SpScorer(const ProteinVec& proteins, const Spectrum& spectrum,
+SpScorer::SpScorer(const Spectrum& spectrum,
                    int charge, double max_mz)
-  : proteins_(proteins), spectrum_(spectrum), charge_(charge), max_mz_(max_mz),
+  : spectrum_(spectrum), charge_(charge), max_mz_(max_mz),
   sp_spectrum_(spectrum, charge, max_mz) {
 }
 
@@ -35,10 +35,9 @@ bool SpScorer::IonLookup(double mass, int charge, bool previous_ion_matched,
   return matched;
 }
 
-void SpScorer::Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data) {
-  Peptide peptide(pb_peptide, proteins_);
-  vector<double> m_z(peptide.Len());
-  string sequence = peptide.Seq();
+void SpScorer::Score(const Peptide* peptide, SpScoreData& sp_score_data) {
+  vector<double> m_z(peptide->Len());
+  string sequence = peptide->Seq();
 
   // Collect m/z values for each residue
   for (int i = 0; i < sequence.length(); i++)
@@ -46,7 +45,7 @@ void SpScorer::Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data) 
 
   // Account for modifications
   const ModCoder::Mod* mods;
-  int num_mods = peptide.Mods(&mods);
+  int num_mods = peptide->Mods(&mods);
   for (int i = 0; i < num_mods; i++) {
     int index;
     double delta;
@@ -61,7 +60,7 @@ void SpScorer::Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data) 
     bool previous_y_ion_matched = false;
 
     double b_ion = MASS_PROTON;
-    double y_ion = peptide.Mass() + MASS_PROTON;
+    double y_ion = peptide->Mass() + MASS_PROTON;
 
     for (int i = 0; i < sequence.length(); i++) {
       // Calculate and look up b-ions

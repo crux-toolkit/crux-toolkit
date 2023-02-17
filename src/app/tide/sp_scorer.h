@@ -33,13 +33,10 @@
 #define SP_SCORER_H
 
 #include <vector>
-//#include "peptide.h"
 #include "crux_sp_spectrum.h"
 #include "raw_proteins.pb.h"
-#include "peptides.pb.h"
 
-typedef vector<const pb::Protein*> ProteinVec;
-typedef vector<const pb::AuxLocation*> AuxLocVec;
+class Peptide;
 
 
 class SpScorer {
@@ -70,10 +67,10 @@ class SpScorer {
     }
   };
   
-  SpScorer(const ProteinVec& proteins, const Spectrum& spectrum, 
+  SpScorer(const Spectrum& spectrum, 
            int charge, double max_mz);
 
-  void Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data);
+  void Score(const Peptide* peptide, SpScoreData& sp_score_data);
   void RankSpScores(vector<SpScoreData>& scores, 
                     double* smallest_score = NULL);
   double TotalIonIntensity() {return sp_spectrum_.TotalIonIntensity();}
@@ -97,7 +94,7 @@ class SpScorer {
                  SpScoreData& sp_score_data);
 
   
-  const ProteinVec& proteins_;
+  // const ProteinVec& proteins_;
   const Spectrum& spectrum_;
   SpSpectrum sp_spectrum_;
   int charge_;

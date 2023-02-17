@@ -31,8 +31,9 @@ class TheoreticalPeakCompiler;
 class ActivePeptideQueue {
  public:
   ActivePeptideQueue(RecordReader* reader,
-            const vector<const pb::Protein*>& proteins);
-
+            const vector<const pb::Protein*>& proteins,
+            vector<const pb::AuxLocation*>* locations=NULL);
+            
   ~ActivePeptideQueue();
 
   bool isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx);
@@ -97,8 +98,8 @@ class ActivePeptideQueue {
   bool exact_pval_search_;
   bool peptide_centric_;
   int elution_window_;
-
-
+  vector<const pb::AuxLocation*>* locations_;
+  
 //  Spectrum* spectrum_;
   // IMPLEMENTATION DETAILS
 

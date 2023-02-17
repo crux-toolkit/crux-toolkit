@@ -301,6 +301,7 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Processed %ld protein sequences", curProtein+1);
     }
   }
+  carp(CARP_INFO, "Digested %ld protein sequences in total.", curProtein+1);
 
   sort_on_disk = true;
   if (pept_file_idx == 0) {  //Peptides fit in memory, no need to use disk, sort them in place
@@ -453,7 +454,7 @@ int TideIndexApplication::main(
     int generateAttemptsMax = 6;    
     pb::Peptide currentPBPeptide;
     getPbPeptide(count++, currentPeptide, currentPBPeptide);      
-
+    pb::AuxLocation pbAuxLoc;
     if (numDecoys == 0) {
       allowDups = true;
     }
@@ -501,13 +502,19 @@ int TideIndexApplication::main(
         if( duplicatedPeptide == currentPeptide) {
           numDuplicateTargets++;
           carp(CARP_DEBUG, "Skipping duplicate %s.", currentPeptide.getSequence().c_str());
-          pb::Location* location = currentPBPeptide.add_aux_loc();
+          pb::Location* location = pbAuxLoc.add_location();
           location->set_protein_id(duplicatedPeptide.getProteinId());
           location->set_pos(duplicatedPeptide.getProteinPos());
         } else {
           break;
         }
       }
+      
+      if (pbAuxLoc.location_size() > 0) {
+        pb::AuxLocation* tempAuxLoc = new pb::AuxLocation(pbAuxLoc);
+        currentPBPeptide.set_allocated_aux_loc(tempAuxLoc);
+        pbAuxLoc.Clear();
+      }       
       // Gather the target peptides of having the same mass.
       pb_peptides.push_back(currentPBPeptide);
       
@@ -564,8 +571,8 @@ int TideIndexApplication::main(
           peptideWriter.Write(&(*pb_pept_itr));
 
           ++numTargets;
-          if (count % 1000000 == 0) {
-            carp(CARP_INFO, "Wrote %lu unique target peptides", count);
+          if (numTargets % 1000000 == 0) {
+            carp(CARP_INFO, "Wrote %lu unique target peptides", numTargets);
           }      
         }
         // Clear the sets and lists.
@@ -574,6 +581,7 @@ int TideIndexApplication::main(
         for (int i = 0; i < numDecoys; ++i)
           peptide_decoy_str_set[i].clear();
       }
+      
       currentPeptide = duplicatedPeptide;
       getPbPeptide(count++, currentPeptide, currentPBPeptide);            
     }
@@ -832,11 +840,14 @@ int TideIndexApplication::main(
 
         pos_str = StringUtils::ToString(startLoc + 1, 1);
         string proteinNames = vProteinHeaderSequence[protein_id]->name() + '(' + pos_str + ')';
-        for (int i = 0; i < current_pb_peptide_.aux_loc_size(); ++i) {
-          const pb::Location& location = current_pb_peptide_.aux_loc(i);
-          protein = vProteinHeaderSequence[location.protein_id()];
-          pos_str = StringUtils::ToString(location.pos() + 1, 1);
-          proteinNames += ',' + protein->name() + '(' + pos_str + ')';
+        if (current_pb_peptide_.has_aux_loc() == true) {
+          const pb::AuxLocation& aux_loc = current_pb_peptide_.aux_loc();
+          for (int i = 0; i < aux_loc.location_size(); ++i) {
+            const pb::Location& location = aux_loc.location(i);
+            protein = vProteinHeaderSequence[location.protein_id()];
+            pos_str = StringUtils::ToString(location.pos() + 1, 1);
+            proteinNames += ',' + protein->name() + '(' + pos_str + ')';
+          }
         }
         *out_target_decoy_list << '\t' << proteinNames << endl;
       }
