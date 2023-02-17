@@ -501,7 +501,7 @@ void DIAmeterApplication::reportDIA(
   // calculate SpScore if necessary
   map<TideMatchSet::Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (Params::GetBool("compute-sp")) {
-    SpScorer sp_scorer(proteins, *spectrum, charge, matches->max_mz_);
+    SpScorer sp_scorer(*spectrum, charge, matches->max_mz_);
     TideMatchSet::computeSpData(targets, &sp_map, &sp_scorer, peptides);
     TideMatchSet::computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }

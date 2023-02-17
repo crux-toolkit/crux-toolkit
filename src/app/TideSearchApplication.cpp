@@ -267,6 +267,12 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
                                                  &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
     delete active_peptide_queue;
   } // End calculation of amino acid frequencies.
+  
+  // Read auxlocs index file
+  vector<const pb::AuxLocation*> locations;
+  if (ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) {
+    carp(CARP_INFO, "Read %d auxiliary locations.", locations.size());
+  }  
 
   // Read peptides index file
   pb::Header peptides_header;
@@ -361,7 +367,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     }
     vector<ActivePeptideQueue*> active_peptide_queue;
     for (int i = 0; i < NUM_THREADS; i++) {
-      active_peptide_queue.push_back(new ActivePeptideQueue(peptide_reader[i]->Reader(), proteins));
+      active_peptide_queue.push_back(new ActivePeptideQueue(peptide_reader[i]->Reader(), proteins, &locations));
       active_peptide_queue[i]->SetBinSize(bin_width_, bin_offset_);
     }
     

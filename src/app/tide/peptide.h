@@ -70,6 +70,7 @@ class Peptide {
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
+          vector<const pb::AuxLocation*>* locations=NULL,
           FifoAllocator* fifo_alloc = NULL)
     : len_(peptide.length()), mass_(peptide.mass()), id_(peptide.id()),
     first_loc_protein_id_(peptide.first_location().protein_id()),
@@ -107,12 +108,22 @@ class Peptide {
         mods_[i] = ModCoder::Mod(peptide.modifications(i));
     }
     mod_precision_ = Params::GetInt("mod-precision");   
+
     // Add auxiliary locations;
-    for (int i = 0; i < peptide.aux_loc_size(); ++i) {
-      aux_locations.push_back(peptide.aux_loc(i));
+    // This handles the old version of tide index in which the aux locations are separately stored in a vector.    
+    if (peptide.aux_locations_index() && locations) {  
+      const pb::AuxLocation* aux_loc = locations->at(peptide.aux_locations_index());
+      for (int i = 0; i < aux_loc->location_size(); ++i) {
+        aux_locations.push_back(aux_loc->location(i));
+      }
+    // this part handles the aux location in the current tide-index.     
+    // Here the aux location are merged to the peptide pb.
+    } else if (peptide.has_aux_loc() == true) {   
+      const pb::AuxLocation& aux_loc = peptide.aux_loc();
+      for (int i = 0; i < aux_loc.location_size(); ++i) {
+        aux_locations.push_back(aux_loc.location(i));
+      }
     }
-    
-    
   }
   class spectrum_matches {
    public:
