@@ -172,8 +172,10 @@ class AssignConfidenceApplication : public CruxApplication {
   void identify_best_psm_per_peptide
     (MatchCollection* all_matches,
     SCORER_TYPE_T score_type);
+    
   static void convert_fdr_to_qvalue(
-    std::vector<FLOAT_T>& qvalues); ///< Come in as FDRs, go out as q-values.
+    std::vector<FLOAT_T>& qvalues, 
+    bool ascending); ///< Come in as FDRs, go out as q-values.
 
   map<FLOAT_T, FLOAT_T> store_arrays_as_hash(
     const std::vector<FLOAT_T>& keys,
