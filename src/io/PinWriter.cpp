@@ -39,6 +39,7 @@ PinWriter::PinWriter():
     
   features_.push_back(make_pair("SpecId", true));
   features_.push_back(make_pair("Label", true));
+  features_.push_back(make_pair("filename", true));
   features_.push_back(make_pair("ScanNr", true));
   features_.push_back(make_pair("ExpMass", true));
   features_.push_back(make_pair("CalcMass", true));
@@ -262,6 +263,8 @@ void PinWriter::printPSM(
       fields.push_back(getId(match, spectrum->getFirstScan()));
     } else if (feature == "Label") {
       fields.push_back(match->getNullPeptide() ? "-1" : "1");
+    } else if (feature == "filename") {
+      fields.push_back(match->getFilePath());
     } else if (feature == "ScanNr") {
       // modified by Yang
       if (Params::GetBool("unique-scannr")) { fields.push_back(StringUtils::ToString(++scannr_cnt_)); }
