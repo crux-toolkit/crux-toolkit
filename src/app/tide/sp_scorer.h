@@ -70,7 +70,7 @@ class SpScorer {
   SpScorer(const Spectrum& spectrum, 
            int charge, double max_mz);
 
-  void Score(const Peptide* peptide, SpScoreData& sp_score_data);
+  void Score(const Peptide &peptide, SpScoreData& sp_score_data);
   void RankSpScores(vector<SpScoreData>& scores, 
                     double* smallest_score = NULL);
   double TotalIonIntensity() {return sp_spectrum_.TotalIonIntensity();}
@@ -86,15 +86,12 @@ class SpScorer {
   }
 
   int GetBin(double mass, int charge) {
-//    double mz = (mass + (charge - 1)*MassConstants::proton)/charge;
     return MassConstants::mass2bin(mass, charge);
   }
 
   bool IonLookup(double mass, int charge, bool previous_ion_matched,
                  SpScoreData& sp_score_data);
 
-  
-  // const ProteinVec& proteins_;
   const Spectrum& spectrum_;
   SpSpectrum sp_spectrum_;
   int charge_;

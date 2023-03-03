@@ -133,7 +133,6 @@ int TideIndexApplication::main(
 */    
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");
-  // string auxLocsPbFile = FileUtils::Join(index, "auxlocs");
   string modless_peptides = out_peptides + ".nomods.tmp";
   string peakless_peptides = out_peptides + ".nopeaks.tmp";
   string pathPeptideFile = FileUtils::Join(index, peptideFile);
@@ -458,7 +457,7 @@ int TideIndexApplication::main(
     if (numDecoys == 0) {
       allowDups = true;
     }
-    /* The trick to keep the sets target and decoy peptides disjunt is that:
+    /* The trick to keep the sets target and decoy peptides disjoint is that:
     One does not need to keep all the unique target peptides in the memory
     and check every time whether a decoy peptide already exists as a target.
     It is enought to keep the target in a set (in the memory) peptdes having

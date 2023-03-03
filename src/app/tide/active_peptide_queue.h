@@ -22,7 +22,6 @@
 #include "spectrum_collection.h"
 #include "io/OutputFiles.h"
 
-//#include "sp_scorer.h"
 #ifndef ACTIVE_PEPTIDE_QUEUE_H
 #define ACTIVE_PEPTIDE_QUEUE_H
 
@@ -86,7 +85,6 @@ class ActivePeptideQueue {
   // peptide.
   deque<Peptide*>::const_iterator iter_, end_;
   
-//  const ProteinVec& proteins_;
  private:
   OutputFiles* output_files_;
   int top_matches_;

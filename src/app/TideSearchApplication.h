@@ -125,7 +125,6 @@ class TideSearchApplication : public CruxApplication {
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     vector<ActivePeptideQueue*> active_peptide_queue,
     ProteinVec& proteins,
-    // vector<const pb::AuxLocation*>& locations,
     double precursor_window,
     WINDOW_TYPE_T window_type,
     double spectrum_min_mz,
@@ -263,7 +262,6 @@ class TideSearchApplication : public CruxApplication {
     const vector<SpectrumCollection::SpecCharge>* spec_charges;
     ActivePeptideQueue* active_peptide_queue;
     ProteinVec proteins;
-    // vector<const pb::AuxLocation*> locations;
     double precursor_window;
     WINDOW_TYPE_T window_type;
     double spectrum_min_mz;
