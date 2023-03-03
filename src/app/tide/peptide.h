@@ -197,11 +197,11 @@ class Peptide {
   /**
  * Gets the protein name with the peptide position appended.
  */
-  void GetLocationStr(const vector<const pb::Protein*>& proteins, const string* decoy_prefix, string* locations) const;
+  void GetLocationStr(const vector<const pb::Protein*>& proteins, const string& decoy_prefix, string& locations) const;
 /**
  * Gets the flanking AAs for a Tide peptide sequence
  */  
-  void GetFlankingAAs(const vector<const pb::Protein*>& proteins, string* flankingAAs) const;
+  void GetFlankingAAs(const vector<const pb::Protein*>& proteins, string& flankingAAs) const;
 
   string SeqWithMods() const;
 

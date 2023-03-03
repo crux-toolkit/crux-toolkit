@@ -80,7 +80,7 @@ int ReadTideIndex::main(int argc, char** argv) {
     *output_stream << peptide.SeqWithMods() << '\t';
     string proteinNames;
 
-    peptide.GetLocationStr(proteins, &TideMatchSet::decoy_prefix_, &proteinNames);
+    peptide.GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
     *output_stream << proteinNames << endl;
   }
 

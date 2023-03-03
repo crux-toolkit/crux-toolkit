@@ -510,7 +510,6 @@ void TideSearchApplication::search(void* threadarg) {
   const vector<SpectrumCollection::SpecCharge>* spec_charges = my_data->spec_charges;
   ActivePeptideQueue* active_peptide_queue = my_data->active_peptide_queue;
   ProteinVec& proteins = my_data->proteins;
-  // vector<const pb::AuxLocation*>& locations = my_data->locations;
   double precursor_window = my_data->precursor_window;
   WINDOW_TYPE_T window_type = my_data->window_type;
   double spectrum_min_mz = my_data->spectrum_min_mz;
@@ -707,7 +706,6 @@ void TideSearchApplication::search(void* threadarg) {
 
         matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
-                       // locations, compute_sp, true, locks_array[LOCK_RESULTS]);
                        compute_sp, true, locks_array[LOCK_RESULTS]);
 					   
       }  //end peptide_centric == false
@@ -1190,7 +1188,6 @@ void TideSearchApplication::search(void* threadarg) {
         } else {
           matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                          spectrum, charge, active_peptide_queue, proteins,
-                         // locations, compute_sp, false, locks_array[LOCK_RESULTS]);
                          compute_sp, false, locks_array[LOCK_RESULTS]);
         }
       } //end peptide_centric == false
@@ -1232,7 +1229,6 @@ void TideSearchApplication::search(
   const vector<SpectrumCollection::SpecCharge>* spec_charges,
   vector<ActivePeptideQueue*> active_peptide_queue,
   ProteinVec& proteins,
-  // vector<const pb::AuxLocation*>& locations,
   double precursor_window,
   WINDOW_TYPE_T window_type,
   double spectrum_min_mz,

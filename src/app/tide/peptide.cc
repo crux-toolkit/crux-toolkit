@@ -282,11 +282,11 @@ vector<double> Peptide::getAAMasses() const {
  */
  void  Peptide::GetLocationStr(
   const vector<const pb::Protein*>& proteins, 
-  const string *decoy_prefix, 
-  string* locations
+  const string& decoy_prefix, 
+  string& locations
 ) const {
   
-  (*locations) = (IsDecoy()?(*decoy_prefix):"") + 
+  locations = (IsDecoy()?decoy_prefix:"") + 
     proteins[FirstLocProteinId()]->name() + 
     "(" + std::to_string(FirstLocPos()+1) + ")";
   
@@ -297,7 +297,7 @@ vector<double> Peptide::getAAMasses() const {
   ) {
     const pb::Protein* protein = proteins[(*loc).protein_id()];
     int pos = (*loc).pos()+1;
-    (*locations) += "," + (IsDecoy()?(*decoy_prefix):"") + protein->name() + 
+    locations += "," + (IsDecoy()?decoy_prefix:"") + protein->name() + 
       "(" + std::to_string(pos) + ")";    
   }
 }
@@ -307,14 +307,14 @@ vector<double> Peptide::getAAMasses() const {
  */
 void  Peptide::GetFlankingAAs(
   const vector<const pb::Protein*>& proteins,
-  string* flankingAAs
+  string& flankingAAs
 ) const {
   
-  flankingAAs->clear();
+  flankingAAs.clear();
   int pos = FirstLocPos();
   const string& seq = proteins[FirstLocProteinId()]->residues();
 
-  (*flankingAAs) = ((pos > 0) ? proteins[FirstLocProteinId()]->residues().substr(pos-1, 1) : "-") +
+  flankingAAs = ((pos > 0) ? proteins[FirstLocProteinId()]->residues().substr(pos-1, 1) : "-") +
     ((pos+Len() <  proteins[FirstLocProteinId()]->residues().length()) ? 
     proteins[FirstLocProteinId()]->residues().substr(pos+Len(),1) : "-");
     
@@ -325,7 +325,7 @@ void  Peptide::GetFlankingAAs(
   ) {
     const pb::Protein* protein = proteins[(*loc).protein_id()];
     pos = (*loc).pos();
-    (*flankingAAs) += "," + ((pos > 0) ? protein->residues().substr(pos-1, 1) : "-") + 
+    flankingAAs += "," + ((pos > 0) ? protein->residues().substr(pos-1, 1) : "-") + 
       ((pos+Len() <  protein->residues().length()) ? 
       protein->residues().substr(pos+Len(),1) : "-");
   }

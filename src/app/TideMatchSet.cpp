@@ -141,7 +141,7 @@ void TideMatchSet::report(
     for (int cnt = 0; cnt < top_matches; ++cnt) {
       SpScorer sp_scorer(*peptide_->spectrum_matches_array[cnt].spectrum_,
                          peptide_->spectrum_matches_array[cnt].charge_, max_mz_);
-      sp_scorer.Score(peptide_, peptide_->spectrum_matches_array[cnt].spData_);
+      sp_scorer.Score((*peptide_), peptide_->spectrum_matches_array[cnt].spData_);
       spScoreRank.push_back(make_pair(-1*peptide_->spectrum_matches_array[cnt].spData_.sp_score, cnt));
     }
     sort(spScoreRank.begin(), spScoreRank.end());
@@ -179,8 +179,8 @@ void TideMatchSet::writeToFile(
   int precision = Params::GetInt("precision");
   string proteinNames;
   string flankingAAs;
-  peptide->GetLocationStr(proteins, &TideMatchSet::decoy_prefix_, &proteinNames);
-  peptide->GetFlankingAAs(proteins, &flankingAAs);
+  peptide->GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
+  peptide->GetFlankingAAs(proteins, flankingAAs);
 
   for (vector<Peptide::spectrum_matches>::const_iterator
         i = peptide_->spectrum_matches_array.begin();
@@ -368,8 +368,8 @@ void TideMatchSet::writeToFileDIA(
 
       string proteinNames;
       string flankingAAs;
-      peptide->GetLocationStr(proteins, &TideMatchSet::decoy_prefix_, &proteinNames);
-      peptide->GetFlankingAAs(proteins, &flankingAAs);
+      peptide->GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
+      peptide->GetFlankingAAs(proteins, flankingAAs);
       
       const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
 
@@ -501,8 +501,8 @@ void TideMatchSet::writeToFile(
     }
     string proteinNames;
     string flankingAAs;
-    peptide->GetLocationStr(proteins, &TideMatchSet::decoy_prefix_, &proteinNames);
-    peptide->GetFlankingAAs(proteins, &flankingAAs);
+    peptide->GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
+    peptide->GetFlankingAAs(proteins, flankingAAs);
   
     const SpScorer::SpScoreData* sp_data = sp_map ? &(sp_map->at(i).first) : NULL;
 
@@ -920,7 +920,7 @@ void TideMatchSet::computeSpData(
   for (vector<Arr::iterator>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
     spData.push_back(make_pair(*i, SpScorer::SpScoreData()));
     Peptide *peptide = peptides->GetPeptide((*i)->rank);
-    sp_scorer->Score(peptide, spData.back().second);
+    sp_scorer->Score((*peptide), spData.back().second);
   }
   sort(spData.begin(), spData.end(), spGreater());
   for (size_t i = 0; i < spData.size(); ++i) {
