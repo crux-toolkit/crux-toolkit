@@ -16,13 +16,14 @@
 DEFINE_int32(fifo_page_size, 1, "Page size for FIFO allocator, in megs");
 
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
-                                       const vector<const pb::Protein*>&
-                                       proteins)
+                                       const vector<const pb::Protein*>& proteins, 
+                                       vector<const pb::AuxLocation*>* locations)
   : reader_(reader),
     proteins_(proteins),
     theoretical_peak_set_(1000),   // probably overkill, but no harm
     theoretical_b_peak_set_(200),  // probably overkill, but no harm
     active_targets_(0), active_decoys_(0),
+    locations_(locations),
     fifo_alloc_peptides_(FLAGS_fifo_page_size << 20),
     fifo_alloc_prog1_(FLAGS_fifo_page_size << 20), 
     fifo_alloc_prog2_(FLAGS_fifo_page_size << 20) {
@@ -90,16 +91,10 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     delete peptide;
   }
   if (queue_.empty()) {
-    //cerr << "Releasing All\n";
-//    fifo_alloc_peptides_.ReleaseAll();
 #ifndef CPP_SCORING
     fifo_alloc_prog1_.ReleaseAll();
     fifo_alloc_prog2_.ReleaseAll();
 #endif
-    //cerr << "Prog1: ";
-    //fifo_alloc_prog1_.Show();
-    //cerr << "Prog2: ";
-    //fifo_alloc_prog2_.Show();
   } else {
     // Free all peptides up to, but not including peptide.
     // fifo_alloc_peptides_.Release(peptide);
@@ -128,7 +123,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
       }
 /*      Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
-  */    Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, NULL);        
+  */    Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_, NULL);        
       assert(peptide != NULL);
       queue_.push_back(peptide);
       //Modified for tailor score calibration method by AKF
@@ -241,7 +236,7 @@ int ActivePeptideQueue::SetActiveRangeBIons(vector<double>* min_mass, vector<dou
       }
 /*      Peptide* peptide = new(&fifo_alloc_peptides_)
         Peptide(current_pb_peptide_, proteins_, &fifo_alloc_peptides_);
-*/      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, NULL);                
+*/      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_, NULL);                
       queue_.push_back(peptide);
       ComputeBTheoreticalPeaksBack();
       if (peptide->Mass() > max_range) {
@@ -450,7 +445,7 @@ void ActivePeptideQueue::ReportPeptideHits(Peptide* peptide) {
 
     if (!output_files_) { //only tab-delimited output is supported
         matches.report(target_file_, decoy_file_, top_matches_,
-                       this, proteins_, *locations_, compute_sp_);
+                       this, proteins_, compute_sp_);
     }
 }
 

@@ -75,7 +75,6 @@ class TideMatchSet {
     int top_matches,
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
-    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -92,7 +91,6 @@ class TideMatchSet {
     int charge, ///< charge for matches
     const ActivePeptideQueue* peptides, ///< peptide queue
     const ProteinVec& proteins, ///< proteins corresponding with peptides
-    const vector<const pb::AuxLocation*>& locations,  ///< auxiliary locations
     bool compute_sp, ///< whether to compute sp or not
     bool highScoreBest, //< indicates semantics of score magnitude
     boost::mutex * rwlock = NULL
@@ -123,7 +121,6 @@ class TideMatchSet {
     int charge,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
-    const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>* delta_cn_map,
     const map<Arr::iterator, FLOAT_T>* delta_lcn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
@@ -220,7 +217,6 @@ class TideMatchSet {
     ofstream* file,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
-    const vector<const pb::AuxLocation*>& locations,
     bool compute_sp ///< whether to compute sp or not
   );
 
@@ -237,7 +233,6 @@ class TideMatchSet {
     int charge,
     const ActivePeptideQueue* peptides,
     const ProteinVec& proteins,
-    const vector<const pb::AuxLocation*>& locations,
     const map<Arr::iterator, FLOAT_T>& delta_cn_map,
     const map<Arr::iterator, FLOAT_T>& delta_lcn_map,
     const map<Arr::iterator, pair<const SpScorer::SpScoreData, int> >* sp_map,
@@ -245,34 +240,6 @@ class TideMatchSet {
   );
 
   Crux::Peptide getCruxPeptide(const Peptide* peptide);
-
-  /**
-   * Create a pb peptide from Tide peptide
-   */
-  static pb::Peptide* getPbPeptide(
-    const Peptide& peptide
-  );
-
-  /**
-   * Gets the protein name with the index appended.
-   */
-  static string getProteinName(
-    const pb::Protein& protein,
-    int pos,
-    bool decoy
-  );
-
-  /**
-   * Gets the flanking AAs for a Tide peptide sequence
-   */
-  static void getFlankingAAs(
-    const Peptide* peptide, ///< Tide peptide to get flanking AAs for
-    const pb::Protein* protein, ///< Tide protein for the peptide
-    int pos,  ///< location of peptide within protein
-    string* out_n,  ///< out parameter for n flank
-    string* out_c ///< out parameter for c flank
-  );
-
 
   struct spGreater {
     inline bool operator() (const pair<Arr::iterator, SpScorer::SpScoreData>& lhs,

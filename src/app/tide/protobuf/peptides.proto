@@ -30,22 +30,25 @@ message Peptide {
   // theoretical_peak_set.h
   // peak1 and neg_peak1 refer to charge 1 ions, and peak2 and neg_peak2 
   // refer to charge 2 ions.
-  repeated int32 peak1 = 5 [packed = true];
-  repeated int32 peak2 = 6 [packed = true];
-  repeated int32 neg_peak1 = 7 [packed = true];
-  repeated int32 neg_peak2 = 8 [packed = true];
+  repeated int32 peak1 = 5 [packed = true];  // Not used.
+  repeated int32 peak2 = 6 [packed = true];  // Not used.
+  repeated int32 neg_peak1 = 7 [packed = true];  // Not used.
+  repeated int32 neg_peak2 = 8 [packed = true];  // Not used.
 
   // array of (index << log_num_unique_deltas + mod), where index is the amino
   // acid with the mod, which is an entry into unique_deltas in the ModTable.
   repeated int32 modifications = 9 [packed = true];
   
-  optional int32 aux_locations_index = 10; // Array index into AuxLocation
+  optional int32 aux_locations_index = 10; // Array index into AuxLocation  // Not used.
   optional int32 decoy_index = 11;
   optional string decoy_sequence = 12;   // Stores the decoy peptide sequence. 
-  // The location, position, and length points to the original target peptide.
+  optional AuxLocation aux_loc = 13;
+  repeated int32 decoy_perm_idx = 14; //Amino acid permutation indeces for decoy generation. The list is -1 separated for for multiple decoys per target.
 }
 
 message AuxLocation {
   repeated Location location = 1;
 }
 
+
+// Use this to compile this protobuf: >protoc --cpp_out=../protoobj/ peptides.proto

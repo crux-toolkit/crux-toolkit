@@ -70,13 +70,12 @@ class Peptide {
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
+          vector<const pb::AuxLocation*>* locations=NULL,
           FifoAllocator* fifo_alloc = NULL)
     : len_(peptide.length()), mass_(peptide.mass()), id_(peptide.id()),
     first_loc_protein_id_(peptide.first_location().protein_id()),
     first_loc_pos_(peptide.first_location().pos()), 
     protein_length_(proteins[first_loc_protein_id_]->residues().length()),
-    has_aux_locations_index_(peptide.has_aux_locations_index()),
-    aux_locations_index_(peptide.aux_locations_index()),
     mods_(NULL), num_mods_(0), decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1),
     prog1_(NULL), prog2_(NULL) {
       
@@ -108,7 +107,23 @@ class Peptide {
       for (int i = 0; i < num_mods_; ++i)
         mods_[i] = ModCoder::Mod(peptide.modifications(i));
     }
-    mod_precision_ = Params::GetInt("mod-precision");    
+    mod_precision_ = Params::GetInt("mod-precision");   
+
+    // Add auxiliary locations;
+    // This handles the old version of tide index in which the aux locations are separately stored in a vector.    
+    if (peptide.aux_locations_index() && locations) {  
+      const pb::AuxLocation* aux_loc = locations->at(peptide.aux_locations_index());
+      for (int i = 0; i < aux_loc->location_size(); ++i) {
+        aux_locations.push_back(aux_loc->location(i));
+      }
+    // this part handles the aux location in the current tide-index.     
+    // Here the aux location are merged to the peptide pb.
+    } else if (peptide.has_aux_loc() == true) {   
+      const pb::AuxLocation& aux_loc = peptide.aux_loc();
+      for (int i = 0; i < aux_loc.location_size(); ++i) {
+        aux_locations.push_back(aux_loc.location(i));
+      }
+    }
   }
   class spectrum_matches {
    public:
@@ -179,6 +194,14 @@ class Peptide {
 */
   string Seq() const { return string(residues_, Len()); } // For display
   string TargetSeq() const { return string(target_residues_, Len()); } // For display
+  /**
+ * Gets the protein name with the peptide position appended.
+ */
+  void GetLocationStr(const vector<const pb::Protein*>& proteins, const string& decoy_prefix, string& locations) const;
+/**
+ * Gets the flanking AAs for a Tide peptide sequence
+ */  
+  void GetFlankingAAs(const vector<const pb::Protein*>& proteins, string& flankingAAs) const;
 
   string SeqWithMods() const;
 
@@ -236,8 +259,6 @@ class Peptide {
   int FirstLocProteinId() const { return first_loc_protein_id_; }
   int FirstLocPos() const { return first_loc_pos_; }
   int ProteinLenth() const {return protein_length_;}
-  bool HasAuxLocationsIndex() const { return has_aux_locations_index_; }
-  int AuxLocationsIndex() const { return aux_locations_index_; }
   int Mods(const ModCoder::Mod** mods) const {
     *mods = mods_;
     return num_mods_;
@@ -278,8 +299,7 @@ class Peptide {
   int first_loc_protein_id_;
   int first_loc_pos_;
   int protein_length_;
-  bool has_aux_locations_index_;
-  int aux_locations_index_;
+  vector<pb::Location> aux_locations;
   const char* residues_;
   const char* target_residues_;
   int num_mods_;

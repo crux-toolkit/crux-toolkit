@@ -77,18 +77,11 @@ int ReadTideIndex::main(int argc, char** argv) {
     Peptide peptide(pb_peptide, proteins);
 
     // Output to file
-    *output_stream << peptide.SeqWithMods() << '\t'
-                   << proteins[peptide.FirstLocProteinId()]->name();
-    if (peptide.HasAuxLocationsIndex()) {
-      const pb::AuxLocation* aux_loc = locations[peptide.AuxLocationsIndex()];
-      for (int i = 0; i < aux_loc->location_size(); i++) {
-        const pb::Protein* protein = proteins[aux_loc->location(i).protein_id()];
-        if (protein->has_name()) {
-          *output_stream << ';' << protein->name();
-        }
-      }
-    }
-    *output_stream << endl;
+    *output_stream << peptide.SeqWithMods() << '\t';
+    string proteinNames;
+
+    peptide.GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
+    *output_stream << proteinNames << endl;
   }
 
   output_stream->close();

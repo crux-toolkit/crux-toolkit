@@ -22,7 +22,6 @@
 #include "spectrum_collection.h"
 #include "io/OutputFiles.h"
 
-//#include "sp_scorer.h"
 #ifndef ACTIVE_PEPTIDE_QUEUE_H
 #define ACTIVE_PEPTIDE_QUEUE_H
 
@@ -31,8 +30,9 @@ class TheoreticalPeakCompiler;
 class ActivePeptideQueue {
  public:
   ActivePeptideQueue(RecordReader* reader,
-            const vector<const pb::Protein*>& proteins);
-
+            const vector<const pb::Protein*>& proteins,
+            vector<const pb::AuxLocation*>* locations=NULL);
+            
   ~ActivePeptideQueue();
 
   bool isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx);
@@ -64,9 +64,8 @@ class ActivePeptideQueue {
   int ActiveDecoys() const { return active_decoys_; }
 
   void ReportPeptideHits(Peptide* peptide);
-  void SetOutputs(OutputFiles* output_files, const vector<const pb::AuxLocation*>* locations, int top_matches,
+  void SetOutputs(OutputFiles* output_files, int top_matches,
                   bool compute_sp, ofstream* target_file, ofstream* decoy_file, double highest_mz) {
-      locations_ = locations;
       output_files_ = output_files;
       top_matches_ = top_matches;
       compute_sp_ = compute_sp;
@@ -86,9 +85,7 @@ class ActivePeptideQueue {
   // peptide.
   deque<Peptide*>::const_iterator iter_, end_;
   
-//  const ProteinVec& proteins_;
  private:
-  const vector<const pb::AuxLocation*>* locations_;
   OutputFiles* output_files_;
   int top_matches_;
   bool compute_sp_;
@@ -99,8 +96,8 @@ class ActivePeptideQueue {
   bool exact_pval_search_;
   bool peptide_centric_;
   int elution_window_;
-
-
+  vector<const pb::AuxLocation*>* locations_;
+  
 //  Spectrum* spectrum_;
   // IMPLEMENTATION DETAILS
 
