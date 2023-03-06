@@ -209,13 +209,6 @@ class TideIndexApplication : public CruxApplication {
       : proteinInfo(protein), start(startLoc), mass(pepMass) {}
   };
 
-  static void writePeptidesAndAuxLocs(
-    const std::string& peptidePbFile,
-    const std::string& auxLocsPbFile,
-    pb::Header& pbHeader,
-    std::vector<ProteinInfo*>& outProteinInfo
-  );
-
   static FixPt calcPepMassTide(
     GeneratePeptides::PeptideReference* pep,
     MASS_TYPE_T massType,
@@ -236,12 +229,6 @@ class TideIndexApplication : public CruxApplication {
     pb::Peptide& outPbPeptide
   );
 
-  static void addAuxLoc(
-    int proteinId,
-    int proteinPos,
-    pb::AuxLocation& outAuxLoc
-  );
- 
   virtual void processParams();
 
 

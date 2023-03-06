@@ -125,7 +125,6 @@ class TideSearchApplication : public CruxApplication {
     const vector<SpectrumCollection::SpecCharge>* spec_charges,
     vector<ActivePeptideQueue*> active_peptide_queue,
     ProteinVec& proteins,
-    vector<const pb::AuxLocation*>& locations,
     double precursor_window,
     WINDOW_TYPE_T window_type,
     double spectrum_min_mz,
@@ -263,7 +262,6 @@ class TideSearchApplication : public CruxApplication {
     const vector<SpectrumCollection::SpecCharge>* spec_charges;
     ActivePeptideQueue* active_peptide_queue;
     ProteinVec proteins;
-    vector<const pb::AuxLocation*> locations;
     double precursor_window;
     WINDOW_TYPE_T window_type;
     double spectrum_min_mz;
@@ -302,8 +300,7 @@ class TideSearchApplication : public CruxApplication {
     vector<int>* negative_isotope_errors;
 
     thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
-            ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_,
-            vector<const pb::AuxLocation*> locations_, double precursor_window_,
+            ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_, double precursor_window_,
             WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
             int min_scan_, int max_scan_, int min_peaks_, int top_matches_,
             double highest_mz_, ofstream* target_file_,
@@ -316,7 +313,7 @@ class TideSearchApplication : public CruxApplication {
             map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, long* total_candidate_peptides_,
             vector<int>* negative_isotope_errors_) :
             spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
-            proteins(proteins_), locations(locations_), precursor_window(precursor_window_), window_type(window_type_),
+            proteins(proteins_), precursor_window(precursor_window_), window_type(window_type_),
             spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
             min_peaks(min_peaks_), top_matches(top_matches_), highest_mz(highest_mz_),
             target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),

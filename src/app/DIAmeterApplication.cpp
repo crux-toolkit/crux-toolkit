@@ -75,8 +75,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   }
   TideMatchSet::decoy_prefix_ = decoy_prefix;
   // Read auxlocs index file
-  vector<const pb::AuxLocation*> locations;
-  if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) { carp(CARP_FATAL, "Error reading index (%s)", auxlocs_file.c_str()); }
+  // vector<const pb::AuxLocation*> locations;
+  // if (!ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) { carp(CARP_FATAL, "Error reading index (%s)", auxlocs_file.c_str()); }
 
   // Read peptides index file
   pb::Header peptides_header;
@@ -150,7 +150,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
       active_peptide_queue->setElutionWindow(0);
       active_peptide_queue->setPeptideCentric(false);
       active_peptide_queue->SetBinSize(bin_width_, bin_offset_);
-      active_peptide_queue->SetOutputs(NULL, &locations, Params::GetInt("top-match"), true, output_file, NULL, highest_ms2_mz);
+      active_peptide_queue->SetOutputs(NULL, Params::GetInt("top-match"), true, output_file, NULL, highest_ms2_mz);
 
       // Some setup adoped from TideSearch
       const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
@@ -308,7 +308,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
           TideMatchSet matches(&match_arr, highest_ms2_mz);
           if (!match_arr.empty()) {
-            reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins, locations,
+            reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins,
                 &matches,
                 &observed,
                 &ms1scan_mz_intensity_rank_map,
@@ -394,7 +394,6 @@ void DIAmeterApplication::reportDIA(
   const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
   const ActivePeptideQueue* peptides, // peptide queue
   const ProteinVec& proteins, // proteins corresponding with peptides
-  const vector<const pb::AuxLocation*>& locations,  // auxiliary locations
   TideMatchSet* matches, // object to manage PSMs
   ObservedPeakSet* observed,
   map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
@@ -502,7 +501,7 @@ void DIAmeterApplication::reportDIA(
   // calculate SpScore if necessary
   map<TideMatchSet::Arr::iterator, pair<const SpScorer::SpScoreData, int> > sp_map;
   if (Params::GetBool("compute-sp")) {
-    SpScorer sp_scorer(proteins, *spectrum, charge, matches->max_mz_);
+    SpScorer sp_scorer(*spectrum, charge, matches->max_mz_);
     TideMatchSet::computeSpData(targets, &sp_map, &sp_scorer, peptides);
     TideMatchSet::computeSpData(decoys, &sp_map, &sp_scorer, peptides);
   }
@@ -515,7 +514,6 @@ void DIAmeterApplication::reportDIA(
       charge,
       peptides,
       proteins,
-      locations,
       &delta_cn_map,
       &delta_lcn_map,
       Params::GetBool("compute-sp")? &sp_map : NULL,
@@ -533,7 +531,6 @@ void DIAmeterApplication::reportDIA(
       charge,
       peptides,
       proteins,
-      locations,
       &delta_cn_map,
       &delta_lcn_map,
       Params::GetBool("compute-sp")? &sp_map : NULL,

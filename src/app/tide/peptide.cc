@@ -277,6 +277,60 @@ vector<double> Peptide::getAAMasses() const {
 
   return masses_charge;
 }
+/**
+ * Gets the protein name with the peptide position appended.
+ */
+ void  Peptide::GetLocationStr(
+  const vector<const pb::Protein*>& proteins, 
+  const string& decoy_prefix, 
+  string& locations
+) const {
+  
+  locations = (IsDecoy()?decoy_prefix:"") + 
+    proteins[FirstLocProteinId()]->name() + 
+    "(" + std::to_string(FirstLocPos()+1) + ")";
+  
+  for (vector<pb::Location>::const_iterator 
+    loc = aux_locations.begin(); 
+    loc != aux_locations.end();
+    ++loc
+  ) {
+    const pb::Protein* protein = proteins[(*loc).protein_id()];
+    int pos = (*loc).pos()+1;
+    locations += "," + (IsDecoy()?decoy_prefix:"") + protein->name() + 
+      "(" + std::to_string(pos) + ")";    
+  }
+}
+
+/**
+ * Gets the flanking AAs for a Tide peptide sequence
+ */
+void  Peptide::GetFlankingAAs(
+  const vector<const pb::Protein*>& proteins,
+  string& flankingAAs
+) const {
+  
+  flankingAAs.clear();
+  int pos = FirstLocPos();
+  const string& seq = proteins[FirstLocProteinId()]->residues();
+
+  flankingAAs = ((pos > 0) ? proteins[FirstLocProteinId()]->residues().substr(pos-1, 1) : "-") +
+    ((pos+Len() <  proteins[FirstLocProteinId()]->residues().length()) ? 
+    proteins[FirstLocProteinId()]->residues().substr(pos+Len(),1) : "-");
+    
+  for (vector<pb::Location>::const_iterator
+    loc = aux_locations.begin();
+    loc != aux_locations.end();
+    ++loc
+  ) {
+    const pb::Protein* protein = proteins[(*loc).protein_id()];
+    pos = (*loc).pos();
+    flankingAAs += "," + ((pos > 0) ? protein->residues().substr(pos-1, 1) : "-") + 
+      ((pos+Len() <  protein->residues().length()) ? 
+      protein->residues().substr(pos+Len(),1) : "-");
+  }
+  
+}
 
 // Probably defunct, uses old calling format.
 /*

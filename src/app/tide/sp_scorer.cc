@@ -7,9 +7,9 @@
 #include "sp_scorer.h"
 #include "peptide.h"
 
-SpScorer::SpScorer(const ProteinVec& proteins, const Spectrum& spectrum,
+SpScorer::SpScorer(const Spectrum& spectrum,
                    int charge, double max_mz)
-  : proteins_(proteins), spectrum_(spectrum), charge_(charge), max_mz_(max_mz),
+  : spectrum_(spectrum), charge_(charge), max_mz_(max_mz),
   sp_spectrum_(spectrum, charge, max_mz) {
 }
 
@@ -35,8 +35,7 @@ bool SpScorer::IonLookup(double mass, int charge, bool previous_ion_matched,
   return matched;
 }
 
-void SpScorer::Score(const pb::Peptide& pb_peptide, SpScoreData& sp_score_data) {
-  Peptide peptide(pb_peptide, proteins_);
+void SpScorer::Score(const Peptide &peptide, SpScoreData& sp_score_data) {
   vector<double> m_z(peptide.Len());
   string sequence = peptide.Seq();
 
