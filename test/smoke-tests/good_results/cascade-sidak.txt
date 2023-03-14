@@ -1,1 +1,1 @@
-file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr rank	exact p-value	refactored xcorr	Sidak adjusted p-value	tdc q-value	distinct matches/spectrum	sequence	cleavage type	protein id	flanking aa	index name
+file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr rank	exact p-value	refactored xcorr	Sidak adjusted p-value	tdc q-value	distinct matches/spectrum	sequence	unmodified sequence	protein id	flanking aa	index name
