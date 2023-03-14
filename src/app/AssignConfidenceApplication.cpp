@@ -576,7 +576,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       carp(CARP_FATAL, "No estimation method specified.");
     }
     cols_to_print[SEQUENCE_COL] = true;
-    cols_to_print[CLEAVAGE_TYPE_COL] = true;
+    cols_to_print[CLEAVAGE_TYPE_COL] = false;
+    cols_to_print[UNMOD_SEQUENCE_COL] = true;
     cols_to_print[PROTEIN_ID_COL] = true;
     cols_to_print[FLANKING_AA_COL] = true;
     if (spectrum_flag_ != NULL) {
