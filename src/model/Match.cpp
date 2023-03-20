@@ -456,6 +456,14 @@ void Match::printOneMatchField(
       free(sequence);
     }
     break;
+  case UNMOD_SEQUENCE_COL:
+    {
+      // this should get the sequence from the match, not the peptide
+      char* sequence = getSequence();
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, sequence);
+      free(sequence);
+    }
+    break;
   case MODIFICATIONS_COL:
     {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,

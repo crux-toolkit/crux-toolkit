@@ -232,13 +232,14 @@ void TideMatchSet::writeToFile(
         }
     }
     string peptide_with_mods = peptide->SeqWithMods();    
+    string peptide_with_nomods = peptide->Seq();
     *file << peptide_with_mods;
     Crux::Peptide cruxPep = getCruxPeptide(peptide);
     
     if (!brief) {
       *file  << '\t'
              << cruxPep.getModsString() << '\t'
-             << CleavageType << '\t'
+             << peptide_with_nomods << '\t'
              << proteinNames << '\t'
              << flankingAAs;
       if (peptide->IsDecoy()) {
@@ -317,7 +318,7 @@ void TideMatchSet::writeHeadersDIA(ofstream* file, bool compute_sp) {
     PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
     RT_DIFF_COL, DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
     COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
-    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
+    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
   };
 
@@ -424,12 +425,13 @@ void TideMatchSet::writeToFileDIA(
       // ENSEMBLE_SCORE_COL
       *file << StringUtils::ToString(0.0, precision, true) << '\t';
 
-      // DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL, PROTEIN_ID_COL, FLANKING_AA_COL
-      Crux::Peptide cruxPep = getCruxPeptide(peptide);      
+      // DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL, PROTEIN_ID_COL, FLANKING_AA_COL
+      Crux::Peptide cruxPep = getCruxPeptide(peptide);  
+      string peptide_with_nomods = peptide->Seq();
       *file << concatDistinctMatches << '\t'
            << peptide_with_mods << '\t'
            << cruxPep.getModsString() << '\t'
-           << CleavageType << '\t'
+           << peptide_with_nomods << '\t'
            << proteinNames << '\t'
            << flankingAAs << '\t';
 
@@ -580,12 +582,14 @@ void TideMatchSet::writeToFile(
       }
     }
     string peptide_with_mods = peptide->SeqWithMods();
+    string peptide_with_nomods = peptide->Seq();    
+    
     *file << peptide_with_mods; // Print the actual peptide sequence, with modifications
     Crux::Peptide cruxPep = getCruxPeptide(peptide);
     if (!brief) {
       *file << '\t'
             << cruxPep.getModsString() << '\t'
-            << CleavageType << '\t'
+            << peptide_with_nomods << '\t'
             << proteinNames << '\t'
             << flankingAAs;
       if (peptide->IsDecoy()) {
@@ -649,7 +653,7 @@ void TideMatchSet::writeHeaders(
     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, SP_SCORE_COL, SP_RANK_COL,
     XCORR_SCORE_COL, BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL,
-    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, CLEAVAGE_TYPE_COL,
+    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
     DECOY_INDEX_COL
   };
