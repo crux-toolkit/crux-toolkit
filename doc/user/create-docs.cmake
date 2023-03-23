@@ -37,24 +37,23 @@ foreach (doc ${doc_list})
     )
   endif (NOT ${status} EQUAL 0)
   message(STATUS "Created ${doc}.html")
-  if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
-    # If building out of source copy doc files back to 
-    # source doc directory.
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} 
-        -E copy ${doc}.html ${DOC_DIR}
-        RESULT_VARIABLE status
-        ERROR_VARIABLE error_message
+  
+  # Copy file to source doc/commands directory.
+  message(STATUS "Copying doc files back to source doc/command directory: ${DOC_DIR}")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} 
+      -E copy ${doc}.html ${DOC_DIR}
+      RESULT_VARIABLE status
+      ERROR_VARIABLE error_message
+  )
+  if (NOT ${status} EQUAL 0)
+    message(
+      FATAL_ERROR
+      "Unable to copy ${doc}.html to ${DOC_DIR}" 
+      "\nError message: ${error_message}"
+      "\nCreation of documents failed."
     )
-    if (NOT ${status} EQUAL 0)
-      message(
-        FATAL_ERROR
-        "Unable to copy ${doc}.html to ${DOC_DIR}" 
-        "\nError message: ${error_message}"
-        "\nCreation of documents failed."
-      )
-    endif (NOT ${status} EQUAL 0)
-  endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+  endif (NOT ${status} EQUAL 0)
 endforeach (doc ${doc_list})
 
 # Create the parameter table
@@ -73,24 +72,23 @@ if (NOT ${status} EQUAL 0)
   )
 endif (NOT ${status} EQUAL 0)
 message(STATUS "Created param-table.html")
-if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
-  # If building out of source copy doc files back to 
-  # source doc directory.
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} 
-      -E copy param-table.html ${DOC_DIR}
-      RESULT_VARIABLE status
-      ERROR_VARIABLE error_message
+
+# Copy file to source doc/commands directory.
+execute_process(
+  COMMAND ${CMAKE_COMMAND} 
+    -E copy param-table.html ${DOC_DIR}
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error_message
+)
+if (NOT ${status} EQUAL 0)
+  message(
+    FATAL_ERROR
+    "Unable to copy param-table.html to ${DOC_DIR}" 
+    "\nError message: ${error_message}"
+    "\nCreation of param-table failed."
   )
-  if (NOT ${status} EQUAL 0)
-    message(
-      FATAL_ERROR
-      "Unable to copy param-table.html to ${DOC_DIR}" 
-      "\nError message: ${error_message}"
-      "\nCreation of param-table failed."
-    )
-  endif (NOT ${status} EQUAL 0)
-endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+endif (NOT ${status} EQUAL 0)
+
 # Create the default.params file
 execute_process(
   COMMAND ${CRUX_PATH} create-docs --no-analytics T default-params
@@ -107,21 +105,19 @@ if (NOT ${status} EQUAL 0)
   )
 endif (NOT ${status} EQUAL 0)
 message(STATUS "Created default.params")
-if (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
-  # If building out of source copy doc files back to 
-  # source doc directory.
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} 
-      -E copy default.params ${DOC_DIR}
-      RESULT_VARIABLE status
-      ERROR_VARIABLE error_message
+
+# Copy file back to source doc/commands directory.
+execute_process(
+  COMMAND ${CMAKE_COMMAND} 
+    -E copy default.params ${DOC_DIR}
+    RESULT_VARIABLE status
+    ERROR_VARIABLE error_message
+)
+if (NOT ${status} EQUAL 0)
+  message(
+    FATAL_ERROR
+    "Unable to copy default.params to ${DOC_DIR}" 
+    "\nError message: ${error_message}"
+    "\nCreation of param-table failed."
   )
-  if (NOT ${status} EQUAL 0)
-    message(
-      FATAL_ERROR
-      "Unable to copy default.params to ${DOC_DIR}" 
-      "\nError message: ${error_message}"
-      "\nCreation of param-table failed."
-    )
-  endif (NOT ${status} EQUAL 0)
-endif (NOT ${PROJECT_SOURCE_DIR} MATCHES ${PROJECT_BINARY_DIR})
+endif (NOT ${status} EQUAL 0)
