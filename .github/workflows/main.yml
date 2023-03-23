@@ -177,6 +177,19 @@ jobs:
              destination-directory: '.'
              commit-email: 'cegrant@uw.edu'
              
+        - name: Push command webpages to website repository
+          uses: dmnemec/copy_file_to_another_repo_action@main
+          env:
+             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
+          with:
+             source_file: 'doc/user/commands/'
+             destination_repo: 'crux-toolkit/crux-toolkit.github.io'
+             destination_branch: master
+             destination_folder: '.'
+             user_email: 'cegrant@uw.edu'
+             user_name: 'CharlesEGrant'
+             commit_message: 'Update version file for the web site' 
+
         - name: Copy version file to website repository
           uses: dmnemec/copy_file_to_another_repo_action@main
           env:
