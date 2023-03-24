@@ -180,7 +180,7 @@ jobs:
         - name: Push command webpages to website repository
           uses: dmnemec/copy_file_to_another_repo_action@main
           env:
-             API_TOKEN_GITHUB: ${{ secrets.GA_SECRET }}
+             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
           with:
              source_file: 'doc/user/commands/'
              destination_repo: 'crux-toolkit/crux-toolkit.github.io'
@@ -193,7 +193,7 @@ jobs:
         - name: Copy version file to website repository
           uses: dmnemec/copy_file_to_another_repo_action@main
           env:
-             API_TOKEN_GITHUB: ${{ secrets.GA_SECRET }}
+             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
           with:
              source_file: 'doc/user/latest-build.txt'
              destination_repo: 'crux-toolkit/crux-toolkit.github.io'
