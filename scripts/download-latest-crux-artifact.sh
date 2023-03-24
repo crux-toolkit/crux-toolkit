@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -eux pipefail
 # Authenticate to GitHub
-gh auth login --with-token < access-repo.txt
+gh auth login --with-token < /net/noble/vol1/home/cegrant/bin/access-repo.txt
 # Set up temp working directory
 temp_dir=$(mktemp -d  gh-crux-download.XXX)
 cd $temp_dir
@@ -16,7 +16,7 @@ then
 echo "$(date): New version detected $new_version" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 # Get the id of the latest run.
 id_latest_run=$(gh run list -R github.com/crux-toolkit/crux-toolkit -b master --workflow main.yml | \
-  grep -oh "success.*"| head -n 1|awk '{print $7}')
+  grep -oh "success.*"| head -n 1|awk -F '\t' '{print $6}')
 echo $id_latest_run
 # Download the artifacts for the latest run
 gh run download $id_latest_run --pattern "crux*.*" -R github.com/crux-toolkit/crux-toolkit
@@ -31,7 +31,9 @@ cp crux-4.1.$new_version.centos7/crux-4.1.Linux.x86_64.zip /noble/www/htdocs/cru
 echo "$(date): Updated crux-4.1.$new_version.Linux.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 cp latest-build.txt /noble/www/htdocs/crux-downloads/daily/latest-build.txt
 echo "$(date): Updated latest-build.txt" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
-rm -rf $temp_dir
 else
-  echo "$(date): No new build available."
+  echo "$(date): No new build available." >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+
 fi
+cd -
+rm -r $temp_dir
