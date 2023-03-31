@@ -175,7 +175,7 @@ window.onload = function () {
                 
                 ttBox.select("#dateField")
                      .text(dates[i]);
-                ttBox.select("#searchField")
+                ttBox.select("#percolatorField")
                      .text(data[i][1] * 1000);
                 ttBox.select("#othersField")
                      .text(data[i][0] * 1000);
@@ -226,7 +226,7 @@ window.onload = function () {
                 .style("font-size", "10px")
                 .text("Crux runs (in 1,000)");            
             
-            legend_data = [['tide-search', colors[1]], ['others', colors[0]]];
+            legend_data = [['percolator', colors[1]], ['others', colors[0]]];
             var legend = d3.select('svg')
                 .append("g")
                 .selectAll("g")
@@ -255,7 +255,7 @@ window.onload = function () {
 	//-----------------------------------------------------
 	}
 	getData = function(){
-	//-- File format: week in YYYYWW, total count, tide-search count
+	//-- File format: week in YYYYWW, total count, percolator count
     	//loading and parsing the data file
 		$.get("gaData.csv", function(data) {
 			var dates = [];
@@ -333,7 +333,7 @@ window.onload = function () {
 				<p>Crux weekly usage by MS proteomics community over the last 32 weeks  (in thousand runs).</p> 
 				<div id="tooltip" class="hidden">
 					<strong>Week:</strong><span id="dateField">100</span><br/>
-					<strong>tide-search:</strong><span id="searchField">100</span><br/>
+					<strong>percolator:</strong><span id="percolatorField">100</span><br/>
 					<strong>others:</strong><span id="othersField">100</span>
 				 </div>    
 				<svg class="chart"/>
