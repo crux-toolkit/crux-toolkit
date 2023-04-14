@@ -1,4 +1,4 @@
-scan	charge	xcorr score	b/y ions matched	b/y ions total	b/y ions fraction	sequence
+scan	charge	xcorr score	sequence
 35	1	-0.02538549	SMSVER
 128	1	-0.18139087	SMSVER
 35	1	0.11599080	FESAVR
