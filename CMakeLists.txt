@@ -118,6 +118,9 @@ add_dependencies(tide-support gflags-2.2.2)
 add_dependencies(tide-support MSToolkit)
 add_dependencies(tide-support ProteoWizard)
 add_dependencies(tide-support protobuf-3.19.4)
+add_dependencies(crux-quant-support MSToolkit)
+add_dependencies(crux-quant-support protobuf-3.19.4)
+add_dependencies(crux crux-quant-support)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
