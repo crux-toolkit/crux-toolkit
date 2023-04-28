@@ -33,7 +33,7 @@
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
 #include "DIAmeterApplication.h"
-#include "CruxQuantApplication.h"
+//#include "CruxQuantApplication.h"
 
 using namespace std;
 
@@ -68,7 +68,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
   apps.add(new DIAmeterApplication());
-  apps.add(new CruxQuantApplication());
+  //apps.add(new CruxQuantApplication());
   
   string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {
