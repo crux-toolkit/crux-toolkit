@@ -16,9 +16,28 @@ string CruxQuantApplication::getName() const {
     return "crux-quant";
 }
 
-// TODO: Add better description
+// TODO: Change the description - this description is copied from tideindex.
 string CruxQuantApplication::getDescription() const {
-    return "Quantify peptides/proteins from MS/MS data";
+    return
+        "[[nohtml:Create an index for all peptides in a fasta file, for use in "
+        "subsequent calls to tide-search.]]"
+        "[[html:<p>Tide is a tool for identifying peptides from tandem mass "
+        "spectra. It is an independent reimplementation of the SEQUEST<sup>&reg;"
+        "</sup> algorithm, which assigns peptides to spectra by comparing the "
+        "observed spectra to a catalog of theoretical spectra derived from a "
+        "database of known proteins. Tide's primary advantage is its speed. Our "
+        "published paper provides more detail on how Tide works. If you use Tide "
+        "in your research, please cite:</p><blockquote>Benjamin J. Diament and "
+        "William Stafford Noble. &quot;<a href=\""
+        "http://dx.doi.org/10.1021/pr101196n\">Faster SEQUEST Searching for "
+        "Peptide Identification from Tandem Mass Spectra.</a>&quot; <em>Journal of "
+        "Proteome Research</em>. 10(9):3871-9, 2011.</blockquote><p>The <code>"
+        "tide-index</code> command performs an optional pre-processing step on the "
+        "protein database, converting it to a binary format suitable for input to "
+        "the <code>tide-search</code> command.</p><p>Tide considers only the "
+        "standard set of 21 amino acids. Peptides containing non-amino acid "
+        "alphanumeric characters (BJXZ) are skipped. Non-alphanumeric characters "
+        "are ignored completely.</p>]]";
 }
 
 vector<string> CruxQuantApplication::getArgs() const {
