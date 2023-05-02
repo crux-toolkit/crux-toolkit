@@ -8,51 +8,66 @@ CruxQuantApplication::CruxQuantApplication() {}
 CruxQuantApplication::~CruxQuantApplication() {}
 
 int CruxQuantApplication::main(int argc, char** argv) {
-    carp(CARP_INFO, "Running crux-quant...");
+    carp(CARP_INFO, "Running crux-lfq...");
     return 0;
 }
 
 string CruxQuantApplication::getName() const {
-    return "crux-quant";
+    return "crux-lfq";
 }
 
 // TODO: Change the description - this description is copied from tideindex.
 string CruxQuantApplication::getDescription() const {
     return
-        "[[nohtml:Create an index for all peptides in a fasta file, for use in "
-        "subsequent calls to tide-search.]]"
-        "[[html:<p>Tide is a tool for identifying peptides from tandem mass "
-        "spectra. It is an independent reimplementation of the SEQUEST<sup>&reg;"
-        "</sup> algorithm, which assigns peptides to spectra by comparing the "
-        "observed spectra to a catalog of theoretical spectra derived from a "
-        "database of known proteins. Tide's primary advantage is its speed. Our "
-        "published paper provides more detail on how Tide works. If you use Tide "
-        "in your research, please cite:</p><blockquote>Benjamin J. Diament and "
-        "William Stafford Noble. &quot;<a href=\""
-        "http://dx.doi.org/10.1021/pr101196n\">Faster SEQUEST Searching for "
-        "Peptide Identification from Tandem Mass Spectra.</a>&quot; <em>Journal of "
-        "Proteome Research</em>. 10(9):3871-9, 2011.</blockquote><p>The <code>"
-        "tide-index</code> command performs an optional pre-processing step on the "
-        "protein database, converting it to a binary format suitable for input to "
-        "the <code>tide-search</code> command.</p><p>Tide considers only the "
-        "standard set of 21 amino acids. Peptides containing non-amino acid "
-        "alphanumeric characters (BJXZ) are skipped. Non-alphanumeric characters "
-        "are ignored completely.</p>]]";
+        "[[nohtml:This command reads a set of PSMs and a corresponding set of spectrum files"
+        "and carries out label-free quantification (LFQ) for each detected peptide.]]"
+        "[[html:<p>This command reads a set of PSMs and a corresponding set of spectrum files "
+        "and carries out label-free quantification (LFQ) for each detected peptide."
+        "The algorithm follows that of FlashLFQ: "
+        "Millikin RJ, Solntsev SK, Shortreed MR, Smith LM. &quot;<a href=\""
+        "https://pubmed.ncbi.nlm.nih.gov/29083185/\">Ultrafast Peptide Label-Free Quantification with FlashLFQ.</a>&quot;" 
+        "<em>Journal of Proteome Research</em>. 17(1):386-391, 2018.</blockquote><p>]]";
 }
 
 vector<string> CruxQuantApplication::getArgs() const {
-    string arr[] = {"spectrum-files", "output-dir"};
+    string arr[] = {
+        "peptide-spectrum matches", 
+        "spectrum file"
+    };
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
 vector<string> CruxQuantApplication::getOptions() const {
-    string arr[] = {"overwrite", "parameter-file", "help"};
+    string arr[] = {
+        "score", 
+        "threshold", 
+        "smaller-is-better",
+        "fileroot",
+        "output-dir",
+        "overwrite",
+        "parameter-file",
+        "spectrum-parser",
+        "verbosity"
+    };
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
 vector< pair<string, string> > CruxQuantApplication::getOutputs() const {
     vector< pair<string, string> > outputs;
-    outputs.push_back(make_pair("crux-quant-output-dir", "Directory containing the output files"));
+    outputs.push_back(make_pair("crux-lfq.txt", 
+        "A tab-delimited text file in which rows are peptides, "
+        "columns correspond to the different spectrum files, "
+        "and values are peptide quantifications.  "
+        "If a peptide is not detected in a given run, "
+        "then its corresponding quantification value is NaN."));
+    outputs.push_back(make_pair("crux-lfq.params.txt",
+        "A file containing the name and value of all parameters/options"
+        " for the current operation. Not all parameters in the file may have"
+        " been used in the operation. The resulting file can be used with the "
+        "--parameter-file option for other Crux programs."));
+    outputs.push_back(make_pair("crux-lfq.log.txt", 
+        "A log file containing a copy of all messages that were printed to the screen during execution."
+    ));
     return outputs;
 }
 
