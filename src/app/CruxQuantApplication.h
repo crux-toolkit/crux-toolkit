@@ -29,6 +29,8 @@ class CruxQuantApplication: public CruxApplication{
          */
         virtual int main(int argc, char** argv);
 
+        int main(const vector<string>& psm_files, const vector<string>& spec_files);
+
         /**
          * \returns the name of the subclassed application
          */

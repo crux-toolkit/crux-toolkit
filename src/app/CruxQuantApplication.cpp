@@ -1,4 +1,5 @@
 #include "io/carp.h"
+#include "util/Params.h"
 #include "CruxQuantApplication.h"
 
 using std::make_pair;
@@ -8,6 +9,12 @@ CruxQuantApplication::CruxQuantApplication() {}
 CruxQuantApplication::~CruxQuantApplication() {}
 
 int CruxQuantApplication::main(int argc, char** argv) {
+    vector<string> psm_files = Params::GetStrings("peptide-spectrum matches");
+    vector<string> spec_files = Params::GetStrings("spectrum files");
+    return main(psm_files, spec_files);
+}
+
+int CruxQuantApplication::main(const vector<string>& psm_files, const vector<string>& spec_files){
     carp(CARP_INFO, "Running crux-lfq...");
     return 0;
 }
@@ -32,7 +39,7 @@ string CruxQuantApplication::getDescription() const {
 vector<string> CruxQuantApplication::getArgs() const {
     string arr[] = {
         "peptide-spectrum matches", 
-        "spectrum file"
+        "spectrum files"
     };
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
