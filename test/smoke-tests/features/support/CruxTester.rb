@@ -173,22 +173,24 @@ class CruxTester
 
   def writeObserved(actual_content, expected_filename, same, write_observed)
     if write_observed == 1
-      observed = expected_filename + ".observed"
+      observed = expected_filename + ".observed"    # Use this to report observed data.
+      # observed = expected_filename # + ".observed"  # use this  to update the results.
       if not same
         File.open(observed, "w") { |file| file.write(actual_content) }
       elsif File.file?(observed)
-        FileUtils.rm(observed)
+        FileUtils.rm(observed)    # comment this to update the results
       end
     end
   end
 
   def copyObserved(actual_filename, expected_filename, same, write_observed)
     if write_observed == 1
-      observed = expected_filename + ".observed"
+      observed = expected_filename + ".observed" # Use this to report observed data.
+      # observed = expected_filename# + ".observed" # use this  to update the results
       if not same
-        FileUtils.cp(actual_filename, expected_filename + ".observed")
+        FileUtils.cp(actual_filename, observed)
       elsif File.file?(observed)
-        FileUtils.rm(observed)
+        FileUtils.rm(observed)   # comment this to update the results
       end
     end
   end

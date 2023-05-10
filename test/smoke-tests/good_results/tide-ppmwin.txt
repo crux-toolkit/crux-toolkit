@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/spectrum	sequence	modifications	unmodified sequence	protein id	flanking aa	target/decoy
-80	2	509.2686	1016.5226	1016.5251	0	0	0.89639971	1	1	ITSGQELNR		ITSGQELNR	YDL198C(45)	KV	target
-92	3	497.2782	1488.8128	1488.8188	0	0	4.02580656	1	1	NFLETVELQVGLK		NFLETVELQVGLK	YGL135W(27)	RN	target
-131	2	745.8486	1489.6826	1489.6871	0	0	0.41849834	1	1	ESVMEHNFGDVVK		ESVMEHNFGDVVK	YOR168W(736)	KN	target
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	b/y ions matched	b/y ions total	b/y ions fraction	xcorr rank	distinct matches/spectrum	sequence	modifications	unmodified sequence	protein id	flanking aa	target/decoy
+80	2	509.2686	1016.5226	1016.5251	0	0	0.89639971	7	16	0.43750000	1	1	ITSGQELNR		ITSGQELNR	YDL198C(45)	KV	target
+92	3	497.2782	1488.8128	1488.8188	0	0	4.02580656	30	48	0.62500000	1	1	NFLETVELQVGLK		NFLETVELQVGLK	YGL135W(27)	RN	target
+131	2	745.8486	1489.6826	1489.6871	0	0	0.41849834	12	24	0.50000000	1	1	ESVMEHNFGDVVK		ESVMEHNFGDVVK	YOR168W(736)	KN	target

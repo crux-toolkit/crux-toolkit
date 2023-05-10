@@ -653,12 +653,12 @@ void TideSearchApplication::search(void* threadarg) {
       // few, and recover the association between counter and peptide. We output
       // the top matches.
       if (peptide_centric) {
+        int peptide_idx = 0;        
         deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
         TideMatchSet::Arr2::iterator it = match_arr2.begin();
-        for (; it != match_arr2.end(); ++iter_, ++it) {
-          int peptide_idx = candidatePeptideStatusSize - (it->second);
+        for (; it != match_arr2.end(); ++iter_, ++peptide_idx, ++it) {
           if ((*candidatePeptideStatus)[peptide_idx]) {
-            (*iter_)->AddHit(spectrum, it->first, 0.0, it->second, charge);
+            (*iter_)->AddHit(spectrum, it->first, 0.0, candidatePeptideStatusSize - peptide_idx, charge);
           }
         }
       } else {  //spectrum centric match report.
@@ -682,15 +682,20 @@ void TideSearchApplication::search(void* threadarg) {
           quantile_score = scores[quantile_pos]+TAILOR_OFFSET; // Make sure scores positive
         }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
-
+        int peptide_idx = 0;
+        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
         for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
              it != match_arr2.end();
-             ++it) {
-          int peptide_idx = candidatePeptideStatusSize - (it->second);
+             ++it, ++peptide_idx, ++iter_) {
           if ((*candidatePeptideStatus)[peptide_idx]) {
             TideMatchSet::Scores curScore;
             curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
-            curScore.rank = it->second;
+            curScore.by_ion_matched = it->second;
+            curScore.by_ion_total = (*iter_)->peaks_0.size();
+            if (charge > 2) {
+              curScore.by_ion_total += (*iter_)->peaks_1.size();
+            }
+            curScore.rank = candidatePeptideStatusSize - peptide_idx;
             //Added for tailor score calibration method by AKF
             if (Params::GetBool("use-tailor-calibration")) {
               curScore.tailor = ((double)(it->first / XCORR_SCALING) + TAILOR_OFFSET) / quantile_score;
@@ -698,7 +703,6 @@ void TideSearchApplication::search(void* threadarg) {
             match_arr.push_back(curScore);
           }
         }
-
         TideMatchSet matches(&match_arr, highest_mz);
 
         matches.exact_pval_search_ = exact_pval_search;
@@ -706,7 +710,7 @@ void TideSearchApplication::search(void* threadarg) {
 
         matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
                        spectrum, charge, active_peptide_queue, proteins,
-                       compute_sp, true, locks_array[LOCK_RESULTS]);
+                       compute_sp, true, locks_array[LOCK_RESULTS]);      
 					   
       }  //end peptide_centric == false
     } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr p-val
@@ -888,12 +892,15 @@ void TideSearchApplication::search(void* threadarg) {
 
           //XCORR
           // score XCorr for target peptide with integerized evidenceObs array
+          int match_num = 0;
           if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
             scoreRefactInt = 0;
             for (vector<unsigned int>::const_iterator iter_uint = iter1_->unordered_peak_list_.begin();
                  iter_uint != iter1_->unordered_peak_list_.end();
                  iter_uint++) {
               scoreRefactInt += evidenceObs[pepMassIntIdx][*iter_uint];
+              if (evidenceObs[pepMassIntIdx][*iter_uint] > 0)
+                ++match_num;
             }
 
             xcorrScores.push_back(scoreRefactInt);
@@ -1356,12 +1363,17 @@ void TideSearchApplication::collectScoresCompiled(
   int cnt = 0;
   for (; iter_ != active_peptide_queue->end_; ++iter_, ++it, ++cnt) {
     int xcorr = 0;
+    int match_cnt = 0;
 
     // Score with single charged theoretical peaks
     for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_0.begin();
       iter_uint != (*iter_)->peaks_0.end();
       iter_uint++) {
       xcorr += cache[*iter_uint];
+      if (cache[*iter_uint] > 0) {
+        ++match_cnt;
+      }
+
     }
     // Score with double charged theoretical peaks
     if (charge > 2){
@@ -1369,11 +1381,14 @@ void TideSearchApplication::collectScoresCompiled(
         iter_uint != (*iter_)->peaks_1.end();
         iter_uint++) {
         xcorr += cache[*iter_uint];
+        if (cache[*iter_uint] > 0) {
+          ++match_cnt;
+        }
       }
     }
 
     it->first = xcorr;
-    it->second = queue_size - cnt;
+    it->second = match_cnt; //queue_size - cnt;
   } 
   match_arr-> set_size(queue_size);
   // End Scoring in C++
