@@ -156,7 +156,7 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
-set(PERCOLATOR_GIT_VERSION 879af86)
+set(PERCOLATOR_GIT_VERSION c34cafb)
 if (UNIX)
   ExternalProject_Add(
     percolator
@@ -278,6 +278,9 @@ ExternalProject_Add(
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/src/RAMPface.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/mzParser/RAMPface.cpp
   BUILD_IN_SOURCE 1
 )
 
@@ -302,6 +305,9 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometData.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
     BUILD_IN_SOURCE 1
   )
 elseif (WIN32 AND NOT CYGWIN)
@@ -325,6 +331,9 @@ elseif (WIN32 AND NOT CYGWIN)
         COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
           ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometData.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
       BUILD_IN_SOURCE 1
   )
 endif (UNIX)
