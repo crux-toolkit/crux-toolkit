@@ -240,8 +240,7 @@
 
 		<tr>
 		<td>xcorr score</td>
-		<td>The SEQUEST-type cross correlation score.
-		This column only appears when <code>exact-p-value=F</code>.</td>
+		<td>The SEQUEST-type cross correlation score.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -256,9 +255,10 @@
 		<tr bgcolor="#DEDEDE">
 		<td>exact p-value</td>
 		<td>The p-value computed as described in
-		<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing Exact p-values
-		for a Cross-correlation Shotgun Proteomics Score Function"</a>.
-		This column only appears when <code>exact-p-value=T</code>.</td>
+		<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing
+		Exact p-values for a Cross-correlation Shotgun
+		Proteomics Score Function."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -272,8 +272,8 @@
 
 		<tr>
 		<td>refactored xcorr</td>
-		<td>A discretized version of XCorr, used to compute the p-value.
-		This column only appears when <code>exact-p-value=T</code>.</td>
+		<td>A discretized version of XCorr, used to compute
+		the p-value. </td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -289,11 +289,9 @@
 		<td>res-ev p-value</td>
 		<td>The high-resolution p-value computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> or
-		<code>--score-function=residue-evidence</code>. In addition,
-		<code>exact-p-value=T</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a></td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -309,10 +307,10 @@
 		<td>res-ev score</td>
 		<td>The high-resolution score computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> or
-		<code>--score-function=residue-evidence</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -328,10 +326,10 @@
 		<td>combined p-value</td>
 		<td>The high-resolution p-value computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> and
-		<code>--exact-p-value=T</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -348,10 +346,10 @@
 		<td>A calibrated version of the XCorr score,
 		normalized by dividing by the 99th percentile of the
 		XCorr scores for each spectrum, as described in
-		<a href="FIXME">
-		"FIXME"</a>.
-		This column only appears when
-                <code>--use-tailor-calibration=T.</td>
+		<a href="https://pubmed.ncbi.nlm.nih.gov/32175744/">
+		"Tailor: A Nonparametric and Rapid Score Calibration
+		Method for Database Search-Based Peptide
+		Identification in Shotgun Proteomics."</a></td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
