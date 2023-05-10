@@ -541,6 +541,11 @@ void TideMatchSet::writeToFile(
         }
       } else {
         *file << StringUtils::ToString(i->xcorr_score, precision, true) << '\t';
+        if (!sp_map && !brief) {
+          *file << StringUtils::ToString(i->by_ion_matched, precision, true) << '\t'
+              << StringUtils::ToString(i->by_ion_total, precision, true) << '\t'
+              << StringUtils::ToString((double)i->by_ion_matched/(double)i->by_ion_total, precision, true) << "\t";
+        }
       }
       //Added for tailor score calibration method by AKF
       if (Params::GetBool("use-tailor-calibration")) {
@@ -686,6 +691,11 @@ void TideMatchSet::writeHeaders(
           }
         } else {
           colPrint(&writtenHeader, file, get_column_header(XCORR_SCORE_COL));
+          if (!compute_sp && !brief) {
+            colPrint(&writtenHeader, file, get_column_header(BY_IONS_MATCHED_COL));
+            colPrint(&writtenHeader, file, get_column_header(BY_IONS_TOTAL_COL));
+            colPrint(&writtenHeader, file, get_column_header(BY_IONS_FRACTION_COL));
+          }
         }
         //Added for tailor score calibration method by AKF
         if (Params::GetBool("use-tailor-calibration")) {
