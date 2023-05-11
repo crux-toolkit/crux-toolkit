@@ -66,6 +66,7 @@
 		<th rowspan="2">cascade-search</th>
     <th rowspan="2">kojak</th>
 		<th colspan="3">percolator</th>
+		<th rowspan="2">diameter search</th>
 		<th rowspan="2">spectral-counts</th>
 		</tr>
 
@@ -80,7 +81,7 @@
 		<!--"✕"= "&#10005" or "&#10006"-->
 		<!--"–"=&#8211-->
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>file</td>
 		<td>The name of the file containing the scan.</td>
 		<td>&nbsp;</td>
@@ -90,6 +91,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -103,6 +105,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -116,6 +119,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -129,6 +133,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -144,6 +149,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -160,6 +166,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -179,6 +186,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -194,6 +202,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -203,6 +212,7 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -225,12 +235,12 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
 		<td>xcorr score</td>
-		<td>The SEQUEST-type cross correlation score.
-		This column only appears when <code>exact-p-value=F</code>.</td>
+		<td>The SEQUEST-type cross correlation score.</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
@@ -238,18 +248,21 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
 		<td>exact p-value</td>
 		<td>The p-value computed as described in
-		<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing Exact p-values
-		for a Cross-correlation Shotgun Proteomics Score Function"</a>.
-		This column only appears when <code>exact-p-value=T</code>.</td>
+		<a href="http://www.ncbi.nlm.nih.gov/pubmed/24895379">"Computing
+		Exact p-values for a Cross-correlation Shotgun
+		Proteomics Score Function."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -259,11 +272,12 @@
 
 		<tr>
 		<td>refactored xcorr</td>
-		<td>A discretized version of XCorr, used to compute the p-value.
-		This column only appears when <code>exact-p-value=T</code>.</td>
+		<td>A discretized version of XCorr, used to compute
+		the p-value. </td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -275,14 +289,13 @@
 		<td>res-ev p-value</td>
 		<td>The high-resolution p-value computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> or
-		<code>--score-function=residue-evidence</code>. In addition,
-		<code>exact-p-value=T</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a></td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -291,16 +304,17 @@
 		</tr>
 
 		<tr>
-		<td>res-ev p-score</td>
+		<td>res-ev score</td>
 		<td>The high-resolution score computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> or
-		<code>--score-function=residue-evidence</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -312,13 +326,14 @@
 		<td>combined p-value</td>
 		<td>The high-resolution p-value computed as described in
 		<a href="https://pubs.acs.org/doi/abs/10.1021/acs.jproteome.8b00206">
-		"Combining High-Resolution and Exact Calibration to Boost Statistical Power:
-		A Well-Calibrated Score Function for High-Resolution MS2 Data"</a>.
-		This column only appears when <code>--score-function=both</code> and
-		<code>--exact-p-value=T</code>.</td>
+		"Combining High-Resolution and Exact Calibration to
+		Boost Statistical Power: A Well-Calibrated Score
+		Function for High-Resolution MS2 Data."</a>
+		</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -326,7 +341,27 @@
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+                <tr>
+		<td>tailor score</td>
+		<td>A calibrated version of the XCorr score,
+		normalized by dividing by the 99th percentile of the
+		XCorr scores for each spectrum, as described in
+		<a href="https://pubmed.ncbi.nlm.nih.gov/32175744/">
+		"Tailor: A Nonparametric and Rapid Score Calibration
+		Method for Database Search-Based Peptide
+		Identification in Shotgun Proteomics."</a></td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
 		<td>xcorr rank</td>
 		<td>The rank of this PSM when sorted by xcorr.</td>
 		<td>&#10003;</td>
@@ -336,10 +371,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>res-ev rank</td>
 		<td>The rank of this PSM when sorted by res-ev score or by res-ev p-value.</td>
 		<td>&nbsp;</td>
@@ -350,9 +386,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>combined p-value rank</td>
 		<td>The rank of this PSM when sorted by combined p-value.</td>
 		<td>&nbsp;</td>
@@ -363,9 +400,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>b/y ions matched</td>
 		<td>The number of b-ions and y-ions in the peptide that have a
 		corresponding peak in the spectrum.</td>
@@ -377,9 +415,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>b/y ions total</td>
 		<td>The total number of b- and y-ions predicted for this peptide.</td>
 		<td>&#10003;</td>
@@ -390,9 +429,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>total matches/spectrum</td>
 		<td>The number of candidate peptides in the database found for this
 		spectrum, including duplicates.  Note that this is always the number
@@ -405,9 +445,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>distinct matches/spectrum</td>
 		<td>The number of unique candidate peptides in the database found for this
 		spectrum.  Note that this is always the number of target candidate
@@ -419,10 +460,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>sequence</td>
 		<td>The peptide sequence.</td>
 		<td>&#10003;</td>
@@ -432,10 +474,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>modifications</td>
 		<td>Variable modifications applied to the sequence.
                   This is comma-separated list of modifications in the
@@ -462,10 +505,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>cleavage type</td>
 		<td>The cleavage rules for generating this peptide based on the
 		user-specified enzyme specificity.</td>
@@ -476,14 +520,17 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
-	<tr bgcolor="#DEDEDE">
+
+		<tr bgcolor="#DEDEDE">
 		<td>unmodified sequence</td>
 		<td>The peptide sequence stripped all the modification related information.</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -505,6 +552,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
+		<td>&#10003;</td>
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
@@ -521,6 +569,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -533,6 +582,7 @@
 		sequence.</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -556,6 +606,7 @@
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
@@ -567,6 +618,7 @@
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -582,6 +634,7 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
@@ -594,6 +647,7 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -608,6 +662,7 @@
 		<td>&#10003;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
@@ -619,6 +674,7 @@
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
@@ -635,6 +691,7 @@
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
@@ -647,6 +704,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		</tr>
 
@@ -661,6 +719,7 @@
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr>
@@ -674,9 +733,183 @@
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
+		<td>precursor intensity logrank M0</td>
+		<td>The log-rank of precursor intensity (for
+		monoisotope) among all observed peaks in MS1 scan</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>precursor intensity logrank M1</td>
+		<td>The log-rank of precursor intensity (for M + 1
+		isotope) among all observed peaks in MS1 scan</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>precursor intensity logrank M2</td>
+		<td>The log-rank of precursor intensity (for M +2
+		isotope) among all observed peaks in MS1 scan</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>rt-diff</td>
+		<td>The difference between observed and predicted
+		retention time</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>dynamic fragment p-value</td>
+		<td>Fragment matching p-value, as described in
+		<a href="https://pubs.acs.org/doi/10.1021/pr500202e">
+		"MS Amanda, a Universal Identification Algorithm
+		Optimized for High Accuracy Tandem Mass Spectra"</a>.
+                When calculating the score, the m/z range
+		(dependent on the observed peaks) is divided into 10
+		equal-length segments and the 10 most intense peaks
+		within each bin are preserved.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>static fragment p-value</td>
+		<td>Similar to the static fragment p-value, except
+		that the m/z range is set independently of the observed
+		peaks.</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>precursor coelution</td>
+		<td>The normalized dot product between the elution
+		profiles of precursor monoisotope and M+1 and M+2
+		isotopes</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>fragment coelution</td>
+		<td>The normalized dot product between the elution
+		profiles of fragment ions</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>precursor fragment coelution</td>
+		<td>The normalized dot product between the elution
+		profiles of precursor isotopes and fragment ions</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
+		<td>ensemble score</td>
+		<td>The aggregated score calculated as the weighted
+		sum of used features</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr bgcolor="#DEDEDE">
+		<td>target/decoy</td>
+		<td>Is this peptide a target or a decoy? Value is
+		"target" or "decoy."</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		<td>&nbsp;</td>
+		</tr>
+
+		<tr>
 		<td>RAW</td>
 		<td>The raw (unnormalized) count of spectra per peptide</td>
 		<td>&nbsp;</td>
@@ -686,10 +919,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>SIN</td>
 		<td>A protein quantification score</td>
 		<td>&nbsp;</td>
@@ -699,10 +933,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>NSAF</td>
 		<td>The normalized spectral abundace factor</td>
 		<td>&nbsp;</td>
@@ -712,10 +947,11 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>dNSAF</td>
 		<td>The distributed normalized spectral abundace factor</td>
 		<td>&nbsp;</td>
@@ -725,12 +961,28 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&#10003;</td>
+		</tr>
+
+		<tr>
+		<td>EMPAI</td>
+		<td>The exponentially modified protein abundance index</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		<td>&#10003;</td>
 		</tr>
 
 		<tr bgcolor="#DEDEDE">
-		<td>EMPAI</td>
-		<td>The exponentially modified protein abundance index</td>
+		<td> parsimony rank</td>
+		<td>The protein rank based on its spectral-counts score.</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
@@ -742,19 +994,6 @@
 		</tr>
 
 		<tr>
-		<td> parsimony rank</td>
-		<td>The protein rank based on its spectral-counts score.</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&#10003;</td>
-		</tr>
-
-		<tr bgcolor="#DEDEDE">
 		<td>Scan Number</td>
 		<td>The identifying number of each scan.</td>
 		<td>&nbsp;</td>
@@ -765,9 +1004,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Ret Time</td>
 		<td>The retention time in minutes.</td>
 		<td>&nbsp;</td>
@@ -778,9 +1018,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Obs Mass</td>
 		<td>The observed mass of the precursor ion peak.</td>
 		<td>&nbsp;</td>
@@ -791,9 +1032,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>PSM Mass</td>
 		<td>The theoretically computed precursor mass of the PSM.</td>
 		<td>&nbsp;</td>
@@ -804,9 +1046,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>PPM Error</td>
 		<td>The difference (in parts per million) between the PSM mass and the Obs Mass.</td>
 		<td>&nbsp;</td>
@@ -817,9 +1060,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Score</td>
 		<td>The Kojak cross-correlation score.</td>
 		<td>&nbsp;</td>
@@ -830,9 +1074,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>dScore</td>
 		<td>The difference between the reported PSM score and the next best PSM score.</td>
 		<td>&nbsp;</td>
@@ -843,9 +1088,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>E-value</td>
 		<td>The overall E-value of the PSM.</td>
 		<td>&nbsp;</td>
@@ -856,9 +1102,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Peptide #1 Score</td>
 		<td>The Kojak xcorr score of the higher scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -869,9 +1116,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Peptide #1 E-value</td>
 		<td>The E-value of the higher scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -882,9 +1130,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Peptide #1</td>
 		<td>The peptide sequence of the higher scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -895,9 +1144,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Linked AA #1</td>
 		<td>The site of the cross-link in Peptide #1</td>
 		<td>&nbsp;</td>
@@ -908,9 +1158,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Protein #1</td>
 		<td>The protein(s) that generated Peptide #1.</td>
 		<td>&nbsp;</td>
@@ -921,9 +1172,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Protein #1 Site</td>
 		<td>The site(s) of the cross-link in Protein #1</td>
 		<td>&nbsp;</td>
@@ -934,9 +1186,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Peptide #2 Score</td>
 		<td>The Kojak xcorr score of the lower scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -947,9 +1200,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Peptide #2 E-value</td>
 		<td>The E-value of the lower scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -960,9 +1214,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Peptide #2</td>
 		<td>The peptide sequence of the lower scoring peptide.</td>
 		<td>&nbsp;</td>
@@ -973,9 +1228,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Linked AA #2</td>
 		<td>The site of the cross-link in Peptide #2</td>
 		<td>&nbsp;</td>
@@ -986,9 +1242,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Protein #2</td>
 		<td>The protein(s) that generated Peptide #2.</td>
 		<td>&nbsp;</td>
@@ -999,9 +1256,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr>
+		<tr bgcolor="#DEDEDE">
 		<td>Protein #2 Site</td>
 		<td>The site(s) of the cross-link in Protein #2</td>
 		<td>&nbsp;</td>
@@ -1012,9 +1270,10 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 		</tr>
 
-		<tr bgcolor="#DEDEDE">
+		<tr>
 		<td>Linker Mass</td>
 		<td>The mass contribution of the cross-linker for cross-linked
 		PSMs or zero otherwise.</td>
@@ -1022,6 +1281,7 @@
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&#10003;</td>
+		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
 		<td>&nbsp;</td>
