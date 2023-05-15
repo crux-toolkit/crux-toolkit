@@ -92,6 +92,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "mix-max q-value",
   "b/y ions matched",
   "b/y ions total",
+  "b/y ions fraction",
   "total matches/spectrum",
   "distinct matches/spectrum",
   "sequence",
