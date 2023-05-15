@@ -1,5 +1,15 @@
 #include "io/carp.h"
+#include "io/SpectrumRecordWriter.h"
+#include "io/PSMReader.h"
+#include "io/MatchFileReader.h"
+#include "io/MzIdentMLReader.h"
+#include "io/SQTReader.h"
+#include "io/PepXMLReader.h"
 #include "util/Params.h"
+#include "util/crux-utils.h"
+#include "util/FileUtils.h"
+#include "util/StringUtils.h"
+#include "TideSearchApplication.h"
 #include "CruxQuantApplication.h"
 
 using std::make_pair;
@@ -9,13 +19,17 @@ CruxQuantApplication::CruxQuantApplication() {}
 CruxQuantApplication::~CruxQuantApplication() {}
 
 int CruxQuantApplication::main(int argc, char** argv) {
-    vector<string> psm_files = Params::GetStrings("peptide-spectrum matches");
+    string psm_file = Params::GetString("lfq-peptide-spectrum matches");
     vector<string> spec_files = Params::GetStrings("spectrum files");
-    return main(psm_files, spec_files);
+    return main(psm_file, spec_files);
 }
 
-int CruxQuantApplication::main(const vector<string>& psm_files, const vector<string>& spec_files){
+int CruxQuantApplication::main(const string& psm_file, const vector<string>& spec_files){
     carp(CARP_INFO, "Running crux-lfq...");
+    // MatchCollection* psm = getPSM(psm_file);
+    vector<InputFile> ms1_spectra_files = getSpecFiles(spec_files, 1);
+    vector<InputFile> ms2_spectra_files = getSpecFiles(spec_files, 2);
+    
     return 0;
 }
 
@@ -23,7 +37,6 @@ string CruxQuantApplication::getName() const {
     return "crux-lfq";
 }
 
-// TODO: Change the description - this description is copied from tideindex.
 string CruxQuantApplication::getDescription() const {
     return
         "[[nohtml:This command reads a set of PSMs and a corresponding set of spectrum files"
@@ -91,3 +104,55 @@ void CruxQuantApplication::processParams() {
 
 }
 
+// I may need to rewrite this code - loadSpectra can be found in TideSearchApplication.
+// Currently all this code does is generates spec records from spec files.
+//  Must revisit this code to have a better understanding of what it does.
+vector<InputFile> CruxQuantApplication::getSpecFiles(const vector<string>& filepaths, int ms_level) const {
+  vector<InputFile> input_sr;
+
+  if (Params::GetString("spectrum-parser") != "pwiz") { 
+    carp(CARP_FATAL, "spectrum-parser must be pwiz instead of %s", Params::GetString("spectrum-parser").c_str() ); 
+  }
+
+  for (vector<string>::const_iterator f = filepaths.begin(); f != filepaths.end(); f++) {
+    string spectrum_input_url = *f;
+    string spectrumrecords_url = make_file_path(FileUtils::BaseName(spectrum_input_url) + ".spectrumrecords.ms" + to_string(ms_level));
+    carp(CARP_INFO, "Converting %s to spectrumrecords %s", spectrum_input_url.c_str(), spectrumrecords_url.c_str());
+    carp(CARP_DEBUG, "New MS%d spectrumrecords filename: %s", ms_level, spectrumrecords_url.c_str());
+
+    if (!FileUtils::Exists(spectrumrecords_url)) {
+      if (!SpectrumRecordWriter::convert(spectrum_input_url, spectrumrecords_url, ms_level, true)) {
+        carp(CARP_FATAL, "Error converting MS2 spectrumrecords from %s", spectrumrecords_url.c_str());
+      }
+    }
+    input_sr.push_back(InputFile(*f, spectrumrecords_url, true));
+  }
+
+  return input_sr;
+}
+
+// MatchCollection* CruxQuantApplication::getPSM(string psm_file){
+//     Database* data; // Figure out the import of this data and why it's needed
+//     PSMReader* reader;
+//     if (StringUtils::IEndsWith(psm_file, ".txt")) {
+//       reader = new MatchFileReader(psm_file.c_str(), data);
+//     } else if (StringUtils::IEndsWith(psm_file, ".html")) {
+//       carp(CARP_FATAL, "HTML format has not been implemented yet");
+//     } else if (StringUtils::IEndsWith(psm_file, ".sqt")) {
+//       reader = new SQTReader(psm_file.c_str(), data);
+//     } else if (StringUtils::IEndsWith(psm_file, ".pin")) {
+//       carp(CARP_FATAL, "Pin format has not been implemented yet");
+//     } else if (StringUtils::IEndsWith(psm_file, ".xml")) {
+//       reader = new PepXMLReader(psm_file.c_str(), data);
+//     } else if (StringUtils::IEndsWith(psm_file, ".mzid")) {
+//       reader = new MzIdentMLReader(psm_file.c_str(), data);
+//     } else {
+//       carp(CARP_FATAL, "Could not determine input format, "
+//            "Please name your files ending with .txt, .html, .sqt, .pin, "
+//            ".xml, .mzid or use the --input-format option to "
+//            "specify file type");
+//     }
+//     MatchCollection* collection = reader->parse();
+
+//     return collection;
+// }

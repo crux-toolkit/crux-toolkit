@@ -1,8 +1,11 @@
 #pragma once
 
+#include <vector>
+
 #include "CruxApplication.h"
 #include "crux-quant/IndexedMassSpectralPeak.h"
 #include "crux-quant/PeakIndexingEngine.h"
+#include "model/MatchCollection.h"
 
 using std::string;
 using std::vector;
@@ -29,7 +32,7 @@ class CruxQuantApplication: public CruxApplication{
          */
         virtual int main(int argc, char** argv);
 
-        int main(const vector<string>& psm_files, const vector<string>& spec_files);
+        int main(const string& psm_file, const vector<string>& spec_files);
 
         /**
          * \returns the name of the subclassed application
@@ -67,4 +70,9 @@ class CruxQuantApplication: public CruxApplication{
         virtual bool needsOutputDirectory() const;
 
         virtual void processParams();
+
+        vector<InputFile> getSpecFiles(const vector<string>& filepaths, int ms_level) const;
+
+        MatchCollection* getPSM(string psm_file);
+        
 };

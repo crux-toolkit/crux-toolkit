@@ -2146,6 +2146,9 @@ InitStringParam("protein-name-separator", ",",
   
   // crux-lfq
 
+  InitArgParam("lfq-peptide-spectrum matches", 
+    "A file in mzTab or Percolator tab-delimited format listing peptide-spectrum matches.");
+
   InitArgParam("spectrum files", 
     "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
 
@@ -2522,6 +2525,7 @@ void Params::Categorize() {
   items.insert("export_mzID");
   AddCategory("Input and output", items);
 
+  // crux-lfq
   items.clear();
   items.insert("lfq-score");
   items.insert("lfq-threshold");
