@@ -71,8 +71,8 @@ class CruxQuantApplication: public CruxApplication{
 
         virtual void processParams();
 
-        vector<InputFile> getSpecFiles(const vector<string>& filepaths, int ms_level) const;
+        vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
 
-        MatchCollection* getPSM(string psm_file);
+        static SpectrumCollection* loadSpectra(const std::string& file);
         
 };

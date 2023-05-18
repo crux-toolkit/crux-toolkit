@@ -20,15 +20,28 @@ CruxQuantApplication::~CruxQuantApplication() {}
 
 int CruxQuantApplication::main(int argc, char** argv) {
     string psm_file = Params::GetString("lfq-peptide-spectrum matches");
-    vector<string> spec_files = Params::GetStrings("spectrum files");
-    return main(psm_file, spec_files);
+    vector<string> input_files = Params::GetStrings("spectrum files");
+    return main(psm_file, input_files);
 }
 
-int CruxQuantApplication::main(const string& psm_file, const vector<string>& spec_files){
+int CruxQuantApplication::main(const string& psm_file, const vector<string>& input_files){
     carp(CARP_INFO, "Running crux-lfq...");
-    // MatchCollection* psm = getPSM(psm_file);
-    vector<InputFile> ms1_spectra_files = getSpecFiles(spec_files, 1);
-    vector<InputFile> ms2_spectra_files = getSpecFiles(spec_files, 2);
+    std::map<std::string, SpectrumCollection*> spectra_;
+    
+    vector<InputFile> sr = getInputFiles(input_files);
+    
+    for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
+        string spectra_file = f->SpectrumRecords;
+        SpectrumCollection* spectra = NULL;
+        map<string, SpectrumCollection*>::iterator spectraIter = spectra_.find(spectra_file);
+        if (spectraIter == spectra_.end()) {
+            carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
+            spectra = loadSpectra(spectra_file);
+            carp(CARP_INFO, "Read %d spectra.", spectra->Size());
+        } else {
+            spectra = spectraIter->second;
+        }
+    }
     
     return 0;
 }
@@ -107,52 +120,44 @@ void CruxQuantApplication::processParams() {
 // I may need to rewrite this code - loadSpectra can be found in TideSearchApplication.
 // Currently all this code does is generates spec records from spec files.
 //  Must revisit this code to have a better understanding of what it does.
-vector<InputFile> CruxQuantApplication::getSpecFiles(const vector<string>& filepaths, int ms_level) const {
+vector<InputFile> CruxQuantApplication::getInputFiles(const vector<string>& filepaths) const {
+   // Try to read all spectrum files as spectrumrecords, convert those that fail
   vector<InputFile> input_sr;
-
-  if (Params::GetString("spectrum-parser") != "pwiz") { 
-    carp(CARP_FATAL, "spectrum-parser must be pwiz instead of %s", Params::GetString("spectrum-parser").c_str() ); 
-  }
-
   for (vector<string>::const_iterator f = filepaths.begin(); f != filepaths.end(); f++) {
-    string spectrum_input_url = *f;
-    string spectrumrecords_url = make_file_path(FileUtils::BaseName(spectrum_input_url) + ".spectrumrecords.ms" + to_string(ms_level));
-    carp(CARP_INFO, "Converting %s to spectrumrecords %s", spectrum_input_url.c_str(), spectrumrecords_url.c_str());
-    carp(CARP_DEBUG, "New MS%d spectrumrecords filename: %s", ms_level, spectrumrecords_url.c_str());
+    SpectrumCollection spectra;
+    pb::Header spectrum_header;
+    string spectrumrecords = *f;
+    bool keepSpectrumrecords = true;
+    if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
+      // Failed, try converting to spectrumrecords file
+      carp(CARP_INFO, "Converting %s to spectrumrecords format", f->c_str());
+      carp(CARP_INFO, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
 
-    if (!FileUtils::Exists(spectrumrecords_url)) {
-      if (!SpectrumRecordWriter::convert(spectrum_input_url, spectrumrecords_url, ms_level, true)) {
-        carp(CARP_FATAL, "Error converting MS2 spectrumrecords from %s", spectrumrecords_url.c_str());
+      
+      spectrumrecords = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
+     
+      carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
+      if (!SpectrumRecordWriter::convert(*f, spectrumrecords)) {
+        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", f->c_str());
+      }
+      carp(CARP_DEBUG, "Reading converted spectrum file %s", spectrumrecords.c_str());
+      // Re-read converted file as spectrumrecords file
+      if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
+        carp(CARP_DEBUG, "Deleting %s", spectrumrecords.c_str());
+        FileUtils::Remove(spectrumrecords);
+        carp(CARP_FATAL, "Error reading spectra file %s", spectrumrecords.c_str());
       }
     }
-    input_sr.push_back(InputFile(*f, spectrumrecords_url, true));
+    input_sr.push_back(InputFile(*f, spectrumrecords, keepSpectrumrecords));
   }
-
   return input_sr;
 }
 
-// MatchCollection* CruxQuantApplication::getPSM(string psm_file){
-//     Database* data; // Figure out the import of this data and why it's needed
-//     PSMReader* reader;
-//     if (StringUtils::IEndsWith(psm_file, ".txt")) {
-//       reader = new MatchFileReader(psm_file.c_str(), data);
-//     } else if (StringUtils::IEndsWith(psm_file, ".html")) {
-//       carp(CARP_FATAL, "HTML format has not been implemented yet");
-//     } else if (StringUtils::IEndsWith(psm_file, ".sqt")) {
-//       reader = new SQTReader(psm_file.c_str(), data);
-//     } else if (StringUtils::IEndsWith(psm_file, ".pin")) {
-//       carp(CARP_FATAL, "Pin format has not been implemented yet");
-//     } else if (StringUtils::IEndsWith(psm_file, ".xml")) {
-//       reader = new PepXMLReader(psm_file.c_str(), data);
-//     } else if (StringUtils::IEndsWith(psm_file, ".mzid")) {
-//       reader = new MzIdentMLReader(psm_file.c_str(), data);
-//     } else {
-//       carp(CARP_FATAL, "Could not determine input format, "
-//            "Please name your files ending with .txt, .html, .sqt, .pin, "
-//            ".xml, .mzid or use the --input-format option to "
-//            "specify file type");
-//     }
-//     MatchCollection* collection = reader->parse();
-
-//     return collection;
-// }
+SpectrumCollection* CruxQuantApplication::loadSpectra(const string& file) {
+  SpectrumCollection* spectra = new SpectrumCollection();
+  pb::Header header;
+  if (!spectra->ReadSpectrumRecords(file, &header)) {
+    carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
+  }
+  return spectra;
+}
