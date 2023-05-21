@@ -26,6 +26,7 @@ use_cxx11()
 add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
+add_subdirectory(test/unit-tests)
 
 
 # Only process smoke tests directory if it exiists
@@ -125,6 +126,7 @@ add_dependencies(tide-support ProteoWizard)
 add_dependencies(tide-support protobuf-3.19.4)
 add_dependencies(crux-quant-support MSToolkit)
 add_dependencies(crux-quant-support protobuf-3.19.4)
+add_dependencies(crux_test crux-quant-support)
 add_dependencies(crux crux-quant-support)
 
 # build a CPack driven installer package
