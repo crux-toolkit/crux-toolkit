@@ -38,6 +38,11 @@ if (EXISTS "${CMAKE_SOURCE_DIR}/test/performance-tests/runall")
   add_subdirectory(test/performance-tests)
 endif (EXISTS "${CMAKE_SOURCE_DIR}/test/performance-tests/runall")
 
+# Only process unit tests directory if it exiists
+if (EXISTS "${CMAKE_SOURCE_DIR}/test/unit-tests/runall")
+  add_subdirectory(test/unit-tests)
+endif (EXISTS "${CMAKE_SOURCE_DIR}/test/unit-tests/runall")
+
 install(FILES license.txt DESTINATION .)
 
 add_custom_target(
