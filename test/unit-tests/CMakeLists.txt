@@ -37,9 +37,9 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_executable(crux_test hello_test.cpp)
+add_executable(crux_test crux_quant_test.cpp)
 
-
+target_link_libraries(crux_test crux-quant-support)
 target_link_libraries(crux_test  GTest::gtest GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(crux_test)
