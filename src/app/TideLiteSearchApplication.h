@@ -16,17 +16,24 @@
 
 using namespace std;
 
-
-
 class TideLiteSearchApplication : public CruxApplication {
+ private:
  
-
  protected:
+  static const double XCORR_SCALING;
+  static const double RESCALE_FACTOR;
+  static const double TAILOR_QUANTILE_TH;
+  static const double TAILOR_OFFSET;
 
   map<pair<string, unsigned int>, bool>* spectrum_flag_;
   string output_file_name_;
   std::string remove_index_;  
-
+  bool exact_pval_search_;
+  double bin_width_;
+  double bin_offset_;
+  bool use_neutral_loss_peaks_;
+  bool use_flanking_peaks_;
+  
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
   static SpectrumCollection* loadSpectra(const std::string& file);
@@ -37,12 +44,6 @@ class TideLiteSearchApplication : public CruxApplication {
   void search();
 
  public:
-
-  // See TideLiteSearchApplication.cpp for descriptions of these two constants
-  static const double XCORR_SCALING;
-  static const double RESCALE_FACTOR;
-
-  bool exact_pval_search_;
 
   /**
    * Constructor
@@ -55,7 +56,7 @@ class TideLiteSearchApplication : public CruxApplication {
   ~TideLiteSearchApplication();
 
   /**
-   * Main method
+   * Main methods
    */
   virtual int main(int argc, char** argv);
 
@@ -93,11 +94,22 @@ class TideLiteSearchApplication : public CruxApplication {
    */
   virtual bool needsOutputDirectory() const;
 
+  /**
+   * Returns the command ID 
+   */
   virtual COMMAND_T getCommand() const;
 
-  //void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
-  virtual void processParams();
+  /**
+   * Processes the output file names
+   */
   string getOutputFileName();
+
+  /**
+   * Processes the parameters
+   */
+  virtual void processParams();
+
+
 };
 
 #endif
