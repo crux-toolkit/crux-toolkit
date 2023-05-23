@@ -182,6 +182,7 @@ set (
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
   app/TideSearchApplication.cpp
+  app/TideLiteSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
   io/DIAmeterPSMFilter.cpp
   io/DIAmeterCVSelector.cpp
