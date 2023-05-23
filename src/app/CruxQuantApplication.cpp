@@ -9,7 +9,6 @@
 #include "util/crux-utils.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
-#include "TideSearchApplication.h"
 #include "CruxQuantApplication.h"
 
 using std::make_pair;

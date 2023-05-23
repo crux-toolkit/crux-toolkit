@@ -6,6 +6,7 @@
 #include "crux-quant/IndexedMassSpectralPeak.h"
 #include "crux-quant/PeakIndexingEngine.h"
 #include "model/MatchCollection.h"
+#include "TideSearchApplication.h"
 
 using std::string;
 using std::vector;

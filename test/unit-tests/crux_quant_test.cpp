@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-// #include "../../src/app/CruxQuantApplication.h"
-// #include "IndexedMassSpectralPeak.cpp"
+#include "CruxQuantApplication.h"
+#include "IndexedMassSpectralPeak.h"
 
 
 // Demonstrate some basic assertions.
