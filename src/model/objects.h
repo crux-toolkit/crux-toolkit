@@ -624,6 +624,7 @@ enum _command {
   CASCADE_COMMAND,      ///< Cascade Search
   LOCALIZE_MODIFICATION_COMMAND, ///< localize-modification
   VERSION_COMMAND,      ///< just print the version number
+  TIDE_LITE_SEARCH_COMMAND, ///< Tide-lite
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value
                         /// changes as cmds are added
