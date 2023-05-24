@@ -38,6 +38,7 @@ TideLiteSearchApplication::TideLiteSearchApplication() {
   exact_pval_search_ = false;
   remove_index_ = "";
   spectrum_flag_ = NULL;
+  decoy_num_ = 0;
 }
 
 TideLiteSearchApplication::~TideLiteSearchApplication() {
@@ -55,19 +56,52 @@ int TideLiteSearchApplication::main(const vector<string>& input_files) {
 int TideLiteSearchApplication::main(const vector<string>& input_files, const string input_index) {
   carp(CARP_INFO, "Running tide-lite-search...");
   
-  string peptides_file = FileUtils::Join(input_index, "pepix");
-  string proteins_file = FileUtils::Join(input_index, "protix");
-  string auxlocs_file = FileUtils::Join(input_index, "auxlocs");  
-
   bin_width_  = Params::GetDouble("mz-bin-width");
   bin_offset_ = Params::GetDouble("mz-bin-offset");
 
   use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
   use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
+  
+  // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
+  ProteinVec proteins;
+  vector<const pb::AuxLocation*> locations;
+  pb::Header peptides_header;
+  string peptides_file = FileUtils::Join(input_index, "pepix");  
+  HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
+  getPeptideIndexData(input_index, proteins, locations, peptides_header);
+
+  // Create active peptide queue
+  ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins, &locations);  
+  // active_peptide_queue->SetBinSize(bin_width_, bin_offset_);  // TODO: consider removing
+
+  // Create the output files
+  ofstream* target_file = NULL;
+  ofstream* decoy_file = NULL;
+ 
+  createOutputFiles(&target_file, &decoy_file);
+
+  // Convert the imput spectrum data files to spectrumRecords if needed
+  vector<InputFile> sr = getInputFiles(input_files);
+
+  // Loop through spectrum files
+  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
+    string spectra_file = f->SpectrumRecords;
+    carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
+  }
+
+  return 0;
+}
+
+
+void TideLiteSearchApplication::getPeptideIndexData(const string input_index, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header){
+
+  string peptides_file = FileUtils::Join(input_index, "pepix");  
+  string proteins_file = FileUtils::Join(input_index, "protix");
+  string auxlocs_file = FileUtils::Join(input_index, "auxlocs");  
 
   // Read protein index file
   carp(CARP_INFO, "Reading index %s", input_index.c_str());
-  ProteinVec proteins;
+
   pb::Header protein_header;
 
   if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins, proteins_file, &protein_header)) {
@@ -85,13 +119,9 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   }
   
   // Read auxlocs index file
-  vector<const pb::AuxLocation*> locations;
   ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file);
 
   // Read peptides index file
-  carp(CARP_INFO, "Reading peptide_header.");  
-  pb::Header peptides_header;
-  HeadedRecordReader peptide_reader =  HeadedRecordReader(peptides_file, &peptides_header);
 
   if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
       !peptides_header.has_peptides_header()) {
@@ -99,12 +129,11 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   }
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
-  int decoysPerTarget = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
-  bool has_decoys = false;
-  if (headerDecoyType != NO_DECOYS) {
-    has_decoys = true;
-  }
+//  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();  // TODO: consider removing
+  decoy_num_ = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
+  // if (headerDecoyType != NO_DECOYS) { // TODO: consider removing
+  //   decoy_num_ = 0;
+  // }
 
   // Initizalize the Mass Constants class
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
@@ -125,45 +154,41 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   TideMatchSet::initModMap(pepHeader.nprotterm_mods(), PROTEIN_N);
   TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
 
+}
+
+void TideLiteSearchApplication::createOutputFiles(ofstream **target_file, ofstream **decoy_file) {
+  
   // Create output search results files
   bool overwrite = Params::GetBool("overwrite");
-  ofstream* target_file = NULL;
-  ofstream* decoy_file = NULL;
+  bool compute_sp = false;   //TODO: reconsider later    bool compute_sp = Params::GetBool("compute-sp");
 
   if (Params::GetBool("concat")) {
 
     string concat_file_name = make_file_path("tide-search.txt");
-    target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
+    *target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
     output_file_name_ = concat_file_name;
   
   } else {
   
     string target_file_name = make_file_path("tide-search.target.txt");
-    target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+    *target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
     output_file_name_ = target_file_name;
-    if (has_decoys) {
+    if (decoy_num_ > 0) {
       string decoy_file_name = make_file_path("tide-search.decoy.txt");
-      decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+      *decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
     }
-  }
-  bool compute_sp = false;   //TODO: reconsider later
-
-  if (target_file) {
-    TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, compute_sp);
-    TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, compute_sp);
+  }  
+  if (*target_file) {
+    TideMatchSet::writeHeaders(*target_file, false, decoy_num_ > 1, compute_sp);
+    TideMatchSet::writeHeaders(*decoy_file, true, decoy_num_ > 1, compute_sp);
   }
 
-  vector<InputFile> sr = getInputFiles(input_files);
-
-  // Loop through spectrum files
-  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
-    string spectra_file = f->SpectrumRecords;
-    carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
-  }
-
-
-  return 0;
 }
+
+string TideLiteSearchApplication::getOutputFileName() {
+  return output_file_name_;
+}
+
 
 vector<string> TideLiteSearchApplication::getOptions() const {
   string arr[] = {
@@ -430,11 +455,6 @@ vector<InputFile> TideLiteSearchApplication::getInputFiles(
     input_sr.push_back(InputFile(*f, spectrumrecords, keepSpectrumrecords));
   }
   return input_sr;
-}
-
-
-string TideLiteSearchApplication::getOutputFileName() {
-  return output_file_name_;
 }
 
 

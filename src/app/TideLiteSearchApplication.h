@@ -33,10 +33,15 @@ class TideLiteSearchApplication : public CruxApplication {
   double bin_offset_;
   bool use_neutral_loss_peaks_;
   bool use_flanking_peaks_;
-  
+
+  int decoy_num_;  // Number of decoys per peptide;
+
 
   vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
   static SpectrumCollection* loadSpectra(const std::string& file);
+  void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
+  void createOutputFiles(std::ofstream **targe_file, std::ofstream **decoy_file);
+
 
   /**
    * Function that contains the search algorithm and performs the search
