@@ -181,6 +181,7 @@ set (
   io/SQTWriter.cpp
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
+  app/TideLiteMatchSet.cpp
   app/TideSearchApplication.cpp
   app/TideLiteSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
