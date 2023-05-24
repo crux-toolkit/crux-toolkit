@@ -80,7 +80,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
  
   createOutputFiles(&target_file, &decoy_file);
 
-  // Convert the imput spectrum data files to spectrumRecords if needed
+  // Convert the input spectrum data files to spectrumRecords if needed
   vector<InputFile> sr = getInputFiles(input_files);
 
   // Loop through spectrum files
@@ -89,6 +89,14 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
   }
 
+    // Delete temporary spectrumrecords file
+  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
+    if (!f->Keep) {
+      string spectra_file = f->SpectrumRecords;      
+      carp(CARP_DEBUG, "Deleting %s", spectra_file.c_str());
+      remove(spectra_file.c_str());
+    }
+  }
   return 0;
 }
 
@@ -159,22 +167,27 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
 void TideLiteSearchApplication::createOutputFiles(ofstream **target_file, ofstream **decoy_file) {
   
   // Create output search results files
-  bool overwrite = Params::GetBool("overwrite");
   bool compute_sp = false;   //TODO: reconsider later    bool compute_sp = Params::GetBool("compute-sp");
-
+  
+  string concat_file_name = make_file_path("tide-search.txt");
+  string target_file_name = make_file_path("tide-search.target.txt");
+  string decoy_file_name  = make_file_path("tide-search.decoy.txt");
+  bool overwrite = Params::GetBool("overwrite");  
+  if (overwrite) {
+    remove(concat_file_name.c_str());  
+    remove(target_file_name.c_str());  
+    remove(decoy_file_name.c_str());  
+  }
   if (Params::GetBool("concat")) {
 
-    string concat_file_name = make_file_path("tide-search.txt");
     *target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
     output_file_name_ = concat_file_name;
   
   } else {
   
-    string target_file_name = make_file_path("tide-search.target.txt");
     *target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
     output_file_name_ = target_file_name;
     if (decoy_num_ > 0) {
-      string decoy_file_name = make_file_path("tide-search.decoy.txt");
       *decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
     }
   }  
