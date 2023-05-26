@@ -66,6 +66,9 @@ bool SpectrumRecordWriter::convert(
   scanCounter_ = 0;
   carp(CARP_DETAILED_DEBUG, "Starting to convert spectrum to pb..." );
   // Go through the spectrum list and write each spectrum
+
+  vector<pb::Spectrum> all_spectra;  //Added by AKF
+
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
 	(*i)->sortPeaks(_PEAK_LOCATION); // Sort by m/z
 
@@ -73,10 +76,19 @@ bool SpectrumRecordWriter::convert(
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
          j != pb_spectra.end();
          ++j) { 
-      writer.Write(&*j);
+//      writer.Write(&*j);  //Added by AKF
+        all_spectra.push_back(*j);
     }
   }
-
+  // Below, added by AKF
+  // all_spectra contains all spectra.
+  // sort all_spectra
+ /* for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin()
+         j != pb_spectra.end();
+         ++j) { 
+      writer.Write(&*j);  //Added by AKF
+  }
+*/
   return true;
 }
 
