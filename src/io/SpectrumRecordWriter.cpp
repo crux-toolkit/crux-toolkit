@@ -21,6 +21,9 @@ int SpectrumRecordWriter::scanCounter_ = 0;
  * Converts a spectra file to spectrumrecords format for use with tide-search.
  * Spectra file is read by pwiz. Returns true on successful conversion.
  */
+bool cmp_spectra(pb::Spectrum a1, pb::Spectrum a2)  {
+  return a1.precursor_m_z() < a2. precursor_m_z();
+}
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile,  ///< spectrumrecords file to output
@@ -64,8 +67,8 @@ bool SpectrumRecordWriter::convert(
   }
 
   scanCounter_ = 0;
-  carp(CARP_DETAILED_DEBUG, "Starting to convert spectrum to pb..." );
-  // Go through the spectrum list and write each spectrum
+   carp(CARP_DETAILED_DEBUG, "starting to convert spectrum to pb..." );
+  // go through the spectrum list and write each spectrum
 
   vector<pb::Spectrum> all_spectra;  //Added by AKF
 
@@ -77,18 +80,19 @@ bool SpectrumRecordWriter::convert(
          j != pb_spectra.end();
          ++j) { 
 //      writer.Write(&*j);  //Added by AKF
+        assert(j->has_precursor_m_z());
         all_spectra.push_back(*j);
     }
   }
   // Below, added by AKF
   // all_spectra contains all spectra.
   // sort all_spectra
- /* for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin()
-         j != pb_spectra.end();
+  std::sort(all_spectra.begin(), all_spectra.end(), cmp_spectra);
+  for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin();
+         j != all_spectra.end();
          ++j) { 
       writer.Write(&*j);  //Added by AKF
   }
-*/
   return true;
 }
 
