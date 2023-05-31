@@ -1,1 +1,1 @@
-file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	tdc q-value	distinct matches/spectrum	sequence	unmodified sequence	protein id	flanking aa	index name
+file	scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	xcorr score	xcorr rank	tdc q-value	b/y ions matched	b/y ions total	distinct matches/spectrum	sequence	unmodified sequence	protein id	flanking aa	index name
