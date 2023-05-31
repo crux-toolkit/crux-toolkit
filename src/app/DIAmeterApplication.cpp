@@ -294,13 +294,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           double quantile_score = getTailorQuantile(&match_arr2);
 
           TideMatchSet::Arr match_arr(nCandPeptide);
-          for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
+          int peptide_idx = 0;// candidatePeptideStatusSize - (it->second);
+          for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it, ++peptide_idx) {
              /// The code below which is adopted from Tide-search
-             int peptide_idx = candidatePeptideStatusSize - (it->second);
              if ((*candidatePeptideStatus)[peptide_idx]) {
               TideMatchSet::Scores curScore;
                curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
-               curScore.rank = it->second;
+               curScore.rank =  candidatePeptideStatusSize - peptide_idx; // it->second;
                curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
                match_arr.push_back(curScore);
              }
