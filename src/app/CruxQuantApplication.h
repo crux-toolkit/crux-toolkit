@@ -3,9 +3,6 @@
 #include <vector>
 
 #include "CruxApplication.h"
-#include "crux-quant/IndexedMassSpectralPeak.h"
-#include "crux-quant/PeakIndexingEngine.h"
-#include "model/MatchCollection.h"
 #include "TideSearchApplication.h"
 
 using std::string;
@@ -48,12 +45,12 @@ class CruxQuantApplication: public CruxApplication{
         /**
          * \returns the command arguments
          */
-        virtual vector<std::string> getArgs() const;
+        virtual vector<string> getArgs() const;
 
         /**
          * \returns the command options
          */
-        virtual vector<std::string> getOptions() const;
+        virtual vector<string> getOptions() const;
 
         /**
          * \returns the command outputs
@@ -72,8 +69,10 @@ class CruxQuantApplication: public CruxApplication{
 
         virtual void processParams();
 
-        vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
+        vector<InputFile> getInputFiles(const vector<string>& filepaths,  int ms_level = 2) const;
 
-        static SpectrumCollection* loadSpectra(const std::string& file);
+        static SpectrumCollection* loadSpectra(const string& file);
+
+        static MatchCollection* read_psm(string psm_file);
         
 };

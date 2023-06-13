@@ -13,6 +13,9 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
 
+include_directories(${CMAKE_SOURCE_DIR}/src/app/crux-quant)
+include_directories(${CMAKE_SOURCE_DIR}/src/app/tide)
+
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})

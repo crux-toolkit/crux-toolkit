@@ -59,11 +59,12 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/blas)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
+include_directories(${CMAKE_BINARY_DIR}/src/app/tide/protoobj)
 
 link_directories(${CMAKE_BINARY_DIR}/src)
 link_directories(${CMAKE_BINARY_DIR}/src/app/bullseye)
 link_directories(${CMAKE_BINARY_DIR}/src/app/hardklor)
+link_directories(${CMAKE_BINARY_DIR}/src/app/tide/protoobj)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
@@ -91,7 +92,7 @@ FetchContent_MakeAvailable(googletest)
 add_executable(crux_test crux_quant_test.cpp)
 
 target_link_libraries(
-crux_test
+  crux_test
   GTest::gtest 
   GTest::gtest_main
   crux-support
