@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include "app/tide/abspath.h"
 #include "app/tide/records_to_vector-inl.h"
@@ -11,11 +12,16 @@
 #include "PSMConvertApplication.h"
 #include "tide/mass_constants.h"
 #include "TideMatchSet.h"
+#include "tide/spectrum_collection.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 #include <math.h> 
-#include <map> 
+#include <map>
+
+//here :O
+#include <iostream>
+#include <set>
 
 /* This constant is the product of the original "magic number" (10000,
  * on line 4622 of search28.c) that was used to rescale the XCorr
@@ -82,13 +88,46 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
 
   // Convert the input spectrum data files to spectrumRecords if needed
   vector<InputFile> sr = getInputFiles(input_files);
-
   // Loop through spectrum files
+  // Here :O
+  vector<vector<Spectrum*>*> vect_spectra;
+  vector<int> idxs_spectra(sr.size(),0);
+  struct pair_mass_spectra{
+    pair_mass_spectra(vector<Spectrum*> *ptr2, int idxx): ptr(ptr2), idx(idxx) {
+    }
+    vector<Spectrum*>* ptr;
+    int idx;
+    bool operator<(const pair_mass_spectra& other) const{
+      return ptr->at(idx)->PrecursorMZ() < other.ptr->at(idx)->PrecursorMZ();
+    }
+  };
+  set<pair_mass_spectra> queue_spectra;
   for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
     string spectra_file = f->SpectrumRecords;
     carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
-  }
+    // here changes
+    SpectrumCollection* spectra = NULL;
+    spectra = loadSpectra(spectra_file); // heap memory!
 
+    vect_spectra.push_back(spectra->Spectra());
+    if (!vect_spectra.back()->empty()) {
+      queue_spectra.insert(pair_mass_spectra(vect_spectra.back(), 0));
+    }
+  }
+  std::cout<<"Printing in order!!!\n";
+  while(!queue_spectra.empty()) {
+    auto it = queue_spectra.begin();
+    auto idx = it->idx;
+    auto ptr = it->ptr;
+    std::cout<<ptr->at(idx)->PrecursorMZ()<<" ";
+    queue_spectra.erase(it);
+    idx++;
+    if (ptr->size() == idx) {
+      continue;
+    }
+    queue_spectra.insert(pair_mass_spectra(ptr, idx));
+  }
+  //merge done!!!
     // Delete temporary spectrumrecords file
   for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
     if (!f->Keep) {
