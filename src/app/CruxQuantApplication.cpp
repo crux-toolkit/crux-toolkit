@@ -174,6 +174,11 @@ SpectrumCollection* CruxQuantApplication::loadSpectra(const string& file) {
 }
 
 MatchCollection* CruxQuantApplication::read_psm(string psm_file){
+    PSMReader* reader;
+    Database* data;
+    bool isTabDelimited = false;
+    data = new Database(); // Need to add support for reading database file https://github.com/crux-toolkit/crux-toolkit/blob/b74024b9c5037bf0e7a476d235216777887fba11/src/app/PSMConvertApplication.cpp#L32
+
     if (StringUtils::IEndsWith(psm_file, ".txt")) {
       reader = new MatchFileReader(psm_file.c_str(), data);
       isTabDelimited = true;
@@ -190,7 +195,10 @@ MatchCollection* CruxQuantApplication::read_psm(string psm_file){
     } else {
       carp(CARP_FATAL, "Could not determine input format, "
            "Please name your files ending with .txt, .html, .sqt, .pin, "
-           ".xml, .mzid or use the --input-format option to "
-           "specify file type");
+           ".xml, .mzid");
     }
+
+    MatchCollection* collection = reader->parse();
+    // May need to add this as well https://github.com/crux-toolkit/crux-toolkit/blob/b74024b9c5037bf0e7a476d235216777887fba11/src/app/PSMConvertApplication.cpp#L86
+    return collection;
 }
