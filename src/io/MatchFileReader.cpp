@@ -187,6 +187,7 @@ MatchCollection* MatchFileReader::parse() {
   MatchCollection* match_collection = new MatchCollection();
   match_collection->preparePostProcess();
   int maxRank = Params::GetInt("top-match-in");
+  //std::cout << "ttt" << std::endl;
 
   while (hasNext()) {
     FLOAT_T ln_experiment_size = 0;
@@ -219,6 +220,7 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
+	match_collection->setScoredType(QVALUE_TDC, !empty(QVALUE_TDC_COL));
 
     // DIAmeter related, added by Yang
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
@@ -249,10 +251,11 @@ MatchCollection* MatchFileReader::parse() {
     } else if (empty(SP_RANK_COL) == 1) {
       rank_col = SP_RANK_COL;
     } else {
-      carp(CARP_FATAL, "Input file does not contain any reconized rank column.");
+      carp(CARP_FATAL, "Input file does not contain any recognized rank column.");
     }
 
     // parse match object
+    //std::cout << "max rank: " << maxRank << std::endl;
     if (maxRank == 0 || getInteger(rank_col) <= maxRank) {
       Crux::Match* match = parseMatch();
       if (match == NULL) {
@@ -260,10 +263,19 @@ MatchCollection* MatchFileReader::parse() {
         return NULL;
       }
 
-      //set all spectrum specific features to parsed match
-      SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
-                            getInteger(CHARGE_COL));
-      match->setZState(zState);
+      // set all spectrum specific features to parsed match
+      // zState also gets set by spectrum = parseSpectrum() and spectrum is used
+      // as input for match. This code changes zState only if charge and neutral
+      // mass column is present. Note that this if statement is required as
+      // Percolator PSMId column is parsed by parseSpectrum()
+      //std::cout << "need to set this" << std::endl;
+      //std::cout << match->getCharge() << std::endl;
+      if (getFloat(SPECTRUM_NEUTRAL_MASS_COL) != -1 &&
+          getInteger(CHARGE_COL) != -1) {
+        SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+                              getInteger(CHARGE_COL));
+        match->setZState(zState);
+      }
       match->setLnExperimentSize(ln_experiment_size);
       //add match to match collection.
       match_collection->addMatchToPostMatchCollection(match);
@@ -280,6 +292,7 @@ MatchCollection* MatchFileReader::parse() {
  */
 Crux::Match* MatchFileReader::parseMatch() {
   // parse spectrum
+  std::cout << "asdf" << std::endl;
   Crux::Spectrum* spectrum = parseSpectrum();
   if (spectrum == NULL) {
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
@@ -373,6 +386,9 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
   }
+  if (!empty(QVALUE_TDC_COL)) {
+    match->setScore(QVALUE_TDC, getFloat(QVALUE_TDC_COL));
+  }
 
   // DIAmeter related, added by Yang
   if (!empty(PRECURSOR_INTENSITY_RANK_M0_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M0, getFloat(PRECURSOR_INTENSITY_RANK_M0_COL)); }
@@ -452,10 +468,32 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 }
 
 Crux::Spectrum* MatchFileReader::parseSpectrum() {
-  return new Crux::Spectrum(getInteger(SCAN_COL),
-                            getInteger(SCAN_COL),
-                            getFloat(SPECTRUM_PRECURSOR_MZ_COL),
-                            vector<int>(1, getInteger(CHARGE_COL)),
-                            getString(FILE_COL));
+  //std::cout << "parse spectrum" << std::endl;
+  //std::cout << getInteger(SCAN_COL) << std::endl;
+  if (getInteger(SCAN_COL) != -1) {
+    return new Crux::Spectrum(getInteger(SCAN_COL),
+                              getInteger(SCAN_COL),
+                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
+                              vector<int>(1, getInteger(CHARGE_COL)),
+                              getString(FILE_COL));
+  } else {
+    // This part allows Percolator output files to be read in
+    std::cout << getString(POUT_PSMID_COL) << std::endl;
+    string intermediate;
+    vector <string> tokens;
+    stringstream psmid(getString(POUT_PSMID_COL));
+
+    // tokenize by underscore
+    while(getline(psmid, intermediate, '_'))
+    {
+        tokens.push_back(intermediate);
+    }
+    std::cout << stoi(tokens[3]) << std::endl;
+    return new Crux::Spectrum(stoi(tokens[2]),
+                              stoi(tokens[2]),
+                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
+                              vector<int>(1, stoi(tokens[3])),
+                              getString(FILE_COL));
+  }
 }
 

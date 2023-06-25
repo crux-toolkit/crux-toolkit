@@ -59,7 +59,7 @@ int SpectralCounts::main(int argc, char** argv) {
 
   // get a set of matches that pass the threshold
   filterMatches();
-  carp(CARP_INFO, "Number of matches passed the threshold %i", 
+  carp(CARP_INFO, "Number of matches passed the threshold: %i",
        matches_.size());
 
   if (matches_.empty()) {
@@ -71,7 +71,7 @@ int SpectralCounts::main(int argc, char** argv) {
   if (unique_mapping_) {
     makeUniqueMapping();
   }
-  carp(CARP_INFO, "Number of peptides %i", peptide_scores_.size());
+  carp(CARP_INFO, "Number of peptides: %i", peptide_scores_.size());
 
   // quantify at either the peptide or protein level
   if (quantitation_ == PEPTIDE_QUANT_LEVEL) { // peptide level
@@ -87,13 +87,13 @@ int SpectralCounts::main(int argc, char** argv) {
       normalizeProteinScores();
       checkProteinNormalization();
     }
-    carp(CARP_INFO, "Number of proteins %i", protein_scores_.size());
+    carp(CARP_INFO, "Number of proteins: %i", protein_scores_.size());
         
     if (parsimony_ != PARSIMONY_NONE) { //if parsimony is not none
       getProteinToPeptides();
       getMetaMapping();
       getProteinToMetaProtein();
-      carp(CARP_INFO, "Number of meta proteins %i", meta_mapping_.size());
+      carp(CARP_INFO, "Number of meta proteins: %i", meta_mapping_.size());
 
       if (parsimony_ == PARSIMONY_GREEDY) { //if parsimony is greedy
         performParsimonyAnalysis();
@@ -330,7 +330,7 @@ void SpectralCounts::normalizePeptideScores() {
 
 
 /**
- * Changes the scores in protien_scores_ to either be divided by the
+ * Changes the scores in protein_scores_ to either be divided by the
  * sum of all scores times the peptide length (SIN, NSAF) or to be the
  * final emPAI score.
  */
@@ -349,10 +349,12 @@ void SpectralCounts::normalizeProteinScores() {
     FLOAT_T score = it->second;
     Protein* protein = it->first;
     if ( (measure_ == MEASURE_NSAF) || (measure_ == MEASURE_DNSAF)) {
+      std::cout << protein->getId() << " " << score << " " << protein->getLength() << " " << score / (FLOAT_T)protein->getLength() << std::endl;
       score = score / (FLOAT_T)protein->getLength();
     }
     total += score;
   }
+  std::cout << "total: " << total << std::endl;
     
   // normalize by sum of all scores
   for (ProteinToScore::iterator it = protein_scores_.begin();
@@ -440,11 +442,14 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   int charge = match->getCharge();
   Spectrum* temp = match->getSpectrum();
   int scan = temp->getFirstScan();
+  std::cout << "scan: " << scan << std::endl;
+  std::cout << "charge: " << charge << std::endl;
 
   Spectrum* spectrum = spectra->getSpectrum(scan);
+  std::cout << "precursor mz: " << spectrum->getPrecursorMz() << std::endl;
 
   if (spectrum == NULL) {
-    carp(CARP_FATAL, "scan: %d doesn't exist or not found!");
+    carp(CARP_FATAL, "scan: %d doesn't exist or not found!", scan);
     return 0.0;
   }
 
@@ -460,7 +465,8 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
     ion = (*ion_it);
     if (ion -> getType() == B_ION || ion -> getType() == Y_ION) {
       if (!ion->isModified()) {
-        Peak * peak = spectrum->getNearestPeak(ion->getMassZ(),
+        //std::cout << "ion mz: " << ion->getMassZ() << std::endl;
+        Peak* peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
         if (peak != NULL) {
           match_intensity += peak->getIntensity();
@@ -470,6 +476,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   }
   delete ion_series;
   free(peptide_seq);
+  std::cout << "intensity: " << match_intensity << std::endl;
 
   return match_intensity;
 }
@@ -553,7 +560,7 @@ void SpectralCounts::filterMatches() {
   match_collection_ = parser_.create(
     psm_file_.c_str(),
     database_name_.c_str());
-  carp(CARP_INFO, "Number of matches:%d", match_collection_->getMatchTotal());
+  carp(CARP_INFO, "Number of matches: %d", match_collection_->getMatchTotal());
 
   switch(threshold_type_) {
     case THRESHOLD_NONE:
@@ -713,12 +720,10 @@ void SpectralCounts::filterMatchesQValue() {
      
     carp(CARP_DEBUG, "xcorr rank:%d q-value:%f", match->getRank(XCORR), match->getScore(qval_type));
     if (match->isDecoy()) {
-      continue;
+      carp(CARP_FATAL, "Input file should not have decoy PSMs.");
     } 
-    if ((qval_type == DECOY_XCORR_QVALUE) && 
-      (match->getRank(XCORR) != 1)) {
-      continue;
-    }
+
+    std::cout << "qval: " << match->getScore(qval_type) << std::endl;
       
     // find a qvalue score lower than threshold
     if (match->getScore(qval_type) != FLT_MIN &&
@@ -731,7 +736,7 @@ void SpectralCounts::filterMatchesQValue() {
 
 /**
  * Figures out which kind of q-value was scored for this match collection.
- * \returns PERCOLATOR_QVALUE, or DECOY_XCORR_QVALUE
+ * Returns PERCOLATOR_QVALUE or QVALUE_TDC
  * if any of those were scored or INVALID_SCORER_TYPE if none were scored. 
  */
 SCORER_TYPE_T SpectralCounts::get_qval_type(
@@ -740,8 +745,8 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
 
   if (match_collection->getScoredType(PERCOLATOR_QVALUE)) {
     scored_type =  PERCOLATOR_QVALUE;
-  } else if (match_collection->getScoredType(DECOY_XCORR_QVALUE)) {
-    scored_type = DECOY_XCORR_QVALUE;
+  } else if (match_collection->getScoredType(QVALUE_TDC)) {
+    scored_type = QVALUE_TDC;
   }
 
   return scored_type;
@@ -970,7 +975,8 @@ void SpectralCounts::makeUniqueMapping() {
       Peptide* peptide = it->first;
       int num_proteins = peptide->getNumPeptideSrc();
       if (num_proteins > 1) {
-        peptide_scores_.erase(it);
+        it = peptide_scores_.erase(it);
+        it--;
       }
     }
   }

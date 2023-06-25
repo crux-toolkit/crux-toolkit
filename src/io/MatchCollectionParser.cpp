@@ -194,6 +194,7 @@ MatchCollection* MatchCollectionParser::create(
   } else if (StringUtils::IEndsWith(match_path, ".mzid")) {
     collection = MzIdentMLReader::parse(match_path, database_, decoy_database_);
   } else {
+    //std::cout << "qqq" << std::endl;
     collection = MatchFileReader::parse(match_path, database_, decoy_database_);
   }
   

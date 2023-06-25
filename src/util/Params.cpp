@@ -317,7 +317,7 @@ Params::Params() : finalized_(false) {
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
     "Output a pepXML results file to the output directory.",
-    "Available for tide-search, percolator.", true);
+    "Available for tide-search.", true);
   InitBoolParam("txt-output", true,
     "Output a tab-delimited results file to the output directory.",
     "Available for tide-search, percolator.", true);
@@ -506,7 +506,7 @@ Params::Params() : finalized_(false) {
     "When given a unsigned integer value seeds the random number generator with that value. "
     "When given the string \"time\" seeds the random number generator with the system time.",
     "Available for all percolator", true);
-InitStringParam("protein-name-separator", "	", // Note this is a tab
+InitStringParam("protein-name-separator", ",",
     "Determines the character to separate the protein IDs in the tab-delimited output format ",
     "Available for all percolator", true);
   InitBoolParam("feature-file-out", false,
@@ -1354,7 +1354,7 @@ InitStringParam("protein-name-separator", "	", // Note this is a tab
     "Only available for crux-predict-peptide-ions.", true);
   // ***** spectral-counts aguments *****
   InitArgParam("input PSMs",
-    "A PSM file in either tab delimited text format (as produced by percolator), or pepXML format.");
+    "A PSM file that has been produced by Percolator or assign-confidence.");
   // also uses "protein-database"
   // ***** spectral-counts options *****
   InitStringParam("protein-database", "",
