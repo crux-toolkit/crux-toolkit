@@ -187,7 +187,6 @@ MatchCollection* MatchFileReader::parse() {
   MatchCollection* match_collection = new MatchCollection();
   match_collection->preparePostProcess();
   int maxRank = Params::GetInt("top-match-in");
-  //std::cout << "ttt" << std::endl;
 
   while (hasNext()) {
     FLOAT_T ln_experiment_size = 0;
@@ -254,7 +253,6 @@ MatchCollection* MatchFileReader::parse() {
     }
 
     // parse match object
-    //std::cout << "max rank: " << maxRank << std::endl;
     if (maxRank == 0 || getInteger(rank_col) <= maxRank) {
       Crux::Match* match = parseMatch();
       if (match == NULL) {
@@ -267,8 +265,6 @@ MatchCollection* MatchFileReader::parse() {
       // as input for match. This code changes zState only if charge and neutral
       // mass column is present. Note that this if statement is required as
       // Percolator PSMId column is parsed by parseSpectrum()
-      //std::cout << "need to set this" << std::endl;
-      //std::cout << match->getCharge() << std::endl;
       if (getFloat(SPECTRUM_NEUTRAL_MASS_COL) != -1 &&
           getInteger(CHARGE_COL) != -1) {
         SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
@@ -291,7 +287,6 @@ MatchCollection* MatchFileReader::parse() {
  */
 Crux::Match* MatchFileReader::parseMatch() {
   // parse spectrum
-  std::cout << "asdf" << std::endl;
   Crux::Spectrum* spectrum = parseSpectrum();
   if (spectrum == NULL) {
     carp(CARP_ERROR, "Failed to parse spectrum (tab delimited).");
@@ -464,8 +459,6 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 }
 
 Crux::Spectrum* MatchFileReader::parseSpectrum() {
-  //std::cout << "parse spectrum" << std::endl;
-  //std::cout << getInteger(SCAN_COL) << std::endl;
   if (getInteger(SCAN_COL) != -1) {
     return new Crux::Spectrum(getInteger(SCAN_COL),
                               getInteger(SCAN_COL),
@@ -474,7 +467,6 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
                               getString(FILE_COL));
   } else {
     // This part allows Percolator output files to be read in
-    std::cout << getString(POUT_PSMID_COL) << std::endl;
     string intermediate;
     vector <string> tokens;
     stringstream psmid(getString(POUT_PSMID_COL));
@@ -484,7 +476,6 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
     {
         tokens.push_back(intermediate);
     }
-    std::cout << stoi(tokens[3]) << std::endl;
     return new Crux::Spectrum(stoi(tokens[2]),
                               stoi(tokens[2]),
                               getFloat(SPECTRUM_PRECURSOR_MZ_COL),

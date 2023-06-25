@@ -349,12 +349,10 @@ void SpectralCounts::normalizeProteinScores() {
     FLOAT_T score = it->second;
     Protein* protein = it->first;
     if ( (measure_ == MEASURE_NSAF) || (measure_ == MEASURE_DNSAF)) {
-      std::cout << protein->getId() << " " << score << " " << protein->getLength() << " " << score / (FLOAT_T)protein->getLength() << std::endl;
       score = score / (FLOAT_T)protein->getLength();
     }
     total += score;
   }
-  std::cout << "total: " << total << std::endl;
     
   // normalize by sum of all scores
   for (ProteinToScore::iterator it = protein_scores_.begin();
@@ -442,11 +440,8 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   int charge = match->getCharge();
   Spectrum* temp = match->getSpectrum();
   int scan = temp->getFirstScan();
-  std::cout << "scan: " << scan << std::endl;
-  std::cout << "charge: " << charge << std::endl;
 
   Spectrum* spectrum = spectra->getSpectrum(scan);
-  std::cout << "precursor mz: " << spectrum->getPrecursorMz() << std::endl;
 
   if (spectrum == NULL) {
     carp(CARP_FATAL, "scan: %d doesn't exist or not found!", scan);
@@ -465,7 +460,6 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
     ion = (*ion_it);
     if (ion -> getType() == B_ION || ion -> getType() == Y_ION) {
       if (!ion->isModified()) {
-        //std::cout << "ion mz: " << ion->getMassZ() << std::endl;
         Peak* peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
         if (peak != NULL) {
@@ -476,7 +470,6 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   }
   delete ion_series;
   free(peptide_seq);
-  std::cout << "intensity: " << match_intensity << std::endl;
 
   return match_intensity;
 }
@@ -723,8 +716,6 @@ void SpectralCounts::filterMatchesQValue() {
       carp(CARP_FATAL, "Input file should not have decoy PSMs.");
     } 
 
-    //std::cout << "qval: " << match->getScore(qval_type) << std::endl;
-      
     // find a qvalue score lower than threshold
     if (match->getScore(qval_type) != FLT_MIN &&
         match->getScore(qval_type) <= threshold_)  {
