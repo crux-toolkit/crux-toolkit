@@ -208,7 +208,6 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(RESIDUE_EVIDENCE_SCORE, !empty(RESIDUE_EVIDENCE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
-    match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
     match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(POUT_QVALUE_COL));
     if (empty(POUT_QVALUE_COL)) {
       match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
@@ -355,9 +354,6 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(BOTH_PVALUE_COL)) {
     match->setScore(BOTH_PVALUE, getFloat(BOTH_PVALUE_COL));
     match->setRank(BOTH_PVALUE, getInteger(BOTH_PVALUE_RANK));
-  }
-  if (!empty(DECOY_XCORR_QVALUE_COL)) {
-    match->setScore(DECOY_XCORR_QVALUE, getFloat(DECOY_XCORR_QVALUE_COL));
   }
   if (!empty(EVALUE_COL)) {
     match->setScore(EVALUE, getFloat(EVALUE_COL));

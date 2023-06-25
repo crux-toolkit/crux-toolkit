@@ -60,7 +60,7 @@ MatchFileWriter::~MatchFileWriter() {
 void MatchFileWriter::setPrecision() {
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++) {
     switch(col_idx) {
-      // integer and string fields
+    // integer and string fields
     case FILE_COL:
     case SCAN_COL:
     case CHARGE_COL:
@@ -82,7 +82,7 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-      // mass fields
+    // mass fields
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
     case MASS_COL:
@@ -93,14 +93,13 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-      // score fields
+    // score fields
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:
     case XCORR_FIRST_COL:
     case XCORR_SECOND_COL:
     case EVALUE_COL:
-    case DECOY_XCORR_QVALUE_COL:
     case DECOY_XCORR_PEP_COL:
     case DECOY_EVALUE_QVALUE_COL:
     case DECOY_EVALUE_PEP_COL:

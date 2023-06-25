@@ -370,12 +370,6 @@ void Match::printOneMatchField(
               getScore(QVALUE_MIXMAX));
 //    }
     break;
-  case DECOY_XCORR_QVALUE_COL:
-    if (null_peptide_ == false) {
-      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-              getScore(DECOY_XCORR_QVALUE));
-    }
-    break;
   case DECOY_XCORR_PEP_COL:
     if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
