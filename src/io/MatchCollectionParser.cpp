@@ -188,6 +188,7 @@ MatchCollection* MatchCollectionParser::create(
   if (FileUtils::IsDir(match_path)) {
     carp(CARP_FATAL, "Internal error");
   } else if (StringUtils::IEndsWith(match_path, ".xml")) {
+    //std::cout << "ppp" << std::endl;
     collection = PepXMLReader::parse(match_path, database_, decoy_database_);
   } else if (StringUtils::IEndsWith(match_path, ".sqt")) {
     collection = SQTReader::parse(match_path, database_, decoy_database_);

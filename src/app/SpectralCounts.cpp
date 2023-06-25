@@ -723,7 +723,7 @@ void SpectralCounts::filterMatchesQValue() {
       carp(CARP_FATAL, "Input file should not have decoy PSMs.");
     } 
 
-    std::cout << "qval: " << match->getScore(qval_type) << std::endl;
+    //std::cout << "qval: " << match->getScore(qval_type) << std::endl;
       
     // find a qvalue score lower than threshold
     if (match->getScore(qval_type) != FLT_MIN &&

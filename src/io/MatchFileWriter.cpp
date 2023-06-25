@@ -101,7 +101,6 @@ void MatchFileWriter::setPrecision() {
     case XCORR_SECOND_COL:
     case EVALUE_COL:
     case DECOY_XCORR_PEP_COL:
-    case DECOY_EVALUE_QVALUE_COL:
     case DECOY_EVALUE_PEP_COL:
     case PERCOLATOR_SCORE_COL:
     case PERCOLATOR_QVALUE_COL:
@@ -127,7 +126,6 @@ void MatchFileWriter::setPrecision() {
     case QVALUE_TDC_COL:
     case TAILOR_COL:   //Added for tailor score calibration method by AKF    
 #ifdef NEW_COLUMNS
-    case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
     case PERCOLATOR_PEPTIDE_QVALUE_COL:   // NEW
 #endif
       match_precision_[col_idx] = Params::GetInt("precision");

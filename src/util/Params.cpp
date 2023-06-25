@@ -1408,8 +1408,7 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("custom-threshold-name", "",
     "Specify which field to apply the threshold to. The direction of the threshold "
     "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
-    "applies to the q-value, specified by \"percolator q-value\", "
-    "\"decoy q-value (xcorr)\".",
+    "applies to the percolator q-value, specified by \"percolator q-value\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
