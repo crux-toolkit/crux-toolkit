@@ -108,8 +108,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   */
 
   // Extract all edge features
-  if (!FileUtils::Exists(output_file_name_unsorted_) /*|| Params::GetBool("overwrite")*/ ) {
-    carp(CARP_DEBUG, "Either file exists or it needs to be overwritten: %s", output_file_name_unsorted_.c_str());
+  // if (!FileUtils::Exists(output_file_name_unsorted_) || Params::GetBool("overwrite") ) {
+  //  carp(CARP_DEBUG, "Either file exists or it needs to be overwritten: %s", output_file_name_unsorted_.c_str());
 
     ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
     TideMatchSet::writeHeadersDIA(output_file, Params::GetBool("compute-sp"));
@@ -294,13 +294,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           double quantile_score = getTailorQuantile(&match_arr2);
 
           TideMatchSet::Arr match_arr(nCandPeptide);
-          for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it) {
+          int peptide_idx = 0;// candidatePeptideStatusSize - (it->second);
+          for (TideMatchSet::Arr2::iterator it = match_arr2.begin(); it != match_arr2.end(); ++it, ++peptide_idx) {
              /// The code below which is adopted from Tide-search
-             int peptide_idx = candidatePeptideStatusSize - (it->second);
              if ((*candidatePeptideStatus)[peptide_idx]) {
               TideMatchSet::Scores curScore;
                curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
-               curScore.rank = it->second;
+               curScore.rank =  candidatePeptideStatusSize - peptide_idx; // it->second;
                curScore.tailor = ((double)(it->first / XCORR_SCALING) + 5.0) / quantile_score;
                match_arr.push_back(curScore);
              }
@@ -351,20 +351,16 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
     // clean up
     if (output_file) { output_file->close(); delete output_file; }
-  }
+  // }
 
   // standardize the features
-  if (!FileUtils::Exists(output_file_name_scaled_) /*|| Params::GetBool("overwrite")*/ ) {
-    DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
-    diameterScaler.calcDataQuantile();
-    diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
-  }
+  DIAmeterFeatureScaler diameterScaler(output_file_name_unsorted_.c_str());
+  diameterScaler.calcDataQuantile();
+  diameterScaler.writeScaledFile(output_file_name_scaled_.c_str());
 
   // filter the edges
-  if (!FileUtils::Exists(output_file_name_filtered_) /*|| Params::GetBool("overwrite")*/ ) {
-    DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
-    diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
-  }
+  DIAmeterPSMFilter diameterFilter(output_file_name_scaled_.c_str());
+  diameterFilter.loadAndFilter(output_file_name_filtered_.c_str(), Params::GetBool("psm-filter") );
 
   // generate .pin file by calling make-pin
   MakePinApplication pinApp;

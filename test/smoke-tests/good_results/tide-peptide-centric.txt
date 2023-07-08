@@ -1,4 +1,4 @@
-scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	xcorr rank	distinct matches/peptide	distinct matches/spectrum	sequence	modifications	unmodified sequence	protein id	flanking aa	target/decoy
+scan	charge	spectrum precursor m/z	spectrum neutral mass	peptide mass	delta_cn	delta_lcn	xcorr score	b/y ions matched	b/y ions total	b/y ions fraction	xcorr rank	distinct matches/peptide	distinct matches/spectrum	sequence	modifications	unmodified sequence	protein id	flanking aa	target/decoy
 35	1	709.0700	708.0627	707.3272	0.156005	0.156005	-0.02538549	1	2	9	SMSVER		SMSVER	YKL145W(395)	KG	target
 128	1	711.0700	710.0627	707.3272	0	0	-0.18139087	2	2	9	SMSVER		SMSVER	YKL145W(395)	KG	target
 35	1	709.0700	708.0627	707.3602	0.145237	0.145237	0.11599080	1	2	9	FESAVR		FESAVR	YOR168W(555)	RK	target
