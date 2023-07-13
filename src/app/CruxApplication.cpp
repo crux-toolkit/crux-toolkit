@@ -22,6 +22,9 @@
 
 using namespace std;
 
+//const map<string, string>& opt;
+
+
 /**
  * Frees an allocated CruxApplication
  */
@@ -163,6 +166,35 @@ void CruxApplication::initializeParams(
         throw ArgParserException(e.what());
       }
     }
+
+  /* The following code is intended to warn the user for a bad usage of command line options on applications
+    Author: Rufino Haroldo Locon
+    HSE University, Moscow, Russia
+    July 2023
+  */
+
+    carp(CARP_INFO, "Total Options in command line: %s", std::to_string(options.size()).c_str());
+
+    if( options.size() != 0 ){
+
+      carp(CARP_INFO, "Default values will be overwritten for:");
+
+      for (map<string, string>::const_iterator i = options.begin(); i != options.end(); i++) {
+        carp(CARP_INFO, "->: %s", i->first.c_str());
+      }
+
+      for (map<string, string>::const_iterator i = options.begin(); i != options.end(); i++) {
+
+        if( !(std::find(appOptions.begin(), appOptions.end(), i->first) != appOptions.end()) ){
+
+          if( i->first.compare("no-analytics") != 0 ){
+
+            carp(CARP_FATAL, "%s doesn't match with allowed options for %s application\n", i->first.c_str(), appName.c_str());
+          }
+        }
+      }
+    }
+
     // Process command line arguments
     const map< string, vector<string> >& args = argParser.GetArgs();
     for (map< string, vector<string> >::const_iterator i = args.begin(); i != args.end(); i++) {
