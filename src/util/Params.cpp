@@ -521,6 +521,9 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("decoy-prefix", "decoy_",
     "Specifies the prefix of the protein names that indicate a decoy.",
     "Available for tide-index and percolator", true);
+  InitBoolParam("no-terminate", false,
+    "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
+    "Available for percolator", true);
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
