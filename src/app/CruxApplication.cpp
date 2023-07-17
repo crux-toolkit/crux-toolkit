@@ -172,7 +172,10 @@ void CruxApplication::initializeParams(
     HSE University, Moscow, Russia
     July 2023
   */
-
+  
+    bool no_mach = false;
+    std:string no_options = "";
+    
     carp(CARP_INFO, "Total Options in command line: %s", std::to_string(options.size()).c_str());
 
     if( options.size() != 0 ){
@@ -189,10 +192,19 @@ void CruxApplication::initializeParams(
 
           if( i->first.compare("no-analytics") != 0 ){
 
-            carp(CARP_FATAL, "%s doesn't match with allowed options for %s application\n", i->first.c_str(), appName.c_str());
+            no_options = no_options + "\t-> " + i->first + "\n";
+            no_mach = true;
+
+            //carp(CARP_FATAL, "%s doesn't match with allowed options for %s application\n", i->first.c_str(), appName.c_str());
           }
         }
       }
+
+      if ( no_mach ){
+
+            carp(CARP_FATAL, "Options found that don't match %s application:\n%s", appName.c_str(), no_options.c_str());
+      }
+
     }
 
     // Process command line arguments
