@@ -266,6 +266,10 @@ int PercolatorApplication::main(
     perc_args_vec.push_back("--static");
   }
 
+  if (Params::GetBool("no-terminate")) {
+    perc_args_vec.push_back("--no-terminate");
+  }
+
   if (!Params::GetString("default-direction").empty()) {  
     perc_args_vec.push_back("--default-direction");
     perc_args_vec.push_back(Params::GetString("default-direction"));
@@ -509,6 +513,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "max-charge-feature",
     "maxiter",
     "mzid-output",
+    "no-terminate",
     "only-psms",
     "output-dir",
     "output-weights",
