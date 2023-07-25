@@ -247,6 +247,11 @@ int PercolatorApplication::main(
   }
 
 
+  if (Params::GetBool("pepxml-output")) {
+    perc_args_vec.push_back("--pepxml-output");
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".pep.xml", output_dir_to_overwrite));
+  }
+
   if (Params::GetBool("feature-file-out")) {
     perc_args_vec.push_back("--tab-out");
     perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt", output_dir_to_overwrite));
