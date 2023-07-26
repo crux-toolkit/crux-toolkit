@@ -1,67 +1,35 @@
 #include "IndexedMassSpectralPeak.h"
+#include <sstream>
 
-#include <string>
+namespace CruxQuant {
 
-using std::string;
+    IndexedMassSpectralPeak::IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime) :
+        mz(mz), zeroBasedMs1ScanIndex(zeroBasedMs1ScanIndex), retentionTime(retentionTime), intensity(intensity) {}
 
-using namespace CruxQuant;
+    bool IndexedMassSpectralPeak::operator==(const IndexedMassSpectralPeak& otherPeak) const {
+        return otherPeak.mz == mz && otherPeak.zeroBasedMs1ScanIndex == zeroBasedMs1ScanIndex;
+    }
 
-IndexedMassSpectralPeak::IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime){
-    this->mz = mz;
-    this->intensity = intensity;
-    this->zeroBasedMs1ScanIndex = zeroBasedMs1ScanIndex;
-    this->retentionTime = retentionTime;
-}
+    bool IndexedMassSpectralPeak::operator!=(const IndexedMassSpectralPeak& otherPeak) const {
+        return !(*this == otherPeak);
+    }
 
-IndexedMassSpectralPeak::~IndexedMassSpectralPeak(void){}
+    size_t IndexedMassSpectralPeak::GetHashCode() const {
+        size_t hash1 = std::hash<double>()(mz);
+        size_t hash2 = std::hash<int>()(zeroBasedMs1ScanIndex);
+        return hash1 ^ (hash2 << 1);
+    }
 
-double IndexedMassSpectralPeak::getMz() const{
-    return this->mz;
-}
+    std::string IndexedMassSpectralPeak::ToString() const {
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(3) << mz << "; " << zeroBasedMs1ScanIndex;
+        return oss.str();
+    }
 
-double IndexedMassSpectralPeak::getIntensity() const{
-    return this->intensity;
-}
+} // namespace CruxQuant
 
-int IndexedMassSpectralPeak::getZeroBasedMs1ScanIndex() const{
-    return this->zeroBasedMs1ScanIndex;
-}
-
-double IndexedMassSpectralPeak::getRetentionTime() const{
-    return this->retentionTime;
-}
-
-void IndexedMassSpectralPeak::setMz(double mz){
-    this->mz = mz;
-}
-
-void IndexedMassSpectralPeak::setIntensity(double intensity){
-    this->intensity = intensity;
-}
-
-void IndexedMassSpectralPeak::setZeroBasedMs1ScanIndex(int zeroBasedMs1ScanIndex){
-    this->zeroBasedMs1ScanIndex = zeroBasedMs1ScanIndex;
-}
-
-void IndexedMassSpectralPeak::setRetentionTime(double retentionTime){
-    this->retentionTime = retentionTime;
-}
-
-bool IndexedMassSpectralPeak::operator==(const IndexedMassSpectralPeak& other) const{
-    
-    return &other != nullptr && 
-        this->mz == other.mz &&
-        this->zeroBasedMs1ScanIndex == other.zeroBasedMs1ScanIndex;
-}
-
-bool IndexedMassSpectralPeak::operator!=(const IndexedMassSpectralPeak& other) const{
-    return !(*this == other);
-}
-
-int IndexedMassSpectralPeak::GetHashCode(){
-    return std::hash<double>()(this->mz);
-}
-
-string IndexedMassSpectralPeak::ToString() const{
-    return "mz: " + std::to_string(this->mz) + ", intensity: " + std::to_string(this->intensity) + ", zeroBasedMs1ScanIndex: " + std::to_string(this->zeroBasedMs1ScanIndex) + ", retentionTime: " + std::to_string(this->retentionTime);
+namespace std {
+    size_t hash<CruxQuant::IndexedMassSpectralPeak>::operator()(const CruxQuant::IndexedMassSpectralPeak& peak) const {
+        return peak.GetHashCode();
+    }
 }

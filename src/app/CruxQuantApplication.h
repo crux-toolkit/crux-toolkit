@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-
 #include "CruxApplication.h"
-#include "TideSearchApplication.h"
+#include "io/SpectrumCollectionFactory.h"
+
 
 using std::string;
 using std::vector;
@@ -69,10 +69,6 @@ class CruxQuantApplication: public CruxApplication{
 
         virtual void processParams();
 
-        vector<InputFile> getInputFiles(const vector<string>& filepaths,  int ms_level = 2) const;
-
-        static SpectrumCollection* loadSpectra(const string& file);
-
-        static MatchCollection* read_psm(string psm_file);
+        static Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
         
 };

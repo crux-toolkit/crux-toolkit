@@ -1,34 +1,32 @@
 #pragma once
 
+#include <iostream>
+#include <iomanip>
 #include <string>
+#include <functional>
 
-using std::string;
+namespace CruxQuant {
 
-
-namespace CruxQuant{
-    class IndexedMassSpectralPeak{
-    private:
-        double mz;
-        double intensity;
-        int zeroBasedMs1ScanIndex;
-        double retentionTime;
+    class IndexedMassSpectralPeak {
     public:
+        const int zeroBasedMs1ScanIndex;
+        const double mz;
+        const double retentionTime;
+        const double intensity;
+
         IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime);
-        ~IndexedMassSpectralPeak(void);
 
-        double getMz() const;
-        double getIntensity() const;
-        int getZeroBasedMs1ScanIndex() const;
-        double getRetentionTime() const;
+        bool operator==(const IndexedMassSpectralPeak& otherPeak) const;
+        bool operator!=(const IndexedMassSpectralPeak& otherPeak) const;
+        size_t GetHashCode() const;
+        std::string ToString() const;
+    };
 
-        void setMz(double mz);
-        void setIntensity(double intensity);
-        void setZeroBasedMs1ScanIndex(int zeroBasedMs1ScanIndex);
-        void setRetentionTime(double retentionTime);
-        
-        bool operator==(const IndexedMassSpectralPeak& other) const;
-        bool operator!=(const IndexedMassSpectralPeak& other) const;
-        int GetHashCode();
-        string ToString() const;
+} // namespace CruxQuant
+
+namespace std {
+    template<>
+    struct hash<CruxQuant::IndexedMassSpectralPeak> {
+        size_t operator()(const CruxQuant::IndexedMassSpectralPeak& peak) const;
     };
 }
