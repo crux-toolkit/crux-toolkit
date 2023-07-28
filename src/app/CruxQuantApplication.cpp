@@ -1,9 +1,12 @@
+#include <cmath>
 #include "io/carp.h"
 #include "util/Params.h"
 #include "util/crux-utils.h"
 #include "CruxQuantApplication.h"
 
 using std::make_pair;
+
+const int BinsPerDalton = 100;
 
 CruxQuantApplication::CruxQuantApplication() {}
 
@@ -17,13 +20,14 @@ int CruxQuantApplication::main(int argc, char** argv) {
 
 int CruxQuantApplication::main(const string& psm_file, const vector<string>& input_files){
     carp(CARP_INFO, "Running crux-lfq...");
-
     
     for(const string& spectra_file : input_files){
-      Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
-      Crux::SpectrumCollection* spectra_ms2 = loadSpectra(spectra_file, 2);
-      carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->getNumSpectra());
-      carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->getNumSpectra());
+        Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
+
+        static std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> _index = IndexedMassSpectralPeaks(spectra_ms1);
+       
+
+      
     }
     return 0;
 }
@@ -103,4 +107,47 @@ Crux::SpectrumCollection* CruxQuantApplication::loadSpectra(const string& file, 
   Crux::SpectrumCollection* spectra = SpectrumCollectionFactory::create(file);
   spectra->parse(ms_level=ms_level);
   return spectra;
+}
+
+std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> CruxQuantApplication::IndexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection) {
+
+    carp(CARP_INFO, "Read %d spectra. for MS1", spectrum_collection->getNumSpectra());
+
+    // Define the hashmap with a list of IndexedMassSpectralPeak instances as the value type
+    std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> _indexedPeaks;
+
+    if(spectrum_collection->getNumSpectra() <= 0){ return _indexedPeaks; }
+
+    
+
+    int scanIndex = 0;
+
+    for(auto spectrum = spectrum_collection->begin(); spectrum != spectrum_collection->end(); ++spectrum){
+        if (*spectrum != nullptr) {
+            for(auto peak = (*spectrum)->begin(); peak != (*spectrum)->end(); ++peak){
+                 if (*peak != nullptr) {
+                    FLOAT_T mz = (*peak)->getLocation();
+                    int roundedMz = static_cast<int>(std::round(mz * BinsPerDalton));
+                    CruxQuant::IndexedMassSpectralPeak spec_data(
+                        mz, // mz value
+                        (*peak)->getIntensity(), // intensity
+                        scanIndex, // zeroBasedMs1ScanIndex
+                        (*spectrum)->getRetentionTime() // retentionTime
+                    );
+
+                    // Find the corresponding entry in _indexedPeaks and create a new entry if it doesn't exist
+                    auto it = _indexedPeaks.find(roundedMz);
+                    if (it == _indexedPeaks.end()){
+                        _indexedPeaks[roundedMz] = std::list<CruxQuant::IndexedMassSpectralPeak>();
+                    }
+
+                    // Add a new IndexedMassSpectralPeak object to the list at the corresponding roundedMz entry
+                    _indexedPeaks[roundedMz].emplace_back(spec_data);
+                }
+            }
+            scanIndex++;
+        }
+    }
+
+    return _indexedPeaks;
 }

@@ -1,8 +1,11 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <list>
 #include "CruxApplication.h"
 #include "io/SpectrumCollectionFactory.h"
+#include "crux-quant/IndexedMassSpectralPeak.h"
 
 
 using std::string;
@@ -70,5 +73,7 @@ class CruxQuantApplication: public CruxApplication{
         virtual void processParams();
 
         static Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
-        
+
+        static std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> IndexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection);
+
 };
