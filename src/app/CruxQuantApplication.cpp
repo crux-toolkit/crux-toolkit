@@ -6,8 +6,6 @@
 
 using std::make_pair;
 
-const int BinsPerDalton = 100;
-
 CruxQuantApplication::CruxQuantApplication() {}
 
 CruxQuantApplication::~CruxQuantApplication() {}
@@ -24,8 +22,8 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& inp
     for(const string& spectra_file : input_files){
         Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
 
-        static std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> _index = IndexedMassSpectralPeaks(spectra_ms1);
-       
+        std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> indexes = IndexedMassSpectralPeaks(spectra_ms1);
+
 
       
     }
@@ -127,7 +125,7 @@ std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> CruxQuant
             for(auto peak = (*spectrum)->begin(); peak != (*spectrum)->end(); ++peak){
                  if (*peak != nullptr) {
                     FLOAT_T mz = (*peak)->getLocation();
-                    int roundedMz = static_cast<int>(std::round(mz * BinsPerDalton));
+                    int roundedMz = static_cast<int>(std::round(mz * CruxQuantApplication::BinsPerDalton));
                     CruxQuant::IndexedMassSpectralPeak spec_data(
                         mz, // mz value
                         (*peak)->getIntensity(), // intensity
@@ -138,11 +136,13 @@ std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> CruxQuant
                     // Find the corresponding entry in _indexedPeaks and create a new entry if it doesn't exist
                     auto it = _indexedPeaks.find(roundedMz);
                     if (it == _indexedPeaks.end()){
-                        _indexedPeaks[roundedMz] = std::list<CruxQuant::IndexedMassSpectralPeak>();
+                        _indexedPeaks.insert({roundedMz, std::list<CruxQuant::IndexedMassSpectralPeak>()});
+                    }else{
+                        // Add a new IndexedMassSpectralPeak object to the list at the corresponding roundedMz entry
+                        _indexedPeaks[roundedMz].emplace_back(spec_data);
                     }
 
-                    // Add a new IndexedMassSpectralPeak object to the list at the corresponding roundedMz entry
-                    _indexedPeaks[roundedMz].emplace_back(spec_data);
+                    
                 }
             }
             scanIndex++;

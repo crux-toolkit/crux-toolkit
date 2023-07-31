@@ -9,7 +9,7 @@ namespace CruxQuant {
    
     std::string IndexedMassSpectralPeak::ToString() const {
         std::ostringstream oss;
-        oss << std::fixed << std::setprecision(3) << mz << "; " << zeroBasedMs1ScanIndex;
+        oss << std::fixed << std::setprecision(3) << "MZ Value: " << mz << "; " << "MS1 Scan Index: "<< zeroBasedMs1ScanIndex << "; " << "Intensity: " << intensity << "; " << "Rentention Time: " << retentionTime ;
         return oss.str();
     }
 

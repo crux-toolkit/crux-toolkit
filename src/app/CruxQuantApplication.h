@@ -18,6 +18,8 @@ using std::pair;
  */
 class CruxQuantApplication: public CruxApplication{
     public:
+
+        static const int BinsPerDalton = 100;
         /**
          * Constructor
          */

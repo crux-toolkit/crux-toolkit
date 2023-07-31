@@ -9,6 +9,11 @@ set (CRUX_QUANT_VERSION_MAJOR "0")
 set (CRUX_QUANT_VERSION_MINOR "0")
 set (CRUX_QUANT_VERSION ${CRUX_QUANT_VERSION_MAJOR}.${CRUX_QUANT_VERSION_MINOR})
 
+set(TEST_DATA_SOURCE_DIR ${CMAKE_SOURCE_DIR}/test/unit-tests/test-data)
+set(TEST_DATA_DESTINATION_DIR "${CMAKE_BINARY_DIR}/test/unit-tests")
+file(COPY ${TEST_DATA_SOURCE_DIR} DESTINATION ${TEST_DATA_DESTINATION_DIR})
+add_definitions(-DTEST_DATA_PATH="${TEST_DATA_DESTINATION_DIR}")
+
 
 macro(use_cxx11)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -44,6 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/app)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_SOURCE_DIR}/src/util)
+
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext)
