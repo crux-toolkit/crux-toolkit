@@ -1,0 +1,20 @@
+# PROTEIN DATABASE: input-data/protein1.fasta
+# OPTIONS:
+#	min-mass: 200.00
+#	max-mass: 7200.00
+#	min-length: 6
+#	max-length: 50
+#	cleavages: tryptic
+#	allow missed-cleavages: FALSE
+#	sort: none
+#	isotopic mass type: average
+#	verbosity: 30
+#	use index: FALSE
+1108.18	protein1	6	11	FGGTSVANAER
+1087.20	protein1	20	10	VADILESNAR
+1497.76	protein1	30	15	QGQVAOOTVLSAPAK
+1268.54	protein1	45	11	ITNHLVAMIEK
+1686.80	protein1	56	16	TISGQDALPNISDAER
+2269.71	protein1	72	22	IFAELLTGLAAAQPGFPLAQLK
+1325.48	protein1	94	11	TFVDQEFAQIK
+1333.52	protein1	105	12	HVLHGISLLGQC

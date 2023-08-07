@@ -70,8 +70,7 @@ class Spectrum{
   FLOAT_T iso_window_lower_mz_;
   FLOAT_T iso_window_upper_mz_;
   int ms1_scan_;
-  int scan_number_;
-  FLOAT_T retention_time_;
+
 
   // constants
   /**
@@ -377,11 +376,6 @@ class Spectrum{
    */
   const char* getFilename();
   const char* getFullFilename();
-
-  /**
-   * @brief Get the retention time of the spectrum
-   */
-  FLOAT_T getRetentionTime() const;
 };    
 
 }

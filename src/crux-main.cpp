@@ -41,8 +41,6 @@
 #include "app/DIAmeterApplication.h"
 #include "app/KojakApplication.h"
 
-#include "app/CruxQuantApplication.h"
-
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -75,7 +73,6 @@ int main(int argc, char** argv) {
     applications.add(new KojakApplication());
 
     applications.add(new DIAmeterApplication());
-    applications.add(new CruxQuantApplication());
 
     // Utilities
     applications.addMessage(applications.getListName() +
