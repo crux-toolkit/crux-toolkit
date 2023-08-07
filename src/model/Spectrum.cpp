@@ -50,7 +50,9 @@ Spectrum::Spectrum() :
    charge_state_assigned_(false),
    iso_window_lower_mz_(0),
    iso_window_upper_mz_(0),
-   ms1_scan_(0)
+   ms1_scan_(0),
+   scan_number_(0),
+   retention_time_(0)
 {
   mz_peak_array_ = NULL;
 }
@@ -79,7 +81,9 @@ Spectrum::Spectrum (
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
    has_mz_peak_array_(false),
-   charge_state_assigned_(false)
+   charge_state_assigned_(false),
+   scan_number_(0),
+   retention_time_(0)
  {
   mz_peak_array_ = NULL;
 
@@ -396,6 +400,9 @@ bool Spectrum::parsePwizSpecInfo(
   int lastScan,
   bool dia_mode
 ){
+
+  scan_number_ = pwiz_spectrum->index;
+  retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pzd::MS_scan_start_time).timeInSeconds();
   // clear any existing values
   zstates_.clear();
   ezstates_.clear();
@@ -1015,6 +1022,13 @@ const char* Spectrum::getFullFilename(){
     return "";
   }
   return filename_.c_str();
+}
+
+/**
+ * \returns The retention time of the spectrum.
+ */
+FLOAT_T Spectrum::getRetentionTime() const{
+  return retention_time_;
 }
 
 /*

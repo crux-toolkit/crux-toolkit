@@ -51,8 +51,17 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
   MSToolkit::MSReader* mst_reader = new MSToolkit::MSReader();
   MSToolkit::Spectrum* mst_spectrum = new MSToolkit::Spectrum();
   
-  // only read ms2 scans
-  mst_reader->setFilter(MSToolkit::MS2);
+  if(ms_level == 1) {
+    mst_reader->setFilter(MSToolkit::MS1);
+  } else if(ms_level == 2) {
+    // only read ms2 scans
+    mst_reader->setFilter(MSToolkit::MS2);
+  } else if(ms_level == 3){
+    mst_reader->setFilter(MSToolkit::MS3);
+  }else {
+    carp(CARP_FATAL, "MSToolkit: Error reading spectra file: %s", filename_.c_str());
+  }
+  
   // read first spectrum
   bool ret = mst_reader->readFile(filename_.c_str(), *mst_spectrum);
   

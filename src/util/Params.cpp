@@ -2146,6 +2146,27 @@ InitStringParam("protein-name-separator", ",",
     "the 'tof6600' is equivalent to spectra-denoising=false, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=25.6, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0. "
     "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
+  
+  // crux-lfq
+
+  InitArgParam("lfq-peptide-spectrum matches", 
+    "A file in mzTab or Percolator tab-delimited format listing peptide-spectrum matches.");
+
+  InitArgParam("spectrum files", 
+    "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
+
+  InitStringParam("lfq-score", "none", "Name of the score to be used in selecting PSMs.  Default = none (i.e., include all PSMs). "
+    "Note that if no score is specified and multiple scores per PSM are included, the program will terminate with an error.",
+    "", true);
+
+  // convert to double
+  InitStringParam("lfq-threshold", "no threshold", "Compute quants only for peptides with scores greater than the specified threshold.  Default = no threshold",
+    "", true);
+
+  InitBoolParam("smaller-is-better", false,
+    "Indicate whether a larger score (F) or a smaller score (T) is considered better.  Default = F.",
+     "", true);
+
 
   Categorize();
 }
@@ -2506,6 +2527,12 @@ void Params::Categorize() {
   items.insert("export_pepXML");
   items.insert("export_mzID");
   AddCategory("Input and output", items);
+
+  // crux-lfq
+  items.clear();
+  items.insert("lfq-score");
+  items.insert("lfq-threshold");
+  items.insert("smaller-is-better");
 
 }
 
