@@ -824,7 +824,7 @@ void Spectrum::setHasLowestSp(bool has_lowest_sp)
 }
 
 /**
- * \returns A read-only reference to the vector of possible chare
+ * \returns A read-only reference to the vector of possible charge
  * states for this spectrum.  If EZ states are available, return those.
  */
 const vector<SpectrumZState>& Spectrum::getZStates() const {
