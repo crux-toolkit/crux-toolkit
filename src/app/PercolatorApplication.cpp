@@ -247,6 +247,11 @@ int PercolatorApplication::main(
   }
 
 
+  if (Params::GetBool("pepxml-output")) {
+    perc_args_vec.push_back("--pepxml-output");
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".pep.xml", output_dir_to_overwrite));
+  }
+
   if (Params::GetBool("feature-file-out")) {
     perc_args_vec.push_back("--tab-out");
     perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt", output_dir_to_overwrite));
@@ -264,6 +269,10 @@ int PercolatorApplication::main(
 
   if (Params::GetBool("static")) {
     perc_args_vec.push_back("--static");
+  }
+
+  if (Params::GetBool("no-terminate")) {
+    perc_args_vec.push_back("--no-terminate");
   }
 
   if (!Params::GetString("default-direction").empty()) {  
@@ -508,6 +517,8 @@ vector<string> PercolatorApplication::getOptions() const {
     "klammer",
     "max-charge-feature",
     "maxiter",
+    "mzid-output",
+    "no-terminate",
     "only-psms",
     "output-dir",
     "output-weights",
