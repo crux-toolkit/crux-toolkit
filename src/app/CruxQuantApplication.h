@@ -5,12 +5,15 @@
 #include <list>
 #include "CruxApplication.h"
 #include "io/SpectrumCollectionFactory.h"
+#include "io/MatchFileReader.h"
 #include "crux-quant/IndexedMassSpectralPeak.h"
 
 
 using std::string;
 using std::vector;
 using std::pair;
+using std::list;
+using std::unordered_map;
 
 /**
  * \class CruxQuantApplication
@@ -76,6 +79,13 @@ class CruxQuantApplication: public CruxApplication{
 
         static Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
 
-        static std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> IndexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection);
+        static unordered_map<int, list<CruxQuant::IndexedMassSpectralPeak>> indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection);
 
+        static unordered_map<string, list<pair<double, double>>> calculateTheoreticalIsotopeDistributions(MatchFileReader* matchFileReader);
+
+        static double getMinChargeState(MatchFileReader* matchFileReader);
+
+        static double getMaxChargeState(MatchFileReader* matchFileReader);
+
+        static vector<double> CreateChargeStates(double minChargeState, double maxChargeState);
 };

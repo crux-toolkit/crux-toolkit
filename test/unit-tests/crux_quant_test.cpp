@@ -8,7 +8,7 @@ std::string spectrum_file = TEST_DATA_PATH "/test-data/sliced-mzml.mzML";
 TEST(TestIndexes, BasicAssertions) {
   // Expect two strings not to be equal.
   Crux::SpectrumCollection* spectra_ms1 = CruxQuantApplication::loadSpectra(spectrum_file, 1);
-  std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> indexes =  CruxQuantApplication::IndexedMassSpectralPeaks(spectra_ms1);
+  std::unordered_map<int, std::list<CruxQuant::IndexedMassSpectralPeak>> indexes =  CruxQuantApplication::indexedMassSpectralPeaks(spectra_ms1);
 
   for(const auto& pair: indexes ){
       int index = pair.first;
