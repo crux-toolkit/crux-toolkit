@@ -97,8 +97,6 @@ class PepXMLWriter {
     int* ranks
   );
 
-  void printAnalysis(double* scores, bool* scores_computed);
-
   /**
    * \brief prints both variable and static modifications for 
    *  peptide sequence

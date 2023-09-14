@@ -72,14 +72,11 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "precursor fragment coelution", // added by Yang
   "ensemble score", // added by Yang
 #ifdef NEW_COLUMNS
-  "decoy PSM q-value",
-  "decoy peptide q-value",      // NEW
   "percolator score",
   "percolator rank",
   "percolator PSM q-value",
   "percolator peptide q-value", // NEW
 #else
-  "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
   "decoy q-value (e-value)",
   "decoy PEP (e-value)",
