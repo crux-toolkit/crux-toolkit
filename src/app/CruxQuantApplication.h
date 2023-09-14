@@ -2,17 +2,13 @@
 
 #include <vector>
 #include <unordered_map>
-#include <list>
 #include "CruxApplication.h"
-#include "io/SpectrumCollectionFactory.h"
-#include "io/MatchFileReader.h"
-#include "crux-quant/IndexedMassSpectralPeak.h"
+#include "crux-quant/Utils.h"
 
 
 using std::string;
 using std::vector;
 using std::pair;
-using std::list;
 using std::unordered_map;
 
 /**
@@ -21,8 +17,6 @@ using std::unordered_map;
  */
 class CruxQuantApplication: public CruxApplication{
     public:
-
-        static const int BinsPerDalton = 100;
         /**
          * Constructor
          */
@@ -76,16 +70,4 @@ class CruxQuantApplication: public CruxApplication{
         virtual bool needsOutputDirectory() const;
 
         virtual void processParams();
-
-        static Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
-
-        static unordered_map<int, list<CruxQuant::IndexedMassSpectralPeak>> indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection);
-
-        static unordered_map<string, list<pair<double, double>>> calculateTheoreticalIsotopeDistributions(MatchFileReader* matchFileReader);
-
-        static double getMinChargeState(MatchFileReader* matchFileReader);
-
-        static double getMaxChargeState(MatchFileReader* matchFileReader);
-
-        static vector<double> CreateChargeStates(double minChargeState, double maxChargeState);
 };
