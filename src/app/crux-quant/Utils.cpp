@@ -288,7 +288,7 @@ unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeD
         char* fn = nullptr;
         strcpy(char_array, formula.c_str());
         CMercury8 dist(fn);
-        dist.Echo(true);
+        // dist.Echo(true);
         dist.GoMercury(char_array, charge);
         vector<double> masses;
         vector<double> abundances;

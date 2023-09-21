@@ -39,7 +39,7 @@ int CruxQuantApplication::main(const string &psm_file, const vector<string> &inp
         vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
         
-        SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
+        CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
         // Print the charge states
