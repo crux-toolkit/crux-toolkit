@@ -22,6 +22,8 @@ string calcFormula(string seq);
 
 const int NUMISOTOPES_REQUIRED = 2;  // May need to make this a user input
 const int BINS_PER_DALTON = 100;
+const double PEAK_FINDING_PPM_TOLERANCE = 20.0; // May need to make this a user input
+const double PPM_TOLERANCE = 10.0; // May need to make this a user input
 
 struct Identification {
     string Sequence;
@@ -30,13 +32,25 @@ struct Identification {
     double MonoisotopicMass;
     double PeakfindingMass;
     double PrecursorCharge;
-    
+    string spectralFile;
 };
+
+struct Ms1ScanInfo{
+    int OneBasedScanNumber;
+    int ZeroBasedMs1ScanIndex;
+    double RetentionTime;
+};
+
+struct IndexedSpectralResults{
+    unordered_map<int, vector<IndexedMassSpectralPeak>> _indexedPeaks;
+    unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
+};
+
 Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
 
-unordered_map<int, vector<CruxQuant::IndexedMassSpectralPeak>> indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection);
+IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string &spectra_file);
 
-vector<Identification> createIdentifications(MatchFileReader* matchFileReader);
+vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string &spectra_file);
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
@@ -44,6 +58,6 @@ void SetPeakFindingMass(vector<Identification>& allIdentifications, unordered_ma
 
 vector<double> createChargeStates(const vector<Identification>& allIdentifications);
 
-
+void QuantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications);
 
 }  // namespace CruxQuant

@@ -35,18 +35,14 @@ int CruxQuantApplication::main(const string &psm_file, const vector<string> &inp
     for (const string &spectra_file : input_files) {
         Crux::SpectrumCollection *spectra_ms1 = CruxQuant::loadSpectra(spectra_file, 1);
 
-        unordered_map<int, vector<CruxQuant::IndexedMassSpectralPeak>> indexes = CruxQuant::indexedMassSpectralPeaks(spectra_ms1);
-        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader);
+        CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
+        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
         
         CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
-        // Print the charge states
-        for (const auto &state : chargeStates) {
-
-            carp(CARP_INFO, "state: %f", state);
-        }
+       
     }
     delete matchFileReader;
     return 0;

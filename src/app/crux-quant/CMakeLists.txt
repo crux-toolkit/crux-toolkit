@@ -67,6 +67,8 @@ if (WIN32 AND NOT CYGWIN)
     ${proto_files_compiled}
     IndexedMassSpectralPeak.cpp
     Utils.cpp
+    PpmTolerance.cpp
+    
   )
 else (WIN32 AND NOT CYGWIN)
   set(
@@ -74,6 +76,7 @@ else (WIN32 AND NOT CYGWIN)
     ${proto_files_compiled}
     IndexedMassSpectralPeak.cpp
     Utils.cpp
+    PpmTolerance.cpp
   )
 endif (WIN32 AND NOT CYGWIN)
 add_library(crux-quant-support STATIC ${crux_quant_lib_files})
