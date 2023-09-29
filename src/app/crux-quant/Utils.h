@@ -6,24 +6,29 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 #include "io/SpectrumCollectionFactory.h"
 #include "IndexedMassSpectralPeak.h"
+#include "PpmTolerance.h"
 #include "io/MatchFileReader.h"
 
 using std::pair;
 using std::string;
 using std::unordered_map;
+using std::map;
 using std::vector;
 
 namespace CruxQuant {
 
-
-string calcFormula(string seq);
+const int BINS_PER_DALTON = 100;
+const double PROTONMASS = 1.007276466879;
 
 const int NUMISOTOPES_REQUIRED = 2;  // May need to make this a user input
-const int BINS_PER_DALTON = 100;
 const double PEAK_FINDING_PPM_TOLERANCE = 20.0; // May need to make this a user input
 const double PPM_TOLERANCE = 10.0; // May need to make this a user input
+
+
+string calcFormula(string seq);
 
 struct Identification {
     string Sequence;
@@ -42,7 +47,9 @@ struct Ms1ScanInfo{
 };
 
 struct IndexedSpectralResults{
-    unordered_map<int, vector<IndexedMassSpectralPeak>> _indexedPeaks;
+    
+    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
+    
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 };
 
@@ -58,6 +65,12 @@ void SetPeakFindingMass(vector<Identification>& allIdentifications, unordered_ma
 
 vector<double> createChargeStates(const vector<Identification>& allIdentifications);
 
-void QuantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications);
+void quantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications);
+
+double toMz(double mass, int charge);
+
+double toMass(double massToChargeRatio, int charge);
+
+IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance, int chargeState,  map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks);
 
 }  // namespace CruxQuant

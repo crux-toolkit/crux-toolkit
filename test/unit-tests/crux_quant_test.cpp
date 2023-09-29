@@ -12,19 +12,20 @@ TEST(CruxQuant, TestLoadSpectra) {
  
 }
 
+// TODO rewrite this test, make it more robust
 TEST(CruxQuant, TestIndexes) {
   Crux::SpectrumCollection* spectra_ms1 = CruxQuant::loadSpectra(spectrum_file, 1);
   CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectrum_file);
-  std::unordered_map<int, std::vector<CruxQuant::IndexedMassSpectralPeak>> indexes = indexResults._indexedPeaks;
+  std::map<int, std::map<int, CruxQuant::IndexedMassSpectralPeak>> indexes = indexResults._indexedPeaks;
 
   for(const auto& pair: indexes ){
       int index = pair.first;
-      const std::vector<CruxQuant::IndexedMassSpectralPeak>& peaksList = pair.second;
+      const std::map<int, CruxQuant::IndexedMassSpectralPeak>& peaksList = pair.second;
   
       // Loop through the list of IndexedMassSpectralPeak for this index
       for (const auto& peak : peaksList) {
           // Access the class variables of CruxQuant::IndexedMassSpectralPeak for each peak
-          FLOAT_T mz = peak.mz;
+          FLOAT_T mz = peak.second.mz;
           int roundedMz = static_cast<int>(std::round(mz * CruxQuant::BINS_PER_DALTON));
           EXPECT_EQ(index, roundedMz);
       }
@@ -68,6 +69,7 @@ TEST(CruxQuant, TestQuantifyMs2IdentifiedPeptides){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
   
-  QuantifyMs2IdentifiedPeptides(spectrum_file, allIdentifications);
+  CruxQuant::quantifyMs2IdentifiedPeptides(spectrum_file, allIdentifications);
   EXPECT_EQ(1, 1);
 }
+

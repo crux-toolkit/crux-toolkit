@@ -41,6 +41,18 @@ int CruxQuantApplication::main(const string &psm_file, const vector<string> &inp
         
         CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
+    
+        auto indexes = indexResults._indexedPeaks;
+        for(const auto& ind: indexes){
+            carp(CARP_INFO, "Bin : %d", ind.first);
+            for(const auto& vec: ind.second){
+                carp(CARP_INFO, "Zero Based Key ... : %d", vec.first);
+                carp(CARP_INFO, "Zero Based Value ... : %d", vec.second.zeroBasedMs1ScanIndex);
+            }
+        }
+
+      
+
 
        
     }

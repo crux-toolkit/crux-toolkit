@@ -8,9 +8,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cmath>
 
 #include "CMercury8.h"
-#include "PpmTolerance.h"
+
 
 using std::pair;
 using std::string;
@@ -31,9 +32,10 @@ IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection *spectr
     carp(CARP_INFO, "Read %d spectra. for MS1", spectrum_collection->getNumSpectra());
 
     string _spectra_file(spectra_file);
-    // Define the hashmap with a vector of IndexedMassSpectralPeak instances as the value type
-    unordered_map<int, vector<IndexedMassSpectralPeak>> _indexedPeaks;
+    
+    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
+
     _ms1Scans[_spectra_file] = vector<Ms1ScanInfo>();
 
     IndexedSpectralResults index_results{_indexedPeaks,_ms1Scans};
@@ -59,23 +61,24 @@ IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection *spectr
                         retentionTime
                     );
 
-                    // Find the corresponding entry in _indexedPeaks and create a new entry if it doesn't exist
-                    auto it = _indexedPeaks.find(roundedMz);
-                    if (it == _indexedPeaks.end()) {
-                        _indexedPeaks.insert({roundedMz, vector<IndexedMassSpectralPeak>()});
+                    auto& indexedPeaks = index_results._indexedPeaks;
+                    auto it = indexedPeaks.find(roundedMz);
+                    if (it == indexedPeaks.end()) {
+                        map<int, IndexedMassSpectralPeak> tmp;
+                        tmp.insert({scanIndex, spec_data});
+                        indexedPeaks[roundedMz] = tmp;
                     } else {
-                        // Add a new IndexedMassSpectralPeak object to the vector at the corresponding roundedMz entry
-                        _indexedPeaks[roundedMz].emplace_back(spec_data);
+                        it->second.insert({scanIndex, spec_data});
                     }
+                    
                     Ms1ScanInfo scan = {oneBasedScanNumber, scanIndex, retentionTime};
-                    _ms1Scans[spectra_file].push_back(scan);
+                    index_results._ms1Scans[spectra_file].push_back(scan);
                 }
             }
             scanIndex++;
             oneBasedScanNumber++;
         }
     }
-
     return index_results; 
 }
 
@@ -366,7 +369,7 @@ vector<double> createChargeStates(const vector<Identification>& allIdentificatio
     return chargeStates;
 }
 
-void QuantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications){
+void quantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications){
     vector<Identification> ms2IdsForThisFile;
 
     // Use std::copy_if to filter the identifications
@@ -384,10 +387,58 @@ void QuantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identificati
         return; // Early return
     }
 
-    PpmTolerance peakfindingTol(CruxQuant::PEAK_FINDING_PPM_TOLERANCE); // Peak finding tolerance is generally higher than ppmTolerance
-    PpmTolerance ppmTolerance(CruxQuant::PPM_TOLERANCE);
+    PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE); // Peak finding tolerance is generally higher than ppmTolerance
+    PpmTolerance ppmTolerance(PPM_TOLERANCE);
+
 
 }
 
+double toMz(double mass, int charge) {
+    return mass / std::abs(charge) + std::copysign(PROTONMASS, charge);
+}
+
+double toMass(double massToChargeRatio, int charge){
+   return std::abs(charge) * massToChargeRatio - charge * PROTONMASS;
+}
+
+
+//TODO Instead of binary search, get data from unordered map using find.
+IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance, int chargeState,  map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks){
+    IndexedMassSpectralPeak* bestPeak = nullptr;
+
+    // Calculate the maximum value using tolerance
+    double maxValue = tolerance.GetMaximumValue(theorMass);
+    double maxMzValue = toMz(maxValue, chargeState);
+    // Calculate ceilingMz by rounding maxMzValue up to the nearest integer
+    int ceilingMz = static_cast<int>(std::ceil(maxMzValue * BINS_PER_DALTON));
+
+    double minValue = tolerance.GetMinimumValue(theorMass);
+    double minMzValue = toMz(minValue, chargeState);
+    int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
+
+    for (int j = floorMz; j <= ceilingMz; j++){
+
+        map<int, IndexedMassSpectralPeak> bin = indexedPeaks[j];
+        
+        auto startIterator = bin.find(zeroBasedScanIndex);
+
+        for (auto it = startIterator; it != bin.end(); ++it){
+            auto _peak = it->second;
+            if(_peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex){
+                break;
+            }
+
+            double expMass = toMass(_peak.mz, chargeState);
+
+            if (tolerance.Within(expMass, theorMass) && _peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex
+                && (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))){
+                bestPeak = &_peak;
+            }
+
+        }
+
+    }
+    return bestPeak;
+}
 
 }  // namespace CruxQuant
