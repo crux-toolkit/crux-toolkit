@@ -57,12 +57,6 @@ if (WIN32 AND NOT CYGWIN)
     )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy 
-        ${PREFIX}/lib/libboost_program_options-vc142-mt${TYPE}.lib
-        ${PREFIX}/lib/libboost_program_options-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
-      RESULT_VARIABLE status
-    )
-    execute_process(
-      COMMAND ${CMAKE_COMMAND} -E copy 
         ${PREFIX}/lib/libboost_system-vc142-mt${TYPE}.lib
         ${PREFIX}/lib/libboost_system-vc142-mt${TYPE}-${BOOST_ARCH}-1_76.lib
       RESULT_VARIABLE status
