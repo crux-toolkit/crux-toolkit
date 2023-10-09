@@ -53,7 +53,10 @@ if (WIN32 AND NOT CYGWIN)
       ProteoWizard
       ${PWIZ_SOURCE}
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
-      CONFIGURE_COMMAND ""
+      CONFIGURE_COMMAND
+        # We don't need to build the .Net/SWIG or Java bindings
+        COMMAND ${CMAKE_COMMAND} -E rm -rf
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
       BUILD_COMMAND
         ${CMAKE_COMMAND}
           -DMSBUILD_PLATFORM=${MSBUILD_PLATFORM}
@@ -435,13 +438,13 @@ if (WIN32 AND NOT CYGWIN AND INCLUDE_VENDOR_LIBRARIES)
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Newtonsoft.Json.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/ParallelExtensionsExtras.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/PeakItgLSS.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/pwiz_bindings_cli.dll
-    ${CMAKE_CURRENT_BINARY_DIR}/lib/pwiz_data_cli.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/QTFLDebugLog.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/QTFLProtoCS.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/Shimadzu.LabSolutions.IO.IoModule.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Data.SQLite.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/System.Runtime.Caching.Generic.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.Data.dll
+    ${CMAKE_CURRENT_BINARY_DIR}/lib/ThermoFisher.CommonCore.RawFileReader.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/timsdata.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/ucrtbase.dll
     ${CMAKE_CURRENT_BINARY_DIR}/lib/UIMFLibrary.dll
