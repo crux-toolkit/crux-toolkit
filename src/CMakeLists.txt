@@ -355,10 +355,9 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_proteome.lib
       libpwiz_data_proteome_examples.lib
       libpwiz_data_proteome_version.lib
-      libpwiz_data_tradata.lib
-      libpwiz_data_tradata_examples.lib
-      libpwiz_data_tradata_version.lib
       libpwiz_data_vendor_readers.lib
+      libpwiz_reader_abi.lib
+      libpwiz_reader_abi_t2d.lib
       libpwiz_reader_agilent.lib
       libpwiz_reader_bruker.lib
       libpwiz_reader_shimadzu.lib
@@ -366,7 +365,6 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_reader_uimf.lib
       libpwiz_reader_unifi.lib
       libpwiz_reader_waters.lib
-      libpwiz_tools_common.lib
       libpwiz_utility_chemistry.lib
       libpwiz_utility_image.lib
       libpwiz_utility_math.lib
@@ -413,21 +411,18 @@ if (WIN32 AND NOT CYGWIN)
   SET(
     BOOST_LIBRARIES
     optimized libboost_chrono-vc142-mt
-    optimized libboost_filesystem-vc142-mt
-    optimized libboost_iostreams-vc142-mt
-    optimized libboost_nowide-vc142-mt
-    optimized libboost_program_options-vc142-mt
-    optimized libboost_serialization-vc142-mt
-    optimized libboost_system-vc142-mt
-    optimized libboost_thread-vc142-mt
-    optimized libfreetype-vc142-mt-2_4
     debug libboost_chrono-vc142-mt-gd
+    optimized libboost_filesystem-vc142-mt
     debug libboost_filesystem-vc142-mt-gd
+    optimized libboost_iostreams-vc142-mt
     debug libboost_iostreams-vc142-mt-gd
+    optimized libboost_nowide-vc142-mt
     debug libboost_nowide-vc142-mt-gd
-    debug libboost_regex-vc142-mt
-    debug libboost_program_options-vc142-mt
+    optimized libboost_serialization-vc142-mt
+    debug libboost_serialization-vc142-mt-gd
+    optimized libboost_system-vc142-mt
     debug libboost_system-vc142-mt-gd
+    optimized libboost_thread-vc142-mt
     debug libboost_thread-vc142-mt-gd
   )
   target_link_libraries(
@@ -442,7 +437,8 @@ if (WIN32 AND NOT CYGWIN)
     blas
     fido
     picked_protein
-    gflags_static
+    optimized gflags_static
+    debug gflags_static_debug
     crux-support
     tide-support
     mstoolkitlite
@@ -452,6 +448,7 @@ if (WIN32 AND NOT CYGWIN)
     ws2_32
     shlwapi
     ${BOOST_LIBRARIES}
+    optimized libfreetype-vc142-mt-2_4
     debug libfreetype-vc142-mt-gd-2_4
     optimized libgd-vc142-mt-2_1
     debug libgd-vc142-mt-gd-2_1
