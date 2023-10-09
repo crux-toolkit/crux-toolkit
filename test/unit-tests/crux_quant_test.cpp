@@ -44,7 +44,7 @@ TEST(CruxQuant, TestcalCulateTheoreticalIsotopeDistributions){
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
   EXPECT_EQ(67, modifiedSequenceToIsotopicDistribution.size());
-  auto it = modifiedSequenceToIsotopicDistribution.find(allIdentifications.at(0).Sequence);
+  auto it = modifiedSequenceToIsotopicDistribution.find(allIdentifications.at(0).sequence);
   ASSERT_NE(it, modifiedSequenceToIsotopicDistribution.end());
 }
 
@@ -54,7 +54,7 @@ TEST(CruxQuant, TestSetPeakFindingMass){
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
   CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
   double actual = std::round(244.62680618106413 * 100)/100;
-  double expected = std::round(allIdentifications.at(0).PeakfindingMass * 100)/100;
+  double expected = std::round(allIdentifications.at(0).peakfindingMass * 100)/100;
   EXPECT_DOUBLE_EQ(actual, expected);
 }
 
@@ -65,6 +65,7 @@ TEST(CruxQuant, TestCreateChargeStates){
   EXPECT_EQ(66, chargeStates.size()) << chargeStates.size();
 }
 
+// TODO Write the actual tests
 TEST(CruxQuant, TestQuantifyMs2IdentifiedPeptides){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
@@ -73,3 +74,7 @@ TEST(CruxQuant, TestQuantifyMs2IdentifiedPeptides){
   EXPECT_EQ(1, 1);
 }
 
+// TODO Write the actual tests
+TEST(CruxQuant, TestGetIndexedPeak){
+  EXPECT_EQ(1, 1);
+}
