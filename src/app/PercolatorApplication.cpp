@@ -247,6 +247,11 @@ int PercolatorApplication::main(
   }
 
 
+  if (Params::GetBool("pepxml-output")) {
+    perc_args_vec.push_back("--pepxml-output");
+    perc_args_vec.push_back(make_file_path(getFileStem() + ".pep.xml", output_dir_to_overwrite));
+  }
+
   if (Params::GetBool("feature-file-out")) {
     perc_args_vec.push_back("--tab-out");
     perc_args_vec.push_back(make_file_path(getFileStem() + ".feature.txt", output_dir_to_overwrite));
@@ -467,8 +472,8 @@ string PercolatorApplication::getDescription() const {
     "differs from the stand-alone version of Percolator in the following "
     "respects:</p><ul><li>In addition to the native Percolator XML file "
     "format, Crux Percolator supports additional input file formats (SQT, "
-    "PepXML, tab-delimited text) and output file formats (PepXML, mzIdentML, "
-    "tab-delimited text). To maintain consistency with the rest of the Crux "
+    "PepXML, tab-delimited text)."
+    "To maintain consistency with the rest of the Crux "
     "commands, Crux Percolator uses different parameter syntax than the stand-"
     "alone version of Percolator.</li><li>Like the rest of the Crux commands, "
     "Crux Percolator writes its files to an output directory, logs all standard "
@@ -520,7 +525,6 @@ vector<string> PercolatorApplication::getOptions() const {
     "override",
     "overwrite",
     "parameter-file",
-    "pepxml-output",
     "percolator-seed",
     "picked-protein",
     "pout-output",
@@ -575,15 +579,6 @@ vector< pair<string, string> > PercolatorApplication::getOutputs() const {
     "operation. Not all parameters in the file may have been used in the "
     "operation. The resulting file can be used with the --parameter-file "
     "option for other crux programs."));
-  outputs.push_back(make_pair("percolator.pep.xml",
-    "a file containing the PSMs in "
-    "<a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">"
-    "pepXML format</a>. This file can be used as input to some of the tools in the "
-    "<a href=\"http://tools.proteomecenter.org/wiki/index.php?title=Software:TPP\">"
-    "Transproteomic Pipeline</a>."));
-  outputs.push_back(make_pair("percolator.mzid",
-    "a file containing the protein, peptide, and spectrum matches in <a href=\""
-    "http://www.psidev.info/mzidentml\">mzIdentML format</a>."));
   outputs.push_back(make_pair("percolator.log.txt",
     "a log file containing a copy of all messages that were printed to "
     "standard error."));

@@ -335,7 +335,7 @@ void PinWriter::printPSM(
     } else if (feature == "Peptide") {
       fields.push_back(getPeptide(peptide));
     } else if (feature == "Proteins") {
-      fields.push_back(StringUtils::Join(peptide->getProteinIds(), '\t'));
+      fields.push_back(StringUtils::Join(peptide->getProteinIds(), ','));
     }
     // DIAmeter related, added by Yang
     else if (feature == "PrecursorIntRankM0" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }
