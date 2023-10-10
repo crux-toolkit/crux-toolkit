@@ -41,6 +41,9 @@
 #include "app/DIAmeterApplication.h"
 #include "app/KojakApplication.h"
 
+/* Code addded by Rufino*/
+#include "app/CruxApplication.h"
+
 /**
  * The starting point for crux.  Prints a general usage statement when
  * given no arguments.  Runs one of the crux commands, including
@@ -89,6 +92,13 @@ int main(int argc, char** argv) {
     applications.add(new PSMConvertApplication());
     applications.add(new SubtractIndexApplication());
     applications.add(new LocalizeModificationApplication());
+
+
+    /* Code added by Rufino */
+    /* Pointers to the first and last element in the applications list, passed to the static function setApplicationsList
+    that will be used in CruxApplication.cpp to locate a specific parameter assinged to an appplication. */
+    CruxApplication::setApplicationsList(applications.begin(), applications.end());
+    
 
     int ret = applications.main(argc, argv);
     google::protobuf::ShutdownProtobufLibrary();

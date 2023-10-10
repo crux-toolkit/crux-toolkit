@@ -152,8 +152,12 @@ class CruxApplication{
     const std::vector<std::string>& options,
     bool full
   );
-};
 
+
+/* Code added by Rufino */
+/* Template of the static function setApplicationsList*/
+  static void setApplicationsList(std::vector<CruxApplication *>::const_iterator f, std::vector<CruxApplication *>::const_iterator l);
+};
 
 
 #endif
