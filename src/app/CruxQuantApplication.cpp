@@ -34,23 +34,21 @@ int CruxQuantApplication::main(const string &psm_file, const vector<string> &inp
 
     for (const string &spectra_file : input_files) {
         Crux::SpectrumCollection *spectra_ms1 = CruxQuant::loadSpectra(spectra_file, 1);
+        Crux::SpectrumCollection *spectra_ms2 = CruxQuant::loadSpectra(spectra_file, 2);
+
+        carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->getNumSpectra());
+        carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->getNumSpectra());
 
         CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
-        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file);
+        
+        // Replace spectra_file in createIdentifications with file column in the matchFileReader
+        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file, spectra_ms2);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
         
-        CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
+        CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
-    
-        auto indexes = indexResults._indexedPeaks;
-        for(const auto& ind: indexes){
-            carp(CARP_INFO, "Bin : %d", ind.first);
-            for(const auto& vec: ind.second){
-                carp(CARP_INFO, "Zero Based Key ... : %d", vec.first);
-                carp(CARP_INFO, "Zero Based Value ... : %d", vec.second.zeroBasedMs1ScanIndex);
-            }
-        }
 
+        CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates);
       
 
 

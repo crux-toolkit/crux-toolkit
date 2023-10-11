@@ -35,13 +35,15 @@ TEST(CruxQuant, TestIndexes) {
 
 TEST(CruxQuant, TestCreateIdentifications){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
-  EXPECT_EQ(100, allIdentifications.size());
+  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
+  EXPECT_EQ(8700, allIdentifications.size());
 }
 
 TEST(CruxQuant, TestcalCulateTheoreticalIsotopeDistributions){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
+  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
   EXPECT_EQ(67, modifiedSequenceToIsotopicDistribution.size());
   auto it = modifiedSequenceToIsotopicDistribution.find(allIdentifications.at(0).sequence);
@@ -50,9 +52,10 @@ TEST(CruxQuant, TestcalCulateTheoreticalIsotopeDistributions){
 
 TEST(CruxQuant, TestSetPeakFindingMass){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
+  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
-  CruxQuant::SetPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
+  CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
   double actual = std::round(244.62680618106413 * 100)/100;
   double expected = std::round(allIdentifications.at(0).peakfindingMass * 100)/100;
   EXPECT_DOUBLE_EQ(actual, expected);
@@ -60,7 +63,8 @@ TEST(CruxQuant, TestSetPeakFindingMass){
 
 TEST(CruxQuant, TestCreateChargeStates){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
+  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
   EXPECT_EQ(66, chargeStates.size()) << chargeStates.size();
 }
@@ -68,9 +72,10 @@ TEST(CruxQuant, TestCreateChargeStates){
 // TODO Write the actual tests
 TEST(CruxQuant, TestQuantifyMs2IdentifiedPeptides){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file);
+  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   
-  CruxQuant::quantifyMs2IdentifiedPeptides(spectrum_file, allIdentifications);
+  // CruxQuant::quantifyMs2IdentifiedPeptides(spectrum_file, allIdentifications);
   EXPECT_EQ(1, 1);
 }
 

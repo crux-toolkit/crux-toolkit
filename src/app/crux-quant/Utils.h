@@ -30,6 +30,7 @@ const double PROTONMASS = 1.007276466879;
 const int NUMISOTOPES_REQUIRED = 2;              // May need to make this a user input
 const double PEAK_FINDING_PPM_TOLERANCE = 20.0;  // May need to make this a user input
 const double PPM_TOLERANCE = 10.0;               // May need to make this a user input
+const bool ID_SPECIFIC_CHARGE_STATE = false;  // May need to make this a user input
 
 string calcFormula(string seq);
 
@@ -41,6 +42,7 @@ struct Identification {
     double peakfindingMass;
     double precursorCharge;
     string spectralFile;
+    FLOAT_T ms2RetentionTimeInMinutes;
 };
 
 struct Ms1ScanInfo {
@@ -96,6 +98,7 @@ struct ChromatographicPeak {
     int numChargeStatesObserved;
     IsotopicEnvelope apex;
     bool isMbrPeak;
+    int _index = std::numeric_limits<int>::max();
 
     ChromatographicPeak(const Identification& id, bool _isMbrPeak, const string& _spectralFile)
         : isMbrPeak(_isMbrPeak), spectralFile(_spectralFile) {
@@ -103,6 +106,7 @@ struct ChromatographicPeak {
         identifications.push_back(id);
         massError = std::numeric_limits<double>::quiet_NaN();
         numChargeStatesObserved = 0;
+        _index = std::numeric_limits<int>::max();
     }
     void calculateIntensityForThisFeature(bool integrate);
 };
@@ -117,20 +121,43 @@ Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
 
 IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
-vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file);
+vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file, Crux::SpectrumCollection* spectrum_collection);
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
-void SetPeakFindingMass(vector<Identification>& allIdentifications, unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution);
+void setPeakFindingMass(
+    vector<Identification>& allIdentifications, 
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution
+);
 
 vector<double> createChargeStates(const vector<Identification>& allIdentifications);
 
-void quantifyMs2IdentifiedPeptides(string spectraFile, const vector<Identification>& allIdentifications);
+void quantifyMs2IdentifiedPeptides(
+    string spectraFile, 
+    const vector<Identification>& allIdentifications, 
+    const vector<double>& chargeStates
+);
 
 double toMz(double mass, int charge);
 
 double toMass(double massToChargeRatio, int charge);
 
-IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance, int chargeState, map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks);
+IndexedMassSpectralPeak* getIndexedPeak(
+    double theorMass, 
+    int zeroBasedScanIndex, 
+    PpmTolerance tolerance, 
+    int chargeState, 
+    map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks
+);
+
+void processRange(
+    int start, 
+    int end, 
+    const vector<Identification>& ms2IdsForThisFile, 
+    const string& spectralFile,
+    const vector<double>& chargeStates,
+    vector<ChromatographicPeak>& chromatographicPeaks,
+    PpmTolerance& peakfindingTol
+);
 
 }  // namespace CruxQuant
