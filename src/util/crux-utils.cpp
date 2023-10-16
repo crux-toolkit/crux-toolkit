@@ -66,7 +66,7 @@ static const int INVALID_ENUM_STRING = -10;
  */
 
 static const char* score_function_strings[NUMBER_SCORE_FUNCTIONS] = {
-  "invalid", "xcorr", "residue-evidence", "both"
+  "invalid", "xcorr", "combined-p-values", "hyperscore", "hyperscore-la"
 };
 
 SCORE_FUNCTION_T string_to_score_function_type(const string& name) {
@@ -527,7 +527,6 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "deltalcn",
   "by_ions_matched",
   "by_ions_total",
-
   "exact_pvalue",
   "refactored_xcorr",
   "res-ev score",
@@ -1620,6 +1619,14 @@ void postToAnalytics(const string& appName) {
         false);
   } catch (...) {
   }
+}
+
+std::string getDateFromCurxVersion(){
+  std::string version = std::string(CRUX_VERSION);
+  int len = version.length();
+  int date_len = 10;
+  std::string date = version.substr(len-date_len, date_len);
+  return date;
 }
 
 /*

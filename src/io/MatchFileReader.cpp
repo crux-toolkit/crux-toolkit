@@ -217,8 +217,10 @@ MatchCollection* MatchFileReader::parse() {
     }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
+    match_collection->setScoredType(BY_ION_FRACTION, !empty(  BY_IONS_FRACTION_COL));
+    match_collection->setScoredType(BY_ION_REPEAT_MATCH, !empty(BY_IONS_REPEAT_MATCH_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
-	match_collection->setScoredType(QVALUE_TDC, !empty(QVALUE_TDC_COL));
+    match_collection->setScoredType(QVALUE_TDC, !empty(QVALUE_TDC_COL));    
 
     // DIAmeter related, added by Yang
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
@@ -370,7 +372,12 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(BY_IONS_TOTAL_COL)) {
     match->setScore(BY_IONS_TOTAL, getInteger(BY_IONS_TOTAL_COL));
   }
-
+  if (!empty(BY_IONS_FRACTION_COL)) {
+    match->setScore(BY_ION_FRACTION, getFloat(BY_IONS_FRACTION_COL));
+  }
+  if (!empty(BY_IONS_REPEAT_MATCH_COL)) {
+    match->setScore(BY_ION_REPEAT_MATCH, getInteger(BY_IONS_REPEAT_MATCH_COL));
+  }
   if (!empty(DECOY_INDEX_COL)) {
     match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
   }
@@ -379,7 +386,7 @@ Crux::Match* MatchFileReader::parseMatch() {
   }
   if (!empty(QVALUE_TDC_COL)) {
     match->setScore(QVALUE_TDC, getFloat(QVALUE_TDC_COL));
-  }
+  }  
 
   // DIAmeter related, added by Yang
   if (!empty(PRECURSOR_INTENSITY_RANK_M0_COL)) { match->setScore(PRECURSOR_INTENSITY_RANK_M0, getFloat(PRECURSOR_INTENSITY_RANK_M0_COL)); }
@@ -483,4 +490,3 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
                               getString(FILE_COL));
   }
 }
-

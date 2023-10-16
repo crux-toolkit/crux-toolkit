@@ -418,6 +418,12 @@ void Match::printOneMatchField(
   case BY_IONS_TOTAL_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, b_y_total);
     break;
+  case BY_IONS_FRACTION_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getScore(BY_ION_FRACTION));
+    break;
+  case BY_IONS_REPEAT_MATCH_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getScore(BY_ION_REPEAT_MATCH));
+    break;
   case DISTINCT_MATCHES_SPECTRUM_COL:
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                        num_target_matches);

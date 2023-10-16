@@ -43,8 +43,8 @@ bool SpectrumRecordSpectrumCollection::parse(int ms_level, bool dia_mode) {
       charges.push_back(pb_spectrum.charge_state(i));
     }
     Crux::Spectrum* spectrum = new Crux::Spectrum(
-      pb_spectrum.spectrum_number(),
-      pb_spectrum.spectrum_number(),
+      pb_spectrum.scan_id(),
+      pb_spectrum.scan_id(),
       pb_spectrum.precursor_m_z(),
       charges,
       filename_);

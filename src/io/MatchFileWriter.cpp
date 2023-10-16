@@ -69,6 +69,7 @@ void MatchFileWriter::setPrecision() {
     case PERCOLATOR_RANK_COL:
     case BY_IONS_MATCHED_COL:
     case BY_IONS_TOTAL_COL:
+    case BY_IONS_REPEAT_MATCH_COL:
     case DISTINCT_MATCHES_SPECTRUM_COL:
     case MATCHES_SPECTRUM_COL:
     case SEQUENCE_COL:
@@ -124,7 +125,8 @@ void MatchFileWriter::setPrecision() {
     case SIDAK_ADJUSTED_COL:
     case QVALUE_MIXMAX_COL:
     case QVALUE_TDC_COL:
-    case TAILOR_COL:   //Added for tailor score calibration method by AKF    
+    case BY_IONS_FRACTION_COL:
+    case TAILOR_COL:
 #ifdef NEW_COLUMNS
     case PERCOLATOR_PEPTIDE_QVALUE_COL:   // NEW
 #endif

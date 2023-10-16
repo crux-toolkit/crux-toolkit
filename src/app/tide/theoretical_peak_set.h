@@ -48,6 +48,7 @@ typedef google::protobuf::RepeatedField<int>::const_iterator FieldIter;
 
 typedef FixedCapacityArray<int> TheoreticalPeakArr;
 #define NUM_PEAK_TYPES 2
+#define MAX_THEORETICAL_PEAK_MZ 10000
 
 // A class that generates a theoretical peak for B and Y ion at charge states
 // of 1+ and 2+. The Original XCorr requires that the thoeretical peaks are 
@@ -67,8 +68,8 @@ class TheoreticalPeakSetBYSparse {
   explicit TheoreticalPeakSetBYSparse(int capacity) {
     peaks_[0].Init(capacity);
     peaks_[1].Init(capacity);
-    peak_mask_end = MaxBin::Global().CacheBinEnd();
-    cache_end = MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES;
+    peak_mask_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1); 
+    cache_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1)*NUM_PEAK_TYPES;
     peak_mask = new int[peak_mask_end];
     memset(peak_mask, 0,  sizeof(int)*peak_mask_end);
   }
