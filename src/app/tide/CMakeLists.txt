@@ -74,6 +74,7 @@ if (WIN32 AND NOT CYGWIN)
     tide_lib_files
     ${proto_files_compiled}
     abspath.cc
+    ActivePeptideQueueLite.cc
     active_peptide_queue.cc
     crux_sp_spectrum.cc
     fifo_alloc.cc
@@ -94,6 +95,7 @@ else (WIN32 AND NOT CYGWIN)
     tide_lib_files
     ${proto_files_compiled}
     abspath.cc
+    ActivePeptideQueueLite.cc
     active_peptide_queue.cc
     crux_sp_spectrum.cc
     fifo_alloc.cc
