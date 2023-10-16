@@ -1,0 +1,19 @@
+option optimize_for = SPEED;
+package pb;
+
+
+// The Stats message consists the amini acid freequencies of the peptides in 
+// the peptide protocol buffer. The AAMass is the list of the amino acid 
+// masses in increasing order. The AAFreqN, (N-Terminal), AAFreqI (Internal), 
+// AAFreqC (C-Terminal) contains the frequencies of the amino acids at N-term, 
+// Interal, C-Terminal positions, respecitvely. 
+
+
+message ResidueStats {
+  required double AAMass  = 1; // The mass of the amino acid
+  required double AAFreqN = 2; // The frequency of this amino acid at N-term   positions
+  required double AAFreqI = 3; // The frequency of this amino acid at internal positions
+  required double AAFreqC = 4; // The frequency of this amino acid at C-term   positions
+  required string AA_str  = 5; // The amino acid char with modifications, e.g. M[+15.9949], 
+}
+

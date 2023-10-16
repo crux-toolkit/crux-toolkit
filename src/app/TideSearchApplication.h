@@ -19,7 +19,7 @@ using namespace std;
 /**
  * Locks for multi-threading in Tide.
  */
-enum _tide_search_lock {
+/*enum _tide_search_lock {
   LOCK_RESULTS,       // Results file output
   LOCK_CASCADE,       // Only used by cascade-search on spectrum_flag (map)
   LOCK_CANDIDATES,    // Updating # of candidate peptides
@@ -29,7 +29,7 @@ enum _tide_search_lock {
 };
 
 typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
-
+*/
 
 struct InputFile {
   std::string OriginalName;

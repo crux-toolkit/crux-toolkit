@@ -179,7 +179,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
 
     MatchCollection* match_collection = parser.create(target_path, Params::GetString("protein-database"));
     distinct_matches = match_collection->getHasDistinctMatches();
-    if (!match_collection->hasDecoyIndexes()) {
+    if (!match_collection->hasMulitpleDecoys()) {
       avgTdc = false;
     }
 
@@ -240,6 +240,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     target_matches->setScoredType(SP, match_collection->getScoredType(SP));
     target_matches->setScoredType(BY_IONS_MATCHED, match_collection->getScoredType(BY_IONS_MATCHED));
     target_matches->setScoredType(BY_IONS_TOTAL, match_collection->getScoredType(BY_IONS_TOTAL));
+    target_matches->setScoredType(BY_ION_FRACTION, match_collection->getScoredType(BY_ION_FRACTION));
+    target_matches->setScoredType(BY_ION_REPEAT_MATCH, match_collection->getScoredType(BY_ION_REPEAT_MATCH));
     target_matches->setScoredType(SIDAK_ADJUSTED, sidak);
     //Added for tailor score calibration method by AKF
     target_matches->setScoredType(TAILOR_SCORE, match_collection->getScoredType(TAILOR_SCORE));
@@ -257,7 +259,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       MatchCollection* temp_collection = parser.create(decoy_path, Params::GetString("protein-database"));
       carp(CARP_INFO, "Found %d PSMs in %s.", temp_collection->getMatchTotal(), decoy_path.c_str());
 
-      if (temp_collection->hasDecoyIndexes()) {
+      if (temp_collection->hasMulitpleDecoys()) {
         avgTdc = true;
         MatchIterator* decoy_iter = new MatchIterator(temp_collection);
         while (decoy_iter->hasNext()) {
@@ -556,6 +558,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     }
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
     cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
+    cols_to_print[BY_IONS_FRACTION_COL] = target_matches->getScoredType(BY_ION_FRACTION);
+    cols_to_print[BY_IONS_REPEAT_MATCH_COL] = target_matches->getScoredType(BY_ION_REPEAT_MATCH);
 
     if (distinct_matches) {
       cols_to_print[DISTINCT_MATCHES_SPECTRUM_COL] = true;

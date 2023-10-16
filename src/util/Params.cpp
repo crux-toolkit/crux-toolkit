@@ -310,6 +310,9 @@ Params::Params() : finalized_(false) {
   InitBoolParam("pin-output", false,
     "Output a Percolator input (PIN) file to the output directory.",
     "Available for tide-search.", true);
+  InitBoolParam("mztab-output", false,
+    "Output results in mzTab file to the output directory.",
+    "Available for tide-search.", true);    
   InitBoolParam("pout-output", false,
     "Output a Percolator [[html:<a href=\""
     "https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd\">]]"
@@ -317,7 +320,7 @@ Params::Params() : finalized_(false) {
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
     "Output a pepXML results file to the output directory.",
-    "Available for tide-search.", true);
+    "Available for tide-search, percolator.", true);
   InitBoolParam("txt-output", true,
     "Output a tab-delimited results file to the output directory.",
     "Available for tide-search, percolator.", true);
@@ -521,9 +524,6 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("decoy-prefix", "decoy_",
     "Specifies the prefix of the protein names that indicate a decoy.",
     "Available for tide-index and percolator", true);
-  InitBoolParam("no-terminate", false,
-    "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
-    "Available for percolator", true);
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
@@ -853,10 +853,13 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", true);
-  InitStringParam("score-function", "xcorr", "xcorr|residue-evidence|both",
-    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; "
-    "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
-    "both scores. The latter requires that exact-p-value=T.",
+  InitStringParam("score-function", "xcorr", "xcorr|combined-p-values|hyperscore|hyperscore-la",
+    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST;"
+    "`combined-p-values` combined (1) exact-p-value: a calibrated version of XCorr that uses "
+    "dynamic programming and (2) residue-evidence-pvalue: a valibarated version of the  ResEV "
+    "that considers pairs of peaks, rather than single peaks; "
+    "`hyperscore` is the score function used in X!Tandem; `hyperscore-la` is a variant of the "
+    "hyperscore designed for open modification searching.",
     "Available for tide-search.", true);
   InitDoubleParam("fragment-tolerance", .02, 0, 2,
     "Mass tolerance (in Da) for scoring pairs of peaks when creating the residue evidence matrix. "
@@ -880,6 +883,13 @@ InitStringParam("protein-name-separator", ",",
     "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
     "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
     "Available for tide-search", true);
+  InitBoolParam("override-charges", false,
+    "If this is set to T, then all spectra are searched in all charge states from min-charge to max-charge. "
+    "Otherwise, the default behavior is to search with all charge states only if a spectrum has no charge "
+    "or charge=0.",
+    "Available for tide-search", true);
+
+
   /*
    * Comet parameters
    */
@@ -1357,7 +1367,7 @@ InitStringParam("protein-name-separator", ",",
     "Only available for crux-predict-peptide-ions.", true);
   // ***** spectral-counts aguments *****
   InitArgParam("input PSMs",
-    "A PSM file that has been produced by Percolator or assign-confidence.");
+    "A PSM file in either tab delimited text format (as produced by percolator), or pepXML format.");
   // also uses "protein-database"
   // ***** spectral-counts options *****
   InitStringParam("protein-database", "",
@@ -1411,7 +1421,8 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("custom-threshold-name", "",
     "Specify which field to apply the threshold to. The direction of the threshold "
     "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
-    "applies to the percolator q-value, specified by \"percolator q-value\".",
+    "applies to the q-value, specified by \"percolator q-value\", "
+    "\"decoy q-value (xcorr)\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
@@ -2256,6 +2267,7 @@ void Params::Categorize() {
   items.insert("evidence-granularity");
   items.insert("top_count");
   items.insert("e_value_depth");
+  items.insert("override-charges");
   AddCategory("Search parameters", items);
 
   items.clear();

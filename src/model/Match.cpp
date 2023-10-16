@@ -370,6 +370,12 @@ void Match::printOneMatchField(
               getScore(QVALUE_MIXMAX));
 //    }
     break;
+  case DECOY_XCORR_QVALUE_COL:
+    if (null_peptide_ == false) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+              getScore(DECOY_XCORR_QVALUE));
+    }
+    break;
   case DECOY_XCORR_PEP_COL:
     if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
@@ -388,6 +394,15 @@ void Match::printOneMatchField(
                                        getScore(DECOY_EVALUE_PEP));
     }
     break;
+  
+#ifdef NEW_COLUMNS
+  case DECOY_XCORR_PEPTIDE_QVALUE_COL:
+    if ( (null_peptide_ == false) && (best_per_peptide_ == true)) {
+      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+              getScore(DECOY_XCORR_PEPTIDE_QVALUE));
+    }
+    break;
+#endif
   case PERCOLATOR_SCORE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
               getScore(PERCOLATOR_SCORE));
@@ -417,6 +432,12 @@ void Match::printOneMatchField(
     break;
   case BY_IONS_TOTAL_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, b_y_total);
+    break;
+  case BY_IONS_FRACTION_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getScore(BY_ION_FRACTION));
+    break;
+  case BY_IONS_REPEAT_MATCH_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, getScore(BY_ION_REPEAT_MATCH));
     break;
   case DISTINCT_MATCHES_SPECTRUM_COL:
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
