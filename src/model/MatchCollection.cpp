@@ -123,8 +123,6 @@ void MatchCollection::sort(
     smaller_is_better = true;
     break;
 
-  case DECOY_XCORR_QVALUE:
-  case DECOY_XCORR_PEPTIDE_QVALUE:
   case DECOY_XCORR_PEP:
     smaller_is_better = false;
     sort_by = XCORR;

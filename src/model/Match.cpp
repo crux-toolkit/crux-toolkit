@@ -370,12 +370,6 @@ void Match::printOneMatchField(
               getScore(QVALUE_MIXMAX));
 //    }
     break;
-  case DECOY_XCORR_QVALUE_COL:
-    if (null_peptide_ == false) {
-      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
-              getScore(DECOY_XCORR_QVALUE));
-    }
-    break;
   case DECOY_XCORR_PEP_COL:
     if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
@@ -394,15 +388,6 @@ void Match::printOneMatchField(
                                        getScore(DECOY_EVALUE_PEP));
     }
     break;
-  
-#ifdef NEW_COLUMNS
-  case DECOY_XCORR_PEPTIDE_QVALUE_COL:
-    if ( (null_peptide_ == false) && (best_per_peptide_ == true)) {
-      output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
-              getScore(DECOY_XCORR_PEPTIDE_QVALUE));
-    }
-    break;
-#endif
   case PERCOLATOR_SCORE_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
               getScore(PERCOLATOR_SCORE));

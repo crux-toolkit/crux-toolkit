@@ -320,7 +320,7 @@ Params::Params() : finalized_(false) {
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
     "Output a pepXML results file to the output directory.",
-    "Available for tide-search, percolator.", true);
+    "Available for tide-search.", true);
   InitBoolParam("txt-output", true,
     "Output a tab-delimited results file to the output directory.",
     "Available for tide-search, percolator.", true);
@@ -524,6 +524,9 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("decoy-prefix", "decoy_",
     "Specifies the prefix of the protein names that indicate a decoy.",
     "Available for tide-index and percolator", true);
+  InitBoolParam("no-terminate", false,
+    "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
+    "Available for percolator", true);    
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
@@ -1367,7 +1370,7 @@ InitStringParam("protein-name-separator", ",",
     "Only available for crux-predict-peptide-ions.", true);
   // ***** spectral-counts aguments *****
   InitArgParam("input PSMs",
-    "A PSM file in either tab delimited text format (as produced by percolator), or pepXML format.");
+    "A PSM file that has been produced by Percolator or assign-confidence.");
   // also uses "protein-database"
   // ***** spectral-counts options *****
   InitStringParam("protein-database", "",
@@ -1421,8 +1424,7 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("custom-threshold-name", "",
     "Specify which field to apply the threshold to. The direction of the threshold "
     "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
-    "applies to the q-value, specified by \"percolator q-value\", "
-    "\"decoy q-value (xcorr)\".",
+    "applies to the percolator q-value, specified by \"percolator q-value\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
