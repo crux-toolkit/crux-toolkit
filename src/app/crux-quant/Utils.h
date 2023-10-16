@@ -14,7 +14,8 @@
 #include "IndexedMassSpectralPeak.h"
 #include "PpmTolerance.h"
 #include "io/MatchFileReader.h"
-#include "io/SpectrumCollectionFactory.h"
+// #include "io/SpectrumCollectionFactory.h"
+#include "tide/spectrum_collection.h"
 
 using std::map;
 using std::pair;
@@ -31,7 +32,7 @@ const int NUMISOTOPES_REQUIRED = 2;              // May need to make this a user
 const double PEAK_FINDING_PPM_TOLERANCE = 20.0;  // May need to make this a user input
 const double PPM_TOLERANCE = 10.0;               // May need to make this a user input
 const bool ID_SPECIFIC_CHARGE_STATE = false;  // May need to make this a user input
-
+const int  MISSED_SCANS_ALLOWED = 1; // May need to make this a user input
 string calcFormula(string seq);
 
 struct Identification {
@@ -117,7 +118,8 @@ struct IndexedSpectralResults {
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 };
 
-Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
+// Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
+SpectrumCollection* loadSpectra(const string& file, bool ms1);
 
 IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
@@ -135,7 +137,9 @@ vector<double> createChargeStates(const vector<Identification>& allIdentificatio
 void quantifyMs2IdentifiedPeptides(
     string spectraFile, 
     const vector<Identification>& allIdentifications, 
-    const vector<double>& chargeStates
+    const vector<double>& chargeStates,
+    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
 );
 
 double toMz(double mass, int charge);
@@ -147,7 +151,7 @@ IndexedMassSpectralPeak* getIndexedPeak(
     int zeroBasedScanIndex, 
     PpmTolerance tolerance, 
     int chargeState, 
-    map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
 );
 
 void processRange(
@@ -157,7 +161,18 @@ void processRange(
     const string& spectralFile,
     const vector<double>& chargeStates,
     vector<ChromatographicPeak>& chromatographicPeaks,
-    PpmTolerance& peakfindingTol
+    PpmTolerance& peakfindingTol,
+    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
+);
+
+vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime, 
+        double mass, 
+        int charge, 
+        const string& spectra_file, 
+        PpmTolerance tolerance,
+        unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+        map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
 );
 
 }  // namespace CruxQuant

@@ -6,12 +6,12 @@
 #include <cmath>
 #include <iostream>
 #include <map>
+#include <mutex>  // Include the mutex header
 #include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#include <mutex> // Include the mutex header
-
+#include <fstream>
 
 #include "CMercury8.h"
 
@@ -20,20 +20,20 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-std::mutex mtx; // Declare a mutex
+std::mutex mtx;  // Declare a mutex
 
 const int MaxThreads = 4;
 
 namespace CruxQuant {
 
-Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level) {
-    Crux::SpectrumCollection* spectra = SpectrumCollectionFactory::create(file);
-    spectra->parse(ms_level = ms_level);
+SpectrumCollection* loadSpectra(const string& file, bool ms1) {
+    SpectrumCollection* spectra = new SpectrumCollection();
+    std::ifstream _file(file);
+    spectra->ReadMS(_file, ms1);
     return spectra;
 }
 
 IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file) {
-   
     string _spectra_file(spectra_file);
 
     map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
@@ -90,24 +90,43 @@ vector<Identification> createIdentifications(MatchFileReader* matchFileReader, c
     while (matchFileReader->hasNext()) {
         for (auto spectrum = spectrum_collection->begin(); spectrum != spectrum_collection->end(); ++spectrum) {
             if (*spectrum != nullptr) {
-                FLOAT_T retentionTime = (*spectrum)->getRetentionTime();  // retentionTime
+                carp(CARP_INFO, "Spectrum Scan ID: %d", (*spectrum)->getScanNumber());
+                carp(CARP_INFO, "Match File Scan ID: %d", matchFileReader->getInteger(SCAN_COL));
+                // carp(CARP_INFO, "Match File Scan ID: %d", matchFileReader->getInteger(SCAN_NR_COL));
+                
+        //         // if(matchFileReader->getColumnName(SCAN_COL) == (*spectrum)->)
+        //         FLOAT_T retentionTime = (*spectrum)->getRetentionTime();  // retentionTime
 
-                Identification identification;
+        //         Identification identification;
 
-                identification.sequence = matchFileReader->getString(SEQUENCE_COL);
-                identification.monoisotopicMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
-                identification.charge = matchFileReader->getInteger(CHARGE_COL);
-                identification.peptideMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
-                identification.precursorCharge = matchFileReader->getDouble(SPECTRUM_PRECURSOR_MZ_COL);
-                identification.spectralFile = _spectra_file;
-                identification.ms2RetentionTimeInMinutes = retentionTime;
-                allIdentifications.push_back(identification);
+        //         identification.sequence = matchFileReader->getString(SEQUENCE_COL);
+        //         identification.monoisotopicMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
+        //         identification.charge = matchFileReader->getInteger(CHARGE_COL);
+        //         identification.peptideMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
+        //         identification.precursorCharge = matchFileReader->getDouble(SPECTRUM_PRECURSOR_MZ_COL);
+        //         identification.spectralFile = _spectra_file;
+        //         identification.ms2RetentionTimeInMinutes = retentionTime;
+        //         allIdentifications.push_back(identification);
             }
         }
+        // int scan_id = matchFileReader->getInteger(SCAN_COL);
+        // auto spectrum = spectrum_collection->getSpectrum(scan_id);
+        // FLOAT_T retentionTime = *spectrum->getRetentionTime(); 
+
+        Identification identification;
+
+        identification.sequence = matchFileReader->getString(SEQUENCE_COL);
+        identification.monoisotopicMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
+        identification.charge = matchFileReader->getInteger(CHARGE_COL);
+        identification.peptideMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
+        identification.precursorCharge = matchFileReader->getDouble(SPECTRUM_PRECURSOR_MZ_COL);
+        identification.spectralFile = _spectra_file;
+        // identification.ms2RetentionTimeInMinutes = retentionTime;
+        allIdentifications.push_back(identification);
 
         matchFileReader->next();
     }
-
+    exit(0);
     return allIdentifications;
 }
 
@@ -380,11 +399,12 @@ vector<double> createChargeStates(const vector<Identification>& allIdentificatio
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
-                  const string& spectralFile, 
-                  const vector<double>& chargeStates, 
+                  const string& spectralFile,
+                  const vector<double>& chargeStates,
                   vector<ChromatographicPeak>& chromatographicPeaks,
-                  PpmTolerance& peakfindingTol) {
-                    
+                  PpmTolerance& peakfindingTol,
+                  unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+                  map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
         {
@@ -394,27 +414,30 @@ void processRange(int start, int end,
             msmsFeature._index = i;
             chromatographicPeaks.push_back(msmsFeature);
             for (const auto& chargeState : chargeStates) {
-                if(ID_SPECIFIC_CHARGE_STATE && chargeState != identification.precursorCharge){
+                if (ID_SPECIFIC_CHARGE_STATE && chargeState != identification.precursorCharge) {
                     continue;
                 }
-
-                // vector<IndexedMassSpectralPeak> xic = peakfind(
-                //     identification.ms2RetentionTimeInMinutes,
-                //     identification.peakfindingMass,
-                //     chargeState,
-                //     identification.spectralFile,
-                //     peakfindingTol
-                // )
+                carp(CARP_INFO, "%lf", identification.ms2RetentionTimeInMinutes);
+                vector<IndexedMassSpectralPeak*> xic = peakFind(
+                    identification.ms2RetentionTimeInMinutes, // This value may not be in minutes, check and convert
+                    identification.peakfindingMass,
+                    chargeState,
+                    identification.spectralFile,
+                    peakfindingTol,
+                    _ms1Scans,
+                    indexedPeaks
+                );
             }
         }
-        
     }
 }
 
 void quantifyMs2IdentifiedPeptides(
     string spectraFile,
     const vector<Identification>& allIdentifications,
-    const vector<double>& chargeStates) {
+    const vector<double>& chargeStates,
+    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
     vector<Identification> ms2IdsForThisFile;
 
     // Use std::copy_if to filter the identifications
@@ -452,15 +475,18 @@ void quantifyMs2IdentifiedPeptides(
                                        &spectraFile,
                                        &chargeStates,
                                        &chromatographicPeaks,
-                                       &peakfindingTol]() {
-            processRange(start, end, 
-                ms2IdsForThisFile, 
-                spectraFile, 
-                chargeStates,
-                chromatographicPeaks,
-                peakfindingTol);
+                                       &peakfindingTol,
+                                       &_ms1Scans,
+                                       &indexedPeaks]() {
+            processRange(start, end,
+                         ms2IdsForThisFile,
+                         spectraFile,
+                         chargeStates,
+                         chromatographicPeaks,
+                         peakfindingTol,
+                         _ms1Scans,
+                         indexedPeaks);
         }));
-
     }
 
     // Join the threads
@@ -477,7 +503,7 @@ double toMass(double massToChargeRatio, int charge) {
     return std::abs(charge) * massToChargeRatio - charge * PROTONMASS;
 }
 
-IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance, int chargeState, map<int, map<int, IndexedMassSpectralPeak>> indexedPeaks) {
+IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance, int chargeState, map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
     IndexedMassSpectralPeak* bestPeak = nullptr;
 
     // Calculate the maximum value using tolerance
@@ -557,6 +583,64 @@ void ChromatographicPeak::calculateIntensityForThisFeature(bool integrate) {
         numChargeStatesObserved = 0;
         apex = {};  // Reset apex to default-constructed IsotopicEnvelope
     }
+}
+
+vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime,
+                                         double mass,
+                                         int charge,
+                                         const string& spectra_file,
+                                         PpmTolerance tolerance,
+                                         unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+                                         map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
+    vector<IndexedMassSpectralPeak*> xic;
+    vector<Ms1ScanInfo> ms1Scans = _ms1Scans[spectra_file];
+    int precursorScanIndex = -1;
+    for (const Ms1ScanInfo& ms1Scan : ms1Scans) {
+        if (ms1Scan.retentionTime < idRetentionTime) {
+            precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
+        } else {
+            break;
+        }
+    }
+
+    // go right
+    int missedScans = 0;
+    for (int t = precursorScanIndex; t < ms1Scans.size(); t++) {
+        auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+        if (peak == nullptr && t != precursorScanIndex) {
+            missedScans++;
+        } else if (peak != nullptr) {
+            missedScans = 0;
+            xic.push_back(peak);
+        }
+
+        if (missedScans > MISSED_SCANS_ALLOWED) {
+            break;
+        }
+    }
+
+    // go left
+    missedScans = 0;
+    for (int t = precursorScanIndex - 1; t >= 0; t--) {
+        auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+
+        if (peak == nullptr && t != precursorScanIndex) {
+            missedScans++;
+        } else if (peak != nullptr) {
+            missedScans = 0;
+            xic.push_back(peak);
+        }
+
+        if (missedScans > MISSED_SCANS_ALLOWED) {
+            break;
+        }
+    }
+
+    std::sort(xic.begin(), xic.end(), [](const IndexedMassSpectralPeak* x, const IndexedMassSpectralPeak* y) {
+        return x->retentionTime < y->retentionTime;
+    });
+
+    return xic;
 }
 
 }  // namespace CruxQuant

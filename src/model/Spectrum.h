@@ -382,6 +382,8 @@ class Spectrum{
    * @brief Get the retention time of the spectrum
    */
   FLOAT_T getRetentionTime() const;
+
+  const int getScanNumber(){return scan_number_;}
 };    
 
 }
