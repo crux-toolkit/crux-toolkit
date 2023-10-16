@@ -679,7 +679,7 @@ void TideSearchApplication::search(void* threadarg) {
 
           if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
 
-          quantile_score = scores[quantile_pos]+TAILOR_OFFSET; // Make sure scores positive
+          quantile_score = scores[quantile_pos]+TAILOR_OFFSET; // Make sure scores  positive
         }  //End of Tailor
         TideMatchSet::Arr match_arr(nCandPeptide);
         int peptide_idx = 0;
@@ -804,7 +804,7 @@ void TideSearchApplication::search(void* threadarg) {
       //For each mass bin, a vector hold the p-values for each corresponding res-ev score
       vector<vector<double> > pValuesResidueObs(maxPrecurMassBin);
 
-      //TODO assumption is that there is one nterm mod per peptide
+      //TODO assumption is that there is one nterm static mod per peptide
       int nTermMassBin;
       double nTermMass;
       if (nterm_mod_table.static_mod_size() > 0) {

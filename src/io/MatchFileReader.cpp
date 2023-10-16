@@ -207,6 +207,7 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(RESIDUE_EVIDENCE_SCORE, !empty(RESIDUE_EVIDENCE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(BOTH_PVALUE, !empty(BOTH_PVALUE_COL)); //Added by Andy Lin for residue evidence
     match_collection->setScoredType(EVALUE, !empty(EVALUE_COL));
+    match_collection->setScoredType(DECOY_XCORR_QVALUE, !empty(DECOY_XCORR_QVALUE_COL));
     match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(POUT_QVALUE_COL));
     if (empty(POUT_QVALUE_COL)) {
       match_collection->setScoredType(PERCOLATOR_QVALUE, !empty(PERCOLATOR_QVALUE_COL));
@@ -217,8 +218,9 @@ MatchCollection* MatchFileReader::parse() {
     }
     match_collection->setScoredType(BY_IONS_MATCHED, !empty(BY_IONS_MATCHED_COL));
     match_collection->setScoredType(BY_IONS_TOTAL, !empty(BY_IONS_TOTAL_COL));
+    match_collection->setScoredType(BY_ION_FRACTION, !empty(  BY_IONS_FRACTION_COL));
+    match_collection->setScoredType(BY_ION_REPEAT_MATCH, !empty(BY_IONS_REPEAT_MATCH_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
-	match_collection->setScoredType(QVALUE_TDC, !empty(QVALUE_TDC_COL));
 
     // DIAmeter related, added by Yang
     match_collection->setScoredType(PRECURSOR_INTENSITY_RANK_M0, !empty(PRECURSOR_INTENSITY_RANK_M0_COL));
@@ -249,7 +251,7 @@ MatchCollection* MatchFileReader::parse() {
     } else if (empty(SP_RANK_COL) == 1) {
       rank_col = SP_RANK_COL;
     } else {
-      carp(CARP_FATAL, "Input file does not contain any recognized rank column.");
+      carp(CARP_FATAL, "Input file does not contain any reconized rank column.");
     }
 
     // parse match object
@@ -260,17 +262,10 @@ MatchCollection* MatchFileReader::parse() {
         return NULL;
       }
 
-      // set all spectrum specific features to parsed match
-      // zState also gets set by spectrum = parseSpectrum() and spectrum is used
-      // as input for match. This code changes zState only if charge and neutral
-      // mass column is present. Note that this if statement is required as
-      // Percolator PSMId column is parsed by parseSpectrum()
-      if (getFloat(SPECTRUM_NEUTRAL_MASS_COL) != -1 &&
-          getInteger(CHARGE_COL) != -1) {
-        SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
-                              getInteger(CHARGE_COL));
-        match->setZState(zState);
-      }
+      //set all spectrum specific features to parsed match
+      SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+                            getInteger(CHARGE_COL));
+      match->setZState(zState);
       match->setLnExperimentSize(ln_experiment_size);
       //add match to match collection.
       match_collection->addMatchToPostMatchCollection(match);
@@ -350,6 +345,9 @@ Crux::Match* MatchFileReader::parseMatch() {
     match->setScore(BOTH_PVALUE, getFloat(BOTH_PVALUE_COL));
     match->setRank(BOTH_PVALUE, getInteger(BOTH_PVALUE_RANK));
   }
+  if (!empty(DECOY_XCORR_QVALUE_COL)) {
+    match->setScore(DECOY_XCORR_QVALUE, getFloat(DECOY_XCORR_QVALUE_COL));
+  }
   if (!empty(EVALUE_COL)) {
     match->setScore(EVALUE, getFloat(EVALUE_COL));
   }
@@ -370,15 +368,17 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(BY_IONS_TOTAL_COL)) {
     match->setScore(BY_IONS_TOTAL, getInteger(BY_IONS_TOTAL_COL));
   }
-
+  if (!empty(BY_IONS_FRACTION_COL)) {
+    match->setScore(BY_ION_FRACTION, getFloat(BY_IONS_FRACTION_COL));
+  }
+  if (!empty(BY_IONS_REPEAT_MATCH_COL)) {
+    match->setScore(BY_ION_REPEAT_MATCH, getInteger(BY_IONS_REPEAT_MATCH_COL));
+  }
   if (!empty(DECOY_INDEX_COL)) {
     match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
   }
   if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
-  }
-  if (!empty(QVALUE_TDC_COL)) {
-    match->setScore(QVALUE_TDC, getFloat(QVALUE_TDC_COL));
   }
 
   // DIAmeter related, added by Yang
@@ -459,28 +459,10 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 }
 
 Crux::Spectrum* MatchFileReader::parseSpectrum() {
-  if (getInteger(SCAN_COL) != -1) {
-    return new Crux::Spectrum(getInteger(SCAN_COL),
-                              getInteger(SCAN_COL),
-                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
-                              vector<int>(1, getInteger(CHARGE_COL)),
-                              getString(FILE_COL));
-  } else {
-    // This part allows Percolator output files to be read in
-    string intermediate;
-    vector <string> tokens;
-    stringstream psmid(getString(POUT_PSMID_COL));
-
-    // tokenize by underscore
-    while(getline(psmid, intermediate, '_'))
-    {
-        tokens.push_back(intermediate);
-    }
-    return new Crux::Spectrum(stoi(tokens[2]),
-                              stoi(tokens[2]),
-                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
-                              vector<int>(1, stoi(tokens[3])),
-                              getString(FILE_COL));
-  }
+  return new Crux::Spectrum(getInteger(SCAN_COL),
+                            getInteger(SCAN_COL),
+                            getFloat(SPECTRUM_PRECURSOR_MZ_COL),
+                            vector<int>(1, getInteger(CHARGE_COL)),
+                            getString(FILE_COL));
 }
 

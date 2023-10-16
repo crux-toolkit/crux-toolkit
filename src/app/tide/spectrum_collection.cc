@@ -22,10 +22,10 @@ using google::protobuf::uint64;
 #define CHECK(x) GOOGLE_CHECK((x))
 
 // Integerization constant for the XCorr p-value calculation.
-#define EVIDENCE_INT_SCALE 500.0
+#define EVIDENCE_INT_SCALE 500.0 
 
 Spectrum::Spectrum(const pb::Spectrum& spec) {
-  spectrum_number_ = spec.spectrum_number();
+  spectrum_number_ = spec.scan_id();
   precursor_m_z_ = spec.precursor_m_z();
   rtime_ = spec.rtime();
   for (int i = 0; i < spec.charge_state_size(); ++i)
@@ -105,7 +105,7 @@ static inline int GetDenom(const vector<double>& vals) {
 
 void Spectrum::FillPB(pb::Spectrum* spec) {
   spec->Clear();
-  spec->set_spectrum_number(spectrum_number_);
+  spec->set_scan_id(spectrum_number_);
   if (precursor_m_z_ > 0)
     spec->set_precursor_m_z(precursor_m_z_);
   spec->set_rtime(rtime_);
