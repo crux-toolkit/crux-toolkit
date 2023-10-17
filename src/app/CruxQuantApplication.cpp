@@ -1,6 +1,6 @@
-#include "CruxQuantApplication.h"
-
 #include <cmath>
+#include <sstream>
+#include "CruxQuantApplication.h"
 #include "IndexedMassSpectralPeak.h"
 #include "crux-quant/Utils.h"
 #include "io/carp.h"
@@ -13,48 +13,43 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
+
 CruxQuantApplication::CruxQuantApplication() {}
 
 CruxQuantApplication::~CruxQuantApplication() {}
 
-int CruxQuantApplication::main(int argc, char **argv) {
+int CruxQuantApplication::main(int argc, char** argv) {
     string psm_file = Params::GetString("lfq-peptide-spectrum matches");
     vector<string> spec_files = Params::GetStrings("spectrum files");
     return main(psm_file, spec_files);
 }
 
-int CruxQuantApplication::main(const string &psm_file, const vector<string> &spec_files) {
+int CruxQuantApplication::main(const string& psm_file, const vector<string>& spec_files) {
     carp(CARP_INFO, "Running crux-lfq...");
 
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
 
-    MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
+    MatchFileReader* matchFileReader = new MatchFileReader(psm_file);
 
-    for (const string &spectra_file : spec_files) {
-        SpectrumCollection* spectra_ms1 = CruxQuant::loadSpectra(spectra_file, true);
-        SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectra_file, false);
+    for (const string& spectra_file : spec_files) {
+        SpectrumListPtr spectra_ms1 = CruxQuant::loadSpectra(spectra_file, 1);
+        SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectra_file, 2);
 
-        spectra_ms1->
-
-        carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->SpectrumNum);
-        carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->getNumSpectra());
-
-        // CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
+        carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->size());
+        carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->size());
         
-        // // Replace spectra_file in createIdentifications with file column in the matchFileReader
-        // vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file, spectra_ms2);
-        // unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
-        
-        // CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
-        // vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
+        CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        // CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks);
-      
+        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file, spectra_ms2);
+        unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
+        CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
+        vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
-       
+        CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks);
     }
     delete matchFileReader;
     return 0;
@@ -91,7 +86,6 @@ vector<string> CruxQuantApplication::getOptions() const {
         "output-dir",
         "overwrite",
         "parameter-file",
-        "spectrum-parser",
         "verbosity"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

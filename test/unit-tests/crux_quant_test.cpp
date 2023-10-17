@@ -5,16 +5,17 @@
 std::string spectrum_file = TEST_DATA_PATH "/test-data/test_filtered.mzML";
 std::string psm_file = TEST_DATA_PATH "/test-data/tide-search.txt";
 
+typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
 TEST(CruxQuant, TestLoadSpectra) {
-  Crux::SpectrumCollection* spectra_ms1 = CruxQuant::loadSpectra(spectrum_file, 1);
-  EXPECT_EQ(spectra_ms1->getNumSpectra(), 13);
+  SpectrumListPtr spectra_ms1 = CruxQuant::loadSpectra(spectrum_file, 1);
+  EXPECT_EQ(spectra_ms1->size(), 13);
  
 }
 
 // TODO rewrite this test, make it more robust
 TEST(CruxQuant, TestIndexes) {
-  Crux::SpectrumCollection* spectra_ms1 = CruxQuant::loadSpectra(spectrum_file, 1);
+  SpectrumListPtr spectra_ms1 = CruxQuant::loadSpectra(spectrum_file, 1);
   CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectrum_file);
   std::map<int, std::map<int, CruxQuant::IndexedMassSpectralPeak>> indexes = indexResults._indexedPeaks;
 
@@ -35,14 +36,14 @@ TEST(CruxQuant, TestIndexes) {
 
 TEST(CruxQuant, TestCreateIdentifications){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   EXPECT_EQ(8700, allIdentifications.size());
 }
 
 TEST(CruxQuant, TestcalCulateTheoreticalIsotopeDistributions){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
   EXPECT_EQ(67, modifiedSequenceToIsotopicDistribution.size());
@@ -52,7 +53,7 @@ TEST(CruxQuant, TestcalCulateTheoreticalIsotopeDistributions){
 
 TEST(CruxQuant, TestSetPeakFindingMass){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
   CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
@@ -63,7 +64,7 @@ TEST(CruxQuant, TestSetPeakFindingMass){
 
 TEST(CruxQuant, TestCreateChargeStates){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
   EXPECT_EQ(66, chargeStates.size()) << chargeStates.size();
@@ -72,7 +73,7 @@ TEST(CruxQuant, TestCreateChargeStates){
 // TODO Write the actual tests
 TEST(CruxQuant, TestQuantifyMs2IdentifiedPeptides){
   MatchFileReader *matchFileReader = new MatchFileReader(psm_file);
-  Crux::SpectrumCollection* spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
+  SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectrum_file, 2);
   vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectrum_file, spectra_ms2);
   
   // CruxQuant::quantifyMs2IdentifiedPeptides(spectrum_file, allIdentifications);

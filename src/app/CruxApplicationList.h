@@ -91,6 +91,8 @@ class CruxApplicationList {
    * calls that applications main method with the rest of the parameters.
    */
   int main(int argc, char** argv);
+
+  
 };
 
 

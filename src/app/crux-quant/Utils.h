@@ -14,14 +14,16 @@
 #include "IndexedMassSpectralPeak.h"
 #include "PpmTolerance.h"
 #include "io/MatchFileReader.h"
-// #include "io/SpectrumCollectionFactory.h"
-#include "tide/spectrum_collection.h"
+#include "io/SpectrumCollectionFactory.h"
+#include "pwiz/data/msdata/MSDataFile.hpp"
+#include "pwiz/data/msdata/SpectrumListWrapper.hpp"
 
 using std::map;
 using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
+using namespace pwiz::msdata;
 
 namespace CruxQuant {
 
@@ -118,12 +120,11 @@ struct IndexedSpectralResults {
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 };
 
-// Crux::SpectrumCollection* loadSpectra(const string& file, int ms_level);
-SpectrumCollection* loadSpectra(const string& file, bool ms1);
+pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
 
-IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
+IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
 
-vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file, Crux::SpectrumCollection* spectrum_collection);
+vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file, SpectrumListPtr spectrum_collection);
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
@@ -174,5 +175,7 @@ vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime,
         unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
         map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
 );
+
+string getScanID(string spectrum_id);
 
 }  // namespace CruxQuant
