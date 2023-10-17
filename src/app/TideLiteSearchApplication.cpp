@@ -118,6 +118,17 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   granularityScale_ = Params::GetInt("evidence-granularity");  
 
   top_matches_ = Params::GetInt("top-match");  
+  num_threads_ = Params::GetInt("num-threads");
+  if (num_threads_ < 1) {
+    num_threads_ = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
+    // (Meaning just main thread) Do not make this value below 1.
+  } else if (num_threads_ > 64) {
+    // make sure that number of threads are reasonable, e.g. user did not specify millions of threads...
+    carp(CARP_FATAL, "Requested more than 64 threads.");
+  }
+  carp(CARP_INFO, "Number of Threads: %d", num_threads_);
+
+
 
   // Check scan-number parameter
   string scan_range = Params::GetString("scan-number");
@@ -152,10 +163,10 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   getPeptideIndexData(input_index, proteins, locations, peptides_header);
   tide_index_mzTab_file_path_ = FileUtils::Join(input_index, TideIndexApplication::tide_index_mzTab_filename_);
   // Create active peptide queue
-  active_peptide_queue_ = new ActivePeptideQueueLite(peptide_reader.Reader(), proteins, &locations);  
+  // active_peptide_queue_ = new ActivePeptideQueueLite(peptide_reader.Reader(), proteins, &locations);  
 
   TideLiteMatchSet::curScoreFunction_ = curScoreFunction_;
-  TideLiteMatchSet::active_peptide_queue_ = active_peptide_queue_;
+  // TideLiteMatchSet::active_peptide_queue_ = active_peptide_queue_;
   TideLiteMatchSet::top_matches_ = top_matches_;
   TideLiteMatchSet::decoy_num_ = decoy_num_;
   TideLiteMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
@@ -166,6 +177,12 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   // Create the output files
   createOutputFiles(); 
 
+  vector<HeadedRecordReader*> peptide_reader_threads;
+  vector<ActivePeptideQueueLite*> APQ;
+  for (int i = 0; i < num_threads_; i++) {
+    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
+    APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back()->Reader(), proteins, &locations));
+  }
 
   // Loop through spectrum files
   vector<InputFile> inputFiles = getInputFiles(input_files);
@@ -184,7 +201,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     // cycle through spectrum-charge pairs, sorted by neutral mass
     for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
         sc != spec_charges->end(); ++sc ) {
-      spectrum_search(&(*sc), spectrum_file_name, spectrum_file_cnt);
+      spectrum_search(&(*sc), APQ[0], spectrum_file_name, spectrum_file_cnt);
     }
   }
 
@@ -240,7 +257,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     }
   }
 */
-  delete active_peptide_queue_;
+  // delete active_peptide_queue_;
 
   if (out_tsv_target_ != NULL)
     delete out_tsv_target_;
@@ -256,11 +273,16 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   if (out_pin_decoy_ != NULL)
     delete out_pin_decoy_;
 
+  for (int i = 0; i < num_threads_; i++) {
+//    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
+//    APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back(), proteins, &locations));
+  }
+
   return 0;
 }
 
 
-void TideLiteSearchApplication::spectrum_search(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt) {
+void TideLiteSearchApplication::spectrum_search(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt) {
   
   // Search one spectrum against its candidate peptides
 
@@ -288,27 +310,27 @@ void TideLiteSearchApplication::spectrum_search(const SpectrumCollection::SpecCh
   vector<double>* max_mass = new vector<double>();
   
   computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
-  active_peptide_queue_->SetActiveRange(min_mass, max_mass, min_range, max_range);
+  active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
   delete min_mass;
   delete max_mass;
 
-  if (active_peptide_queue_->nCandPeptides_ == 0) { // No peptides to score.
+  if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
     return; ///switch to continue in a loop
   }
   locks_array_[LOCK_CANDIDATES]->lock();
-  total_candidate_peptides_ += active_peptide_queue_->nCandPeptides_;
+  total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
   locks_array_[LOCK_CANDIDATES]->unlock();  
 
   // allocate PSMscores for N scores
-  TideLiteMatchSet psm_scores(active_peptide_queue_->nPeptides_);  //nPeptides_ includes acitve and inacitve peptides
+  TideLiteMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
 
   // Calculate the scores needed
   switch (curScoreFunction_) {
     case XCORR_SCORE:
-      XCorrScoring(sc, psm_scores);
+      XCorrScoring(sc, active_peptide_queue, psm_scores);
       break;
     case PVALUES:
-      PValueScoring(sc, psm_scores);
+      PValueScoring(sc, active_peptide_queue, psm_scores);
       break;
   } 
   // Print the top-N results to the output files, 
@@ -317,7 +339,7 @@ void TideLiteSearchApplication::spectrum_search(const SpectrumCollection::SpecCh
   PrintResults(sc, spectrum_file_name, spectrum_file_cnt, &psm_scores);
 }
 
-void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharge* sc, TideLiteMatchSet& psm_scores){
+void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores){
   // spectrum preprocessing for xcorr scoring
 
   long num_range_skipped = 0;
@@ -342,15 +364,15 @@ void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharg
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
   bool score_inactive_peptides = true;
-  if (active_peptide_queue_->min_candidates_ < active_peptide_queue_->nCandPeptides_)
+  if (active_peptide_queue->min_candidates_ < active_peptide_queue->nCandPeptides_)
     score_inactive_peptides = false;
   
   //Actual Xcorr Scoring        
   int cnt = 0;
-  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue_->begin_; 
-    iter != active_peptide_queue_->end_;
+  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue->begin_; 
+    iter != active_peptide_queue->end_;
     ++iter, ++cnt) {
-    if (active_peptide_queue_->candidatePeptideStatus_[cnt] == false && score_inactive_peptides == false) 
+    if (active_peptide_queue->candidatePeptideStatus_[cnt] == false && score_inactive_peptides == false) 
       continue;
     int xcorr = 0;
     int match_cnt = 0;
@@ -374,7 +396,7 @@ void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharg
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
     psm_scores.psm_scores_[cnt].repeat_ion_match_ = repeat_ion_match;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue_->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
     psm_scores.psm_scores_[cnt].by_ion_total_ = (*iter)->peaks_0.size();
     if (charge > 2){
       psm_scores.psm_scores_[cnt].by_ion_total_ += (*iter)->peaks_1.size();
@@ -405,7 +427,7 @@ int TideLiteSearchApplication::PeakMatching(ObservedPeakSet& observed, vector<un
   return score;
 }
 
-void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* sc, TideLiteMatchSet& psm_scores){
+void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores){
   // 1. Calculate the REFACTORED XCORR SCORE and its EXACT P-VALUE
 
   // preprocess spectrum for refactored XCorr score calculation
@@ -418,10 +440,10 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   //pepMassInt contains the corresponding mass bin for each candidate peptide
   //pepMassIntUnique contains the unique set of mass bins that candidate peptides fall in 
   vector<int> pepMassInt;
-  pepMassInt.reserve(active_peptide_queue_->nPeptides_);
+  pepMassInt.reserve(active_peptide_queue->nPeptides_);
   vector<int> pepMassIntUnique;
-  pepMassIntUnique.reserve(active_peptide_queue_->nPeptides_);
-  getMassBin(pepMassInt, pepMassIntUnique);
+  pepMassIntUnique.reserve(active_peptide_queue->nPeptides_);
+  getMassBin(pepMassInt, pepMassIntUnique, active_peptide_queue);
   int nPepMassIntUniq = (int)pepMassIntUnique.size();
   int maxPrecurMassBin = MassConstants::mass2bin(sc->neutral_mass + 250);
 
@@ -452,11 +474,11 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   // between a spectrum and all possible peptide candidates
   int scoreRefactInt;
   int cnt = 0;
-  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue_->begin_; 
-      iter != active_peptide_queue_->end_; 
+  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue_->candidatePeptideStatus_[cnt])
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
       continue;
 
     int pepMassIntIdx = 0;
@@ -485,7 +507,7 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
     psm_scores.psm_scores_[cnt].ordinal_ = cnt;
     psm_scores.psm_scores_[cnt].refactored_xcorr_ = scoreRefactInt / RESCALE_FACTOR;
     psm_scores.psm_scores_[cnt].exact_pval_ = pValue_xcorr;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue_->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
   }
 
   // // 2. Calculate the RES-EV SCORE and its RES-EV P-VALUE, developed by Andy Lin
@@ -545,11 +567,11 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   int scoreResidueEvidence;
   vector<int> resEvScores;
   cnt = 0;
-  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue_->begin_; 
-      iter != active_peptide_queue_->end_; 
+  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue_->candidatePeptideStatus_[cnt]) {
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt]) {
       resEvScores.push_back(-1);
       continue;
     }
@@ -621,11 +643,11 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   double pValue_combined = 0.3;
 
   cnt = 0;
-  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue_->begin_; 
-      iter != active_peptide_queue_->end_; 
+  for (deque<PeptideLite*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue_->candidatePeptideStatus_[cnt])
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
       continue;
 
     int pepMassIntIdx = 0;
@@ -660,7 +682,7 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
     psm_scores.psm_scores_[cnt].resEv_pval_    = pValue_resEv;
     psm_scores.psm_scores_[cnt].combined_pval_ = pValue_combined;
     psm_scores.psm_scores_[cnt].ordinal_ = cnt;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue_->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
 
   }
 }
@@ -1736,15 +1758,16 @@ void TideLiteSearchApplication::PrintResults(const SpectrumCollection::SpecCharg
 //The length of pepMassInt is the number of canddiate peptides
 void TideLiteSearchApplication::getMassBin(
   vector<int>& pepMassInt,
-  vector<int>& pepMassIntUnique
+  vector<int>& pepMassIntUnique,
+  ActivePeptideQueueLite* active_peptide_queue
 ) {
   int pe = 0;
   int peidx = 0;
 
-  for (deque<PeptideLite*>::const_iterator iter_ = active_peptide_queue_->begin_;
-      iter_ != active_peptide_queue_->end_; 
+  for (deque<PeptideLite*>::const_iterator iter_ = active_peptide_queue->begin_;
+      iter_ != active_peptide_queue->end_; 
       ++iter_) {
-    // if (active_peptide_queue_->candidatePeptideStatus_[peidx]) {
+    // if (active_peptide_queue->candidatePeptideStatus_[peidx]) {
     double pepMass = (*iter_)->Mass();
     int pepMaInt = MassConstants::mass2bin(pepMass);
     pepMassInt[pe] = pepMaInt;

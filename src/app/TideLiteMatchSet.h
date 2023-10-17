@@ -72,8 +72,8 @@ class TideLiteMatchSet {
   static int XCorr_pin_cols[];  //these are declared at the beginning of TideLiteMatchSet.cpp
   static int Pvalues_pin_cols[];
 
-  TideLiteMatchSet();
-  TideLiteMatchSet(long size);
+  // TideLiteMatchSet();
+  TideLiteMatchSet(ActivePeptideQueueLite* active_peptide_queue);
   ~TideLiteMatchSet();
 
   static int* getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders);
@@ -90,10 +90,10 @@ class TideLiteMatchSet {
   const double TAILOR_OFFSET = 5.0 ;
   double quantile_score_;
   PSMScores::iterator last_psm_;
+  ActivePeptideQueueLite* active_peptide_queue_;  
 
   // Global static parameters
   static SCORE_FUNCTION_T curScoreFunction_;
-  static ActivePeptideQueueLite* active_peptide_queue_;  
   static int top_matches_;
   static int decoy_num_;
   static int mass_precision_;

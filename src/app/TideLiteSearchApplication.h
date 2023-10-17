@@ -86,10 +86,10 @@ class TideLiteSearchApplication : public CruxApplication {
   /**
    * Function that contains the search algorithm and performs the search
    */
-  void spectrum_search(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt);
-  void XCorrScoring(const SpectrumCollection::SpecCharge* sc, TideLiteMatchSet& psm_scores);
+  void spectrum_search(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt);
+  void XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
   int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
-  void PValueScoring(const SpectrumCollection::SpecCharge* sc, TideLiteMatchSet& psm_scores);
+  void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
 
   void computeWindow(
       const SpectrumCollection::SpecCharge& sc,
@@ -114,7 +114,7 @@ class TideLiteSearchApplication : public CruxApplication {
 
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
-  void getMassBin (vector<int>& pepMassInt, vector<int>& pepMassIntUnique); 
+  void getMassBin (vector<int>& pepMassInt, vector<int>& pepMassIntUnique, ActivePeptideQueueLite* active_peptide_queue); 
   int calcScoreCount(vector<int>& pepMassIntUnique, vector<vector<int>>& evidenceObs, vector<double>& nullDistribution);
   //Added by Andy Lin in March 2016
   //function gets the max evidence of each mass bin(column)
@@ -155,7 +155,7 @@ class TideLiteSearchApplication : public CruxApplication {
  public:
 
   SCORE_FUNCTION_T curScoreFunction_;
-  ActivePeptideQueueLite* active_peptide_queue_; 
+  // ActivePeptideQueueLite* active_peptide_queue_; 
   int decoy_num_;  // Number of decoys per peptide;
   int top_matches_;
 

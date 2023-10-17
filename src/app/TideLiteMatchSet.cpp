@@ -8,7 +8,7 @@
 
 // SCORE_FUNCTION_T is defined in ./src/model/objects.h
 SCORE_FUNCTION_T TideLiteMatchSet::curScoreFunction_ = INVALID_SCORE_FUNCTION;
-ActivePeptideQueueLite* TideLiteMatchSet::active_peptide_queue_ = 0;
+// ActivePeptideQueueLite* TideLiteMatchSet::active_peptide_queue_ = 0;
 int TideLiteMatchSet::top_matches_ = 0;
 int TideLiteMatchSet::decoy_num_ = 0;
 int TideLiteMatchSet::mass_precision_ = 0;
@@ -87,13 +87,14 @@ int TideLiteMatchSet::XCorr_pin_cols[] = {
   };    
 
 
-TideLiteMatchSet::TideLiteMatchSet() {
-  psm_scores_processed_ = false;
-};
+// TideLiteMatchSet::TideLiteMatchSet() {
+//   psm_scores_processed_ = false;
+// };
 
-TideLiteMatchSet::TideLiteMatchSet(long size) {
+TideLiteMatchSet::TideLiteMatchSet(ActivePeptideQueueLite* active_peptide_queue) {
   psm_scores_processed_ = false;
-  psm_scores_ = PSMScores(size);  
+  active_peptide_queue_ = active_peptide_queue;
+  psm_scores_ = PSMScores(active_peptide_queue->nPeptides_);  
 };
 
 TideLiteMatchSet::~TideLiteMatchSet() {
