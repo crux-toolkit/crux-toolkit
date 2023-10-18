@@ -30,11 +30,13 @@ namespace CruxQuant {
 const int BINS_PER_DALTON = 100;
 const double PROTONMASS = 1.007276466879;
 
-const int NUMISOTOPES_REQUIRED = 2;              // May need to make this a user input
-const double PEAK_FINDING_PPM_TOLERANCE = 20.0;  // May need to make this a user input
-const double PPM_TOLERANCE = 10.0;               // May need to make this a user input
-const bool ID_SPECIFIC_CHARGE_STATE = false;  // May need to make this a user input
-const int  MISSED_SCANS_ALLOWED = 1; // May need to make this a user input
+const int NUM_ISOTOPES_REQUIRED = 2;                 // May need to make this a user input
+const double PEAK_FINDING_PPM_TOLERANCE = 20.0;     // May need to make this a user input
+const double PPM_TOLERANCE = 10.0;                  // May need to make this a user input
+const bool ID_SPECIFIC_CHARGE_STATE = false;        // May need to make this a user input
+const int  MISSED_SCANS_ALLOWED = 1;                // May need to make this a user input
+const double ISOTOPE_TOLERANCE_PPM = 5.0;            // May need to make this a user input
+
 string calcFormula(string seq);
 
 struct Identification {
@@ -46,6 +48,7 @@ struct Identification {
     double precursorCharge;
     string spectralFile;
     FLOAT_T ms2RetentionTimeInMinutes;
+    int scanId;
 };
 
 struct Ms1ScanInfo {
@@ -124,7 +127,7 @@ pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
 
 IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
 
-vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file, SpectrumListPtr spectrum_collection);
+vector<Identification> createIdentifications(const string& psm_file, const string& spectra_file, SpectrumListPtr spectrum_collection);
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
@@ -164,7 +167,8 @@ void processRange(
     vector<ChromatographicPeak>& chromatographicPeaks,
     PpmTolerance& peakfindingTol,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+    PpmTolerance& ppmTolerance
 );
 
 vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime, 

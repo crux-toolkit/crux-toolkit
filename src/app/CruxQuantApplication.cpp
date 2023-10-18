@@ -32,8 +32,6 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
 
-    MatchFileReader* matchFileReader = new MatchFileReader(psm_file);
-
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = CruxQuant::loadSpectra(spectra_file, 1);
         SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectra_file, 2);
@@ -43,7 +41,7 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         
         CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(matchFileReader, spectra_file, spectra_ms2);
+        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(psm_file, spectra_file, spectra_ms2);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
@@ -51,7 +49,6 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
 
         CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks);
     }
-    delete matchFileReader;
     return 0;
 }
 

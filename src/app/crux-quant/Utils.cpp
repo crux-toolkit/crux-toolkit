@@ -1,6 +1,7 @@
 #pragma once
 #include "CMercury8.h"
 #include "Utils.h"
+#include "csv.h"
 
 #include <algorithm>
 #include <cmath>
@@ -124,15 +125,28 @@ IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collect
     return index_results;
 }
 
-vector<Identification> createIdentifications(MatchFileReader* matchFileReader, const string& spectra_file, SpectrumListPtr spectrum_collection) {
-    // TODO Rewrite this portion
+
+// Make this a multithreaded process
+vector<Identification> createIdentifications(const string& psm_file, const string& spectra_file, SpectrumListPtr spectrum_collection) {
+    carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
+
+    io::CSVReader<5, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> matchFileReader(psm_file);
+
+    string sequence_col;
+    int scan_col, charge_col;
+    double peptide_mass_col, spectrum_precursor_mz_col;
+
+    matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence");
+
+
     vector<Identification> allIdentifications;
     string _spectra_file(spectra_file);
-    while (matchFileReader->hasNext()) {
+
+
+    while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col)) {
         for (size_t i = 0; i < spectrum_collection->size(); ++i) {
             SpectrumPtr spectrum = spectrum_collection->spectrum(i);
             if (spectrum) {
-
                 int scanIndex;
                 std::string scanId = getScanID(spectrum->id);
                 if (scanId.empty()) {
@@ -141,29 +155,28 @@ vector<Identification> createIdentifications(MatchFileReader* matchFileReader, c
                     scanIndex = std::stoi(scanId);
                 }
 
-                carp(CARP_INFO, "Spectrum Scan ID: %d", scanIndex);
-                carp(CARP_INFO, "Match File Scan ID: %d", matchFileReader->getInteger(SCAN_COL));
-                // TODO Ensure there are no duplicates.
-                if (matchFileReader->getInteger(SCAN_COL) == scanIndex ) {
+                if (scan_col == scanIndex ) {
                     double retentionTimeInSeconds = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
 
                     FLOAT_T retentionTimeInMinutes = retentionTimeInSeconds / 60.0;
 
                     Identification identification;
 
-                    identification.sequence = matchFileReader->getString(SEQUENCE_COL);
-                    identification.monoisotopicMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
-                    identification.charge = matchFileReader->getInteger(CHARGE_COL);
-                    identification.peptideMass = matchFileReader->getDouble(PEPTIDE_MASS_COL);
-                    identification.precursorCharge = matchFileReader->getDouble(SPECTRUM_PRECURSOR_MZ_COL);
+                    identification.sequence = sequence_col;
+                    identification.monoisotopicMass = peptide_mass_col;
+                    identification.charge = charge_col;
+                    identification.peptideMass = peptide_mass_col;
+                    identification.precursorCharge = spectrum_precursor_mz_col;
                     identification.spectralFile = _spectra_file;
                     identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
+                    identification.scanId = scan_col;
                     allIdentifications.push_back(identification);
                 }
+               
             }
         }
-        matchFileReader->next();
     }
+
 
     return allIdentifications;
 }
@@ -387,7 +400,7 @@ unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeD
             abundances[i] /= highestAbundance;
 
             // Look for these isotopes
-            if (isotopicMassesAndNormalizedAbundances.size() < NUMISOTOPES_REQUIRED || abundances[i] > 0.1) {
+            if (isotopicMassesAndNormalizedAbundances.size() < NUM_ISOTOPES_REQUIRED || abundances[i] > 0.1) {
                 isotopicMassesAndNormalizedAbundances.push_back(std::make_pair(masses[i], abundances[i]));
             }
         }
@@ -442,7 +455,8 @@ void processRange(int start, int end,
                   vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-                  map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
+                  map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+                  PpmTolerance& ppmTolerance) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
         {
@@ -455,7 +469,7 @@ void processRange(int start, int end,
                 if (ID_SPECIFIC_CHARGE_STATE && chargeState != identification.precursorCharge) {
                     continue;
                 }
-                carp(CARP_INFO, "%lf", identification.ms2RetentionTimeInMinutes);
+               
                 vector<IndexedMassSpectralPeak*> xic = peakFind(
                     identification.ms2RetentionTimeInMinutes,  // This value may not be in minutes, check and convert
                     identification.peakfindingMass,
@@ -464,6 +478,16 @@ void processRange(int start, int end,
                     peakfindingTol,
                     _ms1Scans,
                     indexedPeaks);
+
+                // Sort the xic vector based on the RetentionTime
+                std::sort(xic.begin(), xic.end(), [](const IndexedMassSpectralPeak* a, const IndexedMassSpectralPeak* b) {
+                    return a->retentionTime < b->retentionTime;
+                });
+
+                xic.erase(std::remove_if(xic.begin(), xic.end(), [&](const IndexedMassSpectralPeak* p) {
+                    return !ppmTolerance.Within(toMass(p->mz, chargeState), identification.peakfindingMass);
+                }), xic.end());
+
             }
         }
     }
@@ -475,6 +499,8 @@ void quantifyMs2IdentifiedPeptides(
     const vector<double>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
+
+    carp(CARP_INFO, "Quantifying MS2, this may take some time...");
     vector<Identification> ms2IdsForThisFile;
 
     // Use std::copy_if to filter the identifications
@@ -514,7 +540,8 @@ void quantifyMs2IdentifiedPeptides(
                                        &chromatographicPeaks,
                                        &peakfindingTol,
                                        &_ms1Scans,
-                                       &indexedPeaks]() {
+                                       &indexedPeaks,
+                                       &ppmTolerance]() {
             processRange(start, end,
                          ms2IdsForThisFile,
                          spectraFile,
@@ -522,7 +549,8 @@ void quantifyMs2IdentifiedPeptides(
                          chromatographicPeaks,
                          peakfindingTol,
                          _ms1Scans,
-                         indexedPeaks);
+                         indexedPeaks,
+                         ppmTolerance);
         }));
     }
 
