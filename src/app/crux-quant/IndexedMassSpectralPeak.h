@@ -26,6 +26,7 @@ class IndexedMassSpectralPeak {
 
     bool operator==(const IndexedMassSpectralPeak& other) const;
     bool operator!=(const IndexedMassSpectralPeak& other) const;
+    IndexedMassSpectralPeak& operator=(const IndexedMassSpectralPeak& other);
     int GetHashCode() const;
     std::string ToString() const;
 };

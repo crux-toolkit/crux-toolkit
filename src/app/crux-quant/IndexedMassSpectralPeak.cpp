@@ -29,4 +29,15 @@ int IndexedMassSpectralPeak::GetHashCode() const {
     return std::hash<double>()(this->mz);
 }
 
+IndexedMassSpectralPeak& IndexedMassSpectralPeak::operator=(const IndexedMassSpectralPeak& other) {
+    if (this != &other) {
+        const_cast<double&>(mz) = other.mz;
+        const_cast<double&>(intensity) = other.intensity;
+        const_cast<int&>(zeroBasedMs1ScanIndex) = other.zeroBasedMs1ScanIndex;
+        const_cast<double&>(retentionTime) = other.retentionTime;
+    }
+    return *this;
+}
+
+
 }  // namespace CruxQuant

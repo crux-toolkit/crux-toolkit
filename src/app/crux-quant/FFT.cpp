@@ -1,8 +1,8 @@
 #include "FFT.h"
 
-void BitReverse(complex* data, int size){
+void BitReverse(mercury_complex* data, int size){
 
-	complex swap;
+	mercury_complex swap;
 	int i,j,k;
   j=0;
 	k=0;
@@ -26,14 +26,14 @@ void BitReverse(complex* data, int size){
 
 };
 
-void FFT(complex* data, int size, bool forward){
+void FFT(mercury_complex* data, int size, bool forward){
 
 	int dir;
 	int jump;
 	int level=1;
 	int i,j,k;
 	double a,b,c,d,e,f;
-	complex swap;
+	mercury_complex swap;
 
 	if(forward) dir=1;
 	else dir=-1;
@@ -79,11 +79,11 @@ void FFT(complex* data, int size, bool forward){
 
 };
 
-void FFTreal(complex* data, int size){
+void FFTreal(mercury_complex* data, int size){
 
 	int i,n;
 	double a,b,c,d,e,f;
-	complex x,x2;
+	mercury_complex x,x2;
 
 	FFT(data,size,true);
 	n=size>>1;

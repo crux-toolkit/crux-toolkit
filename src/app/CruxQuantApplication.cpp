@@ -41,13 +41,15 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         
         CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(psm_file, spectra_file, spectra_ms2);
+        map<int, CruxQuant::PSM> psm_datum =  CruxQuant::create_psm_map(psm_file);
+
+        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(psm_datum, spectra_file, spectra_ms2);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
-        CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks);
+        CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks, modifiedSequenceToIsotopicDistribution);
     }
     return 0;
 }

@@ -10,11 +10,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
+#include "CMercury8.h"
 #include "IndexedMassSpectralPeak.h"
 #include "PpmTolerance.h"
-#include "io/MatchFileReader.h"
-#include "io/SpectrumCollectionFactory.h"
+#include "io/carp.h"
 #include "pwiz/data/msdata/MSDataFile.hpp"
 #include "pwiz/data/msdata/SpectrumListWrapper.hpp"
 
@@ -25,17 +24,21 @@ using std::unordered_map;
 using std::vector;
 using namespace pwiz::msdata;
 
+typedef std::tuple<double, double, double> IsotopePeak;
+
 namespace CruxQuant {
 
 const int BINS_PER_DALTON = 100;
 const double PROTONMASS = 1.007276466879;
+const double C13MinusC12 = 1.00335483810;
 
-const int NUM_ISOTOPES_REQUIRED = 2;                 // May need to make this a user input
+const int NUM_ISOTOPES_REQUIRED = 2;                // May need to make this a user input
 const double PEAK_FINDING_PPM_TOLERANCE = 20.0;     // May need to make this a user input
 const double PPM_TOLERANCE = 10.0;                  // May need to make this a user input
 const bool ID_SPECIFIC_CHARGE_STATE = false;        // May need to make this a user input
 const int  MISSED_SCANS_ALLOWED = 1;                // May need to make this a user input
-const double ISOTOPE_TOLERANCE_PPM = 5.0;            // May need to make this a user input
+const double ISOTOPE_TOLERANCE_PPM = 5.0;           // May need to make this a user input
+const bool INTEGRATE = false;                       // May need to make this a user input
 
 string calcFormula(string seq);
 
@@ -43,8 +46,8 @@ struct Identification {
     string sequence;
     int charge;
     double peptideMass = 0.0;
-    double monoisotopicMass;
-    double peakfindingMass;
+    double monoIsotopicMass;
+    double peakFindingMass;
     double precursorCharge;
     string spectralFile;
     FLOAT_T ms2RetentionTimeInMinutes;
@@ -87,8 +90,9 @@ struct IsotopicEnvelope {
 
     IsotopicEnvelope& operator=(const IsotopicEnvelope& other) {
     if (this != &other) {
-        IsotopicEnvelope temp(other); // Create a copy using the copy constructor
-        std::swap(*this, temp);       // Swap the contents with the temporary object
+        indexedPeak = other.indexedPeak;
+        chargeState = other.chargeState;
+        intensity = other.intensity;
     }
     return *this;
 }
@@ -123,11 +127,21 @@ struct IndexedSpectralResults {
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 };
 
+struct PSM{
+    string sequence_col;
+    int scan_col;
+    int charge_col;
+    double peptide_mass_col;
+    double spectrum_precursor_mz_col;
+};
+
+map<int, PSM> create_psm_map(const string& psm_file);
+
 pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
 
 IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
 
-vector<Identification> createIdentifications(const string& psm_file, const string& spectra_file, SpectrumListPtr spectrum_collection);
+vector<Identification> createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection);
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
@@ -143,7 +157,8 @@ void quantifyMs2IdentifiedPeptides(
     const vector<Identification>& allIdentifications, 
     const vector<double>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution
 );
 
 double toMz(double mass, int charge);
@@ -168,10 +183,12 @@ void processRange(
     PpmTolerance& peakfindingTol,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
-    PpmTolerance& ppmTolerance
+    PpmTolerance& ppmTolerance,
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution
 );
 
-vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime, 
+vector<IndexedMassSpectralPeak*> peakFind(
+        double idRetentionTime, 
         double mass, 
         int charge, 
         const string& spectra_file, 
@@ -181,5 +198,30 @@ vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime,
 );
 
 string getScanID(string spectrum_id);
+
+vector<IsotopicEnvelope> getIsotopicEnvelopes(
+    const vector<IndexedMassSpectralPeak*>& xic, 
+    const Identification& identification,
+    const int chargeState, 
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution,
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
+);
+
+bool checkIsotopicEnvelopeCorrelation(
+    map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
+    const IndexedMassSpectralPeak* peak,
+    int chargeState,
+    PpmTolerance& isotopeTolerance,
+    map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks
+);
+
+struct filterResults{
+    vector<double> expIntensity;
+    vector<double> theorIntensity;
+};
+
+filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
+
+void setToNegativeOneIfNaN(double& value);
 
 }  // namespace CruxQuant
