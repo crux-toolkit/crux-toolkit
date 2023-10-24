@@ -17,12 +17,12 @@ void FFTCharge(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 	int power;
 	int size = (highCharge - lowCharge + 1) * 3;
 	double *in;
-	complex *out;
+	hardklor_complex *out;
 
 	//Find out how many points are needed and dimension arrays.
 	power=2;
 	while(power<(s.size()/2)) power*=2;
-	out = new complex[power];	
+	out = new hardklor_complex[power];	
 	in = new double[power];
 
 	//Build the input array.

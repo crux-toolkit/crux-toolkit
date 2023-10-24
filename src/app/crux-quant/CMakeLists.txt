@@ -5,6 +5,7 @@ cmake_policy(VERSION 3.15)
 if (WIN32 AND NOT CYGWIN)
   include_directories(
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/app/hardklor
     ${CMAKE_BINARY_DIR}/ext/include
     ${CMAKE_CURRENT_BINARY_DIR}/protoobj
     ${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src
@@ -20,6 +21,7 @@ if (WIN32 AND NOT CYGWIN)
 else (WIN32 AND NOT CYGWIN)
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
+  ${CMAKE_SOURCE_DIR}/src/app/hardklor
   ${CMAKE_BINARY_DIR}/ext/include
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
   ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src

@@ -7,14 +7,14 @@
 #define PI      3.14159265358979323846
 #endif
 
-typedef struct complex{
+typedef struct hardklor_complex{
 	double real;
 	double imag;
-} complex;
+} hardklor_complex;
 
 
-void BitReverse(complex* data, int size);
-void FFT(complex* data, int size, bool forward);
-void FFTreal(complex* data, int size);
+void BitReverse(hardklor_complex* data, int size);
+void FFT(hardklor_complex* data, int size, bool forward);
+void FFTreal(hardklor_complex* data, int size);
 
 #endif

@@ -4,12 +4,26 @@
 #include <vector>
 
 #include "CruxApplication.h"
+
+
+#include "pwiz/data/msdata/MSDataFile.hpp"
+#include "pwiz/data/msdata/SpectrumListWrapper.hpp"
+
 #include "crux-quant/Utils.h"
 
 using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
+using CruxQuant::PSM;
+using CruxQuant::IndexedSpectralResults;
+using CruxQuant::Identification;
+using CruxQuant::IndexedMassSpectralPeak;
+using CruxQuant::Ms1ScanInfo;
+using CruxQuant::BINS_PER_DALTON;
+using CruxQuant::getScanID;
+
+typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
 /**
  * \class CruxQuantApplication
@@ -70,4 +84,12 @@ class CruxQuantApplication : public CruxApplication {
     virtual bool needsOutputDirectory() const;
 
     virtual void processParams();
+
+    map<int, PSM> create_psm_map(const string& psm_file);
+
+    pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
+
+    IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
+
+    vector<Identification> createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection);
 };

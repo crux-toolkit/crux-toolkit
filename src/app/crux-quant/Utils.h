@@ -1,5 +1,4 @@
 #pragma once
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -10,19 +9,16 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include "CMercury8.h"
 #include "IndexedMassSpectralPeak.h"
 #include "PpmTolerance.h"
 #include "io/carp.h"
-#include "pwiz/data/msdata/MSDataFile.hpp"
-#include "pwiz/data/msdata/SpectrumListWrapper.hpp"
+
 
 using std::map;
 using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
-using namespace pwiz::msdata;
 
 typedef std::tuple<double, double, double> IsotopePeak;
 
@@ -32,13 +28,14 @@ const int BINS_PER_DALTON = 100;
 const double PROTONMASS = 1.007276466879;
 const double C13MinusC12 = 1.00335483810;
 
-const int NUM_ISOTOPES_REQUIRED = 2;                // May need to make this a user input
-const double PEAK_FINDING_PPM_TOLERANCE = 20.0;     // May need to make this a user input
-const double PPM_TOLERANCE = 10.0;                  // May need to make this a user input
-const bool ID_SPECIFIC_CHARGE_STATE = false;        // May need to make this a user input
-const int  MISSED_SCANS_ALLOWED = 1;                // May need to make this a user input
-const double ISOTOPE_TOLERANCE_PPM = 5.0;           // May need to make this a user input
-const bool INTEGRATE = false;                       // May need to make this a user input
+const int NUM_ISOTOPES_REQUIRED = 2;                    // May need to make this a user input
+const double PEAK_FINDING_PPM_TOLERANCE = 20.0;         // May need to make this a user input
+const double PPM_TOLERANCE = 10.0;                      // May need to make this a user input
+const bool ID_SPECIFIC_CHARGE_STATE = false;            // May need to make this a user input
+const int  MISSED_SCANS_ALLOWED = 1;                    // May need to make this a user input
+const double ISOTOPE_TOLERANCE_PPM = 5.0;               // May need to make this a user input
+const bool INTEGRATE = false;                           // May need to make this a user input
+const double DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;   // May need to make this a user input
 
 string calcFormula(string seq);
 
@@ -109,6 +106,7 @@ struct ChromatographicPeak {
     IsotopicEnvelope apex;
     bool isMbrPeak;
     int _index = std::numeric_limits<int>::max();
+    bool SplitRT = 0;
 
     ChromatographicPeak(const Identification& id, bool _isMbrPeak, const string& _spectralFile)
         : isMbrPeak(_isMbrPeak), spectralFile(_spectralFile) {
@@ -117,6 +115,7 @@ struct ChromatographicPeak {
         massError = std::numeric_limits<double>::quiet_NaN();
         numChargeStatesObserved = 0;
         _index = std::numeric_limits<int>::max();
+        SplitRT = 0;
     }
     void calculateIntensityForThisFeature(bool integrate);
 };
@@ -135,14 +134,6 @@ struct PSM{
     double spectrum_precursor_mz_col;
 };
 
-map<int, PSM> create_psm_map(const string& psm_file);
-
-pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
-
-IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
-
-vector<Identification> createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection);
-
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
 
 void setPeakFindingMass(
@@ -152,13 +143,17 @@ void setPeakFindingMass(
 
 vector<double> createChargeStates(const vector<Identification>& allIdentifications);
 
+// Forward declaration for a class from results.h
+class CruxLFQResults; 
+
 void quantifyMs2IdentifiedPeptides(
     string spectraFile, 
     const vector<Identification>& allIdentifications, 
     const vector<double>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
-    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution,
+    CruxLFQResults& lfqResults
 );
 
 double toMz(double mass, int charge);
@@ -184,7 +179,8 @@ void processRange(
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
     PpmTolerance& ppmTolerance,
-    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution,
+    CruxLFQResults& lfqResults
 );
 
 vector<IndexedMassSpectralPeak*> peakFind(
@@ -223,5 +219,9 @@ struct filterResults{
 filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
 
 void setToNegativeOneIfNaN(double& value);
+
+map<int, PSM> create_psm_map(const string& psm_file);
+
+void cutPeak(ChromatographicPeak& peak, double identificationTime, unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans);
 
 }  // namespace CruxQuant

@@ -1,8 +1,11 @@
 #include <cmath>
 #include <sstream>
+#include <exception>
+
 #include "CruxQuantApplication.h"
 #include "IndexedMassSpectralPeak.h"
 #include "crux-quant/Utils.h"
+#include "crux-quant/Results.h"
 #include "io/carp.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
@@ -12,6 +15,14 @@ using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
+
+using pwiz::cv::MS_scan_start_time;
+using pwiz::msdata::MSDataFile;
+using pwiz::msdata::SpectrumListSimplePtr;
+using pwiz::msdata::SpectrumPtr;
+using pwiz::cv::MS_ms_level;
+using pwiz::msdata::SpectrumListSimple;
+using pwiz::msdata::BinaryDataArrayPtr;
 
 typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
@@ -31,25 +42,33 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
+    map<int, CruxQuant::PSM> psm_datum =  CruxQuant::create_psm_map(psm_file);
+    CruxQuant::CruxLFQResults lfqResults(spec_files);
 
     for (const string& spectra_file : spec_files) {
-        SpectrumListPtr spectra_ms1 = CruxQuant::loadSpectra(spectra_file, 1);
-        SpectrumListPtr spectra_ms2 = CruxQuant::loadSpectra(spectra_file, 2);
+        SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
+        SpectrumListPtr spectra_ms2 = loadSpectra(spectra_file, 2);
 
         carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->size());
         carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->size());
         
-        CruxQuant::IndexedSpectralResults indexResults = CruxQuant::indexedMassSpectralPeaks(spectra_ms1, spectra_file);
+        CruxQuant::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        map<int, CruxQuant::PSM> psm_datum =  CruxQuant::create_psm_map(psm_file);
-
-        vector<CruxQuant::Identification> allIdentifications = CruxQuant::createIdentifications(psm_datum, spectra_file, spectra_ms2);
+        vector<CruxQuant::Identification> allIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
-        CruxQuant::quantifyMs2IdentifiedPeptides(spectra_file, allIdentifications, chargeStates, indexResults._ms1Scans, indexResults._indexedPeaks, modifiedSequenceToIsotopicDistribution);
+        CruxQuant::quantifyMs2IdentifiedPeptides(
+            spectra_file, 
+            allIdentifications, 
+            chargeStates, 
+            indexResults._ms1Scans, 
+            indexResults._indexedPeaks, 
+            modifiedSequenceToIsotopicDistribution,
+            lfqResults
+        );
     }
     return 0;
 }
@@ -117,4 +136,144 @@ bool CruxQuantApplication::needsOutputDirectory() const {
 
 // TODO: Add parameter processing
 void CruxQuantApplication::processParams() {
+}
+
+SpectrumListPtr CruxQuantApplication::loadSpectra(const string& file, int msLevel) {
+    try {
+        MSDataFile msd(file);
+        SpectrumListPtr originalSpectrumList = msd.run.spectrumListPtr;
+        if (!originalSpectrumList) {
+            carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
+        }
+        SpectrumListSimplePtr filteredSpectrumList(new SpectrumListSimple);
+
+        for (size_t i = 0; i < originalSpectrumList->size(); ++i) {
+            SpectrumPtr spectrum = originalSpectrumList->spectrum(i);
+
+            int spectrumMSLevel = spectrum->cvParam(MS_ms_level).valueAs<int>();
+            if (spectrumMSLevel == msLevel) {
+                // Add the spectrum to the filtered list
+                filteredSpectrumList->spectra.push_back(spectrum);
+            }
+        }
+
+        return filteredSpectrumList;
+    } catch (const std::exception& e) {
+        carp(CARP_INFO, "Error:  %s", e.what());
+        return nullptr;
+    }
+}
+
+IndexedSpectralResults CruxQuantApplication::indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file) {
+    string _spectra_file(spectra_file);
+
+    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
+    unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
+
+    _ms1Scans[_spectra_file] = vector<Ms1ScanInfo>();
+
+    IndexedSpectralResults index_results{_indexedPeaks, _ms1Scans};
+
+    if (!spectrum_collection) {
+        return index_results;
+    }
+
+    int _scanIndex = 0;
+    int _oneBasedScanNumber = 1;
+
+    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
+        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
+
+        if (spectrum) {
+            BinaryDataArrayPtr mzs = spectrum->getMZArray();
+            BinaryDataArrayPtr intensities = spectrum->getIntensityArray();
+
+            int scanIndex;
+            int oneBasedScanNumber;
+            std::string scanId = getScanID(spectrum->id);
+            if (scanId.empty()) {
+                scanIndex = _scanIndex;
+                oneBasedScanNumber = _oneBasedScanNumber;
+            } else {
+                scanIndex = std::stoi(scanId);
+                oneBasedScanNumber = scanIndex + 1;
+            }
+
+            double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
+
+            if (mzs && intensities) {
+                const std::vector<double>& mzArray = mzs->data;
+                const std::vector<double>& intensityArray = intensities->data;
+                for (size_t j = 0; j < mzArray.size(); ++j) {
+                    FLOAT_T mz = mzArray[j];
+                    int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
+                    IndexedMassSpectralPeak spec_data(
+                        mz,                 // mz value
+                        intensityArray[j],  // intensity
+                        scanIndex,          // zeroBasedMs1ScanIndex
+                        retentionTime);
+
+                    auto& indexedPeaks = index_results._indexedPeaks;
+                    auto it = indexedPeaks.find(roundedMz);
+                    if (it == indexedPeaks.end()) {
+                        map<int, IndexedMassSpectralPeak> tmp;
+                        tmp.insert({scanIndex, spec_data});
+                        indexedPeaks[roundedMz] = tmp;
+                    } else {
+                        it->second.insert({scanIndex, spec_data});
+                    }
+
+                    Ms1ScanInfo scan = {oneBasedScanNumber, scanIndex, retentionTime};
+                    index_results._ms1Scans[spectra_file].push_back(scan);
+                }
+            }
+
+            _scanIndex++;
+            _oneBasedScanNumber++;
+        }
+    }
+    return index_results;
+}
+
+// Make this a multithreaded process
+vector<Identification> CruxQuantApplication::createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection) {
+    carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
+
+    vector<Identification> allIdentifications;
+    string _spectra_file(spectra_file);
+
+    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
+        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
+        if (spectrum) {
+            int scanIndex;
+            std::string scanId = getScanID(spectrum->id);
+            if (scanId.empty()) {
+                continue;
+            } else {
+                scanIndex = std::stoi(scanId);
+            }
+
+            auto it = psm_datum.find(scanIndex);
+
+            if (it != psm_datum.end()) {
+                double retentionTimeInSeconds = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
+
+                FLOAT_T retentionTimeInMinutes = retentionTimeInSeconds / 60.0;
+
+                Identification identification;
+
+                identification.sequence = it->second.sequence_col;
+                identification.monoIsotopicMass = it->second.peptide_mass_col;
+                identification.charge = it->second.charge_col;
+                identification.peptideMass = it->second.peptide_mass_col;
+                identification.precursorCharge = it->second.spectrum_precursor_mz_col;
+                identification.spectralFile = _spectra_file;
+                identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
+                identification.scanId = it->second.scan_col;
+                allIdentifications.push_back(identification);
+            }
+        }
+    }
+
+    return allIdentifications;
 }

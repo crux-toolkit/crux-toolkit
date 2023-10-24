@@ -17,7 +17,9 @@
 
 
 #include "csv.h"
-#include "correlation.h"
+#include "CQStatistics.h"
+#include "CMercury8.h"
+#include "Results.h"
 
 
 using std::pair;
@@ -25,110 +27,13 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+
 std::mutex mtx;  // Declare a mutex
 
 const int MaxThreads = 4;
 
-typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
-
 namespace CruxQuant {
 
-SpectrumListPtr loadSpectra(const string& file, int msLevel) {
-    try {
-        MSDataFile msd(file);
-        SpectrumListPtr originalSpectrumList = msd.run.spectrumListPtr;
-        if (!originalSpectrumList) {
-            carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
-        }
-        SpectrumListSimplePtr filteredSpectrumList(new SpectrumListSimple);
-
-        for (size_t i = 0; i < originalSpectrumList->size(); ++i) {
-            SpectrumPtr spectrum = originalSpectrumList->spectrum(i);
-
-            int spectrumMSLevel = spectrum->cvParam(MS_ms_level).valueAs<int>();
-            if (spectrumMSLevel == msLevel) {
-                // Add the spectrum to the filtered list
-                filteredSpectrumList->spectra.push_back(spectrum);
-            }
-        }
-
-        return filteredSpectrumList;
-    } catch (exception& e) {
-        carp(CARP_INFO, "Error:  %s", e.what());
-        return nullptr;
-    }
-}
-
-IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file) {
-    string _spectra_file(spectra_file);
-
-    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
-    unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
-
-    _ms1Scans[_spectra_file] = vector<Ms1ScanInfo>();
-
-    IndexedSpectralResults index_results{_indexedPeaks, _ms1Scans};
-
-    if (!spectrum_collection) {
-        return index_results;
-    }
-
-    int _scanIndex = 0;
-    int _oneBasedScanNumber = 1;
-
-    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
-
-        if (spectrum) {
-            BinaryDataArrayPtr mzs = spectrum->getMZArray();
-            BinaryDataArrayPtr intensities = spectrum->getIntensityArray();
-
-            int scanIndex;
-            int oneBasedScanNumber;
-            std::string scanId = getScanID(spectrum->id);
-            if (scanId.empty()) {
-                scanIndex = _scanIndex;
-                oneBasedScanNumber = _oneBasedScanNumber;
-            } else {
-                scanIndex = std::stoi(scanId);
-                oneBasedScanNumber = scanIndex + 1;
-            }
-
-            double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
-
-            if (mzs && intensities) {
-                const std::vector<double>& mzArray = mzs->data;
-                const std::vector<double>& intensityArray = intensities->data;
-                for (size_t j = 0; j < mzArray.size(); ++j) {
-                    FLOAT_T mz = mzArray[j];
-                    int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
-                    IndexedMassSpectralPeak spec_data(
-                        mz,                 // mz value
-                        intensityArray[j],  // intensity
-                        scanIndex,          // zeroBasedMs1ScanIndex
-                        retentionTime);
-
-                    auto& indexedPeaks = index_results._indexedPeaks;
-                    auto it = indexedPeaks.find(roundedMz);
-                    if (it == indexedPeaks.end()) {
-                        map<int, IndexedMassSpectralPeak> tmp;
-                        tmp.insert({scanIndex, spec_data});
-                        indexedPeaks[roundedMz] = tmp;
-                    } else {
-                        it->second.insert({scanIndex, spec_data});
-                    }
-
-                    Ms1ScanInfo scan = {oneBasedScanNumber, scanIndex, retentionTime};
-                    index_results._ms1Scans[spectra_file].push_back(scan);
-                }
-            }
-
-            _scanIndex++;
-            _oneBasedScanNumber++;
-        }
-    }
-    return index_results;
-}
 
 map<int, PSM> create_psm_map(const string& psm_file) {
     carp(CARP_INFO, "loading psm data ...");
@@ -153,48 +58,6 @@ map<int, PSM> create_psm_map(const string& psm_file) {
     }
 
     return psm_datum;
-}
-// Make this a multithreaded process
-vector<Identification> createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection) {
-    carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
-
-    vector<Identification> allIdentifications;
-    string _spectra_file(spectra_file);
-
-    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
-        if (spectrum) {
-            int scanIndex;
-            std::string scanId = getScanID(spectrum->id);
-            if (scanId.empty()) {
-                continue;
-            } else {
-                scanIndex = std::stoi(scanId);
-            }
-
-            auto it = psm_datum.find(scanIndex);
-
-            if (it != psm_datum.end()) {
-                double retentionTimeInSeconds = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
-
-                FLOAT_T retentionTimeInMinutes = retentionTimeInSeconds / 60.0;
-
-                Identification identification;
-
-                identification.sequence = it->second.sequence_col;
-                identification.monoIsotopicMass = it->second.peptide_mass_col;
-                identification.charge = it->second.charge_col;
-                identification.peptideMass = it->second.peptide_mass_col;
-                identification.precursorCharge = it->second.spectrum_precursor_mz_col;
-                identification.spectralFile = _spectra_file;
-                identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
-                identification.scanId = it->second.scan_col;
-                allIdentifications.push_back(identification);
-            }
-        }
-    }
-
-    return allIdentifications;
 }
 
 string calcFormula(string seq) {
@@ -473,7 +336,8 @@ void processRange(int start, int end,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
                   map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
                   PpmTolerance& ppmTolerance,
-                  unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution) {
+                  unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution,
+                  CruxLFQResults& lfqResults) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
         {
@@ -513,10 +377,71 @@ void processRange(int start, int end,
 
             msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
 
-            // TO DO - Continue from here
+            
+            cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
 
-        }
+            if(msmsFeature.isotopicEnvelopes.empty()){
+                continue;
+            }
+
+            vector<IsotopicEnvelope> precursorXic;
+            std::copy_if(
+                msmsFeature.isotopicEnvelopes.begin(),
+                msmsFeature.isotopicEnvelopes.end(),
+                std::back_inserter(precursorXic),
+                [identification](const IsotopicEnvelope& p){
+                    return p.chargeState == identification.precursorCharge;
+                }
+
+            );
+
+            if(precursorXic.empty()){
+                msmsFeature.isotopicEnvelopes.clear();
+                continue;
+            }
+            // Find the minimum and maximum values
+            int min = std::numeric_limits<int>::max(); // Initialize with a large value
+            int max = std::numeric_limits<int>::min(); // Initialize with a small value
+
+            for (const IsotopicEnvelope& p : precursorXic) {
+                int scanIndex = p.indexedPeak.zeroBasedMs1ScanIndex;
+                if (scanIndex < min) {
+                    min = scanIndex;
+                }
+                if (scanIndex > max) {
+                    max = scanIndex;
+                }
+            }
+
+            msmsFeature.isotopicEnvelopes.erase(
+                std::remove_if(
+                    msmsFeature.isotopicEnvelopes.begin(),
+                    msmsFeature.isotopicEnvelopes.end(),
+                    [min](const IsotopicEnvelope& p){
+                        return p.indexedPeak.zeroBasedMs1ScanIndex < min;
+                    }
+                ),
+                msmsFeature.isotopicEnvelopes.end()
+            );
+
+            msmsFeature.isotopicEnvelopes.erase(
+                std::remove_if(
+                    msmsFeature.isotopicEnvelopes.begin(),
+                    msmsFeature.isotopicEnvelopes.end(),
+                    [max](const IsotopicEnvelope& p){
+                        return p.indexedPeak.zeroBasedMs1ScanIndex > max;
+                    }
+                ),
+                msmsFeature.isotopicEnvelopes.end()
+            );
+
+
+            msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
+
+        }   
     }
+
+    lfqResults.Peaks[spectralFile].insert(lfqResults.Peaks[spectralFile].end(), chromatographicPeaks.begin(), chromatographicPeaks.end());
 }
 
 void quantifyMs2IdentifiedPeptides(
@@ -525,7 +450,8 @@ void quantifyMs2IdentifiedPeptides(
     const vector<double>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
-    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution) {
+    unordered_map<string, vector<pair<double, double>>>& modifiedSequenceToIsotopicDistribution,
+    CruxLFQResults& lfqResults) {
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
     vector<Identification> ms2IdsForThisFile;
 
@@ -568,7 +494,8 @@ void quantifyMs2IdentifiedPeptides(
                                        &_ms1Scans,
                                        &indexedPeaks,
                                        &ppmTolerance,
-                                       &modifiedSequenceToIsotopicDistribution]() {
+                                       &modifiedSequenceToIsotopicDistribution,
+                                       &lfqResults]() {
             processRange(start, end,
                          ms2IdsForThisFile,
                          spectraFile,
@@ -578,7 +505,8 @@ void quantifyMs2IdentifiedPeptides(
                          _ms1Scans,
                          indexedPeaks,
                          ppmTolerance,
-                         modifiedSequenceToIsotopicDistribution);
+                         modifiedSequenceToIsotopicDistribution,
+                         lfqResults);
         }));
     }
 
@@ -916,5 +844,119 @@ bool checkIsotopicEnvelopeCorrelation(
 
     bool res = corr > 0.7 && corrShiftedLeft - corrWithPadding < 0.1 && corrShiftedRight - corrWithPadding < 0.1;
     return res;
+}
+
+void cutPeak(ChromatographicPeak& peak, double identificationTime, unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans){
+    // find out if we need to split this peak by using the discrimination factor
+    // this method assumes that the isotope envelopes in a chromatographic peak are already sorted by MS1 scan number
+    bool cutThisPeak = false;
+
+    if(peak.isotopicEnvelopes.size() < 5){
+        return;
+    }
+
+    vector<IsotopicEnvelope> timePointsForApexZ;
+    
+    std::copy_if(
+        peak.isotopicEnvelopes.begin(), 
+        peak.isotopicEnvelopes.end(), 
+        std::back_inserter(timePointsForApexZ),
+        [&peak](const IsotopicEnvelope& p){
+            return p.chargeState == peak.apex.chargeState;
+        }
+    );
+
+    std::unordered_set<int> scanNumbers;
+    std::transform(timePointsForApexZ.begin(), timePointsForApexZ.end(), std::inserter(scanNumbers, scanNumbers.end()),
+        [](const IsotopicEnvelope& p) {
+            return p.indexedPeak.zeroBasedMs1ScanIndex;
+        });
+
+    auto it = std::find(timePointsForApexZ.begin(), timePointsForApexZ.end(), peak.apex);
+    int apexIndex = -1; // Initialize to -1 if the element is not found
+
+    if (it != timePointsForApexZ.end()) {
+        // Calculate the index by subtracting the iterator from the beginning of the vector
+        apexIndex = std::distance(timePointsForApexZ.begin(), it);
+    }
+
+    IsotopicEnvelope* valleyEnvelope = nullptr;
+    int directions[] = {1, -1};
+    for (int direction : directions) {
+        valleyEnvelope = nullptr;
+        int indexOfValley = 0;
+        int lastIndex = timePointsForApexZ.size() - 1;
+        for (int i = apexIndex + direction; i <= lastIndex && i >= 0; i += direction) {
+            IsotopicEnvelope timepoint = timePointsForApexZ[i];
+
+            if(valleyEnvelope == nullptr || timepoint.intensity < valleyEnvelope->intensity){
+                valleyEnvelope = &timepoint;
+                indexOfValley = i; 
+            }
+
+            double discriminationFactor = (timepoint.intensity - valleyEnvelope->intensity) / timepoint.intensity;
+
+            if(discriminationFactor > DISCRIMINATION_FACTOR_TO_CUT_PEAK && 
+                (indexOfValley + direction < timePointsForApexZ.size() && indexOfValley + direction >= 0)){
+                    IsotopicEnvelope secondValleyTimepoint = timePointsForApexZ[indexOfValley + direction];
+                    discriminationFactor = (timepoint.intensity - secondValleyTimepoint.intensity) / timepoint.intensity;
+                    if (discriminationFactor > DISCRIMINATION_FACTOR_TO_CUT_PEAK){
+                        cutThisPeak = true;
+                        break;
+                    }
+                    int nextMs1ScanNum = -1;
+                    for(int j=valleyEnvelope->indexedPeak.zeroBasedMs1ScanIndex-1;
+                        j < _ms1Scans[peak.spectralFile].size() && j >= 0;
+                        j += direction){
+
+                        if(_ms1Scans[peak.spectralFile][j].oneBasedScanNumber >= 0
+                            && _ms1Scans[peak.spectralFile][j].oneBasedScanNumber != valleyEnvelope->indexedPeak.zeroBasedMs1ScanIndex){
+                                nextMs1ScanNum = j + 1;
+                                break;
+                        }
+                    }
+
+                    if(scanNumbers.find(nextMs1ScanNum) ==scanNumbers.end()){
+                        cutThisPeak = true;
+                        break;
+                    }
+            }
+            
+        }
+        if(cutThisPeak){
+            break;
+        }
+    }
+    if(cutPeak){
+        if(identificationTime > valleyEnvelope->indexedPeak.retentionTime){
+            peak.isotopicEnvelopes.erase(
+                std::remove_if(
+                    peak.isotopicEnvelopes.begin(),
+                    peak.isotopicEnvelopes.end(),
+                    [&valleyEnvelope](const IsotopicEnvelope p){
+                        return p.indexedPeak.retentionTime <= valleyEnvelope->indexedPeak.retentionTime;
+                }),
+                peak.isotopicEnvelopes.end()
+            );
+        }else{
+            peak.isotopicEnvelopes.erase(
+                std::remove_if(
+                    peak.isotopicEnvelopes.begin(),
+                    peak.isotopicEnvelopes.end(),
+                    [&valleyEnvelope](const IsotopicEnvelope p){
+                        return p.indexedPeak.retentionTime >= valleyEnvelope->indexedPeak.retentionTime;
+                    }),
+                    peak.isotopicEnvelopes.end()
+            );
+        }
+
+        // recalculate intensity for the peak
+        peak.calculateIntensityForThisFeature(INTEGRATE);
+        peak.SplitRT = valleyEnvelope->indexedPeak.retentionTime;
+
+        // recursively cut
+        cutPeak(peak, identificationTime, _ms1Scans);
+    }
+
 }
 }  // namespace CruxQuant

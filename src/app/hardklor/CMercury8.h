@@ -38,15 +38,15 @@ class CMercury8 {
   //Functions:
   void AccurateMass(int,int);
   void AddElement(char[],int,int);
-  void CalcFreq(complex*, int, int, int, int);
+  void CalcFreq(hardklor_complex*, int, int, int, int);
   void CalcMassRange(int*, double, int, int);
   void CalcVariances(double*, double*, int);
   void CalcWeights(double&,double&,double&,int&,int&,int&,int&,int);
-  void ConvertMass(complex*, int, int, double, double, int, int, int, double, double);
+  void ConvertMass(hardklor_complex*, int, int, double, double, int, int, int, double, double);
   void DefaultValues();
-  void GetPeaks(complex*, int, vector<Result>&, int, int);
+  void GetPeaks(hardklor_complex*, int, vector<Result>&, int, int);
   void InitializeData(char* fn="ISOTOPE.DAT");
-  void MassToInt(complex*, int);
+  void MassToInt(hardklor_complex*, int);
   void Mercury(int,int);
   int ParseMF(char[], int*);
   void RelativeAbundance(vector<Result>&);
