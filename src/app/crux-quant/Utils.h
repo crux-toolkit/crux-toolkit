@@ -49,6 +49,7 @@ struct Identification {
     string spectralFile;
     FLOAT_T ms2RetentionTimeInMinutes;
     int scanId;
+    string modifications;
 };
 
 struct Ms1ScanInfo {
@@ -96,29 +97,7 @@ struct IsotopicEnvelope {
 
 };
 
-struct ChromatographicPeak {
-    vector<Identification> identifications;
-    string spectralFile;
-    vector<IsotopicEnvelope> isotopicEnvelopes;
-    double intensity;
-    double massError;
-    int numChargeStatesObserved;
-    IsotopicEnvelope apex;
-    bool isMbrPeak;
-    int _index = std::numeric_limits<int>::max();
-    bool SplitRT = 0;
-
-    ChromatographicPeak(const Identification& id, bool _isMbrPeak, const string& _spectralFile)
-        : isMbrPeak(_isMbrPeak), spectralFile(_spectralFile) {
-        isotopicEnvelopes.push_back(IsotopicEnvelope());
-        identifications.push_back(id);
-        massError = std::numeric_limits<double>::quiet_NaN();
-        numChargeStatesObserved = 0;
-        _index = std::numeric_limits<int>::max();
-        SplitRT = 0;
-    }
-    void calculateIntensityForThisFeature(bool integrate);
-};
+struct ChromatographicPeak;
 
 struct IndexedSpectralResults {
     map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
@@ -132,6 +111,7 @@ struct PSM{
     int charge_col;
     double peptide_mass_col;
     double spectrum_precursor_mz_col;
+    string modifications;
 };
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);

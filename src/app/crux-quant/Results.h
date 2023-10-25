@@ -1,11 +1,14 @@
 #pragma once
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
+#include "ChromatographicPeak.h"
 #include "Utils.h"
 #include "io/carp.h"
 
@@ -21,9 +24,43 @@ class CruxLFQResults {
         }
     }
 
+    string tabSeperatedHeader() {
+        std::ostringstream oss;
+
+        // Append the header fields
+        oss << "File Name"
+            << "\t"
+            << "Base Sequence"
+            << "\t"
+            << "Full Sequence"
+            << "\t"
+            << "Peptide Monoisotopic Mass"
+            << "\t"
+            << "MS2 Retention Time"
+            << "\t"
+            << "Precursor Charge"
+            << "\t"
+            << "Theoretical MZ"
+            << "\t"
+            << "Peak intensity"
+            << "\t"
+            << "Num Charge States Observed"
+            << "\t"
+            << "PSMs Mapped"
+            << "\t"
+            << "Peak Split Valley RT"
+            << "\t"
+            << "Peak Apex Mass Error (ppm)"
+            << "\t";
+        std::string header = oss.str();
+
+        return header;
+    }
+
     void writeResults(const string& results_file) {
-        
-        string results_header = "Peptides\tSpectrum File\tQuantity";
+        carp(CARP_INFO, "Writing output...");
+
+        string results_header = tabSeperatedHeader();
 
         std::ofstream outFile(results_file);
         if (outFile) {
@@ -32,13 +69,23 @@ class CruxLFQResults {
             char buffer[bufferSize];
             outFile.rdbuf()->pubsetbuf(buffer, bufferSize);
             outFile << results_header << std::endl;
-            for (const auto& peak : Peaks) {
-                for (const auto& c_p : peak.second) {
-                    for (const auto& id : c_p.identifications) {
-                        outFile << id.sequence << "\t" << id.spectralFile << "\t" << c_p.identifications.size() << std::endl;
+
+            for (auto& peak : Peaks) {
+                auto& peak_data = peak.second;
+                std::sort(peak_data.begin(), peak_data.end(), [](const ChromatographicPeak& a, const ChromatographicPeak& b) {
+                    // First, sort by SpectraFileInfo.FilenameWithoutExtension in ascending order
+                    if (a.spectralFile != b.spectralFile) {
+                        return a.spectralFile < b.spectralFile;
                     }
+                    // If filenames are the same, sort by Intensity in descending order
+                    return a.intensity > b.intensity;
+                });
+
+                for (auto& c_p : peak_data) {
+                    outFile << c_p.ToString() << std::endl;
                 }
             }
+
             outFile.close();
         } else {
             carp(CARP_FATAL, "Failed to open results file for writing.");

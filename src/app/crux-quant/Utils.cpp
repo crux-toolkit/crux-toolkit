@@ -20,7 +20,7 @@
 #include "CQStatistics.h"
 #include "CMercury8.h"
 #include "Results.h"
-
+#include "ChromatographicPeak.h"
 
 using std::pair;
 using std::string;
@@ -39,21 +39,22 @@ map<int, PSM> create_psm_map(const string& psm_file) {
     carp(CARP_INFO, "loading psm data ...");
     map<int, PSM> psm_datum;
 
-    io::CSVReader<5, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> matchFileReader(psm_file);
+    io::CSVReader<6, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> matchFileReader(psm_file);
 
-    string sequence_col;
+    string sequence_col, modifications_col;
     int scan_col, charge_col;
     double peptide_mass_col, spectrum_precursor_mz_col;
 
-    matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence");
+    matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence", "modifications");
 
-    while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col)) {
+    while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col, modifications_col)) {
         PSM psm = {
             sequence_col,
             scan_col,
             charge_col,
             peptide_mass_col,
-            spectrum_precursor_mz_col};
+            spectrum_precursor_mz_col,
+            modifications_col};
         psm_datum[scan_col] = psm;
     }
 
@@ -556,54 +557,6 @@ IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex
         }
     }
     return bestPeak;
-}
-void ChromatographicPeak::calculateIntensityForThisFeature(bool integrate) {
-    if (!isotopicEnvelopes.empty()) {
-        // Find the IsotopicEnvelope with the maximum intensity (apex)
-        auto maxIntensityEnvelopes = std::max_element(
-            isotopicEnvelopes.begin(), isotopicEnvelopes.end(),
-            [](const IsotopicEnvelope& a, const IsotopicEnvelope& b) {
-                return a.intensity < b.intensity;
-            });
-
-        if (maxIntensityEnvelopes != isotopicEnvelopes.end()) {
-            apex = *maxIntensityEnvelopes;
-
-            if (integrate) {
-                // Calculate intensity by summing up all IsotopicEnvelope intensities
-                intensity = std::accumulate(
-                    isotopicEnvelopes.begin(), isotopicEnvelopes.end(), 0.0,
-                    [](double sum, const IsotopicEnvelope& envelope) {
-                        return sum + envelope.intensity;
-                    });
-            } else {
-                // Set intensity to the apex intensity
-                intensity = apex.intensity;
-            }
-
-            // Calculate massError for each Identification
-            massError = std::numeric_limits<double>::quiet_NaN();  // Set massError to NaN initially
-
-            for (const Identification& id : identifications) {
-                double massErrorForId = ((toMass(apex.indexedPeak.mz, apex.chargeState) - id.peakFindingMass) / id.peakFindingMass) * 1e6;
-
-                if (std::isnan(massError) || std::abs(massErrorForId) < std::abs(massError)) {
-                    massError = massErrorForId;
-                }
-            }
-            std::unordered_set<int> uniqueChargeStates;
-            for (const IsotopicEnvelope& envelope : isotopicEnvelopes) {
-                uniqueChargeStates.insert(envelope.chargeState);
-            }
-            numChargeStatesObserved = static_cast<int>(uniqueChargeStates.size());
-        }
-    } else {
-        // No isotopicEnvelopes, so set intensity to 0 and massError to NaN
-        intensity = 0.0;
-        massError = std::numeric_limits<double>::quiet_NaN();
-        numChargeStatesObserved = 0;
-        apex = {};  // Reset apex to default-constructed IsotopicEnvelope
-    }
 }
 
 vector<IndexedMassSpectralPeak*> peakFind(double idRetentionTime,

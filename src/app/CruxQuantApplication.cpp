@@ -276,6 +276,7 @@ vector<Identification> CruxQuantApplication::createIdentifications(const map<int
                 identification.spectralFile = _spectra_file;
                 identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
                 identification.scanId = it->second.scan_col;
+                identification.modifications = it->second.modifications;
                 allIdentifications.push_back(identification);
             }
         }
