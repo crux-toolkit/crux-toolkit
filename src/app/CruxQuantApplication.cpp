@@ -1,14 +1,16 @@
-#include <cmath>
-#include <sstream>
-#include <exception>
-
 #include "CruxQuantApplication.h"
+
+#include <cmath>
+#include <exception>
+#include <sstream>
+
 #include "IndexedMassSpectralPeak.h"
-#include "crux-quant/Utils.h"
 #include "crux-quant/Results.h"
+#include "crux-quant/Utils.h"
 #include "io/carp.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
+#include "util/crux-utils.h"
 
 using std::make_pair;
 using std::pair;
@@ -16,13 +18,13 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+using pwiz::cv::MS_ms_level;
 using pwiz::cv::MS_scan_start_time;
+using pwiz::msdata::BinaryDataArrayPtr;
 using pwiz::msdata::MSDataFile;
+using pwiz::msdata::SpectrumListSimple;
 using pwiz::msdata::SpectrumListSimplePtr;
 using pwiz::msdata::SpectrumPtr;
-using pwiz::cv::MS_ms_level;
-using pwiz::msdata::SpectrumListSimple;
-using pwiz::msdata::BinaryDataArrayPtr;
 
 typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
@@ -42,7 +44,7 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
-    map<int, CruxQuant::PSM> psm_datum =  CruxQuant::create_psm_map(psm_file);
+    map<int, CruxQuant::PSM> psm_datum = CruxQuant::create_psm_map(psm_file);
     CruxQuant::CruxLFQResults lfqResults(spec_files);
 
     for (const string& spectra_file : spec_files) {
@@ -51,7 +53,7 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
 
         carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->size());
         carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->size());
-        
+
         CruxQuant::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
         vector<CruxQuant::Identification> allIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
@@ -61,15 +63,19 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
 
         CruxQuant::quantifyMs2IdentifiedPeptides(
-            spectra_file, 
-            allIdentifications, 
-            chargeStates, 
-            indexResults._ms1Scans, 
-            indexResults._indexedPeaks, 
+            spectra_file,
+            allIdentifications,
+            chargeStates,
+            indexResults._ms1Scans,
+            indexResults._indexedPeaks,
             modifiedSequenceToIsotopicDistribution,
-            lfqResults
-        );
+            lfqResults);
+        
     }
+
+    const std::string results_file = make_file_path("crux-lfq.txt");
+    lfqResults.writeResults(results_file);
+
     return 0;
 }
 
