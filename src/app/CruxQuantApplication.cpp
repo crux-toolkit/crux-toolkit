@@ -69,7 +69,10 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
             indexResults._ms1Scans,
             indexResults._indexedPeaks,
             modifiedSequenceToIsotopicDistribution,
-            lfqResults);
+            lfqResults
+        );
+        // TODO Review entire codebase and fix error checks
+        CruxQuant::runErrorChecking(spectra_file, lfqResults);
         
     }
 

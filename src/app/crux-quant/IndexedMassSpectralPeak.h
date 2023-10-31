@@ -32,3 +32,14 @@ class IndexedMassSpectralPeak {
 };
 
 }  // namespace CruxQuant
+
+
+// Declare the explicit specialization of std::hash before use
+namespace std {
+    template <>
+    struct hash<CruxQuant::IndexedMassSpectralPeak> {
+        size_t operator()(const CruxQuant::IndexedMassSpectralPeak& peak) const {
+            return peak.GetHashCode();
+        }
+    };
+}

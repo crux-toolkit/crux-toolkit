@@ -50,6 +50,22 @@ struct Identification {
     FLOAT_T ms2RetentionTimeInMinutes;
     int scanId;
     string modifications;
+    double posteriorErrorProbability = 0; //This may be removed cos it's redundant
+
+    bool operator==(const Identification& other) const {
+        // Implement the logic for comparison
+        return sequence == other.sequence
+            && charge == other.charge
+            && peptideMass == other.peptideMass
+            && monoIsotopicMass == other.monoIsotopicMass
+            && peakFindingMass == other.peakFindingMass
+            && precursorCharge == other.precursorCharge
+            && spectralFile == other.spectralFile
+            && ms2RetentionTimeInMinutes == other.ms2RetentionTimeInMinutes
+            && scanId == other.scanId
+            && modifications == other.modifications
+            && posteriorErrorProbability == other.posteriorErrorProbability;
+    }
 };
 
 struct Ms1ScanInfo {
@@ -203,5 +219,7 @@ void setToNegativeOneIfNaN(double& value);
 map<int, PSM> create_psm_map(const string& psm_file);
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime, unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans);
+
+void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults);
 
 }  // namespace CruxQuant
