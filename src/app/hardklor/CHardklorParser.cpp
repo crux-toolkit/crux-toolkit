@@ -1,6 +1,23 @@
+/*
+Copyright 2007-2016, Michael R. Hoopmann, Institute for Systems Biology
+Michael J. MacCoss, University of Washington
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 #include "CHardklorParser.h"
 
 using namespace std;
+using namespace MSToolkit;
 
 CHardklorParser::CHardklorParser(){
   vQueue = new vector<CHardklorSetting>;
@@ -38,6 +55,10 @@ void CHardklorParser::parse(char* cmd) {
 
 	bool bFile;
 	char param[32];
+  char cmd_bak[4096];
+
+  //make a backup of the command in case it contains something silly, like a '#' in the file name.
+  strcpy(cmd_bak,cmd);
 
   CHardklorSetting hs;
 
@@ -62,7 +83,7 @@ void CHardklorParser::parse(char* cmd) {
 		       
 		//on systems that allow a space in the path, require quotes (") to capture
     //complete file name
-    strcpy(tmpstr,cmd);
+    strcpy(tmpstr,cmd_bak);
 
     //Check for quote
     if(tmpstr[0]=='\"'){
@@ -82,20 +103,20 @@ void CHardklorParser::parse(char* cmd) {
 		} else {
 			tok=strtok(tmpstr," \t\n");
 			strcpy(hs.inFile,tmpstr);
-			j=strlen(tmpstr);
+			j=(int)strlen(tmpstr);
 		}
 
 		//Find first non-whitespace
 		while(true){
-			if(j>=(int)strlen(cmd)){
+			if(j>=(int)strlen(cmd_bak)){
 				cout << "Invalid output file." << endl;
 				exit(-1);
 			}
-			if(cmd[j]!=' ' && cmd[j]!='\t') break;
+			if(cmd_bak[j]!=' ' && cmd_bak[j]!='\t') break;
 			j++;
 		}
 
-		strcpy(tmpstr,&cmd[j]);
+		strcpy(tmpstr,&cmd_bak[j]);
 
     //Check for quote
     if(tmpstr[0]=='\"'){
@@ -115,7 +136,7 @@ void CHardklorParser::parse(char* cmd) {
 		} else {
 			tok=strtok(tmpstr," \t\n");
 			strcpy(hs.outFile,tmpstr);
-			j=strlen(tmpstr);
+			j=(int)strlen(tmpstr);
 		}
 
 		//cout << hs.inFile << "\t" << hs.outFile << endl;
@@ -334,7 +355,7 @@ CHardklorSetting& CHardklorParser::queue(int i){
 }
 
 int CHardklorParser::size(){
-  return vQueue->size();
+  return (int)vQueue->size();
 }
 
 //Identifies file format from extension - Must conform to these conventions
@@ -368,39 +389,39 @@ MSFileFormat CHardklorParser::getFileFormat(char* c){
 
 }
 
-void CHardklorParser::warn(char* c, int i){
-	switch(i){
-		case 0:
-			cout << "Parameter " << c << " has no value." << endl;
-			break;
-		case 1:
-			cout << "Unknown parameter: " << c << endl;
-			break;
-		case 2:
-		default:
-			cout << c << endl;
-			break;
-	}
+void CHardklorParser::warn(const char* c, int i){
+  switch(i){
+    case 0:
+      cout << "Parameter " << c << " has no value." << endl;
+      break;
+    case 1:
+      cout << "Unknown parameter: " << c << endl;
+      break;
+    case 2:
+    default:
+      cout << c << endl;
+      break;
+  }
 }
 
 bool CHardklorParser::makeVariant(char* c){
 
   //For modifications
-	CHardklorVariant v;
-	CPeriodicTable* PT;
-	int j,k;
-	string atom;
-	string isotope;
-	string percent;
-	int atomNum;
-	bool bNew;
+  CHardklorVariant v;
+  CPeriodicTable* PT;
+  int j,k;
+  string atom;
+  string isotope;
+  string percent;
+  int atomNum;
+  bool bNew;
   
   char str[256];
   char* tok;
   strcpy(str,c);
 
   v.clear();
-	PT = new CPeriodicTable(global.HardklorFile);  
+  PT = new CPeriodicTable(global.HardklorFile);  
 
   tok=strtok(str," \n");  
   while(tok!=NULL){
@@ -538,10 +559,10 @@ bool CHardklorParser::makeVariant(char* c){
       }
     }
     tok=strtok(NULL," \n"); 
-	}
+  }
 
-	global.variant->push_back(v);
-	delete PT;
+  global.variant->push_back(v);
+  delete PT;
   return true;
 
 }
