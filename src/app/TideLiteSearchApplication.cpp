@@ -185,14 +185,14 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   }
 
   // Loop through spectrum files
-  vector<InputFile> inputFiles = getInputFiles(input_files);
+  /*vector<InputFile> inputFiles = getInputFiles(input_files);
   int spectrum_file_cnt = 0;
   for (vector<InputFile>::iterator f = inputFiles.begin(); f != inputFiles.end(); f++, ++spectrum_file_cnt) {
 
     string spectrum_records_file = f->SpectrumRecords;
     string spectrum_file_name = f->OriginalName;
     carp(CARP_INFO, "Reading spectrum file %s.", spectrum_records_file.c_str());
-    SpectrumCollection* spectra = loadSpectra(spectrum_records_file);
+    SpectrumCollection* spectra = loadSpectra(spectrum_records_file); //
     carp(CARP_INFO, "Read %d spectra.", spectra->Size());
     
     unsigned int spectrum_num = spectra->SpecCharges()->size();
@@ -201,8 +201,49 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     // cycle through spectrum-charge pairs, sorted by neutral mass
     for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
         sc != spec_charges->end(); ++sc ) {
-      spectrum_search(&(*sc), APQ[0], spectrum_file_name, spectrum_file_cnt);
+      //spectrum_search(&(*sc), APQ[0], spectrum_file_name, spectrum_file_cnt);
+      carp(CARP_INFO, "%lf", (*sc).neutral_mass);
     }
+  }*/
+
+  // Loop through spectrum files
+  vector<InputFile> inputFiles = getInputFiles(input_files);
+  int spectrum_file_cnt = 0;
+  for (vector<InputFile>::iterator f = inputFiles.begin(); f != inputFiles.end(); f++, ++spectrum_file_cnt) {
+
+    string spectrum_records_file = f->SpectrumRecords;
+    string spectrum_file_name = f->OriginalName;
+    carp(CARP_INFO, "Reading spectrum file %s.", spectrum_records_file.c_str());
+
+    pb::Header tmp_header;
+    //if (header == NULL)
+    //  header = &tmp_header;
+    HeadedRecordReader reader(spectrum_records_file);
+    //if (tmp_header->file_type() != pb::Header::SPECTRA)
+    //  return false;
+    pb::Spectrum pb_spectrum;
+ 
+    while (!reader.Done()) {
+      reader.Read(&pb_spectrum);
+      //Spectrum* sp = new Spectrum(pb_spectrum);
+      carp(CARP_INFO, "Precursor: %lf", pb_spectrum.neutral_mass());
+    }
+
+
+    /*SpectrumCollection* spectra = loadSpectra(spectrum_records_file); //
+
+    carp(CARP_INFO, "Read %d spectra.", spectra->Size());
+    
+    unsigned int spectrum_num = spectra->SpecCharges()->size();
+    const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+
+    // cycle through spectrum-charge pairs, sorted by neutral mass
+    for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
+        sc != spec_charges->end(); ++sc ) {
+      //spectrum_search(&(*sc), APQ[0], spectrum_file_name, spectrum_file_cnt);
+      carp(CARP_INFO, "%lf", (*sc).neutral_mass);
+    }*/
+
   }
 
 
