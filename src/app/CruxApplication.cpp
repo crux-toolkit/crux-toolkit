@@ -179,6 +179,7 @@ void CruxApplication::initializeParams(
     bool no_mach = false; // -> this flag is used to check if a parameter in the command line is accepted by the app pointed by appName
     std::string rejected_options = ""; // -> string used to show the final list of parameters thar are not permitted in the current application
     std::string apps_allowed = ""; // -> string used to show the final list of apps where a parameter rejected is permitted
+    std::string separator = ", ";
     std::vector<std::string> next_app_options; // -> string vector to keep the option list from every app in applications list
     bool is_tide_search = false; // -> flag used to check if the current application is tide-search
     
@@ -213,12 +214,19 @@ void CruxApplication::initializeParams(
                   is_tide_search = true;
                 } else {
 
-                  apps_allowed = apps_allowed + ", " + (*currentApplication)->getName() + " ";
+                  if(apps_allowed.empty()) {
+
+                    apps_allowed = apps_allowed + (*currentApplication)->getName();
+
+                  } else {
+
+                    apps_allowed = apps_allowed + separator + (*currentApplication)->getName();
+                  }
                 }
               }
             }
 
-            rejected_options = rejected_options + "\t-> " + options_index->first +" used in: " + apps_allowed + "\n";
+            rejected_options = rejected_options + "\t-> " + options_index->first +" used in " + apps_allowed + "\n";
             apps_allowed = "";
 
             if (!is_tide_search) {
