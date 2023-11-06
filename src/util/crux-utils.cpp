@@ -1447,17 +1447,27 @@ string httpRequest(const string& url, const std::string& data, bool waitForRespo
 
   // Determine method (GET if no data; otherwise POST)
   string method = data.empty() ? "GET" : "POST";
-  string contentLengthHeader = data.empty()
-    ? ""
-    : "Content-Length: " + StringUtils::ToString(data.length()) + "\r\n";
+  string contentHeaders;
+  if (data.empty()) {
+    contentHeaders = "";
+  }
+  else {
+    contentHeaders = "Content-Length: " + StringUtils::ToString(data.length()) + "\r\n";
+    contentHeaders += "Content-Type: application/json\r\n"; 
+  }
   // Send the HTTP request
   string request =
     method + " " + path + " HTTP/1.1\r\n"
     "Host: " + host + "\r\n" +
-    contentLengthHeader +
+    "User-agent: Crux/" + CRUX_VERSION + "\r\n" +
+    contentHeaders +
     "Connection: close\r\n"
     "\r\n" + data;
   sock.send(buffer(request));
+  carp(CARP_ERROR, "HOST: %s\n", host.c_str());
+  carp(CARP_ERROR, "PATH: %s\n", path.c_str());
+  carp(CARP_ERROR, "CONTENT-HEADERS: %s\n", contentHeaders.c_str());
+  carp(CARP_ERROR, "DATA PAYLOAD: %s\n", data.c_str());
 
   if (!waitForResponse) {
     return "";
@@ -1467,12 +1477,13 @@ string httpRequest(const string& url, const std::string& data, bool waitForRespo
   stringstream response;
   boost::system::error_code ec;
   do {
-    char buf[1024];
+    char buf[2048];
     size_t n = sock.receive(buffer(buf), 0, ec);
     if (!ec) {
       response.write(buf, n);
     }
   } while (!ec);
+  carp(CARP_ERROR, "RESPONSE FROM GA4: %s\n", response.str().c_str());
   return response.str();
 }
 
@@ -1551,74 +1562,45 @@ std::string generate_uuid_v4() {
 #endif
 
 
-string ensureClientId(){
-  const string cruxHomeDir{".crux"};
-  const string cruxClientIdFileName{"client_id"};
-  stringstream filePath;
-
-#ifdef _MSC_VER
-  filePath << std::getenv("HOMEDRIVE") << std::getenv("HOMEPATH");
-#else
-  filePath << std::getenv("HOME");
-#endif
-
-  filePath << PATH_SEPARATOR << cruxHomeDir;
-  if(FileUtils::Exists(filePath.str())){
-    if(!FileUtils::IsDir(filePath.str())){
-      FileUtils::Remove(filePath.str());
-      FileUtils::Mkdir(filePath.str());
-    }
-  }
-  else
-    FileUtils::Mkdir(filePath.str());
-  
-  filePath << PATH_SEPARATOR << cruxClientIdFileName;
-
-
-  // If the ID file exists and it contents looks like an UUID then return the contents
-  string clientId{""};
-  if(FileUtils::Exists(filePath.str()) && FileUtils::IsRegularFile(filePath.str())){
-    clientId = FileUtils::Read(filePath.str());
-    static const std::regex e("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
-    if(std::regex_match(clientId, e))
-      return clientId;
-  }
-  auto uuid = generate_uuid_v4();
-  auto idFileStream = FileUtils::GetWriteStream(filePath.str(), true);
-  *idFileStream << uuid.c_str();
-  idFileStream->close();
-  return uuid;
-}
-
 void postToAnalytics(const string& appName) {
-  // Post data to Google Analytics
-  // For more information, see: https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide
+  // Information on the Google GA4 measurement protocol can be found here: 
+  // https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
   try {
-    auto clientId = ensureClientId();
-
-    stringstream paramBuilder;
-    paramBuilder << "v=1"                // Protocol verison
-                 << "&tid=UA-26136956-1" // Tracking ID
-                 // TODO Generate UUID for cid
-                 // The Client ID (cid) anonymously identifies a particular user
-                 // or device and should be a random UUID
-                 << "&cid=" << clientId
-                 << "&t=event"           // Hit type
-                 << "&ec=crux"           // Event category
-                 << "&ea=" << appName    // Event action
-                 << "&el="               // Event label
+    string url ="https://www.google-analytics.com/debug/mp/collect";
+    string params = 
+      "?v=2"              // Protocol verison
+      "&measurement_id=G-V7XKGGFPYX" // Tracking ID for Noble lab website
+      "&api_secret=UIf4l54KSbK84hPRWng2Yg"; // GA4 secret for Noble lab events
+    carp(CARP_ERROR, "URL: %s\n", (url + params).c_str());
+    stringstream data_payload; 
+    data_payload
+      << "{"
+         // The Client ID (cid) anonymously identifies a particular user
+         // We use a fixed client ID as we aren't interested in tracking 
+         // individual users.
+      <<   "\"client_id\" : \"332557735.1693348426\","
+      <<   "\"events\" : "
+      <<   "["
+      <<     "{"
+      <<       "\"name\" : \"crux\","
+      <<       "\"params\" : "
+      <<       "{"
+      <<         "\"application\" : \"" << appName << "\","
+      <<         "\"platform\" : " 
 #ifdef _MSC_VER
-                      "win"
+      <<           "\"win"
 #elif __APPLE__
-                      "mac"
+     <<            "\"mac"
 #else
-                      "linux"
+     <<            "\"linux"
 #endif
-                   << '-' << CRUX_VERSION;
-      httpRequest(
-        "http://www.google-analytics.com/collect",
-        paramBuilder.str(),
-        false);
+     << '-' << CRUX_VERSION
+     << "\""
+     <<        "}"
+     <<      "}"
+     <<    "]"      
+     <<  "}";
+    httpRequest(url + params, data_payload.str(), true);
   } catch (...) {
   }
 }
