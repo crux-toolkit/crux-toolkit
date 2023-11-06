@@ -71,8 +71,9 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
             modifiedSequenceToIsotopicDistribution,
             lfqResults
         );
-        // TODO Review entire codebase and fix error checks
+       
         CruxQuant::runErrorChecking(spectra_file, lfqResults);
+        lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
         
     }
 

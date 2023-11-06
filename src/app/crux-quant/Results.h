@@ -11,11 +11,17 @@
 #include "ChromatographicPeak.h"
 #include "Utils.h"
 #include "io/carp.h"
+#include "Peptide.h"
+#include "ProteinGroup.h"
+
+using std::string;
 
 namespace CruxQuant {
 class CruxLFQResults {
    public:
-    std::map<std::string, std::vector<ChromatographicPeak>> Peaks;
+    std::map<string, std::vector<ChromatographicPeak>> Peaks;
+    std::map<string, Peptide> PeptideModifiedSequences;
+    std::map<string, ProteinGroup> ProteinGroups;
 
     // Constructor that accepts a list of spectra files
     CruxLFQResults(const std::vector<std::string>& spectraFiles) {
@@ -91,5 +97,29 @@ class CruxLFQResults {
             carp(CARP_FATAL, "Failed to open results file for writing.");
         }
     }
+
+    void setPeptideModifiedSequencesAndProteinGroups(const Identification& identification) {
+        for(const Identification& id : identification){
+            auto it = PeptideModifiedSequences.find(id.ModifiedSequence);
+            if(it == PeptideModifiedSequences.end()){
+                Peptide peptide{id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups};
+                PeptideModifiedSequences[id.modifications] = peptide;
+            }else{
+                Peptide& peptide = it->second;
+                for(const ProteinGroup& proteinGroup : id.proteinGroups){
+                    peptide.proteinGroups.insert(proteinGroup);
+                }
+            }
+
+            for(const ProteinGroup& proteinGroup : id.proteinGroups){
+               ProteinGroups[proteinGroup.ProteinGroupName] = proteinGroup;
+            }
+
+        }
+    }
+
+    // void calculatePeptideResults(bool quantifyAmbiguousPeptides){
+
+    // }
 };
 }  // namespace CruxQuant

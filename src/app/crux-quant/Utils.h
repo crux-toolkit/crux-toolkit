@@ -11,6 +11,7 @@
 #include <vector>
 #include "IndexedMassSpectralPeak.h"
 #include "PpmTolerance.h"
+#include "ProteinGroup.h"
 #include "io/carp.h"
 
 
@@ -36,6 +37,7 @@ const int  MISSED_SCANS_ALLOWED = 1;                    // May need to make this
 const double ISOTOPE_TOLERANCE_PPM = 5.0;               // May need to make this a user input
 const bool INTEGRATE = false;                           // May need to make this a user input
 const double DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;   // May need to make this a user input
+const bool QUANTIFY_AMBIGUOUS_PEPTIDES = false;           // May need to make this a user input
 
 string calcFormula(string seq);
 
@@ -51,6 +53,9 @@ struct Identification {
     int scanId;
     string modifications;
     double posteriorErrorProbability = 0; //This may be removed cos it's redundant
+    bool useForProteinQuant;
+    unordered_set<ProteinGroup> ProteinGroups;
+
 
     bool operator==(const Identification& other) const {
         // Implement the logic for comparison
@@ -128,6 +133,15 @@ struct PSM{
     double peptide_mass_col;
     double spectrum_precursor_mz_col;
     string modifications;
+};
+
+enum class DetectionType {
+        MSMS,
+        MBR,
+        NotDetected,
+        MSMSAmbiguousPeakfinding,
+        MSMSIdentifiedButNotQuantified,
+        Imputed
 };
 
 unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeDistributions(const vector<Identification>& allIdentifications);
