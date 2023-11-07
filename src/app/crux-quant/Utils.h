@@ -19,6 +19,7 @@ using std::map;
 using std::pair;
 using std::string;
 using std::unordered_map;
+using std::unordered_set;
 using std::vector;
 
 typedef std::tuple<double, double, double> IsotopePeak;

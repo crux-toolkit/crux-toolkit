@@ -20,7 +20,7 @@ namespace CruxQuant {
 class CruxLFQResults {
    public:
     std::map<string, std::vector<ChromatographicPeak>> Peaks;
-    std::map<string, Peptide> PeptideModifiedSequences;
+    std::map<string, Peptides> PeptideModifiedSequences;
     std::map<string, ProteinGroup> ProteinGroups;
 
     // Constructor that accepts a list of spectra files
@@ -102,12 +102,12 @@ class CruxLFQResults {
         for(const Identification& id : identifications){
             auto it = PeptideModifiedSequences.find(id.modifications);
             if(it == PeptideModifiedSequences.end()){
-                Peptide peptide{id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups};
+                Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups);
                 PeptideModifiedSequences[id.modifications] = peptide;
             }else{
-                Peptide& peptide = it->second;
+                Peptides& peptide = it->second;
                 for(const ProteinGroup& proteinGroup : id.proteinGroups){
-                    peptide.proteinGroups.insert(proteinGroup);
+                    peptide.insertProteinGroup(proteinGroup);
                 }
             }
 
