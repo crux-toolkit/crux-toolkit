@@ -3,7 +3,7 @@
 #include <string>
 #include <map>
 #include <unordered_set>
-#include "utils.h"
+#include "Utils.h"
 #include "ProteinGroup.h"
 
 using std::string;
@@ -15,14 +15,15 @@ class Peptides{
         string sequence;
         string modified_sequence;
         bool useForProteinQuant;
-        std::map<string, DetectionType> DetectionTypeMap;
-        std::unordered_set<proteinGroup> ProteinGroups;
+        std::map<string, DetectionType> detectionTypeMap;
+        std::unordered_set<ProteinGroup> proteinGroups;
     public:
-        Peptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<proteinGroup> ProteinGroups){
+        Peptides() = default;
+        Peptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<ProteinGroup> ProteinGroups){
             this->sequence = sequence;
             this->modified_sequence = modified_sequence;
             this->useForProteinQuant = useForProteinQuant;
-            this->ProteinGroups = ProteinGroups;
+            this->proteinGroups = ProteinGroups;
 
         }
         void setSequence(const string sequence){
@@ -31,6 +32,10 @@ class Peptides{
 
         void setModifiedSequence(const string modified_sequence){
             this->modified_sequence = modified_sequence;
+        }
+
+        void insertProteinGroup(const ProteinGroup proteinGroup){
+            this->proteinGroups.insert(proteinGroup);
         }
 
 
