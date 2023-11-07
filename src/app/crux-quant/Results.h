@@ -98,9 +98,9 @@ class CruxLFQResults {
         }
     }
 
-    void setPeptideModifiedSequencesAndProteinGroups(const Identification& identification) {
-        for(const Identification& id : identification){
-            auto it = PeptideModifiedSequences.find(id.ModifiedSequence);
+    void setPeptideModifiedSequencesAndProteinGroups(const vector<Identification>& identifications) {
+        for(const Identification& id : identifications){
+            auto it = PeptideModifiedSequences.find(id.modifications);
             if(it == PeptideModifiedSequences.end()){
                 Peptide peptide{id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups};
                 PeptideModifiedSequences[id.modifications] = peptide;
@@ -118,8 +118,8 @@ class CruxLFQResults {
         }
     }
 
-    // void calculatePeptideResults(bool quantifyAmbiguousPeptides){
+    void calculatePeptideResults(bool quantifyAmbiguousPeptides){
 
-    // }
+    }
 };
 }  // namespace CruxQuant

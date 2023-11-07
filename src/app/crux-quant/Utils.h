@@ -54,7 +54,7 @@ struct Identification {
     string modifications;
     double posteriorErrorProbability = 0; //This may be removed cos it's redundant
     bool useForProteinQuant;
-    unordered_set<ProteinGroup> ProteinGroups;
+    unordered_set<ProteinGroup> proteinGroups;
 
 
     bool operator==(const Identification& other) const {
