@@ -46,6 +46,7 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
     }
     map<int, CruxQuant::PSM> psm_datum = CruxQuant::create_psm_map(psm_file);
     CruxQuant::CruxLFQResults lfqResults(spec_files);
+    lfqResults.spectraFiles = spec_files;
 
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);

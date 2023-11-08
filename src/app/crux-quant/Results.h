@@ -15,18 +15,21 @@
 #include "ProteinGroup.h"
 
 using std::string;
+using std::vector;
+using std::map;
 
 namespace CruxQuant {
 class CruxLFQResults {
    public:
-    std::map<string, std::vector<ChromatographicPeak>> Peaks;
-    std::map<string, Peptides> PeptideModifiedSequences;
-    std::map<string, ProteinGroup> ProteinGroups;
+    map<string, std::vector<ChromatographicPeak>> Peaks;
+    map<string, Peptides> PeptideModifiedSequences;
+    map<string, ProteinGroup> ProteinGroups;
+    vector<string> spectraFiles;
 
     // Constructor that accepts a list of spectra files
-    CruxLFQResults(const std::vector<std::string>& spectraFiles) {
-        for (const std::string& spectraFile : spectraFiles) {
-            Peaks[spectraFile] = std::vector<ChromatographicPeak>();
+    CruxLFQResults(const vector<string>& spectraFiles) {
+        for (const string& spectraFile : spectraFiles) {
+            Peaks[spectraFile] = vector<ChromatographicPeak>();
         }
     }
 
@@ -119,7 +122,81 @@ class CruxLFQResults {
     }
 
     void calculatePeptideResults(bool quantifyAmbiguousPeptides){
+        for(auto& sequence : PeptideModifiedSequences){
+            for(string& file: spectraFiles){
+                sequence.second.setDetectionType(file, DetectionType::NOT_DETECTED);
+                sequence.second.setIntensity(file, 0);
+            }
+        }
 
+        for(auto& filePeaks: Peaks){
+            map<string, vector<ChromatographicPeak>> groupedPeaks;
+            for(auto& peak: filePeaks.second){
+                if(peak.NumIdentificationsByFullSeq == 1){
+                    groupedPeaks[peak.identifications.front().modifications].push_back(peak);
+                }
+            }
+
+            for(auto& sequenceWithPeaks: groupedPeaks){
+                string sequence = sequenceWithPeaks.first;
+                double intensity =  std::max_element(
+                    sequenceWithPeaks.second.begin(), sequenceWithPeaks.second.end(),
+                    [](const ChromatographicPeak& a, const ChromatographicPeak& b) {
+                        return a.intensity < b.intensity;
+                    })->intensity;
+                auto bestPeak = std::find_if(
+                    sequenceWithPeaks.second.begin(), sequenceWithPeaks.second.end(),
+                    [&intensity](const ChromatographicPeak& p) {
+                        return p.intensity == intensity;
+                    });
+
+                DetectionType detectionType;
+                if(bestPeak->isMbrPeak && intensity > 0){
+                    detectionType = DetectionType::MBR;
+                }else if(!bestPeak->isMbrPeak && intensity > 0){
+                    detectionType = DetectionType::MSMS;
+                }else if(!bestPeak->isMbrPeak && intensity == 0){
+                    detectionType = DetectionType::MSMSIdentifiedButNotQuantified;
+                }else{
+                    detectionType = DetectionType::NOT_DETECTED;
+                }
+
+                PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, detectionType);
+                PeptideModifiedSequences[sequence].setIntensity(filePeaks.first, intensity);
+            }
+
+            // report ambiguous quantification
+            vector<ChromatographicPeak> ambiguousPeaks;
+            for(auto& peak: filePeaks.second){
+                if(peak.NumIdentificationsByFullSeq > 1){
+                    ambiguousPeaks.push_back(peak);
+                }
+            }
+
+            for(auto& ambiguousPeak : ambiguousPeaks){
+                for(auto& id : ambiguousPeak.identifications){
+                    string sequence = id.modifications;
+                    double alreadyRecordedIntensity = PeptideModifiedSequences[sequence].getIntensity(filePeaks.first);
+                    double fractionAmbiguous = ambiguousPeak.intensity / (alreadyRecordedIntensity + ambiguousPeak.intensity);
+
+                    if(quantifyAmbiguousPeptides){
+                        // If the peptide intensity hasn't been recorded, the intensity is set equal to the intensity of the ambiguous peak
+                        if(std::abs(alreadyRecordedIntensity) < 0.01){
+                            PeptideModifiedSequences[sequence].setIntensity(filePeaks.first, ambiguousPeak.intensity);
+                            PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, DetectionType::MSMSAmbiguousPeakfinding);
+                        }else if(fractionAmbiguous > 0.3){
+                            PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, DetectionType::MSMSAmbiguousPeakfinding);
+                        }
+                    }else if(fractionAmbiguous > 0.3){
+                        PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, DetectionType::MSMSAmbiguousPeakfinding);
+                        PeptideModifiedSequences[sequence].setIntensity(filePeaks.first, 0);
+                    }
+                }
+            }
+        }
+        // if(!quantifyAmbiguousPeptides){
+        //     handleAmbiguityInFractions();
+        // }
     }
 };
 }  // namespace CruxQuant
