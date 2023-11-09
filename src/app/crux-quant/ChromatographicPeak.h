@@ -140,6 +140,11 @@ namespace CruxQuant
             oss << intensity << '\t';
 
             oss << numChargeStatesObserved << '\t';
+            if(isMbrPeak){
+                oss << "MBR\t";
+            }else{
+                oss << "MSMS\t";
+            }
             oss << identifications.size() << '\t';
             oss << SplitRT << '\t';
             oss << massError << '\t';

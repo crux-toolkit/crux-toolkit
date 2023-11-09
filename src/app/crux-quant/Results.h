@@ -66,6 +66,8 @@ class CruxLFQResults {
             << "\t"
             << "Num Charge States Observed"
             << "\t"
+            << "Peak Detection Type"
+            << "\t"
             << "PSMs Mapped"
             << "\t"
             << "Peak Split Valley RT"
