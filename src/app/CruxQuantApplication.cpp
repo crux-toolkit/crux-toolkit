@@ -46,7 +46,6 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
     }
     map<int, CruxQuant::PSM> psm_datum = CruxQuant::create_psm_map(psm_file);
     CruxQuant::CruxLFQResults lfqResults(spec_files);
-    lfqResults.spectraFiles = spec_files;
 
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
@@ -74,8 +73,11 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         );
        
         CruxQuant::runErrorChecking(spectra_file, lfqResults);
-        lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
         
+    }
+    if(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES){
+        lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
+        lfqResults.quantifyAmbiguousPeptides(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES);
     }
 
     const std::string results_file = make_file_path("crux-lfq.txt");

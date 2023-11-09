@@ -68,6 +68,19 @@ class Peptides{
             }
         }
 
+        DetectionType getDetectionType(const string& file_name){
+            auto it = this->detectionTypeMap.find(file_name);
+            if(it != this->detectionTypeMap.end()){
+                return it->second;
+            }else{
+                return DetectionType::NotDetected;
+            }
+        }
+
+        string getSequence(){
+            return this->sequence;
+        }
+
 
 };
 }
