@@ -41,7 +41,7 @@ class Peptides{
             this->proteinGroups.insert(proteinGroup);
         }
 
-        void setDetectionType(const string& file_name, DetectionType& detectionType){
+        void setDetectionType(const string& file_name, const DetectionType& detectionType){
             auto it = this->detectionTypeMap.find(file_name);
             if(it != this->detectionTypeMap.end()){
                 it->second = detectionType;
@@ -66,6 +66,19 @@ class Peptides{
             }else{
                 return 0;
             }
+        }
+
+        DetectionType getDetectionType(const string& file_name){
+            auto it = this->detectionTypeMap.find(file_name);
+            if(it != this->detectionTypeMap.end()){
+                return it->second;
+            }else{
+                return DetectionType::NotDetected;
+            }
+        }
+
+        string getSequence(){
+            return this->sequence;
         }
 
 
