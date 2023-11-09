@@ -124,7 +124,7 @@ class CruxLFQResults {
     void calculatePeptideResults(bool quantifyAmbiguousPeptides){
         for(auto& sequence : PeptideModifiedSequences){
             for(string& file: spectraFiles){
-                sequence.second.setDetectionType(file, DetectionType::NOT_DETECTED);
+                sequence.second.setDetectionType(file, DetectionType::NotDetected);
                 sequence.second.setIntensity(file, 0);
             }
         }
@@ -158,7 +158,7 @@ class CruxLFQResults {
                 }else if(!bestPeak->isMbrPeak && intensity == 0){
                     detectionType = DetectionType::MSMSIdentifiedButNotQuantified;
                 }else{
-                    detectionType = DetectionType::NOT_DETECTED;
+                    detectionType = DetectionType::NotDetected;
                 }
 
                 PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, detectionType);
