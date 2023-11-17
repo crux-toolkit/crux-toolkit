@@ -488,6 +488,8 @@ else()
     boost_thread
     dl
     m
+    crypto
+    ssl
     pthread
     hdf5pp
     hdf5

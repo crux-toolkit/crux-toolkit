@@ -3,9 +3,13 @@
  * \brief General-use functions for crux
  */
 
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+
 #include <sys/types.h>
 #include <fstream>
 #include <cstdlib>
+#include <iostream>
+#include <iomanip>
 #include <random>
 #include <chrono>
 #include <string>
@@ -18,7 +22,6 @@
 #else
 #include <stdint.h>
 #endif
-#include <iostream>
 #include "crux-utils.h"
 #include "model/Database.h"
 #include "Params.h"
@@ -29,6 +32,8 @@
 #include "io/LineFileReader.h"
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
+#include <boost/asio/ssl.hpp>
 #include <regex>
 #include "FileUtils.h"
 #include "crux_version.h"
@@ -1404,206 +1409,170 @@ void get_files_from_list(
   }
 }
 
-bool parseUrl(string url, string* host, string* path) {
-  if (!host || !path) {
-    return false;
-  }
-  // find protocol
-  size_t protocolSuffix = url.find("://");
-  if (protocolSuffix != string::npos) {
-    url = url.substr(protocolSuffix + 3);
-  }
-  size_t pathBegin = url.find('/');
-  if (pathBegin == string::npos) {
-    *host = url;
-    *path = "/";
-  } else {
-    *host = url.substr(0, pathBegin);
-    *path = url.substr(pathBegin);
-  }
-  if (host->empty()) {
-    *host = *path = "";
-    return false;
-  }
-  return true;
-}
-
-string httpRequest(const string& url, const std::string& data, bool waitForResponse) {
-  // Parse URL into host and path components
-  string host, path;
-  if (!parseUrl(url, &host, &path)) {
-    carp(CARP_ERROR, "Failed parsing URL %s", url.c_str());
-    return "";
+class Client
+{
+public:
+  Client(
+      boost::asio::io_service& io_service,
+      boost::asio::ssl::context& context,
+      boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+      std::string appName
+  ) : socket_(io_service, context)
+  {
+    appName_ = appName;
+    boost::asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
+        boost::bind(&Client::handle_connect, this,
+          boost::asio::placeholders::error));
   }
 
-  using namespace boost::asio;
-
-  // Establish TCP connection to host on port 80
-  io_service service;
-  ip::tcp::resolver resolver(service);
-  ip::tcp::resolver::iterator endpoint = resolver.resolve(ip::tcp::resolver::query(host, "80"));
-  ip::tcp::socket sock(service);
-  connect(sock, endpoint);
-
-  // Determine method (GET if no data; otherwise POST)
-  string method = data.empty() ? "GET" : "POST";
-  string contentHeaders;
-  if (data.empty()) {
-    contentHeaders = "";
-  }
-  else {
-    contentHeaders = "Content-Length: " + StringUtils::ToString(data.length()) + "\r\n";
-    contentHeaders += "Content-Type: application/json\r\n"; 
-  }
-  // Send the HTTP request
-  string request =
-    method + " " + path + " HTTP/1.1\r\n"
-    "Host: " + host + "\r\n" +
-    "User-agent: Crux/" + CRUX_VERSION + "\r\n" +
-    contentHeaders +
-    "Connection: close\r\n"
-    "\r\n" + data;
-  sock.send(buffer(request));
-  carp(CARP_ERROR, "HOST: %s\n", host.c_str());
-  carp(CARP_ERROR, "PATH: %s\n", path.c_str());
-  carp(CARP_ERROR, "CONTENT-HEADERS: %s\n", contentHeaders.c_str());
-  carp(CARP_ERROR, "DATA PAYLOAD: %s\n", data.c_str());
-
-  if (!waitForResponse) {
-    return "";
+  void handle_connect(const boost::system::error_code& error)
+  {
+      if (!error)
+      {
+          socket_.async_handshake(boost::asio::ssl::stream_base::client,
+                  boost::bind(&Client::handle_handshake, this,
+                      boost::asio::placeholders::error));
+      }
+      else
+      {
+          // Fail sliently, contacting GA4 is optional
+          // std::cout << "Connect failed: " << error.message() << "\n";
+      }
   }
 
-  // Read the response into stringstream
-  stringstream response;
-  boost::system::error_code ec;
-  do {
-    char buf[2048];
-    size_t n = sock.receive(buffer(buf), 0, ec);
-    if (!ec) {
-      response.write(buf, n);
-    }
-  } while (!ec);
-  carp(CARP_ERROR, "RESPONSE FROM GA4: %s\n", response.str().c_str());
-  return response.str();
-}
-
-std::string generate_uuid_v4() {
-
-    //accumulate some random data in the stream
-    // and hash it to obtain a seed for the random sequence
-    wall_clock();
-    std::stringstream randomPool;
-
-    auto tNow = std::chrono::system_clock::now();
-    auto ticks = tNow.time_since_epoch().count();
-    randomPool << ticks;
-
-    extern char **environ;
-    const char* var = *environ;
-    for(int i = 0; var; i++){
-      randomPool << var;
-      var = environ[i];
-    }
-
-    static std::random_device              rd;
-    randomPool << rd()  << wall_clock();
-    auto seedString = randomPool.str();
-
-    CSHA1 enviroHash;
-    enviroHash.Update((const uint8_t *) seedString.c_str(), (unsigned int)seedString.size());
-    enviroHash.Final();
-
-    unsigned char hashBytes[30];
-    enviroHash.GetHash(hashBytes);
-#ifndef _MSC_VER
-    u_int64_t seed = 0; //take the first 8 bytes for the seed
-#else
-    uint64_t seed = 0; //take the first 8 bytes for the seed
-#endif
-    for(int i = 0; i < 8; i++)
-      seed = (seed << 8) + hashBytes[i];
-
-    //now we need to compact the hash into 64 bits using XOR to feed it into
-    // the pseudo-random generator
-    static std::mt19937_64                    gen(seed);
-    static std::uniform_int_distribution<> dis(0, 15);
-    static std::uniform_int_distribution<> dis2(8, 11);
-
-    std::stringstream ss;
-    int i;
-    ss << std::hex;
-    for (i = 0; i < 8; i++) {
-        ss << dis(gen);
-    }
-    ss << "-";
-    for (i = 0; i < 4; i++) {
-        ss << dis(gen);
-    }
-    ss << "-4";
-    for (i = 0; i < 3; i++) {
-        ss << dis(gen);
-    }
-    ss << "-";
-    ss << dis2(gen);
-    for (i = 0; i < 3; i++) {
-        ss << dis(gen);
-    }
-    ss << "-";
-    for (i = 0; i < 12; i++) {
-        ss << dis(gen);
-    };
-    return ss.str();
-}
-
+  void handle_handshake(const boost::system::error_code& error)
+  {
+      if (!error)
+      {
+          // Construct JSON for POST
+          std::stringstream body;
+          body
+            << "{"
+            << "  \"client_id\" : \"332557735.1693348426\","
+            << "  \"events\" : ["
+            << "    {"
+            << "      \"name\" : \"crux\","
+            << "      \"params\" : {"
+            << "        \"tool\" : \"" << appName_ << "\","
+            << "        \"platform\" : \""
 #ifdef _MSC_VER
-  #define PATH_SEPARATOR "\\"
-#else
-  #define PATH_SEPARATOR "/"
-#endif
-
-
-void postToAnalytics(const string& appName) {
-  // Information on the Google GA4 measurement protocol can be found here: 
-  // https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
-  try {
-    string url ="https://www.google-analytics.com/debug/mp/collect";
-    string params = 
-      "?v=2"              // Protocol verison
-      "&measurement_id=G-V7XKGGFPYX" // Tracking ID for Noble lab website
-      "&api_secret=UIf4l54KSbK84hPRWng2Yg"; // GA4 secret for Noble lab events
-    carp(CARP_ERROR, "URL: %s\n", (url + params).c_str());
-    stringstream data_payload; 
-    data_payload
-      << "{"
-         // The Client ID (cid) anonymously identifies a particular user
-         // We use a fixed client ID as we aren't interested in tracking 
-         // individual users.
-      <<   "\"client_id\" : \"332557735.1693348426\","
-      <<   "\"events\" : "
-      <<   "["
-      <<     "{"
-      <<       "\"name\" : \"crux\","
-      <<       "\"params\" : "
-      <<       "{"
-      <<         "\"application\" : \"" << appName << "\","
-      <<         "\"platform\" : " 
-#ifdef _MSC_VER
-      <<           "\"win"
+            <<            "win"
 #elif __APPLE__
-     <<            "\"mac"
+            <<            "mac"
 #else
-     <<            "\"linux"
+            <<            "linux"
 #endif
-     << '-' << CRUX_VERSION
-     << "\""
-     <<        "}"
-     <<      "}"
-     <<    "]"      
-     <<  "}";
-    httpRequest(url + params, data_payload.str(), true);
-  } catch (...) {
+            <<            "\","
+            << "        \"version\" : \""
+            <<            CRUX_VERSION
+            << "\""
+            << "      }"
+            << "    }"
+            << "  ]"
+            << "}";
+          body.seekp(0, std::ios::end);
+          std::stringstream::pos_type body_length = body.tellp();
+
+          // Contruct POST headers and append JSON as body
+          std::stringstream post_content(""); 
+          post_content
+            << "POST /mp/collect?"
+            << "measurement_id=G-V7XKGGFPYX"
+            << "&api_secret=UIf4l54KSbK84hPRWng2Yg"
+            << " HTTP/1.1\n"
+            << "Host: www.google-analytics.com\n"
+            << "accept: */*\n"
+            << "Content-Type: application/json\n"
+            << "Content-Length: " << body_length
+            << "\n\n"
+            << body.str();
+
+          // Request the POST
+          boost::asio::async_write(socket_,
+                  boost::asio::buffer(post_content.str()),
+                  boost::bind(&Client::handle_write, this,
+                      boost::asio::placeholders::error,
+                      boost::asio::placeholders::bytes_transferred));
+      }
+      else
+      {
+          // Fail sliently, contacting GA4 is optional
+          // std::cout << "Handshake failed: " << error.message() << "\n";
+      }
   }
+
+  void handle_write(const boost::system::error_code& error,
+      size_t /*bytes_transferred*/)
+  {
+      if (!error)
+      {
+          boost::asio::async_read_until(
+            socket_,
+            reply_, 
+            '\n',
+            boost::bind(
+              &Client::handle_read, this,
+              boost::asio::placeholders::error,
+              boost::asio::placeholders::bytes_transferred
+            )
+          );
+      }
+      else
+      {
+          // Fail sliently, contacting GA4 is optional
+          // std::cout << "Write failed: " << error.message() << "\n";
+      }
+  }
+
+  void handle_read(const boost::system::error_code& error, size_t /*bytes_transferred*/)
+  {
+      if (!error)
+      {
+          std::istream is(&reply_);
+          std::string line;
+          std::getline(is, line);
+      }
+      else
+      {
+          // Fail sliently, contacting GA4 is optional
+          // std::cout << "Read failed: " << error.message() << "\n";
+      }
+  }
+
+private:
+  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+  boost::asio::streambuf reply_;
+  std::string appName_;
+};
+
+// Post usage data to Google Analytics 4 using async i/o
+// Information on the Google GA4 measurement protocol can be found here: 
+// https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
+void postToAnalytics(const std::string& appName)
+{
+    try
+    {
+
+        const std::string host = "www.google-analytics.com";
+        const std::string protocol = "https";
+        boost::asio::io_service io_service;
+        boost::asio::ip::tcp::resolver resolver(io_service);
+        boost::asio::ip::tcp::resolver::query query(host.c_str(), protocol.c_str());
+        boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+        boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+        ctx.set_default_verify_paths();
+
+        Client c(io_service, ctx, iterator, appName);
+        io_service.run();
+    } 
+    catch (system_error &e)
+    {
+      carp(CARP_DETAILED_DEBUG, "Unable to log use with GA.");
+    }
+    catch (...) {
+    }
 }
+
 
 /*
  * Local Variables:
