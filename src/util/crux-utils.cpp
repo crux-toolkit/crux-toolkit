@@ -33,7 +33,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#ifdef _MSC_VER
+#include <boost/wintls.hpp>
+#else
 #include <boost/asio/ssl.hpp>
+#endif
 #include <regex>
 #include "FileUtils.h"
 #include "crux_version.h"
@@ -1414,13 +1418,21 @@ class Client
 public:
   Client(
       boost::asio::io_service& io_service,
+#ifdef _MSC_VER
+      boost::wintls::context& context,
+#else
       boost::asio::ssl::context& context,
+#endif
       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
       std::string appName
   ) : socket_(io_service, context)
   {
     appName_ = appName;
+#ifdef _MSC_VER
+    boost::asio::async_connect(socket_.next_layer(), endpoint_iterator,
+#else
     boost::asio::async_connect(socket_.lowest_layer(), endpoint_iterator,
+#endif
         boost::bind(&Client::handle_connect, this,
           boost::asio::placeholders::error));
   }
@@ -1429,7 +1441,11 @@ public:
   {
       if (!error)
       {
+#ifdef _MSC_VER
+          socket_.async_handshake(boost::wintls::handshake_type::client,
+#else
           socket_.async_handshake(boost::asio::ssl::stream_base::client,
+#endif
                   boost::bind(&Client::handle_handshake, this,
                       boost::asio::placeholders::error));
       }
@@ -1540,7 +1556,11 @@ public:
   }
 
 private:
+#ifdef _MSC_VER
+  boost::wintls::stream<boost::asio::ip::tcp::socket> socket_;
+#else
   boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+#endif
   boost::asio::streambuf reply_;
   std::string appName_;
 };
@@ -1548,6 +1568,7 @@ private:
 // Post usage data to Google Analytics 4 using async i/o
 // Information on the Google GA4 measurement protocol can be found here: 
 // https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
+// Note that we use different a different SSL support package (wintls) on Windows.
 void postToAnalytics(const std::string& appName)
 {
     try
@@ -1559,8 +1580,12 @@ void postToAnalytics(const std::string& appName)
         boost::asio::ip::tcp::resolver resolver(io_service);
         boost::asio::ip::tcp::resolver::query query(host.c_str(), protocol.c_str());
         boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
+#ifdef _MSC_VER
+        boost::wintls::context ctx(boost::wintls::method::system_default);
+#else
         boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
         ctx.set_default_verify_paths();
+#endif       
 
         Client c(io_service, ctx, iterator, appName);
         io_service.run();

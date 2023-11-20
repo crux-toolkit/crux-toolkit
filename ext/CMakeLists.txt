@@ -64,14 +64,20 @@ if (WIN32 AND NOT CYGWIN)
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
         COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
-        COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost
         COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/wintls
         COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
