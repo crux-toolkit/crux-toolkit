@@ -311,5 +311,9 @@ class CruxLFQResults {
             }
         }
     }
+
+    void calculateProteinResultsMedianPolish(bool useSharedPeptidesForProteinQuant){
+
+    }
 };
 }  // namespace CruxQuant
