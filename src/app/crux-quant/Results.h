@@ -25,6 +25,11 @@ struct SpectraFileInfo {
     int Fraction;
     string Condition;
     string FullFilePathWithExtension;
+
+    bool operator<(const SpectraFileInfo& other) const{
+        return std::tie(BiologicalReplicate, Fraction, Condition, FullFilePathWithExtension) < std::tie(other.BiologicalReplicate, other.Fraction, other.Condition, other.FullFilePathWithExtension);
+    
+    }
 };
 
 class CruxLFQResults {
@@ -305,6 +310,10 @@ class CruxLFQResults {
                 }
             }
         }
+    }
+
+    void calculateProteinResultsMedianPolish(bool useSharedPeptidesForProteinQuant){
+
     }
 };
 }  // namespace CruxQuant
