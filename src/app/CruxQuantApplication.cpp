@@ -76,11 +76,11 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
         // For now this happens in the forloop, but it should be moved out of the forloop based on FlashLFQ Code
         if(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES){
             lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
-            lfqResults.calculatePeptideResults(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES);
         }
         
     }
-    
+    lfqResults.calculatePeptideResults(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES);
+    lfqResults.calculateProteinResultsMedianPolish(CruxQuant::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
     const std::string results_file = make_file_path("crux-lfq.txt");
     lfqResults.writeResults(results_file);
 

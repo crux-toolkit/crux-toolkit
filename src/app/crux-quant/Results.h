@@ -11,6 +11,7 @@
 #include "ChromatographicPeak.h"
 #include "Peptide.h"
 #include "ProteinGroup.h"
+#include "SpectraFileInfo.h"
 #include "Utils.h"
 #include "io/carp.h"
 
@@ -19,18 +20,6 @@ using std::string;
 using std::vector;
 
 namespace CruxQuant {
-
-struct SpectraFileInfo {
-    int BiologicalReplicate;
-    int Fraction;
-    string Condition;
-    string FullFilePathWithExtension;
-
-    bool operator<(const SpectraFileInfo& other) const{
-        return std::tie(BiologicalReplicate, Fraction, Condition, FullFilePathWithExtension) < std::tie(other.BiologicalReplicate, other.Fraction, other.Condition, other.FullFilePathWithExtension);
-    
-    }
-};
 
 class CruxLFQResults {
    public:
@@ -312,8 +301,139 @@ class CruxLFQResults {
         }
     }
 
-    void calculateProteinResultsMedianPolish(bool useSharedPeptidesForProteinQuant){
+    void calculateProteinResultsMedianPolish(bool useSharedPeptides) {
+        // Reset protein intensities to 0
+        for (auto &proteinGroup : ProteinGroups) {
+            for (const auto &file : spectraFiles) {
+                proteinGroup.second.SetIntensity(file, 0);
+            }
+        }
 
-    }
+        vector<Peptides> peptides;
+        for (auto &item : PeptideModifiedSequences) {
+            if (item.second.UnambiguousPeptideQuant()) {
+                peptides.push_back(item.second);
+            }
+        }
+
+        std::unordered_map<ProteinGroup, vector<Peptides>> proteinGroupToPeptides;
+
+        for (Peptides &peptide : peptides) {
+            if (!peptide.getUseForProteinQuant() || (peptide.getProteinGroups().size() > 1 && !useSharedPeptides)) {
+                continue;
+            }
+
+            for (ProteinGroup pg : peptide.getProteinGroups()) {
+                auto it = proteinGroupToPeptides.find(pg);
+                if (it != proteinGroupToPeptides.end()) {
+                    // ProteinGroup found, add the peptide to the existing list
+                    it->second.push_back(peptide);
+                } else {
+                    // ProteinGroup not found, create a new entry
+                    proteinGroupToPeptides[pg] = {peptide};
+                }
+            }
+        }
+
+        std::map<std::string, std::vector<SpectraFileInfo>> filesGroupedByCondition;
+        for (const auto &file : spectraFiles) {
+            filesGroupedByCondition[file.Condition].push_back(file);
+        }
+        // quantify each protein
+        for (const auto &proteinGroupPair : ProteinGroups) {
+            const ProteinGroup &proteinGroup = proteinGroupPair.second;
+
+            auto it = proteinGroupToPeptides.find(proteinGroup);
+            if (it != proteinGroupToPeptides.end()) {
+                // set up peptide intensity table
+                // top row is the column effects, left column is the row effects
+                // the other cells are peptide intensity measurements
+                std::vector<std::string> conditions;
+                std::transform(spectraFiles.begin(), spectraFiles.end(), std::back_inserter(conditions), [](const CruxQuant::SpectraFileInfo &file) {
+                    return file.Condition;
+                });
+                int numSamples = std::unordered_set<std::string>(conditions.begin(), conditions.end()).size();
+                std::vector<std::vector<double>> peptideIntensityMatrix(it->second.size() + 1, std::vector<double>(numSamples + 1));
+
+                // populate matrix w/ log2-transformed peptide intensities
+                // if a value is missing, it will be filled with NaN
+                int sampleN = 0;
+                for (const auto &group : filesGroupedByCondition) {
+                    std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
+                    for (const auto &file : group.second) {
+                        groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
+                    }
+                    for (const auto &sample : groupedByBiologicalReplicate) {
+                        for (Peptides &peptide : it->second) {
+                            double sampleIntensity = 0;
+                            double highestFractionIntensity = 0;
+
+                            // the fraction w/ the highest intensity is used as the sample intensity for this peptide.
+                            // if there is more than one replicate of the fraction, then the replicate intensities are averaged
+                            std::map<int, std::vector<SpectraFileInfo>> groupedByFraction;
+                            for (const auto &file : sample.second) {
+                                groupedByFraction[file.Fraction].push_back(file);
+                            }
+                            for (const auto &fraction : sample.second) {
+                                double fractionIntensity = 0;
+                                int replicatesWithValidValues = 0;
+
+                                for (const SpectraFileInfo &replicate : groupedByFraction[fraction.Fraction]) {
+                                    double replicateIntensity = peptide.getIntensity(replicate.FullFilePathWithExtension);
+
+                                    if (replicateIntensity > 0) {
+                                        fractionIntensity += replicateIntensity;
+                                        replicatesWithValidValues++;
+                                    }
+                                }
+
+                                if (replicatesWithValidValues > 0) {
+                                    fractionIntensity /= replicatesWithValidValues;
+                                }
+
+                                if (fractionIntensity > highestFractionIntensity) {
+                                    highestFractionIntensity = fractionIntensity;
+                                    sampleIntensity = highestFractionIntensity;
+                                }
+                            }
+
+                            int sampleNumber = sample.first;
+
+                            if (sampleIntensity == 0) {
+                                sampleIntensity = std::numeric_limits<double>::quiet_NaN();
+                            } else {
+                                sampleIntensity = std::log2(sampleIntensity);
+                            }
+
+                            auto peptideIndex = std::distance(it->second.begin(), std::find(it->second.begin(), it->second.end(), peptide));
+                            peptideIntensityMatrix[peptideIndex + 1][sampleN + 1] = sampleIntensity;
+                        }
+
+                        sampleN++;
+                    }
+                }
+
+                // if there are any peptides that have only one measurement, mark them as NaN
+                // unless we have ONLY peptides with one measurement
+                int peptidesWithMoreThanOneMmt = std::count_if(peptideIntensityMatrix.begin() + 1, peptideIntensityMatrix.end(),
+                                                               [](const std::vector<double> &row) {
+                                                                   return std::count_if(row.begin() + 1, row.end(), [](double cell) { return !std::isnan(cell); }) > 1;
+                                                               });
+
+                if (peptidesWithMoreThanOneMmt > 0) {
+                    for (size_t i = 1; i < peptideIntensityMatrix.size(); i++) {
+                        int validValueCount = std::count_if(peptideIntensityMatrix[i].begin(), peptideIntensityMatrix[i].end(),
+                                                            [](double p) { return !std::isnan(p) && p != 0; });
+
+                        if (validValueCount < 2 && numSamples >= 2) {
+                            for (size_t j = 1; j < peptideIntensityMatrix[0].size(); j++) {
+                                peptideIntensityMatrix[i][j] = std::numeric_limits<double>::quiet_NaN();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
 };
 }  // namespace CruxQuant
