@@ -38,7 +38,8 @@ const int  MISSED_SCANS_ALLOWED = 1;                    // May need to make this
 const double ISOTOPE_TOLERANCE_PPM = 5.0;               // May need to make this a user input
 const bool INTEGRATE = false;                           // May need to make this a user input
 const double DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;   // May need to make this a user input
-const bool QUANTIFY_AMBIGUOUS_PEPTIDES = false;           // May need to make this a user input
+const bool QUANTIFY_AMBIGUOUS_PEPTIDES = false;         // May need to make this a user input
+const bool USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;    // May need to make this a user input
 
 string calcFormula(string seq);
 

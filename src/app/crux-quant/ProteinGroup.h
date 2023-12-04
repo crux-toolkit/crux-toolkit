@@ -1,32 +1,47 @@
 #pragma once
 
 #include <string>
-
+#include <unordered_map>
+#include "SpectraFileInfo.h"
 
 using std::string;
 
-namespace CruxQuant{
-    class ProteinGroup{
-        public:
-            string ProteinGroupName;
-            ProteinGroup() = default;
-            ProteinGroup(const std::string& groupName) : ProteinGroupName(groupName) {}
+namespace CruxQuant {
 
-            int GetHashCode() const{
-                return std::hash<string>()(ProteinGroupName);
-            };
+class ProteinGroup {
+   private:
+    std::unordered_map<SpectraFileInfo, double> Intensities;
 
-            bool operator==(const ProteinGroup& other) const{
-                return ProteinGroupName == other.ProteinGroupName;
-            };
+   public:
+    string ProteinGroupName;
+    ProteinGroup() = default;
+    ProteinGroup(const std::string& groupName) : ProteinGroupName(groupName) {}
+
+    int GetHashCode() const {
+        return std::hash<string>()(ProteinGroupName);
     };
-}
 
-namespace std{
-    template<>
-    struct hash<CruxQuant::ProteinGroup>{
-        size_t operator()(const CruxQuant::ProteinGroup& proteinGroup) const{
-            return proteinGroup.GetHashCode();
+    bool operator==(const ProteinGroup& other) const {
+        return ProteinGroupName == other.ProteinGroupName;
+    };
+    void SetIntensity(SpectraFileInfo fileInfo, double intensity) {
+        auto it = Intensities.find(fileInfo);
+        if (it != Intensities.end()) {
+            // fileInfo exists in the map
+            it->second = intensity;
+        } else {
+            // fileInfo doesn't exist in the map
+            Intensities[fileInfo] = intensity;
         }
-    };
-}
+    }
+};
+}  // namespace CruxQuant
+
+namespace std {
+template <>
+struct hash<CruxQuant::ProteinGroup> {
+    size_t operator()(const CruxQuant::ProteinGroup& proteinGroup) const {
+        return proteinGroup.GetHashCode();
+    }
+};
+}  // namespace std

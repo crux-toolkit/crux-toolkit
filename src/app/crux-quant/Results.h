@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "SpectraFileInfo.h"
 #include "ChromatographicPeak.h"
 #include "Peptide.h"
 #include "ProteinGroup.h"
@@ -19,18 +20,6 @@ using std::string;
 using std::vector;
 
 namespace CruxQuant {
-
-struct SpectraFileInfo {
-    int BiologicalReplicate;
-    int Fraction;
-    string Condition;
-    string FullFilePathWithExtension;
-
-    bool operator<(const SpectraFileInfo& other) const{
-        return std::tie(BiologicalReplicate, Fraction, Condition, FullFilePathWithExtension) < std::tie(other.BiologicalReplicate, other.Fraction, other.Condition, other.FullFilePathWithExtension);
-    
-    }
-};
 
 class CruxLFQResults {
    public:
@@ -312,8 +301,39 @@ class CruxLFQResults {
         }
     }
 
-    void calculateProteinResultsMedianPolish(bool useSharedPeptidesForProteinQuant){
+    void calculateProteinResultsMedianPolish(bool useSharedPeptides) {
+        // Reset protein intensities to 0
+        for (auto &proteinGroup : ProteinGroups) {
+            for (const auto &file : spectraFiles) {
+                proteinGroup.second.SetIntensity(file, 0);
+            }
+        }
 
+        vector<Peptides> peptides;
+        for (auto &item : PeptideModifiedSequences) {
+            if(item.second.UnambiguousPeptideQuant()){
+                peptides.push_back(item.second);
+            }
+        }
+
+        std::unordered_map<ProteinGroup, vector<Peptides>> proteinGroupToPeptides;
+
+        for (Peptides& peptide : peptides) {
+            if (!peptide.getUseForProteinQuant() || (peptide.getProteinGroups().size() > 1 && !useSharedPeptides)) {
+                continue;
+            }
+
+            for (ProteinGroup pg : peptide.getProteinGroups()) {
+                auto it = proteinGroupToPeptides.find(pg);
+                if (it != proteinGroupToPeptides.end()) {
+                    // ProteinGroup found, add the peptide to the existing list
+                    it->second.push_back(peptide);
+                } else {
+                    // ProteinGroup not found, create a new entry
+                    proteinGroupToPeptides[pg] = {peptide};
+                }
+            }
+        }
     }
 };
 }  // namespace CruxQuant
