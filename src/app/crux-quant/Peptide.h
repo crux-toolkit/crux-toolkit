@@ -103,5 +103,9 @@ class Peptides {
     std::unordered_set<ProteinGroup> getProteinGroups() {
         return this->proteinGroups;
     }
+
+    bool operator==(const Peptides& other) const {
+        return this->sequence == other.sequence;
+    }
 };
 }  // namespace CruxQuant
