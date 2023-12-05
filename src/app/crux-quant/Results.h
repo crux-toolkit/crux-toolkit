@@ -13,6 +13,7 @@
 #include "ProteinGroup.h"
 #include "SpectraFileInfo.h"
 #include "Utils.h"
+#include "CQStatistics.h"
 #include "io/carp.h"
 
 using std::map;
@@ -339,9 +340,15 @@ class CruxLFQResults {
         for (const auto &file : spectraFiles) {
             filesGroupedByCondition[file.Condition].push_back(file);
         }
+        std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
+        for (const auto &group : filesGroupedByCondition) {
+            for (const auto &file : group.second) {
+                groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
+            }
+        }
         // quantify each protein
-        for (const auto &proteinGroupPair : ProteinGroups) {
-            const ProteinGroup &proteinGroup = proteinGroupPair.second;
+        for (auto &proteinGroupPair : ProteinGroups) {
+            ProteinGroup &proteinGroup = proteinGroupPair.second;
 
             auto it = proteinGroupToPeptides.find(proteinGroup);
             if (it != proteinGroupToPeptides.end()) {
@@ -359,10 +366,6 @@ class CruxLFQResults {
                 // if a value is missing, it will be filled with NaN
                 int sampleN = 0;
                 for (const auto &group : filesGroupedByCondition) {
-                    std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
-                    for (const auto &file : group.second) {
-                        groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
-                    }
                     for (const auto &sample : groupedByBiologicalReplicate) {
                         for (Peptides &peptide : it->second) {
                             double sampleIntensity = 0;
@@ -432,8 +435,174 @@ class CruxLFQResults {
                         }
                     }
                 }
+
+                // do median polish protein quantification
+                // row effects in a protein can be considered ~ relative ionization efficiency
+                // column effects are differences between conditions
+                MedianPolish(peptideIntensityMatrix);
+
+                double overallEffect = peptideIntensityMatrix[0][0];
+                std::vector<double> columnEffects(peptideIntensityMatrix[0].begin() + 1, peptideIntensityMatrix[0].end());
+                auto peptidesForThisProtein = it->second;
+                double referenceProteinIntensity = std::pow(2, overallEffect) * peptidesForThisProtein.size();
+
+                // check for unquantifiable proteins; these are proteins w/ quantified peptides, but
+                // the protein is still not quantifiable because there are not peptides to compare across runs
+
+                std::vector<std::string> possibleUnquantifiableSample;
+                sampleN = 0;
+                for (auto &group : filesGroupedByCondition) {
+                    for (auto &sample : groupedByBiologicalReplicate) {
+                        bool isMissingValue = true;
+                        for (SpectraFileInfo spectraFile : sample.second) {
+                            if (std::any_of(
+                                    peptidesForThisProtein.begin(),
+                                    peptidesForThisProtein.end(),
+                                    [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                isMissingValue = false;
+                                break;
+                            }
+                        }
+
+                        if (!isMissingValue && columnEffects[sampleN] == 0) {
+                            possibleUnquantifiableSample.push_back(group.first + "_" + std::to_string(sample.first));
+                        }
+
+                        sampleN++;
+                    }
+                }
+                // set the sample protein intensities
+
+                sampleN = 0;
+                for (auto &group : filesGroupedByCondition)  
+                {
+                    for (auto &sample : groupedByBiologicalReplicate)
+                    {
+                        // this step un-logs the protein "intensity". in reality this value is more like a fold-change
+                        // than an intensity, but unlike a fold-change it's not relative to a particular sample.
+                        // by multiplying this value by the reference protein intensity calculated earlier, then we get
+                        // a protein intensity value
+                        double columnEffect = columnEffects[sampleN];
+                        double sampleProteinIntensity = std::pow(2, columnEffect) * referenceProteinIntensity;
+
+                        // the column effect can be 0 in some cases. sometimes it's a valid value and sometimes it's not.
+                        // so we need to check to see if it is actually a valid value
+                        bool isMissingValue = true;
+
+                        for (SpectraFileInfo spectraFile : sample.second) {
+                            if (std::any_of(
+                                peptidesForThisProtein.begin(), 
+                                peptidesForThisProtein.end(), [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                isMissingValue = false;
+                                break;
+                            }
+                        }
+
+                        if (!isMissingValue) {
+                            if (possibleUnquantifiableSample.size() > 1 && std::find(possibleUnquantifiableSample.begin(), possibleUnquantifiableSample.end(), group.first + "_" + std::to_string(sample.first)) != possibleUnquantifiableSample.end()) {
+                                proteinGroup.SetIntensity(sample.second.front(), std::numeric_limits<double>::quiet_NaN());
+                            } else {
+                                proteinGroup.SetIntensity(sample.second.front(), sampleProteinIntensity);
+                            }
+                        }
+
+                        sampleN++;
+                    }
+                }
             }
         }
     };
+
+    void MedianPolish(std::vector<vector<double>> &table, int maxIterations = 10, double improvementCutoff = 0.0001) {
+        // technically, this is weighted mean polish and not median polish.
+        // but it should give similar results while being more robust to issues
+        // arising from missing values.
+        // the weights are inverse square difference to median.
+
+        // subtract overall effect
+        std::vector<double> allValues;
+        for (const auto &row : table) {
+            for (const auto &cell : row) {
+                if (!std::isnan(cell) && cell != 0) {
+                    allValues.push_back(cell);
+                }
+            }
+        }
+
+        if (!allValues.empty()) {
+            double overallEffect = Median(allValues);
+            table[0][0] += overallEffect;
+            for (size_t r = 1; r < table.size(); r++) {
+                for (size_t c = 1; c < table[0].size(); c++) {
+                    table[r][c] -= overallEffect;
+                }
+            }
+        }
+
+        double sumAbsoluteResiduals = std::numeric_limits<double>::max();
+
+        for (int i = 0; i < maxIterations; i++) {
+            // subtract row effects
+            for (size_t r = 0; r < table.size(); r++) {
+                std::vector<double> rowValues(table[r].begin() + 1, table[r].end());
+                rowValues.erase(std::remove_if(rowValues.begin(), rowValues.end(), [](double p) { return std::isnan(p); }), rowValues.end());
+
+                if (!rowValues.empty()) {
+                    double rowMedian = Median(rowValues);
+                    std::vector<double> weights;
+                    for (auto &p : rowValues) {
+                        weights.push_back(1.0 / std::max(0.0001, std::pow(p - rowMedian, 2)));
+                    }
+                    double rowEffect = std::inner_product(rowValues.begin(), rowValues.end(), weights.begin(), 0.0) / std::accumulate(weights.begin(), weights.end(), 0.0);
+                    table[r][0] += rowEffect;
+
+                    for (size_t c = 1; c < table[0].size(); c++) {
+                        table[r][c] -= rowEffect;
+                    }
+                }
+            }
+
+            // subtract column effects
+            for (size_t c = 0; c < table[0].size(); c++) {
+                std::vector<double> colValues;
+                for (size_t r = 1; r < table.size(); r++) {
+                    if (!std::isnan(table[r][c])) {
+                        colValues.push_back(table[r][c]);
+                    }
+                }
+
+                if (!colValues.empty()) {
+                    double colMedian = Median(colValues);
+                    std::vector<double> weights;
+                    for (auto &p : colValues) {
+                        weights.push_back(1.0 / std::max(0.0001, std::pow(p - colMedian, 2)));
+                    }
+                    double colEffect = std::inner_product(colValues.begin(), colValues.end(), weights.begin(), 0.0) / std::accumulate(weights.begin(), weights.end(), 0.0);
+                    table[0][c] += colEffect;
+
+                    for (size_t r = 1; r < table.size(); r++) {
+                        table[r][c] -= colEffect;
+                    }
+                }
+            }
+
+            // calculate sum of absolute residuals and end the algorithm if it is not improving
+            double iterationSumAbsoluteResiduals = 0.0;
+            for (size_t r = 1; r < table.size(); r++) {
+                for (size_t c = 1; c < table[r].size(); c++) {
+                    if (!std::isnan(table[r][c])) {
+                        iterationSumAbsoluteResiduals += std::abs(table[r][c]);
+                    }
+                }
+            }
+
+            if (std::abs((iterationSumAbsoluteResiduals - sumAbsoluteResiduals) / sumAbsoluteResiduals) < improvementCutoff) {
+                break;
+            }
+
+            sumAbsoluteResiduals = iterationSumAbsoluteResiduals;
+        }
+    }
 };
+
 }  // namespace CruxQuant

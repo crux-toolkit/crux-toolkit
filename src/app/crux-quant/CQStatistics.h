@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace CruxQuant {
-double Pearson(const std::vector<double>& dataA, const std::vector<double>& dataB) {
+inline double Pearson(const std::vector<double>& dataA, const std::vector<double>& dataB) {
     int n = 0;
     double r = 0.0;
 
@@ -37,5 +37,17 @@ double Pearson(const std::vector<double>& dataA, const std::vector<double>& data
     }
 
     return r / std::sqrt(varA * varB);
+}
+
+inline double Median(const std::vector<double>& data) {
+    std::vector<double> sortedData = data;
+    std::sort(sortedData.begin(), sortedData.end());
+
+    size_t size = sortedData.size();
+    if (size % 2 == 0) {
+        return (sortedData[size / 2 - 1] + sortedData[size / 2]) / 2;
+    } else {
+        return sortedData[size / 2];
+    }
 }
 }  // namespace CruxQuant
