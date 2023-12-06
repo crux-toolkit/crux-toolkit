@@ -47,16 +47,19 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
     map<int, CruxQuant::PSM> psm_datum = CruxQuant::create_psm_map(psm_file);
     CruxQuant::CruxLFQResults lfqResults(spec_files);
 
+    vector<CruxQuant::Identification> allIdentifications;
+    for (const string& spectra_file : spec_files) {
+        SpectrumListPtr spectra_ms2 = loadSpectra(spectra_file, 2);
+        carp(CARP_INFO, "Read %d spectra. for MS2 from %s", spectra_ms2->size(), spectra_file.c_str());
+        vector<CruxQuant::Identification> tempIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
+        allIdentifications.insert(allIdentifications.end(), tempIdentifications.begin(), tempIdentifications.end());
+    }
+
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
-        SpectrumListPtr spectra_ms2 = loadSpectra(spectra_file, 2);
-
-        carp(CARP_INFO, "Read %d spectra. for MS1", spectra_ms1->size());
-        carp(CARP_INFO, "Read %d spectra. for MS2", spectra_ms2->size());
+        carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->size(), spectra_file.c_str());
 
         CruxQuant::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
-
-        vector<CruxQuant::Identification> allIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
@@ -74,10 +77,11 @@ int CruxQuantApplication::main(const string& psm_file, const vector<string>& spe
        
         CruxQuant::runErrorChecking(spectra_file, lfqResults);
         // For now this happens in the forloop, but it should be moved out of the forloop based on FlashLFQ Code
-        if(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES){
-            lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
-        }
         
+    }
+
+    if(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES){
+        lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
     }
     lfqResults.calculatePeptideResults(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES);
     lfqResults.calculateProteinResultsMedianPolish(CruxQuant::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
@@ -105,7 +109,7 @@ string CruxQuantApplication::getDescription() const {
 vector<string> CruxQuantApplication::getArgs() const {
     string arr[] = {
         "lfq-peptide-spectrum matches",
-        "spectrum files"};
+        "spectrum files+"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 

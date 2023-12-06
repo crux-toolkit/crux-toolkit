@@ -41,17 +41,34 @@ map<int, PSM> create_psm_map(const string& psm_file) {
     int scan_col, charge_col;
     double peptide_mass_col, spectrum_precursor_mz_col;
 
-    matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence", "modifications");
-
-    while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col, modifications_col)) {
-        PSM psm = {
-            sequence_col,
-            scan_col,
-            charge_col,
-            peptide_mass_col,
-            spectrum_precursor_mz_col,
-            modifications_col};
-        psm_datum[scan_col] = psm;
+    // Check if the header exists
+    if (matchFileReader.has_column("modifications")) {
+        matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence", "modifications");
+        while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col, modifications_col)) {
+            PSM psm = {
+                sequence_col,
+                scan_col,
+                charge_col,
+                peptide_mass_col,
+                spectrum_precursor_mz_col,
+                modifications_col};
+            psm_datum[scan_col] = psm;
+        }
+    } else {
+        // If the header does not exist, set a default value for modifications_col
+        io::CSVReader<5, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>> matchFileReader(psm_file);
+        matchFileReader.read_header(io::ignore_extra_column, "scan", "charge", "spectrum precursor m/z", "peptide mass", "sequence");
+        string default_modifications_col = "";
+        while (matchFileReader.read_row(scan_col, charge_col, spectrum_precursor_mz_col, peptide_mass_col, sequence_col)) {
+            PSM psm = {
+                sequence_col,
+                scan_col,
+                charge_col,
+                peptide_mass_col,
+                spectrum_precursor_mz_col,
+                default_modifications_col};
+            psm_datum[scan_col] = psm;
+        }
     }
 
     return psm_datum;
@@ -528,7 +545,7 @@ IndexedMassSpectralPeak* getIndexedPeak(double theorMass, int zeroBasedScanIndex
     int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
 
     for (int j = floorMz; j <= ceilingMz; j++) {
-        if (j < indexedPeaks.size() && indexedPeaks[j].size() > 0){
+        if (j < indexedPeaks.size() && indexedPeaks[j].size() > 0) {
             map<int, IndexedMassSpectralPeak> bin = indexedPeaks[j];
             auto startIterator = bin.find(zeroBasedScanIndex);
             for (auto it = startIterator; it != bin.end(); ++it) {
@@ -903,8 +920,7 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
             [](const ChromatographicPeak& p) {
                 return &p == nullptr || (p.isMbrPeak && p.isotopicEnvelopes.empty());
             }),
-        lfqResults.Peaks[spectraFile].end()
-    );
+        lfqResults.Peaks[spectraFile].end());
 
     // merge duplicate peaks and handle MBR/MSMS peakfinding conflicts
     unordered_map<IndexedMassSpectralPeak, ChromatographicPeak> errorCheckedPeaksGroupedByApex;
@@ -920,7 +936,7 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
     for (ChromatographicPeak& tryPeak : lfqResults.Peaks[spectraFile]) {
         tryPeak.calculateIntensityForThisFeature(INTEGRATE);
         tryPeak.resolveIdentifications();
-        
+
         IsotopicEnvelope emptyStruct = {};
 
         if (memcmp(&tryPeak.apex, &emptyStruct, sizeof(IsotopicEnvelope)) == 0) {
@@ -931,7 +947,7 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
             continue;
         }
 
-        IndexedMassSpectralPeak apexImsPeak =  tryPeak.apex.indexedPeak;
+        IndexedMassSpectralPeak apexImsPeak = tryPeak.apex.indexedPeak;
         auto it = errorCheckedPeaksGroupedByApex.find(apexImsPeak);
         if (it != errorCheckedPeaksGroupedByApex.end()) {
             ChromatographicPeak storedPeak = it->second;
