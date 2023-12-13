@@ -13,6 +13,7 @@
 #include "PpmTolerance.h"
 #include "ProteinGroup.h"
 #include "io/carp.h"
+#include "util/Params.h"
 
 
 using std::map;
@@ -30,16 +31,22 @@ const int BINS_PER_DALTON = 100;
 const double PROTONMASS = 1.007276466879;
 const double C13MinusC12 = 1.00335483810;
 
-const int NUM_ISOTOPES_REQUIRED = 2;                    // May need to make this a user input
-const double PEAK_FINDING_PPM_TOLERANCE = 20.0;         // May need to make this a user input
-const double PPM_TOLERANCE = 10.0;                      // May need to make this a user input
-const bool ID_SPECIFIC_CHARGE_STATE = false;            // May need to make this a user input
-const int  MISSED_SCANS_ALLOWED = 1;                    // May need to make this a user input
-const double ISOTOPE_TOLERANCE_PPM = 5.0;               // May need to make this a user input
-const bool INTEGRATE = false;                           // May need to make this a user input
-const double DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;   // May need to make this a user input
-const bool QUANTIFY_AMBIGUOUS_PEPTIDES = false;         // May need to make this a user input
-const bool USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;    // May need to make this a user input
+extern int NUM_ISOTOPES_REQUIRED;                    // Default value is 2
+extern double PEAK_FINDING_PPM_TOLERANCE;         // Default value is 20.0
+extern double PPM_TOLERANCE;                      // Default value is 10.0
+extern bool ID_SPECIFIC_CHARGE_STATE;            // Default value is false
+extern int  MISSED_SCANS_ALLOWED;                    // Default value is 1
+extern double ISOTOPE_TOLERANCE_PPM;               // Default value is 5.0
+extern bool INTEGRATE;                           // Default value is false
+extern double DISCRIMINATION_FACTOR_TO_CUT_PEAK;   // Default value is 0.6
+extern bool QUANTIFY_AMBIGUOUS_PEPTIDES;         // Default value is false
+extern bool USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT;    // Default value is false
+extern bool NORMALIZE;                          // Default value is false
+// MBR settings
+extern bool MATCH_BETWEEN_RUNS; // Default value is false
+extern double MATCH_BETWEEN_RUNS_PPM_TOLERANCE; // Default value is 10.0
+extern double MAX_MBR_WINDOW; // Default value is 2.5
+extern bool REQUIRE_MSMS_ID_IN_CONDITION; // Default value is false
 
 string calcFormula(string seq);
 
@@ -70,8 +77,8 @@ struct Identification {
             && spectralFile == other.spectralFile
             && ms2RetentionTimeInMinutes == other.ms2RetentionTimeInMinutes
             && scanId == other.scanId
-            && modifications == other.modifications
-            && posteriorErrorProbability == other.posteriorErrorProbability;
+            && modifications == other.modifications;
+            // && posteriorErrorProbability == other.posteriorErrorProbability;
     }
 };
 
@@ -241,3 +248,31 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime, unordered_map
 void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults);
 
 }  // namespace CruxQuant
+
+namespace std {
+    template <>
+    struct hash<CruxQuant::Identification>{
+        size_t operator()(const CruxQuant::Identification& id) const {
+            return 
+                hash<string>()(id.sequence) ^ 
+                hash<int>()(id.charge) ^ 
+                hash<double>()(id.peptideMass) ^
+                hash<double>()(id.monoIsotopicMass) ^
+                hash<double>()(id.peakFindingMass) ^
+                hash<double>()(id.precursorCharge) ^
+                hash<string>()(id.spectralFile) ^
+                hash<double>()(id.ms2RetentionTimeInMinutes) ^
+                hash<int>()(id.scanId) ^
+                hash<string>()(id.modifications);
+        }
+    };
+
+    template<>
+    struct equal_to<CruxQuant::Identification> {
+        bool operator()(const CruxQuant::Identification& id1, const CruxQuant::Identification& id2) const {
+            // Compare id1 and id2 for equality
+            // This uses the operator== that is already defined
+            return id1 == id2;
+        }
+    };
+}

@@ -12,9 +12,10 @@ struct SpectraFileInfo {
     int Fraction;
     string Condition;
     string FullFilePathWithExtension;
+    int TechnicalReplicate;
 
     bool operator<(const SpectraFileInfo &other) const {
-        return std::tie(BiologicalReplicate, Fraction, Condition, FullFilePathWithExtension) < std::tie(other.BiologicalReplicate, other.Fraction, other.Condition, other.FullFilePathWithExtension);
+        return std::tie(BiologicalReplicate, Fraction, Condition, FullFilePathWithExtension, TechnicalReplicate) < std::tie(other.BiologicalReplicate, other.Fraction, other.Condition, other.FullFilePathWithExtension, TechnicalReplicate);
     }
     bool operator==(const SpectraFileInfo &other) const {
         return FullFilePathWithExtension == other.FullFilePathWithExtension;
