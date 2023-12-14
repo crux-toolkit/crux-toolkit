@@ -121,7 +121,7 @@ add_dependencies(tide-support ProteoWizard)
 add_dependencies(tide-support protobuf-3.19.4)
 add_dependencies(crux-lfq-support MSToolkit)
 add_dependencies(crux-lfq-support protobuf-3.19.4)
-add_dependencies(crux_test crux-lfq-support)
+add_dependencies(crux_lfq_test crux-lfq-support)
 add_dependencies(crux crux-lfq-support)
 
 # build a CPack driven installer package
