@@ -2146,6 +2146,72 @@ InitStringParam("protein-name-separator", ",",
     "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
 
+   // crux-lfq
+
+  InitArgParam("lfq-peptide-spectrum matches", 
+    "A file in mzTab or Percolator tab-delimited format listing peptide-spectrum matches.");
+
+  InitArgParam("spectrum files", 
+    "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
+
+  InitStringParam("lfq-score", "none", "Name of the score to be used in selecting PSMs.  Default = none (i.e., include all PSMs). "
+    "Note that if no score is specified and multiple scores per PSM are included, the program will terminate with an error.",
+    "", true);
+
+  // convert to double
+  InitStringParam("lfq-threshold", "no threshold", "Compute quants only for peptides with scores greater than the specified threshold.  Default = no threshold",
+    "", true);
+
+  InitBoolParam("smaller-is-better", false,
+    "Indicate whether a larger score (F) or a smaller score (T) is considered better.  Default = F.",
+     "", true);
+
+  InitIntParam("num-isotopes-required", 2, 1, 100000000,
+    "The number of isotopic peaks required to be present in the spectrum for a peptide to be considered.  Default = 2.",
+    "", true);
+  InitDoubleParam("peak-finding-ppm-tolerance", 20.0, 1.0, 100000000,
+    "The tolerance (in ppm) used to find isotopic peaks.  Default = 20.0.",
+    "", true);
+  InitDoubleParam("ppm-tolerance", 10.0, 1.0, 100000000,
+    "The tolerance (in ppm).  Default = 10.0.",
+    "", true);
+  InitBoolParam("id-specific-charge-state", false,
+    "Indicate whether to use the charge state of the peptide-spectrum match (T) or the charge state of the peptide (F) when computing the theoretical m/z values.  Default = F.",
+    "", true);
+  InitIntParam("missed-scans-allowed", 1, 1, 100000000,
+    "The number of scans allowed to be missing between the scans containing the isotopic peaks.  Default = 1.",
+    "", true);
+  InitDoubleParam("isotope-tolerance-ppm", 5.0, 1.0, 100000000,
+    "The tolerance (in ppm) used to determine whether two peaks are isotopic.  Default = 5.0.",
+    "", true);
+  InitBoolParam("integrate", false,
+    "Indicate whether to integrate the area under the curve (T) or use the maximum intensity (F) when computing the intensity of the isotopic peaks.  Default = F.",
+    "", true);
+  InitDoubleParam("discrimination-factor-to-cut-peak", 0.6, 0.0, 100000000,
+    "The factor by which the intensity of the isotopic peak must be greater than the intensity of the next highest peak in order to be considered a true peak.  Default = 6.0.",
+    "", true);
+  InitBoolParam("quantify-ambiguous-peptides", false,
+    "Indicate whether to quantify peptides that are not unique to a single protein (T) or not (F).  Default = F.",
+    "", true);
+  InitBoolParam("use-shared-peptides-for-protein-quant", false,
+    "Indicate whether to use peptides that are shared between proteins when quantifying proteins (T) or not (F).  Default = F.",
+    "", true);
+  InitBoolParam("normalize", false,
+    "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
+    "", true);
+  InitBoolParam("match-between-runs", false,
+    "Indicate whether to match peptides between runs (T) or not (F).  Default = F.",
+    "", true);
+  InitDoubleParam("match-between-runs-ppm-tolerance", 10.0, 1.0, 100000000,
+    "The tolerance (in ppm) used to match peptides between runs.  Default = 10.0.",
+    "", true);
+  InitDoubleParam("max-mbr-window", 2.5, 1.0, 100000000,
+    "The maximum number of minutes to search for a peptide in a different run.  Default = 2.5.",
+    "", true);
+  InitBoolParam("require-msms-id-in-condition", false,
+    "Indicate whether to require that a peptide be identified by MS/MS in at least one condition (T) or not (F).  Default = F.",
+    "", true);
+
   Categorize();
 }
 
@@ -2505,6 +2571,28 @@ void Params::Categorize() {
   items.insert("export_pepXML");
   items.insert("export_mzID");
   AddCategory("Input and output", items);
+
+  // crux-lfq
+  items.clear();
+  items.insert("lfq-score");
+  items.insert("lfq-threshold");
+  items.insert("smaller-is-better");
+  items.insert("num-isotopes-required");
+  items.insert("peak-finding-ppm-tolerance");
+  items.insert("ppm-tolerance");
+  items.insert("id-specific-charge-state");
+  items.insert("missed-scans-allowed");
+  items.insert("isotope-tolerance-ppm");
+  items.insert("integrate");
+  items.insert("discrimination-factor-to-cut-peak");
+  items.insert("quantify-ambiguous-peptides");
+  items.insert("use-shared-peptides-for-protein-quant");
+  items.insert("normalize");
+  items.insert("match-between-runs");
+  items.insert("match-between-runs-ppm-tolerance");
+  items.insert("max-mbr-window");
+  items.insert("require-msms-id-in-condition");
+  AddCategory("crux-lfq", items);
 
 }
 

@@ -6,11 +6,13 @@ use_cxx11()
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/tide)
+add_subdirectory(app/crux-lfq)
 
 include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
+include_directories(${CMAKE_SOURCE_DIR}/src/app/crux-lfq)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
@@ -29,6 +31,8 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/crux-lfq/protoobj)
+
 if (WIN32 AND NOT Cygwin)
   # Needed to put DLL containing type libraries
   # in include path for Windows
@@ -187,6 +191,7 @@ set (
   io/DIAmeterCVSelector.cpp
   app/DIAmeterApplication.cpp
   util/utils.cpp
+  app/CruxLFQApplication.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -423,6 +428,7 @@ if (WIN32 AND NOT CYGWIN)
     hardklor
     cometsearch
     kojaksearch
+    crux-lfq-support
     neopepxmlparser.lib
     perclibrary
     blas
@@ -453,6 +459,7 @@ else()
     tide-support
     cometsearch
     kojaksearch
+    crux-lfq-support
     libneopepxmlparser.a
     gflags
     bullseye
