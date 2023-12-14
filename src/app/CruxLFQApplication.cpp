@@ -30,22 +30,22 @@ using pwiz::msdata::SpectrumPtr;
 
 typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
-int CruxQuant::NUM_ISOTOPES_REQUIRED = 2;                       // Default value is 2
-double CruxQuant::PEAK_FINDING_PPM_TOLERANCE = 20.0;            // Default value is 20.0
-double CruxQuant::PPM_TOLERANCE = 10.0;                         // Default value is 10.0
-bool CruxQuant::ID_SPECIFIC_CHARGE_STATE = false;               // Default value is false
-int CruxQuant::MISSED_SCANS_ALLOWED = 1;                        // Default value is 1
-double CruxQuant::ISOTOPE_TOLERANCE_PPM = 5.0;                  // Default value is 5.0
-bool CruxQuant::INTEGRATE = false;                              // Default value is false
-double CruxQuant::DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;      // Default value is 0.6
-bool CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES = false;            // Default value is false
-bool CruxQuant::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;  // Default value is false
-bool CruxQuant::NORMALIZE = false;                              // Default value is false
+int CruxLFQ::NUM_ISOTOPES_REQUIRED = 2;                       // Default value is 2
+double CruxLFQ::PEAK_FINDING_PPM_TOLERANCE = 20.0;            // Default value is 20.0
+double CruxLFQ::PPM_TOLERANCE = 10.0;                         // Default value is 10.0
+bool CruxLFQ::ID_SPECIFIC_CHARGE_STATE = false;               // Default value is false
+int CruxLFQ::MISSED_SCANS_ALLOWED = 1;                        // Default value is 1
+double CruxLFQ::ISOTOPE_TOLERANCE_PPM = 5.0;                  // Default value is 5.0
+bool CruxLFQ::INTEGRATE = false;                              // Default value is false
+double CruxLFQ::DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;      // Default value is 0.6
+bool CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = false;            // Default value is false
+bool CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;  // Default value is false
+bool CruxLFQ::NORMALIZE = false;                              // Default value is false
 // MBR settings
-bool CruxQuant::MATCH_BETWEEN_RUNS = false;                 // Default value is false
-double CruxQuant::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = 10.0;  // Default value is 10.0
-double CruxQuant::MAX_MBR_WINDOW = 2.5;                     // Default value is 2.5
-bool CruxQuant::REQUIRE_MSMS_ID_IN_CONDITION = false;       // Default value is false
+bool CruxLFQ::MATCH_BETWEEN_RUNS = false;                 // Default value is false
+double CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = 10.0;  // Default value is 10.0
+double CruxLFQ::MAX_MBR_WINDOW = 2.5;                     // Default value is 2.5
+bool CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = false;       // Default value is false
 
 CruxLFQApplication::CruxLFQApplication() {}
 
@@ -60,37 +60,37 @@ int CruxLFQApplication::main(int argc, char** argv) {
 int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_files) {
     carp(CARP_INFO, "Running crux-lfq...");
 
-    CruxQuant::NUM_ISOTOPES_REQUIRED = Params::GetInt("num-isotopes-required");                                   // Default value is 2
-    CruxQuant::PEAK_FINDING_PPM_TOLERANCE = Params::GetDouble("peak-finding-ppm-tolerance");                      // Default value is 20.0
-    CruxQuant::PPM_TOLERANCE = Params::GetDouble("ppm-tolerance");                                                // Default value is 10.0
-    CruxQuant::ID_SPECIFIC_CHARGE_STATE = Params::GetBool("id-specific-charge-state");                            // Default value is false
-    CruxQuant::MISSED_SCANS_ALLOWED = Params::GetInt("missed-scans-allowed");                                     // Default value is 1
-    CruxQuant::ISOTOPE_TOLERANCE_PPM = Params::GetDouble("isotope-tolerance-ppm");                                // Default value is 5.0
-    CruxQuant::INTEGRATE = Params::GetBool("integrate");                                                          // Default value is false
-    CruxQuant::DISCRIMINATION_FACTOR_TO_CUT_PEAK = Params::GetDouble("discrimination-factor-to-cut-peak");        // Default value is 0.6
-    CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES = Params::GetBool("quantify-ambiguous-peptides");                      // Default value is false
-    CruxQuant::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = Params::GetBool("use-shared-peptides-for-protein-quant");  // Default value is false
-    CruxQuant::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
+    CruxLFQ::NUM_ISOTOPES_REQUIRED = Params::GetInt("num-isotopes-required");                                   // Default value is 2
+    CruxLFQ::PEAK_FINDING_PPM_TOLERANCE = Params::GetDouble("peak-finding-ppm-tolerance");                      // Default value is 20.0
+    CruxLFQ::PPM_TOLERANCE = Params::GetDouble("ppm-tolerance");                                                // Default value is 10.0
+    CruxLFQ::ID_SPECIFIC_CHARGE_STATE = Params::GetBool("id-specific-charge-state");                            // Default value is false
+    CruxLFQ::MISSED_SCANS_ALLOWED = Params::GetInt("missed-scans-allowed");                                     // Default value is 1
+    CruxLFQ::ISOTOPE_TOLERANCE_PPM = Params::GetDouble("isotope-tolerance-ppm");                                // Default value is 5.0
+    CruxLFQ::INTEGRATE = Params::GetBool("integrate");                                                          // Default value is false
+    CruxLFQ::DISCRIMINATION_FACTOR_TO_CUT_PEAK = Params::GetDouble("discrimination-factor-to-cut-peak");        // Default value is 0.6
+    CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = Params::GetBool("quantify-ambiguous-peptides");                      // Default value is false
+    CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = Params::GetBool("use-shared-peptides-for-protein-quant");  // Default value is false
+    CruxLFQ::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
     // MBR settings
-    CruxQuant::MATCH_BETWEEN_RUNS = Params::GetBool("match-between-runs");                                // Default value is false
-    CruxQuant::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = Params::GetDouble("match-between-runs-ppm-tolerance");  // Default value is 10.0
-    CruxQuant::MAX_MBR_WINDOW = Params::GetDouble("max-mbr-window");                                      // Default value is 2.5
-    CruxQuant::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
+    CruxLFQ::MATCH_BETWEEN_RUNS = Params::GetBool("match-between-runs");                                // Default value is false
+    CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = Params::GetDouble("match-between-runs-ppm-tolerance");  // Default value is 10.0
+    CruxLFQ::MAX_MBR_WINDOW = Params::GetDouble("max-mbr-window");                                      // Default value is 2.5
+    CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
 
     string output_dir = Params::GetString("output-dir");
 
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
-    map<int, CruxQuant::PSM> psm_datum = CruxQuant::create_psm_map(psm_file);
-    CruxQuant::CruxLFQResults lfqResults(spec_files);
+    map<int, CruxLFQ::PSM> psm_datum = CruxLFQ::create_psm_map(psm_file);
+    CruxLFQ::CruxLFQResults lfqResults(spec_files);
 
-    vector<CruxQuant::Identification> allIdentifications;
-    std::unordered_set<CruxQuant::Identification> uniqueIdentifications;
+    vector<CruxLFQ::Identification> allIdentifications;
+    std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms2 = loadSpectra(spectra_file, 2);
         carp(CARP_INFO, "Read %d spectra. for MS2 from %s", spectra_ms2->size(), spectra_file.c_str());
-        vector<CruxQuant::Identification> tempIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
+        vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
         for (auto& id : tempIdentifications) {
             uniqueIdentifications.insert(id);
         }
@@ -101,14 +101,14 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
         carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->size(), spectra_file.c_str());
 
-        CruxQuant::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
+        CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxQuant::calculateTheoreticalIsotopeDistributions(allIdentifications);
+        unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
-        CruxQuant::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
-        vector<double> chargeStates = CruxQuant::createChargeStates(allIdentifications);
+        CruxLFQ::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
+        vector<double> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
 
-        CruxQuant::quantifyMs2IdentifiedPeptides(
+        CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
             allIdentifications,
             chargeStates,
@@ -117,8 +117,8 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             modifiedSequenceToIsotopicDistribution,
             lfqResults);
 
-        if (CruxQuant::MATCH_BETWEEN_RUNS) {
-            crux_quant::IndexedSpectralResults proto_data;
+        if (CruxLFQ::MATCH_BETWEEN_RUNS) {
+            crux_lfq::IndexedSpectralResults proto_data;
 
             // Populate indexed_peaks
             for (const auto& outer_pair : indexResults._indexedPeaks) {
@@ -126,14 +126,14 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
                 const auto& inner_map = outer_pair.second;
 
                 // Get a mutable pointer to the InnerMap object associated with outer_key
-                crux_quant::InnerMap* proto_inner_map = &(*proto_data.mutable_indexed_peaks())[outer_key];
+                crux_lfq::InnerMap* proto_inner_map = &(*proto_data.mutable_indexed_peaks())[outer_key];
 
                 for (const auto& inner_pair : inner_map) {
                     int inner_key = inner_pair.first;
-                    const CruxQuant::IndexedMassSpectralPeak& peak = inner_pair.second;
+                    const CruxLFQ::IndexedMassSpectralPeak& peak = inner_pair.second;
 
                     // Get a mutable pointer to the IndexedMassSpectralPeak object associated with inner_key
-                    crux_quant::IndexedMassSpectralPeak* proto_peak = &(*proto_inner_map->mutable_inner_map())[inner_key];
+                    crux_lfq::IndexedMassSpectralPeak* proto_peak = &(*proto_inner_map->mutable_inner_map())[inner_key];
 
                     // Populate the fields
                     proto_peak->set_mz(peak.mz);
@@ -146,14 +146,14 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             // Populate ms1_scans
             for (const auto& entry : indexResults._ms1Scans) {
                 const std::string& key = entry.first;
-                const std::vector<CruxQuant::Ms1ScanInfo>& scan_info_vector = entry.second;
+                const std::vector<CruxLFQ::Ms1ScanInfo>& scan_info_vector = entry.second;
 
                 // Get a mutable pointer to the Ms1ScanInfoList object associated with key
-                crux_quant::Ms1ScanInfoList* proto_scan_info_list = &(*proto_data.mutable_ms1_scans())[key];
+                crux_lfq::Ms1ScanInfoList* proto_scan_info_list = &(*proto_data.mutable_ms1_scans())[key];
 
-                for (const CruxQuant::Ms1ScanInfo& scan_info : scan_info_vector) {
+                for (const CruxLFQ::Ms1ScanInfo& scan_info : scan_info_vector) {
                     // Add a new Ms1ScanInfo to the ms1_scan_info repeated field
-                    crux_quant::Ms1ScanInfo* proto_scan_info = proto_scan_info_list->add_ms1_scan_info();
+                    crux_lfq::Ms1ScanInfo* proto_scan_info = proto_scan_info_list->add_ms1_scan_info();
 
                     // Populate the fields
                     proto_scan_info->set_one_based_scan_number(scan_info.oneBasedScanNumber);
@@ -178,25 +178,25 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             }
         }
 
-        CruxQuant::runErrorChecking(spectra_file, lfqResults);
+        CruxLFQ::runErrorChecking(spectra_file, lfqResults);
 
         carp(CARP_INFO, "Finished processing %s", spectra_file.c_str());
     }
 
-    if(CruxQuant::NORMALIZE){
-        CruxQuant::IntensityNormalizationEngine intensityNormalizationEngine(
+    if(CruxLFQ::NORMALIZE){
+        CruxLFQ::IntensityNormalizationEngine intensityNormalizationEngine(
             lfqResults, 
-            CruxQuant::INTEGRATE,
-            CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES
+            CruxLFQ::INTEGRATE,
+            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES
         );
         intensityNormalizationEngine.NormalizeResults();
     }
 
-    if (CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES) {
+    if (CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES) {
         lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
     }
-    lfqResults.calculatePeptideResults(CruxQuant::QUANTIFY_AMBIGUOUS_PEPTIDES);
-    lfqResults.calculateProteinResultsMedianPolish(CruxQuant::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
+    lfqResults.calculatePeptideResults(CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
+    lfqResults.calculateProteinResultsMedianPolish(CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
     const std::string results_file = make_file_path("crux-lfq.txt");
     lfqResults.writeResults(results_file);
 
@@ -274,7 +274,7 @@ vector<pair<string, string>> CruxLFQApplication::getOutputs() const {
 }
 
 COMMAND_T CruxLFQApplication::getCommand() const {
-    return CRUX_QUANT_COMMAND;
+    return CRUX_LFQ_COMMAND;
 }
 
 bool CruxLFQApplication::needsOutputDirectory() const {

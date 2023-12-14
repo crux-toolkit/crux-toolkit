@@ -14,7 +14,7 @@
 
 using std::vector;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 enum class Transform {
     Linear,
@@ -394,14 +394,14 @@ class IntensityNormalizationEngine {
     bool quantifyAmbiguousPeptides;
 
     void NormalizeTechreps() {
-        std::vector<CruxQuant::Peptides> peptides;
+        std::vector<CruxLFQ::Peptides> peptides;
         peptides.reserve(results.PeptideModifiedSequences.size());
 
         std::transform(
             results.PeptideModifiedSequences.begin(),
             results.PeptideModifiedSequences.end(),
             std::back_inserter(peptides),
-            [](const std::pair<const std::string, CruxQuant::Peptides>& pair) {
+            [](const std::pair<const std::string, CruxLFQ::Peptides>& pair) {
                 return pair.second;
             });
 
@@ -475,13 +475,13 @@ class IntensityNormalizationEngine {
                 ->Fraction == 0) {
             return;
         }
-        vector<CruxQuant::Peptides> peptides;
+        vector<CruxLFQ::Peptides> peptides;
         peptides.reserve(results.PeptideModifiedSequences.size());
         std::transform(
             results.PeptideModifiedSequences.begin(),
             results.PeptideModifiedSequences.end(),
             std::back_inserter(peptides),
-            [](const std::pair<const std::string, CruxQuant::Peptides>& pair) {
+            [](const std::pair<const std::string, CruxLFQ::Peptides>& pair) {
                 return pair.second;
             });
 

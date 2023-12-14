@@ -6,7 +6,7 @@
 
 using std::string;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 class ProteinGroup {
    private:
@@ -39,8 +39,8 @@ class ProteinGroup {
 
 namespace std {
 template <>
-struct hash<CruxQuant::ProteinGroup> {
-    size_t operator()(const CruxQuant::ProteinGroup& proteinGroup) const {
+struct hash<CruxLFQ::ProteinGroup> {
+    size_t operator()(const CruxLFQ::ProteinGroup& proteinGroup) const {
         return proteinGroup.GetHashCode();
     }
 };

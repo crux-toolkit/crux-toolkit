@@ -29,7 +29,7 @@ std::mutex mtx;  // Declare a mutex
 
 const int MaxThreads = 4;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 map<int, PSM> create_psm_map(const string& psm_file) {
     carp(CARP_INFO, "loading psm data ...");

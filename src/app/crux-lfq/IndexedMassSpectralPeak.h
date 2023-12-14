@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string>
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 class IndexedMassSpectralPeak {
    public:
@@ -37,8 +37,8 @@ class IndexedMassSpectralPeak {
 // Declare the explicit specialization of std::hash before use
 namespace std {
     template <>
-    struct hash<CruxQuant::IndexedMassSpectralPeak> {
-        size_t operator()(const CruxQuant::IndexedMassSpectralPeak& peak) const {
+    struct hash<CruxLFQ::IndexedMassSpectralPeak> {
+        size_t operator()(const CruxLFQ::IndexedMassSpectralPeak& peak) const {
             return peak.GetHashCode();
         }
     };
