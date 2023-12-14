@@ -13,7 +13,7 @@ using std::string;
 using std::unordered_set;
 using std::vector;
 
-namespace CruxQuant
+namespace CruxLFQ
 {
 
     struct ChromatographicPeak

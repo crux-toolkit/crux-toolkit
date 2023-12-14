@@ -1,7 +1,7 @@
 syntax = "proto2";
 
 option optimize_for = SPEED;
-package crux_quant;
+package crux_lfq;
 
 message Ms1ScanInfo {
   required int32 one_based_scan_number = 1;

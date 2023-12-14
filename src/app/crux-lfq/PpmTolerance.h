@@ -5,7 +5,7 @@
 
 
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
     class PpmTolerance{
         public:

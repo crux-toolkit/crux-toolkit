@@ -15,13 +15,13 @@ using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
-using CruxQuant::PSM;
-using CruxQuant::IndexedSpectralResults;
-using CruxQuant::Identification;
-using CruxQuant::IndexedMassSpectralPeak;
-using CruxQuant::Ms1ScanInfo;
-using CruxQuant::BINS_PER_DALTON;
-using CruxQuant::getScanID;
+using CruxLFQ::PSM;
+using CruxLFQ::IndexedSpectralResults;
+using CruxLFQ::Identification;
+using CruxLFQ::IndexedMassSpectralPeak;
+using CruxLFQ::Ms1ScanInfo;
+using CruxLFQ::BINS_PER_DALTON;
+using CruxLFQ::getScanID;
 
 typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 

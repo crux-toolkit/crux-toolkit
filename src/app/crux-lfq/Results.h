@@ -20,7 +20,7 @@ using std::map;
 using std::string;
 using std::vector;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 class CruxLFQResults {
    public:
@@ -356,7 +356,7 @@ class CruxLFQResults {
                 // top row is the column effects, left column is the row effects
                 // the other cells are peptide intensity measurements
                 std::vector<std::string> conditions;
-                std::transform(spectraFiles.begin(), spectraFiles.end(), std::back_inserter(conditions), [](const CruxQuant::SpectraFileInfo &file) {
+                std::transform(spectraFiles.begin(), spectraFiles.end(), std::back_inserter(conditions), [](const CruxLFQ::SpectraFileInfo &file) {
                     return file.Condition;
                 });
                 int numSamples = std::unordered_set<std::string>(conditions.begin(), conditions.end()).size();

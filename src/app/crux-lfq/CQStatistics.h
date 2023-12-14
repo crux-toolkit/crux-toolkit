@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace CruxQuant {
+namespace CruxLFQ {
 inline double Pearson(const std::vector<double>& dataA, const std::vector<double>& dataB) {
     int n = 0;
     double r = 0.0;

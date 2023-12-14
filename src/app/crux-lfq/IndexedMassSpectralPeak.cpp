@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 IndexedMassSpectralPeak::IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime) : mz(mz), zeroBasedMs1ScanIndex(zeroBasedMs1ScanIndex), retentionTime(retentionTime), intensity(intensity) {}
 

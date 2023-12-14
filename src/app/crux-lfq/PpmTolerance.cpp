@@ -1,6 +1,6 @@
 #include "PpmTolerance.h"
 
-namespace CruxQuant {
+namespace CruxLFQ {
     PpmTolerance::PpmTolerance(double value) : Value(std::abs(value)) {}
 
     std::string PpmTolerance::ToString() const {

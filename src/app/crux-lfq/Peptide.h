@@ -10,7 +10,7 @@
 using std::map;
 using std::string;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 class Peptides {
    private:

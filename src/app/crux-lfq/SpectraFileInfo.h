@@ -6,7 +6,7 @@
 
 using std::string;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 struct SpectraFileInfo {
     int BiologicalReplicate;
     int Fraction;
@@ -25,8 +25,8 @@ struct SpectraFileInfo {
 
 namespace std {
 template <>
-struct hash<CruxQuant::SpectraFileInfo> {
-    size_t operator()(const CruxQuant::SpectraFileInfo &spectraFileInfo) const {
+struct hash<CruxLFQ::SpectraFileInfo> {
+    size_t operator()(const CruxLFQ::SpectraFileInfo &spectraFileInfo) const {
         return std::hash<string>()(spectraFileInfo.FullFilePathWithExtension);
     }
 };

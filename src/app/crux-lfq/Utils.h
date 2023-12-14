@@ -25,7 +25,7 @@ using std::vector;
 
 typedef std::tuple<double, double, double> IsotopePeak;
 
-namespace CruxQuant {
+namespace CruxLFQ {
 
 const int BINS_PER_DALTON = 100;
 const double PROTONMASS = 1.007276466879;
@@ -251,8 +251,8 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults);
 
 namespace std {
     template <>
-    struct hash<CruxQuant::Identification>{
-        size_t operator()(const CruxQuant::Identification& id) const {
+    struct hash<CruxLFQ::Identification>{
+        size_t operator()(const CruxLFQ::Identification& id) const {
             return 
                 hash<string>()(id.sequence) ^ 
                 hash<int>()(id.charge) ^ 
@@ -268,8 +268,8 @@ namespace std {
     };
 
     template<>
-    struct equal_to<CruxQuant::Identification> {
-        bool operator()(const CruxQuant::Identification& id1, const CruxQuant::Identification& id2) const {
+    struct equal_to<CruxLFQ::Identification> {
+        bool operator()(const CruxLFQ::Identification& id1, const CruxLFQ::Identification& id2) const {
             // Compare id1 and id2 for equality
             // This uses the operator== that is already defined
             return id1 == id2;
