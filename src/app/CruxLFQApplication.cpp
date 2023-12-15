@@ -239,7 +239,6 @@ vector<string> CruxLFQApplication::getOptions() const {
         "peak-finding-ppm-tolerance",
         "ppm-tolerance",
         "id-specific-charge-state",
-        "",
         "isotope-tolerance-ppm",
         "integrate",
         "discrimination-factor-to-cut-peak",
