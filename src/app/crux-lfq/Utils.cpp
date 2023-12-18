@@ -301,6 +301,30 @@ unordered_map<string, vector<pair<double, double>>> calculateTheoreticalIsotopeD
         delete[] char_array;
     }
 
+    std::unordered_map<std::string, std::vector<Identification>> peptideModifiedSequences;
+
+    for (const auto& identification : allIdentifications) {
+        peptideModifiedSequences[identification.sequence].push_back(identification);
+    }
+
+    for (auto& identifications : peptideModifiedSequences) {
+        // isotope where normalized abundance is 1
+        double mostAbundantIsotopeShift = 0.0;
+
+        auto& isotopicDistribution = modifiedSequenceToIsotopicDistribution[identifications.first];
+
+        for (const auto& item : isotopicDistribution) {
+            if (item.second == 1.0) {
+                mostAbundantIsotopeShift = item.first;
+                break;
+            }
+        }
+
+        for (auto& identification : identifications.second) {
+            identification.peakFindingMass = identification.monoIsotopicMass + mostAbundantIsotopeShift;
+        }
+    }
+
     return modifiedSequenceToIsotopicDistribution;
 }
 
@@ -984,4 +1008,7 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
 
     lfqResults.Peaks[spectraFile] = errorCheckedPeaks;
 }
-}  // namespace CruxQuant
+
+// void quantifyMatchBetweenRunsPeaks(const string& spectraFile, CruxLFQResults& lfqResults) {
+// }
+}  // namespace CruxLFQ
