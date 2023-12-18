@@ -5,9 +5,9 @@
 #include <sstream>
 
 #include "IndexedMassSpectralPeak.h"
+#include "crux-lfq/IntensityNormalizationEngine.h"
 #include "crux-lfq/Results.h"
 #include "crux-lfq/Utils.h"
-#include "crux-lfq/IntensityNormalizationEngine.h"
 #include "indexed_mass_spectral_peak.pb.h"
 #include "io/carp.h"
 #include "util/FileUtils.h"
@@ -42,10 +42,10 @@ bool CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = false;            // Default value i
 bool CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;  // Default value is false
 bool CruxLFQ::NORMALIZE = false;                              // Default value is false
 // MBR settings
-bool CruxLFQ::MATCH_BETWEEN_RUNS = false;                 // Default value is false
-double CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = 10.0;  // Default value is 10.0
-double CruxLFQ::MAX_MBR_WINDOW = 2.5;                     // Default value is 2.5
-bool CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = false;       // Default value is false
+// bool CruxLFQ::MATCH_BETWEEN_RUNS = false;                 // Default value is false
+// double CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = 10.0;  // Default value is 10.0
+// double CruxLFQ::MAX_MBR_WINDOW = 2.5;                     // Default value is 2.5
+// bool CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = false;       // Default value is false
 
 CruxLFQApplication::CruxLFQApplication() {}
 
@@ -71,11 +71,11 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = Params::GetBool("quantify-ambiguous-peptides");                      // Default value is false
     CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = Params::GetBool("use-shared-peptides-for-protein-quant");  // Default value is false
     CruxLFQ::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
-    // MBR settings
-    CruxLFQ::MATCH_BETWEEN_RUNS = Params::GetBool("match-between-runs");                                // Default value is false
-    CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = Params::GetDouble("match-between-runs-ppm-tolerance");  // Default value is 10.0
-    CruxLFQ::MAX_MBR_WINDOW = Params::GetDouble("max-mbr-window");                                      // Default value is 2.5
-    CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
+    // MBR settings --- I may remove all code concerning MBR
+    // CruxLFQ::MATCH_BETWEEN_RUNS = Params::GetBool("match-between-runs");                                // Default value is false
+    // CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = Params::GetDouble("match-between-runs-ppm-tolerance");  // Default value is 10.0
+    // CruxLFQ::MAX_MBR_WINDOW = Params::GetDouble("max-mbr-window");                                      // Default value is 2.5
+    // CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
 
     string output_dir = Params::GetString("output-dir");
 
@@ -117,78 +117,86 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             modifiedSequenceToIsotopicDistribution,
             lfqResults);
 
-        if (CruxLFQ::MATCH_BETWEEN_RUNS) {
-            crux_lfq::IndexedSpectralResults proto_data;
+        // if (CruxLFQ::MATCH_BETWEEN_RUNS) {
+        //     crux_lfq::IndexedSpectralResults proto_data;
 
-            // Populate indexed_peaks
-            for (const auto& outer_pair : indexResults._indexedPeaks) {
-                int outer_key = outer_pair.first;
-                const auto& inner_map = outer_pair.second;
+        //     // Populate indexed_peaks
+        //     for (const auto& outer_pair : indexResults._indexedPeaks) {
+        //         int outer_key = outer_pair.first;
+        //         const auto& inner_map = outer_pair.second;
 
-                // Get a mutable pointer to the InnerMap object associated with outer_key
-                crux_lfq::InnerMap* proto_inner_map = &(*proto_data.mutable_indexed_peaks())[outer_key];
+        //         // Get a mutable pointer to the InnerMap object associated with outer_key
+        //         crux_lfq::InnerMap* proto_inner_map = &(*proto_data.mutable_indexed_peaks())[outer_key];
 
-                for (const auto& inner_pair : inner_map) {
-                    int inner_key = inner_pair.first;
-                    const CruxLFQ::IndexedMassSpectralPeak& peak = inner_pair.second;
+        //         for (const auto& inner_pair : inner_map) {
+        //             int inner_key = inner_pair.first;
+        //             const CruxLFQ::IndexedMassSpectralPeak& peak = inner_pair.second;
 
-                    // Get a mutable pointer to the IndexedMassSpectralPeak object associated with inner_key
-                    crux_lfq::IndexedMassSpectralPeak* proto_peak = &(*proto_inner_map->mutable_inner_map())[inner_key];
+        //             // Get a mutable pointer to the IndexedMassSpectralPeak object associated with inner_key
+        //             crux_lfq::IndexedMassSpectralPeak* proto_peak = &(*proto_inner_map->mutable_inner_map())[inner_key];
 
-                    // Populate the fields
-                    proto_peak->set_mz(peak.mz);
-                    proto_peak->set_intensity(peak.intensity);
-                    proto_peak->set_zero_based_ms1_scan_index(peak.zeroBasedMs1ScanIndex);
-                    proto_peak->set_retention_time(peak.retentionTime);
-                }
-            }
+        //             // Populate the fields
+        //             proto_peak->set_mz(peak.mz);
+        //             proto_peak->set_intensity(peak.intensity);
+        //             proto_peak->set_zero_based_ms1_scan_index(peak.zeroBasedMs1ScanIndex);
+        //             proto_peak->set_retention_time(peak.retentionTime);
+        //         }
+        //     }
 
-            // Populate ms1_scans
-            for (const auto& entry : indexResults._ms1Scans) {
-                const std::string& key = entry.first;
-                const std::vector<CruxLFQ::Ms1ScanInfo>& scan_info_vector = entry.second;
+        //     // Populate ms1_scans
+        //     for (const auto& entry : indexResults._ms1Scans) {
+        //         const std::string& key = entry.first;
+        //         const std::vector<CruxLFQ::Ms1ScanInfo>& scan_info_vector = entry.second;
 
-                // Get a mutable pointer to the Ms1ScanInfoList object associated with key
-                crux_lfq::Ms1ScanInfoList* proto_scan_info_list = &(*proto_data.mutable_ms1_scans())[key];
+        //         // Get a mutable pointer to the Ms1ScanInfoList object associated with key
+        //         crux_lfq::Ms1ScanInfoList* proto_scan_info_list = &(*proto_data.mutable_ms1_scans())[key];
 
-                for (const CruxLFQ::Ms1ScanInfo& scan_info : scan_info_vector) {
-                    // Add a new Ms1ScanInfo to the ms1_scan_info repeated field
-                    crux_lfq::Ms1ScanInfo* proto_scan_info = proto_scan_info_list->add_ms1_scan_info();
+        //         for (const CruxLFQ::Ms1ScanInfo& scan_info : scan_info_vector) {
+        //             // Add a new Ms1ScanInfo to the ms1_scan_info repeated field
+        //             crux_lfq::Ms1ScanInfo* proto_scan_info = proto_scan_info_list->add_ms1_scan_info();
 
-                    // Populate the fields
-                    proto_scan_info->set_one_based_scan_number(scan_info.oneBasedScanNumber);
-                    proto_scan_info->set_zero_based_ms1_scan_index(scan_info.zeroBasedMs1ScanIndex);
-                    proto_scan_info->set_retention_time(scan_info.retentionTime);
-                }
-            }
+        //             // Populate the fields
+        //             proto_scan_info->set_one_based_scan_number(scan_info.oneBasedScanNumber);
+        //             proto_scan_info->set_zero_based_ms1_scan_index(scan_info.zeroBasedMs1ScanIndex);
+        //             proto_scan_info->set_retention_time(scan_info.retentionTime);
+        //         }
+        //     }
 
-            // Serialize to binary format
-            std::string serialized_data;
-            proto_data.SerializeToString(&serialized_data);
-            string file_name = spectra_file.substr(spectra_file.find_last_of("/\\") + 1);
-            string mbr_file = FileUtils::Join(output_dir, file_name + ".pb");
-            // Write the serialized data to a file
-            std::ofstream output_file(mbr_file, std::ios::binary);
-            if (output_file.is_open()) {
-                output_file.write(serialized_data.c_str(), serialized_data.size());
-                output_file.close();
-            } else {
-                // Handle error opening the file
-                carp(CARP_FATAL, "Error opening file %s", mbr_file.c_str());
-            }
-        }
+        //     // Serialize to binary format
+        //     std::string serialized_data;
+        //     proto_data.SerializeToString(&serialized_data);
+        //     string file_name = spectra_file.substr(spectra_file.find_last_of("/\\") + 1);
+        //     string mbr_file = FileUtils::Join(output_dir, file_name + ".pb");
+        //     // Write the serialized data to a file
+        //     std::ofstream output_file(mbr_file, std::ios::binary);
+        //     if (output_file.is_open()) {
+        //         output_file.write(serialized_data.c_str(), serialized_data.size());
+        //         output_file.close();
+        //     } else {
+        //         // Handle error opening the file
+        //         carp(CARP_FATAL, "Error opening file %s", mbr_file.c_str());
+        //     }
+        // }
 
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
 
         carp(CARP_INFO, "Finished processing %s", spectra_file.c_str());
     }
 
-    if(CruxLFQ::NORMALIZE){
+    // if (CruxLFQ::MATCH_BETWEEN_RUNS) {
+    //     carp(CARP_INFO, "Running match-between-runs...");
+    //     for (const string& spectra_file : spec_files) {
+    //         carp(CARP_INFO, "Doing match-between-runs for %s", spectra_file.c_str());
+    //         CruxLFQ::quantifyMatchBetweenRunsPeaks(spectraFile);
+    //         carp(CARP_INFO, "Finished MBR for %s", spectra_file.c_str());
+    //     }
+    // }
+
+    if (CruxLFQ::NORMALIZE) {
         CruxLFQ::IntensityNormalizationEngine intensityNormalizationEngine(
-            lfqResults, 
+            lfqResults,
             CruxLFQ::INTEGRATE,
-            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES
-        );
+            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
         intensityNormalizationEngine.NormalizeResults();
     }
 
