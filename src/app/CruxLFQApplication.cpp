@@ -420,7 +420,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
                 identification.monoIsotopicMass = it->second.peptide_mass_col;
                 identification.charge = it->second.charge_col;
                 identification.peptideMass = it->second.peptide_mass_col;
-                identification.precursorCharge = it->second.spectrum_precursor_mz_col;
+                identification.precursorCharge = static_cast<double>(it->second.charge_col);
                 identification.spectralFile = _spectra_file;
                 identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
                 identification.scanId = it->second.scan_col;
