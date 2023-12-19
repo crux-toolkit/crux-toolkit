@@ -109,7 +109,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxLFQ::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
-        vector<double> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
+        vector<int> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
 
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
