@@ -86,7 +86,18 @@ class TideLiteSearchApplication : public CruxApplication {
   /**
    * Function that contains the search algorithm and performs the search
    */
-  void spectrum_search(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt);
+
+  /* ----- Rufino.start() ------------*/
+  //void spectrum_search(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt);
+  void spectrum_search(pb::Spectrum pb_spectra, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt, int th_num);
+  //bool cmpSpectHeap(pair<pb::Spectrum, int> sp_a, pair<pb::Spectrum, int> sp_b);
+  struct compare_spectrum{
+    bool operator()(pair<pb::Spectrum, int> &a, pair<pb::Spectrum, int> &b){
+      
+      return a.first.neutral_mass() > b.first.neutral_mass();
+    }
+  };
+  /* ----- Rufino.end() -------------*/
   void XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
   int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
   void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
