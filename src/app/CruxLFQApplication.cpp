@@ -78,11 +78,12 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     // CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
 
     string output_dir = Params::GetString("output-dir");
+    string psm_file_format = Params::GetString("psm-file-format");
 
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
-    map<int, CruxLFQ::PSM> psm_datum = CruxLFQ::create_psm_map(psm_file);
+    map<int, CruxLFQ::PSM> psm_datum = CruxLFQ::create_psm_map(psm_file, psm_file_format);
     CruxLFQ::CruxLFQResults lfqResults(spec_files);
 
     vector<CruxLFQ::Identification> allIdentifications;
@@ -96,6 +97,8 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         }
     }
     std::copy(uniqueIdentifications.begin(), uniqueIdentifications.end(), std::back_inserter(allIdentifications));
+
+    lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
 
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
@@ -200,13 +203,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         intensityNormalizationEngine.NormalizeResults();
     }
 
-    if (CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES) {
-        lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
-    }
     lfqResults.calculatePeptideResults(CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
     lfqResults.calculateProteinResultsMedianPolish(CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
     const std::string results_file = make_file_path("crux-lfq.txt");
-    lfqResults.writeResults(results_file);
+    lfqResults.writeResults(results_file, spec_files);
 
     return 0;
 }

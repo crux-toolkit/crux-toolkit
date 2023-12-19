@@ -8,12 +8,12 @@
 #include <string>
 #include <vector>
 
+#include "CQStatistics.h"
 #include "ChromatographicPeak.h"
 #include "Peptide.h"
 #include "ProteinGroup.h"
 #include "SpectraFileInfo.h"
 #include "Utils.h"
-#include "CQStatistics.h"
 #include "io/carp.h"
 
 using std::map;
@@ -39,81 +39,34 @@ class CruxLFQResults {
         }
     }
 
-    string tabSeperatedHeader() {
-        std::ostringstream oss;
-
-        // Append the header fields
-        oss << "File Name"
-            << "\t"
-            << "Base Sequence"
-            << "\t"
-            << "Full Sequence"
-            << "\t"
-            << "Peptide Monoisotopic Mass"
-            << "\t"
-            << "MS2 Retention Time"
-            << "\t"
-            << "Precursor Charge"
-            << "\t"
-            << "Theoretical MZ"
-            << "\t"
-            << "Peak intensity"
-            << "\t"
-            << "Num Charge States Observed"
-            << "\t"
-            << "Peak Detection Type"
-            << "\t"
-            << "PSMs Mapped"
-            << "\t"
-            << "Peak Split Valley RT"
-            << "\t"
-            << "Peak Apex Mass Error (ppm)"
-            << "\t";
-        std::string header = oss.str();
-
-        return header;
-    }
-
-    void writeResults(const string &results_file) {
+    void writeResults(const string &results_file, const vector<std::string> &rawFiles) {
         carp(CARP_INFO, "Writing output...");
 
-        string results_header = tabSeperatedHeader();
-
-        std::ofstream outFile(results_file);
-        if (outFile) {
+        string peptides_results_file = results_file;
+        std::ofstream outFile2(peptides_results_file);
+        if (outFile2) {
             // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
             const std::size_t bufferSize = 8192;
             char buffer[bufferSize];
-            outFile.rdbuf()->pubsetbuf(buffer, bufferSize);
-            outFile << results_header << std::endl;
+            outFile2.rdbuf()->pubsetbuf(buffer, bufferSize);
+            outFile2 << PeptidesTabSeperatedHeader(rawFiles) << std::endl;
 
-            for (auto &peak : Peaks) {
-                auto &peak_data = peak.second;
-                std::sort(peak_data.begin(), peak_data.end(), [](const ChromatographicPeak &a, const ChromatographicPeak &b) {
-                    // First, sort by SpectraFileInfo.FilenameWithoutExtension in ascending order
-                    if (a.spectralFile != b.spectralFile) {
-                        return a.spectralFile < b.spectralFile;
-                    }
-                    // If filenames are the same, sort by Intensity in descending order
-                    return a.intensity > b.intensity; });
-
-                for (auto &c_p : peak_data) {
-                    outFile << c_p.ToString() << std::endl;
-                }
+            for (auto &peptide : PeptideModifiedSequences) {
+                outFile2 << peptide.second.ToString(rawFiles) << std::endl;
             }
 
-            outFile.close();
+            outFile2.close();
         } else {
-            carp(CARP_FATAL, "Failed to open results file for writing.");
+            carp(CARP_FATAL, "Failed to open peptides results file for writing.");
         }
     }
 
     void setPeptideModifiedSequencesAndProteinGroups(const vector<Identification> &identifications) {
         for (const Identification &id : identifications) {
-            auto it = PeptideModifiedSequences.find(id.modifications);
+            auto it = PeptideModifiedSequences.find(id.sequence);
             if (it == PeptideModifiedSequences.end()) {
                 Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups);
-                PeptideModifiedSequences[id.modifications] = peptide;
+                PeptideModifiedSequences[id.sequence] = peptide;
             } else {
                 Peptides &peptide = it->second;
                 for (const ProteinGroup &proteinGroup : id.proteinGroups) {
@@ -122,7 +75,10 @@ class CruxLFQResults {
             }
 
             for (const ProteinGroup &proteinGroup : id.proteinGroups) {
-                ProteinGroups[proteinGroup.ProteinGroupName] = proteinGroup;
+                auto it = ProteinGroups.find(proteinGroup.ProteinGroupName);
+                if (it == ProteinGroups.end()) {
+                    ProteinGroups[proteinGroup.ProteinGroupName] = proteinGroup;
+                }
             }
         }
     }
@@ -139,7 +95,7 @@ class CruxLFQResults {
             map<string, vector<ChromatographicPeak>> groupedPeaks;
             for (auto &peak : filePeaks.second) {
                 if (peak.NumIdentificationsByFullSeq == 1) {
-                    groupedPeaks[peak.identifications.front().modifications].push_back(peak);
+                    groupedPeaks[peak.identifications.front().sequence].push_back(peak);
                 }
             }
 
@@ -182,7 +138,7 @@ class CruxLFQResults {
 
             for (auto &ambiguousPeak : ambiguousPeaks) {
                 for (auto &id : ambiguousPeak.identifications) {
-                    string sequence = id.modifications;
+                    string sequence = id.sequence;
                     double alreadyRecordedIntensity = PeptideModifiedSequences[sequence].getIntensity(filePeaks.first);
                     double fractionAmbiguous = ambiguousPeak.intensity / (alreadyRecordedIntensity + ambiguousPeak.intensity);
 
@@ -234,7 +190,7 @@ class CruxLFQResults {
                     for (auto &file : sample.second) {
                         for (auto &peak : Peaks[file.FullFilePathWithExtension]) {
                             for (auto &id : peak.identifications) {
-                                auto key = std::make_pair(file, id.modifications);
+                                auto key = std::make_pair(file, id.sequence);
                                 auto it = peaksForEachSequence.find(key);
                                 if (it != peaksForEachSequence.end()) {
                                     it->second.push_back(peak);
@@ -474,10 +430,8 @@ class CruxLFQResults {
                 // set the sample protein intensities
 
                 sampleN = 0;
-                for (auto &group : filesGroupedByCondition)  
-                {
-                    for (auto &sample : groupedByBiologicalReplicate)
-                    {
+                for (auto &group : filesGroupedByCondition) {
+                    for (auto &sample : groupedByBiologicalReplicate) {
                         // this step un-logs the protein "intensity". in reality this value is more like a fold-change
                         // than an intensity, but unlike a fold-change it's not relative to a particular sample.
                         // by multiplying this value by the reference protein intensity calculated earlier, then we get
@@ -491,8 +445,8 @@ class CruxLFQResults {
 
                         for (SpectraFileInfo spectraFile : sample.second) {
                             if (std::any_of(
-                                peptidesForThisProtein.begin(), 
-                                peptidesForThisProtein.end(), [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                    peptidesForThisProtein.begin(),
+                                    peptidesForThisProtein.end(), [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
                                 isMissingValue = false;
                                 break;
                             }
@@ -605,4 +559,4 @@ class CruxLFQResults {
     }
 };
 
-}  // namespace CruxQuant
+}  // namespace CruxLFQ

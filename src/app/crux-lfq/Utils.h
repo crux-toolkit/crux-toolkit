@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -62,7 +63,7 @@ struct Identification {
     int scanId;
     string modifications;
     double posteriorErrorProbability = 0;  // This may be removed cos it's redundant
-    bool useForProteinQuant;
+    bool useForProteinQuant = true;
     unordered_set<ProteinGroup> proteinGroups;
 
     bool operator==(const Identification& other) const {
@@ -223,13 +224,37 @@ filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
 
 void setToNegativeOneIfNaN(double& value);
 
-map<int, PSM> create_psm_map(const string& psm_file);
+map<int, PSM> create_psm_map(const string& psm_file, const string& psm_file_format = "percolator");
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime, unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans);
 
 void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults);
 
 // void quantifyMatchBetweenRunsPeaks(const string& spectraFile, CruxLFQResults& lfqResults);
+
+inline std::ostream& operator<<(std::ostream& os, const DetectionType& dt) {
+    switch (dt) {
+        case DetectionType::MSMS:
+            os << "MSMS";
+            break;
+        case DetectionType::MBR:
+            os << "MBR";
+            break;
+        case DetectionType::NotDetected:
+            os << "NotDetected";
+            break;
+        case DetectionType::MSMSAmbiguousPeakfinding:
+            os << "MSMSAmbiguousPeakfinding";
+            break;
+        case DetectionType::MSMSIdentifiedButNotQuantified:
+            os << "MSMSIdentifiedButNotQuantified";
+            break;
+        case DetectionType::Imputed:
+            os << "Imputed";
+            break;
+    }
+    return os;
+}
 
 }  // namespace CruxLFQ
 
