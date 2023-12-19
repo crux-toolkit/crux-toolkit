@@ -161,7 +161,7 @@ void setPeakFindingMass(vector<Identification>& allIdentifications,
                         unordered_map<string, vector<pair<double, double>>>&
                             modifiedSequenceToIsotopicDistribution);
 
-vector<double> createChargeStates(
+vector<int> createChargeStates(
     const vector<Identification>& allIdentifications);
 
 // Forward declaration for a class from results.h
@@ -169,7 +169,7 @@ class CruxLFQResults;
 
 void quantifyMs2IdentifiedPeptides(
     string spectraFile, const vector<Identification>& allIdentifications,
-    const vector<double>& chargeStates,
+    const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
@@ -186,8 +186,7 @@ IndexedMassSpectralPeak* getIndexedPeak(
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
-                  const string& spectralFile,
-                  const vector<double>& chargeStates,
+                  const string& spectralFile, const vector<int>& chargeStates,
                   vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
