@@ -2225,6 +2225,9 @@ Params::Params() : finalized_(false) {
     InitBoolParam("normalize", false,
                   "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
                   "", true);
+    InitStringParam("psm-file-format", "percolator",
+                    "The format of the PSM file. Possible options are; tide-search, assign-confidence and percolator Default = percolator.",
+                    "", true);
     // The code below is commented out until we decide to add MBR - match between runs - to the CRUX-LFQ code.
     // InitBoolParam("match-between-runs", false,
     //   "Indicate whether to match peptides between runs (T) or not (F).  Default = F.",
@@ -2615,6 +2618,7 @@ void Params::Categorize() {
     items.insert("quantify-ambiguous-peptides");
     items.insert("use-shared-peptides-for-protein-quant");
     items.insert("normalize");
+    items.insert("psm-file-format");
     // items.insert("match-between-runs");
     // items.insert("match-between-runs-ppm-tolerance");
     // items.insert("max-mbr-window");

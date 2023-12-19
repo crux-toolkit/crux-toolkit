@@ -1,8 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <map>
+#include <set>
+#include <sstream>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "ProteinGroup.h"
 #include "Utils.h"
@@ -11,6 +15,23 @@ using std::map;
 using std::string;
 
 namespace CruxLFQ {
+
+inline std::string PeptidesTabSeperatedHeader(const std::vector<std::string>& rawFiles) {
+    std::ostringstream sb;
+    sb << "Sequence"
+       << "\t";
+    sb << "Modified Sequence"
+       << "\t";
+    for (const auto& rawfile : rawFiles) {
+        sb << "Intensity_" << rawfile << "\t";
+    }
+    for (const auto& rawfile : rawFiles) {
+        sb << "Detection Type_" << rawfile << "\t";
+    }
+    std::string result = sb.str();
+    result.erase(result.length() - 1);  // Remove the last tab
+    return result;
+}
 
 class Peptides {
    private:
@@ -107,5 +128,22 @@ class Peptides {
     bool operator==(const Peptides& other) const {
         return this->sequence == other.sequence;
     }
+
+    std::string ToString(const std::vector<std::string>& rawFiles) {
+        std::ostringstream str;
+        str << sequence << "\t";
+        str << modified_sequence << "\t";
+
+        for (const auto& file : rawFiles) {
+            str << intensityMap[file] << "\t";
+        }
+        for (const auto& file : rawFiles) {
+            str << detectionTypeMap[file] << "\t";
+        }
+
+        std::string result = str.str();
+        result.erase(result.length() - 1);  // Remove the last tab
+        return result;
+    }
 };
-}  // namespace CruxQuant
+}  // namespace CruxLFQ
