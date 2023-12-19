@@ -391,7 +391,7 @@ void setPeakFindingMass(vector<Identification>& allIdentifications,
   }
 }
 
-vector<double> createChargeStates(
+vector<int> createChargeStates(
     const vector<Identification>& allIdentifications) {
   auto minChargeState = std::numeric_limits<int>::max();
   auto maxChargeState = std::numeric_limits<int>::lowest();
@@ -399,9 +399,9 @@ vector<double> createChargeStates(
     minChargeState = std::min(minChargeState, identification.precursorCharge);
     maxChargeState = std::max(maxChargeState, identification.precursorCharge);
   }
-  vector<double> chargeStates;
+  vector<int> chargeStates;
 
-  for (double charge = minChargeState; charge <= maxChargeState; charge++) {
+  for (int charge = minChargeState; charge <= maxChargeState; charge++) {
     chargeStates.push_back(charge);
   }
 
@@ -410,8 +410,7 @@ vector<double> createChargeStates(
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
-                  const string& spectralFile,
-                  const vector<double>& chargeStates,
+                  const string& spectralFile, const vector<int>& chargeStates,
                   vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
@@ -531,7 +530,7 @@ void processRange(int start, int end,
 
 void quantifyMs2IdentifiedPeptides(
     string spectraFile, const vector<Identification>& allIdentifications,
-    const vector<double>& chargeStates,
+    const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
