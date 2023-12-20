@@ -56,23 +56,22 @@ struct ChromatographicPeak {
     vector<IsotopicEnvelope> isotopicEnvelopes;
     double intensity;
     double massError;
-    int numChargeStatesObserved;
+    int numChargeStatesObserved = 0;
     IsotopicEnvelope apex;
     bool isMbrPeak;
-    int _index = std::numeric_limits<int>::max();
-    bool SplitRT = 0;
+    // int _index = std::numeric_limits<int>::max();
+    double SplitRT = 0.0;
     int NumIdentificationsByBaseSeq = 1;
     int NumIdentificationsByFullSeq = 1;
     double MbrScore;  // Not really used.
 
     ChromatographicPeak(const Identification &id, bool _isMbrPeak, const string &_spectralFile)
-        : isMbrPeak(_isMbrPeak), spectralFile(_spectralFile) {
-        isotopicEnvelopes.push_back(IsotopicEnvelope());
-        identifications.push_back(id);
+        : identifications({id}), isMbrPeak(_isMbrPeak), spectralFile(_spectralFile) {
+        isotopicEnvelopes = std::vector<IsotopicEnvelope>();
         massError = std::numeric_limits<double>::quiet_NaN();
         numChargeStatesObserved = 0;
-        _index = std::numeric_limits<int>::max();
-        SplitRT = 0;
+        // _index = std::numeric_limits<int>::max();
+        SplitRT = 0.0;
         NumIdentificationsByBaseSeq = 1;
         NumIdentificationsByFullSeq = 1;
     }
