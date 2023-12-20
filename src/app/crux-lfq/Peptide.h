@@ -135,10 +135,10 @@ class Peptides {
         str << modified_sequence << "\t";
 
         for (const auto& file : rawFiles) {
-            str << intensityMap[file] << "\t";
+            str << getIntensity(file) << "\t";
         }
         for (const auto& file : rawFiles) {
-            str << detectionTypeMap[file] << "\t";
+            str << getDetectionType(file) << "\t";
         }
 
         std::string result = str.str();
