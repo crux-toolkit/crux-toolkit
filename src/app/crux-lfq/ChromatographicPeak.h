@@ -59,7 +59,6 @@ struct ChromatographicPeak {
     int numChargeStatesObserved = 0;
     IsotopicEnvelope apex;
     bool isMbrPeak;
-    // int _index = std::numeric_limits<int>::max();
     double SplitRT = 0.0;
     int NumIdentificationsByBaseSeq = 1;
     int NumIdentificationsByFullSeq = 1;
@@ -70,10 +69,61 @@ struct ChromatographicPeak {
         isotopicEnvelopes = std::vector<IsotopicEnvelope>();
         massError = std::numeric_limits<double>::quiet_NaN();
         numChargeStatesObserved = 0;
-        // _index = std::numeric_limits<int>::max();
         SplitRT = 0.0;
         NumIdentificationsByBaseSeq = 1;
         NumIdentificationsByFullSeq = 1;
+    }
+
+    ChromatographicPeak(ChromatographicPeak &&other) noexcept
+        : identifications(std::move(other.identifications)),
+          spectralFile(std::move(other.spectralFile)),
+          isotopicEnvelopes(std::move(other.isotopicEnvelopes)),
+          intensity(other.intensity),
+          massError(other.massError),
+          numChargeStatesObserved(other.numChargeStatesObserved),
+          apex(std::move(other.apex)),
+          isMbrPeak(other.isMbrPeak),
+          SplitRT(other.SplitRT),
+          NumIdentificationsByBaseSeq(other.NumIdentificationsByBaseSeq),
+          NumIdentificationsByFullSeq(other.NumIdentificationsByFullSeq),
+          MbrScore(other.MbrScore) {
+        other.identifications.clear();
+        other.spectralFile.clear();
+        other.isotopicEnvelopes.clear();
+        other.apex = {};
+    }
+
+    ChromatographicPeak(const ChromatographicPeak &other)
+        : identifications(other.identifications),
+          spectralFile(other.spectralFile),
+          isotopicEnvelopes(other.isotopicEnvelopes),
+          intensity(other.intensity),
+          massError(other.massError),
+          numChargeStatesObserved(other.numChargeStatesObserved),
+          apex(other.apex),
+          isMbrPeak(other.isMbrPeak),
+          SplitRT(other.SplitRT),
+          NumIdentificationsByBaseSeq(other.NumIdentificationsByBaseSeq),
+          NumIdentificationsByFullSeq(other.NumIdentificationsByFullSeq),
+          MbrScore(other.MbrScore) {
+    }
+
+    ChromatographicPeak &operator=(const ChromatographicPeak &other) {
+        if (this != &other) {
+            identifications = other.identifications;
+            spectralFile = other.spectralFile;
+            isotopicEnvelopes = other.isotopicEnvelopes;
+            intensity = other.intensity;
+            massError = other.massError;
+            numChargeStatesObserved = other.numChargeStatesObserved;
+            apex = other.apex;
+            isMbrPeak = other.isMbrPeak;
+            SplitRT = other.SplitRT;
+            NumIdentificationsByBaseSeq = other.NumIdentificationsByBaseSeq;
+            NumIdentificationsByFullSeq = other.NumIdentificationsByFullSeq;
+            MbrScore = other.MbrScore;
+        }
+        return *this;
     }
 
     void calculateIntensityForThisFeature(bool integrate) {

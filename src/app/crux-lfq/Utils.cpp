@@ -419,106 +419,105 @@ void processRange(int start, int end,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
                   CruxLFQResults& lfqResults) {
+    std::lock_guard<std::mutex> lock(mtx);
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
-        {
-            std::lock_guard<std::mutex> lock(mtx);
-            ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
-            // msmsFeature._index = i;
-            chromatographicPeaks.push_back(msmsFeature);
-            for (const auto& chargeState : chargeStates) {
-                if (ID_SPECIFIC_CHARGE_STATE &&
-                    chargeState != identification.precursorCharge) {
-                    continue;
-                }
+        ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
-                vector<IndexedMassSpectralPeak*> xic = peakFind(
-                    identification.ms2RetentionTimeInMinutes,  // This value may not be in minutes, check and convert
-                    identification.peakFindingMass, chargeState,
-                    identification.spectralFile, peakfindingTol, _ms1Scans,
-                    indexedPeaks);
-
-                // Sort the xic vector based on the RetentionTime
-                std::sort(xic.begin(), xic.end(),
-                          [](const IndexedMassSpectralPeak* a,
-                             const IndexedMassSpectralPeak* b) {
-                              return a->retentionTime < b->retentionTime;
-                          });
-
-                xic.erase(std::remove_if(xic.begin(), xic.end(),
-                                         [&](const IndexedMassSpectralPeak* p) {
-                                             return !ppmTolerance.Within(
-                                                 toMass(p->mz, chargeState),
-                                                 identification.peakFindingMass);
-                                         }),
-                          xic.end());
-
-                vector<IsotopicEnvelope> isotopicEnvelopes = getIsotopicEnvelopes(
-                    xic, identification, chargeState,
-                    modifiedSequenceToIsotopicDistribution, indexedPeaks);
-
-                msmsFeature.isotopicEnvelopes.insert(
-                    msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
-                    isotopicEnvelopes.end());
-            }
-
-            msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
-
-            cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
-
-            if (msmsFeature.isotopicEnvelopes.empty()) {
+        // msmsFeature._index = i;
+        chromatographicPeaks.push_back(msmsFeature);
+        for (const auto& chargeState : chargeStates) {
+            if (ID_SPECIFIC_CHARGE_STATE &&
+                chargeState != identification.precursorCharge) {
                 continue;
             }
 
-            vector<IsotopicEnvelope> precursorXic;
-            std::copy_if(msmsFeature.isotopicEnvelopes.begin(),
-                         msmsFeature.isotopicEnvelopes.end(),
-                         std::back_inserter(precursorXic),
-                         [identification](const IsotopicEnvelope& p) {
-                             return p.chargeState == identification.precursorCharge;
-                         }
+            vector<IndexedMassSpectralPeak*> xic = peakFind(
+                identification.ms2RetentionTimeInMinutes,  // This value may not be in minutes, check and convert
+                identification.peakFindingMass, chargeState,
+                identification.spectralFile, peakfindingTol, _ms1Scans,
+                indexedPeaks);
 
-            );
+            // Sort the xic vector based on the RetentionTime
+            std::sort(xic.begin(), xic.end(),
+                      [](const IndexedMassSpectralPeak* a,
+                         const IndexedMassSpectralPeak* b) {
+                          return a->retentionTime < b->retentionTime;
+                      });
 
-            if (precursorXic.empty()) {
-                msmsFeature.isotopicEnvelopes.clear();
-                continue;
-            }
-            // Find the minimum and maximum values
-            int min =
-                std::numeric_limits<int>::max();  // Initialize with a large value
-            int max =
-                std::numeric_limits<int>::min();  // Initialize with a small value
+            xic.erase(std::remove_if(xic.begin(), xic.end(),
+                                     [&](const IndexedMassSpectralPeak* p) {
+                                         return !ppmTolerance.Within(
+                                             toMass(p->mz, chargeState),
+                                             identification.peakFindingMass);
+                                     }),
+                      xic.end());
 
-            for (const IsotopicEnvelope& p : precursorXic) {
-                int scanIndex = p.indexedPeak.zeroBasedMs1ScanIndex;
-                if (scanIndex < min) {
-                    min = scanIndex;
-                }
-                if (scanIndex > max) {
-                    max = scanIndex;
-                }
-            }
+            vector<IsotopicEnvelope> isotopicEnvelopes = getIsotopicEnvelopes(
+                xic, identification, chargeState,
+                modifiedSequenceToIsotopicDistribution, indexedPeaks);
 
-            msmsFeature.isotopicEnvelopes.erase(
-                std::remove_if(msmsFeature.isotopicEnvelopes.begin(),
-                               msmsFeature.isotopicEnvelopes.end(),
-                               [min](const IsotopicEnvelope& p) {
-                                   return p.indexedPeak.zeroBasedMs1ScanIndex < min;
-                               }),
-                msmsFeature.isotopicEnvelopes.end());
-
-            msmsFeature.isotopicEnvelopes.erase(
-                std::remove_if(msmsFeature.isotopicEnvelopes.begin(),
-                               msmsFeature.isotopicEnvelopes.end(),
-                               [max](const IsotopicEnvelope& p) {
-                                   return p.indexedPeak.zeroBasedMs1ScanIndex > max;
-                               }),
-                msmsFeature.isotopicEnvelopes.end());
-
-            msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
+            msmsFeature.isotopicEnvelopes.insert(
+                msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
+                isotopicEnvelopes.end());
         }
+
+        msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
+
+        cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
+
+        if (msmsFeature.isotopicEnvelopes.empty()) {
+            continue;
+        }
+
+        vector<IsotopicEnvelope> precursorXic;
+        std::copy_if(msmsFeature.isotopicEnvelopes.begin(),
+                     msmsFeature.isotopicEnvelopes.end(),
+                     std::back_inserter(precursorXic),
+                     [identification](const IsotopicEnvelope& p) {
+                         return p.chargeState == identification.precursorCharge;
+                     }
+
+        );
+
+        if (precursorXic.empty()) {
+            msmsFeature.isotopicEnvelopes.clear();
+            continue;
+        }
+        // Find the minimum and maximum values
+        int min =
+            std::numeric_limits<int>::max();  // Initialize with a large value
+        int max =
+            std::numeric_limits<int>::min();  // Initialize with a small value
+
+        for (const IsotopicEnvelope& p : precursorXic) {
+            int scanIndex = p.indexedPeak.zeroBasedMs1ScanIndex;
+            if (scanIndex < min) {
+                min = scanIndex;
+            }
+            if (scanIndex > max) {
+                max = scanIndex;
+            }
+        }
+
+        msmsFeature.isotopicEnvelopes.erase(
+            std::remove_if(msmsFeature.isotopicEnvelopes.begin(),
+                           msmsFeature.isotopicEnvelopes.end(),
+                           [min](const IsotopicEnvelope& p) {
+                               return p.indexedPeak.zeroBasedMs1ScanIndex < min;
+                           }),
+            msmsFeature.isotopicEnvelopes.end());
+
+        msmsFeature.isotopicEnvelopes.erase(
+            std::remove_if(msmsFeature.isotopicEnvelopes.begin(),
+                           msmsFeature.isotopicEnvelopes.end(),
+                           [max](const IsotopicEnvelope& p) {
+                               return p.indexedPeak.zeroBasedMs1ScanIndex > max;
+                           }),
+            msmsFeature.isotopicEnvelopes.end());
+
+        msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
     }
 
     lfqResults.Peaks[spectralFile].insert(lfqResults.Peaks[spectralFile].end(),
