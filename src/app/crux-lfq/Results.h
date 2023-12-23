@@ -107,6 +107,7 @@ class CruxLFQResults {
                                            return a.intensity < b.intensity;
                                        })
                                        ->intensity;
+                carp(CARP_INFO, "Sequence: %s, Intensity: %f", sequence.c_str(), intensity);
                 auto bestPeak = std::find_if(
                     sequenceWithPeaks.second.begin(), sequenceWithPeaks.second.end(),
                     [&intensity](const ChromatographicPeak &p) {

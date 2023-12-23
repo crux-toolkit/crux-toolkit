@@ -20,6 +20,8 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+using namespace pwiz::cv;
+using namespace pwiz::msdata;
 using pwiz::cv::MS_ms_level;
 using pwiz::cv::MS_scan_start_time;
 using pwiz::msdata::BinaryDataArrayPtr;
@@ -71,11 +73,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = Params::GetBool("quantify-ambiguous-peptides");                      // Default value is false
     CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = Params::GetBool("use-shared-peptides-for-protein-quant");  // Default value is false
     CruxLFQ::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
-    // MBR settings --- I may remove all code concerning MBR
-    // CruxLFQ::MATCH_BETWEEN_RUNS = Params::GetBool("match-between-runs");                                // Default value is false
-    // CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = Params::GetDouble("match-between-runs-ppm-tolerance");  // Default value is 10.0
-    // CruxLFQ::MAX_MBR_WINDOW = Params::GetDouble("max-mbr-window");                                      // Default value is 2.5
-    // CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = Params::GetBool("require-msms-id-in-condition");            // Default value is false
 
     string output_dir = Params::GetString("output-dir");
     string psm_file_format = Params::GetString("psm-file-format");
@@ -106,6 +103,9 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
+        carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
+
+        carp(CARP_INFO, "Calculating theoretical isotopic distributions for %s", spectra_file.c_str());
         unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
 
         CruxLFQ::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
@@ -120,80 +120,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             modifiedSequenceToIsotopicDistribution,
             lfqResults);
 
-        // if (CruxLFQ::MATCH_BETWEEN_RUNS) {
-        //     crux_lfq::IndexedSpectralResults proto_data;
-
-        //     // Populate indexed_peaks
-        //     for (const auto& outer_pair : indexResults._indexedPeaks) {
-        //         int outer_key = outer_pair.first;
-        //         const auto& inner_map = outer_pair.second;
-
-        //         // Get a mutable pointer to the InnerMap object associated with outer_key
-        //         crux_lfq::InnerMap* proto_inner_map = &(*proto_data.mutable_indexed_peaks())[outer_key];
-
-        //         for (const auto& inner_pair : inner_map) {
-        //             int inner_key = inner_pair.first;
-        //             const CruxLFQ::IndexedMassSpectralPeak& peak = inner_pair.second;
-
-        //             // Get a mutable pointer to the IndexedMassSpectralPeak object associated with inner_key
-        //             crux_lfq::IndexedMassSpectralPeak* proto_peak = &(*proto_inner_map->mutable_inner_map())[inner_key];
-
-        //             // Populate the fields
-        //             proto_peak->set_mz(peak.mz);
-        //             proto_peak->set_intensity(peak.intensity);
-        //             proto_peak->set_zero_based_ms1_scan_index(peak.zeroBasedMs1ScanIndex);
-        //             proto_peak->set_retention_time(peak.retentionTime);
-        //         }
-        //     }
-
-        //     // Populate ms1_scans
-        //     for (const auto& entry : indexResults._ms1Scans) {
-        //         const std::string& key = entry.first;
-        //         const std::vector<CruxLFQ::Ms1ScanInfo>& scan_info_vector = entry.second;
-
-        //         // Get a mutable pointer to the Ms1ScanInfoList object associated with key
-        //         crux_lfq::Ms1ScanInfoList* proto_scan_info_list = &(*proto_data.mutable_ms1_scans())[key];
-
-        //         for (const CruxLFQ::Ms1ScanInfo& scan_info : scan_info_vector) {
-        //             // Add a new Ms1ScanInfo to the ms1_scan_info repeated field
-        //             crux_lfq::Ms1ScanInfo* proto_scan_info = proto_scan_info_list->add_ms1_scan_info();
-
-        //             // Populate the fields
-        //             proto_scan_info->set_one_based_scan_number(scan_info.oneBasedScanNumber);
-        //             proto_scan_info->set_zero_based_ms1_scan_index(scan_info.zeroBasedMs1ScanIndex);
-        //             proto_scan_info->set_retention_time(scan_info.retentionTime);
-        //         }
-        //     }
-
-        //     // Serialize to binary format
-        //     std::string serialized_data;
-        //     proto_data.SerializeToString(&serialized_data);
-        //     string file_name = spectra_file.substr(spectra_file.find_last_of("/\\") + 1);
-        //     string mbr_file = FileUtils::Join(output_dir, file_name + ".pb");
-        //     // Write the serialized data to a file
-        //     std::ofstream output_file(mbr_file, std::ios::binary);
-        //     if (output_file.is_open()) {
-        //         output_file.write(serialized_data.c_str(), serialized_data.size());
-        //         output_file.close();
-        //     } else {
-        //         // Handle error opening the file
-        //         carp(CARP_FATAL, "Error opening file %s", mbr_file.c_str());
-        //     }
-        // }
-
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
 
         carp(CARP_INFO, "Finished processing %s", spectra_file.c_str());
     }
-
-    // if (CruxLFQ::MATCH_BETWEEN_RUNS) {
-    //     carp(CARP_INFO, "Running match-between-runs...");
-    //     for (const string& spectra_file : spec_files) {
-    //         carp(CARP_INFO, "Doing match-between-runs for %s", spectra_file.c_str());
-    //         CruxLFQ::quantifyMatchBetweenRunsPeaks(spectraFile);
-    //         carp(CARP_INFO, "Finished MBR for %s", spectra_file.c_str());
-    //     }
-    // }
 
     if (CruxLFQ::NORMALIZE) {
         CruxLFQ::IntensityNormalizationEngine intensityNormalizationEngine(
@@ -205,6 +135,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     lfqResults.calculatePeptideResults(CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
     lfqResults.calculateProteinResultsMedianPolish(CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
+    // for(auto p:lf)
     const std::string results_file = make_file_path("crux-lfq.txt");
     lfqResults.writeResults(results_file, spec_files);
 
@@ -302,7 +233,8 @@ SpectrumListPtr CruxLFQApplication::loadSpectra(const string& file, int msLevel)
         SpectrumListSimplePtr filteredSpectrumList(new SpectrumListSimple);
 
         for (size_t i = 0; i < originalSpectrumList->size(); ++i) {
-            SpectrumPtr spectrum = originalSpectrumList->spectrum(i);
+            const bool getBinaryData = true;
+            SpectrumPtr spectrum = originalSpectrumList->spectrum(i, getBinaryData);
 
             int spectrumMSLevel = spectrum->cvParam(MS_ms_level).valueAs<int>();
             if (spectrumMSLevel == msLevel) {
@@ -336,7 +268,8 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
     int _oneBasedScanNumber = 1;
 
     for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
+        const bool getBinaryData = true;
+        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
 
         if (spectrum) {
             BinaryDataArrayPtr mzs = spectrum->getMZArray();
@@ -359,7 +292,7 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
                 const std::vector<double>& mzArray = mzs->data;
                 const std::vector<double>& intensityArray = intensities->data;
                 for (size_t j = 0; j < mzArray.size(); ++j) {
-                    FLOAT_T mz = mzArray[j];
+                    double mz = mzArray[j];
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
                     IndexedMassSpectralPeak spec_data(
                         mz,                 // mz value
@@ -376,7 +309,6 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
                     } else {
                         it->second.insert({scanIndex, spec_data});
                     }
-
                     Ms1ScanInfo scan = {oneBasedScanNumber, scanIndex, retentionTime};
                     index_results._ms1Scans[spectra_file].push_back(scan);
                 }
@@ -397,7 +329,8 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
     string _spectra_file(spectra_file);
 
     for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i);
+        const bool getBinaryData = true;
+        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
         if (spectrum) {
             int scanIndex;
             std::string scanId = getScanID(spectrum->id);
@@ -410,9 +343,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
             auto it = psm_datum.find(scanIndex);
 
             if (it != psm_datum.end()) {
-                double retentionTimeInSeconds = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
-
-                FLOAT_T retentionTimeInMinutes = retentionTimeInSeconds / 60.0;
+                double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
 
                 Identification identification;
 
@@ -421,7 +352,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
                 identification.peptideMass = it->second.peptide_mass_col;
                 identification.precursorCharge = it->second.charge_col;
                 identification.spectralFile = _spectra_file;
-                identification.ms2RetentionTimeInMinutes = retentionTimeInMinutes;
+                identification.ms2RetentionTimeInMinutes = retentionTime;
                 identification.scanId = it->second.scan_col;
                 identification.modifications = it->second.modifications;
                 allIdentifications.push_back(identification);
