@@ -52,8 +52,9 @@ const double TideLiteSearchApplication::RESCALE_FACTOR = 20.0;
 #define CHECK(x) GOOGLE_CHECK(x)
 // Things to do:
 
-boost::mutex mtx;
-std::queue<int> stack_threads;
+// ---- Rufino ---
+boost::mutex mtx; // mutex for thread guard
+std::queue<int> stack_threads; // queue to keep the thread already released
 
 TideLiteSearchApplication::TideLiteSearchApplication() {
   remove_index_ = "";
@@ -215,16 +216,17 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
 
 // Rufino.start() ------------------------------------------------------------------------------------------------------------
 
-  // Loop through spectrum files
+  // loop through spectrum files
   vector<InputFile> inputFiles = getInputFiles(input_files); // input file vector
   int spectrum_file_cnt = 0; // input file counter
  
   pb::Spectrum pb_spectrum; // spectrum message struct
   map<int, HeadedRecordReader*> spectrum_reader_; // map -> key = file number, value = pointer to source file
   vector<pair<pb::Spectrum, int>> spectrum_heap_; // vector -> first = neutral_mass, second = file number
-  int total_records = 0;
-  int record_counter = 0;
+  int total_records = 0; // used in the first for loop to check the number of records readed
+  int record_counter = 0; // used in the parallelization function to campare the number of records
 
+  // loop just to count the total number of records
   for (vector<InputFile>::iterator h = inputFiles.begin(); h != inputFiles.end(); h++) {
 
     string spectrum_records_file = h->SpectrumRecords;
@@ -248,7 +250,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     spectrum_reader_[spectrum_file_cnt] = new HeadedRecordReader(spectrum_records_file);
   }
 
-  //loop to initialize the spectrum heap with the first record from each file
+  // loop to initialize the spectrum heap with the first record from each file
   for (map<int, HeadedRecordReader*>::iterator it = spectrum_reader_.begin(); it != spectrum_reader_.end(); it++) {
     
     if (it->second->OK() && !it->second->Done()) {
@@ -258,28 +260,30 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     }
   }
 
-  /*
-    Loop while the heap is not empty, with the following sequence:
-    1. make a heap with the first record from every file
-    2. sort the heap in ascending order
-    3. pop the minimum value from heap
-    4. print the minimum value
-    5. delete the record
-    6. keep track from which file was the deleted record
-    7. locate the specific file in spectrum file map
-    8. read if possible the next spectrum record
-    9. push to the heap
-    10. goto step 1
-  */
+
 
   string spectrum__file = "";
-  int thread_index = 0;
-  bool thread_reg_initialized = false;
+  int thread_index = 0; // vector index to assign new task on thread
+  bool thread_reg_initialized = false; // flag to prepare the first task for each thread
 
-  std::vector<boost::thread> vector_threads; //make changes here
+  std::vector<boost::thread> vector_threads; // vector to keep track on threads
 
-
+  // make a heap with the first record from every file
   make_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+
+  /*
+    Loop while the heap is not empty, with the following sequence:
+   
+    1. sort the heap in ascending order
+    2. pop the minimum value from heap
+    3. print the minimum value
+    4. delete the record
+    5. keep track from which file was the deleted record
+    6. locate the specific file in spectrum file map
+    7. read if possible the next spectrum record
+    8. push to the heap
+    9. goto step 1
+  */
 
   while (!spectrum_heap_.empty()){
 
@@ -299,9 +303,12 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
       push_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
     }
 
+// ---------------------------------------------------------------------------------------------------------------------------
+// Threads
 
     if (!thread_reg_initialized) {
 
+      // this part of the comparition executes many times ad the number of threads exists, is the intial assigment of tasks
       vector_threads.push_back(boost::thread(boost::bind(&TideLiteSearchApplication::spectrum_search, this, pb_spectrum, APQ[thread_index], spectrum__file, last_element.second, thread_index)));
       ++thread_index;
 
@@ -309,6 +316,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
 
         thread_reg_initialized = true;
 
+        // this cicle executes all the tasks assigned to threads
         for (int a = 0; a < vector_threads.size(); a++ ) {
           
           if (vector_threads[a].joinable() ) {
@@ -319,6 +327,8 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
       } 
     }else {
 
+      // this part executes after the first assigment, on every step it checks the availability of threads in queue and assigns
+      // new task to thread already released
       if (!stack_threads.empty()) {
         thread_index = stack_threads.front();
         stack_threads.pop();
@@ -348,12 +358,10 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   spectrum_reader_.clear();
   spectrum_heap_.clear();
 
-  // ---------------------------------------------------------------------------------------------------------------------------
-  // Threads
-
-  
 
 // Rufino.end() -----------------------------------------------------------------------------------------------------------
+
+
 
   // Convert the input spectrum data files to spectrumRecords if needed
 /*  vector<InputFile> sr = getInputFiles(input_files);
@@ -431,22 +439,25 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   return 0;
 }
 
-//void TideLiteSearchApplication::spectrum_search(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt) {
+
+// --- Rufino.start() --- //
 
 void TideLiteSearchApplication::spectrum_search(pb::Spectrum pb_spectra, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt, int th_num) {
   
-  //boost::unique_lock<boost::mutex> lock(mtx);
+  // mutex for data guard
   boost::lock_guard<boost::mutex> lock(mtx);
-
-  //mtx.lock();
 
   carp(CARP_INFO, "Thread num: %d, File number: %d, Item to delete: %lf", th_num, spectrum_file_cnt, pb_spectra.neutral_mass());
 
+  // 10ms delay before release the currect thread
   boost::this_thread::sleep(boost::posix_time::time_duration(0,0,0,10));
 
+  // push the thread number to the queue for new assigment
   stack_threads.push(th_num);
-  //mtx.unlock();
   
+  // --- Rufino.end() --- //
+
+
 
   /*
   // Search one spectrum against its candidate peptides
