@@ -127,6 +127,13 @@ void SpectralCounts::getParameterValues() {
                      "that the --input-ms2 option specify a file.");
   }
 
+  if ((measure_ == MEASURE_DNSAF || measure_ == MEASURE_NSAF) &&
+      (database_name_ == "")) {
+    carp(CARP_FATAL, "The NSAF and dNSAF computation for spectral-counts "
+                      "requires that the --protein-database option specify "
+                      "a file.");
+  }
+
   bin_width_ = Params::GetDouble("mz-bin-width");
   
   threshold_type_ = get_threshold_type_parameter("threshold-type");
