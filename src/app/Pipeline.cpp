@@ -32,7 +32,7 @@ int PipelineApplication::main(int argc, char** argv) {
   string database = Params::GetString("peptide source");
 
   vector<string> resultsFiles;
-  string post_processor_name;
+  COMMAND_T post_processor_command;
   while (!apps_.empty()) {
     CruxApplication* cur = apps_.front();
     carp(CARP_INFO, "Running %s...", cur->getName().c_str());
@@ -47,10 +47,10 @@ int PipelineApplication::main(int argc, char** argv) {
         break;
       case QVALUE_COMMAND:
       case PERCOLATOR_COMMAND:
-        ret = runPostProcessor(cur, resultsFiles, post_processor_name);
+        ret = runPostProcessor(cur, resultsFiles, post_processor_command);
         break;
       case SPECTRAL_COUNTS_COMMAND:
-        ret = runSpectralCounts(cur, post_processor_name);
+        ret = runSpectralCounts(cur, post_processor_command);
         break;
       default:
         carp(CARP_FATAL, "Pipeline is not set up to run command '%s'",
@@ -207,7 +207,7 @@ int PipelineApplication::runSearch(
 int PipelineApplication::runPostProcessor(
   CruxApplication* app,
   const vector<string>& resultsFiles,
-  string& post_processor_name
+  COMMAND_T& post_processor_name
 ) {
   bool assignConfidence = app->getCommand() == QVALUE_COMMAND;
   bool percolator = app->getCommand() == PERCOLATOR_COMMAND;
@@ -227,7 +227,7 @@ int PipelineApplication::runPostProcessor(
         targetFiles.push_back(*i);
       }
     }
-    post_processor_name = "assign-confidence";
+    post_processor_name = QVALUE_COMMAND;
     return ((AssignConfidenceApplication*)app)->main(targetFiles);
   }
 
@@ -243,17 +243,20 @@ int PipelineApplication::runPostProcessor(
     }
     carp(CARP_INFO, "Finished make-pin.");
   }
-  post_processor_name = "percolator";
+  post_processor_name = PERCOLATOR_COMMAND;
   return ((PercolatorApplication*)app)->main(pin, "", "pipeline");
 }
 
 int PipelineApplication::runSpectralCounts(
   CruxApplication* app,
-  string post_processor_name
+  COMMAND_T post_processor_command
 ) {
-  string outputBase = make_file_path(app->getName());
-  std::cout << outputBase << std::endl;
-  return ((SpectralCounts*)app)->main("pipeline/percolator.target.psms.txt");
+  if (post_processor_command == PERCOLATOR_COMMAND) {
+    return ((SpectralCounts*)app)->main("pipeline/percolator.target.psms.txt");
+  }
+  else {
+    return ((SpectralCounts*)app)->main("pipeline/assign-confidence.target.txt");
+  }
 }
 
 string PipelineApplication::getName() const {
