@@ -784,19 +784,18 @@ void SpectralCounts::writeRankedProteins() {
       } else {
       */
       for (MetaToRank::iterator iter = meta_protein_ranks_.begin();
-        iter != meta_protein_ranks_.end();
-	++iter) {
-	  MetaProtein proteins = iter->first;
-	  for (MetaProtein::iterator protein_it = proteins.begin();
-	       protein_it != proteins.end(); ++protein_it) {
-	    Protein* protein = (*protein_it);
-	    if (protein->getId() == it->first->getId()) {
-	      carp(CARP_DEBUG, "Found protein %s",protein->getId().c_str());
-	      rank = iter->second;
-	    }
-	  }
+           iter != meta_protein_ranks_.end();
+           ++iter) {
+        MetaProtein proteins = iter->first;
+        for (MetaProtein::iterator protein_it = proteins.begin();
+             protein_it != proteins.end(); ++protein_it) {
+          Protein* protein = (*protein_it);
+          if (protein->getId() == it->first->getId()) {
+            carp(CARP_DEBUG, "Found protein %s", protein->getId().c_str());
+            rank = iter->second;
+          }
+        }
       }
-      // }
     }
     proteins.push_back(boost::make_tuple(it->second, it->first, rank));
   }
@@ -902,8 +901,8 @@ void SpectralCounts::getMetaRanks() {
       cur_rank = idx+1;
     }
 
-    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i",cur_score,cur_rank);
-     for (MetaProtein::iterator protein_it = proteins.begin();
+    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i", cur_score,cur_rank);
+    for (MetaProtein::iterator protein_it = proteins.begin();
          protein_it != proteins.end(); ++protein_it) {
       Protein* protein = (*protein_it);
       FLOAT_T score = protein_scores_[protein];
