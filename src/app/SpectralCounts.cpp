@@ -40,6 +40,10 @@ SpectralCounts::~SpectralCounts() {
   delete output_;
 }
 
+int SpectralCounts::main(int argc, char** argv) {
+  return(main(Params::GetString("input PSMs")));
+}
+
 /**
  * Given a collection of scored PSMs, print a list of proteins
  * ranked by their a specified score. Spectral-counts supports two
@@ -50,7 +54,8 @@ SpectralCounts::~SpectralCounts() {
  * and Normalized Spectral Index (SIN). 
  * \returns 0 on successful completion.
  */
-int SpectralCounts::main(int argc, char** argv) {
+int SpectralCounts::main(const string input_file) {
+  psm_file_ = input_file;
   getParameterValues(); // all the get_<type>_parameter calls here
 
   // open output files
@@ -114,7 +119,6 @@ int SpectralCounts::main(int argc, char** argv) {
  * as member variables.
  */
 void SpectralCounts::getParameterValues() {
-  psm_file_ = Params::GetString("input PSMs");
   threshold_ = Params::GetDouble("threshold");
   database_name_ = Params::GetString("protein-database");
   unique_mapping_ = Params::GetBool("unique-mapping");
