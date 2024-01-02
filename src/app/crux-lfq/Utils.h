@@ -43,19 +43,14 @@ extern double DISCRIMINATION_FACTOR_TO_CUT_PEAK;    // Default value is 0.6
 extern bool QUANTIFY_AMBIGUOUS_PEPTIDES;            // Default value is false
 extern bool USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT;  // Default value is false
 extern bool NORMALIZE;                              // Default value is false
-// MBR settings
-// extern bool MATCH_BETWEEN_RUNS;                  // Default value is false
-// extern double MATCH_BETWEEN_RUNS_PPM_TOLERANCE;  // Default value is 10.0
-// extern double MAX_MBR_WINDOW;                    // Default value is 2.5
-// extern bool REQUIRE_MSMS_ID_IN_CONDITION;        // Default value is false
 
 string calcFormula(string seq);
 
 struct Identification {
     string sequence;
-    double peptideMass = 0.0;
+    double peptideMass;
     double monoIsotopicMass;
-    double peakFindingMass;
+    double peakFindingMass = 0.0;
     int precursorCharge;
     string spectralFile;
     double ms2RetentionTimeInMinutes;
@@ -65,6 +60,9 @@ struct Identification {
         0;  // This may be removed cos it's redundant
     bool useForProteinQuant = true;
     unordered_set<ProteinGroup> proteinGroups;
+
+    Identification()
+        : peptideMass(0), monoIsotopicMass(0), peakFindingMass(0), precursorCharge(0), ms2RetentionTimeInMinutes(0), scanId(0), posteriorErrorProbability(0), useForProteinQuant(false) {}
 
     bool operator==(const Identification& other) const {
         // Implement the logic for comparison
@@ -77,6 +75,55 @@ struct Identification {
                scanId == other.scanId && modifications == other.modifications && posteriorErrorProbability == other.posteriorErrorProbability &&
                useForProteinQuant == other.useForProteinQuant &&
                proteinGroups == other.proteinGroups;
+    }
+
+    Identification& operator=(const Identification& other) {
+        if (this != &other) {
+            sequence = other.sequence;
+            peptideMass = other.peptideMass;
+            monoIsotopicMass = other.monoIsotopicMass;
+            peakFindingMass = other.peakFindingMass;
+            precursorCharge = other.precursorCharge;
+            spectralFile = other.spectralFile;
+            ms2RetentionTimeInMinutes = other.ms2RetentionTimeInMinutes;
+            scanId = other.scanId;
+            modifications = other.modifications;
+            posteriorErrorProbability = other.posteriorErrorProbability;
+            useForProteinQuant = other.useForProteinQuant;
+            proteinGroups = other.proteinGroups;
+        }
+        return *this;
+    }
+
+    Identification(const Identification& other) {
+        sequence = other.sequence;
+        peptideMass = other.peptideMass;
+        monoIsotopicMass = other.monoIsotopicMass;
+        peakFindingMass = other.peakFindingMass;
+        precursorCharge = other.precursorCharge;
+        spectralFile = other.spectralFile;
+        ms2RetentionTimeInMinutes = other.ms2RetentionTimeInMinutes;
+        scanId = other.scanId;
+        modifications = other.modifications;
+        posteriorErrorProbability = other.posteriorErrorProbability;
+        useForProteinQuant = other.useForProteinQuant;
+        proteinGroups = other.proteinGroups;
+    }
+
+    Identification(Identification&& other) noexcept
+        : sequence(std::move(other.sequence)),
+          peptideMass(other.peptideMass),
+          monoIsotopicMass(other.monoIsotopicMass),
+          peakFindingMass(other.peakFindingMass),
+          precursorCharge(other.precursorCharge),
+          spectralFile(std::move(other.spectralFile)),
+          ms2RetentionTimeInMinutes(other.ms2RetentionTimeInMinutes),
+          scanId(other.scanId),
+          modifications(std::move(other.modifications)),
+          posteriorErrorProbability(other.posteriorErrorProbability),
+          useForProteinQuant(other.useForProteinQuant),
+          proteinGroups(std::move(other.proteinGroups)) {
+        // Reset other's members to default values, if necessary
     }
 };
 
@@ -141,7 +188,7 @@ struct PSM {
     int scan_col;
     int charge_col;
     double peptide_mass_col;
-    double spectrum_precursor_mz_col;
+    double monoisotopic_mass_col;
     string modifications;
 };
 
@@ -155,12 +202,11 @@ enum class DetectionType {
 };
 
 unordered_map<string, vector<pair<double, double>>>
-calculateTheoreticalIsotopeDistributions(
-    const vector<Identification>& allIdentifications);
+calculateTheoreticalIsotopeDistributions(vector<Identification>& allIdentifications);
 
-void setPeakFindingMass(vector<Identification>& allIdentifications,
-                        unordered_map<string, vector<pair<double, double>>>&
-                            modifiedSequenceToIsotopicDistribution);
+// void setPeakFindingMass(vector<Identification>& allIdentifications,
+// unordered_map<string, vector<pair<double, double>>>&
+// modifiedSequenceToIsotopicDistribution);
 
 vector<int> createChargeStates(
     const vector<Identification>& allIdentifications);
@@ -168,8 +214,18 @@ vector<int> createChargeStates(
 // Forward declaration for a class from results.h
 class CruxLFQResults;
 
+// void quantifyMs2IdentifiedPeptides(
+//     string spectraFile, const vector<Identification>& allIdentifications,
+//     const vector<int>& chargeStates,
+//     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+//     const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+//     unordered_map<string, vector<pair<double, double>>>&
+//         modifiedSequenceToIsotopicDistribution,
+//     CruxLFQResults& lfqResults);
+
 void quantifyMs2IdentifiedPeptides(
-    string spectraFile, const vector<Identification>& allIdentifications,
+    string spectraFile,
+    const vector<Identification>& allIdentifications,
     const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
@@ -182,8 +238,20 @@ double toMz(double mass, int charge);
 double toMass(double massToChargeRatio, int charge);
 
 IndexedMassSpectralPeak* getIndexedPeak(
-    double theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
+    const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState, map<int, map<int, const IndexedMassSpectralPeak>>& indexedPeaks);
+
+// void processRange(int start, int end,
+//                   const vector<Identification>& ms2IdsForThisFile,
+//                   const string& spectralFile, const vector<int>& chargeStates,
+//                   vector<ChromatographicPeak>& chromatographicPeaks,
+//                   PpmTolerance& peakfindingTol,
+//                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+//                   const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+//                   PpmTolerance& ppmTolerance,
+//                   unordered_map<string, vector<pair<double, double>>>&
+//                       modifiedSequenceToIsotopicDistribution,
+//                   CruxLFQResults& lfqResults);
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
@@ -198,7 +266,7 @@ void processRange(int start, int end,
                   CruxLFQResults& lfqResults);
 
 vector<IndexedMassSpectralPeak*> peakFind(
-    double idRetentionTime, double mass, int charge, const string& spectra_file,
+    double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
