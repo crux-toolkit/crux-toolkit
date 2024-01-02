@@ -97,6 +97,9 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
 
+    unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
+
+    vector<int> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
     for (const string& spectra_file : spec_files) {
         SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
         carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->size(), spectra_file.c_str());
@@ -105,11 +108,9 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
-        carp(CARP_INFO, "Calculating theoretical isotopic distributions for %s", spectra_file.c_str());
-        unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
+        // CruxLFQ::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
 
-        CruxLFQ::setPeakFindingMass(allIdentifications, modifiedSequenceToIsotopicDistribution);
-        vector<int> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
+        carp(CARP_INFO, "Finished calculating theoretical isotopic distributions for %s", spectra_file.c_str());
 
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
@@ -293,6 +294,7 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
                 const std::vector<double>& intensityArray = intensities->data;
                 for (size_t j = 0; j < mzArray.size(); ++j) {
                     double mz = mzArray[j];
+                    carp(CARP_INFO, "mz: %f", mz);
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
                     IndexedMassSpectralPeak spec_data(
                         mz,                 // mz value
@@ -318,6 +320,7 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
             _oneBasedScanNumber++;
         }
     }
+    exit(0);
     return index_results;
 }
 
@@ -348,7 +351,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
                 Identification identification;
 
                 identification.sequence = it->second.sequence_col;
-                identification.monoIsotopicMass = it->second.peptide_mass_col;
+                identification.monoIsotopicMass = it->second.monoisotopic_mass_col;
                 identification.peptideMass = it->second.peptide_mass_col;
                 identification.precursorCharge = it->second.charge_col;
                 identification.spectralFile = _spectra_file;
