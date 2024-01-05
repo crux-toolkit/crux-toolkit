@@ -347,7 +347,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
                 Identification identification;
 
                 identification.sequence = it->second.sequence_col;
-                identification.monoIsotopicMass = it->second.peptide_mass_col;
+                identification.monoIsotopicMass = it->second.monoisotopic_mass_col;
                 identification.peptideMass = it->second.peptide_mass_col;
                 identification.precursorCharge = it->second.charge_col;
                 identification.spectralFile = _spectra_file;
