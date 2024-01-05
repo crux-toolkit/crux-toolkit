@@ -56,7 +56,7 @@ map<int, PSM> create_psm_map(const string& psm_file,
                        scan_col,
                        charge_col,
                        peptide_mass_col,
-                       spectrum_precursor_mz_col,
+                       peptide_mass_col,  // Protein Mass is the MonoIsotopic Mass --- Peptide Mass
                        modifications_col};
             psm_datum[scan_col] = psm;
         }
@@ -74,7 +74,7 @@ map<int, PSM> create_psm_map(const string& psm_file,
                        scan_col,
                        charge_col,
                        peptide_mass_col,
-                       spectrum_precursor_mz_col,
+                       peptide_mass_col,
                        default_modifications_col};
             psm_datum[scan_col] = psm;
         }
@@ -92,7 +92,7 @@ map<int, PSM> create_psm_map(const string& psm_file,
                        scan_col,
                        charge_col,
                        peptide_mass_col,
-                       spectrum_precursor_mz_col,
+                       peptide_mass_col,
                        default_modifications_col};
             psm_datum[scan_col] = psm;
         }
@@ -360,9 +360,6 @@ calculateTheoreticalIsotopeDistributions(
         for (auto* identification : identifications.second) {
             identification->peakFindingMass =
                 identification->monoIsotopicMass + mostAbundantIsotopeShift;
-            carp(CARP_INFO, "mostAbundantIsotopeShift: %f", mostAbundantIsotopeShift);
-            carp(CARP_INFO, "identification.monoIsotopicMass: %f", identification->monoIsotopicMass);
-            carp(CARP_INFO, "identification.peakFindingMass: %f", identification->peakFindingMass);
         }
     }
 
@@ -434,7 +431,6 @@ void processRange(int start, int end,
                 chargeState != identification.precursorCharge) {
                 continue;
             }
-            carp(CARP_INFO, "peak finding mass: %f", identification.peakFindingMass);
             vector<IndexedMassSpectralPeak*> xic = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
@@ -534,7 +530,7 @@ void quantifyMs2IdentifiedPeptides(
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
 
     vector<Identification> ms2IdsForThisFile;
-    carp(CARP_INFO, "peak finding mass: %f", allIdentifications.front().peakFindingMass);
+    
     std::copy_if(
         allIdentifications.begin(),
         allIdentifications.end(),
@@ -542,8 +538,7 @@ void quantifyMs2IdentifiedPeptides(
         [&spectraFile](const Identification& id) {
             return id.spectralFile == spectraFile;
         });
-    carp(CARP_INFO, "peak finding mass: %f", allIdentifications.front().peakFindingMass);
-    carp(CARP_INFO, "MS2 peak finding mass: %f", ms2IdsForThisFile.front().peakFindingMass);
+    
     if (ms2IdsForThisFile.empty()) {
         return;
     }
@@ -586,72 +581,37 @@ IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState,
     const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks) {
-    carp(CARP_INFO, "getIndexedPeak");
-    // std::lock_guard<std::mutex> lock(mtx);
     IndexedMassSpectralPeak* bestPeak = nullptr;
-    carp(CARP_INFO, "-theorMass: %f", theorMass);
+
     // Calculate the maximum value using tolerance
     double maxValue = tolerance.GetMaximumValue(theorMass);
-    carp(CARP_INFO, "-maxValue: %f", maxValue);
     double maxMzValue = toMz(maxValue, chargeState);
-    carp(CARP_INFO, "maxMzValue: %f", maxMzValue);
     // Calculate ceilingMz by rounding maxMzValue up to the nearest integer
     int ceilingMz = static_cast<int>(std::ceil(maxMzValue * BINS_PER_DALTON));
 
     double minValue = tolerance.GetMinimumValue(theorMass);
-    carp(CARP_INFO, "-minValue: %f", minValue);
     double minMzValue = toMz(minValue, chargeState);
-    carp(CARP_INFO, "minMzValue: %f", minMzValue);
     int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
 
-    carp(CARP_INFO, "theorMass: %f", theorMass);
-    carp(CARP_INFO, "chargeState: %d", chargeState);
-    carp(CARP_INFO, "floorMz: %d and ceilingMz: %d", floorMz, ceilingMz);
-    exit(0);
-    // for (int j = floorMz; j <= ceilingMz; j++) {
-    //     for (auto id : indexedPeaks) {
-    //         carp(CARP_INFO, "indexPeaks at %d size : %d", id.first, id.second.size());
-    //         carp(CARP_INFO, "floorMz: %d", floorMz);
-    //         carp(CARP_INFO, "ceilingMz: %d", ceilingMz);
-    //     }
-    // carp(CARP_INFO, "indexPeaks at %d size : %d", j, indexedPeaks.count(j));
-    // carp(CARP_INFO, "indexPeaks at %d size : %d", j, indexedPeaks[j].size());
-    // exit(0);
-    // if (j < indexedPeaks.size() && indexedPeaks.count(j) > 0) {
-    // if (!indexedPeaks.at(j).empty()) {
-    // for (auto id : indexedPeaks) {
-    //     carp(CARP_INFO, "indexPeaks at %d size : %d and j is: %d", id.first, id.second.size(), j);
-    // }
-    //     map<int, IndexedMassSpectralPeak> bin = indexedPeaks.at(j);  // Get the bin
-    //     carp(CARP_INFO, "bin size: %d", bin.size());
-    //     auto startIterator = bin.find(zeroBasedScanIndex);
-    //     carp(CARP_INFO, "start iterator: %d", startIterator->first);
-    //     carp(CARP_INFO, "start iterator: %d", startIterator->second.zeroBasedMs1ScanIndex);
-    //     carp(CARP_INFO, "Bin iterator: %f", bin.end()->first);
-    //     carp(CARP_INFO, "Bin iterator: %f", bin.end()->second.zeroBasedMs1ScanIndex);
-    //     // exit(0);
-    //     for (auto it = startIterator; it != bin.end(); ++it) {
-    //         carp(CARP_INFO, "it: %d", it->first);
-    //         auto _peak = it->second;
-    //         carp(CARP_INFO, "peak: %f", _peak.mz);
-    //         exit(0);
-    //         if (_peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
-    //             break;
-    //         }
+    for (int j = floorMz; j <= ceilingMz; j++) {
+        if (indexedPeaks.count(j) > 0 && indexedPeaks.at(j).size() > 0) {
+            map<int, IndexedMassSpectralPeak> bin = indexedPeaks.at(j);
+            auto startIterator = bin.find(zeroBasedScanIndex);
+            for (auto it = startIterator; it != bin.end(); ++it) {
+                auto _peak = it->second;
+                if (_peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
+                    break;
+                }
 
-    //         double expMass = toMass(_peak.mz, chargeState);
+                double expMass = toMass(_peak.mz, chargeState);
 
-    //         if (tolerance.Within(expMass, theorMass) &&
-    //             _peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
-    //             (bestPeak == nullptr ||
-    //              std::abs(expMass - theorMass) <
-    //                  std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
-    //             bestPeak = &_peak;
-    //         }
-    //     }
-    //     // }
-    // }
-    // return bestPeak;
+                if (tolerance.Within(expMass, theorMass) && _peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex && (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
+                    bestPeak = &_peak;
+                }
+            }
+        }
+    }
+    return bestPeak;
 }
 
 vector<IndexedMassSpectralPeak*> peakFind(
@@ -674,11 +634,6 @@ vector<IndexedMassSpectralPeak*> peakFind(
     // go right
     int missedScans = 0;
     for (int t = precursorScanIndex; t < ms1Scans.size(); t++) {
-        // for (auto id : indexedPeaks) {
-        //     carp(CARP_INFO, "indexPeaks at %d size : %d", id.first, id.second.size());
-        // }
-        // exit(0);
-        carp(CARP_INFO, "about to get indexed peak with mass: %f", mass);
         auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
         if (peak == nullptr && t != precursorScanIndex) {
             missedScans++;
