@@ -318,6 +318,10 @@ calculateTheoreticalIsotopeDistributions(
             *std::max_element(abundances.begin(), abundances.end());
 
         for (int i = 0; i < masses.size(); i++) {
+            masses[i] += (monoisotopic - dist.getMonoMass());
+        }
+
+        for (int i = 0; i < masses.size(); i++) {
             // Calculate the expected isotopic mass shift for this peptide
             masses[i] -= monoisotopic;
 
@@ -365,31 +369,6 @@ calculateTheoreticalIsotopeDistributions(
 
     return modifiedSequenceToIsotopicDistribution;
 }
-
-// void setPeakFindingMass(vector<Identification>& allIdentifications,
-//                         unordered_map<string, vector<pair<double, double>>>&
-//                             modifiedSequenceToIsotopicDistribution) {
-//     for (auto& identification : allIdentifications) {
-//         const string& sequence = identification.sequence;
-
-//         // Find the isotope where normalized abundance is 1
-//         double mostAbundantIsotopeShift = 0.0;
-
-//         const auto& isotopicDistribution =
-//             modifiedSequenceToIsotopicDistribution.find(sequence);
-//         if (isotopicDistribution != modifiedSequenceToIsotopicDistribution.end()) {
-//             for (const auto& item : isotopicDistribution->second) {
-//                 if (item.second == 1.0) {
-//                     mostAbundantIsotopeShift = item.first;
-//                     break;
-//                 }
-//             }
-//         }
-
-//         identification.peakFindingMass =
-//             identification.monoIsotopicMass + mostAbundantIsotopeShift;
-//     }
-// }
 
 vector<int> createChargeStates(
     const vector<Identification>& allIdentifications) {
@@ -530,7 +509,7 @@ void quantifyMs2IdentifiedPeptides(
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
 
     vector<Identification> ms2IdsForThisFile;
-    
+
     std::copy_if(
         allIdentifications.begin(),
         allIdentifications.end(),
@@ -538,7 +517,7 @@ void quantifyMs2IdentifiedPeptides(
         [&spectraFile](const Identification& id) {
             return id.spectralFile == spectraFile;
         });
-    
+
     if (ms2IdsForThisFile.empty()) {
         return;
     }
