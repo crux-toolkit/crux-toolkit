@@ -31,12 +31,12 @@
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
 #include <boost/filesystem.hpp>
+#include <boost/bind.hpp>
 #ifdef _MSC_VER
 #include <boost/wintls.hpp>
 #else
 #ifndef __APPLE__
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/asio/ssl.hpp>
 #endif
 #endif
