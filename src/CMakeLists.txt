@@ -8,6 +8,13 @@ if (APPLE)
     find_library(FOUNDATION Foundation)
     set (ASYNCPOST util/AsyncPost.mm)
 endif(APPLE)
+if (NOT APPLE AND NOT WIN32)
+  set(
+    SSL_SUPPORT
+    crypto
+    ssl
+  )
+endif (NOT APPLE AND NOT WIN32)
 
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
@@ -495,6 +502,7 @@ else()
     boost_thread
     dl
     m
+    ${SSL_SUPPORT}
     pthread
     hdf5pp
     hdf5

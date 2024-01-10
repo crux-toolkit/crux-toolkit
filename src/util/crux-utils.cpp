@@ -1431,7 +1431,7 @@ public:
       boost::asio::ssl::context& context,
 #endif
       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-      std::stringstream jsonGA4Data;
+      const std::string jsonGA4Data
   ) : socket_(io_service, context)
   {
     jsonGA4Data_ = jsonGA4Data;
@@ -1467,8 +1467,7 @@ public:
   {
       if (!error)
       {
-          jsonGA4Data_.seekp(0, std::ios::end);
-          std::stringstream::pos_type json_length = jsonGA4Data_.tellp();
+          size_t json_length = jsonGA4Data_.size();
 
           // Contruct POST headers and append JSON as body
           std::stringstream post_content(""); 
@@ -1482,7 +1481,7 @@ public:
             << "Content-Type: application/json\n"
             << "Content-Length: " << json_length
             << "\n\n"
-            << jsaonGA4Data_.str();
+            << jsonGA4Data_;
 
           // Request the POST
           boost::asio::async_write(socket_,
@@ -1544,13 +1543,14 @@ private:
 #endif
   boost::asio::streambuf reply_;
   std::string appName_;
+  std::string jsonGA4Data_;
 };
 
 #endif
 
 // Build string containing JSON data for POST to GA4 updating Crux Usage
 
-std::stringstream generateJSONGA4Data(const std::string appName) {
+std::string generateJSONGA4Data(const std::string appName) {
     // Construct JSON for POST
     std::stringstream jsonGA4Data;
     jsonGA4Data 
@@ -1578,7 +1578,7 @@ std::stringstream generateJSONGA4Data(const std::string appName) {
       << "  ]"
       << "}";
 
-    return jsonGA4Data;
+    return jsonGA4Data.str();
 }
 
 // Post usage data to Google Analytics 4 using async i/o
@@ -1586,13 +1586,13 @@ std::stringstream generateJSONGA4Data(const std::string appName) {
 // https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
 // Note that we use different a different SSL support package (wintls) on Windows.
 void postToGA4(const std::string& appName) {
-    std::stringstream jsonGA4Data = generateJSONGA4Data(appName);
+    std::string jsonGA4Data = generateJSONGA4Data(appName);
 #ifdef __APPLE__
   const char *url = 
       "https:www.google-analytics.com/mp/collect?"
       "measurement_id=G-V7XKGGFPYX&"
       "api_secret=UIf4l54KSbK84hPRWng2Yg";
-  performAsyncPOSTRequest(url, jsonGA4Data.str().c_str());
+  performAsyncPOSTRequest(url, jsonGA4Data.c_str());
 #else
     try
     {
