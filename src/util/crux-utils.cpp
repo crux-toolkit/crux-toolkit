@@ -31,12 +31,14 @@
 #include "WinCrux.h"
 #include "io/LineFileReader.h"
 #include <boost/filesystem.hpp>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #ifdef _MSC_VER
 #include <boost/wintls.hpp>
 #else
+#ifndef __APPLE__
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <boost/asio/ssl.hpp>
+#endif
 #endif
 #include <regex>
 #include "FileUtils.h"
@@ -44,6 +46,10 @@
 
 #define ULONG_MAX 0xFFFFFFFE
 #include <pwiz/utility/misc/SHA1.h>
+
+#ifdef __APPLE__
+extern "C" void performAsyncPOSTRequest(const char *urlString, const char *jsonString);
+#endif
 
 using namespace std;
 
@@ -1413,6 +1419,7 @@ void get_files_from_list(
   }
 }
 
+#ifndef __APPLE__
 class Client
 {
 public:
@@ -1424,10 +1431,10 @@ public:
       boost::asio::ssl::context& context,
 #endif
       boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-      std::string appName
+      std::stringstream jsonGA4Data;
   ) : socket_(io_service, context)
   {
-    appName_ = appName;
+    jsonGA4Data_ = jsonGA4Data;
 #ifdef _MSC_VER
     boost::asio::async_connect(socket_.next_layer(), endpoint_iterator,
 #else
@@ -1460,34 +1467,8 @@ public:
   {
       if (!error)
       {
-          // Construct JSON for POST
-          std::stringstream body;
-          body
-            << "{"
-            << "  \"client_id\" : \"332557735.1693348426\","
-            << "  \"events\" : ["
-            << "    {"
-            << "      \"name\" : \"crux\","
-            << "      \"params\" : {"
-            << "        \"tool\" : \"" << appName_ << "\","
-            << "        \"platform\" : \""
-#ifdef _MSC_VER
-            <<            "win"
-#elif __APPLE__
-            <<            "mac"
-#else
-            <<            "linux"
-#endif
-            <<            "\","
-            << "        \"version\" : \""
-            <<            CRUX_VERSION
-            << "\""
-            << "      }"
-            << "    }"
-            << "  ]"
-            << "}";
-          body.seekp(0, std::ios::end);
-          std::stringstream::pos_type body_length = body.tellp();
+          jsonGA4Data_.seekp(0, std::ios::end);
+          std::stringstream::pos_type json_length = jsonGA4Data_.tellp();
 
           // Contruct POST headers and append JSON as body
           std::stringstream post_content(""); 
@@ -1499,9 +1480,9 @@ public:
             << "Host: www.google-analytics.com\n"
             << "accept: */*\n"
             << "Content-Type: application/json\n"
-            << "Content-Length: " << body_length
+            << "Content-Length: " << json_length
             << "\n\n"
-            << body.str();
+            << jsaonGA4Data_.str();
 
           // Request the POST
           boost::asio::async_write(socket_,
@@ -1565,12 +1546,54 @@ private:
   std::string appName_;
 };
 
+#endif
+
+// Build string containing JSON data for POST to GA4 updating Crux Usage
+
+std::stringstream generateJSONGA4Data(const std::string appName) {
+    // Construct JSON for POST
+    std::stringstream jsonGA4Data;
+    jsonGA4Data 
+      << "{"
+      << "  \"client_id\" : \"332557735.1693348426\","
+      << "  \"events\" : ["
+      << "    {"
+      << "      \"name\" : \"crux\","
+      << "      \"params\" : {"
+      << "        \"tool\" : \"" << appName << "\","
+      << "        \"platform\" : \""
+#ifdef _MSC_VER
+      <<            "win"
+#elif __APPLE__
+      <<            "mac"
+#else
+      <<            "linux"
+#endif
+      <<            "\","
+      << "        \"version\" : \""
+      <<            CRUX_VERSION
+      << "\""
+      << "      }"
+      << "    }"
+      << "  ]"
+      << "}";
+
+    return jsonGA4Data;
+}
+
 // Post usage data to Google Analytics 4 using async i/o
 // Information on the Google GA4 measurement protocol can be found here: 
 // https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag
 // Note that we use different a different SSL support package (wintls) on Windows.
-void postToAnalytics(const std::string& appName)
-{
+void postToGA4(const std::string& appName) {
+    std::stringstream jsonGA4Data = generateJSONGA4Data(appName);
+#ifdef __APPLE__
+  const char *url = 
+      "https:www.google-analytics.com/mp/collect?"
+      "measurement_id=G-V7XKGGFPYX&"
+      "api_secret=UIf4l54KSbK84hPRWng2Yg";
+  performAsyncPOSTRequest(url, jsonGA4Data.str().c_str());
+#else
     try
     {
 
@@ -1587,7 +1610,7 @@ void postToAnalytics(const std::string& appName)
         ctx.set_default_verify_paths();
 #endif       
 
-        Client c(io_service, ctx, iterator, appName);
+        Client c(io_service, ctx, iterator, jsonGA4Data);
         io_service.run();
     } 
     catch (system_error &e)
@@ -1596,6 +1619,7 @@ void postToAnalytics(const std::string& appName)
     }
     catch (...) {
     }
+#endif
 }
 
 

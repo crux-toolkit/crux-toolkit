@@ -3,6 +3,12 @@ cmake_policy(VERSION 3.15)
 
 use_cxx11()
 
+if (APPLE)
+    enable_language(OBJC)
+    find_library(FOUNDATION Foundation)
+    set (ASYNCPOST util/AsyncPost.mm)
+endif(APPLE)
+
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/tide)
@@ -92,6 +98,7 @@ set (
   app/CometApplication.cpp
   app/ComputeQValues.cpp
   app/CreateDocs.cpp
+  ${ASYNCPOST}
   util/crux-utils.cpp
   model/Database.cpp
   model/DatabaseProteinIterator.cpp
@@ -488,14 +495,13 @@ else()
     boost_thread
     dl
     m
-    crypto
-    ssl
     pthread
     hdf5pp
     hdf5
     ${RT_LIBRARY}
     SHA1
     zlib
+    ${FOUNDATION}
   )
 endif(WIN32 AND NOT CYGWIN)
 

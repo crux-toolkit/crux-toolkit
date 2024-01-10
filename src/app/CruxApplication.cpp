@@ -109,7 +109,7 @@ void CruxApplication::initialize(int argc, char** argv) {
   GlobalParams::set();
   if (!Params::GetBool("no-analytics")) {
     // Post usage data to Google Analytics 4 using async i/o
-    postToAnalytics(getName());
+    postToGA4(getName());
   }
 
   if (needsOutputDirectory()) {
