@@ -239,7 +239,7 @@ double toMass(double massToChargeRatio, int charge);
 
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
-    int chargeState, map<int, map<int, const IndexedMassSpectralPeak>>& indexedPeaks);
+    int chargeState, map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
 
 // void processRange(int start, int end,
 //                   const vector<Identification>& ms2IdsForThisFile,

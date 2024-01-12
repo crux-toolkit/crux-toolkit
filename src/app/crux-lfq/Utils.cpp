@@ -575,8 +575,11 @@ IndexedMassSpectralPeak* getIndexedPeak(
     for (int j = floorMz; j <= ceilingMz; j++) {
         if (indexedPeaks.count(j) > 0 && indexedPeaks.at(j).size() > 0) {
             map<int, IndexedMassSpectralPeak> bin = indexedPeaks.at(j);
+            
+            // Fix issue with the line of code below, cos zeroBasedScanIndex must exist.
             auto startIterator = bin.find(zeroBasedScanIndex);
             for (auto it = startIterator; it != bin.end(); ++it) {
+                carp(CARP_INFO, "I am shocked It worked thus far!!!");
                 auto _peak = it->second;
                 if (_peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
                     break;
