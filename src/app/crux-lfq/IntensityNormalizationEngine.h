@@ -369,6 +369,7 @@ class NelderMeadWithStartPoints : public IOptimizer {
             [](const OptimizerResult& a, const OptimizerResult& b) {
                 return a.Error < b.Error;
             });
+        return validResults;
     }
 
    private:
@@ -776,4 +777,4 @@ class IntensityNormalizationEngine {
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
     }
 };
-}  // namespace CruxQuant
+}  // namespace CruxLFQ

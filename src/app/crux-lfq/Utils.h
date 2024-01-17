@@ -178,7 +178,7 @@ struct ChromatographicPeak;
 class Peptide;
 
 struct IndexedSpectralResults {
-    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
+    vector<vector<IndexedMassSpectralPeak>> _indexedPeaks;
 
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 };
@@ -204,31 +204,18 @@ enum class DetectionType {
 unordered_map<string, vector<pair<double, double>>>
 calculateTheoreticalIsotopeDistributions(vector<Identification>& allIdentifications);
 
-// void setPeakFindingMass(vector<Identification>& allIdentifications,
-// unordered_map<string, vector<pair<double, double>>>&
-// modifiedSequenceToIsotopicDistribution);
-
 vector<int> createChargeStates(
     const vector<Identification>& allIdentifications);
 
 // Forward declaration for a class from results.h
 class CruxLFQResults;
 
-// void quantifyMs2IdentifiedPeptides(
-//     string spectraFile, const vector<Identification>& allIdentifications,
-//     const vector<int>& chargeStates,
-//     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-//     const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
-//     unordered_map<string, vector<pair<double, double>>>&
-//         modifiedSequenceToIsotopicDistribution,
-//     CruxLFQResults& lfqResults);
-
 void quantifyMs2IdentifiedPeptides(
     string spectraFile,
     const vector<Identification>& allIdentifications,
     const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
     CruxLFQResults& lfqResults);
@@ -237,21 +224,11 @@ double toMz(double mass, int charge);
 
 double toMass(double massToChargeRatio, int charge);
 
+int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>& indexedPeaks, int zeroBasedScanIndex);
+
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
-    int chargeState, map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
-
-// void processRange(int start, int end,
-//                   const vector<Identification>& ms2IdsForThisFile,
-//                   const string& spectralFile, const vector<int>& chargeStates,
-//                   vector<ChromatographicPeak>& chromatographicPeaks,
-//                   PpmTolerance& peakfindingTol,
-//                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-//                   const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
-//                   PpmTolerance& ppmTolerance,
-//                   unordered_map<string, vector<pair<double, double>>>&
-//                       modifiedSequenceToIsotopicDistribution,
-//                   CruxLFQResults& lfqResults);
+    int chargeState, vector<vector<IndexedMassSpectralPeak>>& indexedPeaks);
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
@@ -259,32 +236,32 @@ void processRange(int start, int end,
                   vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-                  const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks,
+                  const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
                   PpmTolerance& ppmTolerance,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
                   CruxLFQResults& lfqResults);
 
-vector<IndexedMassSpectralPeak*> peakFind(
+vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks);
 
 string getScanID(string spectrum_id);
 
 vector<IsotopicEnvelope> getIsotopicEnvelopes(
-    const vector<IndexedMassSpectralPeak*>& xic,
+    const vector<IndexedMassSpectralPeak>& xic,
     const Identification& identification, const int chargeState,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
-    const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks);
 
 bool checkIsotopicEnvelopeCorrelation(
     map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
-    const IndexedMassSpectralPeak* peak, int chargeState,
+    const IndexedMassSpectralPeak peak, int chargeState,
     PpmTolerance& isotopeTolerance,
-    const map<int, map<int, IndexedMassSpectralPeak>>& indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks);
 
 struct filterResults {
     vector<double> expIntensity;

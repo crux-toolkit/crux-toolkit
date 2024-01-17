@@ -43,11 +43,6 @@ double CruxLFQ::DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;      // Default value i
 bool CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = false;            // Default value is false
 bool CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;  // Default value is false
 bool CruxLFQ::NORMALIZE = false;                              // Default value is false
-// MBR settings
-// bool CruxLFQ::MATCH_BETWEEN_RUNS = false;                 // Default value is false
-// double CruxLFQ::MATCH_BETWEEN_RUNS_PPM_TOLERANCE = 10.0;  // Default value is 10.0
-// double CruxLFQ::MAX_MBR_WINDOW = 2.5;                     // Default value is 2.5
-// bool CruxLFQ::REQUIRE_MSMS_ID_IN_CONDITION = false;       // Default value is false
 
 CruxLFQApplication::CruxLFQApplication() {}
 
@@ -108,8 +103,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
-        carp(CARP_INFO, "Finished calculating theoretical isotopic distributions for %s", spectra_file.c_str());
-
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
             allIdentifications,
@@ -134,7 +127,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     lfqResults.calculatePeptideResults(CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
     lfqResults.calculateProteinResultsMedianPolish(CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
-    // for(auto p:lf)
     const std::string results_file = make_file_path("crux-lfq.txt");
     lfqResults.writeResults(results_file, spec_files);
 
@@ -177,17 +169,13 @@ vector<string> CruxLFQApplication::getOptions() const {
         "peak-finding-ppm-tolerance",
         "ppm-tolerance",
         "id-specific-charge-state",
+        "missed-scans-allowed",
         "isotope-tolerance-ppm",
         "integrate",
         "discrimination-factor-to-cut-peak",
         "quantify-ambiguous-peptides",
         "use-shared-peptides-for-protein-quant",
         "normalize",
-        // MBR settings
-        "match-between-runs",
-        "match-between-runs-ppm-tolerance",
-        "max-mbr-window",
-        "require-msms-id-in-condition",
     };
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -252,7 +240,7 @@ SpectrumListPtr CruxLFQApplication::loadSpectra(const string& file, int msLevel)
 IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file) {
     string _spectra_file(spectra_file);
 
-    map<int, map<int, IndexedMassSpectralPeak>> _indexedPeaks;
+    vector<vector<IndexedMassSpectralPeak>> _indexedPeaks;
     unordered_map<string, vector<Ms1ScanInfo>> _ms1Scans;
 
     _ms1Scans[_spectra_file] = vector<Ms1ScanInfo>();
@@ -263,8 +251,28 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
         return index_results;
     }
 
-    int _scanIndex = 0;
-    int _oneBasedScanNumber = 1;
+    double maxMz = 0.0;
+    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
+        const bool getBinaryData = true;
+        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
+        if (spectrum) {
+            BinaryDataArrayPtr mzs = spectrum->getMZArray();
+            if (mzs) {
+                const std::vector<double>& mzArray = mzs->data;
+                for (size_t j = 0; j < mzArray.size(); ++j) {
+                    double mz = mzArray[j];
+                    if (mz > maxMz) {
+                        maxMz = mz;
+                    }
+                }
+            }
+        }
+    }
+    int size = (int)std::ceil(maxMz * BINS_PER_DALTON) + 1;
+    index_results._indexedPeaks.resize(size);
+
+    int scanIndex = 0;
+    int oneBasedScanNumber = 1;
 
     for (size_t i = 0; i < spectrum_collection->size(); ++i) {
         const bool getBinaryData = true;
@@ -273,17 +281,6 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
         if (spectrum) {
             BinaryDataArrayPtr mzs = spectrum->getMZArray();
             BinaryDataArrayPtr intensities = spectrum->getIntensityArray();
-
-            int scanIndex;
-            int oneBasedScanNumber;
-            std::string scanId = getScanID(spectrum->id);
-            if (scanId.empty()) {
-                scanIndex = _scanIndex;
-                oneBasedScanNumber = _oneBasedScanNumber;
-            } else {
-                scanIndex = std::stoi(scanId);
-                oneBasedScanNumber = scanIndex + 1;
-            }
 
             double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
 
@@ -299,22 +296,17 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
                         scanIndex,          // zeroBasedMs1ScanIndex
                         retentionTime);
 
-                    auto& indexedPeaks = index_results._indexedPeaks;
-                    auto it = indexedPeaks.find(roundedMz);
-                    if (it == indexedPeaks.end()) {
-                        map<int, IndexedMassSpectralPeak> tmp;
-                        tmp.insert({scanIndex, spec_data});
-                        indexedPeaks[roundedMz] = tmp;
-                    } else {
-                        it->second.insert({scanIndex, spec_data});
+                    if (index_results._indexedPeaks[roundedMz].empty()) {
+                        index_results._indexedPeaks[roundedMz] = vector<IndexedMassSpectralPeak>();
                     }
+                    index_results._indexedPeaks[roundedMz].push_back(spec_data);
                     Ms1ScanInfo scan = {oneBasedScanNumber, scanIndex, retentionTime};
                     index_results._ms1Scans[spectra_file].push_back(scan);
                 }
             }
 
-            _scanIndex++;
-            _oneBasedScanNumber++;
+            scanIndex++;
+            oneBasedScanNumber++;
         }
     }
     return index_results;
@@ -332,7 +324,9 @@ vector<Identification> CruxLFQApplication::createIdentifications(const map<int, 
         SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
         if (spectrum) {
             int scanIndex;
+
             std::string scanId = getScanID(spectrum->id);
+
             if (scanId.empty()) {
                 continue;
             } else {
