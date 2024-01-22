@@ -451,6 +451,8 @@ enum _scorer_type {
   XCORR_FIRST,
   XCORR_SECOND,
   
+  DECOY_XCORR_QVALUE,  ///< q-value derived from decoys
+  DECOY_XCORR_PEPTIDE_QVALUE,
   DECOY_XCORR_PEP,     ///< posterior error prob for xcorrs (target/decoy)
   DECOY_EVALUE_QVALUE, ///< q-value derived from empirical null (decoy)
   DECOY_EVALUE_PEPTIDE_QVALUE,
