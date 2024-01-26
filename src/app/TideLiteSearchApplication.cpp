@@ -160,7 +160,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     carp(CARP_INFO, "Searching scan range %d to %d.", min_scan_, max_scan_);
   }
 
-  // Determine which score function to use for scoring PSMs and store in SCORE_FUNCTION enum. TODO: update this in ./src/util/crux-utils.cpp: 68
+  // Determine which score function to use for scoring PSMs and store in SCORE_FUNCTION enum. Change this in ./src/util/crux-utils.cpp: 68
   curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));  
  
   // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
@@ -302,11 +302,14 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
 
   int input_file_source;
   pb::Spectrum pb_spectrum;  
-  while (spectrum_heap_.size() > 0){
+  while (true){
 
     // Get the next spectrum records with the smallest neutral mass from the heap and load the next spectrum records from the input files.
     locks_array_[LOCK_SPECTRUM_READING]->lock();
-    
+    if (spectrum_heap_.size() == 0) {
+      locks_array_[LOCK_SPECTRUM_READING]->unlock();
+      return;
+    }
     // access the lightest spectra in the heap
     auto spectrum_pair = spectrum_heap_.front();   
     input_file_source = spectrum_pair.second;
@@ -319,7 +322,7 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     // read the next spectra from the input files and put it in the heap
     if (!spectrum_reader_[input_file_source]->Done()) {
       spectrum_reader_[input_file_source]->Read(&pb_spectrum);
-      spectrum_heap_.push_back(make_pair(pb_spectrum,input_file_source));
+      spectrum_heap_.push_back(make_pair(pb_spectrum, input_file_source));
       push_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
     }
     if ( !spectrum_reader_[input_file_source]->OK() ){
@@ -331,7 +334,7 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     }
 
     pb_spectrum = spectrum_pair.first;
-    carp(CARP_DEBUG, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
+    // carp(CARP_INFO, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
     locks_array_[LOCK_SPECTRUM_READING]->unlock();
     
     Spectrum* spectrum = new Spectrum(pb_spectrum); 
@@ -1480,6 +1483,7 @@ peptide-centric-search
 use-tailor-calibration
 exact-p-value
 charge-state
+evidence-granularity
 */
 
 string TideLiteSearchApplication::getName() const {
