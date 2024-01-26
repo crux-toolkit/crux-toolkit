@@ -554,6 +554,7 @@ typedef enum _score_function SCORE_FUNCTION_T;
     LOCK_CASCADE,       // Only used by cascade-search on spectrum_flag (map)
     LOCK_CANDIDATES,    // Updating # of candidate peptides
     LOCK_REPORTING,     // Updating sc_index and reporting progress
+    LOCK_SPECTRUM_READING, // Reading spectrum records 
     NUMBER_LOCK_TYPES   // always keep this last so the value
                         // changes as cmds are added
   };

@@ -64,6 +64,8 @@ TideLiteSearchApplication::TideLiteSearchApplication() {
   num_precursors_skipped_ = 0;
   num_isotopes_skipped_ = 0;
   num_retained_ = 0;
+  num_spectra_ = 0;
+  num_spectra_searched_ = 0;
   total_candidate_peptides_ = 0;
   precursor_window_ = 0;
   spectrum_min_mz_ = 0; 
@@ -80,7 +82,7 @@ TideLiteSearchApplication::TideLiteSearchApplication() {
   out_pin_target_ = NULL;        // pin output format for percolator
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
 
-  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
+  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
   }
 }
@@ -137,7 +139,6 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   carp(CARP_INFO, "Number of Threads: %d", num_threads_);
 
 
-
   // Check scan-number parameter
   string scan_range = Params::GetString("scan-number");
   if (scan_range.empty()) {
@@ -170,11 +171,8 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
   getPeptideIndexData(input_index, proteins, locations, peptides_header);
   tide_index_mzTab_file_path_ = FileUtils::Join(input_index, TideIndexApplication::tide_index_mzTab_filename_);
-  // Create active peptide queue
-  // active_peptide_queue_ = new ActivePeptideQueueLite(peptide_reader.Reader(), proteins, &locations);  
 
   TideLiteMatchSet::curScoreFunction_ = curScoreFunction_;
-  // TideLiteMatchSet::active_peptide_queue_ = active_peptide_queue_;
   TideLiteMatchSet::top_matches_ = top_matches_;
   TideLiteMatchSet::decoy_num_ = decoy_num_;
   TideLiteMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
@@ -182,9 +180,10 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   TideLiteMatchSet::mod_precision_ = Params::GetInt("mod-precision");
   TideLiteMatchSet::concat_ = Params::GetBool("concat");  
 
-  // Create the output files
+  // Create the output files, print headers
   createOutputFiles(); 
 
+  // Create the active_peptide_queues and peptide_readers for each threads
   vector<HeadedRecordReader*> peptide_reader_threads;
   vector<ActivePeptideQueueLite*> APQ;
   for (int i = 0; i < num_threads_; i++) {
@@ -192,236 +191,97 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back()->Reader(), proteins, &locations));
   }
 
-  // Loop through spectrum files
-  /*vector<InputFile> inputFiles = getInputFiles(input_files);
-  int spectrum_file_cnt = 0;
-  for (vector<InputFile>::iterator f = inputFiles.begin(); f != inputFiles.end(); f++, ++spectrum_file_cnt) {
+  // Convert the original file names into spectrum records if needed 
+  // Update the file names in the variable inputFiles_ locally.
+  // Run spectrum file convertion in parallel.
+  for (vector<string>::const_iterator original_file_name = input_files.begin(); original_file_name != input_files.end(); ++original_file_name) {
+    inputFiles_.push_back(TideLiteSearchApplication::InputFile(*original_file_name, *original_file_name, false));
+  }
+  // Launch threads to convert files
+  boost::thread_group threadgroup_input_files;
+  for (int t = 1; t < num_threads_; ++t) {
+    boost::thread * currthread = new boost::thread(boost::bind(&TideLiteSearchApplication::getInputFiles, this, t));
+    threadgroup_input_files.add_thread(currthread);
+  }
+  getInputFiles(0);
+  // Join threads
+  threadgroup_input_files.join_all();
 
-    string spectrum_records_file = f->SpectrumRecords;
-    string spectrum_file_name = f->OriginalName;
-    carp(CARP_INFO, "Reading spectrum file %s.", spectrum_records_file.c_str());
-    SpectrumCollection* spectra = loadSpectra(spectrum_records_file); //
-    carp(CARP_INFO, "Read %d spectra.", spectra->Size());
-    
-    unsigned int spectrum_num = spectra->SpecCharges()->size();
-    const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
 
-    // cycle through spectrum-charge pairs, sorted by neutral mass
-    for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin();
-        sc != spec_charges->end(); ++sc ) {
-      //spectrum_search(&(*sc), APQ[0], spectrum_file_name, spectrum_file_cnt);
-      carp(CARP_INFO, "%lf", (*sc).neutral_mass);
-    }
-  }*/
-
-// Rufino.start() ------------------------------------------------------------------------------------------------------------
-
-  // loop through spectrum files
-  vector<InputFile> inputFiles = getInputFiles(input_files); // input file vector
-  int spectrum_file_cnt = 0; // input file counter
- 
+  carp(CARP_INFO, "Starting search.");
+  // Read the first spectrum records from each input files 
+  int file_cnt = 0;
   pb::Spectrum pb_spectrum; // spectrum message struct
-  map<int, HeadedRecordReader*> spectrum_reader_; // map -> key = file number, value = pointer to source file
-  vector<pair<pb::Spectrum, int>> spectrum_heap_; // vector -> first = neutral_mass, second = file number
-  int total_records = 0; // used in the first for loop to check the number of records readed
-  int record_counter = 0; // used in the parallelization function to campare the number of records
+  for (vector<InputFile>::iterator spectrum_file = inputFiles_.begin(); spectrum_file != inputFiles_.end(); ++spectrum_file, ++file_cnt) {
 
-  // loop just to count the total number of records
-  for (vector<InputFile>::iterator h = inputFiles.begin(); h != inputFiles.end(); h++) {
+    string spectrum_records_file = spectrum_file->SpectrumRecords;
+    spectrum_reader_.push_back(new HeadedRecordReader(spectrum_records_file));
 
-    string spectrum_records_file = h->SpectrumRecords;
-    HeadedRecordReader reader(spectrum_records_file);
-
-    while (!reader.Done()) {
-
-      if (reader.OK()) {
-    
-        reader.Read(&pb_spectrum);
-        ++total_records;
-      }
+    if (!spectrum_reader_.back()->Done() ) {
+      spectrum_reader_.back()->Read(&pb_spectrum);
+      spectrum_heap_.push_back(make_pair(pb_spectrum, file_cnt));
     }
-  }
-  
-  // loop to create the map with structure: key = file number, value = pointer to source file
-  for (vector<InputFile>::iterator f = inputFiles.begin(); f != inputFiles.end(); f++, ++spectrum_file_cnt) {
-
-    string spectrum_records_file = f->SpectrumRecords;
-    string spectrum_file_name = f->OriginalName;
-    spectrum_reader_[spectrum_file_cnt] = new HeadedRecordReader(spectrum_records_file);
-  }
-
-  // loop to initialize the spectrum heap with the first record from each file
-  for (map<int, HeadedRecordReader*>::iterator it = spectrum_reader_.begin(); it != spectrum_reader_.end(); it++) {
-    
-    if (it->second->OK() && !it->second->Done()) {
-      
-      it->second->Read(&pb_spectrum);
-      spectrum_heap_.push_back(make_pair(pb_spectrum, it->first));
+    if ( !spectrum_reader_.back()->OK() ){
+      carp(CARP_FATAL, "Spectrum records file %s is corrupt.", spectrum_records_file.c_str());
     }
+
   }
-
-
-
-  string spectrum__file = "";
-  int thread_index = 0; // vector index to assign new task on thread
-  bool thread_reg_initialized = false; // flag to prepare the first task for each thread
-
-  std::vector<boost::thread> vector_threads; // vector to keep track on threads
-
-  // make a heap with the first record from every file
+  // make a heap with the spectrum records 
   make_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
 
-  /*
-    Loop while the heap is not empty, with the following sequence:
-   
-    1. sort the heap in ascending order
-    2. pop the minimum value from heap
-    3. print the minimum value
-    4. delete the record
-    5. keep track from which file was the deleted record
-    6. locate the specific file in spectrum file map
-    7. read if possible the next spectrum record
-    8. push to the heap
-    9. goto step 1
-  */
-
-  while (!spectrum_heap_.empty()){
-
-    pop_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
-    auto last_element = spectrum_heap_.back();
-    spectrum__file = inputFiles[last_element.second].SpectrumRecords;
-    spectrum_heap_.pop_back();
-    ++record_counter;
-
-    //carp(CARP_INFO, "File number: %d, Item to delete: %lf", last_element.second, last_element.first.neutral_mass());
-
-
-    if (spectrum_reader_[last_element.second]->OK() && !spectrum_reader_[last_element.second]->Done()) {
-      
-      spectrum_reader_[last_element.second]->Read(&pb_spectrum);
-      spectrum_heap_.push_back(make_pair(pb_spectrum, last_element.second));
-      push_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
-    }
-
-// ---------------------------------------------------------------------------------------------------------------------------
-// Threads
-
-    if (!thread_reg_initialized) {
-
-      // this part of the comparition executes many times ad the number of threads exists, is the intial assigment of tasks
-      vector_threads.push_back(boost::thread(boost::bind(&TideLiteSearchApplication::spectrum_search, this, pb_spectrum, APQ[thread_index], spectrum__file, last_element.second, thread_index)));
-      ++thread_index;
-
-      if (thread_index >= num_threads_) {
-
-        thread_reg_initialized = true;
-
-        // this cicle executes all the tasks assigned to threads
-        for (int a = 0; a < vector_threads.size(); a++ ) {
-          
-          if (vector_threads[a].joinable() ) {
-
-            vector_threads[a].join();
-          }
-        }
-      } 
-    }else {
-
-      // this part executes after the first assigment, on every step it checks the availability of threads in queue and assigns
-      // new task to thread already released
-      if (!stack_threads.empty()) {
-        thread_index = stack_threads.front();
-        stack_threads.pop();
-      }else{
-        stack_threads.push(0);
-        thread_index = 0;
-      }
-
-      vector_threads[thread_index] = boost::thread(boost::bind(&TideLiteSearchApplication::spectrum_search, this, pb_spectrum, APQ[thread_index], spectrum__file, last_element.second, thread_index));
-      vector_threads[thread_index].join();
-        
-      }
-
+  // Create thread data
+  vector<thread_data> thread_data_array;
+  for (int t = 0; t < num_threads_; ++t) {
+      thread_data_array.push_back(thread_data(APQ[t], t));
   }
 
-  carp(CARP_INFO, "Total files: %d", spectrum_file_cnt);
-  carp(CARP_INFO, "Total Records: %d", total_records);
-  carp(CARP_INFO, "Records Processed: %d", record_counter);
-
-  // Loop to release memory
-  for (int i = 0; i < spectrum_reader_.size(); i++ ){
-
-    delete spectrum_reader_[i];
+  // Launch threads
+  boost::thread_group threadgroup;
+  for (int t = 1; t < num_threads_; ++t) {
+    boost::thread * currthread = new boost::thread(boost::bind(&TideLiteSearchApplication::spectrum_search, this, (void *) &(thread_data_array[t])));
+    threadgroup.add_thread(currthread);
   }
 
-  // release the spectrum file map and record vector
-  spectrum_reader_.clear();
-  spectrum_heap_.clear();
+  // Searches through part of the spec charge vector while waiting for threads are busy
+  spectrum_search( (void *)  &(thread_data_array[0]) );
 
+  // Join threads
+  threadgroup.join_all();
 
-// Rufino.end() -----------------------------------------------------------------------------------------------------------
-
-
-
-  // Convert the input spectrum data files to spectrumRecords if needed
-/*  vector<InputFile> sr = getInputFiles(input_files);
-  // Loop through spectrum files
-  // Here :O
-  vector<vector<Spectrum*>*> vect_spectra;
-  vector<int> idxs_spectra(sr.size(),0);
-  struct pair_mass_spectra{
-    pair_mass_spectra(vector<Spectrum*> *ptr2, int idxx): ptr(ptr2), idx(idxx) {
-    }
-    vector<Spectrum*>* ptr;
-    int idx;
-    bool operator<(const pair_mass_spectra& other) const{
-      return ptr->at(idx)->PrecursorMZ() < other.ptr->at(idx)->PrecursorMZ();
-    }
-  };
-  set<pair_mass_spectra> queue_spectra;
-  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
-    string spectra_file = f->SpectrumRecords;
-    carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
-    // here changes
-    
-    SpectrumCollection* spectra = NULL;
-    spectra = loadSpectra(spectra_file); // heap memory!
-
-    vect_spectra.push_back(spectra->Spectra());
-    if (!vect_spectra.back()->empty()) {
-      queue_spectra.insert(pair_mass_spectra(vect_spectra.back(), 0));
-    }
+  // Print statistics
+  long int total_peaks = num_precursors_skipped_ + num_isotopes_skipped_ + num_range_skipped_ + num_retained_;
+  if (total_peaks == 0) {
+    carp(CARP_INFO, "Warning: no peaks found.");
+  } else {
+    carp(CARP_INFO,
+          "Deleted %d precursor, %d isotope and %d out-of-range peaks.",
+          num_precursors_skipped_, num_isotopes_skipped_, num_range_skipped_);
   }
-  std::cout<<"Printing in order!!!\n";
-  while(!queue_spectra.empty()) {
-    auto it = queue_spectra.begin();
-    auto idx = it->idx;
-    auto ptr = it->ptr;
-    std::cout<<ptr->at(idx)->PrecursorMZ()<<" ";
-    queue_spectra.erase(it);
-    idx++;
-    if (ptr->size() == idx) {
-      continue;
-    }
-    queue_spectra.insert(pair_mass_spectra(ptr, idx));
+  if (num_retained_ == 0) {
+    carp(CARP_INFO, "Warning: no peaks retained.");
+  } else {
+    carp(CARP_INFO, "Retained %g%% of peaks.", (100.0 * num_retained_) / total_peaks);
   }
-  //merge done!!!
-    // Delete temporary spectrumrecords file
-  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
-    if (!f->Keep) {
-      string spectra_file = f->SpectrumRecords;      
-      carp(CARP_DEBUG, "Deleting %s", spectra_file.c_str());
-      remove(spectra_file.c_str());
-    }
-  }
-*/
-  // delete active_peptide_queue_;
+  
+  carp(CARP_INFO, "Time per spectrum-charge combination per thread: %lf s.", wall_clock() / (1e6*num_spectra_searched_));
+  carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
+                  ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
+  carp(CARP_INFO, "%d spectrum-charge combinations loaded, %d spectrum-charge combinations searched. ", num_spectra_, num_spectra_searched_);
+  
 
+  // Delete temporary spectrumrecords file
+ for (vector<TideLiteSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
+    // inputFiles_.push_back(TideLiteSearchApplication::InputFile(*original_file_name, *original_file_name, false));
+    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+    remove((*original_file_name).SpectrumRecords.c_str());
+  }
+
+  // Delete stuffs
   if (out_tsv_target_ != NULL)
     delete out_tsv_target_;
-  if (out_tsv_decoy_ != NULL) {
+  if (out_tsv_decoy_ != NULL)
     delete out_tsv_decoy_;
-  }
   if (out_mztab_target_ != NULL)
     delete out_mztab_target_;
   if (out_mztab_decoy_ != NULL)
@@ -431,90 +291,108 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   if (out_pin_decoy_ != NULL)
     delete out_pin_decoy_;
 
-  for (int i = 0; i < num_threads_; i++) {
-//    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
-//    APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back(), proteins, &locations));
-  }
-
   return 0;
 }
 
+void TideLiteSearchApplication::spectrum_search(void *threadarg) {  
+  struct thread_data *my_data = (struct thread_data *) threadarg;
 
-// --- Rufino.start() --- //
+  ActivePeptideQueueLite* active_peptide_queue = my_data->active_peptide_queue;
+  int thread_id = my_data->thread_id;
 
-void TideLiteSearchApplication::spectrum_search(pb::Spectrum pb_spectra, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt, int th_num) {
-  
-  // mutex for data guard
-  boost::lock_guard<boost::mutex> lock(mtx);
+  int input_file_source;
+  pb::Spectrum pb_spectrum;  
+  while (spectrum_heap_.size() > 0){
 
-  carp(CARP_INFO, "Thread num: %d, File number: %d, Item to delete: %lf", th_num, spectrum_file_cnt, pb_spectra.neutral_mass());
+    // Get the next spectrum records with the smallest neutral mass from the heap and load the next spectrum records from the input files.
+    locks_array_[LOCK_SPECTRUM_READING]->lock();
+    
+    // access the lightest spectra in the heap
+    auto spectrum_pair = spectrum_heap_.front();   
+    input_file_source = spectrum_pair.second;
+    string spectrum_file_name = inputFiles_[input_file_source].OriginalName;
 
-  // 10ms delay before release the currect thread
-  boost::this_thread::sleep(boost::posix_time::time_duration(0,0,0,10));
+    // remove the lightest spectra from the heap.
+    pop_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+    spectrum_heap_.pop_back();   
 
-  // push the thread number to the queue for new assigment
-  stack_threads.push(th_num);
-  
-  // --- Rufino.end() --- //
+    // read the next spectra from the input files and put it in the heap
+    if (!spectrum_reader_[input_file_source]->Done()) {
+      spectrum_reader_[input_file_source]->Read(&pb_spectrum);
+      spectrum_heap_.push_back(make_pair(pb_spectrum,input_file_source));
+      push_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+    }
+    if ( !spectrum_reader_[input_file_source]->OK() ){
+      carp(CARP_FATAL, "Spectrum records file %s is corrupt.", spectrum_file_name.c_str());
+    }
+    ++num_spectra_;
+    if (print_interval_ > 0 && num_spectra_ > 0 && num_spectra_ % print_interval_ == 0) {
+      carp(CARP_INFO, "%d spectrum-charge combinations searched.", num_spectra_);
+    }
 
+    pb_spectrum = spectrum_pair.first;
+    carp(CARP_DEBUG, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
+    locks_array_[LOCK_SPECTRUM_READING]->unlock();
+    
+    Spectrum* spectrum = new Spectrum(pb_spectrum); 
+    
+    int charge = spectrum->ChargeState(0);
+    double neutral_mass = pb_spectrum.neutral_mass();
+    SpectrumCollection::SpecCharge* sc = new SpectrumCollection::SpecCharge(neutral_mass, charge, spectrum, 0);
+   
+    // Search one spectrum against its candidate peptides
 
+    double precursor_mz = spectrum->PrecursorMZ();
+    int scan_num = spectrum->SpectrumNumber();
 
-  /*
-  // Search one spectrum against its candidate peptides
+    if (precursor_mz < spectrum_min_mz_|| 
+        precursor_mz > spectrum_max_mz_ || 
+        scan_num < min_scan_ || 
+        scan_num > max_scan_ ||
+        spectrum->Size() < min_peaks_  ||
+        charge < min_precursor_charge_ || 
+        charge >max_precursor_charge_ ) {
+      continue; ///switch to continue in a loop
+      //return;
+    }
 
-  Spectrum* spectrum = sc->spectrum;
-  double precursor_mz = spectrum->PrecursorMZ();
-  int charge = sc->charge;
-  int scan_num = spectrum->SpectrumNumber();
+    if (spectrum_flag_ != NULL) {  // TODO: Do something, possibly for cascade search
+    }
 
-  if (precursor_mz < spectrum_min_mz_|| 
-      precursor_mz > spectrum_max_mz_ || 
-      scan_num < min_scan_ || 
-      scan_num > max_scan_ ||
-      spectrum->Size() < min_peaks_  ||
-      charge < min_precursor_charge_ || 
-      charge >max_precursor_charge_ ) {
-    //continue; ///switch to continue in a loop
-    return;
+    double min_range, max_range;
+    vector<double>* min_mass = new vector<double>();
+    vector<double>* max_mass = new vector<double>();
+    
+    computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
+    active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+    delete min_mass;
+    delete max_mass;
+
+    if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
+      continue; ///switch to continue in a loop
+    }
+    locks_array_[LOCK_CANDIDATES]->lock();
+    total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
+    locks_array_[LOCK_CANDIDATES]->unlock();  
+
+    // allocate PSMscores for N scores
+    TideLiteMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
+
+    // Calculate the scores needed
+    switch (curScoreFunction_) {
+      case XCORR_SCORE:
+        XCorrScoring(sc, active_peptide_queue, psm_scores);
+        break;
+      case PVALUES:
+        PValueScoring(sc, active_peptide_queue, psm_scores);
+        break;
+    } 
+    // Print the top-N results to the output files, 
+    // The delta_cn, delta_lcn, and tailor score calulation happens here
+
+    PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
+
   }
-
-  if (spectrum_flag_ != NULL) {  // TODO: Do something, possibly for cascade search
-  }
-
-  double min_range, max_range;
-  vector<double>* min_mass = new vector<double>();
-  vector<double>* max_mass = new vector<double>();
-  
-  computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
-  active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
-  delete min_mass;
-  delete max_mass;
-
-  if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
-    return; ///switch to continue in a loop
-  }
-  locks_array_[LOCK_CANDIDATES]->lock();
-  total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
-  locks_array_[LOCK_CANDIDATES]->unlock();  
-
-  // allocate PSMscores for N scores
-  TideLiteMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
-
-  // Calculate the scores needed
-  switch (curScoreFunction_) {
-    case XCORR_SCORE:
-      XCorrScoring(sc, active_peptide_queue, psm_scores);
-      break;
-    case PVALUES:
-      PValueScoring(sc, active_peptide_queue, psm_scores);
-      break;
-  } 
-  // Print the top-N results to the output files, 
-  // The delta_cn, delta_lcn, the tailor score calulation happens here
-
-  PrintResults(sc, spectrum_file_name, spectrum_file_cnt, &psm_scores);
-
-  */
 }
 
 void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores){
@@ -537,6 +415,7 @@ void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharg
   num_precursors_skipped_ += num_precursors_skipped;
   num_isotopes_skipped_ += num_isotopes_skipped;
   num_retained_ += num_retained;
+  ++num_spectra_searched_;
   locks_array_[LOCK_REPORTING]->unlock();
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
@@ -1765,44 +1644,48 @@ void TideLiteSearchApplication::processParams() {
   }  
   */
 }
-
-vector<TideLiteSearchApplication::InputFile> TideLiteSearchApplication::getInputFiles(const vector<string>& filepaths) const {
+void TideLiteSearchApplication::getInputFiles(int thread_id) {
   // Try to read all spectrum files as spectrumrecords, convert those that fail
-  vector<TideLiteSearchApplication::InputFile> input_sr;
-  for (vector<string>::const_iterator f = filepaths.begin(); f != filepaths.end(); f++) {
-    SpectrumCollection spectra;
-    pb::Header spectrum_header;
-    string spectrumrecords = *f;
+  if (thread_id > inputFiles_.size())
+    return;
+  for (vector<TideLiteSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin()+thread_id; 
+       original_file_name < inputFiles_.begin() + (inputFiles_.size()); 
+       original_file_name = original_file_name + num_threads_) 
+    {
+
     bool keepSpectrumrecords = true;
-    if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
-      // Failed, try converting to spectrumrecords file
-      carp(CARP_INFO, "Converting %s to spectrumrecords format", f->c_str());
-      carp(CARP_INFO, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
+    string spectrumrecords = (*original_file_name).OriginalName;   
+
+    // Check if the input file is spectrum records of google protocol buffer
+    pb::Header header;
+    HeadedRecordReader reader((*original_file_name).OriginalName, &header);
+    if (header.file_type() != pb::Header::SPECTRA) {
+      // converting to spectrumrecords file 
+
+      locks_array_[LOCK_SPECTRUM_READING]->lock();
+      carp(CARP_INFO, "Converting %s to spectrumrecords format", (*original_file_name).OriginalName.c_str());
+      carp(CARP_DEBUG, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
+      locks_array_[LOCK_SPECTRUM_READING]->unlock();
+      
       spectrumrecords = Params::GetString("store-spectra");
       keepSpectrumrecords = !spectrumrecords.empty();
       if (!keepSpectrumrecords) {
-        spectrumrecords = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
-      } else if (filepaths.size() > 1) {
+        spectrumrecords = make_file_path(FileUtils::BaseName( (*original_file_name).OriginalName) + ".spectrumrecords.tmp");
+      } else if (inputFiles_.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
       }
       carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
-      if (!SpectrumRecordWriter::convert(*f, spectrumrecords)) {
-        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", f->c_str());
-      }
-      carp(CARP_DEBUG, "Reading converted spectrum file %s", spectrumrecords.c_str());
-      // Re-read converted file as spectrumrecords file
-      if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
-        carp(CARP_DEBUG, "Deleting %s", spectrumrecords.c_str());
-        FileUtils::Remove(spectrumrecords);
-        carp(CARP_FATAL, "Error reading spectra file %s", spectrumrecords.c_str());
+      if (!SpectrumRecordWriter::convert((*original_file_name).OriginalName, spectrumrecords)) {
+        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", (*original_file_name).OriginalName.c_str());
       }
     }
-    input_sr.push_back(TideLiteSearchApplication::InputFile(*f, spectrumrecords, keepSpectrumrecords));
+    (*original_file_name).SpectrumRecords  = spectrumrecords;
+    (*original_file_name).Keep = keepSpectrumrecords;
   }
-  return input_sr;
 }
 
+/*
 SpectrumCollection* TideLiteSearchApplication::loadSpectra(const string& file) {
 
   SpectrumCollection* spectra = new SpectrumCollection();
@@ -1817,7 +1700,7 @@ SpectrumCollection* TideLiteSearchApplication::loadSpectra(const string& file) {
   }
   return spectra;
 }
-
+*/
 void TideLiteSearchApplication::createOutputFiles() {
   
   // Create output files for the search results

@@ -49,6 +49,8 @@ class TideLiteSearchApplication : public CruxApplication {
   long int num_isotopes_skipped_;
   long int num_retained_;
   long int total_candidate_peptides_;
+  long int num_spectra_;
+  long int num_spectra_searched_;
   int print_interval_;
   vector<int> negative_isotope_errors_;
   WINDOW_TYPE_T window_type_;
@@ -74,8 +76,9 @@ class TideLiteSearchApplication : public CruxApplication {
 
   vector<boost::mutex *> locks_array_;  
 
-  vector<TideLiteSearchApplication::InputFile> getInputFiles(const vector<string>& filepaths) const;
-  static SpectrumCollection* loadSpectra(const std::string& file);
+  //vector<TideLiteSearchApplication::InputFile> getInputFiles(const vector<string>& filepaths) const;
+  void getInputFiles(int thread_id);
+  // static SpectrumCollection* loadSpectra(const std::string& file);
   void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
   void createOutputFiles();
   vector<int> getNegativeIsotopeErrors();
@@ -83,14 +86,12 @@ class TideLiteSearchApplication : public CruxApplication {
   void PrintResults(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt, TideLiteMatchSet* psm_scores);
 
 
-  /**
-   * Function that contains the search algorithm and performs the search
-   */
-
-  /* ----- Rufino.start() ------------*/
+  vector<pair<pb::Spectrum, int>> spectrum_heap_; // vector -> first = neutral_mass, second = file number
+  vector<HeadedRecordReader*> spectrum_reader_; // map -> key = file number, value = pointer to source file
+  vector<InputFile> inputFiles_;
 
   // sprectrum search executed in parallel threads
-  void spectrum_search(pb::Spectrum pb_spectra, ActivePeptideQueueLite* active_peptide_queue, string spectrum_file_name, int spectrum_file_cnt, int th_num);
+  void spectrum_search(void *threadarg);  
   
   // comparition of Spectrum data, based on neutral mass
   struct compare_spectrum{
@@ -100,8 +101,16 @@ class TideLiteSearchApplication : public CruxApplication {
     }
   };
 
-  /* ----- Rufino.end() -------------*/
 
+   // Struct holding necessary information for each thread to run.
+  struct thread_data {
+    ActivePeptideQueueLite* active_peptide_queue;
+    int thread_id;
+    thread_data (ActivePeptideQueueLite* active_peptide_queue_, int thread_id_) {
+      active_peptide_queue = active_peptide_queue_;
+      thread_id = thread_id_;
+    }
+  };
 
   void XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
   int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
