@@ -131,9 +131,6 @@ else (UNIX)
     CONFIGURE_COMMAND 
       COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
       COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/
     BUILD_COMMAND
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
@@ -143,9 +140,9 @@ else (UNIX)
     INSTALL_COMMAND
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
@@ -178,6 +175,9 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     INSTALL_COMMAND ""
   )
 else (WIN32 AND NOT CYGWIN)
@@ -195,9 +195,6 @@ else (WIN32 AND NOT CYGWIN)
       -DEXT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/include
       -DWITHOUT_GTEST=ON
     PATCH_COMMAND
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
@@ -385,6 +382,9 @@ ExternalProject_Add(
 PATCH_COMMAND
   COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/patches/kojak/CMakeLists.txt
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/kojak/KLog.h
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
   BUILD_IN_SOURCE 1
 )

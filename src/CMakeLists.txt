@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(VERSION 3.15)
 
-use_cxx11()
+use_cxx14()
 
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
@@ -22,6 +22,7 @@ include_directories(BEFORE ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/blas)

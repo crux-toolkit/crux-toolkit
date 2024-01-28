@@ -5,7 +5,7 @@ project(bullseye)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
