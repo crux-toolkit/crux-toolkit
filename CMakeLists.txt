@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
+cmake_policy(SET CMP0135 NEW)
 project(crux)
 
 set (CRUX_VERSION_MAJOR "4")
@@ -21,7 +22,17 @@ macro(use_cxx11)
   endif (CMAKE_VERSION VERSION_LESS "3.1")
 endmacro(use_cxx11)
 
-use_cxx11()
+macro(use_cxx14)
+  if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  else (CMAKE_VERSION VERSION_LESS "3.1")
+    set(CMAKE_CXX_STANDARD 11)
+  endif (CMAKE_VERSION VERSION_LESS "3.1")
+endmacro(use_cxx14)
+
+use_cxx14()
 
 add_subdirectory(doc/user)
 add_subdirectory(ext)
