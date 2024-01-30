@@ -21,7 +21,7 @@ struct SpectraFileInfo {
         return FullFilePathWithExtension == other.FullFilePathWithExtension;
     }
 };
-}  // namespace CruxQuant
+}  // namespace CruxLFQ
 
 namespace std {
 template <>

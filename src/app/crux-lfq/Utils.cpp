@@ -401,12 +401,13 @@ void processRange(int start, int end,
                       modifiedSequenceToIsotopicDistribution,
                   CruxLFQResults& lfqResults) {
     // No need for a lock since it's single-threaded
+    vector<ChromatographicPeak*> _chromatographicPeaks;
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
         ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
-        chromatographicPeaks.push_back(msmsFeature);
+        _chromatographicPeaks[i] = &msmsFeature;
         for (const auto& chargeState : chargeStates) {
             if (ID_SPECIFIC_CHARGE_STATE &&
                 chargeState != identification.precursorCharge) {
@@ -423,9 +424,7 @@ void processRange(int start, int end,
                          const IndexedMassSpectralPeak b) {
                           return a.retentionTime < b.retentionTime;
                       });
-            // TODO - with the current test data xic ends up becoming empty after this block
-            // -----------------------------------------------------------------------------
-            // carp(CARP_INFO, "XIC Size: %d", xic.size());
+
             xic.erase(std::remove_if(xic.begin(), xic.end(),
                                      [&](const IndexedMassSpectralPeak p) {
                                          return !ppmTolerance.Within(
@@ -434,8 +433,6 @@ void processRange(int start, int end,
                                      }),
                       xic.end());
 
-            // carp(CARP_INFO, "XIC Size: %d", xic.size());
-            // -----------------------------------------------------------------------------
             vector<IsotopicEnvelope> isotopicEnvelopes = getIsotopicEnvelopes(
                 xic, identification, chargeState,
                 modifiedSequenceToIsotopicDistribution, indexedPeaks);
@@ -444,7 +441,8 @@ void processRange(int start, int end,
                 msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
                 isotopicEnvelopes.end());
         }
-
+        // TO Do - continue from here
+        // -----------------------------------------------------------------------------
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
 
         cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
@@ -497,7 +495,9 @@ void processRange(int start, int end,
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
     }
-
+    for (auto chrom : _chromatographicPeaks) {
+        chromatographicPeaks.push_back(*chrom);
+    }
     lfqResults.Peaks[spectralFile].insert(lfqResults.Peaks[spectralFile].end(),
                                           chromatographicPeaks.begin(),
                                           chromatographicPeaks.end());
@@ -659,7 +659,6 @@ vector<IndexedMassSpectralPeak> peakFind(
             missedScans++;
         } else if (peak.zeroBasedMs1ScanIndex != -1) {
             missedScans = 0;
-            // carp(CARP_INFO, "peak.zeroBasedMs1ScanIndex: %d", peak.zeroBasedMs1ScanIndex);
             xic.push_back(peak);
         }
 
@@ -709,8 +708,8 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
         modifiedSequenceToIsotopicDistribution,
     const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks) {
     vector<IsotopicEnvelope> isotopicEnvelopes;
-    vector<pair<double, double>> isotopeMassShifts =
-        modifiedSequenceToIsotopicDistribution[identification.sequence];
+
+    vector<pair<double, double>> isotopeMassShifts = modifiedSequenceToIsotopicDistribution[identification.sequence];
 
     if (isotopeMassShifts.size() < NUM_ISOTOPES_REQUIRED) {
         return isotopicEnvelopes;
@@ -727,8 +726,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
         theoreticalIsotopeAbundances.push_back(p.second);
     }
 
-    int peakfindingMassIndex = static_cast<int>(
-        round(identification.peakFindingMass - identification.monoIsotopicMass));
+    int peakfindingMassIndex = static_cast<int>(round(identification.peakFindingMass - identification.monoIsotopicMass));
 
     // For each peak in the XIC, we consider the possibility that there was an
     // off-by-one or missed monoisotopic mass error in peak assignment /
@@ -741,8 +739,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
     vector<int> directions = {-1, 1};
 
     for (const IndexedMassSpectralPeak peak : xic) {
-        std::fill_n(experimentalIsotopeIntensities.begin(),
-                    experimentalIsotopeIntensities.size(), 0);
+        std::fill(experimentalIsotopeIntensities.begin(), experimentalIsotopeIntensities.end(), 0);
 
         for (auto& kvp : massShiftToIsotopePeaks) {
             kvp.second.clear();
@@ -764,23 +761,16 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
             // breaks.
 
             for (int direction : directions) {
-                int start =
-                    (direction == -1) ? (peakfindingMassIndex - 1) : peakfindingMassIndex;
+                int start = (direction == -1) ? (peakfindingMassIndex - 1) : peakfindingMassIndex;
 
-                for (int i = start; i < theoreticalIsotopeAbundances.size() && i >= 0;
-                     i += direction) {
-                    double isotopeMass =
-                        identification.monoIsotopicMass + observedMassError +
-                        theoreticalIsotopeMassShifts[i] + shift.first * C13MinusC12;
-                    double theoreticalIsotopeIntensity =
-                        theoreticalIsotopeAbundances[i] * peak.intensity;
+                for (int i = start; i < theoreticalIsotopeAbundances.size() && i >= 0; i += direction) {
+                    double isotopeMass = identification.monoIsotopicMass + observedMassError +
+                                         theoreticalIsotopeMassShifts[i] + shift.first * C13MinusC12;
+                    double theoreticalIsotopeIntensity = theoreticalIsotopeAbundances[i] * peak.intensity;
 
-                    IndexedMassSpectralPeak isotopePeak =
-                        getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex,
-                                       isotopeTolerance, chargeState, indexedPeaks);
-                    if (isotopePeak.zeroBasedMs1ScanIndex == -1 ||
-                        isotopePeak.intensity < theoreticalIsotopeIntensity / 4.0 ||
-                        isotopePeak.intensity > theoreticalIsotopeIntensity * 4.0) {
+                    IndexedMassSpectralPeak isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState, indexedPeaks);
+
+                    if (isotopePeak.zeroBasedMs1ScanIndex == -1 || isotopePeak.intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak.intensity > theoreticalIsotopeIntensity * 4.0) {
                         break;
                     }
 
@@ -792,32 +782,29 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                     }
                 }
             }
+        }
+        // check number of isotope peaks observed
+        if (massShiftToIsotopePeaks[0].size() < NUM_ISOTOPES_REQUIRED) {
+            continue;
+        }
 
-            // check number of isotope peaks observed
-            if (massShiftToIsotopePeaks[0].size() < NUM_ISOTOPES_REQUIRED) {
-                continue;
-            }
-
-            // Check that the experimental envelope matches the theoretical
-            if (checkIsotopicEnvelopeCorrelation(massShiftToIsotopePeaks, peak,
-                                                 chargeState, isotopeTolerance,
-                                                 indexedPeaks)) {
-                for (size_t i = 0; i < experimentalIsotopeIntensities.size(); ++i) {
-                    if (experimentalIsotopeIntensities[i] == 0) {
-                        experimentalIsotopeIntensities[i] =
-                            theoreticalIsotopeAbundances[i] *
-                            experimentalIsotopeIntensities[peakfindingMassIndex];
-                    }
+        // Check that the experimental envelope matches the theoretical
+        if (checkIsotopicEnvelopeCorrelation(massShiftToIsotopePeaks, peak,
+                                             chargeState, isotopeTolerance,
+                                             indexedPeaks)) {
+            for (size_t i = 0; i < experimentalIsotopeIntensities.size(); ++i) {
+                if (experimentalIsotopeIntensities[i] == 0) {
+                    experimentalIsotopeIntensities[i] =
+                        theoreticalIsotopeAbundances[i] *
+                        experimentalIsotopeIntensities[peakfindingMassIndex];
                 }
             }
-
             double sumExperimentalIntensities =
                 std::accumulate(experimentalIsotopeIntensities.begin(),
                                 experimentalIsotopeIntensities.end(), 0.0);
 
             IsotopicEnvelope isotopicEnvelope(peak, chargeState,
                                               sumExperimentalIntensities);
-
             isotopicEnvelopes.push_back(isotopicEnvelope);
         }
     }
@@ -929,7 +916,8 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime,
     for (int i = 0; i < timePointsForApexZ.size(); ++i) {
         if (timePointsForApexZ[i] == peak.apex) {
             apexIndex = i;
-            valleyEnvelope = timePointsForApexZ[i];
+            // may delete the line below
+            // valleyEnvelope = timePointsForApexZ[i];
             break;
         }
     }
