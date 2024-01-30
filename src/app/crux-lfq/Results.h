@@ -10,7 +10,7 @@
 
 #include "CQStatistics.h"
 #include "ChromatographicPeak.h"
-#include "Peptide.h"
+#include "LFQPeptide.h"
 #include "ProteinGroup.h"
 #include "SpectraFileInfo.h"
 #include "Utils.h"
@@ -39,10 +39,28 @@ class CruxLFQResults {
         }
     }
 
-    void writeResults(const string &results_file, const vector<std::string> &rawFiles) {
+    void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
         carp(CARP_INFO, "Writing output...");
 
-        string peptides_results_file = results_file;
+        string prf = peak_results_file;
+        std::ofstream outFile1(prf);
+        if (outFile1) {
+            // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
+            const std::size_t bufferSize = 8192;
+            char buffer[bufferSize];
+            outFile1.rdbuf()->pubsetbuf(buffer, bufferSize);
+            outFile1 << ChromatographicPeakTabSeperatedHeader() << std::endl;
+            for (auto &pair : Peaks) {
+                auto &peaks = pair.second;
+                for (auto &peak : peaks) {
+                    outFile1 << peak.ToString() << std::endl;
+                }
+            }
+        } else {
+            carp(CARP_FATAL, "Failed to open peak results file for writing.");
+        }
+
+        string peptides_results_file = mod_pep_results_file;
         std::ofstream outFile2(peptides_results_file);
         if (outFile2) {
             // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)

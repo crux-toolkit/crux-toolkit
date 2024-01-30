@@ -18,10 +18,7 @@ namespace CruxLFQ {
 
 inline std::string PeptidesTabSeperatedHeader(const std::vector<std::string>& rawFiles) {
     std::ostringstream sb;
-    sb << "Sequence"
-       << "\t";
-    sb << "Modified Sequence"
-       << "\t";
+    sb << "Sequence \t Modified Sequence \t";
     for (const auto& rawfile : rawFiles) {
         sb << "Intensity_" << rawfile << "\t";
     }

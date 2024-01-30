@@ -50,4 +50,4 @@ inline double Median(const std::vector<double>& data) {
         return sortedData[size / 2];
     }
 }
-}  // namespace CruxQuant
+}  // namespace CruxLFQ
