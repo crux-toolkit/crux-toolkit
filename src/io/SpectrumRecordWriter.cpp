@@ -134,6 +134,7 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     newSpectrum.set_iso_window_upper_mz(s->getIsoWindowUpperMZ());
 
     newSpectrum.set_scan_id(scan_num);
+    newSpectrum.set_rtime(s->getRTime());
     newSpectrum.set_precursor_m_z(i->getMZ());
     newSpectrum.mutable_charge_state()->Add(i->getCharge());
     newSpectrum.set_neutral_mass(i->getNeutralMass());

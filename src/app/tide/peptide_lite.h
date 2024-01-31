@@ -161,7 +161,6 @@ class PeptideLite {
   double cterm_mod_;
   int decoyIdx_;
   string decoy_seq_;
-  bool b_ions_only_;  // Only the b-ions are needed for exact p-value scoring. It is true for XPV
 
   const vector<const pb::Protein*>* proteins_;
 

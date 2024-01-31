@@ -71,7 +71,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     debug = true; // allows a breakpoint
 #endif
   double precursor_mz = spectrum.PrecursorMZ();
-  double experimental_mass_cut_off = (precursor_mz-MASS_PROTON)*charge+MASS_PROTON + 50;
+  double experimental_mass_cut_off = (precursor_mz - MASS_PROTON)*charge + MASS_PROTON + 50;
   double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
   
   background_bin_end_ = MassConstants::mass2bin(max_peak_mz + MAX_XCORR_OFFSET + 1, 1);
@@ -274,16 +274,16 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       
       // Find all ion mass bins that match newResMassBin
       vector<int>::iterator ionMassBinItr = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin);
-/*      if (ionMassBinItr == ionMassBin.end()){
-        printf("%lf\t %d\t %d\n", bIonMass, bIonMassBin, aaMassBin[curAaMass] );
-        int cnt = 0;
-        // for (vector<int>::iterator itr = ionMassBin.begin(); itr !=  ionMassBin.end(); ++itr){
-        //   printf("massbin: %d\t %d\n", cnt++, (*itr));
-        // }
-        printf("index %d\t inomassbinsize: %d\n",ionMassBinItr - ionMassBin.begin(),  ionMasses.size() );
-        carp(CARP_FATAL, "'%d' does not exist", newResMassBin);        
-      }
-  */
+      // if (ionMassBinItr == ionMassBin.end()){
+      //   printf("%lf\t %d\t %d\n", bIonMass, bIonMassBin, aaMassBin[curAaMass] );
+      //   int cnt = 0;
+      //   // for (vector<int>::iterator itr = ionMassBin.begin(); itr !=  ionMassBin.end(); ++itr){
+      //   //   printf("massbin: %d\t %d\n", cnt++, (*itr));
+      //   // }
+      //   printf("index %d\t inomassbinsize: %d\n",ionMassBinItr - ionMassBin.begin(),  ionMasses.size() );
+      //   // carp(CARP_FATAL, "'%d' does not exist", newResMassBin);        
+      // }
+  
       int index = ionMassBinItr - ionMassBin.begin();
       double score = 0.0;
       for (int i = index; i < ionMasses.size(); i++) {

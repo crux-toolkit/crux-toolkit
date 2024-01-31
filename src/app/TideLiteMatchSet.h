@@ -56,7 +56,7 @@ class TideLiteMatchSet {
   }  
   static bool cmpCombinedPvalue(const Scores& x, const Scores& y) {  // compare PSMs by P-values. smaller comes first
     // return x.refactored_xcorr_ < y.refactored_xcorr_;
-    return x.exact_pval_ > y.exact_pval_;
+    return x.combined_pval_ > y.combined_pval_;
   }  
   static bool cmpHyperScore(const Scores& x, const Scores& y) {  // compare PSMs by hyper scores. larger comes first
     return x.hyper_score_ < y.hyper_score_;

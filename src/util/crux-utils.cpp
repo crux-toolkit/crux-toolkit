@@ -506,7 +506,7 @@ char* ion_type_to_string(ION_TYPE_T type) {
  */
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "spscore",
-  "xcorr_score",
+  "xcorr score",
   "evalue_score",
 
   "xcorr first",
@@ -525,10 +525,12 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "percolator_peptide_qvalue",
   "percolator_PEP",
 
-  "deltacn",
-  "deltalcn",
-  "by_ions_matched",
-  "by_ions_total",
+  "delta_cn",
+  "delta_lcn",
+  "b/y ions matched",
+  "b/y ions total",
+  "b/y ions fraction",
+  "b/y ion repeat match",
   "exact_pvalue",
   "refactored_xcorr",
   "res-ev score",

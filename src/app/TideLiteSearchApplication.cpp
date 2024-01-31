@@ -183,14 +183,6 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   // Create the output files, print headers
   createOutputFiles(); 
 
-  // Create the active_peptide_queues and peptide_readers for each threads
-  vector<HeadedRecordReader*> peptide_reader_threads;
-  vector<ActivePeptideQueueLite*> APQ;
-  for (int i = 0; i < num_threads_; i++) {
-    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
-    APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back()->Reader(), proteins, &locations));
-  }
-
   // Convert the original file names into spectrum records if needed 
   // Update the file names in the variable inputFiles_ locally.
   // Run spectrum file convertion in parallel.
@@ -198,6 +190,8 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     inputFiles_.push_back(TideLiteSearchApplication::InputFile(*original_file_name, *original_file_name, false));
   }
   // Launch threads to convert files
+  int thread_num = num_threads_;
+  num_threads_ = 1;
   boost::thread_group threadgroup_input_files;
   for (int t = 1; t < num_threads_; ++t) {
     boost::thread * currthread = new boost::thread(boost::bind(&TideLiteSearchApplication::getInputFiles, this, t));
@@ -206,8 +200,17 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   getInputFiles(0);
   // Join threads
   threadgroup_input_files.join_all();
+  num_threads_ = thread_num;
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+
+  // Create the active_peptide_queues and peptide_readers for each threads
+  vector<HeadedRecordReader*> peptide_reader_threads;
+  vector<ActivePeptideQueueLite*> APQ;
+  for (int i = 0; i < num_threads_; i++) {
+    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
+    APQ.push_back(new ActivePeptideQueueLite(peptide_reader_threads.back()->Reader(), proteins, &locations));
+  }
 
   carp(CARP_INFO, "Starting search.");
   // Read the first spectrum records from each input files 
@@ -264,7 +267,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     carp(CARP_INFO, "Retained %g%% of peaks.", (100.0 * num_retained_) / total_peaks);
   }
   
-  carp(CARP_INFO, "Time per spectrum-charge combination per thread: %lf s.", wall_clock() / (1e6*num_spectra_searched_));
+  carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*num_spectra_searched_));
   carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
                   ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
   carp(CARP_INFO, "%d spectrum-charge combinations loaded, %d spectrum-charge combinations searched. ", num_spectra_, num_spectra_searched_);
@@ -376,6 +379,7 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     }
     locks_array_[LOCK_CANDIDATES]->lock();
     total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
+    ++num_spectra_searched_;    
     locks_array_[LOCK_CANDIDATES]->unlock();  
 
     // allocate PSMscores for N scores
@@ -383,18 +387,17 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
 
     // Calculate the scores needed
     switch (curScoreFunction_) {
-      case XCORR_SCORE:
-        XCorrScoring(sc, active_peptide_queue, psm_scores);
-        break;
       case PVALUES:
         PValueScoring(sc, active_peptide_queue, psm_scores);
+//        break;
+      case XCORR_SCORE:
+        XCorrScoring(sc, active_peptide_queue, psm_scores);
         break;
     } 
     // Print the top-N results to the output files, 
     // The delta_cn, delta_lcn, and tailor score calulation happens here
 
     PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
-
   }
 }
 
@@ -418,7 +421,6 @@ void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharg
   num_precursors_skipped_ += num_precursors_skipped;
   num_isotopes_skipped_ += num_isotopes_skipped;
   num_retained_ += num_retained;
-  ++num_spectra_searched_;
   locks_array_[LOCK_REPORTING]->unlock();
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
@@ -508,6 +510,7 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   int maxPrecurMassBin = MassConstants::mass2bin(sc->neutral_mass + 250);
 
   vector< vector<int> > evidenceObs(nPepMassIntUniq, vector<int>(maxPrecurMassBin, 0));
+  // carp(CARP_INFO, "nPepMassIntUniq %d", nPepMassIntUniq);
   for (int pe = 0; pe < nPepMassIntUniq; pe++) {
     int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
 
@@ -550,13 +553,19 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
         break;
       }
     }
+    // carp(CARP_INFO, "pepMassInt[cnt] %d", pepMassInt[cnt]);
+    // carp(CARP_INFO, "pepMassIntIdx %d", pepMassIntIdx);
+
     // The actual scoring. Refactored XCorr Score calculation
     scoreRefactInt = 0;
-    for (vector<unsigned int>::const_iterator iter_uint = (*iter)->peaks_0.begin(); iter_uint != (*iter)->peaks_0.end(); iter_uint++) {
-      // printf("peak_id:%u\n", *iter_uint);
+    for (vector<unsigned int>::const_iterator iter_uint = (*iter)->peaks_1b.begin(); iter_uint != (*iter)->peaks_1b.end(); iter_uint++) {
+      // carp(CARP_INFO, "peak_id:%u", *iter_uint);
       if (*iter_uint < maxPrecurMassBin)
         scoreRefactInt += evidenceObs[pepMassIntIdx][*iter_uint];
     }
+    // carp(CARP_INFO, "scoreRefactInt %d", scoreRefactInt);
+    // exit(0);
+
     // Get the p-value of the refactored xcorr score 
     double pValue_xcorr = 1.0;
     if ((int)(scoreRefactInt) + score_offset >= 0) {
@@ -789,7 +798,8 @@ int TideLiteSearchApplication::calcResEvScore(
   int scoreResidueEvidence = 0;
   vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
   for (int res = 0; res < pepLen - 1; res++) {
-    double tmpAAMass = MassConstants::ToDouble(MassConstants::ToFixPt(residueMasses[res]));
+    // Perform some rounding, because the AA masses are rounded in dAAMass
+    double tmpAAMass = MassConstants::ToDouble(MassConstants::ToFixPt(residueMasses[res]));  
 
     vector<double>::const_iterator mass_itr = find(dAAMass_.begin(), dAAMass_.end(), tmpAAMass);
 
@@ -800,8 +810,10 @@ int TideLiteSearchApplication::calcResEvScore(
     int tmpAA = mass_itr - dAAMass_.begin();
 //    scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
     //if (res < curPeptide->peaks_1b.size())
-    if ( curPeptide->peaks_1b.size() > res && res > 0 && curResidueEvidenceMatrix[tmpAA].size() >  curPeptide->peaks_1b[res]-1)
+    if ( curPeptide->peaks_1b.size() > res && curResidueEvidenceMatrix[tmpAA].size() >  curPeptide->peaks_1b[res]-1) {
       scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][curPeptide->peaks_1b[res]-1];
+      // carp(CARP_INFO, "tmpAA: %d, res: %d, peak %d, value: %lf ", tmpAA, res, curPeptide->peaks_1b[res], curResidueEvidenceMatrix[tmpAA][curPeptide->peaks_1b[res]-1] );
+    }
   }
   return scoreResidueEvidence;
 }
@@ -939,7 +951,11 @@ int TideLiteSearchApplication::calcScoreCount(vector<int>& pepMassIntUnique, vec
   
   int score_idx;        
   max_row += 1;
-  nullDistribution = vector<double>(max_row*2, 0);
+  // nullDistribution = vector<double>(max_row*2, 0);
+  nullDistribution.reserve(max_row*2);
+  for (int i = 0; i < max_row*2; ++i)
+    nullDistribution[i] = 0.0;
+  std::fill(nullDistribution.begin(), nullDistribution.begin()+max_row*2, 0);
   double *scoreCountBinAdjust = new double[max_row*2];
   memset(scoreCountBinAdjust, 0.0, sizeof(double)*max_row*2);
   
@@ -1379,9 +1395,9 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
           iAAMass_.push_back(MassConstants::mass2bin(aa_mass));          
         }
       }
-      // Write the stattistics to a Protocol Buffer, so that next time it is at hand
-      RecordWriter residue_stat_wirter = RecordWriter(residue_stats_file);
-      CHECK(residue_stat_wirter.OK());  
+      // Write the statistics to a Protocol Buffer, so that next time it is at hand
+      RecordWriter residue_stat_writer = RecordWriter(residue_stats_file);
+      CHECK(residue_stat_writer.OK());  
       for (int i = 0; i < dAAMass_.size(); ++i){
         pb::ResidueStats last_residue_stat;
         last_residue_stat.set_aamass(dAAMass_[i]);
@@ -1390,7 +1406,7 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
         last_residue_stat.set_aafreqc(dAAFreqC_[i]);
         string aa_str = mMass2AA_[dAAMass_[i]];
         last_residue_stat.set_aa_str(aa_str);
-        CHECK(residue_stat_wirter.Write(&last_residue_stat));
+        CHECK(residue_stat_writer.Write(&last_residue_stat));
         // printf("%lf, %lf, %lf, %lf, %s\n", dAAMass_[i], dAAFreqN_[i], dAAFreqI_[i], dAAFreqC_[i], aa_str.c_str());
 
       }
@@ -1827,19 +1843,21 @@ void TideLiteSearchApplication::getMassBin(
   ActivePeptideQueueLite* active_peptide_queue
 ) {
   int pe = 0;
-  int peidx = 0;
+  // int peidx = 0;
 
   for (deque<PeptideLite*>::const_iterator iter_ = active_peptide_queue->begin_;
       iter_ != active_peptide_queue->end_; 
       ++iter_) {
-    // if (active_peptide_queue->candidatePeptideStatus_[peidx]) {
     double pepMass = (*iter_)->Mass();
     int pepMaInt = MassConstants::mass2bin(pepMass);
     pepMassInt[pe] = pepMaInt;
-    pepMassIntUnique.push_back(pepMaInt);
+    if (active_peptide_queue->candidatePeptideStatus_[pe]) {
+      pepMassIntUnique.push_back(pepMaInt);
+    }
+    // carp(CARP_INFO, "pepMaInt:%d",pepMaInt );
     pe++;
     // }
-    peidx++;
+    // peidx++;
   }
 
   //For pepMassIntUnique vector

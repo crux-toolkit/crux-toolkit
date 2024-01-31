@@ -50,7 +50,8 @@ Spectrum::Spectrum() :
    charge_state_assigned_(false),
    iso_window_lower_mz_(0),
    iso_window_upper_mz_(0),
-   ms1_scan_(0)
+   ms1_scan_(0),
+   retention_time_(0.0)
 {
   mz_peak_array_ = NULL;
 }
@@ -79,7 +80,8 @@ Spectrum::Spectrum (
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
    has_mz_peak_array_(false),
-   charge_state_assigned_(false)
+   charge_state_assigned_(false),
+   retention_time_(0.0)
  {
   mz_peak_array_ = NULL;
 
@@ -291,7 +293,9 @@ void Spectrum::printSqt(
  sorted_by_mz_(old_spectrum.sorted_by_mz_),
  sorted_by_intensity_(old_spectrum.sorted_by_intensity_),
  has_mz_peak_array_(old_spectrum.has_mz_peak_array_),
- charge_state_assigned_(old_spectrum.charge_state_assigned_)
+ charge_state_assigned_(old_spectrum.charge_state_assigned_),
+ retention_time_(old_spectrum.retention_time_)
+
 {
 
   // copy each peak
@@ -323,6 +327,7 @@ void Spectrum::copyFrom(Spectrum *src) {
  sorted_by_intensity_ = src->sorted_by_intensity_;
  has_mz_peak_array_ = src->has_mz_peak_array_;
  charge_state_assigned_ = src->charge_state_assigned_;
+ retention_time_ = src->retention_time_;
  // copy each peak
  for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
    this->addPeak(src->peaks_[peak_idx]->getIntensity(),
@@ -360,6 +365,8 @@ bool Spectrum::parseMstoolkitSpectrum
   first_scan_ = mst_real_spectrum->getScanNumber();
   last_scan_ = mst_real_spectrum->getScanNumber();
   precursor_mz_ = mst_real_spectrum->getMZ();
+
+  retention_time_ = mst_real_spectrum->getRTime();
 
   // setfilename of empty spectrum
   filename_ = filename;
@@ -434,7 +441,20 @@ bool Spectrum::parsePwizSpecInfo(
   // get the isolation window as the precursor m/z
   pzd::IsolationWindow iso_window = pwiz_spectrum->precursors[0].isolationWindow;
   bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
-  if (have_precursor_mz) { precursor_mz_ =iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
+  if (have_precursor_mz) { precursor_mz_ = iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
+  //  MS_retention_time = 1000894,
+  /// retention time: A time interval from the start of chromatography when an analyte exits a chromatographic column.
+  if (pwiz_spectrum->hasCVParam(pwiz::msdata::MS_retention_time)) {   
+    retention_time_ = pwiz_spectrum->cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // MS_scan_start_time = 1000016,
+  /// scan start time: The time that an analyzer started a scan, relative to the start of the MS run.    
+  } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
+    retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_scan_start_time).valueAs<double>();
+  }
+  // The following does not work.
+  // } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_retention_time)) {   
+  //   retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // }
 
   // each charge state(s) stored in selectedIon(s)
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
@@ -1015,6 +1035,11 @@ const char* Spectrum::getFullFilename(){
     return "";
   }
   return filename_.c_str();
+}
+
+FLOAT_T Spectrum::getRTime() const {
+
+  return retention_time_;
 }
 
 /*

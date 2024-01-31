@@ -139,6 +139,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "protein id x",
   "index name",
   "decoy index",
+  "retention time",
   // Percolator PIN columns.
   "PSMId",
   "score",

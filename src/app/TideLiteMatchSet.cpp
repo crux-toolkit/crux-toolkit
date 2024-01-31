@@ -23,7 +23,7 @@ string TideLiteMatchSet::fasta_file_name_ = "null";
 // column IDs are defined in ./src/io/MatchColumns.h and .cpp
 // The order of the columns in the output is defined here by the order of the column Ids
 int TideLiteMatchSet::XCorr_tsv_cols[] = {
-    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
     XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
@@ -31,15 +31,16 @@ int TideLiteMatchSet::XCorr_tsv_cols[] = {
     DECOY_INDEX_COL
   };    
  int TideLiteMatchSet::Pvalues_tsv_cols[] = {  //TODO: update the colums.
-    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, REFACTORED_SCORE_COL, EXACT_PVALUE_COL, 
+    FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
+    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL, REFACTORED_SCORE_COL, EXACT_PVALUE_COL, 
     RESIDUE_EVIDENCE_COL, RESIDUE_PVALUE_COL, BOTH_PVALUE_COL, BOTH_PVALUE_RANK, 
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
     DECOY_INDEX_COL
   };    
 int TideLiteMatchSet::Diameter_tsv_cols[] = { //TODO: update the colums.
-    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, // TODO: add a variable for the matching theoretical peak series.
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
@@ -350,21 +351,21 @@ void TideLiteMatchSet::gatherTargetsDecoys() {
   quantile_score_ = 1.0;
 
   // Calculate Tailor scores. Get the 99th quantile:
-  if (curScoreFunction_ == XCORR_SCORE) {
+  // if (curScoreFunction_ == XCORR_SCORE) {
 
-    int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)psm_scores_.size()+0.5)-1; // zero indexed
-    if (quantile_pos < 2) 
-      quantile_pos = 2;  // the third element
-    if (quantile_pos >= psm_scores_.size()) 
-      quantile_pos = psm_scores_.size()-1; // the last element
+  int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)psm_scores_.size()+0.5)-1; // zero indexed
+  if (quantile_pos < 2) 
+    quantile_pos = 2;  // the third element
+  if (quantile_pos >= psm_scores_.size()) 
+    quantile_pos = psm_scores_.size()-1; // the last element
 
-    make_heap(psm_scores_.begin(), psm_scores_.end(), cmpXcorrScore);
-    for (int i = 0; i <= quantile_pos; ++i){
-      pop_heap(psm_scores_.begin(), psm_scores_.end()-i, cmpXcorrScore);
-      Scores back = psm_scores_[psm_scores_.size()-1-i];
-    }
-    quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ +TAILOR_OFFSET; // Make sure scores positive
+  make_heap(psm_scores_.begin(), psm_scores_.end(), cmpXcorrScore);
+  for (int i = 0; i <= quantile_pos; ++i){
+    pop_heap(psm_scores_.begin(), psm_scores_.end()-i, cmpXcorrScore);
+    Scores back = psm_scores_[psm_scores_.size()-1-i];
   }
+  quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ +TAILOR_OFFSET; // Make sure scores positive
+  // }
 
   // get the value of the last score for the delta_lcn scores
   last_psm_ = std::min_element(psm_scores_.begin(), psm_scores_.end(), comp);
@@ -411,6 +412,7 @@ void TideLiteMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Ad
   switch (curScoreFunction_) {
   case XCORR_SCORE:
   case DIAMETER:
+    last_psm_ = psm_scores.end()-1;
     for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
       (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
       (*it).delta_lcn_ = ((*it).xcorr_score_ - (*last_psm_).xcorr_score_)/max((*it).xcorr_score_, 1.0);
@@ -422,7 +424,9 @@ void TideLiteMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Ad
     }
     break;
   case PVALUES:
+    last_psm_ = psm_scores.end()-1;
     for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
+      (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
       (*it).delta_lcn_ = -log10((*it).combined_pval_) + log10((*last_psm_).combined_pval_);
       if (it != psm_scores.end()-1)
         (*it).delta_cn_ = -log10((*it).combined_pval_) + log10((*(it+1)).combined_pval_);
@@ -505,7 +509,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_4:
       case EXACT_PVALUE_COL:
-        report += StringUtils::ToString((*it).exact_pval_, score_precision_);      // exact p-value score
+        report += StringUtils::ToString((*it).exact_pval_, score_precision_, false);      // exact p-value score
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_6:
       case RESIDUE_EVIDENCE_COL:
@@ -513,11 +517,11 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_8:
       case RESIDUE_PVALUE_COL:
-        report += StringUtils::ToString((*it).resEv_pval_, score_precision_);      // res_ev pvalue
+        report += StringUtils::ToString((*it).resEv_pval_, score_precision_, false);      // res_ev pvalue
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_9:
       case BOTH_PVALUE_COL:
-        report += StringUtils::ToString((*it).combined_pval_, score_precision_);      // combined p-value score
+        report += StringUtils::ToString((*it).combined_pval_, score_precision_, false);      // combined p-value score
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_11:
       case TAILOR_COL:
@@ -538,6 +542,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case MZTAB_SEARCH_ENGINE_SCORE_3:
       case MZTAB_SEARCH_ENGINE_SCORE_7:
       case MZTAB_SEARCH_ENGINE_SCORE_10:
+      case BOTH_PVALUE_RANK:
       case XCORR_RANK_COL:
         report += StringUtils::ToString(cnt, 0);
         break;
@@ -594,6 +599,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case MZTAB_MODIFICATIONS:
         report += mztab_modifications;  // the fasta file name
         break;
+      case RETENTION_TIME_COL:
       case MZTAB_RETENTION_TIME:
         report += StringUtils::ToString(sc->spectrum->RTime(), mass_precision_);  ;  // retention time
         break;

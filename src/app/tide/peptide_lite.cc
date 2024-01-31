@@ -77,10 +77,7 @@ PeptideLite::PeptideLite(const pb::Peptide& peptide,
       aux_locations.push_back(aux_loc.location(i));
     }
   }
-  b_ions_only_ = false;
   string scoring_method = Params::GetString("score-function"); // Handle this properly with Get
-  if ( scoring_method == "combined-p-values") 
-    b_ions_only_ = true; 
   protein_id_str_ = string("");
   flankingAAs_ = string("");
   seq_with_mods_ = string("");
@@ -122,39 +119,37 @@ void PeptideLite::AddIons(W* workspace, bool dia_mode) {
     }
     total += aa_masses[i];
   }
-  if (b_ions_only_ == false) {
-    // Add all charge 1 Y ions.
-    total = aa_masses[Len() - 1];
-    for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
-      workspace->AddYIon(total, 1);
-      int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 1);
-      peaks_1y.push_back(index_y);
-      if (dia_mode) {
-        y_ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
-        ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
-        // ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::Y, 1));
-      }
-      total += aa_masses[i];
+  // Add all charge 1 Y ions.
+  total = aa_masses[Len() - 1];
+  for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
+    workspace->AddYIon(total, 1);
+    int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 1);
+    peaks_1y.push_back(index_y);
+    if (dia_mode) {
+      y_ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
+      ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
+      // ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::Y, 1));
     }
+    total += aa_masses[i];
+  }
 
-    // Add all charge 2 B ions.
-    max_possible_peak = max_possible_peak*2 + 2;  //adjust for larger charge
-    total = aa_masses[0];
-    for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
-      workspace->AddBIon(total, 2);
-      int index_b = MassConstants::mass2bin(total + MassConstants::B + MASS_PROTON, 2);
-      peaks_2b.push_back(index_b);
-      total += aa_masses[i];
-    }
+  // Add all charge 2 B ions.
+  max_possible_peak = max_possible_peak*2 + 2;  //adjust for larger charge
+  total = aa_masses[0];
+  for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
+    workspace->AddBIon(total, 2);
+    int index_b = MassConstants::mass2bin(total + MassConstants::B + MASS_PROTON, 2);
+    peaks_2b.push_back(index_b);
+    total += aa_masses[i];
+  }
 
-    // Add all charge 2 Y ions.
-    total = aa_masses[Len() - 1];
-    for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
-      workspace->AddYIon(total, 2);
-      int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 2);
-      peaks_2y.push_back(index_y);
-      total += aa_masses[i];
-    }
+  // Add all charge 2 Y ions.
+  total = aa_masses[Len() - 1];
+  for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
+    workspace->AddYIon(total, 2);
+    int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 2);
+    peaks_2y.push_back(index_y);
+    total += aa_masses[i];
   }
 
   // added by Yang
