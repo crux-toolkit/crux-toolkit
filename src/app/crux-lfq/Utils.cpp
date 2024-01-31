@@ -402,6 +402,7 @@ void processRange(int start, int end,
                   CruxLFQResults& lfqResults) {
     // No need for a lock since it's single-threaded
     vector<ChromatographicPeak*> _chromatographicPeaks;
+    _chromatographicPeaks.resize(end - start);
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
@@ -1014,7 +1015,7 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
         std::remove_if(lfqResults.Peaks[spectraFile].begin(),
                        lfqResults.Peaks[spectraFile].end(),
                        [](const ChromatographicPeak& p) {
-                           return &p == nullptr ||
+                           return (&p == nullptr) ||
                                   (p.isMbrPeak && p.isotopicEnvelopes.empty());
                        }),
         lfqResults.Peaks[spectraFile].end());
