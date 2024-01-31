@@ -277,6 +277,10 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                       getCharge());
     break;
+  case RETENTION_TIME_COL:
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
+                                      spectrum->getRTime());
+    break;
   case SPECTRUM_PRECURSOR_MZ_COL:
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 
                                      spectrum->getPrecursorMz());

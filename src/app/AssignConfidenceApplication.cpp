@@ -526,6 +526,7 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     cols_to_print[FILE_COL] = Params::GetBool("file-column");
     cols_to_print[SCAN_COL] = true;
     cols_to_print[CHARGE_COL] = true;
+    cols_to_print[RETENTION_TIME_COL] = true;
     cols_to_print[SPECTRUM_PRECURSOR_MZ_COL] = true;
     cols_to_print[SPECTRUM_NEUTRAL_MASS_COL] = true;
     cols_to_print[PEPTIDE_MASS_COL] = true;
@@ -655,9 +656,16 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     if (*i < 0.05) ++fdr5;
     if (*i < 0.10) ++fdr10;
   }
-  carp(CARP_INFO, "Number of PSMs at 1%% FDR = %d.", fdr1);
-  carp(CARP_INFO, "Number of PSMs at 5%% FDR = %d.", fdr5);
-  carp(CARP_INFO, "Number of PSMs at 10%% FDR = %d.", fdr10);
+  if (estimation_method == PEPTIDE_LEVEL_METHOD) {
+    carp(CARP_INFO, "Number of peptides at 1%% FDR = %d.", fdr1);
+    carp(CARP_INFO, "Number of peptides at 5%% FDR = %d.", fdr5);
+    carp(CARP_INFO, "Number of peptides at 10%% FDR = %d.", fdr10);
+  } else {
+    carp(CARP_INFO, "Number of PSMs at 1%% FDR = %d.", fdr1);
+    carp(CARP_INFO, "Number of PSMs at 5%% FDR = %d.", fdr5);
+    carp(CARP_INFO, "Number of PSMs at 10%% FDR = %d.", fdr10);
+
+  }
 
   // Store p-values to q-values as a hash, and then assign them.
   map<FLOAT_T, FLOAT_T> qvalue_hash = store_arrays_as_hash(target_scores, qvalues);

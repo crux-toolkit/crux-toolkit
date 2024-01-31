@@ -419,7 +419,7 @@ bool Spectrum::parsePwizSpecInfo(
   int num_peaks = pwiz_spectrum->defaultArrayLength;
   vector<double> mzs = pwiz_spectrum->getMZArray()->data;
   vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
-  for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
+  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }
   has_peaks_ = true;
@@ -442,6 +442,8 @@ bool Spectrum::parsePwizSpecInfo(
   pzd::IsolationWindow iso_window = pwiz_spectrum->precursors[0].isolationWindow;
   bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
   if (have_precursor_mz) { precursor_mz_ = iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
+
+  // Get the retention time
   //  MS_retention_time = 1000894,
   /// retention time: A time interval from the start of chromatography when an analyte exits a chromatographic column.
   if (pwiz_spectrum->hasCVParam(pwiz::msdata::MS_retention_time)) {   
@@ -1041,6 +1043,11 @@ FLOAT_T Spectrum::getRTime() const {
 
   return retention_time_;
 }
+
+  void Spectrum::setRTime(double retention_time){
+    retention_time_ = retention_time;
+  }
+
 
 /*
  * Local Variables:

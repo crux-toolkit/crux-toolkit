@@ -145,6 +145,7 @@ class Spectrum{
   bool assignZStateDIA();
 
   FLOAT_T getRTime() const;
+  void setRTime(double retention_time);
   /**
    * Prints a spectrum object to file.
    */

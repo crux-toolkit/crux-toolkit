@@ -463,9 +463,12 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 }
 
 Crux::Spectrum* MatchFileReader::parseSpectrum() {
-  return new Crux::Spectrum(getInteger(SCAN_COL),
+  
+  Crux::Spectrum* new_spectrum = new Crux::Spectrum(getInteger(SCAN_COL),
                             getInteger(SCAN_COL),
                             getFloat(SPECTRUM_PRECURSOR_MZ_COL),
                             vector<int>(1, getInteger(CHARGE_COL)),
                             getString(FILE_COL));
+  new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+  return new_spectrum;
 }

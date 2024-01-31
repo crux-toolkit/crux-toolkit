@@ -86,6 +86,7 @@ void MatchFileWriter::setPrecision() {
       // mass fields
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
+    case RETENTION_TIME_COL:
     case MASS_COL:
     case DM_COL:
     case ABS_DM_COL:
