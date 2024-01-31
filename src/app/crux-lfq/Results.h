@@ -39,26 +39,27 @@ class CruxLFQResults {
         }
     }
 
-    void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
+    // void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
+    void writeResults(const string &mod_pep_results_file, const vector<std::string> &rawFiles) {
         carp(CARP_INFO, "Writing output...");
 
-        string prf = peak_results_file;
-        std::ofstream outFile1(prf);
-        if (outFile1) {
-            // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
-            const std::size_t bufferSize = 8192;
-            char buffer[bufferSize];
-            outFile1.rdbuf()->pubsetbuf(buffer, bufferSize);
-            outFile1 << ChromatographicPeakTabSeperatedHeader() << std::endl;
-            for (auto &pair : Peaks) {
-                auto &peaks = pair.second;
-                for (auto &peak : peaks) {
-                    outFile1 << peak.ToString() << std::endl;
-                }
-            }
-        } else {
-            carp(CARP_FATAL, "Failed to open peak results file for writing.");
-        }
+        // string prf = peak_results_file;
+        // std::ofstream outFile1(prf);
+        // if (outFile1) {
+        //     // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
+        //     const std::size_t bufferSize = 8192;
+        //     char buffer[bufferSize];
+        //     outFile1.rdbuf()->pubsetbuf(buffer, bufferSize);
+        //     outFile1 << ChromatographicPeakTabSeperatedHeader() << std::endl;
+        //     for (auto &pair : Peaks) {
+        //         auto &peaks = pair.second;
+        //         for (auto &peak : peaks) {
+        //             outFile1 << peak.ToString() << std::endl;
+        //         }
+        //     }
+        // } else {
+        //     carp(CARP_FATAL, "Failed to open peak results file for writing.");
+        // }
 
         string peptides_results_file = mod_pep_results_file;
         std::ofstream outFile2(peptides_results_file);
@@ -112,7 +113,7 @@ class CruxLFQResults {
         for (auto &filePeaks : Peaks) {
             map<string, vector<ChromatographicPeak>> groupedPeaks;
             for (auto &peak : filePeaks.second) {
-                if (peak.NumIdentificationsByFullSeq == 1) {
+                if (peak.NumIdentificationsByBaseSeq == 1) {
                     groupedPeaks[peak.identifications.front().sequence].push_back(peak);
                 }
             }
@@ -149,7 +150,7 @@ class CruxLFQResults {
             // report ambiguous quantification
             vector<ChromatographicPeak> ambiguousPeaks;
             for (auto &peak : filePeaks.second) {
-                if (peak.NumIdentificationsByFullSeq > 1) {
+                if (peak.NumIdentificationsByBaseSeq > 1) {
                     ambiguousPeaks.push_back(peak);
                 }
             }

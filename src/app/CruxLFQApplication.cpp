@@ -127,9 +127,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     lfqResults.calculatePeptideResults(CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
     lfqResults.calculateProteinResultsMedianPolish(CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT);
-    const std::string mod_pep_results_file = make_file_path("crux-lfq-mod-pep.txt");
-    const std::string peak_results_file = make_file_path("crux-lfq-peaks.txt");
-    lfqResults.writeResults(mod_pep_results_file, peak_results_file, spec_files);
+    // const std::string mod_pep_results_file = make_file_path("crux-lfq-mod-pep.txt");
+    // const std::string peak_results_file = make_file_path("crux-lfq-peaks.txt");
+    const std::string mod_pep_results_file = make_file_path("crux-lfq.txt");
+    lfqResults.writeResults(mod_pep_results_file, spec_files);
 
     return 0;
 }
