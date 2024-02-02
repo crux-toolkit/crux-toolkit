@@ -13,8 +13,8 @@ message Spectrum {
 
   // Actual peak_m_z values are expected to be strictly increasing, so we store
   // the deltas of the numerators to keep the numbers smaller.
-  repeated int32 peak_m_z = 1 [packed = true];
-  repeated int32 peak_intensity = 2 [packed = true];
+  repeated int64 peak_m_z = 1 [packed = true];
+  repeated int64 peak_intensity = 2 [packed = true];
   optional int32 peak_m_z_denominator = 3; // common denominator for all m_z's
   optional int32 peak_intensity_denominator = 4; // common for all intensities
 

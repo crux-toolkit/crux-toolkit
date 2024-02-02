@@ -387,7 +387,7 @@ bool Spectrum::parseMstoolkitSpectrum
       zstates_.push_back(zstate);
     }
   } else { // if no charge states detected, decide based on spectrum
-	charge_state_assigned_ = assignZState();
+	  charge_state_assigned_ = assignZState();
   }
 
   return true;

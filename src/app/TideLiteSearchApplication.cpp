@@ -50,11 +50,6 @@ const double TideLiteSearchApplication::RESCALE_FACTOR = 20.0;
 // -- missing charge states, 0 charege states,, override charge states handled. --> need to update doc. GH issue: #557, #607
 
 #define CHECK(x) GOOGLE_CHECK(x)
-// Things to do:
-
-// ---- Rufino ---
-boost::mutex mtx; // mutex for thread guard
-std::queue<int> stack_threads; // queue to keep the thread already released
 
 TideLiteSearchApplication::TideLiteSearchApplication() {
   remove_index_ = "";
@@ -190,8 +185,8 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
     inputFiles_.push_back(TideLiteSearchApplication::InputFile(*original_file_name, *original_file_name, false));
   }
   // Launch threads to convert files
-  int thread_num = num_threads_;
-  num_threads_ = 1;
+  // int thread_num = num_threads_;
+  // num_threads_ = 1;
   boost::thread_group threadgroup_input_files;
   for (int t = 1; t < num_threads_; ++t) {
     boost::thread * currthread = new boost::thread(boost::bind(&TideLiteSearchApplication::getInputFiles, this, t));
@@ -200,7 +195,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   getInputFiles(0);
   // Join threads
   threadgroup_input_files.join_all();
-  num_threads_ = thread_num;
+  // num_threads_ = thread_num;
 
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
 
@@ -300,8 +295,8 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
 void TideLiteSearchApplication::spectrum_search(void *threadarg) {  
   struct thread_data *my_data = (struct thread_data *) threadarg;
 
-  ActivePeptideQueueLite* active_peptide_queue = my_data->active_peptide_queue;
-  int thread_id = my_data->thread_id;
+  ActivePeptideQueueLite* active_peptide_queue = my_data->active_peptide_queue_;
+  int thread_id = my_data->thread_id_;
 
   int input_file_source;
   pb::Spectrum pb_spectrum;  
@@ -398,6 +393,9 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     // The delta_cn, delta_lcn, and tailor score calulation happens here
 
     PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
+    delete spectrum;
+    delete sc;
+
   }
 }
 
@@ -470,12 +468,13 @@ int TideLiteSearchApplication::PeakMatching(ObservedPeakSet& observed, vector<un
   bool previous_ion_matched = false;
   int score = 0;
   const int* cache = observed.GetCache(); 
-  int end = observed.getCacheEnd()-10;  
+  int end = observed.getCacheEnd();  
 
   for (vector<unsigned int>::const_iterator iter_uint = peak_list.begin(); iter_uint != peak_list.end(); iter_uint++) {
-    if (*iter_uint > end)
+    if (*iter_uint >= end)
       continue;
-    score += cache[*iter_uint];    // sum of the intensity of matching peaks, xcorr score
+    score += cache[*iter_uint];    // sum of the intensity of matching peaks, the xcorr score
+    // carp(CARP_INFO, "peak mz: %u, intensity %d, score: %d", *iter_uint, cache[*iter_uint], score );
     if (previous_ion_matched && cache[*iter_uint] > 0) {
       ++repeat_matching_peaks;
     }

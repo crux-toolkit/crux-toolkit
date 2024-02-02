@@ -104,11 +104,11 @@ class TideLiteSearchApplication : public CruxApplication {
 
    // Struct holding necessary information for each thread to run.
   struct thread_data {
-    ActivePeptideQueueLite* active_peptide_queue;
-    int thread_id;
-    thread_data (ActivePeptideQueueLite* active_peptide_queue_, int thread_id_) {
-      active_peptide_queue = active_peptide_queue_;
-      thread_id = thread_id_;
+    ActivePeptideQueueLite* active_peptide_queue_;
+    int thread_id_;
+    thread_data (ActivePeptideQueueLite* active_peptide_queue, int thread_id) {
+      active_peptide_queue_ = active_peptide_queue;
+      thread_id_ = thread_id;
     }
   };
 
@@ -180,7 +180,6 @@ class TideLiteSearchApplication : public CruxApplication {
  public:
 
   SCORE_FUNCTION_T curScoreFunction_;
-  // ActivePeptideQueueLite* active_peptide_queue_; 
   int decoy_num_;  // Number of decoys per peptide;
   int top_matches_;
 
