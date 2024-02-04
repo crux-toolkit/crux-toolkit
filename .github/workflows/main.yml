@@ -113,7 +113,7 @@ jobs:
             scl enable rh-ruby27 'gem install cucumber rspec'
         
         - name: Checkout
-          uses: actions/checkout@v4.1.1
+          uses: actions/checkout@v3
 
         - name: add-short-sha env property
           shell: bash
@@ -143,19 +143,19 @@ jobs:
             cmake3 --build . --config $BUILD_TYPE --target package_source
             
         - name: Archive Centos 7 binary package
-          uses: actions/upload-artifact@v4.3.0
+          uses: actions/upload-artifact@v3
           with:
             name: crux-4.1.${{env.git_short_sha}}.centos7
             path: crux-4.1.Linux.x86_64.zip
           
         - name: Archive source package
-          uses: actions/upload-artifact@v4.3.0
+          uses: actions/upload-artifact@v3
           with:
             name: crux-4.1.${{env.git_short_sha}}.Source
             path: crux-4.1.Source.tar.gz
         
         - name: Archive smoke test results
-          uses: actions/upload-artifact@v4.3.0
+          uses: actions/upload-artifact@v3
           with:
             name: smoke.html
             path: test/smoke-tests/smoke-tests.html
