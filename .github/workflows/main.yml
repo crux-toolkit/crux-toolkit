@@ -134,7 +134,7 @@ jobs:
           shell: bash
           run: |
             cd test/smoke-tests
-            cucumber --tags "not @ignore" -f html -o smoke-tests.html
+            scl enable rh-python36 rh-ruby27 'cucumber -v --tags "not @ignore" -f html -o smoke-tests.html'
             
         - name: Build binary and source packages
           shell: bash
