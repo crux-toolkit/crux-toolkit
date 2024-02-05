@@ -98,9 +98,8 @@ map<int, PSM> create_psm_map(const string& psm_file,
                        default_modifications_col};
             psm_datum[scan_col] = psm;
         }
-
-        return psm_datum;
     }
+    return psm_datum;
 }
 
 string calcFormula(string seq) {
