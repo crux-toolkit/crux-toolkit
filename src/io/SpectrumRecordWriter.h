@@ -45,14 +45,9 @@ class SpectrumRecordWriter {
     const Crux::Spectrum* s
   );
 
-  /**
-   * See how much precision is given in the vals array.
-   */
-  static void getDenoms(
-    const Crux::Spectrum* s,  ///< values to check
-    int* mzDenom, ///< out parameter for m/z denom
-    int* intensityDenom ///< out parameter for intensity denom
-  );
+ private:
+  static string version_date_;
+  static unsigned long scan_index_;
 
 };
 

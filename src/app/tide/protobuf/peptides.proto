@@ -43,7 +43,10 @@ message Peptide {
   optional int32 decoy_index = 11;
   optional string decoy_sequence = 12;   // Stores the decoy peptide sequence. 
   optional AuxLocation aux_loc = 13;
-  repeated int32 decoy_perm_idx = 14; //Amino acid permutation indeces for decoy generation. The list is -1 separated for for multiple decoys per target.
+  repeated int32 decoy_perm_idx = 14; //Amino acid permutation indeces for decoy generation. The list is -1 separated for multiple decoys per target.
+  
+  optional int32 nterm_mod = 15;
+  optional int32 cterm_mod = 16;
 }
 
 message AuxLocation {

@@ -46,6 +46,7 @@ set(
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/raw_proteins.pb.cc
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/results.pb.cc
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/spectrum.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/residue_stats.pb.cc
 )
 set(
   proto_files
@@ -54,6 +55,7 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/raw_proteins.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/results.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/spectrum.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/residue_stats.proto
 )
 add_custom_command(
   OUTPUT ${proto_files_compiled}
@@ -74,6 +76,7 @@ if (WIN32 AND NOT CYGWIN)
     tide_lib_files
     ${proto_files_compiled}
     abspath.cc
+    ActivePeptideQueueLite.cc
     active_peptide_queue.cc
     crux_sp_spectrum.cc
     fifo_alloc.cc
@@ -83,6 +86,7 @@ if (WIN32 AND NOT CYGWIN)
     max_mz.cc
     mman.c
     peptide.cc
+    peptide_lite.cc
     peptide_mods3.cc
     peptide_peaks.cc
     sp_scorer.cc
@@ -94,6 +98,7 @@ else (WIN32 AND NOT CYGWIN)
     tide_lib_files
     ${proto_files_compiled}
     abspath.cc
+    ActivePeptideQueueLite.cc
     active_peptide_queue.cc
     crux_sp_spectrum.cc
     fifo_alloc.cc
@@ -102,6 +107,7 @@ else (WIN32 AND NOT CYGWIN)
     mass_constants.cc
     max_mz.cc
     peptide.cc
+    peptide_lite.cc
     peptide_mods3.cc
     peptide_peaks.cc
     sp_scorer.cc

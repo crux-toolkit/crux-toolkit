@@ -448,5 +448,6 @@ void get_files_from_list(
 bool parseUrl(std::string url, std::string* host, std::string* path);
 std::string httpRequest(const std::string& url, const std::string& data = "", bool waitForResponse = true);
 void postToAnalytics(const std::string& appName);
+std::string getDateFromCurxVersion();
 
 #endif

@@ -64,7 +64,7 @@ int SpectrumZState::getCharge() const {
  */
 
 void SpectrumZState::setMZ(
-  FLOAT_T mz,
+  double mz,
   int charge
 ) {
 
@@ -73,10 +73,10 @@ void SpectrumZState::setMZ(
 
 }
 
-FLOAT_T SpectrumZState::getMZ() const {
+double SpectrumZState::getMZ() const {
 
   return (neutral_mass_ > 0) ?
-    (neutral_mass_ + (FLOAT_T)charge_*MASS_PROTON) / (FLOAT_T)charge_ :
+    (neutral_mass_ + (double)charge_*MASS_PROTON) / (double)charge_ :
     0;
 }
 
@@ -108,7 +108,7 @@ double SpectrumZState:: getSinglyChargedMass() const {
  * Sets the neutral mass for this z-state
  */
 void SpectrumZState::setNeutralMass(
-  FLOAT_T neutral_mass,
+  double neutral_mass,
   int charge
   ) {
 
@@ -119,7 +119,7 @@ void SpectrumZState::setNeutralMass(
 /**
  * \returns The neutral mass for this z-state
  */
-FLOAT_T SpectrumZState::getNeutralMass() const {
+double SpectrumZState::getNeutralMass() const {
 
   return (neutral_mass_ > 0) ? neutral_mass_ : 0;
 }
@@ -128,7 +128,7 @@ FLOAT_T SpectrumZState::getNeutralMass() const {
  * Sets the retention time for this z-state
  */
 void SpectrumZState::setRTime(
-  FLOAT_T rtime
+  double rtime
   ) {
 
   rtime_ = rtime;
@@ -137,7 +137,7 @@ void SpectrumZState::setRTime(
 /**
  * \returns The retention time for this z-state
  */
-FLOAT_T SpectrumZState::getRTime() const {
+double SpectrumZState::getRTime() const {
   return rtime_;
 }
 
@@ -145,7 +145,7 @@ FLOAT_T SpectrumZState::getRTime() const {
  * Sets the area for this z-state
  */
 void SpectrumZState::setArea(
-    FLOAT_T area
+    double area
   ) {
 
   area_ = area;
@@ -154,7 +154,7 @@ void SpectrumZState::setArea(
 /**
  * \returns The area for this z-state
  */
-FLOAT_T SpectrumZState::getArea() const {
+double SpectrumZState::getArea() const {
   return area_;
 }
 

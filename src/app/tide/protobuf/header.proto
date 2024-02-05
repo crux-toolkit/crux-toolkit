@@ -8,6 +8,7 @@ message Modification {
   optional string amino_acids = 1;
   optional double delta = 2;
   optional int32 max_count = 3;
+  optional string name = 4;
 }
 
 message ModTable {
@@ -56,10 +57,12 @@ message Header {
     optional ModTable cprotterm_mods = 19;
     optional int32 decoys = 9;
     optional int32 decoys_per_target = 17;
+    optional string version = 20;
   }
 
   message SpectraHeader {
     optional bool sorted = 2;
+    optional string version = 3;
   }
   
   message ResultsHeader {
