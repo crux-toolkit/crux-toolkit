@@ -136,7 +136,7 @@ else (UNIX)
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
         -DPREFIX:PATH=${CMAKE_CURRENT_BINARY_DIR}
         -DWORKING_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
-        -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake ${CMAKE_CURRENT_BINARY_DIR}
     INSTALL_COMMAND
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
@@ -178,6 +178,12 @@ if (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/picked_protein/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/picked_protein
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fido/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido
     INSTALL_COMMAND ""
   )
 else (WIN32 AND NOT CYGWIN)
@@ -218,6 +224,11 @@ if (UNIX)
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
       -Dprotobuf_BUILD_TESTS=OFF
+    PATCH_COMMAND
+      # Patch to compile with c++14
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/protobuf-3.19.4/CMakeLists.txt
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/protobuf-3.19.4/cmake
  )
 elseif (WIN32 AND NOT CYGWIN)
   ExternalProject_Add(
