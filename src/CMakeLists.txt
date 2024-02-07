@@ -3,22 +3,22 @@ cmake_policy(VERSION 3.15)
 
 use_cxx14()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/tide)
 
-include_directories(${CMAKE_SOURCE_DIR}/ext)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
+include_directories(${CMAKE_SOURCE_DIR}/src/app/tide/protoobj)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext)
-include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
@@ -59,6 +59,7 @@ endif (WIN32 AND NOT Cygwin)
 
 link_directories(${CMAKE_BINARY_DIR}/app/bullseye)
 link_directories(${CMAKE_BINARY_DIR}/app/hardklor)
+link_directories(${CMAKE_BINARY_DIR}/app/tide-support)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
@@ -463,9 +464,9 @@ else()
     blas
     fido
     picked_protein
-    protobuf
     pwiz_data_msdata
     pwiz_data_msdata_mz5
+    pwiz_data_msdata_mzmlb
     pwiz_data_msdata_version
     pwiz_data_msdata_core
     pwiz_data_identdata
@@ -484,6 +485,8 @@ else()
     boost_serialization
     boost_system
     boost_thread
+    protobuf
+    protoc
     dl
     m
     pthread
