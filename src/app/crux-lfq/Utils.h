@@ -190,6 +190,7 @@ struct PSM {
     double peptide_mass_col;
     double monoisotopic_mass_col;
     string modifications;
+    double retention_time;
 };
 
 enum class DetectionType {
@@ -272,8 +273,10 @@ filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
 
 void setToNegativeOneIfNaN(double& value);
 
-map<int, PSM> create_psm_map(const string& psm_file,
-                             const string& psm_file_format = "percolator");
+vector<PSM> create_psm(const string& psm_file,
+               const string& psm_file_format = "assign-confidence",
+               const bool filtered = false,
+               const double q_value_threshold = 0.01);
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime,
              unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans);

@@ -33,73 +33,75 @@ const int MaxThreads = 4;
 
 namespace CruxLFQ {
 
-map<int, PSM> create_psm_map(const string& psm_file,
-                             const string& psm_file_format) {
+/**
+ * @brief Creates a map of PSM (Peptide-Spectrum Match) data from a given file.
+ *
+ * This function reads a PSM file in a specific format and creates a map of PSM objects.
+ * The PSM file format can be either "tide-search", "assign-confidence", or "percolator".
+ *
+ * @param psm_file The path to the PSM file.
+ * @param psm_file_format The format of the PSM file.
+ * @return A PSM containing the PSM data, where the key is the scan column value.
+ */
+vector<PSM> create_psm(const string& psm_file,
+               const string& psm_file_format,
+               const bool filtered,
+               const double q_value_threshold) {
     carp(CARP_INFO, "loading psm data ...");
-    map<int, PSM> psm_datum;
+    vector<PSM> psm_data;
 
     string sequence_col, modifications_col;
     int scan_col, charge_col;
-    double peptide_mass_col, spectrum_precursor_mz_col, spectrum_neutral_mass_col;
+    double peptide_mass_col, spectrum_precursor_mz_col, spectrum_neutral_mass_col, q_value, retention_time;
 
     // Even though the headers for assign-confidence and percolator are the same,
     // the code is split for the purposes of seperation of concerns
 
+    // Check the file format and handle each format separately
     if (psm_file_format == "tide-search") {
-        io::CSVReader<7, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
+        io::CSVReader<8, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
             matchFileReader(psm_file);
         matchFileReader.read_header(io::ignore_extra_column, "scan", "charge",
                                     "spectrum precursor m/z", "peptide mass",
-                                    "sequence", "modifications", "spectrum neutral mass");
+                                    "sequence", "modifications", "spectrum neutral mass", "retention time");
         while (matchFileReader.read_row(scan_col, charge_col,
                                         spectrum_precursor_mz_col, peptide_mass_col,
-                                        sequence_col, modifications_col, spectrum_neutral_mass_col)) {
+                                        sequence_col, modifications_col, spectrum_neutral_mass_col, retention_time)) {
             PSM psm = {sequence_col,
                        scan_col,
                        charge_col,
                        peptide_mass_col,
                        peptide_mass_col,  // Protein Mass is the MonoIsotopic Mass --- Peptide Mass
-                       modifications_col};
-            psm_datum[scan_col] = psm;
+                       modifications_col,
+                       retention_time};
+            psm_data.push_back(psm);
         }
     } else if (psm_file_format == "assign-confidence") {
-        io::CSVReader<6, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
+        io::CSVReader<8, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
             matchFileReader(psm_file);
         matchFileReader.read_header(io::ignore_extra_column, "scan", "charge",
                                     "spectrum precursor m/z", "peptide mass",
-                                    "sequence", "spectrum neutral mass");
+                                    "sequence", "spectrum neutral mass", "retention time", "tdc q-value");
         string default_modifications_col = "";
         while (matchFileReader.read_row(scan_col, charge_col,
                                         spectrum_precursor_mz_col, peptide_mass_col,
-                                        sequence_col, spectrum_neutral_mass_col)) {
+                                        sequence_col, spectrum_neutral_mass_col, retention_time, q_value)) {
+            if (!filtered && q_value > q_value_threshold) {
+                continue;
+            }
             PSM psm = {sequence_col,
                        scan_col,
                        charge_col,
                        peptide_mass_col,
                        peptide_mass_col,
-                       default_modifications_col};
-            psm_datum[scan_col] = psm;
+                       default_modifications_col,
+                       retention_time};
+            psm_data.push_back(psm);
         }
-    } else if (psm_file_format == "percolator") {
-        io::CSVReader<6, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
-            matchFileReader(psm_file);
-        matchFileReader.read_header(io::ignore_extra_column, "scan", "charge",
-                                    "spectrum precursor m/z", "peptide mass",
-                                    "sequence", "spectrum neutral mass");
-        string default_modifications_col = "";
-        while (matchFileReader.read_row(scan_col, charge_col,
-                                        spectrum_precursor_mz_col, peptide_mass_col,
-                                        sequence_col, spectrum_neutral_mass_col)) {
-            PSM psm = {sequence_col,
-                       scan_col,
-                       charge_col,
-                       peptide_mass_col,
-                       peptide_mass_col,
-                       default_modifications_col};
-            psm_datum[scan_col] = psm;
-        }
+    } else {
+        carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
     }
-    return psm_datum;
+    return psm_data;
 }
 
 string calcFormula(string seq) {

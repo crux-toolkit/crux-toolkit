@@ -4,24 +4,21 @@
 #include <vector>
 
 #include "CruxApplication.h"
-
-
+#include "crux-lfq/Utils.h"
 #include "pwiz/data/msdata/MSDataFile.hpp"
 #include "pwiz/data/msdata/SpectrumListWrapper.hpp"
 
-#include "crux-lfq/Utils.h"
-
+using CruxLFQ::BINS_PER_DALTON;
+using CruxLFQ::getScanID;
+using CruxLFQ::Identification;
+using CruxLFQ::IndexedMassSpectralPeak;
+using CruxLFQ::IndexedSpectralResults;
+using CruxLFQ::Ms1ScanInfo;
+using CruxLFQ::PSM;
 using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
-using CruxLFQ::PSM;
-using CruxLFQ::IndexedSpectralResults;
-using CruxLFQ::Identification;
-using CruxLFQ::IndexedMassSpectralPeak;
-using CruxLFQ::Ms1ScanInfo;
-using CruxLFQ::BINS_PER_DALTON;
-using CruxLFQ::getScanID;
 
 typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
@@ -30,7 +27,7 @@ typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
  * \brief Application for quantifying peptides/proteins from MS/MS data
  */
 class CruxLFQApplication : public CruxApplication {
- public:
+   public:
     /**
      * Constructor
      */
@@ -85,11 +82,11 @@ class CruxLFQApplication : public CruxApplication {
 
     virtual void processParams();
 
-    map<int, PSM> create_psm_map(const string& psm_file);
+    PSM create_psm(const string& psm_file);
 
     pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
 
     IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
 
-    vector<Identification> createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection);
+    vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
 };
