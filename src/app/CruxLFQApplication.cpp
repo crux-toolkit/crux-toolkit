@@ -75,15 +75,13 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
     }
-    map<int, CruxLFQ::PSM> psm_datum = CruxLFQ::create_psm_map(psm_file, psm_file_format);
+    vector<CruxLFQ::PSM> psm_data = CruxLFQ::create_psm(psm_file, psm_file_format);
     CruxLFQ::CruxLFQResults lfqResults(spec_files);
 
     vector<CruxLFQ::Identification> allIdentifications;
     std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
     for (const string& spectra_file : spec_files) {
-        SpectrumListPtr spectra_ms2 = loadSpectra(spectra_file, 2);
-        carp(CARP_INFO, "Read %d spectra. for MS2 from %s", spectra_ms2->size(), spectra_file.c_str());
-        vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_datum, spectra_file, spectra_ms2);
+        vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_data, spectra_file);
         for (auto& id : tempIdentifications) {
             uniqueIdentifications.insert(id);
         }
@@ -315,44 +313,24 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
 }
 
 // Make this a multithreaded process
-vector<Identification> CruxLFQApplication::createIdentifications(const map<int, PSM>& psm_datum, const string& spectra_file, SpectrumListPtr spectrum_collection) {
+vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const string& spectra_file) {
     carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
 
     vector<Identification> allIdentifications;
     string _spectra_file(spectra_file);
 
-    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        const bool getBinaryData = true;
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
-        if (spectrum) {
-            int scanIndex;
+    for (const auto psm : psm_data) {
+        Identification identification;
 
-            std::string scanId = getScanID(spectrum->id);
-
-            if (scanId.empty()) {
-                continue;
-            } else {
-                scanIndex = std::stoi(scanId);
-            }
-
-            auto it = psm_datum.find(scanIndex);
-
-            if (it != psm_datum.end()) {
-                double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
-
-                Identification identification;
-
-                identification.sequence = it->second.sequence_col;
-                identification.monoIsotopicMass = it->second.monoisotopic_mass_col;
-                identification.peptideMass = it->second.peptide_mass_col;
-                identification.precursorCharge = it->second.charge_col;
-                identification.spectralFile = _spectra_file;
-                identification.ms2RetentionTimeInMinutes = retentionTime;
-                identification.scanId = it->second.scan_col;
-                identification.modifications = it->second.modifications;
-                allIdentifications.push_back(identification);
-            }
-        }
+        identification.sequence = psm.sequence_col;
+        identification.monoIsotopicMass = psm.monoisotopic_mass_col;
+        identification.peptideMass = psm.peptide_mass_col;
+        identification.precursorCharge = psm.charge_col;
+        identification.spectralFile = _spectra_file;
+        identification.ms2RetentionTimeInMinutes = psm.retention_time;
+        identification.scanId = psm.scan_col;
+        identification.modifications = psm.modifications;
+        allIdentifications.push_back(identification);
     }
 
     return allIdentifications;
