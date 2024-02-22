@@ -109,12 +109,12 @@ elseif (APPLE)
     INSTALL_COMMAND
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/date_time/gregorian_calendar.ipp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/date_time
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
@@ -396,6 +396,9 @@ PATCH_COMMAND
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
   COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/patches/kojak/KLog.h
+    ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
+  COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/patches/kojak/KParams.h
     ${CMAKE_CURRENT_BINARY_DIR}/build/src/kojak/
   BUILD_IN_SOURCE 1
 )

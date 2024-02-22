@@ -22,11 +22,11 @@ mkdir -p $install_path/lib
 cd $install_path/lib
 
 find $install_path/build/src/ProteoWizard -name '*\.a' -exec cp {} . \;
-ln -s -f libboost_chrono-gcc*a libboost_chrono.a
-ln -s -f libboost_filesystem-gcc*.a libboost_filesystem.a 
-ln -s -f libboost_iostreams-gcc*.a libboost_iostreams.a 
-ln -s -f libboost_serialization-gcc*.a libboost_serialization.a
-ln -s -f libboost_system-gcc*.a libboost_system.a 
-ln -s -f libboost_thread-gcc*.a libboost_thread.a 
-ln -s -f libfreetype-gcc*.a  libfreetype.a
+ln -s -f libboost_chrono-*gcc*a libboost_chrono.a
+ln -s -f libboost_filesystem-*gcc*.a libboost_filesystem.a 
+ln -s -f libboost_iostreams-*gcc*.a libboost_iostreams.a 
+ln -s -f libboost_serialization-*gcc*.a libboost_serialization.a
+ln -s -f libboost_system-*gcc*.a libboost_system.a 
+ln -s -f libboost_thread-*gcc*.a libboost_thread.a 
+ln -s -f libfreetype-*gcc*.a  libfreetype.a
 
