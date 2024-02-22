@@ -51,7 +51,6 @@ if (WIN32 AND NOT CYGWIN)
   set(pwiz_build_args ${pwiz_build_args} --without-waters)
   set(pwiz_build_args ${pwiz_build_args} --without-sciex)
 else()
-  set(pwiz_build_args "${pwiz_build_args} --prefix=${CMAKE_ARGV1}/ext")
   set(pwiz_build ./quickbuild.sh)
 endif (WIN32 AND NOT CYGWIN)
 
