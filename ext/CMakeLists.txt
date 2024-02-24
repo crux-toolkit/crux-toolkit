@@ -129,8 +129,11 @@ else (UNIX)
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
     CONFIGURE_COMMAND 
-      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
-      COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
+      COMMAND ${CMAKE_COMMAND} -E rm -r 
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/
     BUILD_COMMAND
       ${CMAKE_COMMAND}
         -DBUILD_TYPE:STRING=${CMAKE_CFG_INTDIR}
