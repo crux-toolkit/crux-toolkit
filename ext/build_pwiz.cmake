@@ -42,7 +42,7 @@ elseif (WIN32)
 endif()
 if (PROCESSOR_COUNT)
   message("ProteoWizard build will use ${PROCESSOR_COUNT} threads")
-  set(pwiz_build_args "${pwiz_build_args} -j${PROCESSOR_COUNT}")
+  set(pwiz_build_args "${pwiz_build_args} -j1")
 endif()
 
 if (WIN32 AND NOT CYGWIN)
@@ -58,9 +58,10 @@ set(pwiz_build_args "${pwiz_build_args} address-model=64")
 set(pwiz_build_args "${pwiz_build_args} link=static")
 
 if (${BUILD_TYPE} MATCHES "Debug")
-  set(pwiz_build_args ${pwiz_build_args} variant=debug libraries)
+  set(pwiz_build_args "${pwiz_build_args} variant=debug libraries pwiz/data pwiz/analysis pwiz/utility " 
+  )
 else ()
-  set(pwiz_build_args "${pwiz_build_args} variant=release pwiz/data pwiz/analysis pwiz/utility libraries" 
+  set(pwiz_build_args "${pwiz_build_args} variant=release libraries pwiz/data pwiz/analysis pwiz/utility " 
   )
 endif (${BUILD_TYPE} MATCHES "Debug")
 
