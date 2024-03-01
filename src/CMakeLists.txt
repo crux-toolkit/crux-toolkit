@@ -348,7 +348,6 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_reader_abi.lib
       libpwiz_reader_abi_t2d.lib
       libpwiz_reader_agilent.lib
-      libpwiz_reader_bruker.lib
       libpwiz_reader_shimadzu.lib
       libpwiz_reader_thermo.lib
       libpwiz_reader_uimf.lib
@@ -360,7 +359,6 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_utility_misc.lib
       libpwiz_utility_vendor_reader_test_harness.lib
       libpwiz_vendor_api_agilent.lib
-      libpwiz_vendor_api_bruker.lib
       libpwiz_vendor_api_shimadzu.lib
       libpwiz_vendor_api_thermo.lib
       libpwiz_vendor_api_uimf.lib
