@@ -10,7 +10,7 @@ include_directories(
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
-if (UNIX OR APPLE)
+if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
@@ -22,7 +22,7 @@ elseif (WIN32 AND NOT CYGWIN)
   )
   # disable autolinking in boost
   add_definitions( -DBOOST_ALL_NO_LIB )
-endif(WIN32 AND NOT CYGWIN)
+endif(UNIX)
 
 link_directories(
   ${CMAKE_BINARY_DIR}/ext/lib
