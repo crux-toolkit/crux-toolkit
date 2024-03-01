@@ -2,22 +2,6 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(VERSION 3.15)
 
 ###### Set up include and link directories  ######
-if (WIN32 AND NOT CYGWIN)
-  include_directories(
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_BINARY_DIR}/ext/include
-    ${CMAKE_CURRENT_BINARY_DIR}/protoobj
-    ${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src
-    ${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_76_0
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
-  )
-  # On windows set static linking of runtime libraries
-  set(
-    CMAKE_MSVC_RUNTIME_LIBRARY 
-    "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
-  )
-else (WIN32 AND NOT CYGWIN)
 include_directories(
   ${CMAKE_SOURCE_DIR}/src
   ${CMAKE_BINARY_DIR}/ext/include
@@ -26,7 +10,15 @@ include_directories(
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
-endif (WIN32 AND NOT CYGWIN)
+if (WIN32 AND NOT CYGWIN)
+  # On windows set static linking of runtime libraries
+  set(
+    CMAKE_MSVC_RUNTIME_LIBRARY 
+    "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
+  )
+  # disable autolinking in boost
+  add_definitions( -DBOOST_ALL_NO_LIB )
+endif(WIN32 AND NOT CYGWIN)
 
 link_directories(
   ${CMAKE_BINARY_DIR}/ext/lib
@@ -69,44 +61,29 @@ add_custom_command(
 )
 
 ########## Set up tide-support library  ##########
+set(
+  tide_lib_files
+  ${proto_files_compiled}
+  abspath.cc
+  active_peptide_queue.cc
+  crux_sp_spectrum.cc
+  fifo_alloc.cc
+  index_settings.cc
+  make_peptides.cc
+  mass_constants.cc
+  max_mz.cc
+  peptide.cc
+  peptide_mods3.cc
+  peptide_peaks.cc
+  sp_scorer.cc
+  spectrum_collection.cc
+  spectrum_preprocess2.cc
+)
 if (WIN32 AND NOT CYGWIN)
   set(
     tide_lib_files
-    ${proto_files_compiled}
-    abspath.cc
-    active_peptide_queue.cc
-    crux_sp_spectrum.cc
-    fifo_alloc.cc
-    index_settings.cc
-    make_peptides.cc
-    mass_constants.cc
-    max_mz.cc
+    ${tide_lib_files}
     mman.c
-    peptide.cc
-    peptide_mods3.cc
-    peptide_peaks.cc
-    sp_scorer.cc
-    spectrum_collection.cc
-    spectrum_preprocess2.cc
-  )
-else (WIN32 AND NOT CYGWIN)
-  set(
-    tide_lib_files
-    ${proto_files_compiled}
-    abspath.cc
-    active_peptide_queue.cc
-    crux_sp_spectrum.cc
-    fifo_alloc.cc
-    index_settings.cc
-    make_peptides.cc
-    mass_constants.cc
-    max_mz.cc
-    peptide.cc
-    peptide_mods3.cc
-    peptide_peaks.cc
-    sp_scorer.cc
-    spectrum_collection.cc
-    spectrum_preprocess2.cc
   )
 endif (WIN32 AND NOT CYGWIN)
 add_library(tide-support STATIC ${tide_lib_files})
