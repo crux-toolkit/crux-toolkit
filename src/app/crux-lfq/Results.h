@@ -30,9 +30,10 @@ class CruxLFQResults {
     vector<SpectraFileInfo> spectraFiles;
 
     // Constructor that accepts a list of spectra files
-    CruxLFQResults(const vector<string> &spectra_files) {
-        for (const string &spectra_file : spectra_files) {
+    CruxLFQResults(vector<string> spectra_files) {
+        for (string spectra_file : spectra_files) {
             Peaks[spectra_file] = vector<ChromatographicPeak>();
+            // Peaks.insert({spectra_file, vector<ChromatographicPeak>()});
             SpectraFileInfo spectraFileInfo;
             spectraFileInfo.FullFilePathWithExtension = spectra_file;
             spectraFiles.push_back(spectraFileInfo);
@@ -40,26 +41,26 @@ class CruxLFQResults {
     }
 
     // void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
-    void writeResults(const string &mod_pep_results_file, const vector<std::string> &rawFiles) {
+    void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
         carp(CARP_INFO, "Writing output...");
 
-        // string prf = peak_results_file;
-        // std::ofstream outFile1(prf);
-        // if (outFile1) {
-        //     // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
-        //     const std::size_t bufferSize = 8192;
-        //     char buffer[bufferSize];
-        //     outFile1.rdbuf()->pubsetbuf(buffer, bufferSize);
-        //     outFile1 << ChromatographicPeakTabSeperatedHeader() << std::endl;
-        //     for (auto &pair : Peaks) {
-        //         auto &peaks = pair.second;
-        //         for (auto &peak : peaks) {
-        //             outFile1 << peak.ToString() << std::endl;
-        //         }
-        //     }
-        // } else {
-        //     carp(CARP_FATAL, "Failed to open peak results file for writing.");
-        // }
+        string prf = peak_results_file;
+        std::ofstream outFile1(prf);
+        if (outFile1) {
+            // Create a custom stream buffer with a larger buffer size (e.g., 8192 bytes)
+            const std::size_t bufferSize = 8192;
+            char buffer[bufferSize];
+            outFile1.rdbuf()->pubsetbuf(buffer, bufferSize);
+            outFile1 << ChromatographicPeakTabSeperatedHeader() << std::endl;
+            for (auto &pair : Peaks) {
+                auto &peaks = pair.second;
+                for (auto &peak : peaks) {
+                    outFile1 << peak.ToString() << std::endl;
+                }
+            }
+        } else {
+            carp(CARP_FATAL, "Failed to open peak results file for writing.");
+        }
 
         string peptides_results_file = mod_pep_results_file;
         std::ofstream outFile2(peptides_results_file);

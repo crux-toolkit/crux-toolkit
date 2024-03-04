@@ -82,11 +82,9 @@ class CruxLFQApplication : public CruxApplication {
 
     virtual void processParams();
 
-    PSM create_psm(const string& psm_file);
+    static pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
 
-    pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
+    static IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
 
-    IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
-
-    vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
+    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
 };
