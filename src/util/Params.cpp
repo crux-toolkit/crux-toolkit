@@ -2225,7 +2225,7 @@ Params::Params() : finalized_(false) {
     InitBoolParam("normalize", false,
                   "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
                   "", true);
-    InitStringParam("psm-file-format", "percolator",
+    InitStringParam("psm-file-format", "assign-confidence",
                     "The format of the PSM file. Possible options are; tide-search, assign-confidence and percolator Default = percolator.",
                     "", true);
     // The code below is commented out until we decide to add MBR - match between runs - to the CRUX-LFQ code.

@@ -44,9 +44,9 @@ namespace CruxLFQ {
  * @return A PSM containing the PSM data, where the key is the scan column value.
  */
 vector<PSM> create_psm(const string& psm_file,
-               const string& psm_file_format,
-               const bool filtered,
-               const double q_value_threshold) {
+                       const string& psm_file_format,
+                       const bool filtered,
+                       const double q_value_threshold) {
     carp(CARP_INFO, "loading psm data ...");
     vector<PSM> psm_data;
 
@@ -402,14 +402,12 @@ void processRange(int start, int end,
                       modifiedSequenceToIsotopicDistribution,
                   CruxLFQResults& lfqResults) {
     // No need for a lock since it's single-threaded
-    vector<ChromatographicPeak*> _chromatographicPeaks;
-    _chromatographicPeaks.resize(end - start);
+
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
         ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
-        _chromatographicPeaks[i] = &msmsFeature;
         for (const auto& chargeState : chargeStates) {
             if (ID_SPECIFIC_CHARGE_STATE &&
                 chargeState != identification.precursorCharge) {
@@ -496,10 +494,9 @@ void processRange(int start, int end,
             msmsFeature.isotopicEnvelopes.end());
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
+        chromatographicPeaks.push_back(msmsFeature);
     }
-    for (auto chrom : _chromatographicPeaks) {
-        chromatographicPeaks.push_back(*chrom);
-    }
+
     lfqResults.Peaks[spectralFile].insert(lfqResults.Peaks[spectralFile].end(),
                                           chromatographicPeaks.begin(),
                                           chromatographicPeaks.end());
