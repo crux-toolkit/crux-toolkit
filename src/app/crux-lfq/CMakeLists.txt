@@ -70,7 +70,15 @@ if (WIN32 AND NOT CYGWIN)
     IndexedMassSpectralPeak.cpp
     Utils.cpp
     PpmTolerance.cpp
-    
+    ChromatographicPeak.h
+    CQStatistics.h
+    csv.h
+    IntensityNormalizationEngine.h
+    LFQPeptide.h
+    PpmTolerance.cpp
+    ProteinGroup.h
+    Results.h
+    SpectraFileInfo.h
   )
 else (WIN32 AND NOT CYGWIN)
   set(
@@ -79,6 +87,15 @@ else (WIN32 AND NOT CYGWIN)
     IndexedMassSpectralPeak.cpp
     Utils.cpp
     PpmTolerance.cpp
+    ChromatographicPeak.h
+    CQStatistics.h
+    csv.h
+    IntensityNormalizationEngine.h
+    LFQPeptide.h
+    PpmTolerance.cpp
+    ProteinGroup.h
+    Results.h
+    SpectraFileInfo.h
   )
 endif (WIN32 AND NOT CYGWIN)
 add_library(crux-lfq-support STATIC ${crux_lfq_lib_files})

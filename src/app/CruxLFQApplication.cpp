@@ -8,7 +8,6 @@
 #include "crux-lfq/IntensityNormalizationEngine.h"
 #include "crux-lfq/Results.h"
 #include "crux-lfq/Utils.h"
-#include "indexed_mass_spectral_peak.pb.h"
 #include "io/carp.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
