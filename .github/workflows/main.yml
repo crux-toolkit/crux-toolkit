@@ -18,7 +18,7 @@ jobs:
     steps:
   
       - name: checkout-repository    
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
  
       - name: add-short-sha
         shell: bash
@@ -26,7 +26,7 @@ jobs:
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
       - name: setup-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5.0.0
         with: 
             python-version: 3.x
  
@@ -134,7 +134,7 @@ jobs:
           shell: bash
           run: |
             cd test/smoke-tests
-            scl enable rh-python36 rh-ruby27 'cucumber --publish-quiet --tags "not @ignore" -f html -o smoke-tests.html'
+            scl enable rh-python36 rh-ruby27 'cucumber -v --tags "not @ignore" -f html -o smoke-tests.html'
             
         - name: Build binary and source packages
           shell: bash
