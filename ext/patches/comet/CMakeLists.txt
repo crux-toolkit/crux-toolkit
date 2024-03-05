@@ -8,6 +8,8 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/CometSearch
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+
 #############################################################################
 # COMPILE MSToolkit
 ###############################################################################
@@ -41,13 +43,13 @@ if (UNIX)
     target_compile_options  (
       cometsearch
       PUBLIC
-      -O3 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DCRUX -I. -I$(MSTOOLKIT)/include
+      -O3 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++14 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -DCRUX -I. -I$(MSTOOLKIT)/include
     )
   else()
     target_compile_options  (
       cometsearch
       PUBLIC
-      -g -O0 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++11 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -DCRUX -I. -I$(MSTOOLKIT)/include
+      -g -O0 -fpermissive -Wall -Wextra -Wno-write-strings -static -std=c++14 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -DCRUX -I. -I$(MSTOOLKIT)/include
     )
   endif ()
 elseif(WIN32 AND NOT CYGWIN)

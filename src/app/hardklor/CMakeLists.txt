@@ -3,6 +3,12 @@ cmake_policy(VERSION 3.15)
 
 project(hardklor)
 
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+endif (UNIX)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)

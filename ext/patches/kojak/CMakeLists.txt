@@ -9,6 +9,7 @@ include_directories(
   ${HARDKLOR_INCLUDE_PATH}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
 
 #############################################################################
 # COMPILE Kojak
@@ -39,7 +40,7 @@ if (UNIX)
   target_compile_options(
     kojaksearch
     PUBLIC
-    -O3 -static -std=c++11 -I. -I${HEADER_PATH} -D_NOSQLITE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC
+    -O3 -static -std=c++14 -I. -I${HEADER_PATH} -D_NOSQLITE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC
   )
 elseif(WIN32 AND NOT CYGWIN)
   target_compile_definitions(
