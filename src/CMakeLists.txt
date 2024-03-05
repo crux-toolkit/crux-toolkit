@@ -1,24 +1,24 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(VERSION 3.15)
 
-
 add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/tide)
 add_subdirectory(app/crux-lfq)
 
-if (UNIX)
+if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
-elseif (WIN32)
+elseif(WIN32)
   # disable autolinking in boost
-  add_definitions( -DBOOST_ALL_NO_LIB )
+  add_definitions(-DBOOST_ALL_NO_LIB)
 endif(UNIX)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
+
 include_directories(${CMAKE_SOURCE_DIR}/src/app/crux-lfq)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/tide/protoobj)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
@@ -39,58 +39,61 @@ include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/picked_protein)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/tide/protoobj)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/crux-lfq/protoobj)
 
-if (WIN32 AND NOT Cygwin)
+# include_directories(${CMAKE_CURRENT_BINARY_DIR}/app/crux-lfq/protoobj)
+if(WIN32 AND NOT Cygwin)
   # Needed to put DLL containing type libraries
   # in include path for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/lib)
   SET(
-    CMAKE_EXE_LINKER_FLAGS 
+    CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
   )
   SET(
-    CMAKE_EXE_LINKER_FLAGS_DEBUG 
+    CMAKE_EXE_LINKER_FLAGS_DEBUG
     "${CMAKE_EXE_LINKER_FLAGS} /VERBOSE:LIB "
   )
-  #  Need Comet base directory for Windows
+
+  # Need Comet base directory for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/build/src/comet/)
 
   # On Windows we should build vendor libraries by default
-  if (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+  if(NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
     set(INCLUDE_VENDOR_LIBRARIES TRUE)
-  endif (NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
+  endif(NOT DEFINED INCLUDE_VENDOR_LIBRARIES)
 
   # On windows set static linking of runtime libraries
   set(
-    CMAKE_MSVC_RUNTIME_LIBRARY 
+    CMAKE_MSVC_RUNTIME_LIBRARY
     "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
   )
-endif (WIN32 AND NOT Cygwin)
+endif(WIN32 AND NOT Cygwin)
 
 link_directories(${CMAKE_BINARY_DIR}/app/bullseye)
 link_directories(${CMAKE_BINARY_DIR}/app/hardklor)
 link_directories(${CMAKE_BINARY_DIR}/app/tide-support)
+link_directories(${CMAKE_BINARY_DIR}/app/crux-lfq-support)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
-link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
+link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/blas)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/fido)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src/picked_protein)
-if (WIN32 AND NOT Cygwin)
- # Needed for windows build of vendor libraries
+
+if(WIN32 AND NOT Cygwin)
+  # Needed for windows build of vendor libraries
   link_directories(
     ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Waters/vc12_x64
     ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/Bruker/x64
   )
   SET(
-    CMAKE_SHARED_LINKER_FLAGS 
-    ${CMAKE_SHARED_LINKER_FLAGS} 
-    "/NODEFAULTLIBS:MSVCRT" 
+    CMAKE_SHARED_LINKER_FLAGS
+    ${CMAKE_SHARED_LINKER_FLAGS}
+    "/NODEFAULTLIBS:MSVCRT"
   )
-endif (WIN32 AND NOT Cygwin)
+endif(WIN32 AND NOT Cygwin)
 
-set (
+set(
   crux_lib_files
   app/SubtractIndexApplication.cpp
   app/CascadeSearchApplication.cpp
@@ -203,13 +206,13 @@ set (
   app/CruxLFQApplication.cpp
 )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set(
     crux_lib_files
     ${crux_lib_files}
     util/WinCrux.cpp
   )
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 add_definitions(-DCRUX)
 add_definitions(-DBOOST_ALL_NO_LIB)
@@ -220,11 +223,12 @@ add_library(
   ${crux_lib_files}
 )
 
-if (APPLE)
+if(APPLE)
   set(OPENMP_FOUND FALSE)
 else(APPLE)
   find_package(OpenMP)
-  if (OPENMP_FOUND)
+
+  if(OPENMP_FOUND)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   endif(OPENMP_FOUND)
@@ -234,40 +238,42 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    set_property(
-      DIRECTORY
-      APPEND
-      PROPERTY
-      COMPILE_DEFINITIONS
-      _CRT_SECURE_NO_WARNINGS
-     NOMINMAX
-    )
-else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	set_property(
-	  DIRECTORY
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set_property(
+    DIRECTORY
     APPEND
-	  PROPERTY
-	  COMPILE_DEFINITIONS
-	  _LARGEFILE_SOURCE
-	  _LARGEFILE64_SOURCE
-	  _DEFAULT_SOURCE
-	  _POSIX_C_SOURCE=199506L
-	  _FILE_OFFSET_BITS=64
-	  _GNU_SOURCE
-	  GCC
-	  HAVE_EXPAT_CONFIG_H
-	)
-	if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	  set_property(
+    PROPERTY
+    COMPILE_DEFINITIONS
+    _CRT_SECURE_NO_WARNINGS
+    NOMINMAX
+  )
+else(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY
+    COMPILE_DEFINITIONS
+    _LARGEFILE_SOURCE
+    _LARGEFILE64_SOURCE
+    _DEFAULT_SOURCE
+    _POSIX_C_SOURCE=199506L
+    _FILE_OFFSET_BITS=64
+    _GNU_SOURCE
+    GCC
+    HAVE_EXPAT_CONFIG_H
+  )
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set_property(
       DIRECTORY
       APPEND
       PROPERTY
       COMPILE_DEFINITIONS
       DARWIN
       _DARWIN_C_SOURCE
-	  )
-	  if (${CMAKE_SYSTEM_VERSION} VERSION_LESS "12")
+    )
+
+    if(${CMAKE_SYSTEM_VERSION} VERSION_LESS "12")
       set_property(
         DIRECTORY
         APPEND
@@ -275,8 +281,9 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
         COMPILE_DEFINITIONS
         PRE_MOUNTAIN_LION
       )
-	  endif (${CMAKE_SYSTEM_VERSION} VERSION_LESS "12")
-	  if (${CMAKE_SYSTEM_VERSION} VERSION_LESS "11")
+    endif(${CMAKE_SYSTEM_VERSION} VERSION_LESS "12")
+
+    if(${CMAKE_SYSTEM_VERSION} VERSION_LESS "11")
       set_property(
         DIRECTORY
         APPEND
@@ -286,20 +293,21 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       )
     endif(${CMAKE_SYSTEM_VERSION} VERSION_LESS "11")
   endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 add_executable(crux crux-main.cpp)
-if (WIN32 AND NOT CYGWIN)
+
+if(WIN32 AND NOT CYGWIN)
   set_property(
-    TARGET crux 
-    PROPERTY 
-      COMPILE_DEFINITIONS 
-      MAIN
-      GFLAGS_DLL_DECL= 
-      GFLAGS_DLL_DECLARE_FLAG= 
-      GFLAGS_DLL_DEFINE_FLAG=
+    TARGET crux
+    PROPERTY
+    COMPILE_DEFINITIONS
+    MAIN
+    GFLAGS_DLL_DECL=
+    GFLAGS_DLL_DECLARE_FLAG=
+    GFLAGS_DLL_DEFINE_FLAG=
   )
-else (WIN32 AND NOT CYGWIN)
+else(WIN32 AND NOT CYGWIN)
   set_property(
     TARGET
     crux
@@ -307,19 +315,20 @@ else (WIN32 AND NOT CYGWIN)
     COMPILE_DEFINITIONS
     MAIN
   )
-endif (WIN32 AND NOT CYGWIN)
+endif(WIN32 AND NOT CYGWIN)
 
-if (WIN32 AND NOT CYGWIN)
+if(WIN32 AND NOT CYGWIN)
   # These definititions are needed to set the
   # the proper calling conventions (static lib)
   # for Boost and expat. Expat is used in the
   # MSToolkit library.
   add_definitions(-DBOOST_ALL_NO_LIB)
   add_definitions(-DXML_STATIC)
-  if (INCLUDE_VENDOR_LIBRARIES)
+
+  if(INCLUDE_VENDOR_LIBRARIES)
     add_definitions(-DINCLUDE_VENDOR_LIBRARIES)
-  endif (INCLUDE_VENDOR_LIBRARIES)
-endif (WIN32 AND NOT CYGWIN)
+  endif(INCLUDE_VENDOR_LIBRARIES)
+endif(WIN32 AND NOT CYGWIN)
 
 # The rt library is not needed for OS X
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -328,9 +337,9 @@ else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(RT_LIBRARY "rt")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-if (WIN32 AND NOT CYGWIN)
-  if (INCLUDE_VENDOR_LIBRARIES)
-    set (
+if(WIN32 AND NOT CYGWIN)
+  if(INCLUDE_VENDOR_LIBRARIES)
+    set(
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
@@ -377,8 +386,8 @@ if (WIN32 AND NOT CYGWIN)
       baf2sql_c
       timsdata
     )
-  else (INCLUDE_VENDOR_LIBRARIES)
-    set (
+  else(INCLUDE_VENDOR_LIBRARIES)
+    set(
       PWIZ_LIBRARIES
       libpwiz_data_identdata_examples
       libpwiz_data_identdata_version
@@ -397,7 +406,8 @@ if (WIN32 AND NOT CYGWIN)
       libSHA1
       libzlib
     )
-  endif (INCLUDE_VENDOR_LIBRARIES)
+  endif(INCLUDE_VENDOR_LIBRARIES)
+
   SET(
     BOOST_LIBRARIES
     optimized libboost_chrono-mt
@@ -431,6 +441,7 @@ if (WIN32 AND NOT CYGWIN)
     debug gflags_static_debug
     crux-support
     tide-support
+    crux-lfq-support
     mstoolkitlite
     optimized libprotobuf
     debug libprotobufd
@@ -445,6 +456,7 @@ else()
     crux
     crux-support
     tide-support
+    crux-lfq-support
     cometsearch
     kojaksearch
     crux-lfq-support
@@ -491,10 +503,9 @@ else()
   )
 endif(WIN32 AND NOT CYGWIN)
 
-install (
+install(
   TARGETS
   crux
   DESTINATION
   bin
 )
-
