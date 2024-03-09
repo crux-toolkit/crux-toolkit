@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(VERSION 3.15)
 
+if(UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+elseif(WIN32)
+  # disable autolinking in boost
+  add_definitions(-DBOOST_ALL_NO_LIB)
+endif(UNIX)
+
 ###### Set up include and link directories  ######
 if (WIN32 AND NOT CYGWIN)
   include_directories(
