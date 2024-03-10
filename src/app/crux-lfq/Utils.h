@@ -234,7 +234,6 @@ IndexedMassSpectralPeak* getIndexedPeak(
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
                   const string& spectralFile, const vector<int>& chargeStates,
-                  vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
                   const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
@@ -274,9 +273,9 @@ filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
 void setToNegativeOneIfNaN(double& value);
 
 vector<PSM> create_psm(const string& psm_file,
-               const string& psm_file_format = "assign-confidence",
-               const bool filtered = false,
-               const double q_value_threshold = 0.01);
+                       const string& psm_file_format = "assign-confidence",
+                       const bool filtered = false,
+                       const double q_value_threshold = 0.01);
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime,
              unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans);
