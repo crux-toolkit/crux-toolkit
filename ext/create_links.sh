@@ -18,15 +18,15 @@ done
 echo "path:$install_path"
 
 
-
+mkdir -p $install_path/lib
 cd $install_path/lib
 
-ln -s -f libboost_chrono-*.a libboost_chrono.a
-ln -s -f libboost_date_time-**.a libboost_date_time.a
-ln -s -f libboost_filesystem-*.a libboost_filesystem.a 
-ln -s -f libboost_iostreams-*.a libboost_iostreams.a 
-ln -s -f libboost_serialization-*.a libboost_serialization.a
-ln -s -f libboost_system-*.a libboost_system.a 
-ln -s -f libboost_thread-*.a libboost_thread.a 
-ln -s -f libfreetype-*.a  libfreetype.a
+find $install_path/build/src/ProteoWizard -name '*\.a' -exec cp {} . \;
+ln -s -f libboost_chrono-*gcc*a libboost_chrono.a
+ln -s -f libboost_filesystem-*gcc*.a libboost_filesystem.a 
+ln -s -f libboost_iostreams-*gcc*.a libboost_iostreams.a 
+ln -s -f libboost_serialization-*gcc*.a libboost_serialization.a
+ln -s -f libboost_system-*gcc*.a libboost_system.a 
+ln -s -f libboost_thread-*gcc*.a libboost_thread.a 
+ln -s -f libfreetype-*gcc*.a  libfreetype.a
 

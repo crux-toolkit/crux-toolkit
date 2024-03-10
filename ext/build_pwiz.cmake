@@ -23,9 +23,6 @@ macro (check_status status_code)
 endmacro (check_status)
 
 # Set up arguments needed for ProteoWizard build.
-# quickbuild.sh is the script provided by ProteoWizard on UNIX
-# and quickbuild.bat is the corresponding script on Windows
-set(pwiz_build_args ${pwiz_build_args} --prefix=${PREFIX})
 
 # Get number of processors
 if (EXISTS "/proc/cpuinfo")
@@ -45,27 +42,34 @@ if (PROCESSOR_COUNT)
   set(pwiz_build_args ${pwiz_build_args} -j${PROCESSOR_COUNT})
 endif()
 
+# quickbuild.sh is the script provided by ProteoWizard on UNIX
+# and quickbuild.bat is the corresponding script on Windows
 if (WIN32 AND NOT CYGWIN)
   set(pwiz_build "quickbuild.bat")
   set(pwiz_build_args ${pwiz_build_args} --i-agree-to-the-vendor-licenses)
   set(pwiz_build_args ${pwiz_build_args} --without-waters)
   set(pwiz_build_args ${pwiz_build_args} --without-sciex)
+  set(pwiz_build_args ${pwiz_build_args} --without-mascot)
 else()
   set(pwiz_build ./quickbuild.sh)
 endif (WIN32 AND NOT CYGWIN)
 
-set(pwiz_build_args ${pwiz_build_args} address-model=64)
-set(pwiz_build_args ${pwiz_build_args} link=static)
-
 if (${BUILD_TYPE} MATCHES "Debug")
-  set(pwiz_build_args ${pwiz_build_args} variant=debug libraries)
+  set(pwiz_build_args ${pwiz_build_args} variant=debug)
 else ()
-  set(pwiz_build_args ${pwiz_build_args} variant=release libraries)
+  set(pwiz_build_args ${pwiz_build_args} variant=release)
 endif (${BUILD_TYPE} MATCHES "Debug")
 
-message("PWIZ BUILD COMMAND ${pwiz_build} ${pwiz_build_args}")
+set(pwiz_build_args ${pwiz_build_args} --prefix=${PREFIX})
+set(pwiz_build_args ${pwiz_build_args} address-model=64)
+set(pwiz_build_args ${pwiz_build_args} link=static)
+set(pwiz_build_args ${pwiz_build_args} libraries)
+set(pwiz_build_args ${pwiz_build_args} pwiz/data)
+set(pwiz_build_args ${pwiz_build_args} pwiz/utility)
+
 execute_process(
   COMMAND ${pwiz_build} ${pwiz_build_args}
+  COMMAND_ECHO STDOUT
   RESULT_VARIABLE status
 )
 check_status(status)
