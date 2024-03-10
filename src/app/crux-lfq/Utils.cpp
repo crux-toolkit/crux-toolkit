@@ -393,7 +393,6 @@ vector<int> createChargeStates(
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
                   const string& spectralFile, const vector<int>& chargeStates,
-                  vector<ChromatographicPeak>& chromatographicPeaks,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
                   const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
@@ -494,12 +493,8 @@ void processRange(int start, int end,
             msmsFeature.isotopicEnvelopes.end());
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
-        chromatographicPeaks.push_back(msmsFeature);
+        lfqResults.Peaks[spectralFile].push_back(msmsFeature);
     }
-
-    lfqResults.Peaks[spectralFile].insert(lfqResults.Peaks[spectralFile].end(),
-                                          chromatographicPeaks.begin(),
-                                          chromatographicPeaks.end());
 }
 
 void quantifyMs2IdentifiedPeptides(
@@ -530,10 +525,8 @@ void quantifyMs2IdentifiedPeptides(
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
 
-    vector<ChromatographicPeak> chromatographicPeaks;
-
     processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                 chargeStates, chromatographicPeaks, peakfindingTol, _ms1Scans,
+                 chargeStates, peakfindingTol, _ms1Scans,
                  indexedPeaks, ppmTolerance,
                  modifiedSequenceToIsotopicDistribution, lfqResults);
 }
