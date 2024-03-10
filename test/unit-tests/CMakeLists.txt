@@ -10,17 +10,14 @@ set(TEST_DATA_DESTINATION_DIR "${CMAKE_BINARY_DIR}/test/unit-tests")
 file(COPY ${TEST_DATA_SOURCE_DIR} DESTINATION ${TEST_DATA_DESTINATION_DIR})
 add_definitions(-DTEST_DATA_PATH="${TEST_DATA_DESTINATION_DIR}")
 
-macro(use_cxx11)
-  if(CMAKE_VERSION VERSION_LESS "3.1")
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    endif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  else(CMAKE_VERSION VERSION_LESS "3.1")
-    set(CMAKE_CXX_STANDARD 11)
-  endif(CMAKE_VERSION VERSION_LESS "3.1")
-endmacro(use_cxx11)
-
-use_cxx11()
+if(UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+elseif(WIN32)
+  # disable autolinking in boost
+  add_definitions(-DBOOST_ALL_NO_LIB)
+endif(UNIX)
 
 enable_testing()
 
@@ -284,6 +281,7 @@ else()
     protobuf
     pwiz_data_msdata
     pwiz_data_msdata_mz5
+    pwiz_data_msdata_mzmlb
     pwiz_data_msdata_version
     pwiz_data_msdata_core
     pwiz_data_identdata

@@ -5,7 +5,7 @@ project(bullseye)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
-include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_56_0)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
@@ -14,6 +14,12 @@ if (WIN32 AND NOT Cygwin)
   # in include path for Windows
   include_directories(${CMAKE_BINARY_DIR}/ext/lib)
 endif (WIN32 AND NOT Cygwin)
+
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+endif (UNIX)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set_property(
