@@ -316,13 +316,6 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
-# The rt library is not needed for OS X
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "")
-else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "rt")
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
 if (WIN32 AND NOT CYGWIN)
   if (INCLUDE_VENDOR_LIBRARIES)
     set (
@@ -478,7 +471,6 @@ else()
     pthread
     hdf5pp
     hdf5
-    ${RT_LIBRARY}
     SHA1
     zlib
   )
