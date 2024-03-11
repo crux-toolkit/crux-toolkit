@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: crux-4.1.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-4.1.Windows.i386.zip 
+          path: ${{runner.workspace}}/build/crux-4.1.Windows.AMD64.zip 
       
   build-crux-on-centos-7:
       runs-on: 'ubuntu-latest'
@@ -113,7 +113,7 @@ jobs:
             scl enable rh-ruby27 'gem install cucumber rspec'
         
         - name: Checkout
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4.1.1
 
         - name: add-short-sha env property
           shell: bash
