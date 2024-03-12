@@ -110,15 +110,13 @@ jobs:
           path: test/smoke-tests/smoke-tests.html
                  
       - name: Create version file
-        if: github.ref == 'refs/heads/master'
-        if: matrix.os == 'ubuntu-20.04'
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
         shell: bash
         run: |
           echo ${{env.git_short_sha}} > doc/user/latest-build.txt
             
       - name: Push modified webpages to website repository
-        if: github.ref == 'refs/heads/master'
-        if: matrix.os == 'ubuntu-20.04'
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
         uses: nkoppel/push-files-to-another-repository@v1.1.1
         env:
           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
@@ -130,8 +128,7 @@ jobs:
            commit-email: 'cegrant@uw.edu'
              
       - name: Push command webpages to website repository
-        if: github.ref == 'refs/heads/master'
-        if: matrix.os == 'ubuntu-20.04'
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
@@ -145,8 +142,7 @@ jobs:
            commit_message: 'Update version file for the web site' 
 
       - name: Copy version file to website repository
-        if: github.ref == 'refs/heads/master'
-        if: matrix.os == 'ubuntu-20.04'
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
