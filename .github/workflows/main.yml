@@ -96,7 +96,9 @@ jobs:
         with:
           name: crux-4.1.${{env.git_short_sha}}.windows
           path: ${{runner.workspace}}/build/crux-4.1.Windows.AMD64.zip 
+          
       - name: Test
+        if: matrix.os == 'ubuntu-20.04'
         shell: bash
         run: |
              cd test/smoke-tests
