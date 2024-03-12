@@ -96,13 +96,26 @@ jobs:
         with:
           name: crux-4.1.${{env.git_short_sha}}.windows
           path: ${{runner.workspace}}/build/crux-4.1.Windows.AMD64.zip 
+
+      - name: archive-ubuntu-package
+        if: matrix.os == 'ubuntu-20.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: crux-4.1.${{env.git_short_sha}}.ubuntu.20.04
+          path: crux-4.1.Linux.x86_64.zip
           
+      - name: Archive source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crux-4.1.${{env.git_short_sha}}.Source
+          path: crux-4.1.Source.tar.gz
+
       - name: Test
         if: matrix.os == 'ubuntu-20.04'
         shell: bash
         run: |
              cd test/smoke-tests
-             cucumber -v --tags "not @ignore" -f html -o smoke-tests.html'    
+             cucumber -v --tags "not @ignore" -f html -o smoke-tests.html    
 
       - name: Archive smoke test results
         if: matrix.os == 'ubuntu-20.04'
