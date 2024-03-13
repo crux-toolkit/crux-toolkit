@@ -83,8 +83,14 @@ jobs:
         run: |
              cd "${{runner.workspace}}/build"
              cmake --build . --config $BUILD_TYPE --target package
+
+      - name: build-source-package
+        if: (matrix.os == 'ubuntu-20.04')
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
              cmake --build . --config $BUILD_TYPE --target package_source
-  
+
       - name: archive-macos-package
         if: (matrix.os == 'macos-latest')
         uses: actions/upload-artifact@v4
