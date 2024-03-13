@@ -123,7 +123,7 @@ jobs:
         if: (matrix.os == 'ubuntu-20.04')
         shell: bash
         run: |
-             cd test/smoke-tests
+             cd ${{runner.workspace}}/build/test/smoke-tests
              cucumber -v --tags "not @ignore" -f html -o smoke-tests.html    
 
       - name: Archive smoke test results
