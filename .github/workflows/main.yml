@@ -125,7 +125,7 @@ jobs:
         run: |
              cd ${{runner.workspace}}/build/test
              rm -rf smoke-tests
-             cp -r ../../test/smoke-tests
+             cp -r ../../test/smoke-tests .
              cd smoke-tests
              cucumber -v --tags "not @ignore" -f html -o smoke-tests.html    
 
