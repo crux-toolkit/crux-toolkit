@@ -35,8 +35,8 @@ jobs:
         if: matrix.os == 'ubuntu-20.04'
         shell: bash
         run: |
-              sudo python -m pip install numpy
-              sudo python -m pip install pandas
+              python -m pip install numpy
+              python -m pip install pandas
               sudo apt-get install ruby 2.2.0
               sudo gem install cucumber
               sudo gem install rspec
