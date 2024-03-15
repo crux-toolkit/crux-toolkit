@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
-cmake_policy(SET CMP0135 NEW)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+  cmake_policy(SET CMP0135 NEW)
+endif()
 project(crux)
 
 set (CRUX_VERSION_MAJOR "4")
