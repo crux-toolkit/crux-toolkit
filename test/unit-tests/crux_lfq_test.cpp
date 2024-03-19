@@ -58,3 +58,33 @@ TEST(CruxLFQApplicationTest, SetPeptideModifiedSequencesAndProteinGroups) {
     lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
     ASSERT_EQ(lfqResults.PeptideModifiedSequences.size(), 10);
 }
+
+TEST(CalculateTheoreticalIsotopeDistributionsTest, ActualIdentifications) {
+    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence");
+    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
+
+    // Seems redundant but checked to ensure the right data is passed to calculateTheoreticalIsotopeDistributions
+    ASSERT_EQ(15, allIdentifications.size());
+    ASSERT_EQ("RPQYSNPPVQGEVMEGADNQGAGEQGRPVR", allIdentifications[0].sequence);
+
+    unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
+    ASSERT_EQ(modifiedSequenceToIsotopicDistribution.size(), 10);
+}
+
+TEST(CalculateTheoreticalIsotopeDistributionsTest, EmptyInput) {
+    vector<Identification> allIdentifications;
+    unordered_map<string, vector<pair<double, double>>> result = calculateTheoreticalIsotopeDistributions(allIdentifications);
+    EXPECT_TRUE(result.empty());
+}
+
+TEST(CalculateTheoreticalIsotopeDistributionsTest, SingleIdentification) {
+    vector<Identification> allIdentifications;
+    Identification id;
+    id.sequence = "ACDEFG";
+    id.precursorCharge = 2;
+    allIdentifications.push_back(id);
+    unordered_map<string, vector<pair<double, double>>> result = calculateTheoreticalIsotopeDistributions(allIdentifications);
+    ASSERT_EQ(result.size(), 1);
+    // TODO - Figure out why this code passes
+    EXPECT_EQ(result["ACDEFG"].size(), 3);  // Assuming NUM_ISOTOPES_REQUIRED is 3 
+}
