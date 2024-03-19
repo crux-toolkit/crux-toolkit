@@ -1,0 +1,33 @@
+syntax = "proto2";
+
+option optimize_for = SPEED;
+package crux_lfq;
+
+message Ms1ScanInfo {
+  required int32 one_based_scan_number = 1;
+  required int32 zero_based_ms1_scan_index = 2;
+  required double retention_time = 3;
+}
+
+message IndexedMassSpectralPeak {
+  required double mz = 1;
+  required double intensity = 2;
+  required int32 zero_based_ms1_scan_index = 3;
+  required double retention_time = 4;
+}
+
+message InnerMap {
+  map<int32, IndexedMassSpectralPeak> inner_map = 1;
+}
+
+message Ms1ScanInfoList {
+  repeated Ms1ScanInfo ms1_scan_info = 1;
+}
+
+message IndexedSpectralResults {
+  map<int32, InnerMap> indexed_peaks = 1;
+  map<string, Ms1ScanInfoList> ms1_scans = 2;
+}
+
+
+// Use this to compile this protobuf: >protoc --cpp_out=../protoobj/ indexed_mass_spectral_peak.proto
