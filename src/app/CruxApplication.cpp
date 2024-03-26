@@ -185,7 +185,7 @@ void CruxApplication::initializeParams(
     
     carp(CARP_INFO, "Total Options in command line: %s", std::to_string(options.size()).c_str()); // message used to know how many options are in the command line
 
-    if( options.size() != 0 ){ // if there are more than 0 options in command line
+    if( options.size() != 0 ) { // if there are more than 0 options in command line
 
       carp(CARP_INFO, "Default values will be overwritten for:"); // message used to indicate in wich options the default value will be overwrite 
 
@@ -196,52 +196,54 @@ void CruxApplication::initializeParams(
       /* This loop is intended to check the parameters of the current application against all the appplications in application list*/
       for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {
 
-        if( !(std::find(appOptions.begin(), appOptions.end(), options_index->first) != appOptions.end()) ){ // if one parameter is not allowed for the current app,
+        if( !(std::find(appOptions.begin(), appOptions.end(), options_index->first) != appOptions.end()) ) { // if one parameter is not allowed for the current app,
                                                                                                             // then check in the list of applications
 
-          if( options_index->first.compare("no-analytics") != 0 ){
+          // The no-analytics and seed options are available to all
+          // applications and handled somewhat differently,
+          // so don't check.
+          if( options_index->first.compare("no-analytics") == 0 
+              || options_index->first.compare("seed") == 0 ) {
+            break;
+          }
 
-            for ( vector<CruxApplication *>::const_iterator currentApplication = firstInd; currentApplication != lastInd; currentApplication++ ) {
-              //in this loop, a search of the parameter is made on all options for all apps
+          for ( vector<CruxApplication *>::const_iterator currentApplication = firstInd; currentApplication != lastInd; currentApplication++ ) {
+            //in this loop, a search of the parameter is made on all options for all apps
 
-              next_app_options = (*currentApplication)->getOptions();
+            next_app_options = (*currentApplication)->getOptions();
 
-              if( (std::find(next_app_options.begin(), next_app_options.end(), options_index->first) != next_app_options.end()) ){
+            if( (std::find(next_app_options.begin(), next_app_options.end(), options_index->first) != next_app_options.end()) ){
 
-                if (appName.compare("tide-search") == 0 && (*currentApplication)->getName().compare("tide-index") == 0) {
-                  // if the current app is tide-search, and the index in pointed to tide-index, the parameter is then allowed for use in the current app.
+              if (appName.compare("tide-search") == 0 && (*currentApplication)->getName().compare("tide-index") == 0) {
+                // if the current app is tide-search, and the index in pointed to tide-index, the parameter is then allowed for use in the current app.
+                is_tide_search = true;
+              } else {
 
-                  is_tide_search = true;
+                if(apps_allowed.empty()) {
+
+                  apps_allowed = apps_allowed + (*currentApplication)->getName();
+
                 } else {
 
-                  if(apps_allowed.empty()) {
-
-                    apps_allowed = apps_allowed + (*currentApplication)->getName();
-
-                  } else {
-
-                    apps_allowed = apps_allowed + separator + (*currentApplication)->getName();
-                  }
+                  apps_allowed = apps_allowed + separator + (*currentApplication)->getName();
                 }
               }
             }
+          }
 
-            rejected_options = rejected_options + "\t-> " + options_index->first +" used in " + apps_allowed + "\n";
-            apps_allowed = "";
+          rejected_options = rejected_options + "\t-> " + options_index->first +" used in " + apps_allowed + "\n";
+          apps_allowed = "";
 
-            if (!is_tide_search) {
-
-              no_mach = true;
-            }
+          if (!is_tide_search) {
+            no_mach = true;
           }
         }
       }
 
       if ( no_mach ){
-
-            carp(CARP_FATAL, "Options found that don't match %s application:\n%s", appName.c_str(), rejected_options.c_str());
+        carp(CARP_FATAL, "Options found that don't match %s application:\n%s", appName.c_str(), rejected_options.c_str());
       }
-  }
+    }
 
     // Process command line arguments
     const map< string, vector<string> >& args = argParser.GetArgs();
