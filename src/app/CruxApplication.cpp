@@ -22,6 +22,12 @@
 
 using namespace std;
 
+/* Code added by Rufino*/
+
+/* Iterators to the first and last pointers of the main appications list*/
+std::vector<CruxApplication *>::const_iterator firstInd, lastInd;
+
+
 /**
  * Frees an allocated CruxApplication
  */
@@ -163,6 +169,82 @@ void CruxApplication::initializeParams(
         throw ArgParserException(e.what());
       }
     }
+
+  /* The following code is intended to warn the user for a bad usage of command line options on applications
+    Author: Rufino Haroldo Locon
+    HSE University, Moscow, Russia
+    July 2023
+  */
+  
+    bool no_mach = false; // -> this flag is used to check if a parameter in the command line is accepted by the app pointed by appName
+    std::string rejected_options = ""; // -> string used to show the final list of parameters thar are not permitted in the current application
+    std::string apps_allowed = ""; // -> string used to show the final list of apps where a parameter rejected is permitted
+    std::string separator = ", ";
+    std::vector<std::string> next_app_options; // -> string vector to keep the option list from every app in applications list
+    bool is_tide_search = false; // -> flag used to check if the current application is tide-search
+    
+    carp(CARP_INFO, "Total Options in command line: %s", std::to_string(options.size()).c_str()); // message used to know how many options are in the command line
+
+    if( options.size() != 0 ) { // if there are more than 0 options in command line
+
+      carp(CARP_INFO, "Default values will be overwritten for:"); // message used to indicate in wich options the default value will be overwrite 
+
+      for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {
+        carp(CARP_INFO, "->: %s", options_index->first.c_str());
+      }
+
+      /* This loop is intended to check the parameters of the current application against all the appplications in application list*/
+      for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {
+
+        if( !(std::find(appOptions.begin(), appOptions.end(), options_index->first) != appOptions.end()) ) { // if one parameter is not allowed for the current app,
+                                                                                                            // then check in the list of applications
+
+          // The no-analytics and seed options are available to all
+          // applications and handled somewhat differently,
+          // so don't check.
+          if( options_index->first.compare("no-analytics") == 0 
+              || options_index->first.compare("seed") == 0 ) {
+            break;
+          }
+
+          for ( vector<CruxApplication *>::const_iterator currentApplication = firstInd; currentApplication != lastInd; currentApplication++ ) {
+            //in this loop, a search of the parameter is made on all options for all apps
+
+            next_app_options = (*currentApplication)->getOptions();
+
+            if( (std::find(next_app_options.begin(), next_app_options.end(), options_index->first) != next_app_options.end()) ){
+
+              if (appName.compare("tide-search") == 0 && (*currentApplication)->getName().compare("tide-index") == 0) {
+                // if the current app is tide-search, and the index in pointed to tide-index, the parameter is then allowed for use in the current app.
+                is_tide_search = true;
+              } else {
+
+                if(apps_allowed.empty()) {
+
+                  apps_allowed = apps_allowed + (*currentApplication)->getName();
+
+                } else {
+
+                  apps_allowed = apps_allowed + separator + (*currentApplication)->getName();
+                }
+              }
+            }
+          }
+
+          rejected_options = rejected_options + "\t-> " + options_index->first +" used in " + apps_allowed + "\n";
+          apps_allowed = "";
+
+          if (!is_tide_search) {
+            no_mach = true;
+          }
+        }
+      }
+
+      if ( no_mach ){
+        carp(CARP_FATAL, "Options found that don't match %s application:\n%s", appName.c_str(), rejected_options.c_str());
+      }
+    }
+
     // Process command line arguments
     const map< string, vector<string> >& args = argParser.GetArgs();
     for (map< string, vector<string> >::const_iterator i = args.begin(); i != args.end(); i++) {
@@ -245,3 +327,15 @@ string CruxApplication::getUsage(
   return usage.str();
 }
 
+/* Code added by Rufino*/
+
+/* setListApp method receives two parameters, iterator f (first) and interator l (last), those iterators
+    come from the crux-main.cpp entry point after application list is initialized. Those parameters are
+    assigned to the local interators firstIndex (pointer to the first entry of the list) and q (pointer to the first entry of the list)*/
+
+void CruxApplication::setApplicationsList(std::vector<CruxApplication *>::const_iterator firstIndex, std::vector<CruxApplication *>::const_iterator lastIndex){
+
+  firstInd = firstIndex;
+  lastInd = lastIndex;
+
+}
