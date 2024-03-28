@@ -10,6 +10,7 @@
 #include "TideSearchApplication.h"
 #include "TideIndexApplication.h"
 #include "CometApplication.h"
+#include "SpectralCounts.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ int PipelineApplication::main(int argc, char** argv) {
   string database = Params::GetString("peptide source");
 
   vector<string> resultsFiles;
+  COMMAND_T post_processor_command;
   while (!apps_.empty()) {
     CruxApplication* cur = apps_.front();
     carp(CARP_INFO, "Running %s...", cur->getName().c_str());
@@ -45,7 +47,10 @@ int PipelineApplication::main(int argc, char** argv) {
         break;
       case QVALUE_COMMAND:
       case PERCOLATOR_COMMAND:
-        ret = runPostProcessor(cur, resultsFiles);
+        ret = runPostProcessor(cur, resultsFiles, post_processor_command);
+        break;
+      case SPECTRAL_COUNTS_COMMAND:
+        ret = runSpectralCounts(cur, post_processor_command);
         break;
       default:
         carp(CARP_FATAL, "Pipeline is not set up to run command '%s'",
@@ -201,7 +206,8 @@ int PipelineApplication::runSearch(
 
 int PipelineApplication::runPostProcessor(
   CruxApplication* app,
-  const vector<string>& resultsFiles
+  const vector<string>& resultsFiles,
+  COMMAND_T& post_processor_name
 ) {
   bool assignConfidence = app->getCommand() == QVALUE_COMMAND;
   bool percolator = app->getCommand() == PERCOLATOR_COMMAND;
@@ -221,6 +227,7 @@ int PipelineApplication::runPostProcessor(
         targetFiles.push_back(*i);
       }
     }
+    post_processor_name = QVALUE_COMMAND;
     return ((AssignConfidenceApplication*)app)->main(targetFiles);
   }
 
@@ -236,7 +243,20 @@ int PipelineApplication::runPostProcessor(
     }
     carp(CARP_INFO, "Finished make-pin.");
   }
+  post_processor_name = PERCOLATOR_COMMAND;
   return ((PercolatorApplication*)app)->main(pin, "", "pipeline");
+}
+
+int PipelineApplication::runSpectralCounts(
+  CruxApplication* app,
+  COMMAND_T post_processor_command
+) {
+  if (post_processor_command == PERCOLATOR_COMMAND) {
+    return ((SpectralCounts*)app)->main("pipeline/percolator.target.psms.txt");
+  }
+  else {
+    return ((SpectralCounts*)app)->main("pipeline/assign-confidence.target.txt");
+  }
 }
 
 string PipelineApplication::getName() const {
@@ -249,7 +269,7 @@ string PipelineApplication::getDescription() const {
     "sets of tandem mass spectra.]]"
     "[[html:<p>Given one or more sets of tandem mass spectra as well as a "
     "protein database, this command runs a series of Crux tools and reports all "
-    "of the results in a single output directory. There are three steps in the "
+    "of the results in a single output directory. There are four steps in the "
     "pipeline:</p><ol><li><a href=\"bullseye.html\">Bullseye</a> to assign high-"
     "resolution precursor m/z values to MS/MS data. This step is optional.</li>"
     "<li>Database searching using either <a href=\"tide-search.html\">"
@@ -257,9 +277,10 @@ string PipelineApplication::getDescription() const {
     "provided as a file in FASTA format, or additionally, an index as produced "
     "by <a href=\"tide-index.html\">tide-index</a>.</li><li>Post-processing "
     "using either <a href=\"assign-confidence.html\">assign-confidence</a> or "
-    "<a href=\"percolator.html\">Percolator</a>.</li></ol><p>All of the command "
-    "line options associated with the individual tools in the pipeline can be "
-    "used with the <code>pipeline</code> command.</p>]]";
+    "<a href=\"percolator.html\">Percolator</a>.</li><li>Pseudo quantitation "
+    "using <a href=\"spectral-counts.html\">spectral-counts</a></li></ol>"
+    "<p>All of the command line options associated with the individual tools "
+    "in the pipeline can be used with the <code>pipeline</code> command.</p>]]";
 }
 
 vector<string> PipelineApplication::getArgs() const {
@@ -284,6 +305,7 @@ vector<string> PipelineApplication::getOptions() const {
   addOptionsFrom<CometApplication>(&options);
   addOptionsFrom<PercolatorApplication>(&options);
   addOptionsFrom<AssignConfidenceApplication>(&options);
+  addOptionsFrom<SpectralCounts>(&options);
 
   return options;
 }
@@ -296,6 +318,7 @@ vector< pair<string, string> > PipelineApplication::getOutputs() const {
   addOutputsFrom<CometApplication>(&outputs);
   addOutputsFrom<PercolatorApplication>(&outputs);
   addOutputsFrom<AssignConfidenceApplication>(&outputs);
+  addOutputsFrom<SpectralCounts>(&outputs);
 
   return outputs;
 }
@@ -342,6 +365,8 @@ void PipelineApplication::processParams() {
   } else if (postProcessor == "percolator") {
     apps_.push_back(new PercolatorApplication());
   }
+
+  apps_.push_back(new SpectralCounts());
 
   for (vector<CruxApplication*>::iterator i = apps_.begin(); i != apps_.end(); i++) {
     (*i)->processParams();

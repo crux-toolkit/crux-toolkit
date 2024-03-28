@@ -126,7 +126,7 @@ unsigned int PostProcessProtein::getLength() {
 
   if (sequence_ == NULL) {
     carp_once(CARP_WARNING, "Need protein sequence in order to calculate protein length.\n"
-      "   Please provide protein fasta or index using the protein-database parameter\n"
+      "   Please provide protein fasta using the protein-database parameter\n"
       "   Protein %s doesn't have the full sequence", getIdPointer().c_str());
 
     return 0;

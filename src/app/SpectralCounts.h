@@ -35,6 +35,7 @@ class SpectralCounts: public CruxApplication {
   virtual std::vector< std::pair<std::string, std::string> > getOutputs() const;
   virtual COMMAND_T getCommand() const;
   virtual bool needsOutputDirectory() const;
+  int main(const string input_file);
 
  private:
   // internally-used types

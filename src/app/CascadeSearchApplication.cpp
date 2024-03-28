@@ -190,12 +190,12 @@ void CascadeSearchApplication::processParams() {
   Params::Set("top-match", 1);
 
   if (Params::GetString("score-function") == "both") {
-    Params::Set("score","combined p-value");
+    Params::Set("score", "combined p-value");
   } else if (Params::GetString("score-function") == "residue-evidence") {
     if (Params::GetBool("exact-p-value")) {
-      Params::Set("score","res-ev score");
+      Params::Set("score", "res-ev score");
     } else {
-      Params::Set("score","res-ev p-value");
+      Params::Set("score", "res-ev p-value");
     }
   } else if (Params::GetBool("exact-p-value")) {
     Params::Set("score", "exact p-value");
