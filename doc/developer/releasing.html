@@ -9,7 +9,6 @@ This has been replaced by a
 <a href="https://github.com/crux-toolkit/crux-toolkit/blob/master/.github/workflows/main.yml">GitHub Action</a>
 running whenever a commit is made to the <code>master</code>
 branch of the Crux repository.
-An updated guide to releasing major versions is being prepared.
 Intermediate builds are now released automatically, as described
 in 
 <a href="crux-website.html">How to administer the Crux website</a>.
@@ -97,14 +96,21 @@ For example:
 SET(PERCOLATOR_GIT_VERSION "rel-3-02")
 </pre>
 <h3>Update the .github/workflows/main.yml as needed for the new version</h3>
-<ul>
-<li>
 Update the name of the packages generated in the build.
 For example, change <code>crux-4.1.Darwin.x86_64.zip</code>
-to <code>crux-4.2.Darwin.x86_64.zip</code></li>
-</ul>
+to <code>crux-4.2.Darwin.x86_64.zip</code>.
 <h3>Update the Crux download server (<code>noble-web</code></h3>
-You should also download and test the distribution for each platform.
+Crux downloads are stored on the <a
+href="https://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>.
+The distributions are stored in
+<code>noble-web:/noble/www/htdocs/crux-downloads</code>.
+For each new release create a new subdirectory for the release
+and copy the distribution files into it.
+Once the download page on the <a href="https://crux.ms">main Crux web site</a>
+has been updated by the GitHub actions, you should be able to download
+these distributions from the <a href="https://crux.ms/download.html">download
+page</a>.
+You should download and test the distribution for each platform.
 <a name="todo">
 <h3>Checklist</h3></a>
 <p>Here is a list of steps to follow, roughly in this order</p>
@@ -127,12 +133,16 @@ in the download directory of the Crux web site.</li>
 Proteowizard tarball you just created.</li>
 <li>Update the <code>ext/CMakeLists.txt</code> script with the
 <code>PERCOLATOR_GIT_TAG</code> for the current release of Percolator.</li>
-<h4>Update the GitHub build action</h4>
+<h4>Check the results of the GitHub build action</h4>
 <li>Commit changes to the branch.
-<li>Run all of the build tasks for the new release</li>
 <li>Check results of GitHub action builds and smoke tests.
-<h4>Copy the distribution files to a new
-<h4>Check the distribution files</h4>
+<h4>Copy the distribution files to the Noble labe web server.</h4>
+<li>Create a new directory for the distributions in
+<code>noble-web:/noble/htdocs/crux-downloads</code></li>
+<li>Copy the new distribution for each platform from 
+<code>noble-web:/noble/htdocs/crux-downloads/daily</code>
+into the directory for the new release, droping the Git commit hash from the
+name.</li>
 <li>Download, unpack, and build Crux from the source file tarball from the web site.
 <li>Download, unpack and run the binary files from the web site.  <i>You may want to ask someone
     else to do these steps on different computers.</i>
