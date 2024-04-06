@@ -52,13 +52,21 @@
     <h2>Release notes for Crux</h2>
 
 
-<h4>Minor changes</h4>
-<ul>
-  <li>26 March 2024: Updated smoke tests.</li>
+<h3>Version 4.2</h3> April 6, 2024
+
+<h4>Major changes</h4>
+  <li>6 April 2024: Updated to use Percolator commit d0d48b5.
   <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
   dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
-  issues building Crux on newer releases of Linux and MacOS. Replaced Centos 7
-  build with Ubuntu 20.04 in GitHub commit action for Master branch.</li>
+  issues building Crux on newer releases of Linux and MacOS. The Centos 7
+  build was replaced with Ubuntu 20.04 in GitHub commit action for Master branch.
+  The recommended version of CMake is now 3.24. Earlier versions will work,
+  but you may see some warning messages.
+  </li>
+<h4>Minor changes</h4>
+<ul>
+  <li>6 April 2024: Updated UNIMOD definitions.</li>
+  <li>26 March 2024: Updated smoke tests.</li>
   <li>11 Jan 2024: added spectral-counts to pipeline command.</li>
   <li>11 Jan 2024: Fixed bug where NSAF runs to completion with no database.</li>
   <li>14 Nov 2023: Fixed bug in spectral-counts documentation, LaTex not being

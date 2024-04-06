@@ -20,7 +20,7 @@ in
 
 <h3>Introduction</h3>
 After every successful commit to the Crux GitHub repository
-our TeamCity server automatically publishes the current source distribution
+GitHub actions automatically publishes the current source distribution
 and binaries for all platforms to the Crux web site.
 As functionality milestones are achieved
 we also publish stable, versioned releases.
@@ -28,10 +28,10 @@ This document describes how to publish a versioned release.
 
 <h3>Before you begin</h3>
 <p>Consider updating the UNIMOD data: download the latest data in XML format from
-  <code>http://www.unimode.org/xml/unimod.xml</code>. Then, run <code>bin/unimod_parser.py
+  <code>http://www.unimod.org/xml/unimod.xml</code>. Then, run <code>bin/unimod_parser.py
   /path/to/xml/file &gt; src/model/Unimod.h.</code>
 
-<p>Confirm that the TeamCity server successfully built Crux from the current
+<p>Confirm that GitHub Actions successfully built Crux from the current
   repository trunk on all platforms, and that the smoke and performance tests all 
   passed on the 64-bit Linux build.
   Update the release notes
@@ -96,89 +96,14 @@ For example:
 <pre>
 SET(PERCOLATOR_GIT_VERSION "rel-3-02")
 </pre>
-<h3>Add TeamCity build tasks for the new version</h3>
-You'll need to create TeamCity tasks for building the new version of
-Crux on each of the platforms,
-and for deploying the results to the web site.
-The easiest way to do this is to copy the tasks for the previous named release
-and then modify them with the new version and directory information.
-<p />
-For the platform build tasks, the settings that need to be changed include:
-<ul>
-<li>
-General Settings
-<ul>
-<li>
-Name
-</li>
-<li>
-Build configuration ID
-</li>
-<li>
-Artifact Paths
-</li>
-</ul>
-<li>Version Control Settings</li>
-</li>
-<ul>
-<li>
-Edit Name
-<ul>
-<li>VCS root name</li>
-<li>VCS root ID</li>
-<li>URL</li>
-</ul>
-</li>
-</ul>
-<li>Build Steps</li>
+<h3>Update the .github/workflows/main.yml as needed for the new version</h3>
 <ul>
 <li>
 Update the name of the packages generated in the build.
-For example, change <code>crux-3.1.Darwin.x86_64.zip</code>
-to <code>crux-3.2.Darwin.x86_64.zip</code></li>
+For example, change <code>crux-4.1.Darwin.x86_64.zip</code>
+to <code>crux-4.2.Darwin.x86_64.zip</code></li>
 </ul>
-</ul>
-<p />
-For the web site deployment task, the settings that need to be changed include:
-<ul>
-<li>General Settings</li>
-<ul>
-<li>Build configuration ID</li>
-<li>Build counter</li>
-</ul>
-<li>
-Build Step: SSH Deployer
-<ul>
-<li>
-Edit Deploy Artifacts build step
-<ul>
-<li>
-Target path under Deployment Targets.
-</li>
-<li>Artifacts path under Deployment Source</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-Dependencies
-<ul>
-<li>Modify the dependencies to point at the tasks for the builds of the new
-version for each platform.</li>
-<li>Update the artifact dependencies with the new names of the artifacts (zip files and tarballs)</li>
-</ul>
-</li>
-</ul>
-Before running the TeamCity tasks,
-<a href="crux-sourceforge.html" >log on</a> to the <code>crux-toolkit</code> server.
-Create a subdirectory for the new release in 
-<code>/home/project-web/cruxtoolkit/htdocs/download</code>
-<h3>Build the releases and update the web site</h3>
-Once the previous steps have been completed run the TeamCity task to
-deploy the new version to the web site. This will also run the
-tasks to build the new release for each platform.
-<h3>Verify the deployment to the web site</h3>
-You should verify that the web site content has been correctly updated.
+<h3>Update the Crux download server (<code>noble-web</code></h3>
 You should also download and test the distribution for each platform.
 <a name="todo">
 <h3>Checklist</h3></a>
@@ -202,14 +127,11 @@ in the download directory of the Crux web site.</li>
 Proteowizard tarball you just created.</li>
 <li>Update the <code>ext/CMakeLists.txt</code> script with the
 <code>PERCOLATOR_GIT_TAG</code> for the current release of Percolator.</li>
+<h4>Update the GitHub build action</h4>
 <li>Commit changes to the branch.
-<h4>Update TeamCity build tasks</h4>
-<li>Copy TeamCity tasks for previous release to tasks for new release.</li>
-<li>Update details of tasks for new release.</li>
 <li>Run all of the build tasks for the new release</li>
-<li>Check results of TeamCity builds and smoke tests.
-<h4>Deploy new release to web site</h4>
-<li>Run TeamCity task <code>Deploy successful build to website</code>.
+<li>Check results of GitHub action builds and smoke tests.
+<h4>Copy the distribution files to a new
 <h4>Check the distribution files</h4>
 <li>Download, unpack, and build Crux from the source file tarball from the web site.
 <li>Download, unpack and run the binary files from the web site.  <i>You may want to ask someone

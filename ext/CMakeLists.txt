@@ -198,7 +198,7 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
-set(PERCOLATOR_GIT_VERSION 03d38ba)
+set(PERCOLATOR_GIT_VERSION d0d48b5)
 ExternalProject_Add(
   percolator
   GIT_REPOSITORY https://github.com/percolator/percolator.git
