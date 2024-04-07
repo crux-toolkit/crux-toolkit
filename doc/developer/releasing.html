@@ -88,7 +88,7 @@ This is done by editing <code>ext\CMakeLists.txt.</code>
 Look for blocks of code  in the clauses depending
 on <code>USE_LATEST_PWIZ</code>.
 Change these blocks to point to the new Proteowizard tarball on the Crux web site.
-<h3>Modify the Crux build to use a fixed version of Percolator</h3>
+<h3>Modify the Crux build to use a updated version of Percolator</h3>
 In <code>ext/CMakeLists.txt</code> set the CMake varible <code>PERCOLATOR_GIT_VERSION</code>
 to the tag for the current release of Percolator.
 For example:
@@ -99,13 +99,30 @@ SET(PERCOLATOR_GIT_VERSION "rel-3-02")
 Update the name of the packages generated in the build.
 For example, change <code>crux-4.1.Darwin.x86_64.zip</code>
 to <code>crux-4.2.Darwin.x86_64.zip</code>.
-<h3>Update the Crux download server (<code>noble-web</code></h3>
+<h3>Commit the changes to the release branch</h3>
+When you are satisfied with your updates to the new release branch,
+commit and push to GitHub. On GitHub manually trigger the action main.yml
+for the branch. This will trigger a build for each platform,
+run the smoke tests on Linux. It won't update the Crux web site.
+If the builds and smoke tests were all successful,
+obtain a code review for your changes.
+<h3>Merge the changes from the release branch into the main branch</h3>
+Once the code review has been approved merge the changes from the
+release branch into the main branch. This will trigger another
+build and re-run the smoke tests, but now if these are successful
+the Crux web site will be updated. However, the distribution files
+for each platform will need to be put in the proper directory
+on the Crux download server.
+<h3>Update the Crux download server (<code>noble-web</code>)</h3>
 Crux downloads are stored on the <a
 href="https://noble.gs.washington.edu/crux-downloads">Noble lab web server</a>.
 The distributions are stored in
 <code>noble-web:/noble/www/htdocs/crux-downloads</code>.
-For each new release create a new subdirectory for the release
-and copy the distribution files into it.
+Create a new subdirectory for the release and
+copy the new distribution for each platform from 
+<code>noble-web:/noble/htdocs/crux-downloads/daily</code>
+into the directory for the new release, droping the Git commit hash from the
+name.
 Once the download page on the <a href="https://crux.ms">main Crux web site</a>
 has been updated by the GitHub actions, you should be able to download
 these distributions from the <a href="https://crux.ms/download.html">download
@@ -133,9 +150,14 @@ in the download directory of the Crux web site.</li>
 Proteowizard tarball you just created.</li>
 <li>Update the <code>ext/CMakeLists.txt</code> script with the
 <code>PERCOLATOR_GIT_TAG</code> for the current release of Percolator.</li>
-<h4>Check the results of the GitHub build action</h4>
+<h4>Check that the release branch builds and smoke tests pass</h4>
 <li>Commit changes to the branch.
 <li>Check results of GitHub action builds and smoke tests.
+<li>If the builds and smoke tests were successfull obtain a code reivew.</li>
+<li>Once the code review is approved, merge the release branch into
+the main branch. This will trigger another build, but this time
+the Crux web site will be updated.</li>
+<li></li>
 <h4>Copy the distribution files to the Noble labe web server.</h4>
 <li>Create a new directory for the distributions in
 <code>noble-web:/noble/htdocs/crux-downloads</code></li>
