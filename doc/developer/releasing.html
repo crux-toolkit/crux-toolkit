@@ -102,7 +102,7 @@ to <code>crux-4.2.Darwin.x86_64.zip</code>.
 <h3>Commit the changes to the release branch</h3>
 When you are satisfied with your updates to the new release branch,
 commit and push to GitHub. On GitHub manually trigger the action main.yml
-for the branch. This will trigger a build for each platform,
+for the branch. This will trigger a build for each platform and,
 run the smoke tests on Linux. It won't update the Crux web site.
 If the builds and smoke tests were all successful,
 obtain a code review for your changes.
@@ -121,7 +121,7 @@ The distributions are stored in
 Create a new subdirectory for the release and
 copy the new distribution for each platform from 
 <code>noble-web:/noble/htdocs/crux-downloads/daily</code>
-into the directory for the new release, droping the Git commit hash from the
+into the directory for the new release, dropping the Git commit hash from the
 name.
 Once the download page on the <a href="https://crux.ms">main Crux web site</a>
 has been updated by the GitHub actions, you should be able to download
@@ -153,7 +153,7 @@ Proteowizard tarball you just created.</li>
 <h4>Check that the release branch builds and smoke tests pass</h4>
 <li>Commit changes to the branch.
 <li>Check results of GitHub action builds and smoke tests.
-<li>If the builds and smoke tests were successfull obtain a code reivew.</li>
+<li>If the builds and smoke tests were successfull obtain a code review.</li>
 <li>Once the code review is approved, merge the release branch into
 the main branch. This will trigger another build, but this time
 the Crux web site will be updated.</li>
