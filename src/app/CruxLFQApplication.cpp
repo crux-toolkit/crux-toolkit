@@ -100,6 +100,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
+        // TODO Continue from this function
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
             allIdentifications,
@@ -108,7 +109,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             indexResults._indexedPeaks,
             modifiedSequenceToIsotopicDistribution,
             lfqResults);
-
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
 
         carp(CARP_INFO, "Finished processing %s", spectra_file.c_str());

@@ -292,7 +292,8 @@ calculateTheoreticalIsotopeDistributions(
 
     for (auto& identification : allIdentifications) {
         string peptide_sequence = identification.sequence;
-        int charge = identification.precursorCharge;
+        // int charge = identification.precursorCharge; // This code was commented out whilst debugging.
+        int charge = 1;
 
         if (modifiedSequenceToIsotopicDistribution.find(peptide_sequence) !=
             modifiedSequenceToIsotopicDistribution.end()) {
@@ -442,6 +443,7 @@ void processRange(int start, int end,
         }
         // TO Do - continue from here
         // -----------------------------------------------------------------------------
+
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
 
         cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
@@ -775,6 +777,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                 }
             }
         }
+
         // check number of isotope peaks observed
         if (massShiftToIsotopePeaks[0].size() < NUM_ISOTOPES_REQUIRED) {
             continue;
