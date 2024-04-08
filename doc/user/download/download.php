@@ -45,22 +45,22 @@
   # Set names of files available for download
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
-       "Source" => "crux-4.1.Source.tar.gz",
-       "Linux64" => "crux-4.1.Linux.x86_64.zip",
-       "OSX" => "crux-4.1.Darwin.x86_64.zip",
-       "Windows64" => "crux-4.1.Windows.AMD64.zip",
+       "Source" => "crux-4.2.Source.tar.gz",
+       "Linux64" => "crux-4.2.Linux.x86_64.zip",
+       "OSX" => "crux-4.2.Darwin.x86_64.zip",
+       "Windows64" => "crux-4.2.Windows.AMD64.zip",
      );
-     $directory = "crux-4.1/";
+     $directory = "crux-4.2/";
    }
     else {
       # File names for daily build include abbreveiated unique git commit number.
       # Read commit number from file.
       $version = chop(file_get_contents("daily/latest-build.txt"));
       $FileNameBaseArray = array(
-        "Source" => "crux-4.1.$version.Source.tar.gz",
-        "Linux64" => "crux-4.1.$version.Linux.x86_64.zip",
-        "OSX" => "crux-4.1.$version.Darwin.x86_64.zip",
-        "Windows64" => "crux-4.1.$version.Windows.AMD64.zip",
+        "Source" => "crux-4.2.$version.Source.tar.gz",
+        "Linux64" => "crux-4.2.$version.Linux.x86_64.zip",
+        "OSX" => "crux-4.2.$version.Darwin.x86_64.zip",
+        "Windows64" => "crux-4.2.$version.Windows.AMD64.zip",
       );
       $directory = "daily/";
     }
