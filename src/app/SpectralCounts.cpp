@@ -40,6 +40,10 @@ SpectralCounts::~SpectralCounts() {
   delete output_;
 }
 
+int SpectralCounts::main(int argc, char** argv) {
+  return(main(Params::GetString("input PSMs")));
+}
+
 /**
  * Given a collection of scored PSMs, print a list of proteins
  * ranked by their a specified score. Spectral-counts supports two
@@ -50,7 +54,8 @@ SpectralCounts::~SpectralCounts() {
  * and Normalized Spectral Index (SIN). 
  * \returns 0 on successful completion.
  */
-int SpectralCounts::main(int argc, char** argv) {
+int SpectralCounts::main(const string input_file) {
+  psm_file_ = input_file;
   getParameterValues(); // all the get_<type>_parameter calls here
 
   // open output files
@@ -114,7 +119,6 @@ int SpectralCounts::main(int argc, char** argv) {
  * as member variables.
  */
 void SpectralCounts::getParameterValues() {
-  psm_file_ = Params::GetString("input PSMs");
   threshold_ = Params::GetDouble("threshold");
   database_name_ = Params::GetString("protein-database");
   unique_mapping_ = Params::GetBool("unique-mapping");
@@ -125,6 +129,13 @@ void SpectralCounts::getParameterValues() {
   if (measure_ == MEASURE_SIN && Params::GetString("input-ms2").empty()) {
     carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
                      "that the --input-ms2 option specify a file.");
+  }
+
+  if ((measure_ == MEASURE_DNSAF || measure_ == MEASURE_NSAF) &&
+      (database_name_ == "")) {
+    carp(CARP_FATAL, "The NSAF and dNSAF computation for spectral-counts "
+                      "requires that the --protein-database option specify "
+                      "a file.");
   }
 
   bin_width_ = Params::GetDouble("mz-bin-width");
@@ -773,19 +784,18 @@ void SpectralCounts::writeRankedProteins() {
       } else {
       */
       for (MetaToRank::iterator iter = meta_protein_ranks_.begin();
-        iter != meta_protein_ranks_.end();
-	++iter) {
-	  MetaProtein proteins = iter->first;
-	  for (MetaProtein::iterator protein_it = proteins.begin();
-	       protein_it != proteins.end(); ++protein_it) {
-	    Protein* protein = (*protein_it);
-	    if (protein->getId() == it->first->getId()) {
-	      carp(CARP_DEBUG, "Found protein %s",protein->getId().c_str());
-	      rank = iter->second;
-	    }
-	  }
+           iter != meta_protein_ranks_.end();
+           ++iter) {
+        MetaProtein proteins = iter->first;
+        for (MetaProtein::iterator protein_it = proteins.begin();
+             protein_it != proteins.end(); ++protein_it) {
+          Protein* protein = (*protein_it);
+          if (protein->getId() == it->first->getId()) {
+            carp(CARP_DEBUG, "Found protein %s", protein->getId().c_str());
+            rank = iter->second;
+          }
+        }
       }
-      // }
     }
     proteins.push_back(boost::make_tuple(it->second, it->first, rank));
   }
@@ -891,8 +901,8 @@ void SpectralCounts::getMetaRanks() {
       cur_rank = idx+1;
     }
 
-    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i",cur_score,cur_rank);
-     for (MetaProtein::iterator protein_it = proteins.begin();
+    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i", cur_score,cur_rank);
+    for (MetaProtein::iterator protein_it = proteins.begin();
          protein_it != proteins.end(); ++protein_it) {
       Protein* protein = (*protein_it);
       FLOAT_T score = protein_scores_[protein];

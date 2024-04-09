@@ -523,7 +523,6 @@ bool GeneratePeptides::makeDecoyIdx(
     decoyPre = decoyIdx[0];
     decoyPost = decoyIdx.back();
     decoyIdx = std::vector<int>(decoyIdx.begin() + 1, decoyIdx.end() - 1);
-	
   } else {
     decoyOutIdx = decoyIdx;
     if (seq.length() <= 1) {
@@ -539,13 +538,13 @@ bool GeneratePeptides::makeDecoyIdx(
   }
   // Re-add n/c
   if (decoyPre >= 0)
-	  decoyOutIdx.push_back(decoyPre);
-  
+    decoyOutIdx.push_back(decoyPre);
+
   for (std::vector<int>::iterator itr = decoyIdx.begin(); itr != decoyIdx.end(); itr++) {
-	  decoyOutIdx.push_back(*itr);
+    decoyOutIdx.push_back(*itr);
   }
   if (decoyPost >= 0)
-	  decoyOutIdx.push_back(decoyPost);
+    decoyOutIdx.push_back(decoyPost);
 
   return true;
 }
