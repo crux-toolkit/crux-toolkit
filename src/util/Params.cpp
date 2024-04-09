@@ -1479,310 +1479,310 @@ Params::Params() : finalized_(false) {
                   "of the output file.",
                   true);
 
-  /* hardklor parameters */
-  InitStringParam("hardklor-algorithm", "version1", "basic|version1|version2",
-    "Determines which spectral feature detection algorithm to use. Different results are "
-    "possible with each algorithm, and there are pros and cons to each.[[html: There are "
-    "three algorithms to choose from:<ul><li>basic &ndash; Performs unoptimized "
-    "deconvolution and is provided for legacy purposes only.</li><li>version1 &ndash; "
-    "Uses the optimizations developed during the 1.0+ series. It is very accurate, but has "
-    "limited sensitivity, and moderate speed improvements.</li><li>version2 &ndash; Uses "
-    "the optimizations developed for version 2.0+. It is highly sensitive, but less "
-    "accurate for very low abundance features, and performs exceptionally fast.</li></ul>]]",
-    "Available for crux hardklor", true);
-  InitStringParam("averagine-mod", "",
-    "Defines alternative averagine models in the analysis that incorporate additional "
-    "atoms and/or isotopic enrichments. Modifications are represented as text strings. "
-    "Inclusion of additional atoms in the model is done using by entering an atomic "
-    "formula, such as: PO2 or Cl. Inclusion of isotopic enrichment to the model is done by "
-    "specifying the percent enrichment (as a decimal) followed by the atom being enriched "
-    "and an index of the isotope. For example, 0.75H1 specifies 75% enrichment of the first "
-    "heavy isotope of hydrogen. In other words, 75% deuterium enrichment. Two or more "
-    "modifications can be combined into the same model, and separated by spaces: B2 0.5B1",
-    "Available for crux hardklor", true);
-  InitIntParam("boxcar-averaging", 0, 0, BILLION,
-    "Boxcar averaging is a sliding window that averages n adjacent spectra prior to feature "
-    "detection. Averaging generally improves the signal-to-noise ratio of features in the "
-    "spectra, as well as improving the shape of isotopic envelopes. However, averaging will "
-    "also change the observed peak intensities. Averaging with too wide a window will "
-    "increase the occurrence of overlapping features and broaden the chromatographic "
-    "profiles of observed features. The number specified is the total adjacent scans to be "
-    "combined, centered on the scan being analyzed. Therefore, an odd number is recommended "
-    "to center the boxcar window. For example, a value of 3 would produce an average of the "
-    "scan of interest, plus one scan on each side. A value of 0 disables boxcar averaging.",
-    "Available for crux hardklor", true);
-  InitIntParam("boxcar-filter", 0, 0, BILLION,
-    "This parameter is only functional when boxcar-averaging is used. The filter will "
-    "remove any peaks not seen in n scans in the boxcar window. The effect is to reduce "
-    "peak accumulation due to noise and reduce chromatographic broadening of peaks. Caution "
-    "should be used as over-filtering can occur. The suggested number of scans to set for "
-    "filtering should be equal to or less than the boxcar-averaging window size. A value of "
-    "0 disables filtering.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("boxcar-filter-ppm", 10.0, 0.0, BILLION,
-    "This parameter is only functional when boxcar-filter is used. The value specifies the "
-    "mass tolerance in ppm for declaring a peak the same prior to filtering across all "
-    "scans in the boxcar window.",
-    "Available for crux hardklor", true);
-  InitBoolParam("centroided", false,
-    "Indicates whether the data contain profile or centroided peaks.",
-    "Available for crux hardklor", true);
-  InitStringParam("cdm", "Q", "B|F|P|Q|S",
-    "Choose the charge state determination method.[[html: There are five methods to "
-    "choose from:<ul><li>B &ndash; Basic method, assume all charge states are possible."
-    "</li><li>F &ndash; Fast Fourier transform.</li><li>P &ndash; Patterson algorithm.</li>"
-    "<li>Q &ndash; QuickCharge method, uses inverse peak distances.</li><li>S &ndash; "
-    "Senko method, or combined Fast Fourier Transform and Patterson algorithm.</li></ul>]]",
-    "Available for crux hardklor", true);
-  InitIntParam("min-charge", 1, 1, BILLION,
-    "Specifies the minimum charge state to allow when finding spectral features. It is "
-    "best to set this value to the lowest assumed charge state to be present. If set higher "
-    "than actual charge states that are present, those features will not be identified or "
-    "incorrectly assigned a different charge state and mass.",
-    "Available for crux hardklor", true);
-  InitIntParam("max-charge", 5, 1, BILLION,
-    "Specifies the maximum charge state to allow when finding spectral features. It is "
-    "best to set this value to a practical number (i.e. do not set it to 20 when doing a "
-    "tryptic shotgun analysis). If set higher than actual charge states that are present, "
-    "the algorithm will perform significantly slower without any improvement in results.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("corr", 0.85, 0, 1.0,
-    "Sets the correlation threshold (cosine similarity) for accepting each predicted "
-    "feature.",
-    "Available for crux hardklor", true);
-  InitIntParam("depth", 3, 1, BILLION,
-    "Sets the depth of combinatorial analysis. For a given set of peaks in a spectrum, "
-    "search for up to this number of combined peptides that explain the observed peaks. "
-    "The analysis stops before depth is reached if the current number of deconvolved "
-    "features explains the observed peaks with a correlation score above the threshold "
-    "defined with the correlation parameter.",
-    "Available for crux hardklor", true);
-  InitBoolParam("distribution-area", false,
-    "When reporting each feature, report abundance as the sum of all isotope peaks. The "
-    "value reported is the estimate of the correct peak heights based on the averagine "
-    "model scaled to the observed peak heights.",
-    "Available for crux hardklor", true);
-  InitStringParam("hardklor-data-file", "",
-    "Specifies an ASCII text file that defines symbols for the periodic table.",
-    "Available for crux hardklor", true);
-  InitStringParam("instrument", "fticr", "fticr|orbitrap|tof|qit",
-    "Indicates the type of instrument used to collect data. This parameter, combined with "
-    "the resolution parameter, define how spectra will be centroided (if you provide "
-    "profile spectra) and the accuracy when aligning observed peaks to the models.",
-    "Available for crux hardklor", true);
-  InitStringParam("isotope-data-file", "",
-    "Specifies an ASCII text file that can be read to override the natural isotope "
-    "abundances for all elements.",
-    "Available for crux hardklor", true);
-  InitIntParam("max-features", 10, 1, BILLION,
-    "Specifies the maximum number of models to build for a set of peaks being analyzed. "
-    "Regardless of the setting, the number of models will never exceed the number of peaks "
-    "in the current set. However, as many of the low abundance peaks are noise or tail ends "
-    "of distributions, defining models for them is detrimental to the analysis.",
-    "Available for crux hardklor", true);
-  InitIntParam("mzxml-filter", 1, 1, 2,
-    "Filters the spectra prior to analysis for the requested MS/MS level. For example, if "
-    "the data contain MS and MS/MS spectra, setting mzxml-filter = 1 will analyze only the "
-    "MS scan events. Setting mzxml-filter = 2 will analyze only the MS/MS scan events.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("mz-max", 0, 0, 10000,
-    "Constrains the search in each spectrum to signals below this value in Thomsons. "
-    "Setting to 0 disables this feature.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("mz-min", 0, 0, 10000,
-    "Constrains the search in each spectrum to signals above this value in Thomsons. "
-    "Setting to 0 disables this feature.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("mz-window", 4.0, 1.0, 20.0,
-    "Only used when algorithm = version1. Defines the maximum window size in Thomsons to "
-    "analyze when deconvolving peaks in a spectrum into features.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("resolution", 100000, 1, BILLION,
-    "Specifies the resolution of the instrument at 400 m/z for the data being analyzed.",
-    "Available for crux hardklor", true);
-  InitIntParam("scan-range-max", 0, 0, BILLION,
-    "Used to restrict analysis to spectra with scan numbers below this parameter value. "
-    "A value of 0 disables this feature.",
-    "Available for crux hardklor", true);
-  InitIntParam("scan-range-min", 0, 0, BILLION,
-    "Used to restrict analysis to spectra with scan numbers above this parameter value. "
-    "A value of 0 disables this feature.",
-    "Available for crux hardklor", true);
-  InitIntParam("sensitivity", 2, 0, 3,
-    "Set the sensitivity level. There are four levels: 0 (low), 1 (moderate), "
-    "2 (high), and 3 (max). Increasing the sensitivity will increase computation time, "
-    "but will also yield more isotope distributions.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("signal-to-noise", 1.0, 0.0, BILLION,
-    "Filters spectra to remove peaks below this signal-to-noise ratio prior to finding "
-    "features.",
-    "Available for crux hardklor", true);
-  InitIntParam("smooth", 0, 0, 21,
-    "Uses Savitzky-Golay smoothing on profile peak data prior to centroiding the spectra. "
-    "This parameter is recommended for low resolution spectra only. Smoothing data causes "
-    "peak depression and broadening. Only use odd numbers for the degree of smoothing (as "
-    "it defines a window centered on each data point). Higher values will produce smoother "
-    "peaks, but with greater depression and broadening. Setting this parameter to 0 disables "
-    "smoothing.",
-    "Available for crux hardklor", true);
-  InitDoubleParam("sn-window", 250.0, 0.0, BILLION,
-    "Set the signal-to-noise window length (in m/z). Because noise may "
-    "be non-uniform across a spectrum, this value adjusts the segment size "
-    "considered when calculating a signal-over-noise ratio.",
-    "Available for crux hardklor", true);
-  InitBoolParam("static-sn", true,
-    "Applies the lowest noise threshold of any sn_window across the entire mass range for a "
-    "spectrum. Setting this parameter to 0 turns off this feature, and different noise "
-    "thresholds will be used for each local mass window in a spectrum.",
-    "Available for crux hardklor", true);
-  InitBoolParam("hardklor-xml-output", false,
-    "Output XML instead of tab-delimited text.",
-    "Available for crux hardklor", false);
-  /* bullseye parameters */
-  InitArgParam("MS1 spectra",
-    "The name of a file from which to parse high-resolution spectra of intact peptides. "
-    "The file may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or "
-    "mzXML (.mzXML) format. Bullseye will search for PPIDs in these spectra.");
-  InitArgParam("MS2 spectra",
-    "The name of a file from which to parse peptide fragmentation spectra. The file may "
-    "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format. "
-    "Bullseye will assign high-resolution precursor masses to these spectra.");
-  InitStringParam("hardklor-file", "",
-    "Input hardklor file into bullseye",
-    "Hidden option for crux bullseye.", false);
-  InitDoubleParam("max-persist", 2.0, 0, BILLION,
-    "Ignore PPIDs that persist for longer than this length of time in the MS1 spectra. The "
-    "unit of time is whatever unit is used in your data file (usually minutes). These PPIDs "
-    "are considered contaminants.",
-    "Available for crux bullseye", true);
-  InitBoolParam("exact-match", false,
-    "When true, require an exact match (as defined by --exact-tolerance) between the "
-    "center of the precursor isolation window in the MS2 scan and the base isotopic "
-    "peak of the PPID. If this option is set to false and no exact match is observed, "
-    "then attempt to match using a wider m/z tolerance. This wider tolerance is calculated "
-    "using the PPID's monoisotopic mass and charge (the higher the charge, the smaller "
-    "the window).",
-    "Available for crux bullseye", true);
-  InitIntParam("gap-tolerance", 1, 0, BILLION,
-    "Allowed gap size when checking for PPIDs across consecutive MS1 scans.",
-    "Available for crux bullseye", true);
-  InitDoubleParam("bullseye-min-mass", 600, 0, BILLION,
-    "Only consider PPIDs above this minimum mass in daltons.",
-    "Available for crux bullseye", true);
-  InitDoubleParam("bullseye-max-mass", 8000, 1, BILLION,
-    "Only consider PPIDs below this maximum mass in daltons.",
-    "Available for crux bullseye", true);
-  InitDoubleParam("exact-tolerance", 10.0, 0, BILLION,
-    "Set the tolerance (+/-ppm) for --exact-match.",
-    "Available for crux bullseye", true);
-  InitDoubleParam("persist-tolerance", 10.0, 0, BILLION,
-    "Set the mass tolerance (+/-ppm) for finding PPIDs in consecutive MS1 scans.",
-    "Available for crux bullseye", true);
-  InitIntParam("scan-tolerance", 3, 0, BILLION,
-    "Total number of MS1 scans over which a PPID must be observed to be considered real. "
-    "Gaps in persistence are allowed by setting --gap-tolerance.",
-    "Available for crux bullseye", true);
-  InitDoubleParam("retention-tolerance", 0.5, 0, BILLION,
-    "Set the tolerance (+/-units) around the retention time over which a PPID can be "
-    "matches to the MS2 spectrum. The unit of time is whatever unit is used in your data "
-    "file (usually minutes).",
-    "Available for crux bullseye", true);
-  InitStringParam("spectrum-format", "", "|ms2|bms2|cms2|mgf",
-    "The format to write the output spectra to. If empty, the spectra will be "
-    "output in the same format as the MS2 input.",
-    "Available for crux bullseye", true);
-  // crux pipeline options
-  InitBoolParam("bullseye", false,
-    "Run the Bullseye algorithm on the given MS data, using it to assign high-resolution "
-    "precursor values to the MS/MS data. If a spectrum file ends with .ms2 or .cms2, matching "
-    ".ms1/.cms1 files will be used as the MS1 file. Otherwise, it is assumed that the "
-    "spectrum file contains both MS1 and MS2 scans.",
-    "Available for crux pipeline", true);
-  InitStringParam("search-engine", "tide-search", "comet|tide-search",
-    "Specify which search engine to use.",
-    "Available for crux pipeline", true);
-  InitStringParam("post-processor", "percolator", "percolator|assign-confidence",
-    "Specify which post-processor to apply to the search results.",
-    "Available for crux pipeline", true);
-  // create-docs
-  InitArgParam("tool-name",
-    "Specifies the Crux tool to generate documentation for. If the value is "
-    "'list', then a list of available tools will be given. If the value is "
-    "'default-params', then a default parameter file will be given."
-    "If the value is 'param-table' then a table will be printed showing "
-    "which parameters are associated with which commands.");
-  InitStringParam("doc-template", "",
-    "Specifies the main template to be used for generating documentation.",
-    "Available for crux create-docs", false);
-  InitStringParam("doc-input-template", "",
-    "Specifies the template to be used for inputs when generating "
-    "documentation.",
-    "Available for crux create-docs", false);
-  InitStringParam("doc-output-template", "",
-    "Specifies the template to be used for outputs when generating "
-    "documentation.",
-    "Available for crux create-docs", false);
-  InitStringParam("doc-option-category-template", "",
-    "Specifies the template to be used for option categories when generating "
-    "documentation.",
-    "Available for crux create-docs", false);
-  InitStringParam("doc-option-template", "",
-    "Specifies the template to be used for options when generating "
-    "documentation.",
-    "Available for crux create-docs", false);
-  // param-medic
-  InitArgParam("spectrum-file",
-    "File from which to parse fragmentation spectra.");
-  InitBoolParam("pm-ignore-no-charge", true,
-    "When parsing spectra for measurement error estimation, ignore those without charge state information.",
-    "Available for param-medic, tide-search, comet, and kojak", false);
-  InitDoubleParam("pm-min-precursor-mz", 400,
-    "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitDoubleParam("pm-max-precursor-mz", 1800,
-    "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet and kojak", true);
-  InitDoubleParam("pm-min-frag-mz", 150,
-    "Minimum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet and kojak", true);
-  InitDoubleParam("pm-max-frag-mz", 1800,
-    "Maximum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-min-scan-frag-peaks", 40,
-    "Minimum fragment peaks an MS/MS scan must contain to be used in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitDoubleParam("pm-max-precursor-delta-ppm", 50,
-    "Maximum ppm distance between precursor m/z values to consider two scans "
-    "potentially generated by the same peptide for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitStringParam("pm-charges", "0,2,3,4",
-    "Precursor charge states to consider MS/MS spectra from, in measurement error estimation, "
-    "provided as comma-separated values.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-top-n-frag-peaks", 30,
-    "Number of most-intense fragment peaks to consider for measurement error estimation, per MS/MS spectrum.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-pair-top-n-frag-peaks", 5,
-    "Number of fragment peaks per spectrum pair to be used in fragment error "
-    "estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-min-common-frag-peaks", 20,
-    "Number of the most-intense peaks that two spectra must share in order to "
-    "potentially be generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-max-scan-separation", 1000,
-    "Maximum number of scans two spectra can be separated by in order to be "
-    "considered potentially generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  InitIntParam("pm-min-peak-pairs", 200,
-    "Minimum number of peak pairs (for precursor or fragment) that must be "
-    "successfully paired in order to attempt to estimate measurement error distribution.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
-  // localize-modification
-  InitDoubleParam("min-mod-mass", 0, 0, BILLION,
-    "Ignore implied modifications where the absolute value of its mass is "
-    "below this value and only score the unmodified peptide.",
-    "Available for localize-modification", true);
+    /* hardklor parameters */
+    InitStringParam("hardklor-algorithm", "version1", "basic|version1|version2",
+                    "Determines which spectral feature detection algorithm to use. Different results are "
+                    "possible with each algorithm, and there are pros and cons to each.[[html: There are "
+                    "three algorithms to choose from:<ul><li>basic &ndash; Performs unoptimized "
+                    "deconvolution and is provided for legacy purposes only.</li><li>version1 &ndash; "
+                    "Uses the optimizations developed during the 1.0+ series. It is very accurate, but has "
+                    "limited sensitivity, and moderate speed improvements.</li><li>version2 &ndash; Uses "
+                    "the optimizations developed for version 2.0+. It is highly sensitive, but less "
+                    "accurate for very low abundance features, and performs exceptionally fast.</li></ul>]]",
+                    "Available for crux hardklor", true);
+    InitStringParam("averagine-mod", "",
+                    "Defines alternative averagine models in the analysis that incorporate additional "
+                    "atoms and/or isotopic enrichments. Modifications are represented as text strings. "
+                    "Inclusion of additional atoms in the model is done using by entering an atomic "
+                    "formula, such as: PO2 or Cl. Inclusion of isotopic enrichment to the model is done by "
+                    "specifying the percent enrichment (as a decimal) followed by the atom being enriched "
+                    "and an index of the isotope. For example, 0.75H1 specifies 75% enrichment of the first "
+                    "heavy isotope of hydrogen. In other words, 75% deuterium enrichment. Two or more "
+                    "modifications can be combined into the same model, and separated by spaces: B2 0.5B1",
+                    "Available for crux hardklor", true);
+    InitIntParam("boxcar-averaging", 0, 0, BILLION,
+                 "Boxcar averaging is a sliding window that averages n adjacent spectra prior to feature "
+                 "detection. Averaging generally improves the signal-to-noise ratio of features in the "
+                 "spectra, as well as improving the shape of isotopic envelopes. However, averaging will "
+                 "also change the observed peak intensities. Averaging with too wide a window will "
+                 "increase the occurrence of overlapping features and broaden the chromatographic "
+                 "profiles of observed features. The number specified is the total adjacent scans to be "
+                 "combined, centered on the scan being analyzed. Therefore, an odd number is recommended "
+                 "to center the boxcar window. For example, a value of 3 would produce an average of the "
+                 "scan of interest, plus one scan on each side. A value of 0 disables boxcar averaging.",
+                 "Available for crux hardklor", true);
+    InitIntParam("boxcar-filter", 0, 0, BILLION,
+                 "This parameter is only functional when boxcar-averaging is used. The filter will "
+                 "remove any peaks not seen in n scans in the boxcar window. The effect is to reduce "
+                 "peak accumulation due to noise and reduce chromatographic broadening of peaks. Caution "
+                 "should be used as over-filtering can occur. The suggested number of scans to set for "
+                 "filtering should be equal to or less than the boxcar-averaging window size. A value of "
+                 "0 disables filtering.",
+                 "Available for crux hardklor", true);
+    InitDoubleParam("boxcar-filter-ppm", 10.0, 0.0, BILLION,
+                    "This parameter is only functional when boxcar-filter is used. The value specifies the "
+                    "mass tolerance in ppm for declaring a peak the same prior to filtering across all "
+                    "scans in the boxcar window.",
+                    "Available for crux hardklor", true);
+    InitBoolParam("centroided", false,
+                  "Indicates whether the data contain profile or centroided peaks.",
+                  "Available for crux hardklor", true);
+    InitStringParam("cdm", "Q", "B|F|P|Q|S",
+                    "Choose the charge state determination method.[[html: There are five methods to "
+                    "choose from:<ul><li>B &ndash; Basic method, assume all charge states are possible."
+                    "</li><li>F &ndash; Fast Fourier transform.</li><li>P &ndash; Patterson algorithm.</li>"
+                    "<li>Q &ndash; QuickCharge method, uses inverse peak distances.</li><li>S &ndash; "
+                    "Senko method, or combined Fast Fourier Transform and Patterson algorithm.</li></ul>]]",
+                    "Available for crux hardklor", true);
+    InitIntParam("min-charge", 1, 1, BILLION,
+                 "Specifies the minimum charge state to allow when finding spectral features. It is "
+                 "best to set this value to the lowest assumed charge state to be present. If set higher "
+                 "than actual charge states that are present, those features will not be identified or "
+                 "incorrectly assigned a different charge state and mass.",
+                 "Available for crux hardklor", true);
+    InitIntParam("max-charge", 5, 1, BILLION,
+                 "Specifies the maximum charge state to allow when finding spectral features. It is "
+                 "best to set this value to a practical number (i.e. do not set it to 20 when doing a "
+                 "tryptic shotgun analysis). If set higher than actual charge states that are present, "
+                 "the algorithm will perform significantly slower without any improvement in results.",
+                 "Available for crux hardklor", true);
+    InitDoubleParam("corr", 0.85, 0, 1.0,
+                    "Sets the correlation threshold (cosine similarity) for accepting each predicted "
+                    "feature.",
+                    "Available for crux hardklor", true);
+    InitIntParam("depth", 3, 1, BILLION,
+                 "Sets the depth of combinatorial analysis. For a given set of peaks in a spectrum, "
+                 "search for up to this number of combined peptides that explain the observed peaks. "
+                 "The analysis stops before depth is reached if the current number of deconvolved "
+                 "features explains the observed peaks with a correlation score above the threshold "
+                 "defined with the correlation parameter.",
+                 "Available for crux hardklor", true);
+    InitBoolParam("distribution-area", false,
+                  "When reporting each feature, report abundance as the sum of all isotope peaks. The "
+                  "value reported is the estimate of the correct peak heights based on the averagine "
+                  "model scaled to the observed peak heights.",
+                  "Available for crux hardklor", true);
+    InitStringParam("hardklor-data-file", "",
+                    "Specifies an ASCII text file that defines symbols for the periodic table.",
+                    "Available for crux hardklor", true);
+    InitStringParam("instrument", "fticr", "fticr|orbitrap|tof|qit",
+                    "Indicates the type of instrument used to collect data. This parameter, combined with "
+                    "the resolution parameter, define how spectra will be centroided (if you provide "
+                    "profile spectra) and the accuracy when aligning observed peaks to the models.",
+                    "Available for crux hardklor", true);
+    InitStringParam("isotope-data-file", "",
+                    "Specifies an ASCII text file that can be read to override the natural isotope "
+                    "abundances for all elements.",
+                    "Available for crux hardklor", true);
+    InitIntParam("max-features", 10, 1, BILLION,
+                 "Specifies the maximum number of models to build for a set of peaks being analyzed. "
+                 "Regardless of the setting, the number of models will never exceed the number of peaks "
+                 "in the current set. However, as many of the low abundance peaks are noise or tail ends "
+                 "of distributions, defining models for them is detrimental to the analysis.",
+                 "Available for crux hardklor", true);
+    InitIntParam("mzxml-filter", 1, 1, 2,
+                 "Filters the spectra prior to analysis for the requested MS/MS level. For example, if "
+                 "the data contain MS and MS/MS spectra, setting mzxml-filter = 1 will analyze only the "
+                 "MS scan events. Setting mzxml-filter = 2 will analyze only the MS/MS scan events.",
+                 "Available for crux hardklor", true);
+    InitDoubleParam("mz-max", 0, 0, 10000,
+                    "Constrains the search in each spectrum to signals below this value in Thomsons. "
+                    "Setting to 0 disables this feature.",
+                    "Available for crux hardklor", true);
+    InitDoubleParam("mz-min", 0, 0, 10000,
+                    "Constrains the search in each spectrum to signals above this value in Thomsons. "
+                    "Setting to 0 disables this feature.",
+                    "Available for crux hardklor", true);
+    InitDoubleParam("mz-window", 4.0, 1.0, 20.0,
+                    "Only used when algorithm = version1. Defines the maximum window size in Thomsons to "
+                    "analyze when deconvolving peaks in a spectrum into features.",
+                    "Available for crux hardklor", true);
+    InitDoubleParam("resolution", 100000, 1, BILLION,
+                    "Specifies the resolution of the instrument at 400 m/z for the data being analyzed.",
+                    "Available for crux hardklor", true);
+    InitIntParam("scan-range-max", 0, 0, BILLION,
+                 "Used to restrict analysis to spectra with scan numbers below this parameter value. "
+                 "A value of 0 disables this feature.",
+                 "Available for crux hardklor", true);
+    InitIntParam("scan-range-min", 0, 0, BILLION,
+                 "Used to restrict analysis to spectra with scan numbers above this parameter value. "
+                 "A value of 0 disables this feature.",
+                 "Available for crux hardklor", true);
+    InitIntParam("sensitivity", 2, 0, 3,
+                 "Set the sensitivity level. There are four levels: 0 (low), 1 (moderate), "
+                 "2 (high), and 3 (max). Increasing the sensitivity will increase computation time, "
+                 "but will also yield more isotope distributions.",
+                 "Available for crux hardklor", true);
+    InitDoubleParam("signal-to-noise", 1.0, 0.0, BILLION,
+                    "Filters spectra to remove peaks below this signal-to-noise ratio prior to finding "
+                    "features.",
+                    "Available for crux hardklor", true);
+    InitIntParam("smooth", 0, 0, 21,
+                 "Uses Savitzky-Golay smoothing on profile peak data prior to centroiding the spectra. "
+                 "This parameter is recommended for low resolution spectra only. Smoothing data causes "
+                 "peak depression and broadening. Only use odd numbers for the degree of smoothing (as "
+                 "it defines a window centered on each data point). Higher values will produce smoother "
+                 "peaks, but with greater depression and broadening. Setting this parameter to 0 disables "
+                 "smoothing.",
+                 "Available for crux hardklor", true);
+    InitDoubleParam("sn-window", 250.0, 0.0, BILLION,
+                    "Set the signal-to-noise window length (in m/z). Because noise may "
+                    "be non-uniform across a spectrum, this value adjusts the segment size "
+                    "considered when calculating a signal-over-noise ratio.",
+                    "Available for crux hardklor", true);
+    InitBoolParam("static-sn", true,
+                  "Applies the lowest noise threshold of any sn_window across the entire mass range for a "
+                  "spectrum. Setting this parameter to 0 turns off this feature, and different noise "
+                  "thresholds will be used for each local mass window in a spectrum.",
+                  "Available for crux hardklor", true);
+    InitBoolParam("hardklor-xml-output", false,
+                  "Output XML instead of tab-delimited text.",
+                  "Available for crux hardklor", false);
+    /* bullseye parameters */
+    InitArgParam("MS1 spectra",
+                 "The name of a file from which to parse high-resolution spectra of intact peptides. "
+                 "The file may be in MS1 (.ms1), binary MS1 (.bms1), compressed MS1 (.cms1), or "
+                 "mzXML (.mzXML) format. Bullseye will search for PPIDs in these spectra.");
+    InitArgParam("MS2 spectra",
+                 "The name of a file from which to parse peptide fragmentation spectra. The file may "
+                 "be in MS2 (.ms2), binary MS2 (.bms2), compressed MS2 (.cms2) or mzXML (.mzXML) format. "
+                 "Bullseye will assign high-resolution precursor masses to these spectra.");
+    InitStringParam("hardklor-file", "",
+                    "Input hardklor file into bullseye",
+                    "Hidden option for crux bullseye.", false);
+    InitDoubleParam("max-persist", 2.0, 0, BILLION,
+                    "Ignore PPIDs that persist for longer than this length of time in the MS1 spectra. The "
+                    "unit of time is whatever unit is used in your data file (usually minutes). These PPIDs "
+                    "are considered contaminants.",
+                    "Available for crux bullseye", true);
+    InitBoolParam("exact-match", false,
+                  "When true, require an exact match (as defined by --exact-tolerance) between the "
+                  "center of the precursor isolation window in the MS2 scan and the base isotopic "
+                  "peak of the PPID. If this option is set to false and no exact match is observed, "
+                  "then attempt to match using a wider m/z tolerance. This wider tolerance is calculated "
+                  "using the PPID's monoisotopic mass and charge (the higher the charge, the smaller "
+                  "the window).",
+                  "Available for crux bullseye", true);
+    InitIntParam("gap-tolerance", 1, 0, BILLION,
+                 "Allowed gap size when checking for PPIDs across consecutive MS1 scans.",
+                 "Available for crux bullseye", true);
+    InitDoubleParam("bullseye-min-mass", 600, 0, BILLION,
+                    "Only consider PPIDs above this minimum mass in daltons.",
+                    "Available for crux bullseye", true);
+    InitDoubleParam("bullseye-max-mass", 8000, 1, BILLION,
+                    "Only consider PPIDs below this maximum mass in daltons.",
+                    "Available for crux bullseye", true);
+    InitDoubleParam("exact-tolerance", 10.0, 0, BILLION,
+                    "Set the tolerance (+/-ppm) for --exact-match.",
+                    "Available for crux bullseye", true);
+    InitDoubleParam("persist-tolerance", 10.0, 0, BILLION,
+                    "Set the mass tolerance (+/-ppm) for finding PPIDs in consecutive MS1 scans.",
+                    "Available for crux bullseye", true);
+    InitIntParam("scan-tolerance", 3, 0, BILLION,
+                 "Total number of MS1 scans over which a PPID must be observed to be considered real. "
+                 "Gaps in persistence are allowed by setting --gap-tolerance.",
+                 "Available for crux bullseye", true);
+    InitDoubleParam("retention-tolerance", 0.5, 0, BILLION,
+                    "Set the tolerance (+/-units) around the retention time over which a PPID can be "
+                    "matches to the MS2 spectrum. The unit of time is whatever unit is used in your data "
+                    "file (usually minutes).",
+                    "Available for crux bullseye", true);
+    InitStringParam("spectrum-format", "", "|ms2|bms2|cms2|mgf",
+                    "The format to write the output spectra to. If empty, the spectra will be "
+                    "output in the same format as the MS2 input.",
+                    "Available for crux bullseye", true);
+    // crux pipeline options
+    InitBoolParam("bullseye", false,
+                  "Run the Bullseye algorithm on the given MS data, using it to assign high-resolution "
+                  "precursor values to the MS/MS data. If a spectrum file ends with .ms2 or .cms2, matching "
+                  ".ms1/.cms1 files will be used as the MS1 file. Otherwise, it is assumed that the "
+                  "spectrum file contains both MS1 and MS2 scans.",
+                  "Available for crux pipeline", true);
+    InitStringParam("search-engine", "tide-search", "comet|tide-search",
+                    "Specify which search engine to use.",
+                    "Available for crux pipeline", true);
+    InitStringParam("post-processor", "percolator", "percolator|assign-confidence|none",
+                    "Specify which post-processor to apply to the search results.",
+                    "Available for crux pipeline", true);
+    // create-docs
+    InitArgParam("tool-name",
+                 "Specifies the Crux tool to generate documentation for. If the value is "
+                 "'list', then a list of available tools will be given. If the value is "
+                 "'default-params', then a default parameter file will be given."
+                 "If the value is 'param-table' then a table will be printed showing "
+                 "which parameters are associated with which commands.");
+    InitStringParam("doc-template", "",
+                    "Specifies the main template to be used for generating documentation.",
+                    "Available for crux create-docs", false);
+    InitStringParam("doc-input-template", "",
+                    "Specifies the template to be used for inputs when generating "
+                    "documentation.",
+                    "Available for crux create-docs", false);
+    InitStringParam("doc-output-template", "",
+                    "Specifies the template to be used for outputs when generating "
+                    "documentation.",
+                    "Available for crux create-docs", false);
+    InitStringParam("doc-option-category-template", "",
+                    "Specifies the template to be used for option categories when generating "
+                    "documentation.",
+                    "Available for crux create-docs", false);
+    InitStringParam("doc-option-template", "",
+                    "Specifies the template to be used for options when generating "
+                    "documentation.",
+                    "Available for crux create-docs", false);
+    // param-medic
+    InitArgParam("spectrum-file",
+                 "File from which to parse fragmentation spectra.");
+    InitBoolParam("pm-ignore-no-charge", true,
+                  "When parsing spectra for measurement error estimation, ignore those without charge state information.",
+                  "Available for param-medic, tide-search, comet, and kojak", false);
+    InitDoubleParam("pm-min-precursor-mz", 400,
+                    "Minimum precursor m/z value to use in measurement error estimation.",
+                    "Available for param-medic, tide-search, comet, and kojak", true);
+    InitDoubleParam("pm-max-precursor-mz", 1800,
+                    "Minimum precursor m/z value to use in measurement error estimation.",
+                    "Available for param-medic, tide-search, comet and kojak", true);
+    InitDoubleParam("pm-min-frag-mz", 150,
+                    "Minimum fragment m/z value to use in measurement error estimation.",
+                    "Available for param-medic, tide-search, comet and kojak", true);
+    InitDoubleParam("pm-max-frag-mz", 1800,
+                    "Maximum fragment m/z value to use in measurement error estimation.",
+                    "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-min-scan-frag-peaks", 40,
+                 "Minimum fragment peaks an MS/MS scan must contain to be used in measurement error estimation.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    InitDoubleParam("pm-max-precursor-delta-ppm", 50,
+                    "Maximum ppm distance between precursor m/z values to consider two scans "
+                    "potentially generated by the same peptide for measurement error estimation.",
+                    "Available for param-medic, tide-search, comet, and kojak", true);
+    InitStringParam("pm-charges", "0,2,3,4",
+                    "Precursor charge states to consider MS/MS spectra from, in measurement error estimation, "
+                    "provided as comma-separated values.",
+                    "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-top-n-frag-peaks", 30,
+                 "Number of most-intense fragment peaks to consider for measurement error estimation, per MS/MS spectrum.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-pair-top-n-frag-peaks", 5,
+                 "Number of fragment peaks per spectrum pair to be used in fragment error "
+                 "estimation.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-min-common-frag-peaks", 20,
+                 "Number of the most-intense peaks that two spectra must share in order to "
+                 "potentially be generated by the same peptide, for measurement error estimation.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-max-scan-separation", 1000,
+                 "Maximum number of scans two spectra can be separated by in order to be "
+                 "considered potentially generated by the same peptide, for measurement error estimation.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    InitIntParam("pm-min-peak-pairs", 200,
+                 "Minimum number of peak pairs (for precursor or fragment) that must be "
+                 "successfully paired in order to attempt to estimate measurement error distribution.",
+                 "Available for param-medic, tide-search, comet, and kojak", true);
+    // localize-modification
+    InitDoubleParam("min-mod-mass", 0, 0, BILLION,
+                    "Ignore implied modifications where the absolute value of its mass is "
+                    "below this value and only score the unmodified peptide.",
+                    "Available for localize-modification", true);
 
     // Kojak Parameters
     InitStringParam("auto_ppm_tolerance_pre", "false", "false|warn|fail",
