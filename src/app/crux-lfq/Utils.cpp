@@ -772,7 +772,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
 
     vector<int> directions = {-1, 1};
 
-    for (const IndexedMassSpectralPeak peak : xic) {
+    for (const IndexedMassSpectralPeak& peak : xic) {
         std::fill(experimentalIsotopeIntensities.begin(), experimentalIsotopeIntensities.end(), 0);
 
         for (auto& kvp : massShiftToIsotopePeaks) {
