@@ -519,7 +519,7 @@ void quantifyMs2IdentifiedPeptides(
         [&spectraFile](const Identification& id) {
             return id.spectralFile == spectraFile;
         });
-
+    
     if (ms2IdsForThisFile.empty()) {
         return;
     }
@@ -527,10 +527,50 @@ void quantifyMs2IdentifiedPeptides(
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
 
-    processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                 chargeStates, peakfindingTol, _ms1Scans,
-                 indexedPeaks, ppmTolerance,
-                 modifiedSequenceToIsotopicDistribution, lfqResults);
+    // Used for threading /////////////////////////////
+    int totalCount = ms2IdsForThisFile.size();
+    vector<std::thread> threads;
+    int chunkSize = totalCount / MaxThreads;
+    int rem = totalCount % MaxThreads;
+
+    // Create and start the threads
+    for (int i = 0; i < MaxThreads; ++i) {
+        int start = i * chunkSize;
+        int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
+
+        threads.push_back(std::thread([start, end,
+                                       &ms2IdsForThisFile,
+                                       &spectraFile,
+                                       &chargeStates,
+                                       &peakfindingTol,
+                                       &_ms1Scans,
+                                       &indexedPeaks,
+                                       &ppmTolerance,
+                                       &modifiedSequenceToIsotopicDistribution,
+                                       &lfqResults]() {
+            processRange(start, end,
+                         ms2IdsForThisFile,
+                         spectraFile,
+                         chargeStates,
+                         peakfindingTol,
+                         _ms1Scans,
+                         indexedPeaks,
+                         ppmTolerance,
+                         modifiedSequenceToIsotopicDistribution,
+                         lfqResults);
+        }));
+    }
+
+    // Join the threads
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    // Used for threading /////////////////////////////
+
+    // processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
+    //              chargeStates, peakfindingTol, _ms1Scans,
+    //              indexedPeaks, ppmTolerance,
+    //              modifiedSequenceToIsotopicDistribution, lfqResults);
 }
 
 double toMz(double mass, int charge) {
