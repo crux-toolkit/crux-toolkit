@@ -403,7 +403,7 @@ void processRange(int start, int end,
     modifiedSequenceToIsotopicDistribution,
     CruxLFQResults& lfqResults){
     // No need for a lock since it's single-threaded
-
+    #pragma omp parallel for num_threads(MaxThreads)
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
@@ -527,39 +527,12 @@ void quantifyMs2IdentifiedPeptides(
 
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
-
     
-    // Used for OpenMP /////////////////////////////
-
-    int totalCount = ms2IdsForThisFile.size();
-    int chunkSize = totalCount / MaxThreads;
-    int rem = totalCount % MaxThreads;
-
-    #pragma omp parallel num_threads(MaxThreads)
-    {
-        int threadId = omp_get_thread_num();
-        int start = threadId * chunkSize;
-        int end = (threadId == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
-
-        processRange(start, end,
-            ms2IdsForThisFile,
-            spectraFile,
-            chargeStates,
-            peakfindingTol,
-            _ms1Scans,
-            indexedPeaks,
-            ppmTolerance,
-            modifiedSequenceToIsotopicDistribution,
-            lfqResults);
-    }
-    // Used for OpenMP /////////////////////////////
-   
-    /*
      processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
                   chargeStates, peakfindingTol, _ms1Scans,
                   indexedPeaks, ppmTolerance,
                   modifiedSequenceToIsotopicDistribution, lfqResults);
-    */
+ 
 }
 
 double toMz(double mass, int charge) {
