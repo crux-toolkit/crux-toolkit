@@ -8,13 +8,13 @@
 #include <csignal>
 #include <iostream>
 #include <map>
-#include <mutex>  // Include the mutex header
 #include <string>
-#include <thread>
+#include <omp.h>
 #include <tuple>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
+#include <thread>
 
 #include "CMercury8.h"
 #include "CQStatistics.h"
@@ -29,7 +29,7 @@ using std::vector;
 
 std::mutex mtx;  // Declare a mutex
 
-const int MaxThreads = 4;
+const int MaxThreads = std::thread::hardware_concurrency();
 
 namespace CruxLFQ {
 
@@ -528,52 +528,38 @@ void quantifyMs2IdentifiedPeptides(
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
 
-    /*
-    // Used for threading /////////////////////////////
+    
+    // Used for OpenMP /////////////////////////////
+
     int totalCount = ms2IdsForThisFile.size();
-    vector<std::thread> threads;
     int chunkSize = totalCount / MaxThreads;
     int rem = totalCount % MaxThreads;
 
-    // Create and start the threads
-    for (int i = 0; i < MaxThreads; ++i) {
-        int start = i * chunkSize;
-        int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
+    #pragma omp parallel num_threads(MaxThreads)
+    {
+        int threadId = omp_get_thread_num();
+        int start = threadId * chunkSize;
+        int end = (threadId == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
 
-        threads.push_back(std::thread([start, end,
-                                       &ms2IdsForThisFile,
-                                       &spectraFile,
-                                       &chargeStates,
-                                       &peakfindingTol,
-                                       &_ms1Scans,
-                                       &indexedPeaks,
-                                       &ppmTolerance,
-                                       &modifiedSequenceToIsotopicDistribution,
-                                       &lfqResults]() {
-            processRange(start, end,
-                         ms2IdsForThisFile,
-                         spectraFile,
-                         chargeStates,
-                         peakfindingTol,
-                         _ms1Scans,
-                         indexedPeaks,
-                         ppmTolerance,
-                         modifiedSequenceToIsotopicDistribution,
-                         lfqResults);
-        }));
+        processRange(start, end,
+            ms2IdsForThisFile,
+            spectraFile,
+            chargeStates,
+            peakfindingTol,
+            _ms1Scans,
+            indexedPeaks,
+            ppmTolerance,
+            modifiedSequenceToIsotopicDistribution,
+            lfqResults);
     }
-
-    // Join the threads
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    // Used for threading /////////////////////////////
-    */
-
+    // Used for OpenMP /////////////////////////////
+   
+    /*
      processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
                   chargeStates, peakfindingTol, _ms1Scans,
                   indexedPeaks, ppmTolerance,
                   modifiedSequenceToIsotopicDistribution, lfqResults);
+    */
 }
 
 double toMz(double mass, int charge) {
