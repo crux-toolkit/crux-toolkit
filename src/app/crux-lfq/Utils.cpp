@@ -9,7 +9,6 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <omp.h>
 #include <tuple>
 #include <typeinfo>
 #include <unordered_map>
@@ -402,8 +401,8 @@ void processRange(int start, int end,
     unordered_map<string, vector<pair<double, double>>>&
     modifiedSequenceToIsotopicDistribution,
     CruxLFQResults& lfqResults){
-    // No need for a lock since it's single-threaded
-    #pragma omp parallel for num_threads(MaxThreads)
+    
+   
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
@@ -527,11 +526,57 @@ void quantifyMs2IdentifiedPeptides(
 
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
+
     
-     processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
+ 
+    // Used for threading /////////////////////////////
+    int totalCount = ms2IdsForThisFile.size();
+    vector<std::thread> threads;
+    int chunkSize = totalCount / MaxThreads;
+    int rem = totalCount % MaxThreads;
+
+    // Create and start the threads
+    for (int i = 0; i < MaxThreads; ++i) {
+        int start = i * chunkSize;
+        int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
+
+        threads.push_back(std::thread([start, end,
+                                       &ms2IdsForThisFile,
+                                       &spectraFile,
+                                       &chargeStates,
+                                       &peakfindingTol,
+                                       &_ms1Scans,
+                                       &indexedPeaks,
+                                       &ppmTolerance,
+                                       &modifiedSequenceToIsotopicDistribution,
+                                       &lfqResults]() {
+            processRange(start, end,
+                         ms2IdsForThisFile,
+                         spectraFile,
+                         chargeStates,
+                         peakfindingTol,
+                         _ms1Scans,
+                         indexedPeaks,
+                         ppmTolerance,
+                         modifiedSequenceToIsotopicDistribution,
+                         lfqResults);
+        }));
+    }
+
+    // Join the threads
+    for (auto& thread : threads) {
+        thread.join();
+    }
+    // Used for threading /////////////////////////////
+    
+
+    
+    /*
+    processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
                   chargeStates, peakfindingTol, _ms1Scans,
                   indexedPeaks, ppmTolerance,
                   modifiedSequenceToIsotopicDistribution, lfqResults);
+    */
  
 }
 
