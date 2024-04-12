@@ -35,14 +35,14 @@ void ArgParser::Parse(int argc, char** argv, const vector<string>& args) {
         throw ArgParserException("No value found for option '" + option + "'");
       }
       if (used_options.count(option)) {
-        carp(CARP_FATAL, "Found repeated option: %s", option.c_str());
+        carp(CARP_FATAL, "Command line option %s was repeated.", option.c_str());
       }
       options_[option] = argv[i];
       used_options.insert(option);
     } else {
       // This is an argument
       if (used_args.count(arg)) {
-        carp(CARP_FATAL, "Found repeated argument: %s", arg.c_str());
+        carp(CARP_FATAL, "Command line argument %s was repeated.", arg.c_str());
       }
       parsedArgs.push_back(arg);
       used_args.insert(arg);

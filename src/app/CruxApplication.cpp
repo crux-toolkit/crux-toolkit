@@ -183,14 +183,14 @@ void CruxApplication::initializeParams(
     std::vector<std::string> next_app_options; // -> string vector to keep the option list from every app in applications list
     bool is_tide_search = false; // -> flag used to check if the current application is tide-search
     
-    carp(CARP_INFO, "Total Options in command line: %s", std::to_string(options.size()).c_str()); // message used to know how many options are in the command line
+    carp(CARP_DEBUG, "Total Options in command line: %s", std::to_string(options.size()).c_str()); // message used to know how many options are in the command line
 
     if( options.size() != 0 ) { // if there are more than 0 options in command line
 
-      carp(CARP_INFO, "Default values will be overwritten for:"); // message used to indicate in wich options the default value will be overwrite 
+      carp(CARP_DEBUG, "Default values will be overwritten for:"); // message used to indicate in wich options the default value will be overwrite 
 
       for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {
-        carp(CARP_INFO, "->: %s", options_index->first.c_str());
+        carp(CARP_DEBUG, "->: %s", options_index->first.c_str());
       }
 
       /* This loop is intended to check the parameters of the current application against all the appplications in application list*/
