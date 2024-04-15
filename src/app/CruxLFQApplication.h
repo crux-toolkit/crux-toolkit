@@ -5,6 +5,8 @@
 
 #include "CruxApplication.h"
 #include "crux-lfq/Utils.h"
+#include "io/SpectrumCollectionFactory.h"
+#include "model/Spectrum.h"
 #include "pwiz/data/msdata/MSDataFile.hpp"
 #include "pwiz/data/msdata/SpectrumListWrapper.hpp"
 
@@ -82,9 +84,9 @@ class CruxLFQApplication : public CruxApplication {
 
     virtual void processParams();
 
-    static pwiz::msdata::SpectrumListPtr loadSpectra(const string& file, int ms_level);
+    static Crux::SpectrumCollection* loadSpectra(const string& file, int msLevel);
 
-    static IndexedSpectralResults indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file);
+    static IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
     static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
 };
