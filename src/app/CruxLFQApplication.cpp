@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <exception>
+#include <memory>
 #include <sstream>
 
 #include "IndexedMassSpectralPeak.h"
@@ -93,8 +94,8 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     vector<int> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
     for (const string& spectra_file : spec_files) {
-        SpectrumListPtr spectra_ms1 = loadSpectra(spectra_file, 1);
-        carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->size(), spectra_file.c_str());
+        Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
+        carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->getNumSpectra(), spectra_file.c_str());
 
         CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
@@ -174,7 +175,7 @@ vector<string> CruxLFQApplication::getOptions() const {
         "quantify-ambiguous-peptides",
         "use-shared-peptides-for-protein-quant",
         "normalize",
-    };
+        "spectrum-parser"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
@@ -208,34 +209,13 @@ bool CruxLFQApplication::needsOutputDirectory() const {
 void CruxLFQApplication::processParams() {
 }
 
-SpectrumListPtr CruxLFQApplication::loadSpectra(const string& file, int msLevel) {
-    try {
-        MSDataFile msd(file);
-        SpectrumListPtr originalSpectrumList = msd.run.spectrumListPtr;
-        if (!originalSpectrumList) {
-            carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
-        }
-        SpectrumListSimplePtr filteredSpectrumList(new SpectrumListSimple);
-
-        for (size_t i = 0; i < originalSpectrumList->size(); ++i) {
-            const bool getBinaryData = true;
-            SpectrumPtr spectrum = originalSpectrumList->spectrum(i, getBinaryData);
-
-            int spectrumMSLevel = spectrum->cvParam(MS_ms_level).valueAs<int>();
-            if (spectrumMSLevel == msLevel) {
-                // Add the spectrum to the filtered list
-                filteredSpectrumList->spectra.push_back(spectrum);
-            }
-        }
-
-        return filteredSpectrumList;
-    } catch (const std::exception& e) {
-        carp(CARP_INFO, "Error:  %s", e.what());
-        return nullptr;
-    }
+Crux::SpectrumCollection* CruxLFQApplication::loadSpectra(const string& file, int msLevel) {
+    Crux::SpectrumCollection* spectra(SpectrumCollectionFactory::create(file.c_str()));
+    spectra->parse(msLevel);
+    return spectra;
 }
 
-IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumListPtr spectrum_collection, const string& spectra_file) {
+IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file) {
     string _spectra_file(spectra_file);
 
     vector<vector<IndexedMassSpectralPeak>> _indexedPeaks;
@@ -245,56 +225,30 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
 
     IndexedSpectralResults index_results{_indexedPeaks, _ms1Scans};
 
-    if (!spectrum_collection) {
+    if (spectrum_collection->getNumSpectra() <= 0) {
         return index_results;
     }
 
-    double maxMz = 0.0;
-    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        const bool getBinaryData = true;
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
-        if (spectrum) {
-            BinaryDataArrayPtr mzs = spectrum->getMZArray();
-            if (mzs) {
-                const std::vector<double>& mzArray = mzs->data;
-                for (size_t j = 0; j < mzArray.size(); ++j) {
-                    double mz = mzArray[j];
-                    if (mz > maxMz) {
-                        maxMz = mz;
-                    }
-                }
-            }
-        }
-    }
-    int size = (int)std::ceil(maxMz * BINS_PER_DALTON) + 1;
-    index_results._indexedPeaks.resize(size);
-
     int scanIndex = 0;
     int oneBasedScanNumber = 1;
-
-    for (size_t i = 0; i < spectrum_collection->size(); ++i) {
-        const bool getBinaryData = true;
-        SpectrumPtr spectrum = spectrum_collection->spectrum(i, getBinaryData);
-
-        if (spectrum) {
-            BinaryDataArrayPtr mzs = spectrum->getMZArray();
-            BinaryDataArrayPtr intensities = spectrum->getIntensityArray();
-
-            double retentionTime = spectrum->scanList.scans[0].cvParam(MS_scan_start_time).timeInSeconds();
-
-            if (mzs && intensities) {
-                const std::vector<double>& mzArray = mzs->data;
-                const std::vector<double>& intensityArray = intensities->data;
-                for (size_t j = 0; j < mzArray.size(); ++j) {
-                    double mz = mzArray[j];
+    for (auto spectrum = spectrum_collection->begin(); spectrum != spectrum_collection->end(); ++spectrum) {
+        if (*spectrum != nullptr) {
+            for (auto peak = (*spectrum)->begin(); peak != (*spectrum)->end(); ++peak) {
+                if (*peak != nullptr) {
+                    FLOAT_T mz = (*peak)->getLocation();
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
+                    FLOAT_T retentionTime = (*spectrum)->getRTime();
                     IndexedMassSpectralPeak spec_data(
-                        mz,                 // mz value
-                        intensityArray[j],  // intensity
-                        scanIndex,          // zeroBasedMs1ScanIndex
-                        retentionTime);
-
-                    if (index_results._indexedPeaks[roundedMz].empty()) {
+                        mz,                       // mz value
+                        (*peak)->getIntensity(),  // intensity
+                        scanIndex,                // zeroBasedMs1ScanIndex
+                        retentionTime             // retentionTime
+                    );
+                    if (index_results._indexedPeaks.size() <= roundedMz || index_results._indexedPeaks[roundedMz].empty()) {
+                        if (index_results._indexedPeaks.size() <= roundedMz) {
+                            int size = roundedMz + 1;
+                            index_results._indexedPeaks.resize(size);
+                        }
                         index_results._indexedPeaks[roundedMz] = vector<IndexedMassSpectralPeak>();
                     }
                     index_results._indexedPeaks[roundedMz].push_back(spec_data);
@@ -302,11 +256,11 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(SpectrumList
                     index_results._ms1Scans[spectra_file].push_back(scan);
                 }
             }
-
             scanIndex++;
             oneBasedScanNumber++;
         }
     }
+
     return index_results;
 }
 
@@ -319,7 +273,6 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
 
     for (const auto psm : psm_data) {
         Identification identification;
-
         identification.sequence = psm.sequence_col;
         identification.monoIsotopicMass = psm.monoisotopic_mass_col;
         identification.peptideMass = psm.peptide_mass_col;

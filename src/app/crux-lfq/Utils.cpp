@@ -9,11 +9,11 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <thread>
 #include <tuple>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
-#include <thread>
 
 #include "CMercury8.h"
 #include "CQStatistics.h"
@@ -390,19 +390,16 @@ vector<int> createChargeStates(
     return chargeStates;
 }
 
-
 void processRange(int start, int end,
-    const vector<Identification>& ms2IdsForThisFile,
-    const string& spectralFile, const vector<int>& chargeStates,
-    PpmTolerance& peakfindingTol,
-    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
-    PpmTolerance& ppmTolerance,
-    unordered_map<string, vector<pair<double, double>>>&
-    modifiedSequenceToIsotopicDistribution,
-    CruxLFQResults& lfqResults){
-    
-   
+                  const vector<Identification>& ms2IdsForThisFile,
+                  const string& spectralFile, const vector<int>& chargeStates,
+                  PpmTolerance& peakfindingTol,
+                  unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
+                  const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
+                  PpmTolerance& ppmTolerance,
+                  unordered_map<string, vector<pair<double, double>>>&
+                      modifiedSequenceToIsotopicDistribution,
+                  CruxLFQResults& lfqResults) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
@@ -519,7 +516,7 @@ void quantifyMs2IdentifiedPeptides(
         [&spectraFile](const Identification& id) {
             return id.spectralFile == spectraFile;
         });
-    
+
     if (ms2IdsForThisFile.empty()) {
         return;
     }
@@ -527,8 +524,7 @@ void quantifyMs2IdentifiedPeptides(
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
 
-    
- 
+    /*
     // Used for threading /////////////////////////////
     int totalCount = ms2IdsForThisFile.size();
     vector<std::thread> threads;
@@ -568,16 +564,12 @@ void quantifyMs2IdentifiedPeptides(
         thread.join();
     }
     // Used for threading /////////////////////////////
-    
-
-    
-    /*
-    processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                  chargeStates, peakfindingTol, _ms1Scans,
-                  indexedPeaks, ppmTolerance,
-                  modifiedSequenceToIsotopicDistribution, lfqResults);
     */
- 
+
+    processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
+                 chargeStates, peakfindingTol, _ms1Scans,
+                 indexedPeaks, ppmTolerance,
+                 modifiedSequenceToIsotopicDistribution, lfqResults);
 }
 
 double toMz(double mass, int charge) {
