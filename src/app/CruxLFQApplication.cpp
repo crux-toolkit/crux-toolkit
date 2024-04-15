@@ -20,17 +20,6 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-using namespace pwiz::cv;
-using namespace pwiz::msdata;
-using pwiz::cv::MS_ms_level;
-using pwiz::cv::MS_scan_start_time;
-using pwiz::msdata::BinaryDataArrayPtr;
-using pwiz::msdata::MSDataFile;
-using pwiz::msdata::SpectrumListSimple;
-using pwiz::msdata::SpectrumListSimplePtr;
-using pwiz::msdata::SpectrumPtr;
-
-typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
 
 int CruxLFQ::NUM_ISOTOPES_REQUIRED = 2;                       // Default value is 2
 double CruxLFQ::PEAK_FINDING_PPM_TOLERANCE = 20.0;            // Default value is 20.0
@@ -238,6 +227,12 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                     FLOAT_T mz = (*peak)->getLocation();
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
                     FLOAT_T retentionTime = (*spectrum)->getRTime();
+
+                    std::string parser = Params::GetString("spectrum-parser");
+                    if (parser == "mstoolkit") {
+                        retentionTime = retentionTime * 60;
+                    }
+                   
                     IndexedMassSpectralPeak spec_data(
                         mz,                       // mz value
                         (*peak)->getIntensity(),  // intensity

@@ -7,8 +7,6 @@
 #include "crux-lfq/Utils.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "model/Spectrum.h"
-#include "pwiz/data/msdata/MSDataFile.hpp"
-#include "pwiz/data/msdata/SpectrumListWrapper.hpp"
 
 using CruxLFQ::BINS_PER_DALTON;
 using CruxLFQ::getScanID;
@@ -22,7 +20,7 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-typedef pwiz::msdata::SpectrumListPtr SpectrumListPtr;
+
 
 /**
  * \class CruxLFQApplication
