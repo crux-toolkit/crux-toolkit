@@ -19,14 +19,14 @@ int SpectrumRecordWriter::scanCounter_ = 0;
 unsigned long SpectrumRecordWriter::scan_index_ = 0;
 std::string SpectrumRecordWriter::version_date_ = "";
 
-/**
- * Converts a spectra file to spectrumrecords format for use with tide-search.
- * Spectra file is read by pwiz. Returns true on successful conversion.
- */
 bool cmp_pbspectra(pb::Spectrum a1, pb::Spectrum a2) {
   return a1.neutral_mass() < a2.neutral_mass();
 }
 
+/**
+ * Converts a spectra file to spectrumrecords format for use with tide-search.
+ * Spectra file is read by pwiz. Returns true on successful conversion.
+ */
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile,  ///< spectrumrecords file to output

@@ -19,7 +19,7 @@ int TideLiteMatchSet::psm_id_mzTab_  = 1;
 string TideLiteMatchSet::fasta_file_name_ = "null";
 
 
-// column IDs are defined in ./src/io/MatchColumns.h and .cpp
+// column IDs are defined in ./src/io/MatchColumns.h and /src/io/MatchColumns.cpp
 // The order of the columns in the output is defined here by the order of the column Ids
 int TideLiteMatchSet::XCorr_tsv_cols[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
@@ -164,19 +164,19 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
       tide_spectra_files = Params::GetStrings("tide spectra file");
 
       for(unsigned int i=0; i < tide_spectra_files.size(); i++) {
-        mztab_meta_data << "MTD\tms_run[" << i + 1 << "]-location\t" << tide_spectra_files[i]  <<  "\n";
+        mztab_meta_data << "MTD\tms_run[" << i + 1 << "]-location\tfile://" << tide_spectra_files[i]  <<  "\n";
       }
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001155, The SEQUEST result 'XCorr'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001143, The SEQUEST result 'DeltaCn'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003358, XCorr rank]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003359, exact p-value'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003360, refactored XCorr'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003361, res-ev score'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003362, res-ev rank'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003363, res-ev p-value'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003364, combined p-value'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003365, combined p-value rank'.]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003366, tailor score'.]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001155, SEQUEST:xcorr, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001143, SEQUEST:deltacn, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003358, XCorr rank, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003359, exact p-value, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003360, refactored XCorr, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003361, res-ev score, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003362, res-ev rank, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003363, res-ev p-value, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003364, combined p-value, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003365, combined p-value rank, ]\n";
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003366, tailor score, ]\n";
       
       // Add tide-index params
       if (tide_index_mztab_param) {
@@ -186,46 +186,46 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
       }
       // Add tide-search params
       mztab_meta_data << "MTD\tsoftware[2]\t[MS, MS:1002575, tide-search, "  << CRUX_VERSION << "]\n";    
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tmod-precision = " << Params::GetInt("mod-precision") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tauto-precursor-window = " << Params::GetString("auto-precursor-window") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tmax-precursor-charge = " << Params::GetInt("max-precursor-charge") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tprecursor-window = " << Params::GetDouble("precursor-window") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tprecursor-window-type = " << Params::GetString("precursor-window-type") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tauto-mz-bin-width = " << Params::GetString("auto-mz-bin-width") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tdeisotope = " << Params::GetDouble("deisotope") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tisotope-error = " << Params::GetString("isotope-error") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tmin-peaks = " << Params::GetInt("min-peaks") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tmz-bin-offset = " << Params::GetDouble("mz-bin-offset") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tmz-bin-width = " << Params::GetDouble("mz-bin-width") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tscore-function = " << Params::GetString("score-function") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tfragment-tolerance = " << Params::GetDouble("fragment-tolerance") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tevidence-granularity = " << Params::GetInt("evidence-granularity") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tremove-precursor-peak = " << (Params::GetBool("remove-precursor-peak")?"True":"False") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tremove-precursor-tolerance = " << Params::GetDouble("remove-precursor-tolerance") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tscan-number = " << Params::GetString("scan-number") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tskip-preprocessing = " << (Params::GetBool("skip-preprocessing")?"True":"False") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tspectrum-charge = " << Params::GetString("spectrum-charge") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tspectrum-max-mz = " << Params::GetDouble("spectrum-max-mz") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tspectrum-min-mz = " << Params::GetDouble("spectrum-min-mz") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tuse-flanking-peaks = " << (Params::GetBool("use-flanking-peaks")?"True":"False") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tuse-neutral-loss-peaks = " << Params::GetDouble("use-neutral-loss-peaks") << "\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tnum-threads = " << Params::GetInt("num-threads") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-charges = " << Params::GetString("pm-charges") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-max-frag-mz = " << Params::GetDouble("pm-max-frag-mz") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-max-precursor-delta-ppm = " << Params::GetDouble("pm-max-precursor-delta-ppm") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-max-precursor-mz = " << Params::GetDouble("pm-max-precursor-mz") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-max-scan-separation = " << Params::GetInt("pm-max-scan-separation") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-min-common-frag-peaks = " << Params::GetInt("pm-min-common-frag-peaks") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-min-frag-mz = " << Params::GetDouble("pm-min-frag-mz") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-min-peak-pairs = " << Params::GetInt("pm-min-peak-pairs") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-min-precursor-mz = " << Params::GetDouble("pm-min-precursor-mz") <<"\n"; 
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-min-scan-frag-peaks = " << Params::GetInt("pm-min-scan-frag-peaks") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-pair-top-n-frag-peaks = " << Params::GetInt("pm-pair-top-n-frag-peaks") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tpm-top-n-frag-peaks = " << Params::GetInt("pm-top-n-frag-peaks") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tconcat = " << (Params::GetBool("concat")?"True":"False") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tspectrum-parser = " << Params::GetString("spectrum-parser") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\ttop-match = " << Params::GetInt("top-match") <<"\n";
-      mztab_meta_data << "MTD\tsoftware[2]-settings[" << param_cnt++ << "]\tuse-z-line = " << Params::GetInt("use-z-line") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tmod-precision = " << Params::GetInt("mod-precision") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tauto-precursor-window = " << Params::GetString("auto-precursor-window") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tmax-precursor-charge = " << Params::GetInt("max-precursor-charge") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tprecursor-window = " << Params::GetDouble("precursor-window") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tprecursor-window-type = " << Params::GetString("precursor-window-type") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tauto-mz-bin-width = " << Params::GetString("auto-mz-bin-width") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tdeisotope = " << Params::GetDouble("deisotope") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tisotope-error = " << Params::GetString("isotope-error") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tmin-peaks = " << Params::GetInt("min-peaks") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tmz-bin-offset = " << Params::GetDouble("mz-bin-offset") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tmz-bin-width = " << Params::GetDouble("mz-bin-width") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tscore-function = " << Params::GetString("score-function") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tfragment-tolerance = " << Params::GetDouble("fragment-tolerance") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tevidence-granularity = " << Params::GetInt("evidence-granularity") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tremove-precursor-peak = " << (Params::GetBool("remove-precursor-peak")?"True":"False") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tremove-precursor-tolerance = " << Params::GetDouble("remove-precursor-tolerance") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tscan-number = " << Params::GetString("scan-number") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tskip-preprocessing = " << (Params::GetBool("skip-preprocessing")?"True":"False") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tspectrum-charge = " << Params::GetString("spectrum-charge") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tspectrum-max-mz = " << Params::GetDouble("spectrum-max-mz") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tspectrum-min-mz = " << Params::GetDouble("spectrum-min-mz") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tuse-flanking-peaks = " << (Params::GetBool("use-flanking-peaks")?"True":"False") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tuse-neutral-loss-peaks = " << Params::GetDouble("use-neutral-loss-peaks") << "\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tnum-threads = " << Params::GetInt("num-threads") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-charges = " << Params::GetString("pm-charges") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-max-frag-mz = " << Params::GetDouble("pm-max-frag-mz") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-max-precursor-delta-ppm = " << Params::GetDouble("pm-max-precursor-delta-ppm") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-max-precursor-mz = " << Params::GetDouble("pm-max-precursor-mz") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-max-scan-separation = " << Params::GetInt("pm-max-scan-separation") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-min-common-frag-peaks = " << Params::GetInt("pm-min-common-frag-peaks") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-min-frag-mz = " << Params::GetDouble("pm-min-frag-mz") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-min-peak-pairs = " << Params::GetInt("pm-min-peak-pairs") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-min-precursor-mz = " << Params::GetDouble("pm-min-precursor-mz") <<"\n"; 
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-min-scan-frag-peaks = " << Params::GetInt("pm-min-scan-frag-peaks") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-pair-top-n-frag-peaks = " << Params::GetInt("pm-pair-top-n-frag-peaks") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tpm-top-n-frag-peaks = " << Params::GetInt("pm-top-n-frag-peaks") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tconcat = " << (Params::GetBool("concat")?"True":"False") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tspectrum-parser = " << Params::GetString("spectrum-parser") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\ttop-match = " << Params::GetInt("top-match") <<"\n";
+      mztab_meta_data << "MTD\tsoftware[2]-setting[" << param_cnt++ << "]\tuse-z-line = " << Params::GetInt("use-z-line") <<"\n";
 
       site_prefix = "";
       position_prefix = "Anywhere";
@@ -295,7 +295,6 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
       header += '\n';
       return header;
   }
-
 }
 
 void TideLiteMatchSet::getReport(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, string &concat_or_target_report, string& decoy_report) { 
@@ -313,7 +312,7 @@ void TideLiteMatchSet::getReport(TSV_OUTPUT_FORMATS_T format, string spectrum_fi
 
   // Prepare the results in a string
   printResults(format, spectrum_filename, sc, spectrum_file_cnt, concat_or_target_psm_scores_, concat_or_target_report);
-  printResults(format, spectrum_filename, sc, spectrum_file_cnt, decoy_psm_scores_, decoy_report); // decoy_report is empty string if decoy_psm_scores is empty 
+  printResults(format, spectrum_filename, sc, spectrum_file_cnt, decoy_psm_scores_, decoy_report); // decoy_report is an empty string if decoy_psm_scores is empty 
 
 }
 
@@ -345,7 +344,6 @@ void TideLiteMatchSet::gatherTargetsDecoys() {
   quantile_score_ = 1.0;
 
   // Calculate Tailor scores. Get the 99th quantile:
-  // if (curScoreFunction_ == XCORR_SCORE) {
 
   int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)psm_scores_.size()+0.5)-1; // zero indexed
   if (quantile_pos < 2) 
@@ -359,14 +357,12 @@ void TideLiteMatchSet::gatherTargetsDecoys() {
     Scores back = psm_scores_[psm_scores_.size()-1-i];
   }
   quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ +TAILOR_OFFSET; // Make sure scores positive
-  // }
 
   // get the value of the last score for the delta_lcn scores
   last_psm_ = std::min_element(psm_scores_.begin(), psm_scores_.end(), comp);
-  // printf("last value:%lf\n", (*last_psm_).xcorr_score_);
   
   // Gather target and decoy PSMs
-  int gatherSize = top_matches_ + 1; // Get one more psms than the top-matches, so the delta_cn can be calculated correctly for the last element.
+  int gatherSize = top_matches_ + 1; // Get one more psms than the top-matches, so the delta_cn can be calculated correctly for the last rankedd PSM element.
   map<int, int> decoyWriteCount;
   
   make_heap(psm_scores_.begin(), psm_scores_.end(), comp);
@@ -376,7 +372,6 @@ void TideLiteMatchSet::gatherTargetsDecoys() {
     if ((*i).active_ == false)
       continue;
 
-// TODO: uncommented for debugging, put it back
     PeptideLite* peptide = active_peptide_queue_->GetPeptide((*i).ordinal_);
     if (concat_ || !peptide->IsDecoy()) {
       if (concat_or_target_psm_scores_.size() < gatherSize) {
@@ -414,7 +409,6 @@ void TideLiteMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Ad
         (*it).delta_cn_ = ((*it).xcorr_score_ - (*(it+1)).xcorr_score_)/max((*it).xcorr_score_, 1.0);
       else 
         (*it).delta_cn_ = 0.0;
-      // printf("xcorr:%lf, tailor:%lf, delta_cn: %lf, delta_lcn: %lf\n", (*it).xcorr_score_, (*it).tailor_, (*it).delta_cn_, (*it).delta_lcn_);
     }
     break;
   case PVALUES:
@@ -426,8 +420,6 @@ void TideLiteMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Ad
         (*it).delta_cn_ = -log10((*it).combined_pval_) + log10((*(it+1)).combined_pval_);
       else 
         (*it).delta_cn_ = 0.0;
-      // printf("xcorr:%lf, tailor:%lf, delta_cn: %lf, delta_lcn: %lf, ", (*it).xcorr_score_, (*it).tailor_, (*it).delta_cn_, (*it).delta_lcn_);
-      // printf("refactored xcorr: %lf, p-value: %lf, CPV: %lf\n ", (*it).refactored_xcorr_, (*it).exact_pval_, (*it).combinedPval_, (*it).delta_lcn_);
     }
     break;
   case PVALUES_HR:
@@ -575,7 +567,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
         break;
  // MZTAB columns      
       case MZTAB_PSH:
-        report += "PSM";  // Just prints PSM
+        report += "PSM";  // Just prints PSM at the beginnning of the row
         break;
       case MZTAB_PSM_ID:
         report += StringUtils::ToString(psm_id_mzTab_++, 0);  // PSM ID

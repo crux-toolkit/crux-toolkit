@@ -197,39 +197,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
                     const double residueToleranceMass,
                     vector< vector<double> >& residueEvidenceMatrix);
 
-  // For debugging
-/*  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
-    int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();
-    for (int i = 0; i < end; ++i) {
-      double peak = Peak(peak_type, i);
-      if (peak != 0)
-        cout << name << "[" << i << "] = " << peak << endl;
-    }
-  }
 
-#define SHOW(x, y) Show(#x, x, y);
-
-  // For debugging
-  void ShowCache() {
-    SHOW(PeakMain, false);
-    SHOW(LossPeak, false);
-    SHOW(FlankingPeak, false);
-    SHOW(PrimaryPeak, false);
-    SHOW(PeakCombinedB1, true);
-    SHOW(PeakCombinedY1, true);
-    SHOW(PeakCombinedB2, true);
-    SHOW(PeakCombinedY2, true);
-//    SHOW(PeakCombinedB2b, true);
-//    SHOW(PeakCombinedY2b, true);
-  }
-
-  // For debugging
-  void ShowPeaks() {
-    for (int i = 0; i < max_mz_.BackgroundBinEnd(); ++i)
-      if (peaks_[i] != 0)
-        cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
-  }
-*/
   // added by Yang
   int LargestMzbin() const { return largest_mzbin_; };
   int SmallestMzbin() const { return smallest_mzbin_; };

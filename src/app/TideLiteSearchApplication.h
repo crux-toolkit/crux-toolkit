@@ -101,7 +101,6 @@ class TideLiteSearchApplication : public CruxApplication {
     }
   };
 
-
    // Struct holding necessary information for each thread to run.
   struct thread_data {
     ActivePeptideQueueLite* active_peptide_queue_;

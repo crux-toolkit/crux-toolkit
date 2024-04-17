@@ -89,6 +89,7 @@ class TideLiteMatchSet {
   const double TAILOR_QUANTILE_TH = 0.01;
   const double TAILOR_OFFSET = 5.0 ;
   double quantile_score_;
+  
   PSMScores::iterator last_psm_;
   ActivePeptideQueueLite* active_peptide_queue_;  
 

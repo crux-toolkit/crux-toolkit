@@ -23,15 +23,14 @@
 #include "crux_version.h"
 
 //here :O
-#include <iostream>
-#include <set>
-
-// ---- Rufino ---
+//#include <iostream>
+//#include <set>
+/*
 #include <vector>
 #include <queue>
 #include <sstream>
 #include <cstdlib>
-
+*/
 /* This constant is the product of the original "magic number" (10000,
  * on line 4622 of search28.c) that was used to rescale the XCorr
  * score, and the integerization constant used by Benjamin Diament in
@@ -519,15 +518,9 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
       bin_width_, bin_offset_, sc->charge, pepMassMonoMean, maxPrecurMassBin,
       &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
   }
-  // locks_array_[LOCK_REPORTING]->lock();
-  // num_range_skipped_ += num_range_skipped;
-  // num_precursors_skipped_ += num_precursors_skipped;
-  // num_isotopes_skipped_ += num_isotopes_skipped;
-  // num_retained_ += num_retained;
-  // locks_array_[LOCK_REPORTING]->unlock();
+  // The num_range_skipped etc. counts are counted only in the XCorr scoring. 
 
   // Calculate the null distribution OF PSM scores with dynamic programming method
-
   vector<double> nullDistribution;  // The score null distribution comes to this vector.
   //Score offset indicates the position in the vector corresponding to the score value 0.
   int score_offset = calcScoreCount(pepMassIntUnique, evidenceObs, nullDistribution);   
@@ -552,9 +545,6 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
         break;
       }
     }
-    // carp(CARP_INFO, "pepMassInt[cnt] %d", pepMassInt[cnt]);
-    // carp(CARP_INFO, "pepMassIntIdx %d", pepMassIntIdx);
-
     // The actual scoring. Refactored XCorr Score calculation
     scoreRefactInt = 0;
     for (vector<unsigned int>::const_iterator iter_uint = (*iter)->peaks_1b.begin(); iter_uint != (*iter)->peaks_1b.end(); iter_uint++) {
@@ -562,8 +552,6 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
       if (*iter_uint < maxPrecurMassBin)
         scoreRefactInt += evidenceObs[pepMassIntIdx][*iter_uint];
     }
-    // carp(CARP_INFO, "scoreRefactInt %d", scoreRefactInt);
-    // exit(0);
 
     // Get the p-value of the refactored xcorr score 
     double pValue_xcorr = 1.0;
@@ -622,12 +610,6 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
     }
     residueEvidenceMatrix[pe] = curResidueEvidenceMatrix;
   }
-  locks_array_[LOCK_REPORTING]->lock();
-  num_range_skipped_ += num_range_skipped;
-  num_precursors_skipped_ += num_precursors_skipped;
-  num_isotopes_skipped_ += num_isotopes_skipped;
-  num_retained_ += num_retained;
-  locks_array_[LOCK_REPORTING]->unlock();
 
   //Calculates a residue evidence score 
   //between a spectrum and all possible peptide candidates
@@ -755,7 +737,6 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   }
 }
 
-
 //Added by Andy Lin in March 2016
 //Functions returns max value in curResidueEvidenceMatrix
 //Function assumes that all values in curResidueEvidenceMatrix have been rounded to int
@@ -827,8 +808,7 @@ int TideLiteSearchApplication::calcScoreCount(vector<int>& pepMassIntUnique, vec
 
   int nPepMassIntUniq = evidenceObs.size();
   int maxPrecurMassBin = evidenceObs[0].size();
-  // printf("nPepMassIntUniq: %d, maxPrecurMassBin: %d\n",maxPrecurMassBin, maxPrecurMassBin );
-  // internal variables
+  // local variables
   int row;
   int col;
   int ma;
@@ -1300,7 +1280,7 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
     } else {
       carp(CARP_INFO, "You are using an old format of the peptide index data. Please recreate your peptide index data");
       // The following (this whole else branch) part should be removed later.
-      // Calculate the Amino Acid Frequencies for the P-value calculation
+      // Calculate the Amino Acid Frequencies for the P-value calculation if it wasn't done before with tide-index.
       unsigned int len;
       unsigned int i;
       unsigned int cntTerm = 0;
@@ -1406,14 +1386,7 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
         string aa_str = mMass2AA_[dAAMass_[i]];
         last_residue_stat.set_aa_str(aa_str);
         CHECK(residue_stat_writer.Write(&last_residue_stat));
-        // printf("%lf, %lf, %lf, %lf, %s\n", dAAMass_[i], dAAFreqN_[i], dAAFreqI_[i], dAAFreqC_[i], aa_str.c_str());
-
-      }
-
-      // for (map<double, std::string>::iterator i = mMass2AA_.begin(); i != mMass2AA_.end(); i++) {
-      //   printf("%lf, %s\n", i->first, i->second.c_str());
-      // }
-        
+      }       
       delete[] nvAAMassCounterN;
       delete[] nvAAMassCounterI;
       delete[] nvAAMassCounterC;
@@ -1704,22 +1677,6 @@ void TideLiteSearchApplication::getInputFiles(int thread_id) {
   }
 }
 
-/*
-SpectrumCollection* TideLiteSearchApplication::loadSpectra(const string& file) {
-
-  SpectrumCollection* spectra = new SpectrumCollection();
-  pb::Header header;
-  if (!spectra->ReadSpectrumRecords(file, &header)) {
-    carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
-  }
-  if (string_to_window_type(Params::GetString("precursor-window-type")) != WINDOW_MZ) {
-    spectra->Sort();
-  } else {
-    spectra->Sort<ScSortByMz>(ScSortByMz(Params::GetDouble("precursor-window")));
-  }
-  return spectra;
-}
-*/
 void TideLiteSearchApplication::createOutputFiles() {
   
   // Create output files for the search results
@@ -1842,8 +1799,6 @@ void TideLiteSearchApplication::getMassBin(
   ActivePeptideQueueLite* active_peptide_queue
 ) {
   int pe = 0;
-  // int peidx = 0;
-
   for (deque<PeptideLite*>::const_iterator iter_ = active_peptide_queue->begin_;
       iter_ != active_peptide_queue->end_; 
       ++iter_) {
@@ -1853,10 +1808,7 @@ void TideLiteSearchApplication::getMassBin(
     if (active_peptide_queue->candidatePeptideStatus_[pe]) {
       pepMassIntUnique.push_back(pepMaInt);
     }
-    // carp(CARP_INFO, "pepMaInt:%d",pepMaInt );
     pe++;
-    // }
-    // peidx++;
   }
 
   //For pepMassIntUnique vector
