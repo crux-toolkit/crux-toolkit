@@ -1420,6 +1420,7 @@ vector<string> TideLiteSearchApplication::getOptions() const {
     "mz-bin-offset",
     "mz-bin-width",
     "mzid-output",
+    "mztab-output",
     "num-threads",
     "output-dir",
     "override-charges",

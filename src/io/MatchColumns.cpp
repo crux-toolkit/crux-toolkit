@@ -180,8 +180,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "end",
   "opt_ms_run[1]_spectrum_neutral_mass",
   "opt_ms_run[1]_delta_lcn",
-  "opt_ms_run[1]_distinct_matches/spectrum",
-  "opt_ms_run[1]_target/decoy",
+  "opt_ms_run[1]_distinct_matches_per_spectrum",
+  "opt_ms_run[1]_target_or_decoy",
   "opt_ms_run[1]_original_target_sequence",
   "opt_ms_run[1]_decoy_index",
 

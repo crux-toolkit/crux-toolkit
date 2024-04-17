@@ -8853,68 +8853,6 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('Y', ANYWHERE);
       return mod;
     }
-    case 2044: {
-      Modification mod("RBS-ID_Uridine", "RNA-protein UVC-crosslinked, hydrofluoride-digested uridine adduct", 244.069536, 244.201400);
-      mod.addSpecificity('Y', ANYWHERE);
-      return mod;
-    }
-    case 2054: {
-      Modification mod("pRBS-ID_4-thiouridine", "RNA-protein UVA-crosslinked, hydrofluoride-digested 4-thiouridine adduct", 226.058972, 226.186100);
-      mod.addSpecificity('F', ANYWHERE);
-      return mod;
-    }
-    case 2053: {
-      Modification mod("Biotin:Aha-PC", "Intact PC Biotin Alkyne tag", 690.243160, 690.724600);
-      mod.addSpecificity('M', ANYWHERE);
-      return mod;
-    }
-    case 2062: {
-      Modification mod("DBIA", "desthiobiotinylation of cysteine with DBIA probe", 296.184841, 296.365400);
-      mod.addSpecificity('C', ANYWHERE);
-      return mod;
-    }
-    case 2055: {
-      Modification mod("pRBS-ID_6-thioguanosine", "RNA-protein UVA-crosslinked, hydrofluoride-digested 6-thioguanosine adduct", 265.081104, 265.225400);
-      mod.addSpecificity('W', ANYWHERE);
-      return mod;
-    }
-    case 2057: {
-      Modification mod("6C-CysPAT", "Iodoacetamido-LC-Phosphonic Acid derivative", 221.081695, 221.190700);
-      mod.addSpecificity('Y', ANYWHERE);
-      mod.addSpecificity('T', ANYWHERE);
-      mod.addSpecificity('S', ANYWHERE);
-      mod.addSpecificity('E', ANYWHERE);
-      mod.addSpecificity('D', ANYWHERE);
-      mod.addSpecificity('H', ANYWHERE);
-      mod.addSpecificity('n', ANY_N);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('C', ANYWHERE);
-      return mod;
-    }
-    case 2058: {
-      Modification mod("Xlink:DSPP[210]", "Intact DSPP/TBDSPP crosslinker", 209.971810, 210.080200);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 2059: {
-      Modification mod("Xlink:DSPP[228]", "Water-quenched monolink of DSPP/TBDSPP crosslinker", 227.982375, 228.095500);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 2060: {
-      Modification mod("Xlink:DSPP[331]", "Tris-quenched monolink of DSPP/TBDSPP crosslinker", 331.045704, 331.215200);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 2061: {
-      Modification mod("Xlink:DSPP[226]", "Ammonia-quenched monolink of DSPP/TBDSPP crosslinker", 225.990534, 226.102800);
-      mod.addSpecificity('K', ANYWHERE);
-      mod.addSpecificity('n', PROTEIN_N);
-      return mod;
-    }
     case 2073: {
       Modification mod("N6pAMP", "Plain N6-Propargyl-AMP modified proteins without any clicked enrichment tag", 367.068170, 367.253900);
       mod.addSpecificity('Y', ANYWHERE);
@@ -8933,36 +8871,7 @@ static Modification Get(int unimodId) {
       mod.addSpecificity('C', ANYWHERE);
       return mod;
     }
-    case 2067: {
-      Modification mod("Mono_Nγ-propargyl-L-Gln_desthiobiotin", "Monomodification of N-propargyl-L-Gln probe with clicked desthiobiotin-azide", 596.328211, 596.676400);
-      mod.addSpecificity('C', ANYWHERE);
-      return mod;
-    }
-    case 2068: {
-      Modification mod("Di_L-Glu_Nγ-propargyl-L-Gln_desthiobiotin", "Dimodification of L-Glu and N-propargyl-L-Gln probe with clicked desthiobiotin-azide", 709.375889, 709.790900);
-      mod.addSpecificity('E', ANYWHERE);
-      mod.addSpecificity('D', ANYWHERE);
-      return mod;
-    }
-    case 2069: {
-      Modification mod("Di_L-Gln_Nγ-propargyl-L-Gln_desthiobiotin", "Dimodification of L-Gln and N-propargyl-L-Gln probe with clicked desthiobiotin-azide", 708.391873, 708.806200);
-      mod.addSpecificity('E', ANYWHERE);
-      mod.addSpecificity('D', ANYWHERE);
-      return mod;
-    }
-    case 2070: {
-      Modification mod("L-Gln", "Monomodification with glutamine", 128.058578, 128.129200);
-      mod.addSpecificity('D', ANYWHERE);
-      mod.addSpecificity('E', ANYWHERE);
-      return mod;
-    }
-    case 2072: {
-      Modification mod("Glyceroyl", "Glyceroylation", 88.016044, 88.062100);
-      mod.addSpecificity('n', PROTEIN_N);
-      mod.addSpecificity('K', ANYWHERE);
-      return mod;
-    }
-    case 2079: {
+  case 2079: {
       Modification mod("NBF", "Thiol blocking reagent", 163.001791, 163.090400);
       mod.addSpecificity('R', ANYWHERE);
       mod.addSpecificity('K', ANYWHERE);

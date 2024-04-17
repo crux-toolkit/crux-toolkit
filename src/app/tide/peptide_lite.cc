@@ -51,12 +51,13 @@ PeptideLite::PeptideLite(const pb::Peptide& peptide,
   num_mods_ = peptide.modifications_size();
   for (int i = 0; i < num_mods_; ++i)
     mods_.push_back(ModCoder::Mod(peptide.modifications(i)));
-  if (peptide.has_nterm_mod()){  // Handle N-terminal modifications
+
+  if (peptide.has_nterm_mod()) {  // Handle N-terminal modifications
     MassConstants::DecodeMod(ModCoder::Mod(peptide.nterm_mod()), &index, &delta);
     nterm_mod_ = delta;
   }
 
-  if (peptide.has_cterm_mod()){  // Handle C-terminal modifications
+  if (peptide.has_cterm_mod()) {  // Handle C-terminal modifications
     MassConstants::DecodeMod(ModCoder::Mod(peptide.cterm_mod()), &index, &delta);
     cterm_mod_ = delta;
   }
@@ -402,8 +403,8 @@ void PeptideLite::getModifications(int mod_precision, string& mod_crux_string, s
         string mod = std::to_string(i+1) + sep + string("V") +  sep + StringUtils::ToString(delta, mod_precision);
         mods_list.push_back(mod);
         var_mod_idx++;
-        mod = std::to_string(i) + mztab_sep + mod_name;
-        mztab_mod_list.push_back(mod);
+//        mod = std::to_string(i) + mztab_sep + mod_name;
+  //      mztab_mod_list.push_back(mod);
         if (find_variable_mod(MassConstants::mod_table_, residues_[i], delta, mod_name)) { // variable mod
           mod = std::to_string(i+1) + mztab_sep + mod_name;
           mztab_mod_list.push_back(mod);
@@ -414,11 +415,11 @@ void PeptideLite::getModifications(int mod_precision, string& mod_crux_string, s
       string mod = std::to_string(len_) + sep + string("V") +  sep + StringUtils::ToString(cterm_mod_, mod_precision);
       mods_list.push_back(mod);
       if (find_variable_mod(MassConstants::c_mod_table_, residues_[i], cterm_mod_, mod_name)) { // variable mod
-        mod = std::to_string(i+2) + mztab_sep + mod_name;
+        mod = std::to_string(i+1) + mztab_sep + mod_name;
         mztab_mod_list.push_back(mod);
       }
       if (find_variable_mod(MassConstants::cprot_mod_table_, residues_[i], cterm_mod_, mod_name)) { // variable mod
-        mod = std::to_string(i+2) + mztab_sep + mod_name;
+        mod = std::to_string(i+1) + mztab_sep + mod_name;
         mztab_mod_list.push_back(mod);
       }
     }
@@ -449,7 +450,7 @@ bool PeptideLite::find_static_mod(const pb::ModTable* mod_table, char AA, double
           mod_name = mod.name();
           int pos1 = mod_name.find(",");
           int pos2 = mod_name.find(",", pos1+1);
-          mod_name = mod_name.substr(pos1+2, pos2-pos1-1);
+          mod_name = mod_name.substr(pos1+2, pos2-pos1-2);
           return true;
         }
       }
@@ -473,7 +474,7 @@ bool PeptideLite::find_variable_mod(const pb::ModTable* mod_table, char AA, doub
           mod_name = mod.name();
           int pos1 = mod_name.find(",");
           int pos2 = mod_name.find(",", pos1+1);
-          mod_name = mod_name.substr(pos1+2, pos2-pos1-1);
+          mod_name = mod_name.substr(pos1+2, pos2-pos1-2);
           return true;
         }
       }

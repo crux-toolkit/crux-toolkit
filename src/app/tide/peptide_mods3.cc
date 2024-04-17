@@ -189,9 +189,9 @@ class ModsOutputter {//: public IModsOutputter {
       if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
         ++counts[poss_max_ct];
         int delta_index = mod_table_->PossDeltIx(aa, i, mod_spec);  
-        peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-        OutputMods(1, counts);
-        peptide_->mutable_modifications()->RemoveLast();
+        peptide_->set_nterm_mod(mod_table_->EncodeMod(pos, delta_index));
+        OutputMods(0, counts);
+        peptide_->clear_nterm_mod();
         --counts[poss_max_ct];
       }
     }    
@@ -214,9 +214,9 @@ class ModsOutputter {//: public IModsOutputter {
         int poss_max_ct = mod_table_->PossMaxCt(*aa, i, NTPEP);
         if (max_counts_[poss_max_ct] == 0) {
           int delta_index = mod_table_->PossDeltIx(*aa, i, NTPEP);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-          OutputMods(1, counts);
-          peptide_->mutable_modifications()->RemoveLast();
+          peptide_->set_nterm_mod(mod_table_->EncodeMod(pos, delta_index));
+          OutputMods(0, counts);
+          peptide_->clear_nterm_mod();
           any_term_modification = true;
         }
       }
@@ -242,14 +242,13 @@ class ModsOutputter {//: public IModsOutputter {
         if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
           ++counts[poss_max_ct];
           int delta_index = mod_table_->PossDeltIx(aa, i, mod_type);
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+          peptide_->set_cterm_mod(mod_table_->EncodeMod(pos, delta_index));
 
           if (TotalMods(counts) >= FLAGS_min_mods) {
             peptide_->set_id(count_++);
             Write(counts);
           }
-
-          peptide_->mutable_modifications()->RemoveLast();
+          peptide_->clear_cterm_mod();
           --counts[poss_max_ct];
         }
       }
@@ -275,13 +274,13 @@ class ModsOutputter {//: public IModsOutputter {
         int poss_max_ct = mod_table_->PossMaxCt(*aa, i, CTPEP);
         if (max_counts_[poss_max_ct] == 0) {                          //this condition is never satisfied because max_counts_ is initialized 
           int delta_index = mod_table_->PossDeltIx(*aa, i, CTPEP);    //with the var mods table and var mods max count is always >0  
-          peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
+          peptide_->set_cterm_mod(mod_table_->EncodeMod(pos, delta_index));
 
           if (TotalMods(counts) >= FLAGS_min_mods) {
             peptide_->set_id(count_++);
             Write(counts);
           }
-          peptide_->mutable_modifications()->RemoveLast();
+          peptide_->clear_cterm_mod();
           any_term_modification = true;
         }
       }

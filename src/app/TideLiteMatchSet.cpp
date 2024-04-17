@@ -580,7 +580,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
         report += fasta_file_name_;  // the fasta file name
         break;
       case MZTAB_SEARCH_ENGINE:
-        report += "software[2]";  // the fasta file name
+        report += "[MS, MS:1002575, tide-search, ]";  // the fasta file name
         break;
       case MZTAB_MODIFICATIONS:
         report += mztab_modifications;  // the fasta file name
@@ -590,7 +590,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
         report += StringUtils::ToString(sc->spectrum->RTime(), mass_precision_);  ;  // retention time
         break;
       case MZTAB_SPECTRA_REF:
-        report += "ms_run["+ StringUtils::ToString(spectrum_file_cnt, 0) +"]:index=" +  StringUtils::ToString(sc->spectrum->SpectrumNumber(), 0);  // the fasta file name
+        report += "ms_run["+ StringUtils::ToString(spectrum_file_cnt+1, 0) +"]:index=" +  StringUtils::ToString(sc->spectrum->SpectrumNumber(), 0);  // the fasta file name
         break;
       case MZTAB_PRE:
         report += flankingAAs.substr(0, 1);  // the fasta file name
