@@ -12,5 +12,5 @@ Scenario Outline: User runs print-processed-spectra
 
 Examples:
   |test_name               |args                                                                  |input_spectra|output_spectra    |expected_output   |
-  |print_processed_spectrum|--overwrite T --remove-precursor-tolerance 15 --mz-bin-width 1.0005079|test.ms2     |processed-test.ms2|processed-test.ms2|
+  |print_processed_spectrum|--overwrite T --parameter-file params/print-processed-spectra-params|test.ms2     |processed-test.ms2|processed-test.ms2|
 

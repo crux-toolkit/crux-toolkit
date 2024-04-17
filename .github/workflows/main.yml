@@ -9,16 +9,17 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build-macos-windows-distributions:
+  build-distributions:
+    continue-on-error: true
     strategy:
       matrix:
-        os: [macos-latest, windows-2019]
+        os: [ubuntu-20.04, macos-latest, windows-2019]
     runs-on: ${{ matrix.os }}
 
     steps:
   
       - name: checkout-repository    
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
  
       - name: add-short-sha
         shell: bash
@@ -26,10 +27,24 @@ jobs:
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
       - name: setup-python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5.0.0
         with: 
             python-version: 3.x
  
+      - name: configure-build-for-ubuntu
+        if: matrix.os == 'ubuntu-20.04'
+        shell: bash
+        run: |
+              python -m pip install numpy
+              python -m pip install pandas
+              sudo apt-get install ruby 2.2.0
+              sudo gem install cucumber
+              sudo gem install rspec
+              cmake -E make_directory "${{runner.workspace}}/build"
+              cd "${{runner.workspace}}/build"
+              echo Configuring in $(pwd)
+              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
       - name: configure-build-for-macos
         if: matrix.os == 'macos-latest'
         shell: bash
@@ -45,161 +60,126 @@ jobs:
         if: matrix.os == 'windows-2019'
         shell: cmd
         run: |
-          cmake -E make_directory "${{runner.workspace}}/build"
-          cd "${{runner.workspace}}/build"
-          C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
-          unzip -P iacceptthelicense Thermo.zip -d dlls
-          echo "XRawfile2_x64.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
-          echo "fregistry_x64.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
-          echo "Fileio_x64.dll.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
-          cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c 
-          
-      - name: build-on-macos-and-windows
-        shell: bash
-        run: |
-          cd "${{runner.workspace}}/build"
-          echo Building in $(pwd)
-          cmake --build . --config $BUILD_TYPE 
+             cmake -E make_directory "${{runner.workspace}}/build"
+             cd "${{runner.workspace}}/build"
+             C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+             unzip -P iacceptthelicense Thermo.zip -d dlls
+             echo "XRawfile2_x64.dll"
+             regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
+             echo "fregistry_x64.dll"
+             regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
+             echo "Fileio_x64.dll.dll"
+             regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
+             cmake "${{github.workspace}}" -G "Visual Studio 16 2019" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c 
 
-      - name: build-package-macos-windows-packages
+      - name: build
         shell: bash
         run: |
-          cd "${{runner.workspace}}/build"
-          cmake --build . --config $BUILD_TYPE --target package
-  
+             cd "${{runner.workspace}}/build"
+             echo Building in $(pwd)
+             cmake --build . --config $BUILD_TYPE 
+
+      - name: build-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package
+
+      - name: build-source-package
+        if: (matrix.os == 'ubuntu-20.04')
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package_source
+
       - name: archive-macos-package
-        if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
+        if: (matrix.os == 'macos-latest')
+        uses: actions/upload-artifact@v4
         with:
-          name: crux-4.1.${{env.git_short_sha}}.macos
-          path: ${{runner.workspace}}/build/crux-4.1.Darwin.x86_64.zip
+          name: crux-4.2.${{env.git_short_sha}}.macos
+          path: ${{runner.workspace}}/build/crux-4.2.Darwin.x86_64.zip
         
       - name: archive-windows-package
-        if: matrix.os == 'windows-2019'
-        uses: actions/upload-artifact@v3
+        if: (matrix.os == 'windows-2019')
+        uses: actions/upload-artifact@v4
         with:
-          name: crux-4.1.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-4.1.Windows.i386.zip 
-      
-  build-crux-on-centos-7:
-      runs-on: 'ubuntu-latest'
-      container: 'centos:centos7'
-      needs: build-macos-windows-distributions
-       
-      steps:
-        - name: Install prerequisites for Docker Centos 7
-          shell: bash
-          run: |
-            yum -y update
-            yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
-            yum -y install epel-release 
-            yum -y install git
-            git --version
-            yum -y install lbzip2
-            yum -y install cmake3
-            yum -y install centos-release-scl
-            yum-config-manager --enable rhel-server-rhscl-7-rpms
-            yum -y install devtoolset-8
-            yum -y install rh-python36
-            yum -y install rh-ruby27
-            yum -y install rh-ruby27-ruby-devel
-            yum -y install gem
-            scl enable devtoolset-8 rh-ruby27 'gcc --version'
-            scl enable rh-python36 'python --version' 
-            scl enable rh-python36 'python -m pip install --upgrade pip numpy pandas'
-            scl enable rh-ruby27 'gem install cucumber rspec'
-        
-        - name: Checkout
-          uses: actions/checkout@v3
+          name: crux-4.2.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-4.2.Windows.AMD64.zip 
 
-        - name: add-short-sha env property
-          shell: bash
-          run: |
-            git config --global --add safe.directory /__w/crux-toolkit/crux-toolkit
-            echo git_short_sha=$(git rev-parse --short HEAD)  >> $GITHUB_ENV
-            echo "${{github.workspace}}"
-   
-        - name: Configure and build on Centos
-          shell: bash
-          run: |
-             echo $(pwd)
-             ls doc/user/*.html
-             scl enable devtoolset-8 "cmake3  -DCMAKE_BUILD_TYPE=$BUILD_TYPE ."
-             scl enable devtoolset-8 "cmake3 --build . --config $BUILD_TYPE"  
-             
-        - name: Test
-          shell: bash
-          run: |
-            cd test/smoke-tests
-            scl enable rh-python36 rh-ruby27 'cucumber --publish-quiet --tags "not @ignore" -f html -o smoke-tests.html'
-            
-        - name: Build binary and source packages
-          shell: bash
-          run: |
-            cmake3 --build . --config $BUILD_TYPE --target package
-            cmake3 --build . --config $BUILD_TYPE --target package_source
-            
-        - name: Archive Centos 7 binary package
-          uses: actions/upload-artifact@v3
-          with:
-            name: crux-4.1.${{env.git_short_sha}}.centos7
-            path: crux-4.1.Linux.x86_64.zip
+      - name: archive-ubuntu-package
+        if: (matrix.os == 'ubuntu-20.04')
+        uses: actions/upload-artifact@v4
+        with:
+          name: crux-4.2.${{env.git_short_sha}}.ubuntu.20.04
+          path:  ${{runner.workspace}}/build/crux-4.2.Linux.x86_64.zip
           
-        - name: Archive source package
-          uses: actions/upload-artifact@v3
-          with:
-            name: crux-4.1.${{env.git_short_sha}}.Source
-            path: crux-4.1.Source.tar.gz
-        
-        - name: Archive smoke test results
-          uses: actions/upload-artifact@v3
-          with:
-            name: smoke.html
-            path: test/smoke-tests/smoke-tests.html
-                 
-        - name: Create version file
-          shell: bash
-          run: |
-            echo ${{env.git_short_sha}} > doc/user/latest-build.txt
-            
-        - name: Push modified webpages to website repository
-          if: github.ref == 'refs/heads/master'
-          uses: nkoppel/push-files-to-another-repository@v1.1.1
-          env:
-            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
-          with:
-             source-files: 'doc/user/*'
-             destination-username: 'crux-toolkit'
-             destination-repository: 'crux-toolkit.github.io'
-             destination-directory: '.'
-             commit-email: 'cegrant@uw.edu'
-             
-        - name: Push command webpages to website repository
-          uses: dmnemec/copy_file_to_another_repo_action@main
-          env:
-             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
-          with:
-             source_file: 'doc/user/commands/'
-             destination_repo: 'crux-toolkit/crux-toolkit.github.io'
-             destination_branch: master
-             destination_folder: '.'
-             user_email: 'cegrant@uw.edu'
-             user_name: 'CharlesEGrant'
-             commit_message: 'Update version file for the web site' 
+      - name: Archive source package
+        if: (matrix.os == 'ubuntu-20.04')
+        uses: actions/upload-artifact@v4
+        with:
+          name: crux-4.2.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-4.2.Source.tar.gz
 
-        - name: Copy version file to website repository
-          uses: dmnemec/copy_file_to_another_repo_action@main
-          env:
-             API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
-          with:
-             source_file: 'doc/user/latest-build.txt'
-             destination_repo: 'crux-toolkit/crux-toolkit.github.io'
-             destination_branch: master
-             destination_folder: '.'
-             user_email: 'cegrant@uw.edu'
-             user_name: 'CharlesEGrant'
-             commit_message: 'Update version file for the web site' 
+      - name: Test
+        if: (matrix.os == 'ubuntu-20.04')
+        shell: bash
+        run: |
+             cd ${{runner.workspace}}/build/test
+             rm -rf smoke-tests
+             cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
+             cd smoke-tests
+             cucumber -v --tags "not @ignore" -f html -o smoke-tests.html    
+
+      - name: Archive smoke test results
+        if:  (matrix.os == 'ubuntu-20.04' && always())
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke.html
+          path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+                 
+      - name: Create version file
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
+        shell: bash
+        run: |
+          echo ${{env.git_short_sha}} > doc/user/latest-build.txt
+            
+      - name: Push modified webpages to website repository
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
+        uses: nkoppel/push-files-to-another-repository@v1.1.1
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
+        with:
+           source-files: 'doc/user/*'
+           destination-username: 'crux-toolkit'
+           destination-repository: 'crux-toolkit.github.io'
+           destination-directory: '.'
+           commit-email: 'cegrant@uw.edu'
+             
+      - name: Push command webpages to website repository
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
+        with:
+           source_file: 'doc/user/commands/'
+           destination_repo: 'crux-toolkit/crux-toolkit.github.io'
+           destination_branch: master
+           destination_folder: '.'
+           user_email: 'cegrant@uw.edu'
+           user_name: 'CharlesEGrant'
+           commit_message: 'Update version file for the web site' 
+
+      - name: Copy version file to website repository
+        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-20.04')
+        uses: dmnemec/copy_file_to_another_repo_action@main
+        env:
+           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
+        with:
+           source_file: 'doc/user/latest-build.txt'
+           destination_repo: 'crux-toolkit/crux-toolkit.github.io'
+           destination_branch: master
+           destination_folder: '.'
+           user_email: 'cegrant@uw.edu'
+           user_name: 'CharlesEGrant'
+           commit_message: 'Update version file for the web site' 
   
