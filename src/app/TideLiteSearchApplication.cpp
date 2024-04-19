@@ -1586,7 +1586,7 @@ void TideLiteSearchApplication::processParams() {
     Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
   }
   // run param-medic?
-/*  const string autoPrecursor = Params::GetString("auto-precursor-window");
+  const string autoPrecursor = Params::GetString("auto-precursor-window");
   const string autoFragment = Params::GetString("auto-mz-bin-width");
   if (autoPrecursor != "false" || autoFragment != "false") {
     if (autoPrecursor != "false" && Params::GetString("precursor-window-type") != "ppm") {
@@ -1629,7 +1629,7 @@ void TideLiteSearchApplication::processParams() {
       }
     }
   }  
-  */
+  
 }
 void TideLiteSearchApplication::getInputFiles(int thread_id) {
   // Try to read all spectrum files as spectrumrecords, convert those that fail
