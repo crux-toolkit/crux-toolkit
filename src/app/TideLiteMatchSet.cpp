@@ -51,16 +51,36 @@ int TideLiteMatchSet::XCorr_mzTab_cols[] = {
     MZTAB_PSH, MZTAB_SEQUENCE, MZTAB_PSM_ID, MZTAB_ACCESSION, MZTAB_UNIQUE, MZTAB_DATABASE,
     MZTAB_DATABASE_VERSION, MZTAB_SEARCH_ENGINE, 
     MZTAB_SEARCH_ENGINE_SCORE_1,  // [MS, MS:1001155, The SEQUEST result 'XCorr'.]
-    MZTAB_SEARCH_ENGINE_SCORE_2,  // [MS, MS:1001143, The SEQUEST result 'DeltaCn'.]
-    MZTAB_SEARCH_ENGINE_SCORE_3,  // [MS, MS:1003358, XCorr rank]
-    MZTAB_SEARCH_ENGINE_SCORE_4,  // [MS, MS:1003359, exact p-value'.]
+    MZTAB_SEARCH_ENGINE_SCORE_2,  // [MS, MS:1003366, tailor score'.]
+    MZTAB_SEARCH_ENGINE_SCORE_3,  // [MS, MS:1001143, The SEQUEST result 'DeltaCn'.]
+    MZTAB_SEARCH_ENGINE_SCORE_4,  // [MS, MS:1003358, XCorr rank]
+    // MZTAB_SEARCH_ENGINE_SCORE_5,  // [MS, MS:1003360, refactored XCorr'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_6,  // [MS, MS:1003359, exact p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_7,  // [MS, MS:1003361, res-ev score'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_8,  // [MS, MS:1003363, res-ev p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_9,  // [MS, MS:1003364, combined p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_10, // [MS, MS:1003365, combined p-value rank'.]
+    MZTAB_MODIFICATIONS, MZTAB_RETENTION_TIME,
+    MZTAB_CHARGE, MZTAB_EXP_MASS_TO_CHARGE, MZTAB_CALC_MASS_TO_CHARGE, MZTAB_SPECTRA_REF,
+    MZTAB_PRE, MZTAB_POST, MZTAB_START, MZTAB_END, MZTAB_OPT_MS_RUN_1_SPECTRUM_NEUTRAL_MASS,
+    MZTAB_OPT_MS_RUN_1_DELTA_LCN, MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC,
+    MZTAB_OPT_MS_RUN_1_TARGET_DECOY, MZTAB_OPT_MS_RUN_1_ORIGINAL_TARGET_SEQUENCE_COL, 
+    MZTAB_OPT_MS_RUN_1_DECOY_INDEX
+  };    
+
+int TideLiteMatchSet::Pvalues_mzTab_cols[] = {
+    MZTAB_PSH, MZTAB_SEQUENCE, MZTAB_PSM_ID, MZTAB_ACCESSION, MZTAB_UNIQUE, MZTAB_DATABASE,
+    MZTAB_DATABASE_VERSION, MZTAB_SEARCH_ENGINE, 
+    MZTAB_SEARCH_ENGINE_SCORE_1,  // [MS, MS:1001155, The SEQUEST result 'XCorr'.]
+    MZTAB_SEARCH_ENGINE_SCORE_2,  // [MS, MS:1003366, tailor score'.]
+    MZTAB_SEARCH_ENGINE_SCORE_3,  // [MS, MS:1001143, The SEQUEST result 'DeltaCn'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_4,  // [MS, MS:1003358, XCorr rank]
     MZTAB_SEARCH_ENGINE_SCORE_5,  // [MS, MS:1003360, refactored XCorr'.]
-    MZTAB_SEARCH_ENGINE_SCORE_6,  // [MS, MS:1003361, res-ev score'.]
-    MZTAB_SEARCH_ENGINE_SCORE_7,  // [MS, MS:1003362, res-ev rank'.]
+    MZTAB_SEARCH_ENGINE_SCORE_6,  // [MS, MS:1003359, exact p-value'.]
+    MZTAB_SEARCH_ENGINE_SCORE_7,  // [MS, MS:1003361, res-ev score'.]
     MZTAB_SEARCH_ENGINE_SCORE_8,  // [MS, MS:1003363, res-ev p-value'.]
     MZTAB_SEARCH_ENGINE_SCORE_9,  // [MS, MS:1003364, combined p-value'.]
     MZTAB_SEARCH_ENGINE_SCORE_10, // [MS, MS:1003365, combined p-value rank'.]
-    MZTAB_SEARCH_ENGINE_SCORE_11, // [MS, MS:1003366, tailor score'.]
     MZTAB_MODIFICATIONS, MZTAB_RETENTION_TIME,
     MZTAB_CHARGE, MZTAB_EXP_MASS_TO_CHARGE, MZTAB_CALC_MASS_TO_CHARGE, MZTAB_SPECTRA_REF,
     MZTAB_PRE, MZTAB_POST, MZTAB_START, MZTAB_END, MZTAB_OPT_MS_RUN_1_SPECTRUM_NEUTRAL_MASS,
@@ -116,9 +136,9 @@ int* TideLiteMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeader
         case XCORR_SCORE:
           numHeaders = sizeof(XCorr_mzTab_cols) / sizeof(int);
           return XCorr_mzTab_cols;
-        // case PVALUES:
-        //   numHeaders = sizeof(Pvalues_mzTab_cols) / sizeof(int);
-        //   return Pvalues_mzTab_cols;
+        case PVALUES:
+          numHeaders = sizeof(Pvalues_mzTab_cols) / sizeof(int);
+          return Pvalues_mzTab_cols;
         // case DIAMETER:
         //   numHeaders = sizeof(Diameter_mzTab_cols) / sizeof(int);
         //   return Diameter_mzTab_cols;
@@ -167,17 +187,20 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
         mztab_meta_data << "MTD\tms_run[" << i + 1 << "]-location\tfile://" << tide_spectra_files[i]  <<  "\n";
       }
       mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001155, SEQUEST:xcorr, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001143, SEQUEST:deltacn, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003358, XCorr rank, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003359, exact p-value, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003360, refactored XCorr, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003361, res-ev score, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003362, res-ev rank, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003363, res-ev p-value, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003364, combined p-value, ]\n";
-      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003365, combined p-value rank, ]\n";
       mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003366, tailor score, ]\n";
-      
+      mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1001143, SEQUEST:deltacn, ]\n";
+      if (curScoreFunction_ != PVALUES) {
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003358, XCorr rank, ]\n";
+      }
+      if (curScoreFunction_ == PVALUES) {
+        search_engine_score_index++; //a jamp for the XCorr rank
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003360, refactored XCorr, ]\n";
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003359, exact p-value, ]\n";
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003361, res-ev score, ]\n";
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003363, res-ev p-value, ]\n";
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003364, combined p-value, ]\n";
+        mztab_meta_data << "MTD\tpsm_search_engine_score[" << search_engine_score_index++ << "]\t[MS, MS:1003365, combined p-value rank, ]\n";
+      }
       // Add tide-index params
       if (tide_index_mztab_param) {
         while( std::getline(tide_index_mztab_param, line) ) {
@@ -272,11 +295,11 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
       mods = GetModificationList(MassConstants::cprot_mod_table_, site_prefix, position_prefix, true, cnt); //true = variable mods;
       mztab_meta_data << mods;
       if ( cnt == 1 ) 
-        mztab_meta_data << "MTD\tMS:1002454 (No variable modifications searched)\m";
+        mztab_meta_data << "MTD\tMS:1002454 (No variable modifications searched)\n";
       header = mztab_meta_data.str();
 
       numHeaders = 0;
-      header_cols = getColumns(format, numHeaders);
+      header_cols = getColumns(format, numHeaders);  // numHeaders is an output variable
       header += get_column_header(header_cols[0]);
       for (size_t i = 1; i < numHeaders; ++i) {
         header += '\t';
@@ -285,7 +308,8 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
       header += '\n';
       return header;
     case TIDE_SEARCH_PIN_TSV:
-      numHeaders = 0;
+    // TODO: Finish Percolator Input (PIN) File format later
+/*      numHeaders = 0;
       header_cols = getColumns(format, numHeaders);
       header += get_column_header(header_cols[0]);
       for (size_t i = 1; i < numHeaders; ++i) {
@@ -293,6 +317,7 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
         header += get_column_header(header_cols[i]);
       }
       header += '\n';
+*/
       return header;
   }
 }
@@ -477,7 +502,7 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case PEPTIDE_MASS_COL:
         report += StringUtils::ToString(peptide->Mass(), mass_precision_);                                         // spectrum neutral mass
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_2:
+      case MZTAB_SEARCH_ENGINE_SCORE_3:
       case DELTA_CN_COL:
         report += StringUtils::ToString((*it).delta_cn_, score_precision_);         // delta_cn
         break;
@@ -485,31 +510,61 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case DELTA_LCN_COL:
         report += StringUtils::ToString((*it).delta_lcn_, score_precision_);        // delta_lcn
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_1:
+      case MZTAB_SEARCH_ENGINE_SCORE_1:  // xcorr score
       case XCORR_SCORE_COL:
         report += StringUtils::ToString((*it).xcorr_score_, score_precision_);      // xcorr score
+        break;       
+      case MZTAB_SEARCH_ENGINE_SCORE_5:   // refactored XCorr
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString((*it).refactored_xcorr_, score_precision_, false);      // refactored XCorr
+        } else {
+          report += "null";       // refactored XCorr
+        }
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_5:
       case REFACTORED_SCORE_COL:
         report += StringUtils::ToString((*it).refactored_xcorr_, score_precision_);      // refactored xcorr score
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_4:
+      case MZTAB_SEARCH_ENGINE_SCORE_6:      // exact p-value
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString((*it).exact_pval_, score_precision_, false);      // exact p-value score
+        } else {
+          report += "null";      // exact p-value score
+        }
+        break;
       case EXACT_PVALUE_COL:
         report += StringUtils::ToString((*it).exact_pval_, score_precision_, false);      // exact p-value score
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_6:
+      case MZTAB_SEARCH_ENGINE_SCORE_7:                                                 // res-ev score
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString((*it).resEv_score_, score_precision_, false);      // res-ev score
+        } else {
+          report += "null";      // res-ev score
+        }
+        break;
       case RESIDUE_EVIDENCE_COL:
         report += StringUtils::ToString((*it).resEv_score_, score_precision_);      // res-ev score
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_8:
+      case MZTAB_SEARCH_ENGINE_SCORE_8:     // res-ev p-value rank
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString((*it).resEv_pval_, score_precision_, false);      // res-ev score
+        } else {
+          report += "null";      // exact p-value score
+        }
+        break;
       case RESIDUE_PVALUE_COL:
         report += StringUtils::ToString((*it).resEv_pval_, score_precision_, false);      // res_ev pvalue
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_9:
+      case MZTAB_SEARCH_ENGINE_SCORE_9:  //  combined p-value'
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString((*it).combined_pval_, score_precision_, false);      // combined p-value
+        } else {
+          report += "null";      // combined p-value
+        }
+        break;
       case BOTH_PVALUE_COL:
         report += StringUtils::ToString((*it).combined_pval_, score_precision_, false);      // combined p-value score
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_11:
+      case MZTAB_SEARCH_ENGINE_SCORE_2:
       case TAILOR_COL:
         report += StringUtils::ToString((*it).tailor_, score_precision_);           // tailor score
         break;
@@ -525,10 +580,22 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case BY_IONS_REPEAT_MATCH_COL:
         report += StringUtils::ToString((*it).repeat_ion_match_, score_precision_);  // fraction of the matched per total by-ions
         break;
-      case MZTAB_SEARCH_ENGINE_SCORE_3:
-      case MZTAB_SEARCH_ENGINE_SCORE_7:
-      case MZTAB_SEARCH_ENGINE_SCORE_10:
-      case BOTH_PVALUE_RANK:
+  
+      case MZTAB_SEARCH_ENGINE_SCORE_4:  // [MS, MS:1003358, XCorr rank]
+        if (curScoreFunction_ != PVALUES) {
+          report += StringUtils::ToString(cnt, 0);  // rank
+        } else {
+          report += "null";      // xcorr rank in p-value scoring
+        }
+        break;
+      case MZTAB_SEARCH_ENGINE_SCORE_10:  // [MS, MS:1003365, combined p-value rank'.]
+        if (curScoreFunction_ == PVALUES) {
+          report += StringUtils::ToString(cnt, 0);  // rank
+        } else {
+          report += "null";      // exact p-value score
+        }
+        break;
+      case BOTH_PVALUE_RANK:    // combined p-value rank
       case XCORR_RANK_COL:
         report += StringUtils::ToString(cnt, 0);
         break;

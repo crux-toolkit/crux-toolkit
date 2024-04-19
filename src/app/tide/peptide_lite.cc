@@ -387,11 +387,11 @@ void PeptideLite::getModifications(int mod_precision, string& mod_crux_string, s
       string mod = std::to_string(1) + sep + string("V") +  sep + StringUtils::ToString(nterm_mod_, mod_precision);
       mods_list.push_back(mod);
       if (find_variable_mod(MassConstants::n_mod_table_, residues_[i], nterm_mod_, mod_name)) { // variable mod
-        mod = std::to_string(0) + mztab_sep + mod_name;
+        mod = std::to_string(1) + mztab_sep + mod_name;
         mztab_mod_list.push_back(mod);
       }
       if (find_variable_mod(MassConstants::nprot_mod_table_, residues_[i], nterm_mod_, mod_name)) { // variable mod
-        mod = std::to_string(0) + mztab_sep + mod_name;
+        mod = std::to_string(1) + mztab_sep + mod_name;
         mztab_mod_list.push_back(mod);
       }
     }
@@ -403,8 +403,6 @@ void PeptideLite::getModifications(int mod_precision, string& mod_crux_string, s
         string mod = std::to_string(i+1) + sep + string("V") +  sep + StringUtils::ToString(delta, mod_precision);
         mods_list.push_back(mod);
         var_mod_idx++;
-//        mod = std::to_string(i) + mztab_sep + mod_name;
-  //      mztab_mod_list.push_back(mod);
         if (find_variable_mod(MassConstants::mod_table_, residues_[i], delta, mod_name)) { // variable mod
           mod = std::to_string(i+1) + mztab_sep + mod_name;
           mztab_mod_list.push_back(mod);

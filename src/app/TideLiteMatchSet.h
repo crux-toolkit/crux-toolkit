@@ -39,8 +39,8 @@ class TideLiteMatchSet {
     double delta_cn_;
     double delta_lcn_;
     bool active_;
-    Scores():ordinal_(0), xcorr_score_(0), exact_pval_(0), refactored_xcorr_(0), 
-      resEv_score_(0), resEv_pval_(0), combined_pval_(0), tailor_(0), by_ion_matched_(0), by_ion_total_(0), 
+    Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
+      resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
       sp_score_(0), hyper_score_(0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0), active_(false) {}
   };
 //   typedef FixedCapacityArray<Scores> PSMScores;
@@ -68,6 +68,7 @@ class TideLiteMatchSet {
   static int Diameter_tsv_cols[]; 
 
   static int XCorr_mzTab_cols[];  //these are declared at the beginning of TideLiteMatchSet.cpp
+  static int Pvalues_mzTab_cols[];  //these are declared at the beginning of TideLiteMatchSet.cpp
 
   static int XCorr_pin_cols[];  //these are declared at the beginning of TideLiteMatchSet.cpp
   static int Pvalues_pin_cols[];

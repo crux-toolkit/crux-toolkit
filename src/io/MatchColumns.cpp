@@ -156,18 +156,17 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "database",
   "database_version",
   "search_engine",
-  "search_engine_score[1]",   // [MS, MS:1001155, The SEQUEST result 'XCorr'.]
-  "search_engine_score[2]",   // [MS, MS:1001143, The SEQUEST result 'DeltaCn'.]
-  "search_engine_score[3]",   // [MS, MS:1003358, XCorr rank]
-  "search_engine_score[4]",   // [MS, MS:1003359, exact p-value'.]
-  "search_engine_score[5]",   // [MS, MS:1003360, refactored XCorr'.]
-  "search_engine_score[6]",   // [MS, MS:1003361, res-ev score'.]
-  "search_engine_score[7]",   // [MS, MS:1003362, res-ev rank'.]
-  "search_engine_score[8]",   // [MS, MS:1003363, res-ev p-value'.]
-  "search_engine_score[9]",   // [MS, MS:1003364, combined p-value'.]
-  "search_engine_score[10]",  // [MS, MS:1003365, combined p-value rank'.]
-  "search_engine_score[11]",  // [MS, MS:1003366, tailor score'.]
-  "search_engine_score[12]",  // [MS, MS:1002354, PSM-level q-value'.]
+  "search_engine_score[1]",   // [MS, MS:1001155, The SEQUEST result 'XCorr']
+  "search_engine_score[2]",  // [MS, MS:1003366, tailor score]
+  "search_engine_score[3]",   // [MS, MS:1001143, The SEQUEST result 'DeltaCn']
+  "search_engine_score[4]",   // [MS, MS:1003358, XCorr rank]
+  "search_engine_score[5]",   // [MS, MS:1003360, refactored XCorr]
+  "search_engine_score[6]",   // [MS, MS:1003359, exact p-value]
+  "search_engine_score[7]",   // [MS, MS:1003361, res-ev score]
+  "search_engine_score[8]",   // [MS, MS:1003363, res-ev p-value]
+  "search_engine_score[9]",   // [MS, MS:1003364, combined p-value]
+  "search_engine_score[10]",  // [MS, MS:1003365, combined p-value rank]
+  "search_engine_score[11]",  // [MS, MS:1002354, PSM-level q-value]
   "modifications",
   "retention_time",
   "charge",
