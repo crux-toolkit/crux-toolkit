@@ -87,6 +87,25 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
+        /*
+        for (const auto& peaks : indexResults._indexedPeaks) {
+            for (const auto& peak : peaks) {
+                // Print peak data
+                std::cout << "mz: " << peak.mz << ", intensity: " << peak.intensity << ", Scan Index: " << peak.zeroBasedMs1ScanIndex << ", Retention Time: " << peak.retentionTime << std::endl;
+            }
+        }
+
+        for (const auto& scans : indexResults._ms1Scans) {
+            std::cout << "Scan Info for key: " << scans.first << std::endl;
+            for (const auto& scanInfo : scans.second) {
+                // Print scan info data
+                std::cout << "Scan Number: " << scanInfo.oneBasedScanNumber << ", Scan Index: " << scanInfo.zeroBasedMs1ScanIndex << ", Retention Time: " << scanInfo.retentionTime << std::endl;
+            }
+        }
+
+               exit(0);
+        */
+
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
         // TODO Continue from this function
@@ -227,10 +246,12 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
                     double retentionTime = (*spectrum)->getRTime();
 
+                    /*
                     std::string parser = Params::GetString("spectrum-parser");
                     if (parser == "mstoolkit") {
                         retentionTime = retentionTime * 60;
                     }
+                    */
 
                     IndexedMassSpectralPeak spec_data(
                         mz,                       // mz value
