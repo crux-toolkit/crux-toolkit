@@ -88,6 +88,7 @@ vector<PSM> create_psm(const string& psm_file,
             if (!filtered && q_value > q_value_threshold) {
                 continue;
             }
+            retention_time = retention_time / 60.0;
             PSM psm = {sequence_col,
                        scan_col,
                        charge_col,
@@ -642,12 +643,12 @@ IndexedMassSpectralPeak getIndexedPeak(
 
     for (int j = floorMz; j <= ceilingMz; j++) {
         if (j < indexedPeaks.size() && indexedPeaks[j].size() > 0) {
-            vector<IndexedMassSpectralPeak> bin = indexedPeaks[j];
+            const auto& bin = indexedPeaks[j];
 
             int index = binarySearchForIndexedPeak(bin, zeroBasedScanIndex);
 
             for (int i = index; i < bin.size(); i++) {
-                auto peak = bin[i];
+                const auto& peak = bin[i];
                 if (peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
                     break;
                 }
@@ -685,6 +686,7 @@ vector<IndexedMassSpectralPeak> peakFind(
 
     // go right
     int missedScans = 0;
+    xic.reserve(ms1Scans.size());  // Reserve memory for xic to avoid frequent reallocations
     for (int t = precursorScanIndex; t < ms1Scans.size(); t++) {
         auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
 
