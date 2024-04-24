@@ -109,9 +109,20 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
         // TODO Continue from this function
+        vector<CruxLFQ::Identification> filteredIdentifications;
+            
+       std::copy_if(
+            allIdentifications.begin(), 
+            allIdentifications.end(), 
+            std::back_inserter(filteredIdentifications), 
+           [&spectra_file](const Identification& identification) {
+               return identification.spectralFile == spectra_file;
+        });
+
+
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
-            allIdentifications,
+            filteredIdentifications,
             chargeStates,
             indexResults._ms1Scans,
             indexResults._indexedPeaks,
@@ -280,19 +291,19 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
 }
 
 // Make this a multithreaded process
-vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const string& spectra_file) {
+vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data,const string& spectra_file) {
     carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
 
     vector<Identification> allIdentifications;
-    string _spectra_file(spectra_file);
+    //string _spectra_file(spectra_file);
 
-    for (const auto psm : psm_data) {
+    for (const auto& psm : psm_data) {
         Identification identification;
         identification.sequence = psm.sequence_col;
         identification.monoIsotopicMass = psm.monoisotopic_mass_col;
         identification.peptideMass = psm.peptide_mass_col;
         identification.precursorCharge = psm.charge_col;
-        identification.spectralFile = _spectra_file;
+        identification.spectralFile = spectra_file;
         identification.ms2RetentionTimeInMinutes = psm.retention_time;
         identification.scanId = psm.scan_col;
         identification.modifications = psm.modifications;
