@@ -499,7 +499,7 @@ void processRange(int start, int end,
 
 void quantifyMs2IdentifiedPeptides(
     string spectraFile,
-    const vector<Identification>& allIdentifications,
+    const vector<Identification>& ms2IdsForThisFile,
     const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
     const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
@@ -508,7 +508,7 @@ void quantifyMs2IdentifiedPeptides(
     CruxLFQResults& lfqResults) {
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
 
-    vector<Identification> ms2IdsForThisFile;
+   /* vector<Identification> ms2IdsForThisFile;
 
     std::copy_if(
         allIdentifications.begin(),
@@ -516,7 +516,7 @@ void quantifyMs2IdentifiedPeptides(
         std::back_inserter(ms2IdsForThisFile),
         [&spectraFile](const Identification& id) {
             return id.spectralFile == spectraFile;
-        });
+        });*/
 
     if (ms2IdsForThisFile.empty()) {
         return;
@@ -976,8 +976,8 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime,
             double discriminationFactor = (timepoint.intensity - valleyEnvelope.intensity) / timepoint.intensity;
 
             if (discriminationFactor > DISCRIMINATION_FACTOR_TO_CUT_PEAK &&
-                (indexOfValley + direction < timePointsForApexZ.size() && indexOfValley + direction >= 0)) {
-                IsotopicEnvelope secondValleyTimepoint = timePointsForApexZ[indexOfValley + direction];
+                (static_cast<unsigned long long>(indexOfValley) + direction < timePointsForApexZ.size() && indexOfValley + direction >= 0)) {
+                IsotopicEnvelope secondValleyTimepoint = timePointsForApexZ[static_cast<std::vector<CruxLFQ::IsotopicEnvelope, std::allocator<CruxLFQ::IsotopicEnvelope>>::size_type>(indexOfValley) + direction];
 
                 discriminationFactor = (timepoint.intensity - secondValleyTimepoint.intensity) / timepoint.intensity;
 
