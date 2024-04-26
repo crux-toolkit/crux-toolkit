@@ -8,7 +8,7 @@
 
 using namespace std;
 
-double const MassConstants::kFixedPointScalar = 1e5;
+double const MassConstants::kFixedPointScalar = 1e5; 
 
 const double MassConstants::elts_mono[] = {
   1.007825035, // H

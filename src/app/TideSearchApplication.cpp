@@ -472,8 +472,9 @@ vector<InputFile> TideSearchApplication::getInputFiles(
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
       }
+      int num_spectra = 0;
       carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
-      if (!SpectrumRecordWriter::convert(*f, spectrumrecords)) {
+      if (!SpectrumRecordWriter::convert(*f, spectrumrecords, num_spectra)) {
         carp(CARP_FATAL, "Error converting %s to spectrumrecords format", f->c_str());
       }
       carp(CARP_DEBUG, "Reading converted spectrum file %s", spectrumrecords.c_str());

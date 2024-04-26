@@ -30,6 +30,7 @@ bool cmp_pbspectra(pb::Spectrum a1, pb::Spectrum a2) {
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile,  ///< spectrumrecords file to output
+  int &spectra_converted, //output variable that tells the number of spectra converted  
   int ms_level,   /// MS level to extract (1 or 2)
   bool dia_mode  /// whether it's used in DIAmeter
 ) {
@@ -91,7 +92,9 @@ bool SpectrumRecordWriter::convert(
   }
   // sort all spectra by neutral mass.
   std::sort(all_spectra.begin(), all_spectra.end(), cmp_pbspectra);
-
+  
+  spectra_converted = all_spectra.size();
+  
   // Write the spectra to spectrum protocol buffer in spectrum records format.
   for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin();
          j != all_spectra.end();

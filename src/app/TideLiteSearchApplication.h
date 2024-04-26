@@ -65,6 +65,7 @@ class TideLiteSearchApplication : public CruxApplication {
   int num_threads_;
   double fragTol_;
   int granularityScale_;  
+  int total_spectra_num_;
   string tide_index_mzTab_file_path_;
 
   ofstream* out_tsv_target_; // original tide-search output format in tab-delimited text files (txt)

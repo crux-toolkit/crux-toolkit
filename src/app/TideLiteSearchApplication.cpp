@@ -75,6 +75,7 @@ TideLiteSearchApplication::TideLiteSearchApplication() {
   out_mztab_decoy_ = NULL;      // mzTAB output format for the decoy psms only
   out_pin_target_ = NULL;        // pin output format for percolator
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
+  total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum convertion
 
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
@@ -197,6 +198,10 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   // Join threads
   threadgroup_input_files.join_all();
 
+  if (total_spectra_num_ > 0) {
+    carp(CARP_INFO, "There were a total of %d spectrum conversions from %d input spectrum files.",
+         total_spectra_num_, inputFiles_.size());
+  }
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
 
   // Create the active_peptide_queues and peptide_readers for each threads
@@ -784,7 +789,10 @@ int TideLiteSearchApplication::calcResEvScore(
     vector<double>::const_iterator mass_itr = find(dAAMass_.begin(), dAAMass_.end(), tmpAAMass);
 
     if (mass_itr == dAAMass_.end()){
-      carp(CARP_FATAL, "'%lf' does not exist", tmpAAMass);
+      // for (vector<double>::const_iterator mass_itr = dAAMass_.begin(); mass_itr != dAAMass_.end(); ++mass_itr) {
+      //   carp(CARP_INFO, "AA mass: %lf", *mass_itr);
+      // }
+      carp(CARP_FATAL, "'%lf' does not exist. residue mass: %lf", tmpAAMass, residueMasses[res]);
     }
     
     int tmpAA = mass_itr - dAAMass_.begin();
@@ -1017,13 +1025,13 @@ void TideLiteSearchApplication::calcResidueScoreCount (
   int bottomRowBuffer = maxEvidence;
   int topRowBuffer = -minEvidence;
   int colBuffer = maxAaMass;
-  int colStart = nTermMass_;
+  int colStart = nTermMassBin_;
   int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
   int nCol = colBuffer + pepMassInt + maxAaMass;
   int rowFirst = bottomRowBuffer + 1;
   int rowLast = rowFirst - minScore + maxScore;
   int colFirst = colStart + 1;
-  int colLast = pepMassInt - cTermMass_;
+  int colLast = pepMassInt - cTermMassBin_;
   int initCountRow = bottomRowBuffer - minScore + 1;
   int initCountCol = colStart;
 
@@ -1054,25 +1062,26 @@ void TideLiteSearchApplication::calcResidueScoreCount (
 
     //&& -1 is to account for zero-based indexing in evidence vector
     //row = initCountRow + residueEvidueMatrix[ de ][ ma + nTermMass - 1 ]; //original
-    row = initCountRow + residueEvidenceMatrix[de][ma + 1 - 1]; //+1 for N-Term H and -1 for 0 indexing
+    row = initCountRow + residueEvidenceMatrix[de][ma + nTermMassBin_ - 1]; //+nTermMassBin for N-Term mod and -1 for 0 indexing
 
     //TODO need to change this to based off bool
-    if (nTermMass_ == 1) { //N-Term not modified
-      col = initCountCol + ma;
-    } else { //N-Term is modified
-      col = initCountCol + ma - nTermMass_ + 1;
-    }
+    // if (nTermMassBin_ == 1) { //N-Term not modified
+    //   col = initCountCol + ma;
+    // } else { //N-Term is modified
+    //   col = initCountCol + ma - nTermMassBin_ + 1;
+    // }
+    col = initCountCol + ma - nTermMassBin_ + 1;
 
-//    if ( col <= maxAaMass + colLast ) { //original
+    //  if ( col <= maxAaMass + colLast ) { // original
     if (col <= maxAaMass + colLast && col >= initCountCol) { //TODO not sure if below or above is correct
       dynProgArray[row][col] += dynProgArray[initCountRow][initCountCol] * dAAFreqN_[de];
     }
   }
 
-  //set to zero now that score counts for first amino acid are in matrix
+  // Set to zero now that score counts for first amino acid are in matrix
   dynProgArray[initCountRow][initCountCol] = 0.0;
 
-//The following code was added by AKF to make the DP calculation faster
+  //  The following code was reorganized by AKF to make the DP calculation ~3 times faster
   int newCol;
   for (ma = initCountCol+1; ma < colLast; ++ma) {
     col = ma;  
@@ -1663,9 +1672,14 @@ void TideLiteSearchApplication::getInputFiles(int thread_id) {
                          "spectrum files");
       }
       carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
-      if (!SpectrumRecordWriter::convert((*original_file_name).OriginalName, spectrumrecords)) {
+      int spectra_num = 0;
+      if (!SpectrumRecordWriter::convert((*original_file_name).OriginalName, spectrumrecords, spectra_num)) {
         carp(CARP_FATAL, "Error converting %s to spectrumrecords format", (*original_file_name).OriginalName.c_str());
       }
+      locks_array_[LOCK_SPECTRUM_READING]->lock();
+      total_spectra_num_ += spectra_num;
+      locks_array_[LOCK_SPECTRUM_READING]->unlock();
+
     }
     (*original_file_name).SpectrumRecords  = spectrumrecords;
     (*original_file_name).Keep = keepSpectrumrecords;
