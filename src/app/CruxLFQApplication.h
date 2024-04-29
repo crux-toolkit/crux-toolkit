@@ -9,7 +9,7 @@
 #include "model/Spectrum.h"
 
 using CruxLFQ::BINS_PER_DALTON;
-using CruxLFQ::getScanID;
+
 using CruxLFQ::Identification;
 using CruxLFQ::IndexedMassSpectralPeak;
 using CruxLFQ::IndexedSpectralResults;

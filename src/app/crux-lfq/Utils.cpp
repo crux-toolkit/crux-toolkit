@@ -46,7 +46,6 @@ vector<PSM> create_psm(const string& psm_file,
                        const string& psm_file_format,
                        const bool filtered,
                        const double q_value_threshold) {
-    carp(CARP_INFO, "loading psm data ...");
     vector<PSM> psm_data;
 
     string sequence_col, modifications_col;
@@ -66,14 +65,13 @@ vector<PSM> create_psm(const string& psm_file,
         while (matchFileReader.read_row(scan_col, charge_col,
                                         spectrum_precursor_mz_col, peptide_mass_col,
                                         sequence_col, modifications_col, spectrum_neutral_mass_col, retention_time)) {
-            PSM psm = {sequence_col,
-                       scan_col,
-                       charge_col,
-                       peptide_mass_col,
-                       peptide_mass_col,  // Protein Mass is the MonoIsotopic Mass --- Peptide Mass
-                       modifications_col,
-                       retention_time};
-            psm_data.push_back(psm);
+            psm_data.emplace_back(sequence_col,
+                                  scan_col,
+                                  charge_col,
+                                  peptide_mass_col,
+                                  peptide_mass_col,
+                                  modifications_col,
+                                  retention_time);
         }
     } else if (psm_file_format == "assign-confidence") {
         io::CSVReader<8, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
@@ -89,14 +87,14 @@ vector<PSM> create_psm(const string& psm_file,
                 continue;
             }
             retention_time = retention_time / 60.0;
-            PSM psm = {sequence_col,
-                       scan_col,
-                       charge_col,
-                       peptide_mass_col,
-                       peptide_mass_col,
-                       default_modifications_col,
-                       retention_time};
-            psm_data.push_back(psm);
+
+            psm_data.emplace_back(sequence_col,
+                                  scan_col,
+                                  charge_col,
+                                  peptide_mass_col,
+                                  peptide_mass_col,
+                                  default_modifications_col,
+                                  retention_time);
         }
     } else {
         carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
@@ -336,7 +334,7 @@ calculateTheoreticalIsotopeDistributions(
             if (isotopicMassesAndNormalizedAbundances.size() <
                     NUM_ISOTOPES_REQUIRED ||
                 abundances[i] > 0.1) {
-                isotopicMassesAndNormalizedAbundances.push_back(
+                isotopicMassesAndNormalizedAbundances.emplace_back(
                     std::make_pair(masses[i], abundances[i]));
             }
         }
@@ -349,7 +347,7 @@ calculateTheoreticalIsotopeDistributions(
         peptideModifiedSequences;
 
     for (auto& identification : allIdentifications) {
-        peptideModifiedSequences[identification.sequence].push_back(&identification);
+        peptideModifiedSequences[identification.sequence].emplace_back(&identification);
     }
 
     for (auto& identifications : peptideModifiedSequences) {
@@ -395,12 +393,12 @@ void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
                   const string& spectralFile, const vector<int>& chargeStates,
                   PpmTolerance& peakfindingTol,
-                  unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-                  const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
+                  unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
+                  const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
                   PpmTolerance& ppmTolerance,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
-                  CruxLFQResults& lfqResults) {
+                  CruxLFQResults* lfqResults) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
 
@@ -411,7 +409,9 @@ void processRange(int start, int end,
                 chargeState != identification.precursorCharge) {
                 continue;
             }
-            vector<IndexedMassSpectralPeak> xic = peakFind(
+
+            // we use a memory address here so as to be more efficent
+            vector<IndexedMassSpectralPeak>&& xic = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
                 identification.spectralFile, peakfindingTol, _ms1Scans,
@@ -431,7 +431,7 @@ void processRange(int start, int end,
                                      }),
                       xic.end());
 
-            vector<IsotopicEnvelope> isotopicEnvelopes = getIsotopicEnvelopes(
+            vector<IsotopicEnvelope>&& isotopicEnvelopes = getIsotopicEnvelopes(
                 xic, identification, chargeState,
                 modifiedSequenceToIsotopicDistribution, indexedPeaks);
 
@@ -493,7 +493,7 @@ void processRange(int start, int end,
             msmsFeature.isotopicEnvelopes.end());
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
-        lfqResults.Peaks[spectralFile].push_back(msmsFeature);
+        lfqResults->Peaks[spectralFile].push_back(msmsFeature);
     }
 }
 
@@ -501,22 +501,22 @@ void quantifyMs2IdentifiedPeptides(
     string spectraFile,
     const vector<Identification>& ms2IdsForThisFile,
     const vector<int>& chargeStates,
-    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks,
+    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
+    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
-    CruxLFQResults& lfqResults) {
+    CruxLFQResults* lfqResults) {
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
 
-   /* vector<Identification> ms2IdsForThisFile;
+    /* vector<Identification> ms2IdsForThisFile;
 
-    std::copy_if(
-        allIdentifications.begin(),
-        allIdentifications.end(),
-        std::back_inserter(ms2IdsForThisFile),
-        [&spectraFile](const Identification& id) {
-            return id.spectralFile == spectraFile;
-        });*/
+     std::copy_if(
+         allIdentifications.begin(),
+         allIdentifications.end(),
+         std::back_inserter(ms2IdsForThisFile),
+         [&spectraFile](const Identification& id) {
+             return id.spectralFile == spectraFile;
+         });*/
 
     if (ms2IdsForThisFile.empty()) {
         return;
@@ -537,7 +537,7 @@ void quantifyMs2IdentifiedPeptides(
         int start = i * chunkSize;
         int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
 
-        threads.push_back(std::thread([start, end,
+        threads.emplace_back(std::thread([start, end,
                                        &ms2IdsForThisFile,
                                        &spectraFile,
                                        &chargeStates,
@@ -581,10 +581,10 @@ double toMass(double massToChargeRatio, int charge) {
     return std::abs(charge) * massToChargeRatio - charge * PROTONMASS;
 }
 
-int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>& indexedPeaks, int zeroBasedScanIndex) {
+int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPeaks, int zeroBasedScanIndex) {
     int m = 0;
     int l = 0;
-    int r = static_cast<int>(indexedPeaks.size()) - 1;
+    int r = static_cast<int>(indexedPeaks->size()) - 1;
 
     while (l <= r) {
         m = l + ((r - l) / 2);
@@ -592,7 +592,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>& indexedPea
         if (r - l < 2) {
             break;
         }
-        if (indexedPeaks[m].zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+        if (indexedPeaks->operator[](m).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
             l = m + 1;
         } else {
             r = m - 1;
@@ -600,7 +600,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>& indexedPea
     }
 
     for (int i = m; i >= 0; i--) {
-        if (indexedPeaks[i].zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+        if (indexedPeaks->operator[](i).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
             break;
         }
 
@@ -625,11 +625,11 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>& indexedPea
  * @return A pointer to the indexed mass spectral peak, or nullptr if not found.
  */
 
-IndexedMassSpectralPeak getIndexedPeak(
+IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks) {
-    IndexedMassSpectralPeak bestPeak;
+    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
+    IndexedMassSpectralPeak* bestPeak = nullptr;
 
     // Calculate the maximum value using tolerance
     double maxValue = tolerance.GetMaximumValue(theorMass);
@@ -642,10 +642,10 @@ IndexedMassSpectralPeak getIndexedPeak(
     int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
 
     for (int j = floorMz; j <= ceilingMz; j++) {
-        if (j < indexedPeaks.size() && indexedPeaks[j].size() > 0) {
-            const auto& bin = indexedPeaks[j];
+        if (j < indexedPeaks->size() && indexedPeaks->operator[](j).size() > 0) {
+            const auto& bin = indexedPeaks->operator[](j);
 
-            int index = binarySearchForIndexedPeak(bin, zeroBasedScanIndex);
+            int index = binarySearchForIndexedPeak(&bin, zeroBasedScanIndex);
 
             for (int i = index; i < bin.size(); i++) {
                 const auto& peak = bin[i];
@@ -658,8 +658,8 @@ IndexedMassSpectralPeak getIndexedPeak(
                 if (
                     tolerance.Within(expMass, theorMass) &&
                     peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
-                    (bestPeak.zeroBasedMs1ScanIndex == -1 || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak.mz, chargeState) - theorMass))) {
-                    bestPeak = peak;
+                    (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
+                    bestPeak = const_cast<CruxLFQ::IndexedMassSpectralPeak*>(&peak);
                 }
             }
         }
@@ -671,12 +671,17 @@ IndexedMassSpectralPeak getIndexedPeak(
 vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
-    unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks) {
+    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
+    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
     vector<IndexedMassSpectralPeak> xic;
-    vector<Ms1ScanInfo> ms1Scans = _ms1Scans[spectra_file];
+
+    vector<Ms1ScanInfo>* ms1Scans = &_ms1Scans->operator[](spectra_file);
+
     int precursorScanIndex = -1;
-    for (const Ms1ScanInfo& ms1Scan : ms1Scans) {
+
+    for (size_t i = 0; i < ms1Scans->size(); i++) {
+        Ms1ScanInfo ms1Scan = ms1Scans->at(i);
+
         if (ms1Scan.retentionTime < idRetentionTime) {
             precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
         } else {
@@ -686,38 +691,52 @@ vector<IndexedMassSpectralPeak> peakFind(
 
     // go right
     int missedScans = 0;
-    xic.reserve(ms1Scans.size());  // Reserve memory for xic to avoid frequent reallocations
-    for (int t = precursorScanIndex; t < ms1Scans.size(); t++) {
-        auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
 
-        if (peak.zeroBasedMs1ScanIndex == -1 && t != precursorScanIndex) {
+    xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
+
+    // std::thread rightThread([&]() {
+    for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
+        auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+
+        if (peak == nullptr && t != precursorScanIndex) {
             missedScans++;
-        } else if (peak.zeroBasedMs1ScanIndex != -1) {
+
+        } else if (peak != nullptr) {
             missedScans = 0;
-            xic.push_back(peak);
+
+            xic.push_back(*peak);
         }
 
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
     }
+    // });
 
     // go left
-    missedScans = 0;
+    // missedScans = 0;
+    // std::thread leftThread([&]() {
     for (int t = precursorScanIndex - 1; t >= 0; t--) {
-        auto peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+        auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
 
-        if (peak.zeroBasedMs1ScanIndex == -1 && t != precursorScanIndex) {
+        if (peak == nullptr && t != precursorScanIndex) {
             missedScans++;
-        } else if (peak.zeroBasedMs1ScanIndex != -1) {
+
+        } else if (peak != nullptr) {
             missedScans = 0;
-            xic.push_back(peak);
+
+            xic.push_back(*peak);
         }
 
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
     }
+    // });
+
+    // Wait for both threads to finish
+    // rightThread.join();
+    // leftThread.join();
 
     std::sort(
         xic.begin(), xic.end(),
@@ -728,20 +747,12 @@ vector<IndexedMassSpectralPeak> peakFind(
     return xic;
 }
 
-string getScanID(string spectrum_id) {
-    size_t scanPos = spectrum_id.find("scan=");
-    if (scanPos != std::string::npos) {
-        return spectrum_id.substr(scanPos + 5);
-    }
-    return "";
-}
-
 vector<IsotopicEnvelope> getIsotopicEnvelopes(
     const vector<IndexedMassSpectralPeak>& xic,
     const Identification& identification, const int chargeState,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
     vector<IsotopicEnvelope> isotopicEnvelopes;
 
     vector<pair<double, double>> isotopeMassShifts = modifiedSequenceToIsotopicDistribution[identification.sequence];
@@ -803,17 +814,17 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                                          theoreticalIsotopeMassShifts[i] + shift.first * C13MinusC12;
                     double theoreticalIsotopeIntensity = theoreticalIsotopeAbundances[i] * peak.intensity;
 
-                    IndexedMassSpectralPeak isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState, indexedPeaks);
+                    IndexedMassSpectralPeak* isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState, indexedPeaks);
 
-                    if (isotopePeak.zeroBasedMs1ScanIndex == -1 || isotopePeak.intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak.intensity > theoreticalIsotopeIntensity * 4.0) {
+                    if (isotopePeak == nullptr || isotopePeak->intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak->intensity > theoreticalIsotopeIntensity * 4.0) {
                         break;
                     }
 
-                    shift.second.push_back(std::make_tuple(isotopePeak.intensity,
-                                                           theoreticalIsotopeIntensity,
-                                                           isotopeMass));
+                    shift.second.emplace_back(std::make_tuple(isotopePeak->intensity,
+                                                              theoreticalIsotopeIntensity,
+                                                              isotopeMass));
                     if (shift.first == 0) {
-                        experimentalIsotopeIntensities[i] = isotopePeak.intensity;
+                        experimentalIsotopeIntensities[i] = isotopePeak->intensity;
                     }
                 }
             }
@@ -839,9 +850,8 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                 std::accumulate(experimentalIsotopeIntensities.begin(),
                                 experimentalIsotopeIntensities.end(), 0.0);
 
-            IsotopicEnvelope isotopicEnvelope(peak, chargeState,
-                                              sumExperimentalIntensities);
-            isotopicEnvelopes.push_back(isotopicEnvelope);
+            isotopicEnvelopes.emplace_back(peak, chargeState,
+                                           sumExperimentalIntensities);
         }
     }
 
@@ -853,10 +863,8 @@ filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks) {
     std::vector<double> theorIntensity;
 
     for (const IsotopePeak& peak : isotopePeaks) {
-        double _expIntensity = std::get<0>(peak);
-        expIntensity.push_back(_expIntensity);
-        double _theorIntensity = std::get<1>(peak);
-        theorIntensity.push_back(_theorIntensity);
+        expIntensity.emplace_back(std::get<0>(peak));
+        theorIntensity.emplace_back(std::get<1>(peak));
     }
 
     filterResults results{expIntensity, theorIntensity};
@@ -874,7 +882,7 @@ bool checkIsotopicEnvelopeCorrelation(
     map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
     const IndexedMassSpectralPeak peak, int chargeState,
     PpmTolerance& isotopeTolerance,
-    const vector<vector<IndexedMassSpectralPeak>>& indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
     filterResults results =
         filterMassShiftToIsotopePeaks(massShiftToIsotopePeaks[0]);
     double corr = Pearson(results.expIntensity, results.theorIntensity);
@@ -890,15 +898,15 @@ bool checkIsotopicEnvelopeCorrelation(
             unexpectedMass = std::min(unexpectedMass, theorMass);
         }
         unexpectedMass -= C13MinusC12;
-        IndexedMassSpectralPeak unexpectedPeak =
+        IndexedMassSpectralPeak* unexpectedPeak =
             getIndexedPeak(unexpectedMass, peak.zeroBasedMs1ScanIndex,
                            isotopeTolerance, chargeState, indexedPeaks);
 
-        if (unexpectedPeak.zeroBasedMs1ScanIndex == -1) {
-            shift.second.push_back(std::make_tuple(0.0, 0.0, unexpectedMass));
+        if (unexpectedPeak == nullptr) {
+            shift.second.emplace_back(std::make_tuple(0.0, 0.0, unexpectedMass));
         } else {
-            shift.second.push_back(
-                std::make_tuple(unexpectedPeak.intensity, 0.0, unexpectedMass));
+            shift.second.emplace_back(
+                std::make_tuple(unexpectedPeak->intensity, 0.0, unexpectedMass));
         }
     }
 
@@ -923,7 +931,7 @@ bool checkIsotopicEnvelopeCorrelation(
 }
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime,
-             unordered_map<string, vector<Ms1ScanInfo>>& _ms1Scans) {
+             unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans) {
     // find out if we need to split this peak by using the discrimination factor
     // this method assumes that the isotope envelopes in a chromatographic peak
     // are already sorted by MS1 scan number
@@ -988,10 +996,10 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime,
 
                 int nextMs1ScanNum = -1;
                 for (int j = valleyEnvelope.indexedPeak.zeroBasedMs1ScanIndex - 1;
-                     j < _ms1Scans[peak.spectralFile].size() && j >= 0;
+                     j < _ms1Scans->operator[](peak.spectralFile).size() && j >= 0;
                      j += direction) {
-                    if (_ms1Scans[peak.spectralFile][j].oneBasedScanNumber >= 0 &&
-                        _ms1Scans[peak.spectralFile][j].oneBasedScanNumber !=
+                    if (_ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber >= 0 &&
+                        _ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber !=
                             valleyEnvelope.indexedPeak.zeroBasedMs1ScanIndex) {
                         nextMs1ScanNum = j + 1;
                         break;
