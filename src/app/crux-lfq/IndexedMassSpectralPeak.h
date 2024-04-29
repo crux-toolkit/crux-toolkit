@@ -16,10 +16,10 @@ class IndexedMassSpectralPeak {
 
     // Default constructor
     IndexedMassSpectralPeak()
-        : mz(0.0),                    // Initialize mz to a suitable default
-          intensity(0.0),             // Initialize intensity to a suitable default
-          zeroBasedMs1ScanIndex(-1),  // Initialize zeroBasedMs1ScanIndex to a suitable default
-          retentionTime(0.0)          // Initialize retentionTime to a suitable default
+        : mz(0.0),                   // Initialize mz to a suitable default
+          intensity(0.0),            // Initialize intensity to a suitable default
+          zeroBasedMs1ScanIndex(0),  // Initialize zeroBasedMs1ScanIndex to a suitable default
+          retentionTime(0.0)         // Initialize retentionTime to a suitable default
     {}
 
     IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime);
