@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "IndexedMassSpectralPeak.h"
+#include "LFQMetaData.h"
 #include "crux-lfq/IntensityNormalizationEngine.h"
 #include "crux-lfq/Results.h"
 #include "crux-lfq/Utils.h"
@@ -104,6 +105,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         vector<vector<CruxLFQ::IndexedMassSpectralPeak>*> convertedPeaks;
 
+        auto metadata = &CruxLFQ::LFQMetaData::getInstance();
         std::transform(
             indexResults._indexedPeaks.begin(),
             indexResults._indexedPeaks.end(),
@@ -111,6 +113,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             [](vector<CruxLFQ::IndexedMassSpectralPeak>& innerVec) {
                 return &innerVec;
             });
+        metadata->setIndexedPeaks(&convertedPeaks);  // TODO - ensure metaData is used throughout the code, also for all other data that is uneccessarily passed around
         auto* conv_ptr = &convertedPeaks;
 
         CruxLFQ::quantifyMs2IdentifiedPeptides(

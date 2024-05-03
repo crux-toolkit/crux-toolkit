@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "IndexedMassSpectralPeak.h"
+#include "LFQMetaData.h"
 #include "PpmTolerance.h"
 #include "ProteinGroup.h"
 #include "io/carp.h"
@@ -244,7 +245,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
 
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
-    int chargeState, vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
+    int chargeState);
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
@@ -260,8 +261,7 @@ void processRange(int start, int end,
 vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
-    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
+    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans);
 
 vector<IsotopicEnvelope> getIsotopicEnvelopes(
     const vector<IndexedMassSpectralPeak>& xic,

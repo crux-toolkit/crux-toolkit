@@ -415,8 +415,7 @@ void processRange(int start, int end,
             vector<IndexedMassSpectralPeak>&& xic = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
-                identification.spectralFile, peakfindingTol, _ms1Scans,
-                indexedPeaks);
+                identification.spectralFile, peakfindingTol, _ms1Scans);
 
             std::sort(xic.begin(), xic.end(),
                       [](const IndexedMassSpectralPeak a,
@@ -628,8 +627,9 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
 
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
-    int chargeState,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
+    int chargeState) {
+    auto metaData = &LFQMetaData::getInstance();
+    auto indexedPeaks = metaData->getIndexedPeaks();
     IndexedMassSpectralPeak* bestPeak = nullptr;
 
     // Calculate the maximum value using tolerance
@@ -676,8 +676,7 @@ IndexedMassSpectralPeak* getIndexedPeak(
 vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
-    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
+    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans) {
     vector<IndexedMassSpectralPeak> xic;
 
     vector<Ms1ScanInfo>* ms1Scans = &_ms1Scans->operator[](spectra_file);
@@ -703,7 +702,7 @@ vector<IndexedMassSpectralPeak> peakFind(
 
     std::thread rightThread([&]() {
         for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
-            auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+            auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
             if (peak == nullptr && t != precursorScanIndex) {
                 missedScans++;
@@ -726,7 +725,7 @@ vector<IndexedMassSpectralPeak> peakFind(
     missedScans = 0;
     std::thread leftThread([&]() {
         for (int t = precursorScanIndex - 1; t >= 0; t--) {
-            auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+            auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
             if (peak == nullptr && t != precursorScanIndex) {
                 missedScans++;
@@ -829,7 +828,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                                          theoreticalIsotopeMassShifts[i] + shift.first * C13MinusC12;
                     double theoreticalIsotopeIntensity = theoreticalIsotopeAbundances[i] * peak.intensity;
 
-                    IndexedMassSpectralPeak* isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState, indexedPeaks);
+                    IndexedMassSpectralPeak* isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState);
 
                     if (isotopePeak == nullptr || isotopePeak->intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak->intensity > theoreticalIsotopeIntensity * 4.0) {
                         break;
@@ -915,7 +914,7 @@ bool checkIsotopicEnvelopeCorrelation(
         unexpectedMass -= C13MinusC12;
         IndexedMassSpectralPeak* unexpectedPeak =
             getIndexedPeak(unexpectedMass, peak.zeroBasedMs1ScanIndex,
-                           isotopeTolerance, chargeState, indexedPeaks);
+                           isotopeTolerance, chargeState);
 
         if (unexpectedPeak == nullptr) {
             shift.second.emplace_back(std::make_tuple(0.0, 0.0, unexpectedMass));
