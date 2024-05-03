@@ -8,6 +8,7 @@
 #include <csignal>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -394,7 +395,7 @@ void processRange(int start, int end,
                   const string& spectralFile, const vector<int>& chargeStates,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-                  const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
+                  const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
                   PpmTolerance& ppmTolerance,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
@@ -502,7 +503,7 @@ void quantifyMs2IdentifiedPeptides(
     const vector<Identification>& ms2IdsForThisFile,
     const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
     CruxLFQResults* lfqResults) {
@@ -525,7 +526,6 @@ void quantifyMs2IdentifiedPeptides(
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
 
-    /*
     // Used for threading /////////////////////////////
     int totalCount = ms2IdsForThisFile.size();
     vector<std::thread> threads;
@@ -538,15 +538,15 @@ void quantifyMs2IdentifiedPeptides(
         int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
 
         threads.emplace_back(std::thread([start, end,
-                                       &ms2IdsForThisFile,
-                                       &spectraFile,
-                                       &chargeStates,
-                                       &peakfindingTol,
-                                       &_ms1Scans,
-                                       &indexedPeaks,
-                                       &ppmTolerance,
-                                       &modifiedSequenceToIsotopicDistribution,
-                                       &lfqResults]() {
+                                          &ms2IdsForThisFile,
+                                          &spectraFile,
+                                          &chargeStates,
+                                          &peakfindingTol,
+                                          &_ms1Scans,
+                                          &indexedPeaks,
+                                          &ppmTolerance,
+                                          &modifiedSequenceToIsotopicDistribution,
+                                          &lfqResults]() {
             processRange(start, end,
                          ms2IdsForThisFile,
                          spectraFile,
@@ -565,12 +565,13 @@ void quantifyMs2IdentifiedPeptides(
         thread.join();
     }
     // Used for threading /////////////////////////////
-    */
 
-    processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
+    /*
+        processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
                  chargeStates, peakfindingTol, _ms1Scans,
                  indexedPeaks, ppmTolerance,
                  modifiedSequenceToIsotopicDistribution, lfqResults);
+    */
 }
 
 double toMz(double mass, int charge) {
@@ -628,7 +629,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
     IndexedMassSpectralPeak* bestPeak = nullptr;
 
     // Calculate the maximum value using tolerance
@@ -641,14 +642,16 @@ IndexedMassSpectralPeak* getIndexedPeak(
     double minMzValue = toMz(minValue, chargeState);
     int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
 
+    // The thread was commented out because it seems to lead to stochastic results
+    // std::thread getIndThread([&]() {
     for (int j = floorMz; j <= ceilingMz; j++) {
-        if (j < indexedPeaks->size() && indexedPeaks->operator[](j).size() > 0) {
+        if (j < indexedPeaks->size() && indexedPeaks->operator[](j)->size() > 0) {
             const auto& bin = indexedPeaks->operator[](j);
 
-            int index = binarySearchForIndexedPeak(&bin, zeroBasedScanIndex);
+            int index = binarySearchForIndexedPeak(bin, zeroBasedScanIndex);
 
-            for (int i = index; i < bin.size(); i++) {
-                const auto& peak = bin[i];
+            for (int i = index; i < bin->size(); i++) {
+                const auto& peak = bin->operator[](i);
                 if (peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
                     break;
                 }
@@ -659,12 +662,14 @@ IndexedMassSpectralPeak* getIndexedPeak(
                     tolerance.Within(expMass, theorMass) &&
                     peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
                     (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
+                    std::lock_guard<std::mutex> lock(mtx);
                     bestPeak = const_cast<CruxLFQ::IndexedMassSpectralPeak*>(&peak);
                 }
             }
         }
     }
-
+    // });
+    // getIndThread.join();
     return bestPeak;
 }
 
@@ -672,7 +677,7 @@ vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
     unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
     vector<IndexedMassSpectralPeak> xic;
 
     vector<Ms1ScanInfo>* ms1Scans = &_ms1Scans->operator[](spectra_file);
@@ -692,51 +697,61 @@ vector<IndexedMassSpectralPeak> peakFind(
     // go right
     int missedScans = 0;
 
-    xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
+    // xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
 
-    // std::thread rightThread([&]() {
-    for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
-        auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+    vector<IndexedMassSpectralPeak> leftBatch, rightBatch;
 
-        if (peak == nullptr && t != precursorScanIndex) {
-            missedScans++;
+    std::thread rightThread([&]() {
+        for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
+            auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
 
-        } else if (peak != nullptr) {
-            missedScans = 0;
+            if (peak == nullptr && t != precursorScanIndex) {
+                missedScans++;
 
-            xic.push_back(*peak);
+            } else if (peak != nullptr) {
+                missedScans = 0;
+                // Lock the vector before inserting to prevent race conditions
+                // std::lock_guard<std::mutex> lock(mtx);
+                // xic.push_back(*peak);
+                leftBatch.push_back(*peak);
+            }
+
+            if (missedScans > MISSED_SCANS_ALLOWED) {
+                break;
+            }
         }
-
-        if (missedScans > MISSED_SCANS_ALLOWED) {
-            break;
-        }
-    }
-    // });
+    });
 
     // go left
-    // missedScans = 0;
-    // std::thread leftThread([&]() {
-    for (int t = precursorScanIndex - 1; t >= 0; t--) {
-        auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
+    missedScans = 0;
+    std::thread leftThread([&]() {
+        for (int t = precursorScanIndex - 1; t >= 0; t--) {
+            auto* peak = getIndexedPeak(mass, t, tolerance, charge, indexedPeaks);
 
-        if (peak == nullptr && t != precursorScanIndex) {
-            missedScans++;
+            if (peak == nullptr && t != precursorScanIndex) {
+                missedScans++;
 
-        } else if (peak != nullptr) {
-            missedScans = 0;
+            } else if (peak != nullptr) {
+                missedScans = 0;
+                // Lock the vector before inserting to prevent race conditions
+                // std::lock_guard<std::mutex> lock(mtx);
+                // xic.push_back(*peak);
+                rightBatch.push_back(*peak);
+            }
 
-            xic.push_back(*peak);
+            if (missedScans > MISSED_SCANS_ALLOWED) {
+                break;
+            }
         }
-
-        if (missedScans > MISSED_SCANS_ALLOWED) {
-            break;
-        }
-    }
-    // });
+    });
 
     // Wait for both threads to finish
-    // rightThread.join();
-    // leftThread.join();
+    rightThread.join();
+    leftThread.join();
+
+    xic.reserve(leftBatch.size() + rightBatch.size());  // Reserve memory for xic
+    xic.insert(xic.end(), leftBatch.begin(), leftBatch.end());
+    xic.insert(xic.end(), rightBatch.begin(), rightBatch.end());
 
     std::sort(
         xic.begin(), xic.end(),
@@ -752,7 +767,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
     const Identification& identification, const int chargeState,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
     vector<IsotopicEnvelope> isotopicEnvelopes;
 
     vector<pair<double, double>> isotopeMassShifts = modifiedSequenceToIsotopicDistribution[identification.sequence];
@@ -882,7 +897,7 @@ bool checkIsotopicEnvelopeCorrelation(
     map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
     const IndexedMassSpectralPeak peak, int chargeState,
     PpmTolerance& isotopeTolerance,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks) {
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
     filterResults results =
         filterMassShiftToIsotopePeaks(massShiftToIsotopePeaks[0]);
     double corr = Pearson(results.expIntensity, results.theorIntensity);

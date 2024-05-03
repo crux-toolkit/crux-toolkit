@@ -231,7 +231,7 @@ void quantifyMs2IdentifiedPeptides(
     const vector<Identification>& allIdentifications,
     const vector<int>& chargeStates,
     unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
     CruxLFQResults* lfqResults);
@@ -244,14 +244,14 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
 
 IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
-    int chargeState, vector<vector<IndexedMassSpectralPeak>>* indexedPeaks);
+    int chargeState, vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
 
 void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
                   const string& spectralFile, const vector<int>& chargeStates,
                   PpmTolerance& peakfindingTol,
                   unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-                  const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks,
+                  const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
                   PpmTolerance& ppmTolerance,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
@@ -261,20 +261,20 @@ vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance,
     unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
 
 vector<IsotopicEnvelope> getIsotopicEnvelopes(
     const vector<IndexedMassSpectralPeak>& xic,
     const Identification& identification, const int chargeState,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
 
 bool checkIsotopicEnvelopeCorrelation(
     map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
     const IndexedMassSpectralPeak peak, int chargeState,
     PpmTolerance& isotopeTolerance,
-    const vector<vector<IndexedMassSpectralPeak>>* indexedPeaks);
+    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks);
 
 struct filterResults {
     vector<double> expIntensity;

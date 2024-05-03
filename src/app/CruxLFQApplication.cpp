@@ -102,12 +102,23 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
                 return identification.spectralFile == spectra_file;
             });
 
+        vector<vector<CruxLFQ::IndexedMassSpectralPeak>*> convertedPeaks;
+
+        std::transform(
+            indexResults._indexedPeaks.begin(),
+            indexResults._indexedPeaks.end(),
+            std::back_inserter(convertedPeaks),
+            [](vector<CruxLFQ::IndexedMassSpectralPeak>& innerVec) {
+                return &innerVec;
+            });
+        auto* conv_ptr = &convertedPeaks;
+
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
             filteredIdentifications,
             chargeStates,
             &indexResults._ms1Scans,
-            &indexResults._indexedPeaks,
+            conv_ptr,
             modifiedSequenceToIsotopicDistribution,
             &lfqResults);
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
