@@ -394,8 +394,6 @@ void processRange(int start, int end,
                   const vector<Identification>& ms2IdsForThisFile,
                   const string& spectralFile, const vector<int>& chargeStates,
                   PpmTolerance& peakfindingTol,
-                  unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-                  const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
                   PpmTolerance& ppmTolerance,
                   unordered_map<string, vector<pair<double, double>>>&
                       modifiedSequenceToIsotopicDistribution,
@@ -415,7 +413,7 @@ void processRange(int start, int end,
             vector<IndexedMassSpectralPeak>&& xic = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
-                identification.spectralFile, peakfindingTol, _ms1Scans);
+                identification.spectralFile, peakfindingTol);
 
             std::sort(xic.begin(), xic.end(),
                       [](const IndexedMassSpectralPeak a,
@@ -433,7 +431,7 @@ void processRange(int start, int end,
 
             vector<IsotopicEnvelope>&& isotopicEnvelopes = getIsotopicEnvelopes(
                 xic, identification, chargeState,
-                modifiedSequenceToIsotopicDistribution, indexedPeaks);
+                modifiedSequenceToIsotopicDistribution);
 
             msmsFeature.isotopicEnvelopes.insert(
                 msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
@@ -444,7 +442,7 @@ void processRange(int start, int end,
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
 
-        cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes, _ms1Scans);
+        cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes);
 
         if (msmsFeature.isotopicEnvelopes.empty()) {
             continue;
@@ -501,22 +499,10 @@ void quantifyMs2IdentifiedPeptides(
     string spectraFile,
     const vector<Identification>& ms2IdsForThisFile,
     const vector<int>& chargeStates,
-    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks,
     unordered_map<string, vector<pair<double, double>>>&
         modifiedSequenceToIsotopicDistribution,
     CruxLFQResults* lfqResults) {
     carp(CARP_INFO, "Quantifying MS2, this may take some time...");
-
-    /* vector<Identification> ms2IdsForThisFile;
-
-     std::copy_if(
-         allIdentifications.begin(),
-         allIdentifications.end(),
-         std::back_inserter(ms2IdsForThisFile),
-         [&spectraFile](const Identification& id) {
-             return id.spectralFile == spectraFile;
-         });*/
 
     if (ms2IdsForThisFile.empty()) {
         return;
@@ -524,7 +510,7 @@ void quantifyMs2IdentifiedPeptides(
 
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
-
+    /*
     // Used for threading /////////////////////////////
     int totalCount = ms2IdsForThisFile.size();
     vector<std::thread> threads;
@@ -541,8 +527,6 @@ void quantifyMs2IdentifiedPeptides(
                                           &spectraFile,
                                           &chargeStates,
                                           &peakfindingTol,
-                                          &_ms1Scans,
-                                          &indexedPeaks,
                                           &ppmTolerance,
                                           &modifiedSequenceToIsotopicDistribution,
                                           &lfqResults]() {
@@ -551,8 +535,6 @@ void quantifyMs2IdentifiedPeptides(
                          spectraFile,
                          chargeStates,
                          peakfindingTol,
-                         _ms1Scans,
-                         indexedPeaks,
                          ppmTolerance,
                          modifiedSequenceToIsotopicDistribution,
                          lfqResults);
@@ -564,13 +546,12 @@ void quantifyMs2IdentifiedPeptides(
         thread.join();
     }
     // Used for threading /////////////////////////////
-
-    /*
-        processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                 chargeStates, peakfindingTol, _ms1Scans,
-                 indexedPeaks, ppmTolerance,
-                 modifiedSequenceToIsotopicDistribution, lfqResults);
     */
+    
+        processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
+                 chargeStates, peakfindingTol, ppmTolerance,
+                 modifiedSequenceToIsotopicDistribution, lfqResults);
+    
 }
 
 double toMz(double mass, int charge) {
@@ -581,34 +562,48 @@ double toMass(double massToChargeRatio, int charge) {
     return std::abs(charge) * massToChargeRatio - charge * PROTONMASS;
 }
 
+// int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPeaks, int zeroBasedScanIndex) {
+//     int m = 0;
+//     int l = 0;
+//     int r = static_cast<int>(indexedPeaks->size()) - 1;
+
+//     while (l <= r) {
+//         m = l + ((r - l) / 2);
+
+//         if (r - l < 2) {
+//             break;
+//         }
+//         if (indexedPeaks->operator[](m).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+//             l = m + 1;
+//         } else {
+//             r = m - 1;
+//         }
+//     }
+
+//     for (int i = m; i >= 0; i--) {
+//         if (indexedPeaks->operator[](i).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+//             break;
+//         }
+
+//         m--;
+//     }
+
+//     if (m < 0) {
+//         m = 0;
+//     }
+
+//     return m;
+// }
+
 int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPeaks, int zeroBasedScanIndex) {
-    int m = 0;
-    int l = 0;
-    int r = static_cast<int>(indexedPeaks->size()) - 1;
+    auto it = std::lower_bound(indexedPeaks->begin(), indexedPeaks->end(), zeroBasedScanIndex,
+                               [](const IndexedMassSpectralPeak& peak, int value) {
+                                   return peak.zeroBasedMs1ScanIndex < value;
+                               });
 
-    while (l <= r) {
-        m = l + ((r - l) / 2);
-
-        if (r - l < 2) {
-            break;
-        }
-        if (indexedPeaks->operator[](m).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
-            l = m + 1;
-        } else {
-            r = m - 1;
-        }
-    }
-
-    for (int i = m; i >= 0; i--) {
-        if (indexedPeaks->operator[](i).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
-            break;
-        }
-
+    int m = std::distance(indexedPeaks->begin(), it);
+    if (m > 0 && indexedPeaks->at(m).zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
         m--;
-    }
-
-    if (m < 0) {
-        m = 0;
     }
 
     return m;
@@ -662,7 +657,7 @@ IndexedMassSpectralPeak* getIndexedPeak(
                     tolerance.Within(expMass, theorMass) &&
                     peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
                     (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
-                    std::lock_guard<std::mutex> lock(mtx);
+                    // std::lock_guard<std::mutex> lock(mtx);
                     bestPeak = const_cast<CruxLFQ::IndexedMassSpectralPeak*>(&peak);
                 }
             }
@@ -675,17 +670,16 @@ IndexedMassSpectralPeak* getIndexedPeak(
 
 vector<IndexedMassSpectralPeak> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
-    PpmTolerance tolerance,
-    unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans) {
-    vector<IndexedMassSpectralPeak> xic;
+    PpmTolerance tolerance) {
+    auto metaData = &LFQMetaData::getInstance();
+    unordered_map<string, vector<Ms1ScanInfo>>* ms1Scans = metaData->getMs1Scans();
 
-    vector<Ms1ScanInfo>* ms1Scans = &_ms1Scans->operator[](spectra_file);
+    vector<Ms1ScanInfo>* ms1ScanVec = &ms1Scans->operator[](spectra_file);
 
     int precursorScanIndex = -1;
 
-    for (size_t i = 0; i < ms1Scans->size(); i++) {
-        Ms1ScanInfo ms1Scan = ms1Scans->at(i);
-
+    for (size_t i = 0; i < ms1ScanVec->size(); i++) {
+        Ms1ScanInfo ms1Scan = ms1ScanVec->at(i);
         if (ms1Scan.retentionTime < idRetentionTime) {
             precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
         } else {
@@ -696,61 +690,64 @@ vector<IndexedMassSpectralPeak> peakFind(
     // go right
     int missedScans = 0;
 
-    // xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
+    vector<IndexedMassSpectralPeak> xic;
+    xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
 
-    vector<IndexedMassSpectralPeak> leftBatch, rightBatch;
+    // vector<IndexedMassSpectralPeak> leftBatch, rightBatch;
+    // leftBatch.reserve(ms1Scans->size());
+    // rightBatch.reserve(ms1Scans->size());
 
-    std::thread rightThread([&]() {
-        for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
-            auto* peak = getIndexedPeak(mass, t, tolerance, charge);
+    // std::thread rightThread([&]() {
+    for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
+        auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
-            if (peak == nullptr && t != precursorScanIndex) {
-                missedScans++;
+        if (peak == nullptr && t != precursorScanIndex) {
+            missedScans++;
 
-            } else if (peak != nullptr) {
-                missedScans = 0;
-                // Lock the vector before inserting to prevent race conditions
-                // std::lock_guard<std::mutex> lock(mtx);
-                // xic.push_back(*peak);
-                leftBatch.push_back(*peak);
-            }
-
-            if (missedScans > MISSED_SCANS_ALLOWED) {
-                break;
-            }
+        } else if (peak != nullptr) {
+            missedScans = 0;
+            // Lock the vector before inserting to prevent race conditions
+            // std::lock_guard<std::mutex> lock(mtx);
+            xic.push_back(*peak);
+            // leftBatch.push_back(*peak);
         }
-    });
+
+        if (missedScans > MISSED_SCANS_ALLOWED) {
+            break;
+        }
+    }
+    // });
 
     // go left
     missedScans = 0;
-    std::thread leftThread([&]() {
-        for (int t = precursorScanIndex - 1; t >= 0; t--) {
-            auto* peak = getIndexedPeak(mass, t, tolerance, charge);
+    // std::thread leftThread([&]() {
+    for (int t = precursorScanIndex - 1; t >= 0; t--) {
+        auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
-            if (peak == nullptr && t != precursorScanIndex) {
-                missedScans++;
+        if (peak == nullptr && t != precursorScanIndex) {
+            missedScans++;
 
-            } else if (peak != nullptr) {
-                missedScans = 0;
-                // Lock the vector before inserting to prevent race conditions
-                // std::lock_guard<std::mutex> lock(mtx);
-                // xic.push_back(*peak);
-                rightBatch.push_back(*peak);
-            }
-
-            if (missedScans > MISSED_SCANS_ALLOWED) {
-                break;
-            }
+        } else if (peak != nullptr) {
+            missedScans = 0;
+            // Lock the vector before inserting to prevent race conditions
+            // std::lock_guard<std::mutex> lock(mtx);
+            xic.push_back(*peak);
+            // rightBatch.push_back(*peak);
         }
-    });
+
+        if (missedScans > MISSED_SCANS_ALLOWED) {
+            break;
+        }
+    }
+    // });
 
     // Wait for both threads to finish
-    rightThread.join();
-    leftThread.join();
+    // rightThread.join();
+    // leftThread.join();
 
-    xic.reserve(leftBatch.size() + rightBatch.size());  // Reserve memory for xic
-    xic.insert(xic.end(), leftBatch.begin(), leftBatch.end());
-    xic.insert(xic.end(), rightBatch.begin(), rightBatch.end());
+    // xic.reserve(leftBatch.size() + rightBatch.size());  // Reserve memory for xic
+    // xic.insert(xic.end(), leftBatch.begin(), leftBatch.end());
+    // xic.insert(xic.end(), rightBatch.begin(), rightBatch.end());
 
     std::sort(
         xic.begin(), xic.end(),
@@ -765,8 +762,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
     const vector<IndexedMassSpectralPeak>& xic,
     const Identification& identification, const int chargeState,
     unordered_map<string, vector<pair<double, double>>>&
-        modifiedSequenceToIsotopicDistribution,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
+        modifiedSequenceToIsotopicDistribution) {
     vector<IsotopicEnvelope> isotopicEnvelopes;
 
     vector<pair<double, double>> isotopeMassShifts = modifiedSequenceToIsotopicDistribution[identification.sequence];
@@ -851,8 +847,7 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
 
         // Check that the experimental envelope matches the theoretical
         if (checkIsotopicEnvelopeCorrelation(massShiftToIsotopePeaks, peak,
-                                             chargeState, isotopeTolerance,
-                                             indexedPeaks)) {
+                                             chargeState, isotopeTolerance)) {
             for (size_t i = 0; i < experimentalIsotopeIntensities.size(); ++i) {
                 if (experimentalIsotopeIntensities[i] == 0) {
                     experimentalIsotopeIntensities[i] =
@@ -895,8 +890,7 @@ void setToNegativeOneIfNaN(double& value) {
 bool checkIsotopicEnvelopeCorrelation(
     map<int, vector<IsotopePeak>>& massShiftToIsotopePeaks,
     const IndexedMassSpectralPeak peak, int chargeState,
-    PpmTolerance& isotopeTolerance,
-    const vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks) {
+    PpmTolerance& isotopeTolerance) {
     filterResults results =
         filterMassShiftToIsotopePeaks(massShiftToIsotopePeaks[0]);
     double corr = Pearson(results.expIntensity, results.theorIntensity);
@@ -944,11 +938,12 @@ bool checkIsotopicEnvelopeCorrelation(
     return res;
 }
 
-void cutPeak(ChromatographicPeak& peak, double identificationTime,
-             unordered_map<string, vector<Ms1ScanInfo>>* _ms1Scans) {
+void cutPeak(ChromatographicPeak& peak, double identificationTime) {
     // find out if we need to split this peak by using the discrimination factor
     // this method assumes that the isotope envelopes in a chromatographic peak
     // are already sorted by MS1 scan number
+    auto metaData = &LFQMetaData::getInstance();
+    auto ms1Scans = metaData->getMs1Scans();
     bool cutThisPeak = false;
 
     if (peak.isotopicEnvelopes.size() < 5) {
@@ -1010,10 +1005,10 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime,
 
                 int nextMs1ScanNum = -1;
                 for (int j = valleyEnvelope.indexedPeak.zeroBasedMs1ScanIndex - 1;
-                     j < _ms1Scans->operator[](peak.spectralFile).size() && j >= 0;
+                     j < ms1Scans->operator[](peak.spectralFile).size() && j >= 0;
                      j += direction) {
-                    if (_ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber >= 0 &&
-                        _ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber !=
+                    if (ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber >= 0 &&
+                        ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber !=
                             valleyEnvelope.indexedPeak.zeroBasedMs1ScanIndex) {
                         nextMs1ScanNum = j + 1;
                         break;
@@ -1061,7 +1056,7 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime,
         peak.SplitRT = valleyEnvelope.indexedPeak.retentionTime;
 
         // recursively cut
-        cutPeak(peak, identificationTime, _ms1Scans);
+        cutPeak(peak, identificationTime);
     }
 }
 

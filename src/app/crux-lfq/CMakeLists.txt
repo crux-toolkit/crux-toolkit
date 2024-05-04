@@ -89,6 +89,8 @@ if (WIN32 AND NOT CYGWIN)
     Results.h
     SpectraFileInfo.h
     LFQMetaData.h
+    Ms1ScanInfo.h
+
   )
 else (WIN32 AND NOT CYGWIN)
   set(
@@ -107,6 +109,7 @@ else (WIN32 AND NOT CYGWIN)
     Results.h
     SpectraFileInfo.h
     LFQMetaData.h
+    Ms1ScanInfo.h
   )
 endif (WIN32 AND NOT CYGWIN)
 add_library(crux-lfq-support STATIC ${crux_lfq_lib_files})

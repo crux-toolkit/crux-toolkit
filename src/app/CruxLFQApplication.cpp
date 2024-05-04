@@ -113,15 +113,13 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             [](vector<CruxLFQ::IndexedMassSpectralPeak>& innerVec) {
                 return &innerVec;
             });
-        metadata->setIndexedPeaks(&convertedPeaks);  // TODO - ensure metaData is used throughout the code, also for all other data that is uneccessarily passed around
-        auto* conv_ptr = &convertedPeaks;
+        metadata->setIndexedPeaks(&convertedPeaks);
+        metadata->setMs1Scans(&indexResults._ms1Scans);
 
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
             filteredIdentifications,
             chargeStates,
-            &indexResults._ms1Scans,
-            conv_ptr,
             modifiedSequenceToIsotopicDistribution,
             &lfqResults);
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
