@@ -34,6 +34,7 @@ double CruxLFQ::DISCRIMINATION_FACTOR_TO_CUT_PEAK = 0.6;      // Default value i
 bool CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = false;            // Default value is false
 bool CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = false;  // Default value is false
 bool CruxLFQ::NORMALIZE = false;                              // Default value is false
+int CruxLFQ::MaxThreads = 1;                                  // Default value is 1
 
 CruxLFQApplication::CruxLFQApplication() {}
 
@@ -59,6 +60,9 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES = Params::GetBool("quantify-ambiguous-peptides");                      // Default value is false
     CruxLFQ::USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT = Params::GetBool("use-shared-peptides-for-protein-quant");  // Default value is false
     CruxLFQ::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
+    CruxLFQ::MaxThreads = Params::GetInt("num-threads");                                                        // Default value is 1
+
+    std::cout << CruxLFQ::MaxThreads << std::endl;
 
     string output_dir = Params::GetString("output-dir");
     string psm_file_format = Params::GetString("psm-file-format");
@@ -170,7 +174,7 @@ vector<string> CruxLFQApplication::getOptions() const {
     string arr[] = {
         "score",
         "threshold",
-        "smaller-is-better",
+        // "smaller-is-better",
         "fileroot",
         "output-dir",
         "overwrite",
@@ -187,7 +191,8 @@ vector<string> CruxLFQApplication::getOptions() const {
         "quantify-ambiguous-peptides",
         "use-shared-peptides-for-protein-quant",
         "normalize",
-        "spectrum-parser"};
+        "spectrum-parser",
+        "num-threads"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 

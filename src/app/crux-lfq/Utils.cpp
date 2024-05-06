@@ -3,6 +3,7 @@
 #include "Utils.h"
 
 #include <algorithm>
+#include <array>
 #include <cfloat>  // For DBL_MAX
 #include <cmath>
 #include <csignal>
@@ -28,8 +29,6 @@ using std::unordered_map;
 using std::vector;
 
 std::mutex mtx;  // Declare a mutex
-
-const int MaxThreads = std::thread::hardware_concurrency();
 
 namespace CruxLFQ {
 
@@ -410,19 +409,19 @@ void processRange(int start, int end,
             }
 
             // we use a memory address here so as to be more efficent
-            vector<IndexedMassSpectralPeak>&& xic = peakFind(
+            vector<IndexedMassSpectralPeak*> xic_ptr = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
                 identification.spectralFile, peakfindingTol);
 
-            std::sort(xic.begin(), xic.end(),
-                      [](const IndexedMassSpectralPeak a,
-                         const IndexedMassSpectralPeak b) {
-                          return a.retentionTime < b.retentionTime;
-                      });
+            std::vector<IndexedMassSpectralPeak> xic;
+
+            // Transforming the vector of pointers to a vector of objects
+            std::transform(xic_ptr.begin(), xic_ptr.end(), std::back_inserter(xic),
+                           [](IndexedMassSpectralPeak* ptr) { return *ptr; });
 
             xic.erase(std::remove_if(xic.begin(), xic.end(),
-                                     [&](const IndexedMassSpectralPeak p) {
+                                     [&](const IndexedMassSpectralPeak& p) {
                                          return !ppmTolerance.Within(
                                              toMass(p.mz, chargeState),
                                              identification.peakFindingMass);
@@ -510,48 +509,51 @@ void quantifyMs2IdentifiedPeptides(
 
     PpmTolerance peakfindingTol(PEAK_FINDING_PPM_TOLERANCE);
     PpmTolerance ppmTolerance(PPM_TOLERANCE);
-    /*
-    // Used for threading /////////////////////////////
-    int totalCount = ms2IdsForThisFile.size();
-    vector<std::thread> threads;
-    int chunkSize = totalCount / MaxThreads;
-    int rem = totalCount % MaxThreads;
-
-    // Create and start the threads
-    for (int i = 0; i < MaxThreads; ++i) {
-        int start = i * chunkSize;
-        int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
-
-        threads.emplace_back(std::thread([start, end,
-                                          &ms2IdsForThisFile,
-                                          &spectraFile,
-                                          &chargeStates,
-                                          &peakfindingTol,
-                                          &ppmTolerance,
-                                          &modifiedSequenceToIsotopicDistribution,
-                                          &lfqResults]() {
-            processRange(start, end,
-                         ms2IdsForThisFile,
-                         spectraFile,
-                         chargeStates,
-                         peakfindingTol,
-                         ppmTolerance,
-                         modifiedSequenceToIsotopicDistribution,
-                         lfqResults);
-        }));
+    if (MaxThreads == 0) {
+        MaxThreads = std::thread::hardware_concurrency();
     }
 
-    // Join the threads
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    // Used for threading /////////////////////////////
-    */
-    
+    if (MaxThreads == 1) {
         processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                 chargeStates, peakfindingTol, ppmTolerance,
-                 modifiedSequenceToIsotopicDistribution, lfqResults);
-    
+                     chargeStates, peakfindingTol, ppmTolerance,
+                     modifiedSequenceToIsotopicDistribution, lfqResults);
+    } else {
+        // Used for threading /////////////////////////////
+        int totalCount = ms2IdsForThisFile.size();
+        vector<std::thread> threads;
+        int chunkSize = totalCount / MaxThreads;
+        int rem = totalCount % MaxThreads;
+
+        // Create and start the threads
+        for (int i = 0; i < MaxThreads; ++i) {
+            int start = i * chunkSize;
+            int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
+
+            threads.emplace_back(std::thread([start, end,
+                                              &ms2IdsForThisFile,
+                                              &spectraFile,
+                                              &chargeStates,
+                                              &peakfindingTol,
+                                              &ppmTolerance,
+                                              &modifiedSequenceToIsotopicDistribution,
+                                              &lfqResults]() {
+                processRange(start, end,
+                             ms2IdsForThisFile,
+                             spectraFile,
+                             chargeStates,
+                             peakfindingTol,
+                             ppmTolerance,
+                             modifiedSequenceToIsotopicDistribution,
+                             lfqResults);
+            }));
+        }
+
+        // Join the threads
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        // Used for threading /////////////////////////////
+    }
 }
 
 double toMz(double mass, int charge) {
@@ -637,15 +639,13 @@ IndexedMassSpectralPeak* getIndexedPeak(
     double minMzValue = toMz(minValue, chargeState);
     int floorMz = static_cast<int>(std::floor(minMzValue * BINS_PER_DALTON));
 
-    // The thread was commented out because it seems to lead to stochastic results
-    // std::thread getIndThread([&]() {
     for (int j = floorMz; j <= ceilingMz; j++) {
         if (j < indexedPeaks->size() && indexedPeaks->operator[](j)->size() > 0) {
             const auto& bin = indexedPeaks->operator[](j);
 
             int index = binarySearchForIndexedPeak(bin, zeroBasedScanIndex);
-
-            for (int i = index; i < bin->size(); i++) {
+            size_t binSize = bin->size();
+            for (int i = index; i < binSize; i++) {
                 const auto& peak = bin->operator[](i);
                 if (peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
                     break;
@@ -657,29 +657,30 @@ IndexedMassSpectralPeak* getIndexedPeak(
                     tolerance.Within(expMass, theorMass) &&
                     peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
                     (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
-                    // std::lock_guard<std::mutex> lock(mtx);
                     bestPeak = const_cast<CruxLFQ::IndexedMassSpectralPeak*>(&peak);
                 }
             }
         }
     }
-    // });
-    // getIndThread.join();
+
     return bestPeak;
 }
 
-vector<IndexedMassSpectralPeak> peakFind(
-    double idRetentionTime, const double& mass, int charge, const string& spectra_file,
+vector<IndexedMassSpectralPeak*> peakFind(
+    double idRetentionTime,
+    const double& mass,
+    int charge, const string& spectra_file,
     PpmTolerance tolerance) {
     auto metaData = &LFQMetaData::getInstance();
     unordered_map<string, vector<Ms1ScanInfo>>* ms1Scans = metaData->getMs1Scans();
+    size_t ms1ScansSize = ms1Scans->size();
 
     vector<Ms1ScanInfo>* ms1ScanVec = &ms1Scans->operator[](spectra_file);
 
     int precursorScanIndex = -1;
-
-    for (size_t i = 0; i < ms1ScanVec->size(); i++) {
-        Ms1ScanInfo ms1Scan = ms1ScanVec->at(i);
+    size_t vecSize = ms1ScanVec->size();
+    for (size_t i = 0; i < vecSize; i++) {
+        const Ms1ScanInfo& ms1Scan = ms1ScanVec->operator[](i);
         if (ms1Scan.retentionTime < idRetentionTime) {
             precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
         } else {
@@ -690,15 +691,10 @@ vector<IndexedMassSpectralPeak> peakFind(
     // go right
     int missedScans = 0;
 
-    vector<IndexedMassSpectralPeak> xic;
-    xic.reserve(ms1Scans->size());  // Reserve memory for xic to avoid frequent reallocations
+    vector<IndexedMassSpectralPeak*> xic;
+    xic.reserve(ms1ScansSize);  // Reserve memory for xic to avoid frequent reallocations
 
-    // vector<IndexedMassSpectralPeak> leftBatch, rightBatch;
-    // leftBatch.reserve(ms1Scans->size());
-    // rightBatch.reserve(ms1Scans->size());
-
-    // std::thread rightThread([&]() {
-    for (int t = precursorScanIndex; t < ms1Scans->size(); t++) {
+    for (int t = precursorScanIndex; t < ms1ScansSize; t++) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
         if (peak == nullptr && t != precursorScanIndex) {
@@ -706,21 +702,18 @@ vector<IndexedMassSpectralPeak> peakFind(
 
         } else if (peak != nullptr) {
             missedScans = 0;
-            // Lock the vector before inserting to prevent race conditions
-            // std::lock_guard<std::mutex> lock(mtx);
-            xic.push_back(*peak);
-            // leftBatch.push_back(*peak);
+
+            xic.push_back(peak);
         }
 
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
     }
-    // });
 
     // go left
     missedScans = 0;
-    // std::thread leftThread([&]() {
+
     for (int t = precursorScanIndex - 1; t >= 0; t--) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
@@ -729,30 +722,22 @@ vector<IndexedMassSpectralPeak> peakFind(
 
         } else if (peak != nullptr) {
             missedScans = 0;
-            // Lock the vector before inserting to prevent race conditions
-            // std::lock_guard<std::mutex> lock(mtx);
-            xic.push_back(*peak);
-            // rightBatch.push_back(*peak);
+
+            xic.push_back(peak);
         }
 
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
     }
-    // });
+    // Remove nullptr elements
+    xic.erase(std::remove(xic.begin(), xic.end(), nullptr), xic.end());
 
-    // Wait for both threads to finish
-    // rightThread.join();
-    // leftThread.join();
-
-    // xic.reserve(leftBatch.size() + rightBatch.size());  // Reserve memory for xic
-    // xic.insert(xic.end(), leftBatch.begin(), leftBatch.end());
-    // xic.insert(xic.end(), rightBatch.begin(), rightBatch.end());
-
+    // Sort the data based on retentionTime
     std::sort(
         xic.begin(), xic.end(),
-        [](const IndexedMassSpectralPeak x, const IndexedMassSpectralPeak y) {
-            return x.retentionTime < y.retentionTime;
+        [](const IndexedMassSpectralPeak* x, const IndexedMassSpectralPeak* y) {
+            return x->retentionTime < y->retentionTime;
         });
 
     return xic;
