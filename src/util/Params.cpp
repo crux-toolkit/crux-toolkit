@@ -890,7 +890,7 @@ Params::Params() : finalized_(false) {
                     true);
     InitIntParam("num-threads", 1, 0, 64,
                  "0=poll CPU to set num threads; else specify num threads directly.",
-                 "Available for tide-search tab-delimited files only.", true);
+                 "Available for tide-search and crux-lfq tab-delimited files only.", true);
     InitBoolParam("brief-output", false,
                   "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
                   "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
@@ -2179,18 +2179,18 @@ Params::Params() : finalized_(false) {
     InitArgParam("spectrum files",
                  "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
 
-    InitStringParam("lfq-score", "none",
-                    "Name of the score to be used in selecting PSMs.  Default = none (i.e., include all PSMs). "
-                    "Note that if no score is specified and multiple scores per PSM are included, the program will terminate with an error.",
-                    "", true);
+    // InitStringParam("lfq-score", "none",
+    //                 "Name of the score to be used in selecting PSMs.  Default = none (i.e., include all PSMs). "
+    //                 "Note that if no score is specified and multiple scores per PSM are included, the program will terminate with an error.",
+    //                 "", true);
 
     // convert to double
-    InitStringParam("lfq-threshold", "no threshold", "Compute quants only for peptides with scores greater than the specified threshold.  Default = no threshold",
-                    "", true);
+    // InitStringParam("lfq-threshold", "no threshold", "Compute quants only for peptides with scores greater than the specified threshold.  Default = no threshold",
+    //                 "", true);
 
-    InitBoolParam("smaller-is-better", false,
-                  "Indicate whether a larger score (F) or a smaller score (T) is considered better.  Default = F.",
-                  "", true);
+    // InitBoolParam("smaller-is-better", false,
+    //               "Indicate whether a larger score (F) or a smaller score (T) is considered better.  Default = F.",
+    //               "", true);
 
     InitIntParam("num-isotopes-required", 2, 1, 100000000,
                  "The number of isotopic peaks required to be present in the spectrum for a peptide to be considered.  Default = 2.",
@@ -2226,8 +2226,11 @@ Params::Params() : finalized_(false) {
                   "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
                   "", true);
     InitStringParam("psm-file-format", "assign-confidence",
-                    "The format of the PSM file. Possible options are; tide-search, assign-confidence and percolator Default = percolator.",
+                    "The format of the PSM file. Possible options are; tide-search and assign-confidence Default = assign-confidence.",
                     "", true);
+    // InitIntParam("num-threads", 1, 0, 64,
+    //              "0=poll CPU to set num threads; else specify num threads directly.",
+    //              "Available for crux-lfq.", true);
     // The code below is commented out until we decide to add MBR - match between runs - to the CRUX-LFQ code.
     // InitBoolParam("match-between-runs", false,
     //   "Indicate whether to match peptides between runs (T) or not (F).  Default = F.",
@@ -2604,9 +2607,9 @@ void Params::Categorize() {
 
     // crux-lfq
     items.clear();
-    items.insert("lfq-score");
-    items.insert("lfq-threshold");
-    items.insert("smaller-is-better");
+    // items.insert("lfq-score");
+    // items.insert("lfq-threshold");
+    // items.insert("smaller-is-better");
     items.insert("num-isotopes-required");
     items.insert("peak-finding-ppm-tolerance");
     items.insert("ppm-tolerance");
@@ -2619,6 +2622,7 @@ void Params::Categorize() {
     items.insert("use-shared-peptides-for-protein-quant");
     items.insert("normalize");
     items.insert("psm-file-format");
+    // items.insert("num-threads");
     // items.insert("match-between-runs");
     // items.insert("match-between-runs-ppm-tolerance");
     // items.insert("max-mbr-window");

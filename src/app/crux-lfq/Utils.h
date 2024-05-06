@@ -46,6 +46,7 @@ extern double DISCRIMINATION_FACTOR_TO_CUT_PEAK;    // Default value is 0.6
 extern bool QUANTIFY_AMBIGUOUS_PEPTIDES;            // Default value is false
 extern bool USE_SHARED_PEPTIDES_FOR_PROTEIN_QUANT;  // Default value is false
 extern bool NORMALIZE;                              // Default value is false
+extern int MaxThreads;                              // Default value is 1
 
 string calcFormula(string seq);
 
@@ -246,7 +247,7 @@ void processRange(int start, int end,
                       modifiedSequenceToIsotopicDistribution,
                   CruxLFQResults* lfqResults);
 
-vector<IndexedMassSpectralPeak> peakFind(
+vector<IndexedMassSpectralPeak*> peakFind(
     double idRetentionTime, const double& mass, int charge, const string& spectra_file,
     PpmTolerance tolerance);
 
