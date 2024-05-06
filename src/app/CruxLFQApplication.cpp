@@ -62,8 +62,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     CruxLFQ::NORMALIZE = Params::GetBool("normalize");                                                          // Default value is false
     CruxLFQ::MaxThreads = Params::GetInt("num-threads");                                                        // Default value is 1
 
-    std::cout << CruxLFQ::MaxThreads << std::endl;
-
     string output_dir = Params::GetString("output-dir");
     string psm_file_format = Params::GetString("psm-file-format");
 
