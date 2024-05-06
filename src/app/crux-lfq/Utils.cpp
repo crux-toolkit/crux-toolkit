@@ -564,48 +564,34 @@ double toMass(double massToChargeRatio, int charge) {
     return std::abs(charge) * massToChargeRatio - charge * PROTONMASS;
 }
 
-// int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPeaks, int zeroBasedScanIndex) {
-//     int m = 0;
-//     int l = 0;
-//     int r = static_cast<int>(indexedPeaks->size()) - 1;
-
-//     while (l <= r) {
-//         m = l + ((r - l) / 2);
-
-//         if (r - l < 2) {
-//             break;
-//         }
-//         if (indexedPeaks->operator[](m).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
-//             l = m + 1;
-//         } else {
-//             r = m - 1;
-//         }
-//     }
-
-//     for (int i = m; i >= 0; i--) {
-//         if (indexedPeaks->operator[](i).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
-//             break;
-//         }
-
-//         m--;
-//     }
-
-//     if (m < 0) {
-//         m = 0;
-//     }
-
-//     return m;
-// }
-
 int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPeaks, int zeroBasedScanIndex) {
-    auto it = std::lower_bound(indexedPeaks->begin(), indexedPeaks->end(), zeroBasedScanIndex,
-                               [](const IndexedMassSpectralPeak& peak, int value) {
-                                   return peak.zeroBasedMs1ScanIndex < value;
-                               });
+    int m = 0;
+    int l = 0;
+    int r = static_cast<int>(indexedPeaks->size()) - 1;
 
-    int m = std::distance(indexedPeaks->begin(), it);
-    if (m > 0 && indexedPeaks->at(m).zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
+    while (l <= r) {
+        m = l + ((r - l) / 2);
+
+        if (r - l < 2) {
+            break;
+        }
+        if (indexedPeaks->operator[](m).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+            l = m + 1;
+        } else {
+            r = m - 1;
+        }
+    }
+
+    for (int i = m; i >= 0; i--) {
+        if (indexedPeaks->operator[](i).zeroBasedMs1ScanIndex < zeroBasedScanIndex) {
+            break;
+        }
+
         m--;
+    }
+
+    if (m < 0) {
+        m = 0;
     }
 
     return m;
@@ -673,7 +659,6 @@ vector<IndexedMassSpectralPeak*> peakFind(
     PpmTolerance tolerance) {
     auto metaData = &LFQMetaData::getInstance();
     unordered_map<string, vector<Ms1ScanInfo>>* ms1Scans = metaData->getMs1Scans();
-    size_t ms1ScansSize = ms1Scans->size();
 
     vector<Ms1ScanInfo>* ms1ScanVec = &ms1Scans->operator[](spectra_file);
 
@@ -692,9 +677,9 @@ vector<IndexedMassSpectralPeak*> peakFind(
     int missedScans = 0;
 
     vector<IndexedMassSpectralPeak*> xic;
-    xic.reserve(ms1ScansSize);  // Reserve memory for xic to avoid frequent reallocations
+    xic.reserve(vecSize);  // Reserve memory for xic to avoid frequent reallocations
 
-    for (int t = precursorScanIndex; t < ms1ScansSize; t++) {
+    for (int t = precursorScanIndex; t < vecSize; t++) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
 
         if (peak == nullptr && t != precursorScanIndex) {
