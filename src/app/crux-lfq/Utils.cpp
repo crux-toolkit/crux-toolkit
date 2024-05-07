@@ -513,46 +513,36 @@ void quantifyMs2IdentifiedPeptides(
         MaxThreads = std::thread::hardware_concurrency();
     }
 
-    if (MaxThreads == 1) {
-        processRange(0, ms2IdsForThisFile.size(), ms2IdsForThisFile, spectraFile,
-                     chargeStates, peakfindingTol, ppmTolerance,
-                     modifiedSequenceToIsotopicDistribution, lfqResults);
-    } else {
-        // Used for threading /////////////////////////////
-        int totalCount = ms2IdsForThisFile.size();
-        vector<std::thread> threads;
-        int chunkSize = totalCount / MaxThreads;
-        int rem = totalCount % MaxThreads;
+    const int numThreads = std::min(MaxThreads, static_cast<int>(ms2IdsForThisFile.size()));
+    const int batchSize = (ms2IdsForThisFile.size() + numThreads - 1) / numThreads;
 
-        // Create and start the threads
-        for (int i = 0; i < MaxThreads; ++i) {
-            int start = i * chunkSize;
-            int end = (i == MaxThreads - 1) ? (start + chunkSize + rem) : (start + chunkSize);
+    // Create and run threads
+    std::vector<std::thread> threads;
+    for (int i = 0; i < numThreads; ++i) {
+        int start = i * batchSize;
+        int end = std::min(start + batchSize, static_cast<int>(ms2IdsForThisFile.size()));
+        threads.emplace_back(std::thread([start, end,
+                                          &ms2IdsForThisFile,
+                                          &spectraFile,
+                                          &chargeStates,
+                                          &peakfindingTol,
+                                          &ppmTolerance,
+                                          &modifiedSequenceToIsotopicDistribution,
+                                          &lfqResults]() {
+            processRange(start, end,
+                         ms2IdsForThisFile,
+                         spectraFile,
+                         chargeStates,
+                         peakfindingTol,
+                         ppmTolerance,
+                         modifiedSequenceToIsotopicDistribution,
+                         lfqResults);
+        }));
+    }
 
-            threads.emplace_back(std::thread([start, end,
-                                              &ms2IdsForThisFile,
-                                              &spectraFile,
-                                              &chargeStates,
-                                              &peakfindingTol,
-                                              &ppmTolerance,
-                                              &modifiedSequenceToIsotopicDistribution,
-                                              &lfqResults]() {
-                processRange(start, end,
-                             ms2IdsForThisFile,
-                             spectraFile,
-                             chargeStates,
-                             peakfindingTol,
-                             ppmTolerance,
-                             modifiedSequenceToIsotopicDistribution,
-                             lfqResults);
-            }));
-        }
-
-        // Join the threads
-        for (auto& thread : threads) {
-            thread.join();
-        }
-        // Used for threading /////////////////////////////
+    // Join threads
+    for (auto& thread : threads) {
+        thread.join();
     }
 }
 
@@ -677,7 +667,7 @@ vector<IndexedMassSpectralPeak*> peakFind(
     int missedScans = 0;
 
     vector<IndexedMassSpectralPeak*> xic;
-    xic.reserve(vecSize);  // Reserve memory for xic to avoid frequent reallocations
+    // xic.reserve(vecSize);  // Reserve memory for xic to avoid frequent reallocations
 
     for (int t = precursorScanIndex; t < vecSize; t++) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
@@ -716,7 +706,7 @@ vector<IndexedMassSpectralPeak*> peakFind(
         }
     }
     // Remove nullptr elements
-    xic.erase(std::remove(xic.begin(), xic.end(), nullptr), xic.end());
+    // xic.erase(std::remove(xic.begin(), xic.end(), nullptr), xic.end());
 
     // Sort the data based on retentionTime
     std::sort(

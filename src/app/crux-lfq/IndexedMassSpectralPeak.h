@@ -9,19 +9,13 @@ namespace CruxLFQ {
 
 class IndexedMassSpectralPeak {
    public:
-    const double mz;
-    const double intensity;
-    const int zeroBasedMs1ScanIndex;
-    const double retentionTime;
+    double mz = 0.0;
+    double intensity = 0.0;
+    int zeroBasedMs1ScanIndex = 0;
+    double retentionTime = 0.0;
 
     // Default constructor
-    IndexedMassSpectralPeak()
-        : mz(0.0),                   // Initialize mz to a suitable default
-          intensity(0.0),            // Initialize intensity to a suitable default
-          zeroBasedMs1ScanIndex(0),  // Initialize zeroBasedMs1ScanIndex to a suitable default
-          retentionTime(0.0)         // Initialize retentionTime to a suitable default
-    {}
-
+    IndexedMassSpectralPeak() = default;
     IndexedMassSpectralPeak(double mz, double intensity, int zeroBasedMs1ScanIndex, double retentionTime);
 
     bool operator==(const IndexedMassSpectralPeak& other) const;
