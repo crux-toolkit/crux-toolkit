@@ -409,7 +409,7 @@ void processRange(int start, int end,
             }
 
             // we use a memory address here so as to be more efficent
-            vector<IndexedMassSpectralPeak*> xic_ptr = peakFind(
+            vector<IndexedMassSpectralPeak*>&& xic_ptr = peakFind(
                 identification.ms2RetentionTimeInMinutes,
                 identification.peakFindingMass, chargeState,
                 identification.spectralFile, peakfindingTol);
@@ -418,7 +418,13 @@ void processRange(int start, int end,
 
             // Transforming the vector of pointers to a vector of objects
             std::transform(xic_ptr.begin(), xic_ptr.end(), std::back_inserter(xic),
-                           [](IndexedMassSpectralPeak* ptr) { return *ptr; });
+                           [](IndexedMassSpectralPeak* ptr) {
+                               if (ptr) {
+                                   return *ptr;
+                               } else {
+                                   return IndexedMassSpectralPeak();
+                               }
+                           });
 
             xic.erase(std::remove_if(xic.begin(), xic.end(),
                                      [&](const IndexedMassSpectralPeak& p) {
@@ -490,7 +496,11 @@ void processRange(int start, int end,
             msmsFeature.isotopicEnvelopes.end());
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
-        lfqResults->Peaks[spectralFile].push_back(msmsFeature);
+        // May need to change this
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            lfqResults->Peaks[spectralFile].push_back(msmsFeature);
+        }
     }
 }
 
@@ -605,10 +615,8 @@ IndexedMassSpectralPeak* getIndexedPeak(
     auto indexedPeaks = metaData->getIndexedPeaks();
     IndexedMassSpectralPeak* bestPeak = nullptr;
 
-    // Calculate the maximum value using tolerance
     double maxValue = tolerance.GetMaximumValue(theorMass);
     double maxMzValue = toMz(maxValue, chargeState);
-    // Calculate ceilingMz by rounding maxMzValue up to the nearest integer
     int ceilingMz = static_cast<int>(std::ceil(maxMzValue * BINS_PER_DALTON));
 
     double minValue = tolerance.GetMinimumValue(theorMass);
@@ -617,28 +625,25 @@ IndexedMassSpectralPeak* getIndexedPeak(
 
     for (int j = floorMz; j <= ceilingMz; j++) {
         if (j < indexedPeaks->size() && indexedPeaks->operator[](j)->size() > 0) {
-            const auto& bin = indexedPeaks->operator[](j);
-
+            auto bin = indexedPeaks->operator[](j);
             int index = binarySearchForIndexedPeak(bin, zeroBasedScanIndex);
             size_t binSize = bin->size();
             for (int i = index; i < binSize; i++) {
-                const auto& peak = bin->operator[](i);
-                if (peak.zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
+                auto* peak = &bin->operator[](i);
+                if (peak->zeroBasedMs1ScanIndex > zeroBasedScanIndex) {
                     break;
                 }
-
-                double expMass = toMass(peak.mz, chargeState);
+                double expMass = toMass(peak->mz, chargeState);
 
                 if (
                     tolerance.Within(expMass, theorMass) &&
-                    peak.zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
+                    peak->zeroBasedMs1ScanIndex == zeroBasedScanIndex &&
                     (bestPeak == nullptr || std::abs(expMass - theorMass) < std::abs(toMass(bestPeak->mz, chargeState) - theorMass))) {
-                    bestPeak = const_cast<CruxLFQ::IndexedMassSpectralPeak*>(&peak);
+                    bestPeak = peak;
                 }
             }
         }
     }
-
     return bestPeak;
 }
 
@@ -648,39 +653,34 @@ vector<IndexedMassSpectralPeak*> peakFind(
     int charge, const string& spectra_file,
     PpmTolerance tolerance) {
     auto metaData = &LFQMetaData::getInstance();
-    unordered_map<string, vector<Ms1ScanInfo>>* ms1Scans = metaData->getMs1Scans();
-
-    vector<Ms1ScanInfo>* ms1ScanVec = &ms1Scans->operator[](spectra_file);
-
+    unordered_map<string, vector<Ms1ScanInfo>>& ms1ScansMap = *metaData->getMs1Scans();
     int precursorScanIndex = -1;
-    size_t vecSize = ms1ScanVec->size();
-    for (size_t i = 0; i < vecSize; i++) {
-        const Ms1ScanInfo& ms1Scan = ms1ScanVec->operator[](i);
-        if (ms1Scan.retentionTime < idRetentionTime) {
-            precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
-        } else {
-            break;
+    size_t vecSize = 0;
+
+    auto it = ms1ScansMap.find(spectra_file);
+    if (it != ms1ScansMap.end()) {
+        const vector<Ms1ScanInfo>& ms1ScanVec = it->second;
+        vecSize = ms1ScanVec.size();  // Calculate size here
+        for (const auto& ms1Scan : ms1ScanVec) {
+            if (ms1Scan.retentionTime < idRetentionTime) {
+                precursorScanIndex = ms1Scan.zeroBasedMs1ScanIndex;
+            } else {
+                break;
+            }
         }
     }
 
     // go right
     int missedScans = 0;
-
     vector<IndexedMassSpectralPeak*> xic;
-    // xic.reserve(vecSize);  // Reserve memory for xic to avoid frequent reallocations
-
     for (int t = precursorScanIndex; t < vecSize; t++) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
-
         if (peak == nullptr && t != precursorScanIndex) {
             missedScans++;
-
         } else if (peak != nullptr) {
             missedScans = 0;
-
             xic.push_back(peak);
         }
-
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
@@ -688,33 +688,24 @@ vector<IndexedMassSpectralPeak*> peakFind(
 
     // go left
     missedScans = 0;
-
     for (int t = precursorScanIndex - 1; t >= 0; t--) {
         auto* peak = getIndexedPeak(mass, t, tolerance, charge);
-
         if (peak == nullptr && t != precursorScanIndex) {
             missedScans++;
-
         } else if (peak != nullptr) {
             missedScans = 0;
-
             xic.push_back(peak);
         }
-
         if (missedScans > MISSED_SCANS_ALLOWED) {
             break;
         }
     }
-    // Remove nullptr elements
-    // xic.erase(std::remove(xic.begin(), xic.end(), nullptr), xic.end());
 
-    // Sort the data based on retentionTime
     std::sort(
         xic.begin(), xic.end(),
         [](const IndexedMassSpectralPeak* x, const IndexedMassSpectralPeak* y) {
             return x->retentionTime < y->retentionTime;
         });
-
     return xic;
 }
 
