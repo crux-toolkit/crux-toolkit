@@ -1,0 +1,454 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<head><title>Libra in the Trans-Proteomic Pipeline</title>
+
+  <BODY>
+
+  <table border="0" width="100%" cellpadding="0" cellspacing="0">
+  <tr><td>&nbsp;</td></tr>
+  <tr align=center>
+    <td>
+    <table border="0" width="90%" cellpadding="0" cellspacing="0">
+
+      <CAPTION><H1>Libra</H1></CAPTION>
+
+      <tr>
+        <td>
+          <P style="text-align:justify;">
+            Libra is a module within the trans-proteomic pipeline to
+            perform quantification on MS/MS spectra that have multi-reagent
+            labeled peptides.  More specifically, at ISB we use Libra on
+            MS/MS spectra of iTRAQ labeled samples.
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          <P>
+            <b style="color: #3300cc">
+              Patrick Pedrioli
+            </b> 
+            -- original code author of Quantitation <BR>
+            <b style="color: #3300cc"> 
+              Andrew Keller
+            </b> 
+            -- peptide assignment to proteins within pipeline
+            <BR>
+            <b style="color: #3300cc">
+              Nichole King
+            </b> 
+            -- code statistics/maintenance/additions/corrections and satellite applications
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          <li>
+            <A href="#commandLines">Command line syntax for using Libra</A><BR>
+          </li>
+      
+          <li>
+            <A href="#conditionFile">The condition file</A><BR>
+          </li>
+
+          <li>
+            <A href="#quantitation">Details about what Libra does</A><BR>
+          </li>
+
+          <li>
+            <A href="#accuracy">How accurate is the quantitation?</A><BR>
+          </li>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr><td><HR></td></tr>
+      <tr>
+        <td>
+          <A name="commandLines"></a>
+          <u><b>Command line syntax to use Libra in the pipeline</b></u>
+          <P style="text-align:justify;">
+            To run the pipeline using PeptideProphet, ProteinProphet,
+            and Libra, specify your input files (PepXML files or
+            summary html files), 'Prophet flags, and Libra flag.
+            The libra flag is of form:
+            -L[conditionFile]
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          <P style="text-align:justify;">
+            For example, to run PeptideProphet retaining identifications
+            with P less than 0.05 (-p0), run PropteinProphet (-Op), 
+            and run Libra to return quantitation  use:
+            <BR>&nbsp;&nbsp;&nbsp;
+            <em style="color: #3300cc">
+            xinteract  -p0 -Op *.html -Lcondition.xml
+            </em>
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+        You'll find the integrated intensities of the reagent 
+        m/z fragment ion lines in your interact.xml file, and you'll find
+        the protein quantitation in your interact-prot.xml
+        file. 
+        <BR> Additionally, there's a tab separated file called
+        quantitation.tsv which you can load into Excel or favorite
+        spreadsheet tool to do your own math if you like.  
+        Your web interface to your interact files provides export options too.
+        (If you wanted to tailor the peptide to protein assignment yourselves,
+        use export options on your interact (PepXML) file.)
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr><td><HR></td></tr>
+      <tr>
+        <td>
+          <A name="conditionFile"></a>
+          <u><b>The condition file</b></u>
+          <P style="text-align:justify;">
+            The condition file specifies the reagent M/Z values,
+            mass tolerance, isotopic correction coefficients, 
+            method of centroiding, method of normalization, 
+            minimum threshhold intensity (not required),
+            output type, among other parameters.
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+        <pre>
+	The condition.xml elements and attributes (in sequential order) 
+        have the following function:
+
+	1. &#60;fragmentMasses&#62; 
+	       &#60;reagent&#62; 
+           specifies the m/z values to be used in the analysis.
+
+	2. &#60;isotopicContributions&#62;
+           specifies the isotopic contributions of one line to it's adjacent
+           lines (specified in fractions).  
+	   The order is:
+		contribution of channel 1 to channel 2
+		contribution of channel 2 to channel 1 and then to channel 3
+		contribution of channel 3 to channel 2 and then to channel 4
+		contribution of channel 4 to channel 3
+
+	   If you do not want to apply isotopic corrections input -2.
+
+	3. Specifies the mass tolerance. If in field one you have choosen
+	   m/z = 114 and you set a mass tolerance of 1, libra would look
+	   for the most intense m/z value in the interval 113 to 115.
+
+	4. Specifies centroiding preferences.
+	   0: none
+	   1: mathematical average
+	   2: intensity weighted average
+	   For 1 and 2 a number of iterations must be specified as well.
+
+	5. Specifies normalization preferences.
+            1 ... n: corresponding m/z value in the sorted (ascending order) 
+                     list of m/z values specified in field one.
+
+            The default is channel 1 if not specified, but you'll want to specify.
+
+
+	6. Specifies the level of the MS scans to use in the analysis.
+	   1: MS
+	   2: MS2
+	   n: MSn
+
+	7. Switch between printing the scan number or the retention time in
+	   the output file.
+	   Retention time can be usefull when a link to the native data is 
+	   required, but the scan numbers in the mzXML format and the native
+	   output from the MS instrument do not correspond.
+           [NOTE: haven't checked this feature, it might not be working.]
+
+	8. Name of output file with tab separated information (not active yet,
+           default filename is quantitation.tsv)
+
+	9. Minimum threshhold intensity (not required).  If you have low S/N spectra
+           you'll want to set this to ignore noise below a certain integrated count
+           for a line. 
+
+        </pre>
+
+        </td>
+      </tr>
+      <tr><td>If you would like to generate a condition.xml file, please use 
+          <a href=" http://db.systemsbiology.net/webapps/conditionFileApp/">http://db.systemsbiology.net/webapps/conditionFileApp/</a>
+      </td></tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr><td>Here's an example condition file: [NOTE: this changed June, 24, 2006 so please update your condition file using the web application above or information here.]</td></tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td style="color: #3300cc">
+          <pre>
+&#60;SUMmOnCondition description="iTraq"&#62;
+  &#60;fragmentMasses&#62;
+    &#60;reagent mz="114.1"&#62;
+    &#60;reagent mz="115.1"&#62;
+    &#60;reagent mz="116.1"&#62;
+    &#60;reagent mz="117.1"&#62;
+  &#60;/fragmentMasses&#62;
+  &#60;isotopicContributions&#62;
+    &#60;contributingMz value="1"&#62;
+        &#60;affected mz="2" correction="0.063"/&#62;
+    &#60;/contributingMz&#62;
+    &#60;contributingMz value="2"&#62;
+        &#60;affected mz="1" correction="0.02"/&#62;
+        &#60;affected mz="3" correction="0.06"/&#62;
+    &#60;/contributingMz&#62;
+    &#60;contributingMz value="3"&#62;
+        &#60;affected mz="2" correction="0.03"/&#62;
+        &#60;affected mz="4" correction="0.049"/&#62;
+    &#60;/contributingMz&#62;
+    &#60;contributingMz value="4"&#62;
+        &#60;affected mz="3" correction="0.04"/&#62;
+    &#60;/contributingMz&#62;
+  &#60;/isotopicContributions&#62;
+  &#60;massTolerance value="0.2"/&#62;
+  &#60;centroiding type="2" iterations="1"/&#62;
+  &#60;normalization type="4"/&#62;
+  &#60;output type="1"/&#62;
+  &#60;quantitationFile name="quantitation.tsv"/&#62;
+  &#60;minimumThreshhold value="20"/&#62;
+&#60;/SUMmOnCondition&#62;
+          </pre>
+       </td>
+      </tr>
+
+      <tr><td>&nbsp;</td></tr>
+
+      <tr><td><HR></td></tr>
+      <tr>
+        <td>
+          <A name="quantitation"></a>
+          <u><b>Details about what Libra does</b></u>
+          <P style="text-align:justify;">
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          <P style="text-align:justify;">
+            Given conditions, Libra integrates the intensities of the 
+            reagent m/z lines (a.k.a. channels throughout documentation) 
+            in an MS/MS spectrum and stores the values at the peptide 
+            level in the interact.xml file. ProteinProphet, within the 
+            trans-proteomic pipeline, infers the simplest list of proteins 
+            consistent with the identified peptides. (Note that peptides 
+            with PeptideProphet probabilities less than 0.5 are excluded 
+            in Libra.)
+          </P>
+          <P style="text-align:justify;">
+            Protein quantitation is derived from the group of peptides
+            associated with the protein.
+            Each peptide integrated intensity is normalized by the
+            sum of it's channel intensities, the normalized channels
+            are averaged over all peptides of a protein, the standard
+            deviation of the mean is determined for each normalized
+            channel of a peptide, normalized channels more than
+            2 sigma from the mean are removed, the average channels
+            of the protein are recalculated for those channels
+            surviving outlier removing, and the 1-sigma standard errors are 
+            calculated using the standard deviation.  If the user has 
+            specified a reference normalization channel, the protein quantitation is
+            normalized w.r.t. that channel, and the errors become
+            the channel error and the reference channel error 
+            added in quadrature.  
+            <b>The value 99.99 </b> indicates that a protein's quantition was calculated
+            using only peptide, and so the standard error is infinite.
+            <b>The value -9.0 </b>indicates that no peptides of the protein survived the threshhold filter
+            and outlier removal, so the protein quantitation is undefined.
+            (One day, would like to use intensity weighted mean and errors in calcs.)
+          </P>
+          <P style="text-align:justify;">
+            When a reagent m/z (channel) wasn't found in the peptide spectrum, that reagent m/z 
+            is replaced with the default value.  When the intensity of a reagent line is
+            less than or equal to zero,  it's value is replaced with zero.
+            Note, there are still a few loose ends to tie up.
+          </P>
+          <P style="text-align:justify;"><sup>*</sup>
+          Be wary of quantitation from very poor S/N spectra.  Is your 
+          integrated intensity for a peptide channel less than 20 counts, for example?
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          An detailed example of the steps going into the quantitation follows. ProteinA has 8 peptides. 
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          The interact.xml file shows the peptide integrated 
+          intensities for each channel:
+<pre>
+      libra 114   libra 115  libra 116   libra 117
+pep1    67.100      39.153    49.651      47.567
+pep2  2311.460  167071.800  1847.637    1762.466
+pep3  2311.460    1670.718  1847.637    1762.466
+pep4  2311.460    1670.718  1847.637    1762.466
+pep5  2311.460    1670.718  1847.637    1762.466
+pep6  2311.460    1670.718  1847.637    1762.466
+pep7   224.920     231.700   246.938     241.900
+pep8   287.600     293.121   263.173     268.105 
+</pre>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          Libra normalizes each peptide channel by the sum of that peptide's 
+          channels:
+<pre>
+      libra 114   libra 115  libra 116   libra 117
+pep1  0.330       0.192      0.244       0.234
+pep2  0.013       0.966      0.011       0.010
+pep3  0.304       0.220      0.243       0.232
+pep4  0.304       0.220      0.243       0.232
+pep5  0.304       0.220      0.243       0.232
+pep6  0.304       0.220      0.243       0.232
+pep7  0.238       0.245      0.261       0.256
+pep8  0.259       0.264      0.237       0.241
+</pre>
+
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          Determines the mean and standard deviation of the mean:
+<pre>
+        libra 114   libra 115  libra 116   libra 117
+mean    0.257       0.318      0.216       0.209
+st dev  0.103       0.262      0.083       0.081
+
+</pre>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          Removes those that deviate from the mean by more than 2 sigma, which are
+          those outside of the range below in this example:
+<pre>
+        libra 114   libra 115   libra 116   libra 117
+        0.05-0.46   0.00-0.81  0.06-0.37   0.06-0.36
+</pre>
+
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          Recalculates the mean and standard deviation (outliers have been removed):
+<pre>
+        libra 114   libra 115  libra 116   libra 117
+mean    0.292       0.226      0.245       0.237
+st dev  0.032       0.023      0.008       0.009
+</pre>
+      </tr></td>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          Re-normalizes with respect to the user selected channel, 
+          channel 4 in this example:
+<pre>
+                libra 114   libra 115  libra 116   libra 117
+          mean    1.232       0.953      1.034       1.000
+standard error    0.013       0.009      0.004       0.005
+</pre>
+      </td></tr>
+
+      <tr><td>&nbsp;</td></tr>
+
+      <tr><td><HR></td></tr>
+      <tr>
+        <td>
+          <A name="accuracy"><b><u>How accurate is the quantitation?</u></b></a>
+          <u><b></b></u>
+          <P style="text-align:justify;">
+           Test datasets were created by Anne-Claude Gingras, Patrick Pedrioli, 
+           (and Hookeun Lee?) from a 9 protein mix labeled with iTRAQ.   
+           The mix treatment was varied slightly, and several measurements were
+           obtained on the Q-TOF, the Qstar, and the TOF-TOF.
+           The preliminary results presented below are from one sample run on the Q-TOF.
+           The expected numbers in the table are the concentrations normalized to 
+           channel 4.
+          </P>
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+<pre>
+Peptides deviating from the mean by more than 2 standard deviations were removed.
+A minimum intensity thresshold of 20 counts was used.  The software additionally
+removes peptides in which a channel mass is not found.  IC is an abbreviation for
+isotopic correction provided in the condition.xml file.
+
+                                                          P0.9                  P0.9
+                      |     EXPECTED            | LIBRA (w/IC, thresh=20) | Libra (w/IC, thresh=0.01)
+                      |                         |                         |
+Name          Species |  114    115   116   117 |  114    115   116   117 |  114    115   116   117
+--------------------- |-------------------------|-------------------------|-------------------------
+cytochrome c          |  .25    1     .25    1  |  0.21   0.88  0.26  1.0 | 0.28   0.91  0.26  1.00
+ovalbumin     Chicken |  1      1      1     1  |  0.87   0.93  1.07  1.0 | 0.90   1.04  1.20  1.00
+transferrin   Bovine  |  8      8      1     1  |  6.16   5.64  1.20  1.0 | 6.01   5.63  1.06  1.00
+beta lactoglobulin    | .125  .125     1     1  |  0.10   0.11  1.08  1.0 | 0.10   0.08  1.10  1.00
+serum albumin Bovine  |  4      1      4     1  |  3.12   0.93  3.91  1.0 | 3.13   0.88  4.19  1.00
+catalase      Bovine  |  0     100    10     1  |  0.98  82.57 11.42  1.0 | 1.15  20.37  4.79  1.00
+
+</pre>
+        </td>
+      </tr>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+          <P style="text-align:justify;">
+          Please add to/edit this section.  From the table above, we can see a handful of experimental
+          errors.  There may be errors in the purity of the protein purchased,
+          errors in the protein concentration placed in the sample, errors in
+          peptide concentration due to incomplete digestion or method of digestion,
+          and errors introduced in peptide acquisition and measurement in mass spectrometer.  
+          [The later measurement errors are seen as the standard deviation in the top of this document.
+          These are the smallest uncertainties.]
+          Guesstimating a rough accuracy in the 10 - 25% range using the expected numbers 
+          and the measurements above.  This is preliminary as haven't analyzed the gazillion other
+          test datasets.
+          ** Note, can see above that will have difficulties with zero intensities.  For these cases, please
+          check your quantitation.tsv file until have time to modify code to handle those cases...
+        </td>
+      </tr>
+      <tr><td>&nbsp;</td></tr>
+      <tr>
+        <td>
+        </td>
+      </tr>
+      <tr>
+        <td><BR><i>last updated Nov 19, 2006, Nichole King</i>
+        </td>
+      </tr>
+    </table>
+  </tr></td>
+  <tr><td>&nbsp;</td></tr>
+  </center>
+  </table>
+
+  </BODY>
+</HTML>
+
