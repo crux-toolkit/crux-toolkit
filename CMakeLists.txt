@@ -37,7 +37,7 @@ endmacro(use_cxx14)
 add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
-
+add_subdirectory(src/app/libra)
 
 # Only process smoke tests directory if it exiists
 if (EXISTS "${CMAKE_SOURCE_DIR}/test/smoke-tests/runall")
@@ -122,6 +122,9 @@ add_dependencies(hardklor ProteoWizard)
 add_dependencies(kojak neopepxmlparser)
 add_dependencies(kojak hardklor)
 add_dependencies(kojak MSToolkit)
+add_dependencies(libra libarchive-3.1.2)
+add_dependencies(libra MSToolkit)
+add_dependencies(libra neopepxmlparser)
 add_dependencies(neopepxmlparser MSToolkit)
 add_dependencies(percolator MSToolkit)
 add_dependencies(percolator ProteoWizard)
