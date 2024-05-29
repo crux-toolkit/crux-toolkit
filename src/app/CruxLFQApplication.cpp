@@ -248,11 +248,12 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
     int oneBasedScanNumber = 1;
     for (auto spectrum = spectrum_collection->begin(); spectrum != spectrum_collection->end(); ++spectrum) {
         if (*spectrum != nullptr) {
+            double retentionTime = (*spectrum)->getRTime();
             for (auto peak = (*spectrum)->begin(); peak != (*spectrum)->end(); ++peak) {
                 if (*peak != nullptr) {
                     double mz = (*peak)->getLocation();
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
-                    double retentionTime = (*spectrum)->getRTime();
+                    
                     if (index_results._indexedPeaks.size() <= roundedMz) {
                         int size = roundedMz + 1;
                         index_results._indexedPeaks.resize(size);
@@ -265,9 +266,10 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                         retentionTime             // retentionTime
                     );
 
-                    index_results._ms1Scans[spectra_file].emplace_back(oneBasedScanNumber, scanIndex, retentionTime);
+                    
                 }
             }
+            index_results._ms1Scans[spectra_file].emplace_back(oneBasedScanNumber, scanIndex, retentionTime);
             scanIndex++;
             oneBasedScanNumber++;
         }
