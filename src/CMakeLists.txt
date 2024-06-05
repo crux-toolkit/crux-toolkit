@@ -198,6 +198,8 @@ set (
   io/DIAmeterCVSelector.cpp
   app/DIAmeterApplication.cpp
   util/utils.cpp
+  io/SpectrumConverter.cpp
+  io/MSToolkitSpectrumConverter.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")

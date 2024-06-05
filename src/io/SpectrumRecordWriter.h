@@ -25,11 +25,6 @@ class SpectrumRecordWriter {
     int ms_level = 2,  /// MS level to extract (1 or 2)
     bool dia_mode = false  /// whether it's used in DIAmeter
   );
-
- protected:
-
-  static int scanCounter_;
-
   /**
    * Return a pb::Spectrum from a Crux::Spectrum
    * Returns a default instance if there is a problem
@@ -37,6 +32,11 @@ class SpectrumRecordWriter {
   static std::vector<pb::Spectrum> getPbSpectra(
     const Crux::Spectrum* s
   );
+
+ protected:
+
+  static int scanCounter_;
+
 
   /**
    * Add peaks to a pb::Spectrum
