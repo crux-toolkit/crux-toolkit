@@ -1,0 +1,40 @@
+#!/bin/bash
+
+currdate=`date +%Y%m%d`
+
+## declare each organism
+## info from ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/README
+declare -a   organism=("HUMAN"            "ARATH"            "BOVIN"            "CAEEL"            "DANRE"            "DROME"            "MOUSE"             "RAT"               "YEAST")
+declare -a   taxonomy=("Eukaryota"        "Eukaryota"        "Eukaryota"        "Eukaryota"        "Eukaryota"        "Eukaryota"        "Eukaryota"         "Eukaryota"         "Eukaryota")
+declare -a proteomeID=("UP000005640_9606" "UP000006548_3702" "UP000009136_9913" "UP000001940_6239" "UP000000437_7955" "UP000000803_7227" "UP000000589_10090" "UP000002494_10116" "UP000002311_559292")
+
+for ((i=0; i<${#organism[@]}; i++))
+do
+   wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/"${taxonomy[i]}"/"${proteomeID[i]}".fasta.gz
+   wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/"${taxonomy[i]}"/"${proteomeID[i]}"_additional.fasta.gz
+   gunzip "${proteomeID[i]}".fasta.gz "${proteomeID[i]}"_additional.fasta.gz
+   mv "${proteomeID[i]}".fasta "${organism[i]}".fasta."$currdate" ; cat "${proteomeID[i]}"_additional.fasta >> "${organism[i]}".fasta."$currdate" ; rm -f "${proteomeID[i]}"_additional.fasta
+done
+
+
+#
+# append common contaminants to databases  ----------
+# entries from www.thegpm.org/crap/ with sequence updated from UniProt 2010_05
+#
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.other contam.yeast >> HUMAN.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> ARATH.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.ecoli contam.human contam.other contam.yeast >> BOVIN.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> CAEEL.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> DANRE.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> DROME.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> MOUSE.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other contam.yeast >> RAT.fasta.$currdate
+tar xzOf uniprot.contam.tgz contam.bovin contam.ecoli contam.human contam.other >> YEAST.fasta.$currdate
+
+#
+# grab sprot+trembl and append
+#
+wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+#wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz
+gunzip uniprot_sprot.fasta.gz 
+mv uniprot_sprot.fasta uniprot_sprot.fasta.$currdate

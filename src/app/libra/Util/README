@@ -1,0 +1,10 @@
+rev 2016
+
+dtafilter1.c - simple ways to filter .dta files
+runsearch1.c - our script to run a sequest search from an mzXML file
+subsetdb1.c - creates subset fasta files, reverse databases, etc
+checkdb1.c - simple fasta checker that looks for duplicate headers & extra long header/definition lines
+
+These is my little script to download protein sequence databases from UniProt:
+getdb.uniprot_proteomes
+

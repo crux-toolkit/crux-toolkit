@@ -36,7 +36,7 @@ CNBrEnzymeDigestion::CNBrEnzymeDigestion() : EnzymeDigestion("M", "", "", 1, 0) 
 // only count internal M without following modifications
 int CNBrEnzymeDigestion::numMissedCleavages(char* pep) {
   if(strlen(pep) > 4 && pep[1] == '.' && pep[strlen(pep)-2] != '.') {
-    cerr << "cannot parse peptide " << pep << endl;
+    std::cerr << "cannot parse peptide " << pep << std::endl;
     exit(1);
   }
   int counter = 0;

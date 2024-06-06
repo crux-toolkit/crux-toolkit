@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SUMmOnCondition>
+  <fragmentMasses>
+    <reagent mz="114.1"/>
+    <reagent mz="115.1"/>
+    <reagent mz="116.1"/>
+    <reagent mz="117.1"/>
+  </fragmentMasses>
+  <isotopicContributions>
+    <contributingMz value="1">
+      <affected mz="2" correction="0.063"/>
+    </contributingMz>
+    <contributingMz value="2">
+      <affected mz="1" correction="0.02"/>
+      <affected mz="3" correction="0.06"/>
+    </contributingMz>
+    <contributingMz value="3">
+      <affected mz="2" correction="0.03"/>
+      <affected mz="4" correction="0.049"/>
+    </contributingMz>
+    <contributingMz value="4">
+      <affected mz="3" correction="0.04"/>
+    </contributingMz>
+  </isotopicContributions>
+  <massTolerance value="0.2"/>
+  <centroiding type="2" iterations="1"/>
+  <normalization type="1"/>
+  <output type="1"/>
+  <quantitationFile name="quantitation.tsv"/>
+  <minimumThreshhold value="20" />
+</SUMmOnCondition>
+

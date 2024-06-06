@@ -52,7 +52,7 @@ EnzymeDigestion::~EnzymeDigestion() {
 int EnzymeDigestion::numMissedCleavages(char* peptide) {
   char* pep = strip(peptide, 1);
   if(strlen(pep) > 4 && pep[1] == '.' && pep[strlen(pep)-2] != '.') {
-    cerr << "cannot parse peptide " << pep << endl;
+    std::cerr << "cannot parse peptide " << pep << std::endl;
     exit(1);
   }
   int MIN_PEP_LENGTH = 9;
@@ -136,7 +136,7 @@ int EnzymeDigestion::numCompatibleTermini(char prev, char* pep, char foll) {
 // pep of form: P.XXXXX.F
 int EnzymeDigestion::numCompatibleTermini(char* pep) {
   if(strlen(pep) < 4 || pep[1] != '.' || pep[strlen(pep)-2] != '.') {
-    cerr << "cannot parse peptide " << pep << endl;
+    std::cerr << "cannot parse peptide " << pep << std::endl;
     exit(1);
   }
   int nct = 0;

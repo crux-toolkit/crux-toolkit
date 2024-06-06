@@ -3,14 +3,19 @@ cmake_policy(VERSION 3.15)
 
 ###### Set up include and link directories  ######
 include_directories(
+  ${CMAKE_SOURCE_DIR}/src/app/libra
+  ${CMAKE_SOURCE_DIR}/src/app/libra/extern/gzstream
   ${CMAKE_SOURCE_DIR}/LibraPeptideParser
   ${CMAKE_SOURCE_DIR}/LibraProteinParser
   ${CMAKE_BINARY_DIR}/ext/include
+  ${CMAKE_BINARY_DIR}/ext/include/MSToolkit
+  ${CMAKE_BINARY_DIR}/src/app/libra/include
 )
 if (UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_FILE_OFFSET_BITS=64")
 elseif (WIN32 AND NOT CYGWIN)
   # On windows set static linking of runtime libraries
   set(
@@ -33,12 +38,22 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=Release
+    -DENABLE_TEST=OFF
   PATCH_COMMAND ""
 )
 
 set(
   libra_lib_files
-  Common/crypt.cpp
+  extern/gzstream/gzstream.C
+  Util/RACI/chunky_streambuf.cpp
+  Util/RACI/RACI.cpp
+  Util/RACI/random_access_compressed_streambuf.cpp
+  #Parsers/Parser/OuterTag.cpp
+  #Parsers/Parser/Parser.cpp
+  #Parsers/Parser/Tag.cpp
+  #Parsers/Parser/TagFilter.cpp
+  #Parsers/Parser/TagListComparator.cpp
+  #Common/crypt.cpp
   Common/get_random_number.cpp
   Common/hooks_tpp.cpp
   Common/kwset.cpp
@@ -62,9 +77,7 @@ set(
   Common/Enzyme/EnzymeDigestion/TrypticCNBrEnzymeDigestion.cpp
   Common/Enzyme/EnzymeDigestion/TrypticEnzymeDigestion.cpp
   Common/Enzyme/EnzymeDigestionParser/EnzymeDigestionParser.cpp
-  Common/Enzyme/EnzymeDigestionParser/EnzymeDigestionParserMain.cpp
   Common/Enzyme/ProteolyticEnzyme/ProteolyticEnzyme.cpp
-  Common/Enzyme/ProteolyticEnzyme/ProteolyticEnzymeMain.cpp
   Common/Enzyme/ProteolyticEnzyme/ProteolyticEnzymeFactory/ProteolyticEnzymeFactory.cpp
   Common/ModificationInfo/ModificationInfo.cpp
   Common/ModifiedResidueMass/ModifiedResidueMass.cpp
@@ -72,7 +85,7 @@ set(
   LibraPeptideParser/Intensity.cpp
   LibraPeptideParser/LibraConditionHandler.cpp
   LibraPeptideParser/LibraPeptideParser.cpp
-  LibraPeptideParser/LibraPeptideParserMain.cpp
+  #LibraPeptideParser/LibraPeptideParserMain.cpp
   LibraPeptideParser/LibraResult.cpp
   LibraPeptideParser/LibraSummary.cpp
   LibraPeptideParser/LibraWrapper.cpp
@@ -80,7 +93,7 @@ set(
   LibraProteinRatioParser/LibraConditionHandler2.cpp
   LibraProteinRatioParser/LibraGroupPeptideParser.cpp
   LibraProteinRatioParser/LibraProteinRatioParser.cpp
-  LibraProteinRatioParser/LibraProteinRatioParserMain.cpp
+  #LibraProteinRatioParser/LibraProteinRatioParserMain.cpp
   LibraProteinRatioParser/QuantitationFile.cpp
   LibraProteinRatioParser/StringConvertor.cpp
 )
