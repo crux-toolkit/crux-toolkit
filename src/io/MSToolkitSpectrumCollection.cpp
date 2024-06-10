@@ -27,7 +27,7 @@ MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
+bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_output) {
 
   // spectrum_collection has already been parsed
   if(is_parsed_) {
@@ -70,10 +70,17 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
     if( mst_spectrum->getScanNumber() > last_scan ) {
       break;
     }
+    
     Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
     if (parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str())) {
-      addSpectrumToEnd(parsed_spectrum);
-      spectraByScan_[first_scan] = parsed_spectrum;
+      if (pb_output) {
+        AddSpectraPb(parsed_spectrum);
+        delete parsed_spectrum;
+      } else {
+        addSpectrumToEnd(parsed_spectrum);
+        spectraByScan_[first_scan] = parsed_spectrum;
+      }
+      
     } else {
       delete parsed_spectrum;
     }

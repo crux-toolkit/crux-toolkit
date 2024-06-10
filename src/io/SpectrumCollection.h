@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include "model/objects.h"
 #include "model/Spectrum.h"
-
 #include <deque>
+#include <spectrum.pb.h>
 
 /**
  * \class SpectrumCollection
@@ -29,7 +29,7 @@ class SpectrumCollection {
   std::string filename_;                  ///< filename
   bool is_parsed_;      ///< file has been read and spectra_ populated 
   int num_charged_spectra_;  ///< sum of all charge states from all spectra
-  
+  std::vector<pb::Spectrum> spectra_pb_;
   /**
    * Base class constructor is protected.  Sets filename and
    * initializes member variables.
@@ -86,7 +86,7 @@ class SpectrumCollection {
    * variable.
    * \returns TRUE if the spectra are parsed successfully. FALSE if otherwise.
    */
-  virtual bool parse(int ms_level=2, bool dia_mode = false) = 0;
+  virtual bool parse(int ms_level=2, bool dia_mode = false, bool pb_output = false) = 0;
 
   /**
    * Parses a single spectrum from a spectrum_collection with first scan
@@ -131,6 +131,10 @@ class SpectrumCollection {
    * \returns TRUE if the spectrum_collection file has been parsed
    */
   bool getIsParsed();
+
+
+  std::vector<pb::Spectrum>& GetSpectraPb();
+  void AddSpectraPb(Crux::Spectrum*);
 };
 
 }  // namespace Crux

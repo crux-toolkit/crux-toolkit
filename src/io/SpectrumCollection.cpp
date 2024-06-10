@@ -17,6 +17,7 @@
 #include "io/carp.h"
 #include "util/WinCrux.h"
 #include <iostream>
+#include "SpectrumRecordWriter.h"
 
 using namespace std;
 using namespace Crux;
@@ -243,6 +244,17 @@ bool SpectrumCollection::getIsParsed() {
   return is_parsed_;
 }
 
+std::vector<pb::Spectrum>& SpectrumCollection::GetSpectraPb() {
+  return spectra_pb_;
+}
+void SpectrumCollection::AddSpectraPb(Crux::Spectrum *spectra) {
+  spectra->sortPeaks(_PEAK_LOCATION);
+  vector<pb::Spectrum> pb_spectra = SpectrumRecordWriter::getPbSpectra(spectra);
+  for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin(); j != pb_spectra.end(); ++j) {
+    assert(j->has_neutral_mass());
+    spectra_pb_.push_back(*j);
+  }
+}
 } // namespace Crux
 
 /*

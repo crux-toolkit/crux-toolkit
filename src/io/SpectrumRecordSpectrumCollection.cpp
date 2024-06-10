@@ -22,7 +22,7 @@ bool SpectrumRecordSpectrumCollection::IsSpectrumRecordFile(const string& filena
   return header.file_type() == pb::Header::SPECTRA;
 }
 
-bool SpectrumRecordSpectrumCollection::parse(int ms_level, bool dia_mode) {
+bool SpectrumRecordSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_output) {
   if (is_parsed_) {
     return false;
   }

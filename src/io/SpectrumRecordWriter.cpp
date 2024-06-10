@@ -32,7 +32,8 @@ bool SpectrumRecordWriter::convert(
   string outfile,  ///< spectrumrecords file to output
   int &spectra_converted, //output variable that tells the number of spectra converted  
   int ms_level,   /// MS level to extract (1 or 2)
-  bool dia_mode  /// whether it's used in DIAmeter
+  bool dia_mode,  /// whether it's used in DIAmeter
+  bool pb_spectra
 ) {
   carp(CARP_DEBUG, "Converting ms_level %d ... ", ms_level);
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
@@ -45,7 +46,7 @@ bool SpectrumRecordWriter::convert(
 
   // Open infile
   try {
-    if (!spectra->parse(ms_level, dia_mode)) {
+    if (!spectra->parse(ms_level, dia_mode, pb_spectra)) {
       return false;
     }
   } catch (const std::exception& e) {
@@ -76,7 +77,17 @@ bool SpectrumRecordWriter::convert(
   scanCounter_ = 0;
    carp(CARP_DETAILED_DEBUG, "starting to convert spectrum to pb..." );
   // go through the spectrum list and write each spectrum
-
+  if (pb_spectra) {
+    vector<pb::Spectrum>& spectra_pb = spectra->GetSpectraPb();
+    std::sort(spectra_pb.begin(), spectra_pb.end(), cmp_pbspectra);
+    spectra_converted = spectra_pb.size();
+    for (vector<pb::Spectrum>::const_iterator j = spectra_pb.begin();
+         j != spectra_pb.end();
+         ++j) { 
+      writer.Write(&*j); 
+    }
+    return true;
+  }
   vector<pb::Spectrum> all_spectra; 
 
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
