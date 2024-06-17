@@ -78,7 +78,7 @@ bool SpectrumRecordWriter::convert(
    carp(CARP_DETAILED_DEBUG, "starting to convert spectrum to pb..." );
   // go through the spectrum list and write each spectrum
   if (pb_spectra) {
-    vector<pb::Spectrum>& spectra_pb = spectra->GetSpectraPb();
+    vector<pb::Spectrum>& spectra_pb = spectra->getSpectraPb();
     std::sort(spectra_pb.begin(), spectra_pb.end(), cmp_pbspectra);
     spectra_converted = spectra_pb.size();
     for (vector<pb::Spectrum>::const_iterator j = spectra_pb.begin();

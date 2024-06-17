@@ -70,11 +70,23 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_out
     if( mst_spectrum->getScanNumber() > last_scan ) {
       break;
     }
-    
+    if (!Params::GetBool("skip-preprocessing") && !mst_spectrum->getPeaks()->empty()) {
+      const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intersity
+      auto peaks = mst_spectrum->getPeaks();
+      auto max_peak = std::max_element(peaks->begin(), peaks->end(), 
+      [](const MSToolkit::Peak_T& a, const MSToolkit::Peak_T& b) {
+        return a.intensity < b.intensity;
+      });
+      auto start_deletion = std::remove_if(peaks->begin(), peaks->end(), 
+      [&max_peak, &ratio](const MSToolkit::Peak_T& peak) {
+        return peak.intensity < (*max_peak).intensity * ratio;
+      });
+      peaks->erase(start_deletion, peaks->end());
+    }
     Crux::Spectrum* parsed_spectrum = new Crux::Spectrum();
     if (parsed_spectrum->parseMstoolkitSpectrum(mst_spectrum, filename_.c_str())) {
       if (pb_output) {
-        AddSpectraPb(parsed_spectrum);
+        addSpectraPb(parsed_spectrum);
         delete parsed_spectrum;
       } else {
         addSpectrumToEnd(parsed_spectrum);

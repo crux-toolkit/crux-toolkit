@@ -133,8 +133,8 @@ class SpectrumCollection {
   bool getIsParsed();
 
 
-  std::vector<pb::Spectrum>& GetSpectraPb();
-  void AddSpectraPb(Crux::Spectrum*);
+  std::vector<pb::Spectrum>& getSpectraPb();
+  void addSpectraPb(Crux::Spectrum*);
 };
 
 }  // namespace Crux
