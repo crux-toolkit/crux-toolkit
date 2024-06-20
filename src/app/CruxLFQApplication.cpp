@@ -64,6 +64,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     string output_dir = Params::GetString("output-dir");
     string psm_file_format = Params::GetString("psm-file-format");
+    bool is_rt_seconds = Params::GetBool("is-rt-seconds");
 
     if (!FileUtils::Exists(psm_file)) {
         carp(CARP_FATAL, "PSM file %s not found", psm_file.c_str());
@@ -253,7 +254,7 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                 if (*peak != nullptr) {
                     double mz = (*peak)->getLocation();
                     int roundedMz = static_cast<int>(std::round(mz * BINS_PER_DALTON));
-                    
+
                     if (index_results._indexedPeaks.size() <= roundedMz) {
                         int size = roundedMz + 1;
                         index_results._indexedPeaks.resize(size);
@@ -265,8 +266,6 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                         scanIndex,                // zeroBasedMs1ScanIndex
                         retentionTime             // retentionTime
                     );
-
-                    
                 }
             }
             index_results._ms1Scans[spectra_file].emplace_back(oneBasedScanNumber, scanIndex, retentionTime);

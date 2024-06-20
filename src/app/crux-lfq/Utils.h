@@ -274,7 +274,7 @@ void setToNegativeOneIfNaN(double& value);
 vector<PSM> create_psm(const string& psm_file,
                        const string& psm_file_format = "assign-confidence",
                        const bool filtered = false,
-                       const double q_value_threshold = 0.01);
+                       const double q_value_threshold = 0.01, const bool is_rt_seconds = false);
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime);
 

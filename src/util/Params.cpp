@@ -2228,6 +2228,9 @@ Params::Params() : finalized_(false) {
     InitStringParam("psm-file-format", "assign-confidence",
                     "The format of the PSM file. Possible options are; tide-search and assign-confidence Default = assign-confidence.",
                     "", true);
+    InitBoolParam("is-rt-seconds", false,
+                  "Indicate whether retention time is in seconds or minutes (T) or not (F).  Default = F.",
+                  "", true);
     // InitIntParam("num-threads", 1, 0, 64,
     //              "0=poll CPU to set num threads; else specify num threads directly.",
     //              "Available for crux-lfq.", true);
