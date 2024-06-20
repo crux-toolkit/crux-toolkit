@@ -248,13 +248,14 @@ std::vector<pb::Spectrum>& SpectrumCollection::getSpectraPb() {
   return spectra_pb_;
 }
 void SpectrumCollection::addSpectraPb(Crux::Spectrum *spectra) {
-  auto max_mz_peak = std::max_element(spectra->begin(), spectra->end(), 
-    [](Peak* a, Peak* b) {
-      return Peak::compareByMZ(*a, *b);
-  });
+  Peak* max_mz_peak = nullptr;
+  for (const auto &peak : *spectra) {
+    if (max_mz_peak == nullptr || Peak::compareByMZ(*max_mz_peak, *peak)) {
+      max_mz_peak = peak;
+    }
+  }
   auto last_peak = spectra->end() - 1;
-  iter_swap(*max_mz_peak, *last_peak); // putting max_element in the end
-
+  swap(*max_mz_peak, *(*last_peak));
   vector<pb::Spectrum> pb_spectra = SpectrumRecordWriter::getPbSpectra(spectra);
   for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin(); j != pb_spectra.end(); ++j) {
     assert(j->has_neutral_mass());
