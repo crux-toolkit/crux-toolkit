@@ -103,6 +103,7 @@ def createParameterFile(parameterFileName):
   parameterFile.write("digest_mass_range=200 7200\n")
   
   # Other Crux parameters.
+  parameterFile.write("num-threads=12\n")
   parameterFile.write("compute-sp=T\n")
   parameterFile.write("overwrite=T\n")
   parameterFile.write("peptide-list=T\n")
@@ -234,64 +235,79 @@ runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
            "%s/tide-index.peptides.txt" % database)
 
 # Run four searches (Comet, and Tide XCorr, XCorr p-value, and residue evidence p-value).
-runSearch("tide-xcorr", "tide-search", "", database,
-          "tide-xcorr/tide-search.txt",
-          "xcorr score", "")
-runSearch("tide-p-value", "tide-search", "--exact-p-value T",
-          database, "tide-p-value/tide-search.txt",
+runSearch("tide-xcorr", "tide-lite-search", "", database,
+          "tide-xcorr/tide-lite-search.txt",
+          "xcorr score", "--score \"xcorr score\"")
+runSearch("tide-p-value", "tide-lite-search",
+          "--score-function combined-p-values --fragment-tolerance 1.0005079",
+          database, "tide-p-value/tide-lite-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
-runSearch("tide-res-ev", "tide-search",
-          "--exact-p-value T --score-function residue-evidence --fragment-tolerance 1.0005079",
-          database, "tide-res-ev/tide-search.txt",
-          "res-ev p-value", "--score \"res-ev p-value\"")
+runSearch("tide-res-ev", "tide-lite-search",
+          "--score-function combined-p-values --fragment-tolerance 1.0005079",
+          database, "tide-res-ev/tide-lite-search.txt",
+          "res-ev score", "--score \"res-ev p-value\"")
+runSearch("tide-combined", "tide-lite-search",
+          "--score-function combined-p-values --fragment-tolerance 1.0005079",
+          database, "tide-combined/tide-lite-search.txt",
+          "combined p-value", "--score \"combined p-value\"")
 runSearch("comet", "comet", "", "%s.fa" % database,
           "comet/comet.txt",
           "xcorr score", "--score e-value")
-runSearch("tide-tailor", "tide-search", "--use-tailor-calibration T", database,
-          "tide-tailor/tide-search.txt",
-          "xcorr score", "")
+runSearch("tide-tailor", "tide-lite-search", "", database,
+          "tide-tailor/tide-lite-search.txt",
+          "tailor score", "--score \"tailor score\"")
 
 # Make the performance plots, segregated by search method..
 makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),
                      ("comet/comet.percolator.q.txt", "Comet Percolator")])
 makePerformancePlot("tide.p-value",
-                    [("tide-p-value/tide-search.q.txt", "Tide p-value"),
-                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator")])
+                    [("tide-p-value/tide-lite-search.q.txt", "Tide p-value"),
+                     ("tide-p-value/tide-lite-search.percolator.q.txt", "Tide p-value Percolator")])
 makePerformancePlot("tide.xcorr",
-                    [("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
-                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator")])
+                    [("tide-xcorr/tide-lite-search.q.txt", "Tide XCorr"),
+                     ("tide-xcorr/tide-lite-search.percolator.q.txt", "Tide XCorr Percolator")])
 makePerformancePlot("tide.tailor",
-                    [("tide-tailor/tide-search.q.txt", "Tide Tailor "),
-                     ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator")])
+                    [("tide-tailor/tide-lite-search.q.txt", "Tide Tailor "),
+                     ("tide-tailor/tide-lite-search.percolator.q.txt", "Tide Tailor Percolator")])
 makePerformancePlot("tide.res-ev",
-                    [("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
-                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator")])
+                    [("tide-res-ev/tide-lite-search.q.txt", "Tide res-ev"),
+                     ("tide-res-ev/tide-lite-search.percolator.q.txt", "Tide res-ev Percolator")])
+makePerformancePlot("tide.combined",
+                    [("tide-combined/tide-lite-search.q.txt", "Tide combined p-value"),
+                     ("tide-combined/tide-lite-search.percolator.q.txt", "Tide combined p-value Percolator")])
 
 # Make the performance plots, segregated by post-processor.
 makePerformancePlot("assign-confidence",
                     [("comet/comet.q.txt", "Comet E-value"),
-                     ("tide-p-value/tide-search.q.txt", "Tide p-value"),
-                     ("tide-xcorr/tide-search.q.txt", "Tide XCorr"),
-                     ("tide-res-ev/tide-search.q.txt", "Tide res-ev"),
-                     ("tide-tailor/tide-search.q.txt", "Tide Tailor")])
+                     ("tide-p-value/tide-lite-search.q.txt", "Tide p-value"),
+                     ("tide-xcorr/tide-lite-search.q.txt", "Tide XCorr"),
+                     ("tide-res-ev/tide-lite-search.q.txt", "Tide res-ev"),
+                     ("tide-combined/tide-lite-search.q.txt", "Tide combined p-value"),
+                     ("tide-tailor/tide-lite-search.q.txt", "Tide Tailor")])
 makePerformancePlot("percolator",
                     [("comet/comet.percolator.q.txt", "Comet Percolator"),
-                     ("tide-p-value/tide-search.percolator.q.txt", "Tide p-value Percolator"),
-                     ("tide-xcorr/tide-search.percolator.q.txt", "Tide XCorr Percolator"),
-                     ("tide-res-ev/tide-search.percolator.q.txt", "Tide res-ev Percolator"),
-                     ("tide-tailor/tide-search.percolator.q.txt", "Tide Tailor Percolator")])
+                     ("tide-p-value/tide-lite-search.percolator.q.txt", "Tide p-value Percolator"),
+                     ("tide-xcorr/tide-lite-search.percolator.q.txt", "Tide XCorr Percolator"),
+                     ("tide-res-ev/tide-lite-search.percolator.q.txt", "Tide res-ev Percolator"),
+                     ("tide-combined/tide-lite-search.percolator.q.txt", "Tide combined p-value Percolator"),
+                     ("tide-tailor/tide-lite-search.percolator.q.txt", "Tide Tailor Percolator")])
 
 
 # Make the XCorr scatter plots.
-makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt", 
+makeScatterPlot("tide-xcorr/tide-lite-search.target.reduced.txt", 
                 "Tide XCorr",
-                "tide-p-value/tide-search.target.reduced.txt", 
+                "tide-p-value/tide-lite-search.target.reduced.txt", 
                 "Refactored XCorr",
                 "plots/xcorr.refactored")
-makeScatterPlot("tide-xcorr/tide-search.target.reduced.txt", 
+makeScatterPlot("tide-xcorr/tide-lite-search.target.reduced.txt", 
                 "Tide XCorr",
                 "comet/comet.target.reduced.txt", 
                 "Comet XCorr",
                 "plots/xcorr.comet")
+makeScatterPlot("tide-res-ev/tide-lite-search.target.reduced.txt", 
+                "Current Tide Res-Ev score",
+                "./tide-search.target.reduced.txt", 
+                "Stored Tide Res-Ev score",
+                "plots/resev")
 
 

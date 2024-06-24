@@ -35,6 +35,7 @@ fragment_bin_tol=1.0005079
 min-mass=200
 max-mass=7200
 digest_mass_range=200 7200
+num-threads=12
 compute-sp=T
 overwrite=T
 peptide-list=T
