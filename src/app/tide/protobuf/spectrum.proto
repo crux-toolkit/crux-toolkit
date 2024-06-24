@@ -18,7 +18,7 @@ message Spectrum {
   optional int32 peak_m_z_denominator = 3; // common denominator for all m_z's
   optional int32 peak_intensity_denominator = 4; // common for all intensities
 
-  optional int32 spectrum_number = 5;
+  optional int32 scan_id = 5;   // This is used to store scan_id
   optional double precursor_m_z = 6;
   optional double rtime = 8;
   repeated int32 charge_state = 7 [packed = true]; // may as well use packed
@@ -26,4 +26,8 @@ message Spectrum {
   optional int32 ms1_spectrum_number = 9;
   optional double iso_window_lower_mz = 10;
   optional double iso_window_upper_mz = 11;
+  optional int32 scan_index = 12;
+  optional double neutral_mass = 13;
+  
+  
 }

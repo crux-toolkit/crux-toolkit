@@ -60,7 +60,7 @@ MatchFileWriter::~MatchFileWriter() {
 void MatchFileWriter::setPrecision() {
   for(int col_idx = 0; col_idx < NUMBER_MATCH_COLUMNS; col_idx++) {
     switch(col_idx) {
-    // integer and string fields
+      // integer and string fields
     case FILE_COL:
     case SCAN_COL:
     case CHARGE_COL:
@@ -69,6 +69,7 @@ void MatchFileWriter::setPrecision() {
     case PERCOLATOR_RANK_COL:
     case BY_IONS_MATCHED_COL:
     case BY_IONS_TOTAL_COL:
+    case BY_IONS_REPEAT_MATCH_COL:
     case DISTINCT_MATCHES_SPECTRUM_COL:
     case MATCHES_SPECTRUM_COL:
     case SEQUENCE_COL:
@@ -82,9 +83,10 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-    // mass fields
+      // mass fields
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
+    case RETENTION_TIME_COL:
     case MASS_COL:
     case DM_COL:
     case ABS_DM_COL:
@@ -93,14 +95,16 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-    // score fields
+      // score fields
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:
     case XCORR_FIRST_COL:
     case XCORR_SECOND_COL:
     case EVALUE_COL:
+    case DECOY_XCORR_QVALUE_COL:
     case DECOY_XCORR_PEP_COL:
+    case DECOY_EVALUE_QVALUE_COL:
     case DECOY_EVALUE_PEP_COL:
     case PERCOLATOR_SCORE_COL:
     case PERCOLATOR_QVALUE_COL:
@@ -124,8 +128,10 @@ void MatchFileWriter::setPrecision() {
     case SIDAK_ADJUSTED_COL:
     case QVALUE_MIXMAX_COL:
     case QVALUE_TDC_COL:
-    case TAILOR_COL:   //Added for tailor score calibration method by AKF    
+    case BY_IONS_FRACTION_COL:
+    case TAILOR_COL:
 #ifdef NEW_COLUMNS
+    case DECOY_XCORR_PEPTIDE_QVALUE_COL:  // NEW
     case PERCOLATOR_PEPTIDE_QVALUE_COL:   // NEW
 #endif
       match_precision_[col_idx] = Params::GetInt("precision");
