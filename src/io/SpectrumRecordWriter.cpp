@@ -91,7 +91,7 @@ bool SpectrumRecordWriter::convert(
   vector<pb::Spectrum> all_spectra; 
 
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-	(*i)->sortPeaks(_PEAK_LOCATION); // Sort peaks by m/z
+	  (*i)->putHighestPeak(); // Put the highest by m/z peak to the end
 
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
