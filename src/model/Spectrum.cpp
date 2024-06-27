@@ -949,7 +949,23 @@ void Spectrum::sortPeaks(PEAK_SORT_TYPE_T type)
   sorted_by_mz_ = (type == _PEAK_LOCATION);
   sorted_by_intensity_ = (type == _PEAK_INTENSITY);
 }
-
+/**
+ * Put the highest peak to the end
+ */
+void Spectrum::putHighestPeak() {
+  if (sorted_by_mz_ || peaks_.size() == 1) {
+    return;
+  }
+  size_t max_mz_peak_index = 0;
+  for (size_t i = 1; i < peaks_.size(); ++i) {
+    if (Peak::compareByMZ(*peaks_[max_mz_peak_index], *peaks_[i])) {
+      max_mz_peak_index = i;
+    }
+  }
+  Peak* temp = peaks_[max_mz_peak_index];
+  peaks_[max_mz_peak_index] = peaks_.back();
+  peaks_.back() = temp;
+}
 /**
  * Populate peaks with rank information.
  */
