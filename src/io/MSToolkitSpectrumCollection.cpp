@@ -27,7 +27,7 @@ MSToolkitSpectrumCollection::MSToolkitSpectrumCollection(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_output) {
+bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
 
   // spectrum_collection has already been parsed
   if(is_parsed_) {
@@ -69,22 +69,6 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_out
     // are we past the last scan?
     if( mst_spectrum->getScanNumber() > last_scan ) {
       break;
-    }
-    if (!Params::GetBool("skip-preprocessing") && !mst_spectrum->getPeaks()->empty()) {
-      const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intersity
-      auto peaks = mst_spectrum->getPeaks();
-      const MSToolkit::Peak_T* highest_intens_peak = nullptr;
-      for (const auto &peak : *peaks) {
-        if (highest_intens_peak == nullptr || highest_intens_peak->intensity < peak.intensity) {
-          highest_intens_peak = &peak;
-        }
-      }
-      for (int i = 0; i < peaks->size(); ++i) {
-        if (peaks->at(i).intensity < highest_intens_peak->intensity * ratio) {
-          std::swap(peaks->at(i), peaks->at(peaks->size() - 1));
-          peaks->pop_back();
-        }
-      }
     }
     if (!Params::GetBool("skip-preprocessing") && !mst_spectrum->getPeaks()->empty()) {
       const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intersity

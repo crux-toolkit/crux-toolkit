@@ -140,7 +140,7 @@ bool PWIZSpectrumCollection::parseFirstLastScanFromTitle(
  * variable.
  * \returns True if the spectra are parsed successfully. False if otherwise.
  */
-bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode, bool pb_output) {
+bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   // spectrum_collection has already been parsed
   if(is_parsed_) {
     return false;

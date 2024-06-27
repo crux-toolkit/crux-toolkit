@@ -243,25 +243,6 @@ int SpectrumCollection::getNumChargedSpectra() {
 bool SpectrumCollection::getIsParsed() {
   return is_parsed_;
 }
-
-std::vector<pb::Spectrum>& SpectrumCollection::getSpectraPb() {
-  return spectra_pb_;
-}
-void SpectrumCollection::addSpectraPb(Crux::Spectrum *spectra) {
-  Peak* max_mz_peak = nullptr;
-  for (const auto &peak : *spectra) {
-    if (max_mz_peak == nullptr || Peak::compareByMZ(*max_mz_peak, *peak)) {
-      max_mz_peak = peak;
-    }
-  }
-  auto last_peak = spectra->end() - 1;
-  swap(*max_mz_peak, *(*last_peak));
-  vector<pb::Spectrum> pb_spectra = SpectrumRecordWriter::getPbSpectra(spectra);
-  for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin(); j != pb_spectra.end(); ++j) {
-    assert(j->has_neutral_mass());
-    spectra_pb_.push_back(*j);
-  }
-}
 } // namespace Crux
 
 /*

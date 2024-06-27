@@ -23,8 +23,7 @@ class SpectrumRecordWriter {
     string outfile,  ///< spectrumrecords file to output
     int &spectra_converted, //output variable that tells the number of spectra converted
     int ms_level = 2,  /// MS level to extract (1 or 2)
-    bool dia_mode = false,  /// whether it's used in DIAmeter
-    bool pb_spectra = false
+    bool dia_mode = false  /// whether it's used in DIAmeter
   );
   /**
    * Return a pb::Spectrum from a Crux::Spectrum
