@@ -38,6 +38,7 @@ jobs:
               python -m pip install numpy
               python -m pip install pandas
               sudo apt-get install ruby 2.2.0
+              sudo gem update --system
               sudo gem install cucumber
               sudo gem install rspec
               cmake -E make_directory "${{runner.workspace}}/build"
