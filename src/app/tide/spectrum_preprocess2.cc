@@ -76,6 +76,11 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   
   background_bin_end_ = MassConstants::mass2bin(max_peak_mz + MAX_XCORR_OFFSET + 1, 1);
   cache_end_ = MassConstants::mass2bin(max_peak_mz + MAX_XCORR_OFFSET + 30, 1)*NUM_PEAK_TYPES;
+
+  if (peaks_ != NULL)
+    delete peaks_;
+  if (cache_ != NULL)
+  delete[] cache_; 
   
   peaks_ = new double[background_bin_end_];
   cache_ = new int[cache_end_];

@@ -38,7 +38,7 @@ ActivePeptideQueueLite::~ActivePeptideQueueLite() {
 void ActivePeptideQueueLite::ComputeTheoreticalPeaksBack() {
   theoretical_peak_set_.Clear();
   PeptideLite* peptide = queue_.back();
-  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_);
+  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
 }
 
 bool ActivePeptideQueueLite::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {

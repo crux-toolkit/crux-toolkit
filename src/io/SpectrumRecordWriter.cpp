@@ -94,7 +94,7 @@ bool SpectrumRecordWriter::convert(
   std::sort(all_spectra.begin(), all_spectra.end(), cmp_pbspectra);
   
   spectra_converted = all_spectra.size();
-  
+
   // Write the spectra to spectrum protocol buffer in spectrum records format.
   for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin();
          j != all_spectra.end();

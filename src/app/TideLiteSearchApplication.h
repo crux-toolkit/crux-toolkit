@@ -82,7 +82,6 @@ class TideLiteSearchApplication : public CruxApplication {
   // static SpectrumCollection* loadSpectra(const std::string& file);
   void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
   void createOutputFiles();
-  vector<int> getNegativeIsotopeErrors();
 
   void PrintResults(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt, TideLiteMatchSet* psm_scores);
 
@@ -112,8 +111,6 @@ class TideLiteSearchApplication : public CruxApplication {
     }
   };
 
-  void XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
-  int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
   void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
 
   void computeWindow(
@@ -182,6 +179,11 @@ class TideLiteSearchApplication : public CruxApplication {
   SCORE_FUNCTION_T curScoreFunction_;
   int decoy_num_;  // Number of decoys per peptide;
   int top_matches_;
+  
+  // These are public functions to be accessed from diameter application.
+  static vector<int> getNegativeIsotopeErrors();
+  static void XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores);
+  static int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
 
 
 

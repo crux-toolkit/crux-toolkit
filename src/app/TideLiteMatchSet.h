@@ -84,7 +84,13 @@ class TideLiteMatchSet {
                    string &concat_or_target_report, string& decoy_report);
   void gatherTargetsDecoys();  // Additional scores are:  delta_cn, delta_lcn, tailor
   void calculateAdditionalScores(PSMScores& psm_scores);  // Additional scores are:  delta_cn, delta_lcn, tailor; 
-  void printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& results);
+  void printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& results,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map = NULL,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map = NULL,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map = NULL,
+    map<PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map = NULL,
+    map<string, double>* peptide_predrt_map = NULL);
+
   static string GetModificationList(const pb::ModTable* mod_table, string site_prefix, string position_prefix, bool variable, int& cnt);
   /* Constants required for the tailor scoring */
   const double TAILOR_QUANTILE_TH = 0.01;
@@ -106,7 +112,7 @@ class TideLiteMatchSet {
   static int psm_id_mzTab_;
   static string fasta_file_name_;
 
- private:
+//  private:
   PSMScores concat_or_target_psm_scores_;
   PSMScores decoy_psm_scores_;
 

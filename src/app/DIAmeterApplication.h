@@ -10,7 +10,7 @@
 
 #include "CruxApplication.h"
 #include "TideMatchSet.h"
-#include "TideSearchApplication.h"
+// #include "TideLiteSearchApplication.h"
 
 #include <iostream>
 #include <fstream>
@@ -71,9 +71,9 @@ class DIAmeterApplication : public CruxApplication {
     ofstream* output_file,  // output file to write to
     const string& spectrum_filename, // name of spectrum file
     const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
-    const ActivePeptideQueue* peptides, // peptide queue
+    ActivePeptideQueueLite* peptides, // peptide queue
     const ProteinVec& proteins, // proteins corresponding with peptides
-    TideMatchSet* matches, // object to manage PSMs
+    TideLiteMatchSet& matches, // object to manage PSMs
     ObservedPeakSet* observed,
     map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
     map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
@@ -82,31 +82,31 @@ class DIAmeterApplication : public CruxApplication {
   );
 
   void computePrecIntRank(
-      const vector<TideMatchSet::Arr::iterator>& vec,
-      const ActivePeptideQueue* peptides,
+      TideLiteMatchSet::PSMScores& vec,
+      ActivePeptideQueueLite* peptides,
       const double* mz_arr,
     const double* intensity_arr,
       const double* intensity_rank_arr,
     boost::tuple<double, double> slope_intercept_tp,
     int peak_num,
-      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* intensity_map,
-      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* logrank_map,
+      map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map,
+      map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map,
       int charge
   );
 
   void computePrecFragCoelute(
-    const vector<TideMatchSet::Arr::iterator>& vec,
-    const ActivePeptideQueue* peptides,
+    TideLiteMatchSet::PSMScores& vec,
+    ActivePeptideQueueLite* peptides,
     vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
-      map<TideMatchSet::Arr::iterator, boost::tuple<double, double, double>>* coelute_map,
+      map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
       int charge
   );
 
   void computeMS2Pval(
-    const vector<TideMatchSet::Arr::iterator>& vec,
-    const ActivePeptideQueue* peptides,
+    TideLiteMatchSet::PSMScores& vec,
+    ActivePeptideQueueLite* peptides,
     ObservedPeakSet* observed,
-    map<TideMatchSet::Arr::iterator, boost::tuple<double, double>>* ms2pval_map
+    map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
   );
 
   void computeWindowDIA(
@@ -117,8 +117,6 @@ class DIAmeterApplication : public CruxApplication {
     double* min_range,
     double* max_range
   );
-
-  double getTailorQuantile(TideMatchSet::Arr2* match_arr2);
 
   void getPeptidePredRTMapping(map<string, double>* peptide_predrt_map, int percent_bins = 200);
 

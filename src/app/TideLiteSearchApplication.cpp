@@ -75,7 +75,7 @@ TideLiteSearchApplication::TideLiteSearchApplication() {
   out_mztab_decoy_ = NULL;      // mzTAB output format for the decoy psms only
   out_pin_target_ = NULL;        // pin output format for percolator
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
-  total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum convertion
+  total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
 
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
@@ -159,7 +159,7 @@ int TideLiteSearchApplication::main(const vector<string>& input_files, const str
   curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));  
 
   if (curScoreFunction_ == PVALUES && bin_width_ < 1.0) {
-    carp(CARP_FATAL, "Tide-search does not support P-value calculation with bin-wifth less than 1.0 Da.");
+    carp(CARP_FATAL, "Tide-search does not support P-value calculation with bin-width less than 1.0 Da.");
   }
  
   // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
@@ -357,9 +357,8 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
         spectrum->Size() < min_peaks_  ||
         charge < min_precursor_charge_ || 
         charge >max_precursor_charge_ ) {
-      continue; ///switch to continue in a loop
-      //return;
-    }
+      continue; 
+   }
 
     if (spectrum_flag_ != NULL) {  // TODO: Do something, possibly for cascade search
     }
@@ -374,7 +373,7 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     delete max_mass;
 
     if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
-      continue; ///switch to continue in a loop
+      continue; 
     }
     locks_array_[LOCK_CANDIDATES]->lock();
     total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
@@ -388,13 +387,32 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
     switch (curScoreFunction_) {
       case PVALUES:
         PValueScoring(sc, active_peptide_queue, psm_scores);
-//        break;
+        //break; // Run standard xcorr scoring in case of combined p-value calculations
       case XCORR_SCORE:
-        XCorrScoring(sc, active_peptide_queue, psm_scores);
+        // Spectrum preprocessing for xcorr scoring
+        long num_range_skipped = 0;
+        long num_precursors_skipped = 0;
+        long num_isotopes_skipped = 0;
+        long num_retained = 0;
+
+        ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
+        observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
+                                    &num_precursors_skipped,
+                                    &num_isotopes_skipped, &num_retained);
+
+        locks_array_[LOCK_REPORTING]->lock();
+        num_range_skipped_ += num_range_skipped;
+        num_precursors_skipped_ += num_precursors_skipped;
+        num_isotopes_skipped_ += num_isotopes_skipped;
+        num_retained_ += num_retained;
+        locks_array_[LOCK_REPORTING]->unlock();
+
+        XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
         break;
+      // case HYPERSCOR: TODO add noew scoring functinos here
     } 
     // Print the top-N results to the output files, 
-    // The delta_cn, delta_lcn, and tailor score calulation happens here
+    // The delta_cn, delta_lcn, and tailor score calulation happens in PrintResults
 
     PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
     delete spectrum;
@@ -403,27 +421,7 @@ void TideLiteSearchApplication::spectrum_search(void *threadarg) {
   }
 }
 
-void TideLiteSearchApplication::XCorrScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores){
-  // spectrum preprocessing for xcorr scoring
-
-  long num_range_skipped = 0;
-  long num_precursors_skipped = 0;
-  long num_isotopes_skipped = 0;
-  long num_retained = 0;
-
-  int charge = sc->charge;  
-
-  ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
-  observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
-                              &num_precursors_skipped,
-                              &num_isotopes_skipped, &num_retained);
-
-  locks_array_[LOCK_REPORTING]->lock();
-  num_range_skipped_ += num_range_skipped;
-  num_precursors_skipped_ += num_precursors_skipped;
-  num_isotopes_skipped_ += num_isotopes_skipped;
-  num_retained_ += num_retained;
-  locks_array_[LOCK_REPORTING]->unlock();
+void TideLiteSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueueLite* active_peptide_queue, TideLiteMatchSet& psm_scores){
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
@@ -578,7 +576,6 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
   //nAARes: number of amino acids
   //maxPrecurMassBin: max number of mass bins
   int nAARes = iAAMass_.size();
-  // printf("nAARes: %d\t npepmassintuniq: %d\t macprecurmassbin:%d\n", nAARes, nPepMassIntUniq, maxPrecurMassBin);
   vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
       vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin, 0)));
 
@@ -737,8 +734,8 @@ void TideLiteSearchApplication::PValueScoring(const SpectrumCollection::SpecChar
     psm_scores.psm_scores_[cnt].resEv_score_   = scoreResidueEvidence;
     psm_scores.psm_scores_[cnt].resEv_pval_    = pValue_resEv;
     psm_scores.psm_scores_[cnt].combined_pval_ = pValue_combined;
-    psm_scores.psm_scores_[cnt].ordinal_ = cnt;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].ordinal_       = cnt;
+    psm_scores.psm_scores_[cnt].active_        = active_peptide_queue->candidatePeptideStatus_[cnt];  
   }
 }
 
@@ -1072,7 +1069,6 @@ void TideLiteSearchApplication::calcResidueScoreCount (
     // }
     col = initCountCol + ma - nTermMassBin_ + 1;
 
-    //  if ( col <= maxAaMass + colLast ) { // original
     if (col <= maxAaMass + colLast && col >= initCountCol) { //TODO not sure if below or above is correct
       dynProgArray[row][col] += dynProgArray[initCountRow][initCountCol] * dAAFreqN_[de];
     }
@@ -1283,7 +1279,7 @@ void TideLiteSearchApplication::getPeptideIndexData(const string input_index, Pr
     } else {
       carp(CARP_INFO, "You are using an old format of the peptide index data. Please recreate your peptide index data");
       // The following (this whole else branch) part should be removed later.
-      // Calculate the Amino Acid Frequencies for the P-value calculation if it wasn't done before with tide-index.
+      // Calculate the Amino Acid Frequencies for the P-value calculation if it wasn't done with tide-index.
       unsigned int len;
       unsigned int i;
       unsigned int cntTerm = 0;
@@ -1410,7 +1406,7 @@ vector<string> TideLiteSearchApplication::getOptions() const {
     "concat",
     "deisotope",
     "elution-window-size",
-    "evidence-granularity", // To be removed
+    // "evidence-granularity", // To be removed
     "file-column",
     "fileroot",
     "fragment-tolerance",

@@ -98,7 +98,7 @@ void PeptideLite::AddIons(W* workspace, bool dia_mode) {
 
   // added by Yang
   if (dia_mode) {
-    // ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
+    ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
     ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
   }
   peaks_1b.clear();
@@ -116,7 +116,7 @@ void PeptideLite::AddIons(W* workspace, bool dia_mode) {
     if (dia_mode) {
       b_ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::B, 1)));
       ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::B, 1)));
-      // ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::B, 1));
+      ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::B, 1));
     }
     total += aa_masses[i];
   }
@@ -129,7 +129,7 @@ void PeptideLite::AddIons(W* workspace, bool dia_mode) {
     if (dia_mode) {
       y_ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
       ion_mzbins_.push_back(MassConstants::mass2bin(PeptideLite::MassToMz(total + MassConstants::Y, 1)));
-      // ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::Y, 1));
+      ion_mzs_.push_back(PeptideLite::MassToMz(total + MassConstants::Y, 1));
     }
     total += aa_masses[i];
   }
@@ -158,7 +158,7 @@ void PeptideLite::AddIons(W* workspace, bool dia_mode) {
     sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
     sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
     sort(ion_mzbins_.begin(), ion_mzbins_.end());
-    // sort(ion_mzs_.begin(), ion_mzs_.end());
+    sort(ion_mzs_.begin(), ion_mzs_.end());
   }
 }
 

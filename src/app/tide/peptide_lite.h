@@ -131,6 +131,7 @@ class PeptideLite {
   vector<int>& IonMzbins() { return ion_mzbins_; }
   vector<int>& BIonMzbins() { return b_ion_mzbins_; }
   vector<int>& YIonMzbins() { return y_ion_mzbins_; }
+  vector<double>& IonMzs() { return ion_mzs_; } // added for debug purpose  
   
   vector<unsigned int> peaks_0;   // Single charged b-y ions, in case of exact p-value, this contains only the b-ions
   vector<unsigned int> peaks_1;   // Double charged b-y ions
@@ -165,6 +166,8 @@ class PeptideLite {
   const vector<const pb::Protein*>* proteins_;
 
   vector<int> ion_mzbins_, b_ion_mzbins_, y_ion_mzbins_;   // Added for Diameter
+  vector<double> ion_mzs_; // added for debug purpose
+
   string protein_id_str_;
   string flankingAAs_;
   string seq_with_mods_;

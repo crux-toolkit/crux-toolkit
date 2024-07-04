@@ -572,6 +572,7 @@ enum _tsv_output_formats {
     TIDE_SEARCH_TSV, //original tide-search output format
     TIDE_SEARCH_MZTAB_TSV, // MzTAB format
     TIDE_SEARCH_PIN_TSV, // pin format for Percolator
+    DIAMETER_TSV,
     NUMBER_TSV_FORMATS 
 };
 
