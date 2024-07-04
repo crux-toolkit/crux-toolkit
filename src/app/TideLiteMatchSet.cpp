@@ -29,7 +29,7 @@ int TideLiteMatchSet::XCorr_tsv_cols[] = {
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
     DECOY_INDEX_COL
   };    
- int TideLiteMatchSet::Pvalues_tsv_cols[] = {  //TODO: update the colums.
+ int TideLiteMatchSet::Pvalues_tsv_cols[] = {  //TODO: update the columns.
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL, REFACTORED_SCORE_COL, EXACT_PVALUE_COL, 
@@ -38,14 +38,17 @@ int TideLiteMatchSet::XCorr_tsv_cols[] = {
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
     DECOY_INDEX_COL
   };    
-int TideLiteMatchSet::Diameter_tsv_cols[] = { //TODO: update the colums.
-    FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
-    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, // TODO: add a variable for the matching theoretical peak series.
+
+  int TideLiteMatchSet::Diameter_tsv_cols[] = {
+    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL,  XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
+    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
+    PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
+    RT_DIFF_COL, DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
+    COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
-    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
-    DECOY_INDEX_COL
-  };    
+    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
+  };
 
 int TideLiteMatchSet::XCorr_mzTab_cols[] = {
     MZTAB_PSH, MZTAB_SEQUENCE, MZTAB_PSM_ID, MZTAB_ACCESSION, MZTAB_UNIQUE, MZTAB_DATABASE,
@@ -89,22 +92,22 @@ int TideLiteMatchSet::Pvalues_mzTab_cols[] = {
     MZTAB_OPT_MS_RUN_1_DECOY_INDEX
   };    
 
-int TideLiteMatchSet::XCorr_pin_cols[] = {
-    POUT_PSMID_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
-    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
-    XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
-    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
-    DECOY_INDEX_COL
-  };    
- int TideLiteMatchSet::Pvalues_pin_cols[] = {  //TODO: update the colums.
-    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, REFACTORED_SCORE_COL, EXACT_PVALUE_COL, 
-    RESIDUE_EVIDENCE_COL, RESIDUE_PVALUE_COL, BOTH_PVALUE_COL, BOTH_PVALUE_RANK, 
-    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
-    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
-    DECOY_INDEX_COL
-  };    
+// int TideLiteMatchSet::XCorr_pin_cols[] = {
+//     POUT_PSMID_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+//     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
+//     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
+//     XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
+//     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
+//     DECOY_INDEX_COL
+//   };    
+//  int TideLiteMatchSet::Pvalues_pin_cols[] = {  //TODO: update the colums.
+//     FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+//     PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, REFACTORED_SCORE_COL, EXACT_PVALUE_COL, 
+//     RESIDUE_EVIDENCE_COL, RESIDUE_PVALUE_COL, BOTH_PVALUE_COL, BOTH_PVALUE_RANK, 
+//     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
+//     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
+//     DECOY_INDEX_COL
+//   };    
 
 TideLiteMatchSet::TideLiteMatchSet(ActivePeptideQueueLite* active_peptide_queue) {
   psm_scores_processed_ = false;
@@ -118,6 +121,9 @@ TideLiteMatchSet::~TideLiteMatchSet() {
 int* TideLiteMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders){
   // TSV_OUTPUT_FORMATS_T is defined in ./src/model/objects.h
   switch (format) {
+    case DIAMETER_TSV:
+      numHeaders = sizeof(Diameter_tsv_cols) / sizeof(int);
+      return Diameter_tsv_cols;
     case TIDE_SEARCH_TSV:
       switch (curScoreFunction_) {
         case XCORR_SCORE:
@@ -144,7 +150,7 @@ int* TideLiteMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeader
         //   return Diameter_mzTab_cols;
       }
       break;
-    case TIDE_SEARCH_PIN_TSV:
+    case TIDE_SEARCH_PIN_TSV:  // Consider to print pin format directly, so that MakePinApplication can be removed.
       break;
   }
 }
@@ -167,6 +173,7 @@ string TideLiteMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_inde
 
   switch (format) {
     case TIDE_SEARCH_TSV:
+    case DIAMETER_TSV:
       header_cols = getColumns(format, numHeaders);
       header += get_column_header(header_cols[0]);
       for (size_t i = 1; i < numHeaders; ++i) {
@@ -356,13 +363,12 @@ void TideLiteMatchSet::gatherTargetsDecoys() {
   bool (*comp)(const Scores& x, const Scores& y);
 
   switch (curScoreFunction_) {
+  case DIAMETER:
   case XCORR_SCORE:
     comp = &cmpXcorrScore;
     break;
   case PVALUES:
     comp = &cmpCombinedPvalue;
-    break;
-  case DIAMETER:
     break;
   }
 
@@ -459,11 +465,17 @@ void TideLiteMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Ad
 
 }
 
-void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& report) { 
+void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& report,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map,
+    map<PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
+    map<PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map,
+    map<string, double>* peptide_predrt_map) { 
   // The order of the fields of the results is solely based on the column order
   size_t numHeaders;
   int* header_cols = getColumns(format, numHeaders);
   int cnt = 1;
+  double predrt;
   for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it, ++cnt) {
     if (cnt > top_matches_)
       break;
@@ -671,6 +683,86 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
       case MZTAB_END:
         report += StringUtils::ToString(peptide->FirstLocPos()+peptide->Len()-1, 0);  // the fasta file name
         break;
+      // Diameter features: PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
+      // RT_DIFF_COL, DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
+      // COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
+      case PRECURSOR_INTENSITY_RANK_M0_COL:
+        if (intensity_map != NULL) {
+          boost::tuple<double, double, double> intensity_tuple = intensity_map->at(it);
+          report += StringUtils::ToString(intensity_tuple.get<0>()+intensity_tuple.get<1>()+intensity_tuple.get<2>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case PRECURSOR_INTENSITY_RANK_M1_COL:
+        if (intensity_map != NULL) {
+          boost::tuple<double, double, double> intensity_tuple = intensity_map->at(it);
+          report += StringUtils::ToString(intensity_tuple.get<0>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case PRECURSOR_INTENSITY_RANK_M2_COL:
+        if (logrank_map != NULL) {
+          boost::tuple<double, double, double> logrank_tuple = logrank_map->at(it);
+          report += StringUtils::ToString(logrank_tuple.get<0>()+logrank_tuple.get<1>()+logrank_tuple.get<2>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case RT_DIFF_COL:
+        predrt = 0.5;
+        if (peptide_predrt_map != NULL) {
+          map<string, double>::iterator predrtIter = peptide_predrt_map->find(peptide_with_mods);
+          if (predrtIter != peptide_predrt_map->end()) { 
+            predrt = predrtIter->second; 
+          }
+        }
+        report += StringUtils::ToString(fabs(predrt - sc->spectrum->RTime()), score_precision_, true);
+        break;
+      case DYN_FRAGMENT_PVALUE_COL:
+        if (ms2pval_map != NULL) {
+          boost::tuple<double, double> ms2pval = ms2pval_map->at(it);
+          report += StringUtils::ToString(ms2pval.get<0>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case STA_FRAGMENT_PVALUE_COL:
+        if (ms2pval_map != NULL) {
+          boost::tuple<double, double> ms2pval = ms2pval_map->at(it);
+          report += StringUtils::ToString(ms2pval.get<1>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case COELUTE_MS1_COL:
+        if (coelute_map != NULL) {
+          boost::tuple<double, double, double> coelute_tuple = coelute_map->at(it);
+          report += StringUtils::ToString(coelute_tuple.get<0>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case COELUTE_MS2_COL:
+        if (coelute_map != NULL) {
+          boost::tuple<double, double, double> coelute_tuple = coelute_map->at(it);
+          report += StringUtils::ToString(coelute_tuple.get<1>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case COELUTE_MS1_MS2_COL:
+        if (coelute_map != NULL) {
+          boost::tuple<double, double, double> coelute_tuple = coelute_map->at(it);
+          report += StringUtils::ToString(coelute_tuple.get<2>(), score_precision_, true);
+        } else {
+          report += "0";
+        }
+        break;
+      case ENSEMBLE_SCORE_COL:
+        report += StringUtils::ToString(0.0, score_precision_, true);
+        break;
       }
 
       if (i < numHeaders-1)  // If not the last column, add a column separator
@@ -680,6 +772,18 @@ void TideLiteMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum
   }
 }
 
+/*
+  int TideLiteMatchSet::Diameter_tsv_cols[] = {
+    FILE_COL, SCAN_COL, CHARGE_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL,  XCORR_SCORE_COL, TAILOR_COL, XCORR_RANK_COL,
+    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
+    PRECURSOR_INTENSITY_RANK_M0_COL, PRECURSOR_INTENSITY_RANK_M1_COL, PRECURSOR_INTENSITY_RANK_M2_COL,
+    RT_DIFF_COL, DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
+    COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL, ENSEMBLE_SCORE_COL,
+    DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
+    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
+  };
+*/
 string TideLiteMatchSet::GetModificationList(const pb::ModTable* mod_table, string site_prefix, string position_prefix, bool variable_mods, int& cnt){
   string mods;
   string site;
