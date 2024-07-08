@@ -71,7 +71,8 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
       break;
     }
     if (!Params::GetBool("skip-preprocessing") && !mst_spectrum->getPeaks()->empty()) {
-      const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intersity
+      const FLOAT_T ratio = 0.05f; // setting the ratio to delete small peaks by intensity
+      FLOAT_T highest_peak_intensity_threshold = 0.0;
       auto peaks = mst_spectrum->getPeaks();
       const MSToolkit::Peak_T* highest_intens_peak = nullptr;
       for (const auto &peak : *peaks) {
@@ -79,8 +80,9 @@ bool MSToolkitSpectrumCollection::parse(int ms_level, bool dia_mode) {
           highest_intens_peak = &peak;
         }
       }
+      highest_peak_intensity_threshold = sqrt(highest_intens_peak->intensity) * ratio;
       for (int i = 0; i < peaks->size(); ++i) {
-        if (peaks->at(i).intensity < highest_intens_peak->intensity * ratio) {
+        if (sqrt(peaks->at(i).intensity) < highest_peak_intensity_threshold) {
           std::swap(peaks->at(i), peaks->at(peaks->size() - 1));
           peaks->pop_back();
         }
