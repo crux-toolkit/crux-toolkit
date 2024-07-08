@@ -37,8 +37,8 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   double m_z_denom = spec.peak_m_z_denominator();
   double intensity_denom = spec.peak_intensity_denominator();
   for (int i = 0; i < size; ++i) {
-    CHECK(spec.peak_m_z(i) > 0);
-    total += spec.peak_m_z(i); // deltas of m/z are stored
+    // CHECK(spec.peak_m_z(i) > 0);
+    total = spec.peak_m_z(i); // deltas of m/z are stored
     peak_m_z_.push_back(total / m_z_denom);
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }

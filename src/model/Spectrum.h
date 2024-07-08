@@ -199,6 +199,11 @@ class Spectrum{
   void sortPeaks(PEAK_SORT_TYPE_T type);
 
   /**
+   * Put highest peak to the end
+   */
+  void putHighestPeak();
+  
+  /**
    * Populate peaks with rank information.
    */
   void rankPeaks();

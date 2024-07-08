@@ -80,7 +80,7 @@ bool SpectrumRecordWriter::convert(
   vector<pb::Spectrum> all_spectra; 
 
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-	(*i)->sortPeaks(_PEAK_LOCATION); // Sort peaks by m/z
+	(*i)->putHighestPeak(); // Sort peaks by m/z
 
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
@@ -163,27 +163,27 @@ void SpectrumRecordWriter::addPeaks(
   int intensity_denom = kMaxPrecision;
   spectrum->set_peak_m_z_denominator(mz_denom);
   spectrum->set_peak_intensity_denominator(intensity_denom);
-  uint64_t last = 0;
-  int last_index = -1;
+  // uint64_t last = 0;
+  // int last_index = -1;
   uint64_t intensity_sum = 0;
 
   for (PeakIterator i = s->begin(); i != s->end(); ++i) {
     FLOAT_T peakMz = (*i)->getLocation();
     uint64_t mz = peakMz * mz_denom + 0.5;
     uint64_t intensity = (*i)->getIntensity() * intensity_denom + 0.5;
+    /*
     if (mz < last) {
       // Unsorted peaks, this should never happen since peaks get sorted earlier
       carp(CARP_FATAL, "Peaks are not sorted");
-    } else if (mz == last) {
+    }
+    if (mz == last) {
       intensity_sum += intensity;
       spectrum->set_peak_intensity(last_index, intensity_sum);
-    } else {
-      spectrum->add_peak_m_z(mz - last);
-      spectrum->add_peak_intensity(intensity);
-      last = mz;
-      intensity_sum = intensity;
-      ++last_index;
     }
+    */
+    spectrum->add_peak_m_z(mz);
+    spectrum->add_peak_intensity(intensity);
+    intensity_sum = intensity;
   }
 }
 
