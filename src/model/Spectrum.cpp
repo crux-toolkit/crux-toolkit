@@ -372,7 +372,19 @@ bool Spectrum::parseMstoolkitSpectrum
   filename_ = filename;
 
   //add all peaks.
+  const FLOAT_T ratio = 0.05f; // setting the ratio to delete small peaks by intensity
+  FLOAT_T highest_peak_intensity_threshold = 0.0;
+  FLOAT_T highest_intens_peak = 0.0;
+  for (int i = 0; i < (int)mst_real_spectrum->size(); ++i) {
+    if (highest_intens_peak < mst_real_spectrum->at(i).intensity) {
+      highest_intens_peak = mst_real_spectrum->at(i).intensity;
+    }
+  }
+  highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
   for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
+    if (!Params::GetBool("skip-preprocessing") && sqrt(mst_real_spectrum->at(peak_idx).intensity) < highest_peak_intensity_threshold) {
+      continue;
+    }
     this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
                    mst_real_spectrum->at(peak_idx).mz);
   }
@@ -419,7 +431,19 @@ bool Spectrum::parsePwizSpecInfo(
   int num_peaks = pwiz_spectrum->defaultArrayLength;
   vector<double> mzs = pwiz_spectrum->getMZArray()->data;
   vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
+  const FLOAT_T ratio = 0.05f; // setting the ratio to delete small peaks by intensity
+  FLOAT_T highest_intens_peak = 0.0;
+  FLOAT_T highest_peak_intensity_threshold = 0.0;
   for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+    if (highest_intens_peak < intensities[peak_idx]) {
+      highest_intens_peak = intensities[peak_idx];
+    }
+  }
+  highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
+  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+    if (!Params::GetBool("skip-preprocessing") && sqrt(intensities[peak_idx]) < highest_peak_intensity_threshold * ratio) {
+      continue;
+    }
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }
   has_peaks_ = true;
