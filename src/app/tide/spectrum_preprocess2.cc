@@ -126,7 +126,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         continue;
       }
       //denoising-related, added by Yang
-      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) {
+        continue;
+      }
 
       // Remove precursor peaks.
       if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
