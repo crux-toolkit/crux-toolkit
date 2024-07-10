@@ -17,7 +17,7 @@
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 #include "util/MathUtil.h"
-#include "TideLiteMatchSet.h"
+#include "TideMatchSet.h"
 
 #include "io/DIAmeterFeatureScaler.h"
 #include "io/DIAmeterPSMFilter.h"
@@ -53,12 +53,12 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   double bin_offset_ = Params::GetDouble("mz-bin-offset");
   int print_interval = Params::GetInt("print-search-progress");
 
-  TideLiteMatchSet::curScoreFunction_ = XCORR_SCORE;
-  TideLiteMatchSet::top_matches_ = Params::GetInt("top-match");
-  TideLiteMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
-  TideLiteMatchSet::score_precision_ = Params::GetInt("precision");
-  TideLiteMatchSet::mod_precision_ = Params::GetInt("mod-precision");  
-  TideLiteMatchSet::concat_ = Params::GetBool("concat");
+  TideMatchSet::curScoreFunction_ = XCORR_SCORE;
+  TideMatchSet::top_matches_ = Params::GetInt("top-match");
+  TideMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
+  TideMatchSet::score_precision_ = Params::GetInt("precision");
+  TideMatchSet::mod_precision_ = Params::GetInt("mod-precision");  
+  TideMatchSet::concat_ = Params::GetBool("concat");
 
   // Get the peptide and protein index files. 
   const string index = input_index;
@@ -86,9 +86,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
                        "This will not affect your results, but this index may need to be "
                        "re-created to work with future versions of tide-index. ");
   }
-  TideLiteMatchSet::decoy_prefix_ = decoy_prefix;  
+  TideMatchSet::decoy_prefix_ = decoy_prefix;  
   if (headerSource.has_filename()){
-    TideLiteMatchSet::fasta_file_name_ = headerSource.filename();
+    TideMatchSet::fasta_file_name_ = headerSource.filename();
   }
   
   HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
@@ -99,7 +99,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   }
 
   const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  TideLiteMatchSet::decoy_num_ = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
+  TideMatchSet::decoy_num_ = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
 
   // Initizalize the Mass Constants class
   MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
@@ -110,10 +110,10 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
   string output_file_name_scaled_ = make_file_path("diameter.psm-features.txt");
   string output_file_name_filtered_ = make_file_path("diameter.psm-features.filtered.txt");
 
-  vector<int> negative_isotope_errors = TideLiteSearchApplication::getNegativeIsotopeErrors();
+  vector<int> negative_isotope_errors = TideSearchApplication::getNegativeIsotopeErrors();
 
   ofstream* output_file = create_stream_in_path(output_file_name_unsorted_.c_str(), NULL, Params::GetBool("overwrite"));
-  string output_header = TideLiteMatchSet::getHeader(DIAMETER_TSV, "");
+  string output_header = TideMatchSet::getHeader(DIAMETER_TSV, "");
   *output_file << output_header;
 
   map<string, double> peptide_predrt_map;
@@ -148,7 +148,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
     // Active queue to process the indexed peptides
     HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
-    ActivePeptideQueueLite* active_peptide_queue = new ActivePeptideQueueLite(peptide_reader.Reader(), proteins, NULL, dia_mode);
+    ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins, NULL, dia_mode);
 
     // Some setup adopted from TideSearch
     const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
@@ -283,9 +283,9 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
             continue; 
           }
           // allocate PSMscores for N scores
-          TideLiteMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
+          TideMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
 
-          TideLiteSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);
+          TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);
 
           reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins,
               psm_scores, &observed, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map,
@@ -358,9 +358,9 @@ void DIAmeterApplication::reportDIA(
   ofstream* output_file,  // output file to write to
   const string& spectrum_filename, // name of spectrum file
   const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
-  ActivePeptideQueueLite* peptides, // peptide queue
+  ActivePeptideQueue* peptides, // peptide queue
   const ProteinVec& proteins, // proteins corresponding with peptides
-  TideLiteMatchSet& matches, // object to manage PSMs
+  TideMatchSet& matches, // object to manage PSMs
   ObservedPeakSet* observed,
   map<int, boost::tuple<double*, double*, double*, int>>* ms1scan_mz_intensity_rank_map,
   map<int, boost::tuple<double, double>>* ms1scan_slope_intercept_map,
@@ -401,8 +401,8 @@ void DIAmeterApplication::reportDIA(
   }
   boost::tuple<double, double> slope_intercept_tp = boost::make_tuple(slope_new, intercept_new);
 
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> intensity_map;
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> logrank_map;
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> intensity_map;
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> logrank_map;
   computePrecIntRank(matches.concat_or_target_psm_scores_, peptides, mz_arr_new, intensity_arr_new, intensity_rank_arr_new, slope_intercept_tp, peak_num_new, &intensity_map, &logrank_map, charge);
   computePrecIntRank(matches.decoy_psm_scores_,            peptides, mz_arr_new, intensity_arr_new, intensity_rank_arr_new, slope_intercept_tp, peak_num_new, &intensity_map, &logrank_map, charge);
 
@@ -452,12 +452,12 @@ void DIAmeterApplication::reportDIA(
       mz_intensity_arrs_vector.push_back(boost::make_tuple(ms1_mz_arr, ms1_intensity_arr, ms1_peak_num, ms2_mz_arr, ms2_intensity_arr, ms2_peak_num));
     }
   }
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> coelute_map;
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>> coelute_map;
   computePrecFragCoelute(matches.concat_or_target_psm_scores_, peptides, &mz_intensity_arrs_vector, &coelute_map, charge);
   computePrecFragCoelute(matches.decoy_psm_scores_,            peptides, &mz_intensity_arrs_vector, &coelute_map, charge);
 
   // calculate MS2 p-value
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double>> ms2pval_map;
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double>> ms2pval_map;
   computeMS2Pval(matches.concat_or_target_psm_scores_, peptides, observed, &ms2pval_map);
   computeMS2Pval(matches.decoy_psm_scores_,            peptides, observed, &ms2pval_map);
 
@@ -489,15 +489,15 @@ void DIAmeterApplication::reportDIA(
 }
 
 void DIAmeterApplication::computePrecIntRank(
-  TideLiteMatchSet::PSMScores& vec,
-  ActivePeptideQueueLite* peptides,
+  TideMatchSet::PSMScores& vec,
+  ActivePeptideQueue* peptides,
   const double* mz_arr,
   const double* intensity_arr,
   const double* intensity_rank_arr,
   boost::tuple<double, double> slope_intercept_tp,
   int peak_num,
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map,
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map,
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map,
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map,
   int charge
 ) {
   double noise_intensity_rank = avg_noise_intensity_logrank_;
@@ -505,9 +505,9 @@ void DIAmeterApplication::computePrecIntRank(
   double slope = slope_intercept_tp.get<0>();
   double intercept = slope_intercept_tp.get<1>();
 
-  for (TideLiteMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    PeptideLite& peptide = *(peptides->GetPeptide((*i).ordinal_));
-    double peptide_mz_m0 = PeptideLite::MassToMz(peptide.Mass(), charge);
+  for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
+    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
+    double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
 
     double intensity_rank_m0 = closestPPMValue(mz_arr, intensity_rank_arr, peak_num, peptide_mz_m0, Params::GetInt("prec-ppm"), noise_intensity_rank, false);
     double intensity_rank_m1 = closestPPMValue(mz_arr, intensity_rank_arr, peak_num, peptide_mz_m0 + 1.0/(charge * 1.0), Params::GetInt("prec-ppm"), noise_intensity_rank, false);
@@ -523,19 +523,19 @@ void DIAmeterApplication::computePrecIntRank(
 }
 
 void DIAmeterApplication::computePrecFragCoelute(
-  TideLiteMatchSet::PSMScores& vec,
-  ActivePeptideQueueLite* peptides,
+  TideMatchSet::PSMScores& vec,
+  ActivePeptideQueue* peptides,
   vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
   int charge
 ) {
   int coelute_size = mz_intensity_arrs_vector->size();
   vector<double> ms1_corrs, ms2_corrs, ms1_ms2_corrs;
 
-  for (TideLiteMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    PeptideLite& peptide = *(peptides->GetPeptide((*i).ordinal_));
+  for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
+    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
     // Precursor signals
-    double peptide_mz_m0 = PeptideLite::MassToMz(peptide.Mass(), charge);
+    double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
     // Fragment signals
     vector<double> ion_mzs = peptide.IonMzs();
     // Precursor and fragment chromatograms
@@ -623,10 +623,10 @@ void DIAmeterApplication::computePrecFragCoelute(
 }
 
 void DIAmeterApplication::computeMS2Pval(
-  TideLiteMatchSet::PSMScores& vec,
-  ActivePeptideQueueLite* peptides,
+  TideMatchSet::PSMScores& vec,
+  ActivePeptideQueue* peptides,
   ObservedPeakSet* observed,
-  map<TideLiteMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
+  map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
 ) {
   int smallest_mzbin = observed->SmallestMzbin();
   int largest_mzbin = observed->LargestMzbin();
@@ -649,8 +649,8 @@ void DIAmeterApplication::computeMS2Pval(
   vector<int> intersect_mzbins;
   vector<double> pvalue_binomial_probs;
 
-  for (TideLiteMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    PeptideLite& peptide = *(peptides->GetPeptide((*i).ordinal_));
+  for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
+    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
     vector<int> ion_mzbins = peptide.IonMzbins();
 
     intersect_mzbins.clear();

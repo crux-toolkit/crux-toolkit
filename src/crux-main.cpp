@@ -37,7 +37,6 @@
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
-#include "app/TideLiteSearchApplication.h"
 
 #include "app/DIAmeterApplication.h"
 #include "app/KojakApplication.h"
@@ -66,7 +65,6 @@ int main(int argc, char** argv) {
     applications.add(new CruxBullseyeApplication());
     applications.add(new TideIndexApplication());
     applications.add(new TideSearchApplication());
-    applications.add(new TideLiteSearchApplication());
     applications.add(new ReadSpectrumRecordsApplication());
     applications.add(new ReadTideIndex());
     applications.add(new CometApplication());

@@ -71,8 +71,7 @@ set(
   tide_lib_files
   ${proto_files_compiled}
   abspath.cc
-  ActivePeptideQueueLite.cc  
-  active_peptide_queue.cc
+  ActivePeptideQueue.cc  
   crux_sp_spectrum.cc
   fifo_alloc.cc
   index_settings.cc
@@ -80,10 +79,8 @@ set(
   mass_constants.cc
   max_mz.cc
   peptide.cc
-  peptide_lite.cc
   peptide_mods3.cc
   peptide_peaks.cc
-  sp_scorer.cc
   spectrum_collection.cc
   spectrum_preprocess2.cc
 )

@@ -16,7 +16,6 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/abspath.h"
 #include "TideSearchApplication.h"
-#include "TideLiteSearchApplication.h"
 #include "DIAmeterApplication.h"
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
@@ -39,7 +38,6 @@ struct PbPeptideSortGreater {
 class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
-  friend class TideLiteSearchApplication;
   friend class DIAmeterApplication;
  public:
 

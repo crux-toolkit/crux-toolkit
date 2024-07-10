@@ -94,9 +94,7 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
 
   double binWidth = Params::GetDouble("mz-bin-width");
   double binOffset = Params::GetDouble("mz-bin-offset");
-  TheoreticalPeakSetBIons tps(200);
-  tps.binWidth_ = binWidth;
-  tps.binOffset_ = binOffset;
+  TheoreticalPeakSetBYSparse tps(200);
 
   int topMatch = Params::GetInt("top-match");
   uint64_t curStep = 0;
@@ -147,7 +145,7 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
     for (vector<pb::Peptide>::const_iterator i = peptides.begin(); i != peptides.end(); i++) {
       Peptide peptide(*i, proteins);
       tps.Clear();
-      peptide.ComputeBTheoreticalPeaks(&tps);
+      peptide.ComputeTheoreticalPeaks(&tps);
 
       if (i == peptides.begin() + 1) {
         // After we've scored the unmodified peptide, create new evidence vector for scoring the modified peptides
@@ -156,8 +154,8 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
       }
 
       double xcorr = 0;
-      for (vector<unsigned int>::const_iterator j = tps.unordered_peak_list_.begin();
-          j != tps.unordered_peak_list_.end();
+      for (vector<unsigned int>::const_iterator j = peptide.peaks_1b.begin();
+          j != peptide.peaks_1b.end();
           j++) {
         xcorr += evidence[*j];
       }

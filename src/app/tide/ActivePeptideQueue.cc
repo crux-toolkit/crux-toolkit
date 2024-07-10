@@ -4,16 +4,16 @@
 #include <gflags/gflags.h>
 #include "records.h"
 #include "peptides.pb.h"
-#include "peptide_lite.h"
-#include "ActivePeptideQueueLite.h"
+#include "peptide.h"
+#include "ActivePeptideQueue.h"
 #include "records_to_vector-inl.h"
 #include "theoretical_peak_set.h"
 #include "compiler.h"
-#include "app/TideLiteMatchSet.h"
+#include "app/TideMatchSet.h"
 #include <map> 
 #define CHECK(x) GOOGLE_CHECK((x))
 
-ActivePeptideQueueLite::ActivePeptideQueueLite(RecordReader* reader,
+ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
                                        vector<const pb::AuxLocation*>* locations, 
                                        bool dia_mode)
@@ -30,18 +30,18 @@ ActivePeptideQueueLite::ActivePeptideQueueLite(RecordReader* reader,
   CandPeptidesDecoy_ = 0;  
 }
 
-ActivePeptideQueueLite::~ActivePeptideQueueLite() {
+ActivePeptideQueue::~ActivePeptideQueue() {
 }
 
 // Compute the theoretical peaks of the peptide in the "back" of the queue
 // (i.e. the one most recently read from disk -- the heaviest).
-void ActivePeptideQueueLite::ComputeTheoreticalPeaksBack() {
+void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
   theoretical_peak_set_.Clear();
-  PeptideLite* peptide = queue_.back();
+  Peptide* peptide = queue_.back();
   peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
 }
 
-bool ActivePeptideQueueLite::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
+bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
   for (int i = *isotope_idx; i < min_mass->size(); ++i) {
     if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
       if (i > *isotope_idx) {
@@ -53,7 +53,7 @@ bool ActivePeptideQueueLite::isWithinIsotope(vector<double>* min_mass, vector<do
   return false;
 }
 
-int ActivePeptideQueueLite::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
+int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -63,7 +63,7 @@ int ActivePeptideQueueLite::SetActiveRange(vector<double>* min_mass, vector<doub
 
   // delete anything already loaded that falls below min_range
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
-    PeptideLite* peptide = queue_.front();
+    Peptide* peptide = queue_.front();
     queue_.pop_front();
     delete peptide;
   }
@@ -89,7 +89,7 @@ int ActivePeptideQueueLite::SetActiveRange(vector<double>* min_mass, vector<doub
         // we would delete current_pb_peptide_;
         continue; // skip peptides that fall below min_range
       }
-      PeptideLite* peptide = new PeptideLite(current_pb_peptide_, proteins_, locations_);
+      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
       assert(peptide != NULL);
       queue_.push_back(peptide);
       //Modified for tailor score calibration method by AKF

@@ -27,10 +27,25 @@ class LocalizeModificationApplication : public CruxApplication {
  private:
   class Results {
    public:
+
+    void initModMap(const pb::ModTable& modTable, ModPosition position) {
+      for (int i = 0; i < modTable.variable_mod_size(); i++) {
+        const pb::Modification& mod = modTable.variable_mod(i);
+        if (mod.has_delta() && mod.has_amino_acids()) {
+          ModificationDefinition::NewVarMod(mod.amino_acids(), mod.delta(), position);
+        }
+      }
+      for (int i = 0; i < modTable.static_mod_size(); i++) {
+        const pb::Modification& mod = modTable.static_mod(i);
+        if (mod.has_delta() && mod.has_amino_acids()) {
+          ModificationDefinition::NewStaticMod(mod.amino_acids(), mod.delta(), position);
+        }
+      }
+    }   
     Results(VariableModTable* modTable) {
-      TideMatchSet::initModMap(*modTable->ParsedModTable(), ANY);
-      TideMatchSet::initModMap(*modTable->ParsedNtpepModTable(), PEPTIDE_N);
-      TideMatchSet::initModMap(*modTable->ParsedCtpepModTable(), PEPTIDE_C);
+      initModMap(*modTable->ParsedModTable(), ANY);
+      initModMap(*modTable->ParsedNtpepModTable(), PEPTIDE_N);
+      initModMap(*modTable->ParsedCtpepModTable(), PEPTIDE_C);
     }
     ~Results() {
       for (std::vector< std::pair<Crux::Peptide*, FLOAT_T> >::const_iterator i = results_.begin();
@@ -42,9 +57,28 @@ class LocalizeModificationApplication : public CruxApplication {
         ModificationDefinition::Remove(*i);
       }
     }
+    vector<Crux::Modification> getMods(const Peptide* peptide) {
+      vector<Crux::Modification> modVector;
+      string seq(peptide->Seq());
+      vector<ModCoder::Mod> mods = peptide->Mods();
+      int pep_mods = mods.size();
+      for (int i = 0; i < pep_mods; i++) {
+        int mod_index;
+        double mod_delta;
+        MassConstants::DecodeMod(mods[i], &mod_index, &mod_delta);
+        const ModificationDefinition* modDef = ModificationDefinition::Find(mod_delta, false);
+        if (modDef == NULL) {
+          carp(CARP_ERROR, "Could not find modification with delta %f", mod_delta);
+          continue;
+        }
+        modVector.push_back(Crux::Modification(modDef, mod_index));
+      }
+      return modVector;
+    }
+
     void Add(Crux::Peptide* cruxPeptide, const Peptide* tidePeptide, FLOAT_T xcorr) {
       Crux::Peptide* peptide = new Crux::Peptide(cruxPeptide);
-      vector<Crux::Modification> mods = TideMatchSet::getMods(tidePeptide);
+      vector<Crux::Modification> mods = getMods(tidePeptide);
       peptide->setMods(mods);
       for (vector<Crux::Modification>::const_iterator i = mods.begin(); i != mods.end(); i++) {
         mods_.insert(i->Definition());

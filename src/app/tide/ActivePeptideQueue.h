@@ -1,29 +1,29 @@
 #include <deque>
 #include "peptides.pb.h"
-#include "peptide_lite.h"
+#include "peptide.h"
 #include "theoretical_peak_set.h"
 #include "fifo_alloc.h"
 #include "spectrum_collection.h"
 #include "io/OutputFiles.h"
 
-#ifndef ACTIVE_LITE_PEPTIDE_QUEUE_H
-#define ACTIVE_LITE_PEPTIDE_QUEUE_H
+#ifndef ACTIVE_PEPTIDE_QUEUE_H
+#define ACTIVE_PEPTIDE_QUEUE_H
 
 class TheoreticalPeakCompiler;
 
-class ActivePeptideQueueLite {
+class ActivePeptideQueue {
  public:
-  ActivePeptideQueueLite(RecordReader* reader,
+  ActivePeptideQueue(RecordReader* reader,
         const vector<const pb::Protein*>& proteins,
         vector<const pb::AuxLocation*>* locations=NULL, 
         bool dia_mode = false);
 
-  ~ActivePeptideQueueLite();
+  ~ActivePeptideQueue();
 
   int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, 
         double min_range, double max_range); 
 
-  PeptideLite* GetPeptide(int index) {
+  Peptide* GetPeptide(int index) {
     return *(begin_ + index);
   }
 
@@ -32,8 +32,8 @@ class ActivePeptideQueueLite {
   int CandPeptidesTarget_;
   int CandPeptidesDecoy_;
 
-  deque<PeptideLite*> queue_;
-  deque<PeptideLite*>::const_iterator begin_, end_;  
+  deque<Peptide*> queue_;
+  deque<Peptide*>::const_iterator begin_, end_;  
   vector<bool> candidatePeptideStatus_;
   int min_candidates_;
   bool dia_mode_;

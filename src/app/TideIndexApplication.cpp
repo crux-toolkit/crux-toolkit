@@ -33,7 +33,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include "residue_stats.pb.h"
-#include "tide/peptide_lite.h"
 #include "crux_version.h"
 
 #include <regex>
@@ -1341,7 +1340,7 @@ void TideIndexApplication::getAAFrequencies(pb::Peptide& current_pb_peptide, Pro
   unsigned int residue_bin;  
   string tempAA;
 
-  PeptideLite peptide(current_pb_peptide, vProteinHeaderSequence);
+  Peptide peptide(current_pb_peptide, vProteinHeaderSequence);
   vector<double> residue_masses = peptide.getAAMasses(); //retrieves the amino acid masses, modifications included
   string peptide_seq = peptide.Seq();
   len = current_pb_peptide.length();
