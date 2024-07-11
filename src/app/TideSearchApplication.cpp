@@ -1402,12 +1402,9 @@ vector<string> TideSearchApplication::getOptions() const {
   string arr[] = {
     "auto-mz-bin-width",
     "auto-precursor-window",
-//    "compute-sp",   // To be removed
     "concat",
     "deisotope",
     "elution-window-size",
-    // "evidence-granularity", // To be removed
-    "file-column",
     "fileroot",
     "fragment-tolerance",
     "isotope-error",
@@ -1425,7 +1422,6 @@ vector<string> TideSearchApplication::getOptions() const {
     "override-charges",
     "overwrite",
     "parameter-file",
-//    "peptide-centric-search", // To be removed
     "pepxml-output",
     "pin-output",
     "pm-charges",
