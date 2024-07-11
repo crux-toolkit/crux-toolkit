@@ -460,7 +460,7 @@ bool Spectrum::parsePwizSpecInfo(
     retention_time_ = pwiz_spectrum->cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
   // MS_scan_start_time = 1000016,
   /// scan start time: The time that an analyzer started a scan, relative to the start of the MS run.    
-  } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
+  } else if (!pwiz_spectrum->scanList.empty() && pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
     retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_scan_start_time).valueAs<double>();
   }
   // The following does not work.
@@ -557,11 +557,11 @@ bool Spectrum::parsePwizSpecInfo(
 
   }
   // get peaks
-  bool remove_precursor = Params::GetBool("remove-precursor-peak");  
-  double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
   int num_peaks = pwiz_spectrum->defaultArrayLength;
   vector<double> mzs = pwiz_spectrum->getMZArray()->data;
   vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
+  bool remove_precursor = Params::GetBool("remove-precursor-peak");  
+  double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
   const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intensity
   FLOAT_T highest_intens_peak = 0.0;
   FLOAT_T highest_peak_intensity_threshold = 0.0;
@@ -574,10 +574,10 @@ bool Spectrum::parsePwizSpecInfo(
       highest_intens_peak = intensities[peak_idx];
     }
   }
-  highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
+  // highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
   for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
-    if (!Params::GetBool("skip-preprocessing") && sqrt(intensities[peak_idx]) < highest_peak_intensity_threshold ) {
-      continue;
+    if (!Params::GetBool("skip-preprocessing") && highest_peak_intensity_threshold > 1 && sqrt(intensities[peak_idx]) < highest_peak_intensity_threshold ) {
+      // continue;
     }
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }

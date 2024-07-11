@@ -98,7 +98,7 @@ int TideSearchApplication::main(const vector<string>& input_files) {
 
 int TideSearchApplication::main(const vector<string>& input_files, const string input_index) {
 
-  carp(CARP_INFO, "Running tide--search...");
+  carp(CARP_INFO, "Running tide-search...");
 
   print_interval_ = Params::GetInt("print-search-progress");  
   
