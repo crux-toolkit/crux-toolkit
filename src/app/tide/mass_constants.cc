@@ -192,7 +192,7 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
       nprotterm_mono_table[i] = cprotterm_mono_table[i] = 0;
   }
 
-  // Store the modeification tables. Thay are used in reporting peptide modifications in TideMatchSet
+  // Store the modification tables. Thay are used in reporting peptide modifications in TideMatchSet
   mod_table_ = mod_table; 
   n_mod_table_ = n_mod_table; 
   c_mod_table_ = c_mod_table; 

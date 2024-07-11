@@ -152,21 +152,27 @@ class ModsOutputter {//: public IModsOutputter {
     if (TotalMods(counts) > FLAGS_max_mods) {
       return;
     }
-    if (pos == peptide_->length()) {
-      OutputCtermMods(pos-1, counts);
+/*    if (pos == peptide_->length()) {
+      OutputCtermMods(pos-1, counts);  // TODO: Why is this here? It seems never to be executed. 
     } else {
       if (pos == peptide_->length()-1){
         OutputCtermMods(pos, counts);
       } else {
-        char aa = residues_[pos];
+*/        char aa = residues_[pos];
         int num_poss = mod_table_->NumPoss(aa);
         for (int i = 0; i < num_poss; ++i) {
           int poss_max_ct = mod_table_->PossMaxCt(aa, i);
           if (counts[poss_max_ct] < max_counts_[poss_max_ct]) {
             ++counts[poss_max_ct];
             int delta_index = mod_table_->PossDeltIx(aa, i);
+            // We put regular variable modifications on the last amino acid
+            // but then we additionall also can place terminal modifications            
             peptide_->add_modifications(mod_table_->EncodeMod(pos, delta_index));
-            OutputMods(pos+1, counts);
+            if (pos == peptide_->length()-1){ 
+              OutputCtermMods(pos, counts);
+            } else {
+              OutputMods(pos+1, counts);
+            }
             peptide_->mutable_modifications()->RemoveLast();
             --counts[poss_max_ct];
           }
@@ -176,9 +182,15 @@ class ModsOutputter {//: public IModsOutputter {
         // modified positions toward the front of the peptide to appear before those
         // that come toward the end of the peptide. Having this call at the end
         // achieves that.
-        OutputMods(pos+1, counts); // without further mods
-      }
-    }
+        
+        // proceed without further mods
+        if (pos == peptide_->length()-1){ 
+          OutputCtermMods(pos, counts);
+        } else {
+          OutputMods(pos+1, counts); 
+        }
+  //     }
+  //   }
   }
 
   void PlaceVariableNTermMod(int pos, char aa, mods_spec_type mod_spec, vector<int>& counts){
@@ -288,9 +300,9 @@ class ModsOutputter {//: public IModsOutputter {
 
     if (!any_term_modification) {
       //if there were no static modifications add amino acid mods
-      char aa = residues_[pos];
-      //add any matching regular mods first
-      PlaceCTermVariableMod(pos, residues_[pos], MOD_SPEC, counts);
+      // char aa = residues_[pos];
+      // //add any matching regular mods first
+      // PlaceCTermVariableMod(pos, residues_[pos], MOD_SPEC, counts);
 
       //add variable c-terminal mods
       int prot_idx = peptide_->first_location().protein_id();
@@ -400,9 +412,6 @@ unsigned long long AddMods(HeadedRecordReader* reader,
 
   memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
   ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, &writer, memory_limit);
-//  IModsOutputter* outputter;
-
-//  outputter = &outputOrig;
 
   pb::Peptide peptide;
   while (!reader->Done()) {
