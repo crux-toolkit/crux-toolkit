@@ -85,7 +85,7 @@ class TideMatchSet {
                    string &concat_or_target_report, string& decoy_report);
   void gatherTargetsDecoys();  // Additional scores are:  delta_cn, delta_lcn, tailor
   void calculateAdditionalScores(PSMScores& psm_scores);  // Additional scores are:  delta_cn, delta_lcn, tailor; 
-  void printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& results,
+  void printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, bool target, PSMScores& psm_scores, string& results,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map = NULL,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map = NULL,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map = NULL,

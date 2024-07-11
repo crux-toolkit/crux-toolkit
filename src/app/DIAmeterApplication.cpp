@@ -21,10 +21,6 @@
 
 #include "io/DIAmeterFeatureScaler.h"
 #include "io/DIAmeterPSMFilter.h"
-// #include "io/DIAmeterCVSelector.h"
-
-// const double DIAmeterApplication::XCORR_SCALING = 100000000.0;
-// const double DIAmeterApplication::RESCALE_FACTOR = 20.0;
 
 DIAmeterApplication::DIAmeterApplication():
   remove_index_(""), output_pin_(""), output_percolator_(""), scan_gap_(0) { /* do nothing */
@@ -466,6 +462,7 @@ void DIAmeterApplication::reportDIA(
   matches.printResults(
     DIAMETER_TSV, spectrum_filename, 
     &sc, spectrum_file_cnt, 
+    true, // true = target, ineffective in concat case
     matches.concat_or_target_psm_scores_, 
     results, 
     &intensity_map,
@@ -477,6 +474,7 @@ void DIAmeterApplication::reportDIA(
   matches.printResults(
     DIAMETER_TSV, spectrum_filename, 
     &sc, spectrum_file_cnt, 
+    false, // false = decoy, ineffective in concat case
     matches.decoy_psm_scores_, 
     results,     // Decoy results will be concatenated to the results string of target PSMs. 
     &intensity_map,

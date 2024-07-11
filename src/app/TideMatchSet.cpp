@@ -343,8 +343,8 @@ void TideMatchSet::getReport(TSV_OUTPUT_FORMATS_T format, string spectrum_filena
   calculateAdditionalScores(decoy_psm_scores_);  // decoy_psm_scores is empty in case of concat=T
 
   // Prepare the results in a string
-  printResults(format, spectrum_filename, sc, spectrum_file_cnt, concat_or_target_psm_scores_, concat_or_target_report);
-  printResults(format, spectrum_filename, sc, spectrum_file_cnt, decoy_psm_scores_, decoy_report); // decoy_report is an empty string if decoy_psm_scores is empty 
+  printResults(format, spectrum_filename, sc, spectrum_file_cnt, true, concat_or_target_psm_scores_, concat_or_target_report);  // true = target
+  printResults(format, spectrum_filename, sc, spectrum_file_cnt, false, decoy_psm_scores_, decoy_report); // decoy_report is an empty string if decoy_psm_scores is empty; false = decoy
 
 }
 
@@ -428,11 +428,15 @@ void TideMatchSet::gatherTargetsDecoys() {
 
 void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additional scores are:  delta_cn, delta_lcn, tailor;
   // The  gatherTargetsDecoys must be run before calling this function.
+  int last_psm_pos = -2;
+  if (top_matches_ >= psm_scores.size()) {
+    last_psm_pos = -1;
+  }
+  last_psm_ = psm_scores.end()+last_psm_pos;
 
   switch (curScoreFunction_) {
   case XCORR_SCORE:
   case DIAMETER:
-    last_psm_ = psm_scores.end()-1;
     for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
       (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
       (*it).delta_lcn_ = ((*it).xcorr_score_ - (*last_psm_).xcorr_score_)/max((*it).xcorr_score_, 1.0);
@@ -443,7 +447,6 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additi
     }
     break;
   case PVALUES:
-    last_psm_ = psm_scores.end()-1;
     for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
       (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
       (*it).delta_lcn_ = -log10((*it).combined_pval_) + log10((*last_psm_).combined_pval_);
@@ -465,7 +468,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additi
 
 }
 
-void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, PSMScores& psm_scores, string& report,
+void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, bool target, PSMScores& psm_scores, string& report,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
@@ -613,7 +616,13 @@ void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_fil
         break;
       case MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC:
       case DISTINCT_MATCHES_SPECTRUM_COL:
-        report += StringUtils::ToString(active_peptide_queue_->nCandPeptides_, 0); //StringUtils::ToString(target ? n_concat_or_target_matches_:n_decoy_matches_, 0);  // no candidate peptides
+        if (concat_ == true) {
+          report += StringUtils::ToString(active_peptide_queue_->nCandPeptides_, 0); // Print num of targets and decoys
+        } else if (target) {
+          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesTarget_, 0); // Print num of targets
+        } else {
+          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesDecoy_, 0); // Print num of decoys
+        }
         break;
       case SEQUENCE_COL:
         report += peptide_with_mods;        // peptide sequence with modifications
