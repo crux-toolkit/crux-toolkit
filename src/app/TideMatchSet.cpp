@@ -477,12 +477,20 @@ void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_fil
   // The order of the fields of the results is solely based on the column order
   size_t numHeaders;
   int* header_cols = getColumns(format, numHeaders);
-  int cnt = 1;
+  vector<int> cnt;
+  for (int i=0; i<decoy_num_; ++i) {
+    cnt.push_back(0);
+  }
   double predrt;
-  for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it, ++cnt) {
-    if (cnt > top_matches_)
-      break;
+  
+  for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it) {
     Peptide* peptide = active_peptide_queue_->GetPeptide((*it).ordinal_);
+    int decoy_idx = peptide->DecoyIdx();
+    decoy_idx = decoy_idx < 0 ? 0 : decoy_idx;
+    ++cnt[decoy_idx];
+    if (cnt[decoy_idx] > top_matches_) {
+      continue;
+    }
 
     string proteinNames = peptide->GetLocationStr(decoy_prefix_);
     string flankingAAs = peptide->GetFlankingAAs();
@@ -598,21 +606,21 @@ void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_fil
   
       case MZTAB_SEARCH_ENGINE_SCORE_4:  // [MS, MS:1003358, XCorr rank]
         if (curScoreFunction_ != PVALUES) {
-          report += StringUtils::ToString(cnt, 0);  // rank
+          report += StringUtils::ToString(cnt[decoy_idx], 0);  // rank
         } else {
           report += "null";      // xcorr rank in p-value scoring
         }
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_10:  // [MS, MS:1003365, combined p-value rank'.]
         if (curScoreFunction_ == PVALUES) {
-          report += StringUtils::ToString(cnt, 0);  // rank
+          report += StringUtils::ToString(cnt[decoy_idx], 0);  // rank
         } else {
           report += "null";      // exact p-value score
         }
         break;
       case BOTH_PVALUE_RANK:    // combined p-value rank
       case XCORR_RANK_COL:
-        report += StringUtils::ToString(cnt, 0);
+        report += StringUtils::ToString(cnt[decoy_idx], 0);
         break;
       case MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC:
       case DISTINCT_MATCHES_SPECTRUM_COL:

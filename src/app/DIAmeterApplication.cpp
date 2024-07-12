@@ -1015,6 +1015,7 @@ vector<string> DIAmeterApplication::getOptions() const {
   "mz-bin-width",
   "output-dir",
   "overwrite",
+  // "parameter-file",  
   // "precursor-window",
   "predrt-files",
   // "msamanda-regional-topk",
