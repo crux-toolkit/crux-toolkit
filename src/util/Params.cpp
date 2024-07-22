@@ -257,8 +257,8 @@ Params::Params() : finalized_(false) {
     "then converts the resulting m/z range to the peptide mass range using the precursor "
     "charge. For the parts-per-million (ppm) window-type, the spectrum mass is calculated as "
     "in the mass type. The lower bound of the mass window is then defined as the spectrum "
-    "mass / (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
-    "mass / (1.0 - (precursor-window / 1000000)).",
+    "mass * (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
+    "mass * (1.0 - (precursor-window / 1000000)).",
     "Available for tide-search.", true);
   InitStringParam("auto-precursor-window", "false", "false|warn|fail",
     "Automatically estimate optimal value for the precursor-window parameter "
