@@ -371,7 +371,7 @@ bool Spectrum::parseMstoolkitSpectrum
   // setfilename of empty spectrum
   filename_ = filename;
 
-  //add all peaks. 
+  //add peaks. // This part probably should not run for MS1 data. This should run only for tide-search.
   bool remove_precursor = Params::GetBool("remove-precursor-peak");  
   double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
   const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intensity
@@ -433,8 +433,58 @@ bool Spectrum::parsePwizSpecInfo(
   first_scan_ = firstScan;
   last_scan_ = lastScan;
 
+  // Get the retention time
+  //  MS_retention_time = 1000894,
+  /// retention time: A time interval from the start of chromatography when an analyte exits a chromatographic column.
+  if (pwiz_spectrum->hasCVParam(pwiz::msdata::MS_retention_time)) {   
+    retention_time_ = pwiz_spectrum->cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // MS_scan_start_time = 1000016,
+  /// scan start time: The time that an analyzer started a scan, relative to the start of the MS run.    
+  } else if (!pwiz_spectrum->scanList.empty() && pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
+    retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_scan_start_time).valueAs<double>();
+  }
+  // The following does not work.
+  // } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_retention_time)) {   
+  //   retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // }
+ // get peaks
+  int num_peaks = pwiz_spectrum->defaultArrayLength;
+  vector<double> mzs = pwiz_spectrum->getMZArray()->data;
+  vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
+
+  if (dia_mode || Params::GetBool("skip-preprocessing") ) {
+    for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+      addPeak(intensities[peak_idx], mzs[peak_idx]);
+    }
+  } else { //  This should run only for tide-search.
+    bool remove_precursor = Params::GetBool("remove-precursor-peak");  
+    double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
+    const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intensity
+    FLOAT_T highest_intens_peak = 0.0;
+    FLOAT_T highest_peak_intensity_threshold = 0.0;
+    for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+      if (remove_precursor && fabs(mzs[peak_idx] - precursor_mz_) <= precursor_tolerance ) {
+        continue;
+      }
+
+      if (highest_intens_peak < intensities[peak_idx]) {
+        highest_intens_peak = intensities[peak_idx];
+      }
+    }
+    highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
+    for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+      if ( highest_peak_intensity_threshold > 1 && sqrt(intensities[peak_idx]) < highest_peak_intensity_threshold ) {
+        continue;
+      }
+      addPeak(intensities[peak_idx], mzs[peak_idx]);
+    }
+
+  }
+  has_peaks_ = true;
+  carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
+
   // added by Yang
-  if ( pwiz_spectrum->precursors.size() <= 0 ) {
+  if ( pwiz_spectrum->precursors.size() <= 0 ) {  // TODO: Is this a good way to check if we are dealing with MS1 spectra?? -- AKF
 	  SpectrumZState zstate;
 	  zstate.setMZ(precursor_mz_, 1);
 	  zstates_.push_back(zstate);
@@ -452,21 +502,6 @@ bool Spectrum::parsePwizSpecInfo(
   pzd::IsolationWindow iso_window = pwiz_spectrum->precursors[0].isolationWindow;
   bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
   if (have_precursor_mz) { precursor_mz_ = iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
-
-  // Get the retention time
-  //  MS_retention_time = 1000894,
-  /// retention time: A time interval from the start of chromatography when an analyte exits a chromatographic column.
-  if (pwiz_spectrum->hasCVParam(pwiz::msdata::MS_retention_time)) {   
-    retention_time_ = pwiz_spectrum->cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
-  // MS_scan_start_time = 1000016,
-  /// scan start time: The time that an analyzer started a scan, relative to the start of the MS run.    
-  } else if (!pwiz_spectrum->scanList.empty() && pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
-    retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_scan_start_time).valueAs<double>();
-  }
-  // The following does not work.
-  // } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_retention_time)) {   
-  //   retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
-  // }
 
   // each charge state(s) stored in selectedIon(s)
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
@@ -556,33 +591,6 @@ bool Spectrum::parsePwizSpecInfo(
     }
 
   }
-  // get peaks
-  int num_peaks = pwiz_spectrum->defaultArrayLength;
-  vector<double> mzs = pwiz_spectrum->getMZArray()->data;
-  vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
-  bool remove_precursor = Params::GetBool("remove-precursor-peak");  
-  double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
-  const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intensity
-  FLOAT_T highest_intens_peak = 0.0;
-  FLOAT_T highest_peak_intensity_threshold = 0.0;
-  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
-    if (remove_precursor && fabs(mzs[peak_idx] - precursor_mz_) <= precursor_tolerance ) {
-      continue;
-    }
-
-    if (highest_intens_peak < intensities[peak_idx]) {
-      highest_intens_peak = intensities[peak_idx];
-    }
-  }
-  // highest_peak_intensity_threshold = sqrt(highest_intens_peak) * ratio;
-  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
-    if (!Params::GetBool("skip-preprocessing") && highest_peak_intensity_threshold > 1 && sqrt(intensities[peak_idx]) < highest_peak_intensity_threshold ) {
-      // continue;
-    }
-    addPeak(intensities[peak_idx], mzs[peak_idx]);
-  }
-  has_peaks_ = true;
-  carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 
   return true;
 }
@@ -991,7 +999,7 @@ void Spectrum::sortPeaks(PEAK_SORT_TYPE_T type)
  * Put the highest peak to the end
  */
 void Spectrum::putHighestPeak() {
-  if (sorted_by_mz_ || peaks_.size() == 1) {
+  if (sorted_by_mz_ || peaks_.size() < 2) {
     return;
   }
   size_t max_mz_peak_index = 0;

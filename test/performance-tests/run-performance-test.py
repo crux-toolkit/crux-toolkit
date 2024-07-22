@@ -19,15 +19,17 @@ CRUX = "../../src/crux"
 # Input files.
 database = "worm+contaminants"
 ms2 = "051708-worm-ASMS-10.ms2"
-
+dia_index = "cerevisiae_orf_trans_all"
+dia_ms = "e01306.mzXML"
 #############################################################################
 # Run a command with error checking.
-def runCommand(command, outputFileName):
+def runCommand(command, outputFileName, overwrite=False):
 
   # Skip the command if the output file already exists.
-  if (outputFileName != "") and (os.path.exists(outputFileName)):
-    sys.stderr.write("%s exists.\n" % outputFileName)
-    return
+  if overwrite == False: 
+    if (outputFileName != "") and (os.path.exists(outputFileName)):
+      sys.stderr.write("%s exists.\n" % outputFileName)
+      return
   
   sys.stderr.write("RUN: %s\n" % command)
   try:
@@ -50,7 +52,9 @@ def createParameterFile(parameterFileName):
   parameterFile.write("num_enzyme_termini=2\n")
   parameterFile.write("missed-cleavages=0\n")
   parameterFile.write("allowed_missed_cleavage=0\n")
-  
+  parameterFile.write("spectrum-parser=mstoolkit\n")
+
+
   # Minimums
   parameterFile.write("minimum_peaks=10\n")
   parameterFile.write("min-peaks=10\n")
@@ -153,8 +157,8 @@ def calculateQvalues(outputDirectory, searchName, searchParam, database,
               psmFile, scoreColumn, confidenceParam):    
                
   confidenceFile = "%s/assign-confidence.target.txt" % outputDirectory
-  runCommand("%s assign-confidence --output-dir %s %s %s" % 
-             (CRUX, outputDirectory, confidenceParam, psmFile), confidenceFile)
+  runCommand("%s assign-confidence --overwrite T --output-dir %s %s %s" % 
+             (CRUX, outputDirectory, confidenceParam, psmFile), confidenceFile, overwrite=True)
 
   qFile = "%s/%s.q.txt" % (outputDirectory, searchName)
   extractData(confidenceFile, "tdc q-value", qFile)
@@ -172,6 +176,12 @@ def calculateQvalues(outputDirectory, searchName, searchParam, database,
   reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
   runCommand("awk 'NR > 1 {print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' %s | sort -k 1b,1 > %s" %
              (fourColFile, reducedFile), "")
+
+def getPercolatorQvalues(outputDirectory, searchName):    
+               
+  percolatorFile = "%s/percolator.target.psms.txt" % outputDirectory
+  qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
+  extractData(percolatorFile, "q-value", qFile)
 
 
 # Create a scatter plot of XCorr scores.
@@ -231,7 +241,21 @@ def makePerformancePlot(title, listOfMethods):
 
 # Create the parameter file.
 parameterFileName = "crux.param"
-createParameterFile(parameterFileName)
+# createParameterFile(parameterFileName)
+
+# # Create the index for diameter.
+# runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fasta %s"
+#            % (CRUX, dia_index, parameterFileName, dia_index, dia_index),
+#            "%s/tide-index.peptides.txt" % dia_index)
+
+# # Run diameter.
+# runSearch("diameter", "diameter", "", dia_index,
+#           "diameter/percolator-output/percolator.target.psms.txt",
+#           "tailor score", "--score \"tailor score\"")
+# getPercolatorQvalues("diameter", "diameter")
+
+# Add performance tests for cascade search too.
+
 
 # Create the index.
 runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
@@ -247,6 +271,7 @@ runSearch("tide-xcorr", "tide-lite-search", "", database,
 calculateQvalues("tide-xcorr", "tide-xcorr", "", database,
           "tide-xcorr/tide-lite-search.txt",
           "xcorr score", "--score \"xcorr score\"")
+
 calculateQvalues("tide-xcorr", "tide-tailor", "", database,
           "tide-xcorr/tide-lite-search.txt",
           "tailor score", "--score \"tailor score\"")
@@ -283,6 +308,7 @@ runSearch("comet", "comet", "", "%s.fa" % database,
 calculateQvalues("comet", "comet", "", "%s.fa" % database,
           "comet/comet.txt",
           "xcorr score", "--score e-value")
+
 
 # Make the performance plots, segregated by search method..
 makePerformancePlot("comet", [("comet/comet.q.txt", "Comet E-value"),

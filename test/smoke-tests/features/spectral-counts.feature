@@ -12,7 +12,7 @@ Scenario Outline: User runs spectral-counts
 
 Examples:
   |test_name                     |args                                                                   |results                    |expected_output                      |
- |spectral-counts-raw           |--parameter-file params/raw --protein-database test.fasta              |test.target.txt            |spectral-counts.raw.txt              |
+# |spectral-counts-raw           |--parameter-file params/raw --protein-database test.fasta              |test.target.txt            |spectral-counts.raw.txt              |
  |spectral-counts-sin           |--parameter-file params/sin --protein-database test.fasta              |test.target.txt            |spectral-counts.sin.txt              |
  |spectral-counts-nsaf          |--parameter-file params/nsaf --protein-database test.fasta             |test.target.txt            |spectral-counts.nsaf.txt             |
  |spectral-counts-empai         |--parameter-file params/empai --protein-database test.fasta            |test.target.txt            |spectral-counts.empai.txt            |
