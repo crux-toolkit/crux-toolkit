@@ -64,12 +64,37 @@ struct Identification {
         0;  // This may be removed cos it's redundant
     bool useForProteinQuant = true;
     unordered_set<ProteinGroup> proteinGroups;
+    string protein_id = "";
 
-    Identification(string sequence, double monoIsotopicMass, double peptideMass, int precursorCharge, string spectralFile, double ms2RetentionTimeInMinutes, int scanId, string modifications)
-        : sequence(sequence), monoIsotopicMass(monoIsotopicMass), peptideMass(peptideMass), precursorCharge(precursorCharge), spectralFile(spectralFile), ms2RetentionTimeInMinutes(ms2RetentionTimeInMinutes), scanId(scanId), modifications(modifications) {}
+    Identification(
+        string sequence,
+        double monoIsotopicMass,
+        double peptideMass,
+        int precursorCharge,
+        string spectralFile,
+        double ms2RetentionTimeInMinutes,
+        int scanId,
+        string modifications,
+        string protein_id = "")
+        : sequence(sequence),
+          monoIsotopicMass(monoIsotopicMass),
+          peptideMass(peptideMass),
+          precursorCharge(precursorCharge),
+          spectralFile(spectralFile),
+          ms2RetentionTimeInMinutes(ms2RetentionTimeInMinutes),
+          scanId(scanId),
+          modifications(modifications),
+          protein_id(protein_id) {}
 
     Identification()
-        : peptideMass(0), monoIsotopicMass(0), peakFindingMass(0), precursorCharge(0), ms2RetentionTimeInMinutes(0), scanId(0), posteriorErrorProbability(0), useForProteinQuant(false) {}
+        : peptideMass(0),
+          monoIsotopicMass(0),
+          peakFindingMass(0),
+          precursorCharge(0),
+          ms2RetentionTimeInMinutes(0),
+          scanId(0),
+          posteriorErrorProbability(0),
+          useForProteinQuant(false) {}
 
     bool operator==(const Identification& other) const {
         // Implement the logic for comparison
@@ -81,7 +106,8 @@ struct Identification {
                ms2RetentionTimeInMinutes == other.ms2RetentionTimeInMinutes &&
                scanId == other.scanId && modifications == other.modifications && posteriorErrorProbability == other.posteriorErrorProbability &&
                useForProteinQuant == other.useForProteinQuant &&
-               proteinGroups == other.proteinGroups;
+               proteinGroups == other.proteinGroups &&
+               protein_id == other.protein_id;
     }
 
     Identification& operator=(const Identification& other) {
@@ -98,6 +124,7 @@ struct Identification {
             posteriorErrorProbability = other.posteriorErrorProbability;
             useForProteinQuant = other.useForProteinQuant;
             proteinGroups = other.proteinGroups;
+            protein_id = other.protein_id;
         }
         return *this;
     }
@@ -115,6 +142,7 @@ struct Identification {
         posteriorErrorProbability = other.posteriorErrorProbability;
         useForProteinQuant = other.useForProteinQuant;
         proteinGroups = other.proteinGroups;
+        protein_id = other.protein_id;
     }
 
     Identification(Identification&& other) noexcept
@@ -129,7 +157,8 @@ struct Identification {
           modifications(std::move(other.modifications)),
           posteriorErrorProbability(other.posteriorErrorProbability),
           useForProteinQuant(other.useForProteinQuant),
-          proteinGroups(std::move(other.proteinGroups)) {
+          proteinGroups(std::move(other.proteinGroups)),
+          protein_id(std::move(other.protein_id)) {
         // Reset other's members to default values, if necessary
     }
 };
@@ -192,14 +221,23 @@ struct PSM {
     double monoisotopic_mass_col;
     string modifications;
     double retention_time;
+    string protein_id;
 
-    PSM(string seq, int scan, int charge, double pmass, double mmass, string mod, double rt) : sequence_col(seq),
-                                                                                               scan_col(scan),
-                                                                                               charge_col(charge),
-                                                                                               peptide_mass_col(pmass),
-                                                                                               monoisotopic_mass_col(mmass),
-                                                                                               modifications(mod),
-                                                                                               retention_time(rt) {}
+    PSM(string seq,
+        int scan,
+        int charge,
+        double pmass,
+        double mmass,
+        string mod,
+        double rt,
+        string prot_id = "") : sequence_col(seq),
+                               scan_col(scan),
+                               charge_col(charge),
+                               peptide_mass_col(pmass),
+                               monoisotopic_mass_col(mmass),
+                               modifications(mod),
+                               retention_time(rt),
+                               protein_id(prot_id) {}
 };
 
 enum class DetectionType {

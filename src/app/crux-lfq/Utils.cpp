@@ -48,40 +48,34 @@ vector<PSM> create_psm(const string& psm_file,
                        const double q_value_threshold, const bool is_rt_seconds) {
     vector<PSM> psm_data;
 
-    string sequence_col, modifications_col, unmodified_sequence;
+    string sequence_col, modifications_col, unmodified_sequence, protein_id;
     int scan_col, charge_col;
     double peptide_mass_col, spectrum_precursor_mz_col, spectrum_neutral_mass_col, q_value, retention_time;
 
-    // Even though the headers for assign-confidence and percolator are the same,
-    // the code is split for the purposes of seperation of concerns
-
-    // Check the file format and handle each format separately
-    if (psm_file_format == "tide-search") {
-        io::CSVReader<8, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
+    if (psm_file_format == "assign-confidence") {
+        io::CSVReader<10, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
             matchFileReader(psm_file);
-        matchFileReader.read_header(io::ignore_extra_column, "scan", "charge",
-                                    "spectrum precursor m/z", "peptide mass",
-                                    "sequence", "modifications", "spectrum neutral mass", "retention time");
-        while (matchFileReader.read_row(scan_col, charge_col,
-                                        spectrum_precursor_mz_col, peptide_mass_col,
-                                        sequence_col, modifications_col, spectrum_neutral_mass_col, retention_time)) {
-            psm_data.emplace_back(modifications_col,
-                                  scan_col,
-                                  charge_col,
-                                  peptide_mass_col,
-                                  peptide_mass_col,
-                                  sequence_col,
-                                  retention_time);
-        }
-    } else if (psm_file_format == "assign-confidence") {
-        io::CSVReader<9, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
-            matchFileReader(psm_file);
-        matchFileReader.read_header(io::ignore_extra_column, "scan", "charge",
-                                    "spectrum precursor m/z", "peptide mass",
-                                    "sequence", "unmodified sequence", "spectrum neutral mass", "retention time", "tdc q-value");
-        while (matchFileReader.read_row(scan_col, charge_col,
-                                        spectrum_precursor_mz_col, peptide_mass_col,
-                                        sequence_col, unmodified_sequence, spectrum_neutral_mass_col, retention_time, q_value)) {
+        matchFileReader.read_header(io::ignore_extra_column,
+                                    "scan",
+                                    "charge",
+                                    "spectrum precursor m/z",
+                                    "peptide mass",
+                                    "sequence",
+                                    "unmodified sequence",
+                                    "spectrum neutral mass",
+                                    "retention time",
+                                    "tdc q-value",
+                                    "protein id");
+        while (matchFileReader.read_row(scan_col,
+                                        charge_col,
+                                        spectrum_precursor_mz_col,
+                                        peptide_mass_col,
+                                        sequence_col,
+                                        unmodified_sequence,
+                                        spectrum_neutral_mass_col,
+                                        retention_time,
+                                        q_value,
+                                        protein_id)) {
             if (!filtered && q_value > q_value_threshold) {
                 continue;
             }
@@ -95,7 +89,8 @@ vector<PSM> create_psm(const string& psm_file,
                                   peptide_mass_col,
                                   peptide_mass_col,
                                   unmodified_sequence,
-                                  retention_time);
+                                  retention_time,
+                                  protein_id);
         }
     } else {
         carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");

@@ -292,7 +292,8 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
             spectra_file,
             psm.retention_time,
             psm.scan_col,
-            psm.modifications);
+            psm.modifications,
+            psm.protein_id);
     }
 
     return allIdentifications;

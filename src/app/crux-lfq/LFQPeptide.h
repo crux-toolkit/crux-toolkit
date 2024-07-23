@@ -18,7 +18,7 @@ namespace CruxLFQ {
 
 inline std::string PeptidesTabSeperatedHeader(const std::vector<std::string>& rawFiles) {
     std::ostringstream sb;
-    sb << "Sequence\tUnmodified Sequence\t";
+    sb << "Sequence\tUnmodified Sequence\tProtein ID\t";
     for (const auto& rawfile : rawFiles) {
         sb << "Intensity_" << rawfile << "\t";
     }
@@ -38,14 +38,16 @@ class Peptides {
     map<string, DetectionType> detectionTypeMap;
     std::unordered_set<ProteinGroup> proteinGroups;
     map<string, double> intensityMap;
+    string protein_id;
 
    public:
     Peptides() = default;
-    Peptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<ProteinGroup> ProteinGroups) {
+    Peptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<ProteinGroup> ProteinGroups, string protein_id = "") {
         this->sequence = sequence;
         this->modified_sequence = modified_sequence;
         this->useForProteinQuant = useForProteinQuant;
         this->proteinGroups = ProteinGroups;
+        this->protein_id = protein_id;
     }
     void setSequence(const string sequence) {
         this->sequence = sequence;
@@ -130,6 +132,7 @@ class Peptides {
         std::ostringstream str;
         str << sequence << "\t";
         str << modified_sequence << "\t";
+        str << protein_id << "\t";
 
         for (const auto& file : rawFiles) {
             str << getIntensity(file) << "\t";

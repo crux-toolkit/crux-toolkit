@@ -85,7 +85,7 @@ class CruxLFQResults {
         for (const Identification &id : identifications) {
             auto it = PeptideModifiedSequences.find(id.sequence);
             if (it == PeptideModifiedSequences.end()) {
-                Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups);
+                Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups, id.protein_id);
                 PeptideModifiedSequences[id.sequence] = peptide;
             } else {
                 Peptides &peptide = it->second;
