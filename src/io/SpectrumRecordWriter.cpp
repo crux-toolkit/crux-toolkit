@@ -75,7 +75,6 @@ bool SpectrumRecordWriter::convert(
 
   scanCounter_ = 0;
   carp(CARP_DETAILED_DEBUG, "starting to convert spectrum to pb..." );
-  carp(CARP_INFO, "starting to convert spectrum to pb..." );
   // go through the spectrum list and write each spectrum
 
   vector<pb::Spectrum> all_spectra; 
