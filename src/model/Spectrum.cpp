@@ -452,7 +452,10 @@ bool Spectrum::parsePwizSpecInfo(
   vector<double> mzs = pwiz_spectrum->getMZArray()->data;
   vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
 
-  if (dia_mode || Params::GetBool("skip-preprocessing") ) {
+  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
+    addPeak(intensities[peak_idx], mzs[peak_idx]);
+  }
+/*  if (dia_mode || Params::GetBool("skip-preprocessing") ) {
     for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
       addPeak(intensities[peak_idx], mzs[peak_idx]);
     }
@@ -480,6 +483,7 @@ bool Spectrum::parsePwizSpecInfo(
     }
 
   }
+  */
   has_peaks_ = true;
   carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 

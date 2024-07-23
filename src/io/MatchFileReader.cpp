@@ -262,11 +262,22 @@ MatchCollection* MatchFileReader::parse() {
         carp(CARP_ERROR, "Failed to parse tab-delimited PSM match");
         return NULL;
       }
+      // set all spectrum specific features to parsed match
+      // zState also gets set by spectrum = parseSpectrum() and spectrum is used
+      // as input for match. This code changes zState only if charge and neutral
+      // mass column is present. Note that this if statement is required as
+      // Percolator PSMId column is parsed by parseSpectrum()
+      if (getFloat(SPECTRUM_NEUTRAL_MASS_COL) != -1 &&
+          getInteger(CHARGE_COL) != -1) {
+        SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+                              getInteger(CHARGE_COL));
+        match->setZState(zState);
+      }
 
-      //set all spectrum specific features to parsed match
-      SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
-                            getInteger(CHARGE_COL));
-      match->setZState(zState);
+      // //set all spectrum specific features to parsed match
+      // SpectrumZState zState(getFloat(SPECTRUM_NEUTRAL_MASS_COL),
+      //                       getInteger(CHARGE_COL));
+      // match->setZState(zState);
       match->setLnExperimentSize(ln_experiment_size);
       //add match to match collection.
       match_collection->addMatchToPostMatchCollection(match);
@@ -464,11 +475,33 @@ Crux::Peptide* MatchFileReader::parsePeptide() {
 
 Crux::Spectrum* MatchFileReader::parseSpectrum() {
   
-  Crux::Spectrum* new_spectrum = new Crux::Spectrum(getInteger(SCAN_COL),
-                            getInteger(SCAN_COL),
-                            getFloat(SPECTRUM_PRECURSOR_MZ_COL),
-                            vector<int>(1, getInteger(CHARGE_COL)),
-                            getString(FILE_COL));
-  new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
-  return new_spectrum;
+  if (getInteger(SCAN_COL) != -1) {
+    Crux::Spectrum* new_spectrum = new Crux::Spectrum(getInteger(SCAN_COL),
+                              getInteger(SCAN_COL),
+                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
+                              vector<int>(1, getInteger(CHARGE_COL)),
+                              getString(FILE_COL));
+    new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    return new_spectrum;
+  } else {
+    // This part allows Percolator output files to be read in
+    string intermediate;
+    vector <string> tokens;
+    stringstream psmid(getString(POUT_PSMID_COL));
+
+    // tokenize by underscore
+    while(getline(psmid, intermediate, '_'))
+    {
+        tokens.push_back(intermediate);
+    }
+    carp(CARP_INFO, "chrage state: %d", stoi(tokens[3]));
+    Crux::Spectrum* new_spectrum = new Crux::Spectrum(stoi(tokens[2]),
+                              stoi(tokens[2]),
+                              getFloat(SPECTRUM_PRECURSOR_MZ_COL),
+                              vector<int>(1, stoi(tokens[3])),
+                              getString(FILE_COL));
+    new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    return new_spectrum;
+  }
+    
 }

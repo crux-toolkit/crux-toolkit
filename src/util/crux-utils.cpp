@@ -536,7 +536,22 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "res-ev score",
   "res-ev p-value",
   "combined p-value",
-  "tailor score" //Added for tailor score calibration method by AKF  
+  "tailor score",
+  "precursor intensity logrank M0",
+  "precursor intensity logrank M1",
+  "precursor intensity logrank M2",
+  "rt-diff",
+  "dynamic fragment p-value",
+  "static fragment p-value",
+  "precursor coelution",
+  "fragment coelution",
+  "precursor fragment coelution",
+  "ensemble score",
+  "Sidak adjusted p-value",
+  "smoothed p-value",
+  "tdc q-value",
+  "mix-max q-value"
+//  "invalid", // This needs to be removed if new score types are added.
 };
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {

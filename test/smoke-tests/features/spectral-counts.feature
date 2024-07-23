@@ -12,7 +12,7 @@ Scenario Outline: User runs spectral-counts
 
 Examples:
   |test_name                     |args                                                                   |results                    |expected_output                      |
-# |spectral-counts-raw           |--parameter-file params/raw --protein-database test.fasta              |test.target.txt            |spectral-counts.raw.txt              |
+ |spectral-counts-raw           |--parameter-file params/raw --protein-database test.fasta              |test.target.txt            |spectral-counts.raw.txt              |
  |spectral-counts-sin           |--parameter-file params/sin --protein-database test.fasta              |test.target.txt            |spectral-counts.sin.txt              |
  |spectral-counts-nsaf          |--parameter-file params/nsaf --protein-database test.fasta             |test.target.txt            |spectral-counts.nsaf.txt             |
  |spectral-counts-empai         |--parameter-file params/empai --protein-database test.fasta            |test.target.txt            |spectral-counts.empai.txt            |
@@ -26,4 +26,4 @@ Examples:
  |spectral-counts-tsv-nodb      |--parameter-file params/raw                                            |sample.target.psms.txt     |spectral-counts.raw.nodb.txt         |
   #|spectral-counts-mzid          |--threshold-type none --measure RAW                                    |Sequest_example_ver1.1.mzid|spectral-counts.mzid.txt             |
  |spectral-counts-barista       |--parameter-file params/nsaf --protein-database small-yeast.fasta      |sample2.target.psms.txt    |spectral-counts.barista.txt          |
-  |spectral-counts-peptides      |--protein-database tubulins.fasta --quant-level peptide --measure RAW  |three_psms.psms.txt        |three_psms.spectral-counts.target.txt|
+ |spectral-counts-peptides      |--protein-database tubulins.fasta --quant-level peptide --measure RAW  |three_psms.psms.txt        |three_psms.spectral-counts.target.txt|

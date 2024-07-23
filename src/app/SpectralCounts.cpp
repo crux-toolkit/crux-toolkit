@@ -327,6 +327,10 @@ void SpectralCounts::normalizePeptideScores() {
     FLOAT_T score = it->second;
     total += score;
   }
+  // Avoid div by zero
+  if (total < 0.0000001) {  // TODO: what if total is negative?
+    total = 1.0;
+  }
 
   // normalize by sum of scores and length
   for (PeptideToScore::iterator it = peptide_scores_.begin();
@@ -334,7 +338,6 @@ void SpectralCounts::normalizePeptideScores() {
     FLOAT_T score = it->second;
     Peptide* peptide = it->first;
     it->second = score / total / (FLOAT_T)peptide->getLength();
-
   }
 
 }
@@ -363,6 +366,10 @@ void SpectralCounts::normalizeProteinScores() {
       score = score / (FLOAT_T)protein->getLength();
     }
     total += score;
+  }
+
+  if (total < 0.0000001) {
+    total = 1.0;
   }
     
   // normalize by sum of all scores
@@ -470,6 +477,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
        ion_it != ion_series->end(); ++ion_it) {
     ion = (*ion_it);
     if (ion -> getType() == B_ION || ion -> getType() == Y_ION) {
+  
       if (!ion->isModified()) {
         Peak* peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
@@ -500,7 +508,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
  */
 void SpectralCounts::getPeptideScores() {
   Crux::SpectrumCollection* spectra = NULL;
-  // for SIN, parse out spectrum collection from ms2 fiel
+  // for SIN, parse out spectrum collection from ms2 file
   if( measure_ == MEASURE_SIN ) {
     spectra = SpectrumCollectionFactory::create(Params::GetString("input-ms2"));
   }
@@ -539,6 +547,7 @@ void SpectralCounts::getPeptideScores() {
       peptide_scores_.insert(make_pair(peptide, 0.0));
     }
     peptide_scores_[peptide] += match_intensity;
+
   }
 
   if (measure_ == MEASURE_SIN) {
@@ -565,7 +574,6 @@ void SpectralCounts::filterMatches() {
     psm_file_.c_str(),
     database_name_.c_str());
   carp(CARP_INFO, "Number of matches: %d", match_collection_->getMatchTotal());
-
   switch(threshold_type_) {
     case THRESHOLD_NONE:
       filterMatchesNone();
@@ -633,10 +641,9 @@ void SpectralCounts::filterMatchesCustom() {
     invalidCustomScore();
   }
 
-
   //first try to map from tab delimited headers
   SCORER_TYPE_T scorer;
-  bool tab_header = string_to_scorer_type(custom_threshold_name_.c_str(), &scorer);
+  bool tab_header = string_to_scorer_type(custom_threshold_name_, &scorer);
 
   if (tab_header) {
     //must be a custom field, this can happen with pep xml or mzid.
@@ -644,8 +651,6 @@ void SpectralCounts::filterMatchesCustom() {
   } else {
     filterMatchesCustomScore();
   }
-
-
 }
 
 /**
@@ -654,7 +659,6 @@ void SpectralCounts::filterMatchesCustom() {
 void SpectralCounts::filterMatchesScore(
   SCORER_TYPE_T scorer ///< scorer to use
   ) {
-
   MatchIterator match_iterator(match_collection_, scorer, false);
   
   while (match_iterator.hasNext()) {
@@ -679,7 +683,6 @@ void SpectralCounts::filterMatchesScore(
 void SpectralCounts::filterMatchesCustomScore() {
 
   MatchIterator match_iterator(match_collection_);
-
   while(match_iterator.hasNext()) {
     Match* match = match_iterator.next();
     if (!match->isDecoy()) {
