@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0091 NEW)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+  cmake_policy(SET CMP0135 NEW)
+endif()
 project(crux)
 
 set (CRUX_VERSION_MAJOR "4")
-set (CRUX_VERSION_MINOR "1")
+set (CRUX_VERSION_MINOR "2")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -21,7 +24,15 @@ macro(use_cxx11)
   endif (CMAKE_VERSION VERSION_LESS "3.1")
 endmacro(use_cxx11)
 
-use_cxx11()
+macro(use_cxx14)
+  if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  else (CMAKE_VERSION VERSION_LESS "3.1")
+    set(CMAKE_CXX_STANDARD 11)
+  endif (CMAKE_VERSION VERSION_LESS "3.1")
+endmacro(use_cxx14)
 
 add_subdirectory(doc/user)
 add_subdirectory(ext)
@@ -78,7 +89,7 @@ add_custom_target(
   COMMENT "Not building external dependendcies."
 )
 
-# a custom target for obtaining the SVN revision number
+# a custom target for obtaining the GIT commit number
 add_custom_target(crux_version ALL DEPENDS crux_version_header )
 
 # creates crux_version.h using cmake script
@@ -122,13 +133,9 @@ add_dependencies(tide-support protobuf-3.19.4)
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
 
+# Set build processor type
 if (WIN32 AND NOT CYGWIN)
-  # If windows build we need to select 32/64 bit platform
-  if (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    SET(BUILD_PROCESSOR "AMD64")
-  else (CMAKE_GENERATOR MATCHES "^.*Win64$")
-    SET(BUILD_PROCESSOR "i386")
-  endif (CMAKE_GENERATOR MATCHES "^.*Win64$")
+  SET(BUILD_PROCESSOR "AMD64")
 else (WIN32 AND NOT CYGWIN)
   SET(BUILD_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR})
 endif (WIN32 AND NOT CYGWIN)

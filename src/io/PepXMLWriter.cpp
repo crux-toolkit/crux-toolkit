@@ -284,9 +284,6 @@ void PepXMLWriter::printPeptideElement(int *ranks,
   // print scores
   printScores(scores, scores_computed, ranks);
 
-  // print post-search (analysis) fields
-  printAnalysis(scores, scores_computed);
-
   // close the search_hit tag
   fprintf(file_, "    </search_hit>\n");
 }
@@ -310,48 +307,6 @@ void PepXMLWriter::printScores(
       }
     }
   }
-}
-
-
-void PepXMLWriter::printAnalysis(double* scores,
-                                 bool* scores_computed) {
-  // only write the analysis_result section for post-search psms
-  bool post_search = false;
-  if( scores_computed[PERCOLATOR_SCORE] || scores_computed[DECOY_XCORR_QVALUE] ) {
-    post_search = true;
-  }
-
-  if( !post_search ) {
-    return;
-  }
-
-  SCORER_TYPE_T score = INVALID_SCORER_TYPE;
-  SCORER_TYPE_T qval = INVALID_SCORER_TYPE;
-  SCORER_TYPE_T pep = INVALID_SCORER_TYPE;
-  string score_name;
-  
-  if (scores_computed[PERCOLATOR_SCORE]) {
-    score = PERCOLATOR_SCORE;
-    qval = PERCOLATOR_QVALUE;
-    pep = PERCOLATOR_PEP;
-    score_name = "percolator_score";
-  }
-
-  fprintf(file_, "<analysis_result analysis=\"peptideprophet\">\n");
-  fprintf(file_, "<peptideprophet_result probability=\"%.*f\">\n", 
-          precision_, (1 - scores[pep]));
-  fprintf(file_, "<search_score_summary>\n");
-  if (!score_name.empty()) {
-    fprintf(file_, "<parameter name=\"%s\" value=\"%.*f\"/>\n",
-            score_name.c_str(), precision_, scores[score]);
-  }
-  fprintf(file_, "<parameter name=\"%s\" value=\"%.*f\"/>\n", 
-          "qvalue", precision_, scores[qval]);
-  fprintf(file_, "<parameter name=\"%s\" value=\"%.*f\"/>\n", 
-          "pep", precision_, scores[pep]);
-  fprintf(file_, "</search_score_summary>\n");
-  fprintf(file_, "</peptideprophet_result>\n");
-  fprintf(file_, "</analysis_result>\n");
 }
 
 /**

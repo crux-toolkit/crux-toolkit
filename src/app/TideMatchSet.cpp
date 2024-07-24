@@ -414,7 +414,7 @@ void TideMatchSet::writeToFileDIA(
       // DYN_FRAGMENT_PVALUE_COL, STA_FRAGMENT_PVALUE_COL,
       boost::tuple<double, double> ms2pval = ms2pval_map->at(i);
       *file << StringUtils::ToString(ms2pval.get<0>(), precision, true) << '\t'
-    	    << StringUtils::ToString(ms2pval.get<1>(), precision, true) << '\t';
+            << StringUtils::ToString(ms2pval.get<1>(), precision, true) << '\t';
 
       // COELUTE_MS1_COL, COELUTE_MS2_COL, COELUTE_MS1_MS2_COL
       boost::tuple<double, double, double> coelute_tuple = coelute_map->at(i);
@@ -868,7 +868,7 @@ void TideMatchSet::gatherTargetsAndDecoys(
         decoysOut.push_back(i);
       }
     }
-    if ((concat && targetsOut.size() >= gatherSize) || (!concat && targetsOut.size() >= gatherSize && decoysOut.size() >= gatherSize*numDecoys)){
+    if ((concat && targetsOut.size() >= gatherSize) || (!concat && targetsOut.size() >= gatherSize && decoysOut.size() >= gatherSize*numDecoys)) {
       break;
     }
   }

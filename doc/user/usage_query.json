@@ -1,0 +1,23 @@
+{
+  "dimensions":[
+    {"name":"eventName"},
+    {"name":"isoWeek"},
+    {"name":"isoYear"},
+    {"name":"customEvent:tool"}
+  ],
+  "metrics":[
+    {"name":"eventCount"}
+  ],
+  "dateRanges":[
+    {"startDate":"2023-01-01","endDate":"yesterday"}
+  ],
+  "dimensionFilter":
+  {
+    "filter":{"fieldName":"eventName","stringFilter":{"matchType":"EXACT","value":"crux"}}
+  },
+  "limit":"90",
+  "orderBys":[
+    {"dimension":{"orderType":"NUMERIC","dimensionName":"isoWeek"}},
+    {"dimension":{"orderType":"NUMERIC","dimensionName":"isoYear"}}
+  ]
+}

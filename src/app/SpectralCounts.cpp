@@ -40,6 +40,10 @@ SpectralCounts::~SpectralCounts() {
   delete output_;
 }
 
+int SpectralCounts::main(int argc, char** argv) {
+  return(main(Params::GetString("input PSMs")));
+}
+
 /**
  * Given a collection of scored PSMs, print a list of proteins
  * ranked by their a specified score. Spectral-counts supports two
@@ -50,7 +54,8 @@ SpectralCounts::~SpectralCounts() {
  * and Normalized Spectral Index (SIN). 
  * \returns 0 on successful completion.
  */
-int SpectralCounts::main(int argc, char** argv) {
+int SpectralCounts::main(const string input_file) {
+  psm_file_ = input_file;
   getParameterValues(); // all the get_<type>_parameter calls here
 
   // open output files
@@ -59,7 +64,7 @@ int SpectralCounts::main(int argc, char** argv) {
 
   // get a set of matches that pass the threshold
   filterMatches();
-  carp(CARP_INFO, "Number of matches passed the threshold %i", 
+  carp(CARP_INFO, "Number of matches passed the threshold: %i",
        matches_.size());
 
   if (matches_.empty()) {
@@ -71,7 +76,7 @@ int SpectralCounts::main(int argc, char** argv) {
   if (unique_mapping_) {
     makeUniqueMapping();
   }
-  carp(CARP_INFO, "Number of peptides %i", peptide_scores_.size());
+  carp(CARP_INFO, "Number of peptides: %i", peptide_scores_.size());
 
   // quantify at either the peptide or protein level
   if (quantitation_ == PEPTIDE_QUANT_LEVEL) { // peptide level
@@ -87,13 +92,13 @@ int SpectralCounts::main(int argc, char** argv) {
       normalizeProteinScores();
       checkProteinNormalization();
     }
-    carp(CARP_INFO, "Number of proteins %i", protein_scores_.size());
+    carp(CARP_INFO, "Number of proteins: %i", protein_scores_.size());
         
     if (parsimony_ != PARSIMONY_NONE) { //if parsimony is not none
       getProteinToPeptides();
       getMetaMapping();
       getProteinToMetaProtein();
-      carp(CARP_INFO, "Number of meta proteins %i", meta_mapping_.size());
+      carp(CARP_INFO, "Number of meta proteins: %i", meta_mapping_.size());
 
       if (parsimony_ == PARSIMONY_GREEDY) { //if parsimony is greedy
         performParsimonyAnalysis();
@@ -114,7 +119,6 @@ int SpectralCounts::main(int argc, char** argv) {
  * as member variables.
  */
 void SpectralCounts::getParameterValues() {
-  psm_file_ = Params::GetString("input PSMs");
   threshold_ = Params::GetDouble("threshold");
   database_name_ = Params::GetString("protein-database");
   unique_mapping_ = Params::GetBool("unique-mapping");
@@ -125,6 +129,13 @@ void SpectralCounts::getParameterValues() {
   if (measure_ == MEASURE_SIN && Params::GetString("input-ms2").empty()) {
     carp(CARP_FATAL, "The SIN computation for spectral-counts requires "
                      "that the --input-ms2 option specify a file.");
+  }
+
+  if ((measure_ == MEASURE_DNSAF || measure_ == MEASURE_NSAF) &&
+      (database_name_ == "")) {
+    carp(CARP_FATAL, "The NSAF and dNSAF computation for spectral-counts "
+                      "requires that the --protein-database option specify "
+                      "a file.");
   }
 
   bin_width_ = Params::GetDouble("mz-bin-width");
@@ -330,7 +341,7 @@ void SpectralCounts::normalizePeptideScores() {
 
 
 /**
- * Changes the scores in protien_scores_ to either be divided by the
+ * Changes the scores in protein_scores_ to either be divided by the
  * sum of all scores times the peptide length (SIN, NSAF) or to be the
  * final emPAI score.
  */
@@ -444,7 +455,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
   Spectrum* spectrum = spectra->getSpectrum(scan);
 
   if (spectrum == NULL) {
-    carp(CARP_FATAL, "scan: %d doesn't exist or not found!");
+    carp(CARP_FATAL, "scan: %d doesn't exist or not found!", scan);
     return 0.0;
   }
 
@@ -460,7 +471,7 @@ FLOAT_T SpectralCounts::sumMatchIntensity(Match* match,
     ion = (*ion_it);
     if (ion -> getType() == B_ION || ion -> getType() == Y_ION) {
       if (!ion->isModified()) {
-        Peak * peak = spectrum->getNearestPeak(ion->getMassZ(),
+        Peak* peak = spectrum->getNearestPeak(ion->getMassZ(),
                                                 bin_width_);
         if (peak != NULL) {
           match_intensity += peak->getIntensity();
@@ -553,7 +564,7 @@ void SpectralCounts::filterMatches() {
   match_collection_ = parser_.create(
     psm_file_.c_str(),
     database_name_.c_str());
-  carp(CARP_INFO, "Number of matches:%d", match_collection_->getMatchTotal());
+  carp(CARP_INFO, "Number of matches: %d", match_collection_->getMatchTotal());
 
   switch(threshold_type_) {
     case THRESHOLD_NONE:
@@ -713,13 +724,9 @@ void SpectralCounts::filterMatchesQValue() {
      
     carp(CARP_DEBUG, "xcorr rank:%d q-value:%f", match->getRank(XCORR), match->getScore(qval_type));
     if (match->isDecoy()) {
-      continue;
+      carp(CARP_FATAL, "Input file should not have decoy PSMs.");
     } 
-    if ((qval_type == DECOY_XCORR_QVALUE) && 
-      (match->getRank(XCORR) != 1)) {
-      continue;
-    }
-      
+
     // find a qvalue score lower than threshold
     if (match->getScore(qval_type) != FLT_MIN &&
         match->getScore(qval_type) <= threshold_)  {
@@ -731,7 +738,7 @@ void SpectralCounts::filterMatchesQValue() {
 
 /**
  * Figures out which kind of q-value was scored for this match collection.
- * \returns PERCOLATOR_QVALUE, or DECOY_XCORR_QVALUE
+ * Returns PERCOLATOR_QVALUE or QVALUE_TDC
  * if any of those were scored or INVALID_SCORER_TYPE if none were scored. 
  */
 SCORER_TYPE_T SpectralCounts::get_qval_type(
@@ -740,8 +747,8 @@ SCORER_TYPE_T SpectralCounts::get_qval_type(
 
   if (match_collection->getScoredType(PERCOLATOR_QVALUE)) {
     scored_type =  PERCOLATOR_QVALUE;
-  } else if (match_collection->getScoredType(DECOY_XCORR_QVALUE)) {
-    scored_type = DECOY_XCORR_QVALUE;
+  } else if (match_collection->getScoredType(QVALUE_TDC)) {
+    scored_type = QVALUE_TDC;
   }
 
   return scored_type;
@@ -777,19 +784,18 @@ void SpectralCounts::writeRankedProteins() {
       } else {
       */
       for (MetaToRank::iterator iter = meta_protein_ranks_.begin();
-        iter != meta_protein_ranks_.end();
-	++iter) {
-	  MetaProtein proteins = iter->first;
-	  for (MetaProtein::iterator protein_it = proteins.begin();
-	       protein_it != proteins.end(); ++protein_it) {
-	    Protein* protein = (*protein_it);
-	    if (protein->getId() == it->first->getId()) {
-	      carp(CARP_DEBUG, "Found protein %s",protein->getId().c_str());
-	      rank = iter->second;
-	    }
-	  }
+           iter != meta_protein_ranks_.end();
+           ++iter) {
+        MetaProtein proteins = iter->first;
+        for (MetaProtein::iterator protein_it = proteins.begin();
+             protein_it != proteins.end(); ++protein_it) {
+          Protein* protein = (*protein_it);
+          if (protein->getId() == it->first->getId()) {
+            carp(CARP_DEBUG, "Found protein %s", protein->getId().c_str());
+            rank = iter->second;
+          }
+        }
       }
-      // }
     }
     proteins.push_back(boost::make_tuple(it->second, it->first, rank));
   }
@@ -895,8 +901,8 @@ void SpectralCounts::getMetaRanks() {
       cur_rank = idx+1;
     }
 
-    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i",cur_score,cur_rank);
-     for (MetaProtein::iterator protein_it = proteins.begin();
+    carp(CARP_DEBUG, "Meta Protein score:%g rank:%i", cur_score,cur_rank);
+    for (MetaProtein::iterator protein_it = proteins.begin();
          protein_it != proteins.end(); ++protein_it) {
       Protein* protein = (*protein_it);
       FLOAT_T score = protein_scores_[protein];
@@ -970,7 +976,8 @@ void SpectralCounts::makeUniqueMapping() {
       Peptide* peptide = it->first;
       int num_proteins = peptide->getNumPeptideSrc();
       if (num_proteins > 1) {
-        peptide_scores_.erase(it);
+        it = peptide_scores_.erase(it);
+        it--;
       }
     }
   }

@@ -527,8 +527,6 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "xcorr first",
   "xcorr second",
 
-  "decoy_xcorr_qvalue",
-  "decoy_xcorr_peptide_qvalue",
   "decoy_xcorr_PEP",
 
   "decoy_evalue_qvalue",
@@ -544,6 +542,7 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "deltalcn",
   "by_ions_matched",
   "by_ions_total",
+
   "exact_pvalue",
   "refactored_xcorr",
   "res-ev score",

@@ -257,8 +257,8 @@ Params::Params() : finalized_(false) {
     "then converts the resulting m/z range to the peptide mass range using the precursor "
     "charge. For the parts-per-million (ppm) window-type, the spectrum mass is calculated as "
     "in the mass type. The lower bound of the mass window is then defined as the spectrum "
-    "mass / (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
-    "mass / (1.0 - (precursor-window / 1000000)).",
+    "mass * (1.0 + (precursor-window / 1000000)) and the upper bound is defined as spectrum "
+    "mass * (1.0 - (precursor-window / 1000000)).",
     "Available for tide-search.", true);
   InitStringParam("auto-precursor-window", "false", "false|warn|fail",
     "Automatically estimate optimal value for the precursor-window parameter "
@@ -317,7 +317,7 @@ Params::Params() : finalized_(false) {
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
     "Output a pepXML results file to the output directory.",
-    "Available for tide-search, percolator.", true);
+    "Available for tide-search.", true);
   InitBoolParam("txt-output", true,
     "Output a tab-delimited results file to the output directory.",
     "Available for tide-search, percolator.", true);
@@ -1357,7 +1357,7 @@ InitStringParam("protein-name-separator", ",",
     "Only available for crux-predict-peptide-ions.", true);
   // ***** spectral-counts aguments *****
   InitArgParam("input PSMs",
-    "A PSM file in either tab delimited text format (as produced by percolator), or pepXML format.");
+    "A PSM file that has been produced by Percolator or assign-confidence.");
   // also uses "protein-database"
   // ***** spectral-counts options *****
   InitStringParam("protein-database", "",
@@ -1411,8 +1411,7 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("custom-threshold-name", "",
     "Specify which field to apply the threshold to. The direction of the threshold "
     "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
-    "applies to the q-value, specified by \"percolator q-value\", "
-    "\"decoy q-value (xcorr)\".",
+    "applies to the percolator q-value, specified by \"percolator q-value\".",
     "Available for spectral-counts.", true);
   InitBoolParam("custom-threshold-min", true,
     "When selecting matches with a custom threshold, custom-threshold-min determines "
@@ -1678,7 +1677,7 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("search-engine", "tide-search", "comet|tide-search",
     "Specify which search engine to use.",
     "Available for crux pipeline", true);
-  InitStringParam("post-processor", "percolator", "percolator|assign-confidence|none",
+  InitStringParam("post-processor", "percolator", "percolator|assign-confidence",
     "Specify which post-processor to apply to the search results.",
     "Available for crux pipeline", true);
   // create-docs

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(VERSION 3.15)
 
-use_cxx11()
 
 if (APPLE)
     enable_language(OBJC)
@@ -20,22 +19,31 @@ add_subdirectory(app/bullseye)
 add_subdirectory(app/hardklor)
 add_subdirectory(app/tide)
 
-include_directories(${CMAKE_SOURCE_DIR}/ext)
+if (UNIX)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
+elseif (WIN32)
+  # disable autolinking in boost
+  add_definitions( -DBOOST_ALL_NO_LIB )
+endif(UNIX)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/bullseye)
 include_directories(${CMAKE_SOURCE_DIR}/src/app/hardklor)
+include_directories(${CMAKE_SOURCE_DIR}/src/app/tide/protoobj)
 include_directories(${CMAKE_SOURCE_DIR}/src/io)
 include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
-include_directories(${CMAKE_BINARY_DIR}/ext)
-include_directories(${CMAKE_BINARY_DIR}/ext)
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
-include_directories(BEFORE ${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/google/protobuf)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux)
+include_directories(${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/pwiz)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/blas)
 include_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator/src/fido)
@@ -71,6 +79,7 @@ endif (WIN32 AND NOT Cygwin)
 
 link_directories(${CMAKE_BINARY_DIR}/app/bullseye)
 link_directories(${CMAKE_BINARY_DIR}/app/hardklor)
+link_directories(${CMAKE_BINARY_DIR}/app/tide-support)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib)
 link_directories(${CMAKE_BINARY_DIR}/ext/lib64)
 link_directories(${CMAKE_BINARY_DIR}/ext/build/src/percolator-build/src) 
@@ -222,7 +231,6 @@ add_library(
 
 if (APPLE)
   set(OPENMP_FOUND FALSE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=nonportable-include-path")
 else(APPLE)
   find_package(OpenMP)
   if (OPENMP_FOUND)
@@ -322,31 +330,12 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
 endif (WIN32 AND NOT CYGWIN)
 
-# The rt library is not needed for OS X
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "")
-else(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(RT_LIBRARY "rt")
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
 if (WIN32 AND NOT CYGWIN)
   if (INCLUDE_VENDOR_LIBRARIES)
     set (
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
-      libpwiz_analysis_chromatogram_processing.lib
-      libpwiz_analysis_common.lib
-      libpwiz_analysis_demux.lib
-      libpwiz_analysis_frequency.lib
-      libpwiz_analysis_passive.lib
-      libpwiz_analysis_passive_core.lib
-      libpwiz_analysis_peakdetect.lib
-      libpwiz_analysis_peptideid.lib
-      libpwiz_analysis_proteome_processing.lib
-      libpwiz_analysis_spectrum_processing.lib
-      libpwiz_analysis_spectrum_processing_basic.lib
-      libpwiz_analysis_version.lib
       libpwiz_data_common.lib
       libpwiz_data_identdata.lib
       libpwiz_data_identdata_examples.lib
@@ -356,31 +345,27 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_msdata_core.lib
       libpwiz_data_msdata_examples.lib
       libpwiz_data_msdata_mz5.lib
+      libpwiz_data_msdata_mzmlb.lib
       libpwiz_data_msdata_version.lib
       libpwiz_data_obo.lib
       libpwiz_data_proteome.lib
       libpwiz_data_proteome_examples.lib
       libpwiz_data_proteome_version.lib
-      libpwiz_data_tradata.lib
-      libpwiz_data_tradata_examples.lib
-      libpwiz_data_tradata_version.lib
       libpwiz_data_vendor_readers.lib
+      libpwiz_reader_abi.lib
+      libpwiz_reader_abi_t2d.lib
       libpwiz_reader_agilent.lib
-      libpwiz_reader_bruker.lib
       libpwiz_reader_shimadzu.lib
       libpwiz_reader_thermo.lib
       libpwiz_reader_uimf.lib
       libpwiz_reader_unifi.lib
       libpwiz_reader_waters.lib
-      libpwiz_tools_common.lib
       libpwiz_utility_chemistry.lib
-      libpwiz_utility_image.lib
       libpwiz_utility_math.lib
       libpwiz_utility_minimxml.lib
       libpwiz_utility_misc.lib
       libpwiz_utility_vendor_reader_test_harness.lib
       libpwiz_vendor_api_agilent.lib
-      libpwiz_vendor_api_bruker.lib
       libpwiz_vendor_api_shimadzu.lib
       libpwiz_vendor_api_thermo.lib
       libpwiz_vendor_api_uimf.lib
@@ -408,7 +393,6 @@ if (WIN32 AND NOT CYGWIN)
       libpwiz_data_proteome_version
       libpwiz_data_common
       libpwiz_utility_chemistry
-      libpwiz_utility_image
       libpwiz_utility_math
       libpwiz_utility_minimxml
       libpwiz_version
@@ -418,22 +402,19 @@ if (WIN32 AND NOT CYGWIN)
   endif (INCLUDE_VENDOR_LIBRARIES)
   SET(
     BOOST_LIBRARIES
-    optimized libboost_chrono-vc142-mt
-    optimized libboost_filesystem-vc142-mt
-    optimized libboost_iostreams-vc142-mt
-    optimized libboost_nowide-vc142-mt
-    optimized libboost_program_options-vc142-mt
-    optimized libboost_serialization-vc142-mt
-    optimized libboost_system-vc142-mt
-    optimized libboost_thread-vc142-mt
-    optimized libfreetype-vc142-mt-2_4
-    debug libboost_chrono-vc142-mt-gd
-    debug libboost_filesystem-vc142-mt-gd
-    debug libboost_iostreams-vc142-mt-gd
-    debug libboost_nowide-vc142-mt-gd
-    debug libboost_regex-vc142-mt
-    debug libboost_program_options-vc142-mt
-    debug libboost_system-vc142-mt-gd
+    optimized libboost_chrono-mt
+    debug libboost_chrono-mt-gd
+    optimized libboost_filesystem-mt
+    debug libboost_filesystem-mt-gd
+    optimized libboost_iostreams-mt
+    debug libboost_iostreams-mt-gd
+    optimized libboost_nowide-mt
+    debug libboost_nowide-mt-gd
+    optimized libboost_serialization-mt
+    debug libboost_serialization-mt-gd
+    optimized libboost_system-mt
+    debug libboost_system-mt-gd
+    optimized libboost_thread-mt.lib
     debug libboost_thread-vc142-mt-gd
   )
   target_link_libraries(
@@ -447,7 +428,8 @@ if (WIN32 AND NOT CYGWIN)
     blas
     fido
     picked_protein
-    gflags_static
+    optimized gflags_static
+    debug gflags_static_debug
     crux-support
     tide-support
     mstoolkitlite
@@ -457,10 +439,6 @@ if (WIN32 AND NOT CYGWIN)
     ws2_32
     shlwapi
     ${BOOST_LIBRARIES}
-    debug libfreetype-vc142-mt-gd-2_4
-    optimized libgd-vc142-mt-2_1
-    debug libgd-vc142-mt-gd-2_1
-    libpng
   )
 else()
   # UNIX SYSTEMS
@@ -479,9 +457,9 @@ else()
     blas
     fido
     picked_protein
-    protobuf
     pwiz_data_msdata
     pwiz_data_msdata_mz5
+    pwiz_data_msdata_mzmlb
     pwiz_data_msdata_version
     pwiz_data_msdata_core
     pwiz_data_identdata
@@ -500,13 +478,14 @@ else()
     boost_serialization
     boost_system
     boost_thread
+    protobuf
+    protoc
     dl
     m
     ${SSL_SUPPORT}
     pthread
     hdf5pp
     hdf5
-    ${RT_LIBRARY}
     SHA1
     zlib
     ${FOUNDATION}

@@ -52,8 +52,32 @@
     <h2>Release notes for Crux</h2>
 
 
+<h3>Version 4.2</h3> April 6, 2024
+
+<h4>Major changes</h4>
+  <li>6 April 2024: Updated to use Percolator commit d0d48b5.
+  <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
+  dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
+  issues building Crux on newer releases of Linux and MacOS. The Centos 7
+  build was replaced with Ubuntu 20.04 in GitHub commit action for Master branch.
+  The recommended version of CMake is now 3.24. Earlier versions will work,
+  but you may see some warning messages.
+  </li>
 <h4>Minor changes</h4>
 <ul>
+  <li>02 July 2024: Typo fix in the documentation of precursor window calculation.</li>
+  <li>12 April 2024: Fixed bug in ArgParser with repeated options and arguments.</li>
+  <li>6 April 2024: Updated UNIMOD definitions.</li>
+  <li>26 March 2024: Updated smoke tests.</li>
+  <li>11 Jan 2024: added spectral-counts to pipeline command.</li>
+  <li>11 Jan 2024: Fixed bug where NSAF runs to completion with no database.</li>
+  <li>14 Nov 2023: Fixed bug in spectral-counts documentation, LaTex not being
+  rendered.</li>
+  <li>10 Oct 2023: When a parameter introduced by user doesn't match, app halts with an error.</li>
+  <li>5 Oct 2023: Fixed bug in Bullseye and Hardklor which prevented them from
+  processing files with a '#' in the file name.</li>
+  <li>1 Oct 2023: Removed uneeded DLL from Windows distribution. Fixed error in Thermo RAW file support.</li>
+  <li>1 Sept 2023: Fixed several bugs related to spectral counts. Spectral counts can now parse native Percolator output.</li>
   <li>25 July 2023: crux percolator --pepxml-output T now uses internal
   percolator code to generate pepxml output.</li>
   <li>10 July 2023: Added support for the percolator --no-terminate option, which
