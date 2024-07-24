@@ -48,6 +48,11 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("deltCn", true));
   features_.push_back(make_pair("XCorr", true));
   features_.push_back(make_pair("TailorScore", true));  
+  features_.push_back(make_pair("byIonsMatched", true));  
+  features_.push_back(make_pair("byIonsTotal", true));  
+  features_.push_back(make_pair("byIonsFraction", true));  
+  features_.push_back(make_pair("byIonsRepeatMatch", true));  
+
   features_.push_back(make_pair("Sp", false));
   features_.push_back(make_pair("IonFrac", false));
   features_.push_back(make_pair("RefactoredXCorr", false));
@@ -198,7 +203,6 @@ void PinWriter::write(MatchCollection* collection, string database) {
   }
   if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-rtdiff"), 0)) {
      setEnabledStatus("RTDiff", collection->getScoredType(RT_DIFF));
-
   }
   if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-elution"), 0)) {
      setEnabledStatus("CoeluteMS1", collection->getScoredType(COELUTE_MS1));
@@ -315,6 +319,18 @@ void PinWriter::printPSM(
     } else if (feature == "TailorScore" ) {
       FLOAT_T tailor = match->getScore(TAILOR_SCORE);
       fields.push_back(StringUtils::ToString(tailor));
+    } else if (feature == "byIonsMatched" ) {
+      FLOAT_T byIonsMatched = match->getScore(BY_IONS_MATCHED);
+      fields.push_back(StringUtils::ToString(byIonsMatched));
+    } else if (feature == "byIonsTotal" ) {
+      FLOAT_T byIonsTotal = match->getScore(BY_IONS_TOTAL);
+      fields.push_back(StringUtils::ToString(byIonsTotal));
+    } else if (feature == "byIonsFraction" ) {
+      FLOAT_T byIonsFraction = match->getScore(BY_ION_FRACTION);
+      fields.push_back(StringUtils::ToString(byIonsFraction));
+    } else if (feature == "byIonsRepeatMatch" ) {
+      FLOAT_T byIonsRepeatMatch = match->getScore(BY_ION_REPEAT_MATCH);
+      fields.push_back(StringUtils::ToString(byIonsRepeatMatch));
     } else if (feature == "PepLen") {
       fields.push_back(StringUtils::ToString((unsigned) peptide->getLength()));
     } else if (StringUtils::StartsWith(feature, "Charge")) {
@@ -335,7 +351,7 @@ void PinWriter::printPSM(
     } else if (feature == "Peptide") {
       fields.push_back(getPeptide(peptide));
     } else if (feature == "Proteins") {
-      fields.push_back(StringUtils::Join(peptide->getProteinIds(), ','));
+      fields.push_back(StringUtils::Join(peptide->getProteinIds(), '\t'));
     }
     // DIAmeter related, added by Yang
     else if (feature == "PrecursorIntRankM0" && !MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) { fields.push_back(StringUtils::ToString(match->getScore(PRECURSOR_INTENSITY_RANK_M0))); }

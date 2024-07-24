@@ -63,6 +63,7 @@ class MatchCollection {
     ///< has an itterator been created? if TRUE can't manipulate matches
 
   bool has_distinct_matches_; ///< does the match collection have distinct matches?
+  bool has_mulitple_decoys_;
   bool has_decoy_indexes_;
 
   // The following features (post_*) are only valid when
@@ -327,8 +328,12 @@ class MatchCollection {
   bool getHasDistinctMatches();
   void setHasDistinctMatches(bool distinct_matches);
 
+  bool hasMulitpleDecoys();
+  void setHasMulitpleDecoys(bool value);
+
   bool hasDecoyIndexes() const;
   void setHasDecoyIndexes(bool value);
+
 
   /**
    * Try setting the match collection's zstate.  Successful if the

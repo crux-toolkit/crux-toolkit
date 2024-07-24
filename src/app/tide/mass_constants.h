@@ -127,18 +127,19 @@ class MassConstants {
     return (bin - 1.0 + bin_offset_) * charge*bin_width_ + (charge - 1)*MASS_PROTON;
   }
 
-  // added by Yang
-  /*static unsigned int mz2bin(double mz) {
-	  return (unsigned int)((mz/bin_width_) + 1.0 - bin_offset_);
-  }*/
-
   static double bin_width_;
   static double bin_offset_;
+  const static pb::ModTable* mod_table_; 
+  const static pb::ModTable* n_mod_table_;
+  const static pb::ModTable* c_mod_table_; 
+  const static pb::ModTable* nprot_mod_table_;
+  const static pb::ModTable* cprot_mod_table_;
  private:
   static void FillMassTable(const double* elements, double* table);
 
   static ModCoder mod_coder_;
   static std::vector<double> unique_deltas_;
+
 
 };
 

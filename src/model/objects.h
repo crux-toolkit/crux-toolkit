@@ -451,8 +451,9 @@ enum _scorer_type {
   XCORR_FIRST,
   XCORR_SECOND,
   
+  DECOY_XCORR_QVALUE,  ///< q-value derived from decoys
+  DECOY_XCORR_PEPTIDE_QVALUE,
   DECOY_XCORR_PEP,     ///< posterior error prob for xcorrs (target/decoy)
-
   DECOY_EVALUE_QVALUE, ///< q-value derived from empirical null (decoy)
   DECOY_EVALUE_PEPTIDE_QVALUE,
   DECOY_EVALUE_PEP, ///< posterior error prob for e-value (target/decoy)
@@ -467,6 +468,8 @@ enum _scorer_type {
   DELTA_LCN,
   BY_IONS_MATCHED,
   BY_IONS_TOTAL,
+  BY_ION_FRACTION,
+  BY_ION_REPEAT_MATCH,
 
   TIDE_SEARCH_EXACT_PVAL,       ///< exact p-value from Tide
   TIDE_SEARCH_REFACTORED_XCORR, ///< raw score corresponding to exact p-value
@@ -526,6 +529,12 @@ typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
  */
 enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
                        XCORR_SCORE, //original SEQUEST score fxn
+                       PVALUES, // combined p-values
+                       PVALUES_HR, // combined p-values for high resolution, including Res-EV,
+                       PVALUES_LR, // combined p-values for low  resolution, including only exact p-value,
+                       HYPERSCORE, // HyperScore from X!tandem
+                       HYPERSCORE_LA, // hyperscore-la 
+                       DIAMETER, // Diameter scoring 
                        RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data
                        BOTH_SCORE, //use both score fxns from above
                        NUMBER_SCORE_FUNCTIONS };
@@ -536,6 +545,45 @@ enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
  * \added by Andy Lin
  */
 typedef enum _score_function SCORE_FUNCTION_T;
+
+  /**
+  * Locks for multi-threading in Tide.  
+  */
+  enum _tide_search_lock {
+    LOCK_RESULTS,       // Results file output
+    LOCK_CASCADE,       // Only used by cascade-search on spectrum_flag (map)
+    LOCK_CANDIDATES,    // Updating # of candidate peptides
+    LOCK_REPORTING,     // Updating sc_index and reporting progress
+    LOCK_SPECTRUM_READING, // Reading spectrum records 
+    NUMBER_LOCK_TYPES   // always keep this last so the value
+                        // changes as cmds are added
+  };
+/**
+ * \typedef TIDE_SEARCH_LOCK_T
+ * \brief The typedef for locks 
+ */
+typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
+
+/**
+* The enum for the text-based tab-delimited outputs
+*/
+enum _tsv_output_formats { 
+    INVALID_TSV_FORMAT, //Added by Andy Lin
+    TIDE_SEARCH_TSV, //original tide-search output format
+    TIDE_SEARCH_MZTAB_TSV, // MzTAB format
+    TIDE_SEARCH_PIN_TSV, // pin format for Percolator
+    DIAMETER_TSV,
+    NUMBER_TSV_FORMATS 
+};
+
+/**
+ * \typedef TSV_OUTPUT_FORMATS_T
+ * \brief The typedef for the tsv  output formats.
+ * \added by Andy Lin
+ */
+typedef enum _tsv_output_formats TSV_OUTPUT_FORMATS_T;
+
+
 
 /**
  *\class Match
@@ -623,6 +671,7 @@ enum _command {
   CASCADE_COMMAND,      ///< Cascade Search
   LOCALIZE_MODIFICATION_COMMAND, ///< localize-modification
   VERSION_COMMAND,      ///< just print the version number
+  TIDE_LITE_SEARCH_COMMAND, ///< Tide-lite
   MISC_COMMAND,         ///< miscellaneous command
   NUMBER_COMMAND_TYPES  ///< always keep this last so the value
                         /// changes as cmds are added

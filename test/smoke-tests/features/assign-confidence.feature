@@ -11,13 +11,11 @@ Scenario Outline: User runs tide-index / tide-search
   And crux-output/<actual_output> should contain the same lines as good_results/<expected_output>
 
 Examples:
-  |test_name        |args                                                     |input                      |actual_output               |expected_output                          |
-  |xcorr            |                                                         |assign-default.target.txt  |assign-confidence.target.txt|assign-confidence-default.target.txt     |
-  |concat           |                                                         |assign-concat.txt          |assign-confidence.target.txt|assign-confidence-concat.target.txt      |
-  |auto-score       |                                                         |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-exact-tdc.target.txt   |
-  |exact_pval       |--score "exact p-value"                                  |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-exact-tdc.target.txt   |
-  |exact_pval_mixmax|--score "exact p-value" --estimation-method mix-max      |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-mixmax.target.txt      |
-  |sidak            |--score "exact p-value" --sidak T                        |assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-sidak.target.txt       |
-  |peptide-level    |--score "exact p-value" --estimation-method peptide-level|assign-exactpval.target.txt|assign-confidence.target.txt|assign-confidence-peptidelevel.target.txt|
-  |atdc             |                                                         |tide-5d.target.txt         |assign-confidence.target.txt|assign-confidence-atdc.target.txt        |
+  |test_name        |args                                                     |input                                  |actual_output               |expected_output                          |
+  |xcorr            |  --score "xcorr score"                                  |assign-default-tide-search.target.txt  |assign-confidence.target.txt|assign-confidence-default.target.txt     |
+  |concat           |  --score "xcorr score"                                  |assign-concat-tide-search.txt          |assign-confidence.target.txt|assign-confidence-concat.target.txt      |
+  |auto-score       |                                                         |assign-default-tide-search.target.txt  |assign-confidence.target.txt|assign-confidence-tailor-tdc.target.txt  |
+  |combined_pval    |--score "combined p-value"                               |assign-pval-tide-search.target.txt     |assign-confidence.target.txt|assign-confidence-combined-tdc.target.txt|
+  |exact_pval       |--score "exact p-value"                                  |assign-pval-tide-search.target.txt     |assign-confidence.target.txt|assign-confidence-exact-tdc.target.txt   |
+  |atdc             |                                                         |assign-5dec-tide-search.target.txt     |assign-confidence.target.txt|assign-confidence-atdc.target.txt        |
 

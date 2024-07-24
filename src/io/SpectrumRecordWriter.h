@@ -21,6 +21,7 @@ class SpectrumRecordWriter {
   static bool convert(
     const string& infile, ///< spectra file to convert
     string outfile,  ///< spectrumrecords file to output
+    int &spectra_converted, //output variable that tells the number of spectra converted
     int ms_level = 2,  /// MS level to extract (1 or 2)
     bool dia_mode = false  /// whether it's used in DIAmeter
   );
@@ -45,14 +46,9 @@ class SpectrumRecordWriter {
     const Crux::Spectrum* s
   );
 
-  /**
-   * See how much precision is given in the vals array.
-   */
-  static void getDenoms(
-    const Crux::Spectrum* s,  ///< values to check
-    int* mzDenom, ///< out parameter for m/z denom
-    int* intensityDenom ///< out parameter for intensity denom
-  );
+ private:
+  static string version_date_;
+  static unsigned long scan_index_;
 
 };
 

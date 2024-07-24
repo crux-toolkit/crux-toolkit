@@ -131,6 +131,14 @@ int MakePinApplication::main(const vector<string>& paths) {
                           target_collection->getScoredType(BOTH_PVALUE));
   writer.setEnabledStatus("TailorScore",
                           target_collection->getScoredType(TAILOR_SCORE));
+  writer.setEnabledStatus("byIonsMatched",
+                          target_collection->getScoredType(BY_IONS_MATCHED));
+  writer.setEnabledStatus("byIonsTotal",
+                          target_collection->getScoredType(BY_IONS_TOTAL));
+  writer.setEnabledStatus("byIonsFraction",
+                          target_collection->getScoredType(BY_ION_FRACTION));
+  writer.setEnabledStatus("byIonsRepeatMatch",
+                          target_collection->getScoredType(BY_ION_REPEAT_MATCH));
 
   if (writer.getEnabledStatus("lnNumSP") && target_collection->getHasDistinctMatches()) {
     writer.setEnabledStatus("lnNumSP", false);

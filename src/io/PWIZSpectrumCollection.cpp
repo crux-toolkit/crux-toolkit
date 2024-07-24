@@ -145,6 +145,7 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   if(is_parsed_) {
     return false;
   }
+  carp(CARP_DEBUG, "ms level: %d", ms_level );
 
   carp(CARP_DEBUG, "Using proteowizard to parse spectra.");
 
@@ -265,7 +266,6 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
     }
   }
 
-  // carp(CARP_DETAILED_DEBUG, "spectra_ size:%d", spectra_.size() );
   is_parsed_ = true;
   return true;
 }

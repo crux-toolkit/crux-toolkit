@@ -20,8 +20,8 @@
 #include "GeneratePeptides.h"
 #include "util/crux-utils.h"
 
-#include "app/tide/mass_constants.h"
 
+#include "app/tide/mass_constants.h"
 
 using namespace std;
 
@@ -97,6 +97,8 @@ class TideIndexApplication : public CruxApplication {
   virtual bool needsOutputDirectory() const;
 
   virtual COMMAND_T getCommand() const;
+
+  static string tide_index_mzTab_filename_;  
 
  protected:
   class TideIndexPeptide {
@@ -234,6 +236,20 @@ class TideIndexApplication : public CruxApplication {
 
   static TideIndexPeptide* readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequnce, int sourceId);
   void dump_peptides_to_binary_file(vector<TideIndexPeptide> *peptide_list, string pept_file);
+  void getAAFrequencies(pb::Peptide& current_pb_peptide, ProteinVec& vProteinHeaderSequence);
+  
+ private:
+  unsigned int* nvAAMassCounterN_;   // N-terminal amino acids
+  unsigned int* nvAAMassCounterC_;   // C-terminal amino acids
+  unsigned int* nvAAMassCounterI_;   // Inner amino acids in the peptides
+  map<double, std::string> mMass2AA_;
+
+
+  unsigned int cntTerm_;
+  unsigned int cntInside_;
+  int mod_precision_;
+
+
 };
 
 #endif
