@@ -264,41 +264,41 @@ runCommand("%s tide-index --output-dir %s --parameter-file %s %s.fa %s"
 
 # Run searches (Comet, and Tide XCorr (includes tailor), XCorr combined (includes exact p-value and res-ev).
 
-runSearch("tide-xcorr", "tide-lite-search", "", database,
-          "tide-xcorr/tide-lite-search.txt",
+runSearch("tide-xcorr", "tide-search", "", database,
+          "tide-xcorr/tide-search.txt",
           "xcorr score", "--score \"xcorr score\"")
 
 calculateQvalues("tide-xcorr", "tide-xcorr", "", database,
-          "tide-xcorr/tide-lite-search.txt",
+          "tide-xcorr/tide-search.txt",
           "xcorr score", "--score \"xcorr score\"")
 
 calculateQvalues("tide-xcorr", "tide-tailor", "", database,
-          "tide-xcorr/tide-lite-search.txt",
+          "tide-xcorr/tide-search.txt",
           "tailor score", "--score \"tailor score\"")
 
-runSearch("tide-combined", "tide-lite-search",
+runSearch("tide-combined", "tide-search",
           "--score-function combined-p-values --fragment-tolerance 1.0005079",
-          database, "tide-combined/tide-lite-search.txt",
+          database, "tide-combined/tide-search.txt",
           "combined p-value", "--score \"combined p-value\"")
 
 calculateQvalues("tide-combined", "tide-combined",
           "--score-function combined-p-values --fragment-tolerance 1.0005079",
-          database, "tide-combined/tide-lite-search.txt",
+          database, "tide-combined/tide-search.txt",
           "combined p-value", "--score \"combined p-value\"")
 
 calculateQvalues("tide-combined", "tide-xpv",
           "--score-function combined-p-values --fragment-tolerance 1.0005079",
-          database, "tide-combined/tide-lite-search.txt",
+          database, "tide-combined/tide-search.txt",
           "exact p-value", "--score \"exact p-value\"")
 
 calculateQvalues("tide-combined", "tide-refact",
           "--score-function combined-p-values --fragment-tolerance 1.0005079",
-          database, "tide-combined/tide-lite-search.txt",
+          database, "tide-combined/tide-search.txt",
           "refactored xcorr", "--score \"exact p-value\"")
 
 calculateQvalues("tide-combined", "tide-res-ev",
           "--score-function combined-p-values --fragment-tolerance 1.0005079",
-          database, "tide-combined/tide-lite-search.txt",
+          database, "tide-combined/tide-search.txt",
           "res-ev score", "--score \"res-ev p-value\"")
 
 runSearch("comet", "comet", "", "%s.fa" % database,

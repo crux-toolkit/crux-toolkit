@@ -19,7 +19,7 @@ int SpectrumRecordWriter::scanCounter_ = 0;
 unsigned long SpectrumRecordWriter::scan_index_ = 0;
 std::string SpectrumRecordWriter::version_date_ = "";
 
-bool cmp_pbspectra(pb::Spectrum a1, pb::Spectrum a2) {
+bool cmp_pbspectra(pb::Spectrum& a1, pb::Spectrum& a2) {
   return a1.neutral_mass() < a2.neutral_mass();
 }
 
