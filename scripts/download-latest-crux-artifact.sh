@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -eux pipefail
 # Authenticate to GitHub
-gh auth login --with-token < /net/noble/vol1/home/cegrant/bin/access-repo.txt
+gh auth login --with-token 
 # Set up temp working directory
 temp_dir=$(mktemp -d  gh-crux-download.XXX)
 cd $temp_dir
@@ -15,11 +15,11 @@ if [ "$new_version" != "$old_version" ];
 then
 echo "$(date): New version detected $new_version" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 # Get the id of the latest run.
-id_latest_run=$(gh run list -R github.com/crux-toolkit/crux-toolkit -b master --workflow main.yml | \
+id_latest_run=$(gh run list -R github.com/crux-toolkit/crux-toolkit --workflow main.yml | \
   grep -oh "success.*"| head -n 1|awk -F '\t' '{print $6}')
 echo $id_latest_run
 # Download the artifacts for the latest run
-gh run download $id_latest_run --pattern "crux*.*" -R github.com/crux-toolkit/crux-toolkit
+gh run download $id_latest_run  -R github.com/crux-toolkit/crux-toolkit
 # Copy artifacts to web site
 cp crux-4.2.$new_version.Source/crux-4.2.Source.tar.gz /noble/www/htdocs/crux-downloads/daily/crux-4.2.$new_version.Source.tar.gz
 echo "$(date): Updated crux-4.2.$new_version.Source.tar.gz" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
