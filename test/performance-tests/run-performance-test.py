@@ -174,7 +174,7 @@ def calculateQvalues(outputDirectory, searchName, searchParam, database,
   data_frame.to_csv(fourColFile, sep='\t', index=False)
 
   reducedFile = "%s/%s.target.reduced.txt" % (outputDirectory, searchName)
-  runCommand("awk 'NR > 1 {print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' %s | sort -k 1b,1 > %s" %
+  runCommand("awk 'NR > 1 {print $1 \"~\" $2 \"~\" $3 \"\t\" $4}' %s | LANG=en_EN sort -k 1b,1 > %s" %
              (fourColFile, reducedFile), "")
 
 def getPercolatorQvalues(outputDirectory, searchName):    
@@ -187,7 +187,7 @@ def getPercolatorQvalues(outputDirectory, searchName):
 # Create a scatter plot of XCorr scores.
 def makeScatterPlot(xData, xLabel, yData, yLabel, outputRoot):
 
-  runCommand("join %s %s | awk -F \"~\" '{print $1 \" \" $2 \" \" $3}' | awk '{print $1 \"\t\" $2 \"\t\" $3 \"\t\" $4 \"\t\" $5}' | sort -n > %s.txt"
+  runCommand("LANG=en_EN join %s %s | awk -F \"~\" '{print $1 \" \" $2 \" \" $3}' | awk '{print $1 \"\t\" $2 \"\t\" $3 \"\t\" $4 \"\t\" $5}' | sort -n > %s.txt"
              % (xData, yData, outputRoot), "")
 
   gnuplotFileName = "%s.gnuplot" % outputRoot
