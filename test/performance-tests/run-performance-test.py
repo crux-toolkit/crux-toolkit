@@ -54,7 +54,6 @@ def createParameterFile(parameterFileName):
   parameterFile.write("allowed_missed_cleavage=0\n")
   parameterFile.write("spectrum-parser=mstoolkit\n")
 
-
   # Minimums
   parameterFile.write("minimum_peaks=10\n")
   parameterFile.write("min-peaks=10\n")
@@ -182,7 +181,6 @@ def getPercolatorQvalues(outputDirectory, searchName):
   percolatorFile = "%s/percolator.target.psms.txt" % outputDirectory
   qFile = "%s/%s.percolator.q.txt" % (outputDirectory, searchName)
   extractData(percolatorFile, "q-value", qFile)
-
 
 # Create a scatter plot of XCorr scores.
 def makeScatterPlot(xData, xLabel, yData, yLabel, outputRoot):
