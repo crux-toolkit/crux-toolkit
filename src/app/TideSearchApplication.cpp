@@ -1640,41 +1640,42 @@ void TideSearchApplication::getInputFiles(int thread_id) {
        original_file_name < inputFiles_.begin() + (inputFiles_.size()); 
        original_file_name = original_file_name + num_threads_) 
     {
-
+    carp(CARP_INFO, "Start processing input files");
     bool keepSpectrumrecords = true;
-    string spectrumrecords = (*original_file_name).OriginalName;   
-
+    string original_name = (*original_file_name).OriginalName;
+    string spectrumrecords = original_name;
     // Check if the input file is spectrum records of google protocol buffer
     pb::Header header;
-    HeadedRecordReader reader((*original_file_name).OriginalName, &header);
+    HeadedRecordReader reader(original_name, &header);
     if (header.file_type() != pb::Header::SPECTRA) {
       // converting to spectrumrecords file 
 
-      locks_array_[LOCK_SPECTRUM_READING]->lock();
-      carp(CARP_INFO, "Converting %s to spectrumrecords format", (*original_file_name).OriginalName.c_str());
+      carp(CARP_INFO, "Converting %s to spectrumrecords format", original_name.c_str());
       carp(CARP_DEBUG, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
-      locks_array_[LOCK_SPECTRUM_READING]->unlock();
       
       spectrumrecords = Params::GetString("store-spectra");
       keepSpectrumrecords = !spectrumrecords.empty();
       if (!keepSpectrumrecords) {
-        spectrumrecords = make_file_path(FileUtils::BaseName( (*original_file_name).OriginalName) + ".spectrumrecords.tmp");
+        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords.tmp");
       } else if (inputFiles_.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
       }
       carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
       int spectra_num = 0;
-      if (!SpectrumRecordWriter::convert((*original_file_name).OriginalName, spectrumrecords, spectra_num)) {
-        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", (*original_file_name).OriginalName.c_str());
+      if (!SpectrumRecordWriter::convert(original_name, spectrumrecords, spectra_num)) {
+        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", original_name.c_str());
       }
       locks_array_[LOCK_SPECTRUM_READING]->lock();
       total_spectra_num_ += spectra_num;
       locks_array_[LOCK_SPECTRUM_READING]->unlock();
 
     }
+    locks_array_[LOCK_SPECTRUM_READING]->lock();
     (*original_file_name).SpectrumRecords  = spectrumrecords;
     (*original_file_name).Keep = keepSpectrumrecords;
+    locks_array_[LOCK_SPECTRUM_READING]->unlock();
+    carp(CARP_INFO, "Finish converting");
   }
 }
 
