@@ -1241,25 +1241,7 @@ long Random(int i, int j) {
   return i + myrandom_limit(j-i+1);
 }
 
-void quick_sort(FLOAT_T a[], int left, int right) {
-  int last = left, i;
 
-  if (left >= right) return;
-  
-  swap_quick(a, left, Random(left, right));
-  for (i = left + 1; i <= right; i++) {
-    if (a[i] > a[left]) { /// CHECK THIS!!
-      swap_quick(a, ++last, i);
-    }
-  }
-  swap_quick(a, left, last);
-  quick_sort(a, left, last-1);
-  quick_sort(a, last+1, right);
-}
-
-void quicksort(FLOAT_T a[], int array_size) {
-  quick_sort(a, 0, array_size - 1);
-}
 
 /**
  * \brief Shuffle an array of floats.  Uses the Knuth algorithm.  Uses
