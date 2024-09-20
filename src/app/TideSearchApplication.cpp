@@ -1671,10 +1671,8 @@ void TideSearchApplication::getInputFiles(int thread_id) {
       locks_array_[LOCK_SPECTRUM_READING]->unlock();
 
     }
-    locks_array_[LOCK_SPECTRUM_READING]->lock();
     (*original_file_name).SpectrumRecords  = spectrumrecords;
     (*original_file_name).Keep = keepSpectrumrecords;
-    locks_array_[LOCK_SPECTRUM_READING]->unlock();
     carp(CARP_INFO, "Finish converting");
   }
 }
