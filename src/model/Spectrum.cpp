@@ -372,37 +372,12 @@ bool Spectrum::parseMstoolkitSpectrum
   filename_ = filename;
 
   //add peaks. // This part probably should not run for MS1 data. This should run only for tide-search.
-  // if (Params::GetBool("skip-preprocessing")) {
-    for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
-      this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
-                    mst_real_spectrum->at(peak_idx).mz);
-    }
-    has_peaks_ = true;
+  for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
+    this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
+                  mst_real_spectrum->at(peak_idx).mz);
+  }
+  has_peaks_ = true;
 
-  // } else {
-  //   bool remove_precursor = Params::GetBool("remove-precursor-peak");  
-  //   double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");  
-  //   const FLOAT_T ratio = 0.01f; // setting the ratio to delete small peaks by intensity
-  //   FLOAT_T highest_peak_intensity_threshold = 0.0;
-  //   FLOAT_T highest_intens_peak = 1.0;
-  //   for (int i = 0; i < (int)mst_real_spectrum->size(); ++i) {
-  //     if (remove_precursor && fabs(mst_real_spectrum->at(i).mz - precursor_mz_) <= precursor_tolerance ) {
-  //       continue;
-  //     }
-
-  //     if (highest_intens_peak < mst_real_spectrum->at(i).intensity) {
-  //       highest_intens_peak = mst_real_spectrum->at(i).intensity;
-  //     }
-  //   }
-  //   highest_peak_intensity_threshold = highest_intens_peak * ratio * ratio;
-  //   for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
-  //     if (mst_real_spectrum->at(peak_idx).intensity < highest_peak_intensity_threshold) {
-  //       continue;
-  //     }
-  //     this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
-  //                   mst_real_spectrum->at(peak_idx).mz);
-  //   }
-  // }
   //add possible charge states.
   if(  mst_real_spectrum->sizeZ() > 0 ){
     for (int z_idx = 0; z_idx < mst_real_spectrum -> sizeZ(); z_idx++) {
