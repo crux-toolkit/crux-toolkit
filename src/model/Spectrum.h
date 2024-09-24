@@ -65,6 +65,7 @@ class Spectrum{
   bool             has_mz_peak_array_; ///< Is the mz_peak_array populated.
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
   bool             charge_state_assigned_;
+  FLOAT_T          retention_time_;
 
   // added by Yang
   FLOAT_T iso_window_lower_mz_;
@@ -143,6 +144,8 @@ class Spectrum{
   FLOAT_T getIsoWindowUpperMZ() const;
   bool assignZStateDIA();
 
+  FLOAT_T getRTime() const;
+  void setRTime(double retention_time);
   /**
    * Prints a spectrum object to file.
    */
