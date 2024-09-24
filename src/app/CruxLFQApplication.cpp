@@ -148,7 +148,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 }
 
 string CruxLFQApplication::getName() const {
-    return "crux-lfq";
+    return "lfq";
 }
 
 string CruxLFQApplication::getDescription() const {
@@ -173,7 +173,6 @@ vector<string> CruxLFQApplication::getOptions() const {
     string arr[] = {
         "score",
         "threshold",
-        // "smaller-is-better",
         "fileroot",
         "output-dir",
         "overwrite",
@@ -197,12 +196,15 @@ vector<string> CruxLFQApplication::getOptions() const {
 
 vector<pair<string, string>> CruxLFQApplication::getOutputs() const {
     vector<pair<string, string>> outputs;
-    outputs.push_back(make_pair("crux-lfq.txt",
+    outputs.push_back(make_pair("crux-lfq-mod-pep.txt",
                                 "A tab-delimited text file in which rows are peptides, "
                                 "columns correspond to the different spectrum files, "
                                 "and values are peptide quantifications.  "
                                 "If a peptide is not detected in a given run, "
                                 "then its corresponding quantification value is NaN."));
+    outputs.push_back(make_pair("crux-lfq-peaks.txt",
+                                "A tab-delimited text file in which rows are peaks, "
+                                "columns correspond to meta-data about the peaks"));
     outputs.push_back(make_pair("crux-lfq.params.txt",
                                 "A file containing the name and value of all parameters/options"
                                 " for the current operation. Not all parameters in the file may have"
