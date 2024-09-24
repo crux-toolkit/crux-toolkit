@@ -2567,9 +2567,6 @@ void Params::Categorize() {
 
     // crux-lfq
     items.clear();
-    // items.insert("lfq-score");
-    // items.insert("lfq-threshold");
-    // items.insert("smaller-is-better");
     items.insert("num-isotopes-required");
     items.insert("peak-finding-ppm-tolerance");
     items.insert("ppm-tolerance");
@@ -2582,11 +2579,6 @@ void Params::Categorize() {
     items.insert("use-shared-peptides-for-protein-quant");
     items.insert("normalize");
     items.insert("psm-file-format");
-    // items.insert("num-threads");
-    // items.insert("match-between-runs");
-    // items.insert("match-between-runs-ppm-tolerance");
-    // items.insert("max-mbr-window");
-    // items.insert("require-msms-id-in-condition");
     AddCategory("crux-lfq", items);
 }
 
