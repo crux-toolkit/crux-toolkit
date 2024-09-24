@@ -31,13 +31,15 @@
       $result = fputcsv($fd, array($date, $remote_addr, $download_filename));
       fclose($fd);
    
-      if($result > 0)
-        return array(status => true);  
-      else
-        return array(status => false, message => 'Unable to write to '.$log_filename.'!');
+      if($result > 0) {
+        return array("status" => true);  
+      }
+      else {
+        return array("status" => false, message => 'Unable to write to '.$log_filename.'!');
+      }
     }
     else {
-      return array(status => false, message => 'Unable to open log '.$log_filename.'!');
+      return array("status" => false, message => 'Unable to open log '.$log_filename.'!');
     }
   }
 
@@ -65,8 +67,8 @@
       $directory = "daily/";
     }
     # Redriect to file to be downloaded.
-	  $downloadType = $_POST['downloadtype'];
-	  $filename = $FileNameBaseArray[$downloadType];
+	  $type = $_POST['downloadtype'];
+	  $filename = $FileNameBaseArray[$type];
     $filepath = $directory . $filename;
     log_download($filepath);
     header("Location: http://noble.gs.washington.edu/crux-downloads/" . $filepath);

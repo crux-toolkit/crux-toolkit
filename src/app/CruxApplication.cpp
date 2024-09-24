@@ -114,8 +114,8 @@ void CruxApplication::initialize(int argc, char** argv) {
   Params::Finalize();
   GlobalParams::set();
   if (!Params::GetBool("no-analytics")) {
-    // Post data to Google Analytics using a separate thread
-    boost::thread analytics_thread(postToAnalytics, getName());
+    // Post usage data to Google Analytics 4 using async i/o
+    postToGA4(getName());
   }
 
   if (needsOutputDirectory()) {

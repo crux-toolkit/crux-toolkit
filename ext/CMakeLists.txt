@@ -107,11 +107,17 @@ if (WIN32 AND NOT CYGWIN)
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
         COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/wintls
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
         COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
