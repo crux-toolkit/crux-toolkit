@@ -105,8 +105,6 @@ set (
   model/Database.cpp
   model/DatabaseProteinIterator.cpp
   model/DatabasePeptideIterator.cpp
-  app/CruxApplication.cpp
-  app/CruxApplicationList.cpp
   io/DelimitedFile.cpp
   io/DelimitedFileReader.cpp
   io/DelimitedFileWriter.cpp
@@ -119,7 +117,6 @@ set (
   model/IonConstraint.cpp
   model/IonFilteredIterator.cpp
   model/IonSeries.cpp
-  app/KojakApplication.cpp
   util/linked_list.cpp
   io/LineFileReader.cpp
   app/LocalizeModification.cpp
@@ -153,12 +150,7 @@ set (
   io/PepXMLWriter.cpp
   app/PercolatorApplication.cpp
   io/PinWriter.cpp
-  app/Pipeline.cpp
-  app/GeneratePeptides.cpp
   model/PostProcessProtein.cpp
-  app/PredictPeptideIons.cpp
-  app/PrintProcessedSpectra.cpp
-  app/PrintVersion.cpp
   model/Protein.cpp
   model/ProteinPeptideIterator.cpp
   model/ProteinIndex.cpp
@@ -175,10 +167,7 @@ set (
   io/PMCSQTWriter.cpp
   model/SpectrumMatch.cpp
   io/PWIZSpectrumCollection.cpp
-  app/ReadSpectrumRecordsApplication.cpp
-  app/ReadTideIndex.cpp
   model/Scorer.cpp
-  app/SpectralCounts.cpp
   io/SpectrumCollection.cpp
   io/SpectrumCollectionFactory.cpp
   model/Spectrum.cpp
@@ -188,13 +177,25 @@ set (
   util/StringUtils.cpp
   io/SQTReader.cpp
   io/SQTWriter.cpp
-  app/TideIndexApplication.cpp
-  app/TideMatchSet.cpp
-  app/TideSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
   io/DIAmeterPSMFilter.cpp
   io/DIAmeterCVSelector.cpp
+  app/TideIndexApplication.cpp
+  app/TideMatchSet.cpp
+  app/TideSearchApplication.cpp
+  app/Pipeline.cpp
+  app/GeneratePeptides.cpp
   app/DIAmeterApplication.cpp
+  app/CruxApplication.cpp
+  app/CruxApplicationList.cpp
+  app/KojakApplication.cpp
+  app/LibraApplication.cpp
+  app/PredictPeptideIons.cpp
+  app/PrintProcessedSpectra.cpp
+  app/PrintVersion.cpp
+  app/ReadSpectrumRecordsApplication.cpp
+  app/ReadTideIndex.cpp
+  app/SpectralCounts.cpp
   util/utils.cpp
 )
 

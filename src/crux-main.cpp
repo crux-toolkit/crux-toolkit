@@ -19,6 +19,7 @@
 #include "app/GeneratePeptides.h"
 #include "app/GetMs2Spectrum.h"
 #include "app/LocalizeModification.h"
+#include "app/LibraApplication.h"
 #include "app/ParamMedicApplication.h"
 #include "app/Pipeline.h"
 #include "app/PredictPeptideIons.h"
@@ -74,6 +75,7 @@ int main(int argc, char** argv) {
     applications.add(new CascadeSearchApplication());
     applications.add(new AssignConfidenceApplication());
     applications.add(new KojakApplication());
+    applications.add(new LibraApplication());
 
     applications.add(new DIAmeterApplication());
 
