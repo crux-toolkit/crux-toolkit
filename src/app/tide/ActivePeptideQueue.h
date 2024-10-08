@@ -49,7 +49,6 @@ class ActivePeptideQueue {
   RecordReader* reader_;
   const vector<const pb::Protein*>& proteins_; 
   vector<const pb::AuxLocation*>* locations_;
-
   
   TheoreticalPeakSetBYSparse theoretical_peak_set_;
   pb::Peptide current_pb_peptide_;
