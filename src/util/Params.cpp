@@ -526,7 +526,7 @@ InitStringParam("protein-name-separator", ",",
     "Available for tide-index and percolator", true);
   InitBoolParam("no-terminate", false,
     "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
-    "Available for percolator", true);    
+    "Available for percolator", true); 
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
@@ -891,8 +891,6 @@ InitStringParam("protein-name-separator", ",",
     "Otherwise, the default behavior is to search with all charge states only if a spectrum has no charge "
     "or charge=0.",
     "Available for tide-search", true);
-
-
   /*
    * Comet parameters
    */

@@ -33,13 +33,13 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   int size = spec.peak_m_z_size();
   CHECK(size == spec.peak_intensity_size());
   ReservePeaks(size);
-  uint64 total = 0;
+  uint64 peak_mz = 0;
   double m_z_denom = spec.peak_m_z_denominator();
   double intensity_denom = spec.peak_intensity_denominator();
   for (int i = 0; i < size; ++i) {
     // CHECK(spec.peak_m_z(i) > 0);
-    total = spec.peak_m_z(i); // deltas of m/z are stored
-    peak_m_z_.push_back(total / m_z_denom);
+    peak_mz = spec.peak_m_z(i); // the m/z of the peaks
+    peak_m_z_.push_back(peak_mz / m_z_denom);
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }
 

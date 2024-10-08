@@ -69,7 +69,7 @@ class TheoreticalPeakSetBYSparse {
     peaks_[0].Init(capacity);
     peaks_[1].Init(capacity);
     peak_mask_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1); 
-    cache_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1)*NUM_PEAK_TYPES;
+    cache_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1) * NUM_PEAK_TYPES;
     peak_mask = new int[peak_mask_end];
     memset(peak_mask, 0,  sizeof(int)*peak_mask_end);
   }

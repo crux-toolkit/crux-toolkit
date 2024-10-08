@@ -140,7 +140,6 @@ class MassConstants {
   static ModCoder mod_coder_;
   static std::vector<double> unique_deltas_;
 
-
 };
 
 #endif

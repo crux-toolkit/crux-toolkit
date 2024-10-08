@@ -83,7 +83,7 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-      // mass fields
+    // mass fields
     case SPECTRUM_PRECURSOR_MZ_COL:
     case SPECTRUM_NEUTRAL_MASS_COL:
     case RETENTION_TIME_COL:
@@ -95,7 +95,7 @@ void MatchFileWriter::setPrecision() {
       match_fixed_float_[col_idx] = true;
       break;
 
-      // score fields
+    // score fields
     case DELTA_CN_COL:
     case SP_SCORE_COL:
     case XCORR_SCORE_COL:

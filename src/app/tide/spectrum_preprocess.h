@@ -118,7 +118,7 @@ class ObservedPeakSet {
  public:
 
   // This constructor is to be removed when marging TideSearchLite into the main branch.
-  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
+/*  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
      double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
     : peaks_(NULL),
@@ -133,7 +133,7 @@ class ObservedPeakSet {
   }
 
   // Keep this constructor when TideSearchLite is accepted.
-  ObservedPeakSet( bool NL = false, bool FP = false) {
+*/  ObservedPeakSet( bool NL = false, bool FP = false) {
     peaks_ = NULL;
     cache_ = NULL;
 

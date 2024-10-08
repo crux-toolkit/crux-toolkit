@@ -57,7 +57,7 @@ class Peptide {
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
-          vector<const pb::AuxLocation*>* locations=NULL);
+          vector<const pb::AuxLocation*>* locations = NULL);
 
   // CAUTION: We do NOT expect this destructor to get called when FIFO 
   // allocation is used. It will get called only when normal system memory

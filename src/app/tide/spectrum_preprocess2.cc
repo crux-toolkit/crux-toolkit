@@ -80,7 +80,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   if (peaks_ != NULL)
     delete peaks_;
   if (cache_ != NULL)
-  delete[] cache_; 
+    delete[] cache_; 
   
   peaks_ = new double[background_bin_end_];
   cache_ = new int[cache_end_];
@@ -281,15 +281,6 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       
       // Find all ion mass bins that match newResMassBin
       vector<int>::iterator ionMassBinItr = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin);
-      // if (ionMassBinItr == ionMassBin.end()){
-      //   printf("%lf\t %d\t %d\n", bIonMass, bIonMassBin, aaMassBin[curAaMass] );
-      //   int cnt = 0;
-      //   // for (vector<int>::iterator itr = ionMassBin.begin(); itr !=  ionMassBin.end(); ++itr){
-      //   //   printf("massbin: %d\t %d\n", cnt++, (*itr));
-      //   // }
-      //   printf("index %d\t inomassbinsize: %d\n",ionMassBinItr - ionMassBin.begin(),  ionMasses.size() );
-      //   // carp(CARP_FATAL, "'%d' does not exist", newResMassBin);        
-      // }
   
       int index = ionMassBinItr - ionMassBin.begin();
       double score = 0.0;
@@ -299,7 +290,6 @@ void ObservedPeakSet::addEvidToResEvMatrix(
         } 
        
         double ionMassDiff = ionMass[i] - bIonMass;
-        //double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
         double aaTolScore = 1.0 - (std::abs(ionMassDiff - aaMass[curAaMass]) / residueToleranceMass);
 
         if (aaTolScore > 0.0) {

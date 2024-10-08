@@ -187,9 +187,12 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
   for (int i = 0; i < 256; ++i) {
     mono_table[i] = avg_table[i] = nterm_mono_table[i] = 
     cterm_mono_table[i] = nterm_avg_table[i] = cterm_avg_table[i] = 0;
-    if(nprot_mod_table != nullptr && cprot_mod_table != nullptr)
-      nprotterm_avg_table[i] = cprotterm_avg_table[i] = 
-      nprotterm_mono_table[i] = cprotterm_mono_table[i] = 0;
+    if(nprot_mod_table != nullptr && cprot_mod_table != nullptr) {
+      nprotterm_avg_table[i] = 0;
+      cprotterm_avg_table[i] = 0;
+      nprotterm_mono_table[i] = 0;
+      cprotterm_mono_table[i] = 0;
+    }
   }
 
   // Store the modification tables. Thay are used in reporting peptide modifications in TideMatchSet

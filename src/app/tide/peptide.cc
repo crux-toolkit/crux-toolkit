@@ -354,7 +354,7 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
       }
     }
 
-    if (i == len_-1) {  // peptide C-term
+    if (i == len_ - 1) {  // peptide C-term
       if (find_static_mod(MassConstants::c_mod_table_, AA, mod_mass, mod_name)) {
         //Get the string
         string mod = std::to_string(i+1) + sep + string("S") +  sep + StringUtils::ToString(mod_mass, mod_precision) + "_c";   
@@ -364,7 +364,7 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
 
       }
     }
-    if (i == len_-1 && prot_pos +i + 1 ==  proteins_->at(FirstLocProteinId())->residues().length() ) {  // protein C-term
+    if (i == (len_ - 1) && (prot_pos + i + 1 ==  proteins_->at(FirstLocProteinId())->residues().length()) ) {  // protein C-term
       if (find_static_mod(MassConstants::cprot_mod_table_, AA, mod_mass, mod_name)) {
         //Get the string
         string mod = std::to_string(i+1) + sep + string("S") +  sep + StringUtils::ToString(mod_mass, mod_precision) + "_C";   
@@ -409,7 +409,7 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
         }
       }
     }
-    if (cterm_mod_ != 0.0 && i == len_-1){
+    if (cterm_mod_ != 0.0 && i == len_ - 1){
       string mod = std::to_string(len_) + sep + string("V") +  sep + StringUtils::ToString(cterm_mod_, mod_precision);
       mods_list.push_back(mod);
       if (find_variable_mod(MassConstants::c_mod_table_, residues_[i], cterm_mod_, mod_name)) { // variable mod

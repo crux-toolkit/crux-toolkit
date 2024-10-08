@@ -269,7 +269,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   
   carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*num_spectra_searched_));
   carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
-                  ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
+    ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
   carp(CARP_INFO, "%d spectrum-charge combinations loaded, %d spectrum-charge combinations searched. ", num_spectra_, num_spectra_searched_);
   
 
@@ -397,8 +397,8 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
 
         ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
         observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
-                                    &num_precursors_skipped,
-                                    &num_isotopes_skipped, &num_retained);
+          &num_precursors_skipped,
+          &num_isotopes_skipped, &num_retained);
 
         locks_array_[LOCK_REPORTING]->lock();
         num_range_skipped_ += num_range_skipped;
