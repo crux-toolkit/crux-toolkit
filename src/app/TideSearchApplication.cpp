@@ -1640,7 +1640,7 @@ void TideSearchApplication::getInputFiles(int thread_id) {
        original_file_name < inputFiles_.begin() + (inputFiles_.size()); 
        original_file_name = original_file_name + num_threads_) 
     {
-    carp(CARP_INFO, "Start processing input files");
+    carp(CARP_DEBUG, "Start processing input files");
     bool keepSpectrumrecords = true;
     string original_name = (*original_file_name).OriginalName;
     string spectrumrecords = original_name;
@@ -1673,7 +1673,7 @@ void TideSearchApplication::getInputFiles(int thread_id) {
     }
     (*original_file_name).SpectrumRecords  = spectrumrecords;
     (*original_file_name).Keep = keepSpectrumrecords;
-    carp(CARP_INFO, "Finish converting");
+    carp(CARP_DEBUG, "Finish converting");
   }
 }
 
