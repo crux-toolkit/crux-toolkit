@@ -248,11 +248,6 @@ std::ofstream* create_stream_in_path(
 bool valid_peptide_sequence(const std::string& sequence);
 
 /**
- * quickSort for FLOAT_Ts
- */
-void quicksort(FLOAT_T numbers[], int array_size);
-
-/**
  * User define our upper and our lower bounds.
  * The random number will always be 
  * between low and high, inclusive.

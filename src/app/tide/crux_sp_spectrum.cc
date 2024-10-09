@@ -151,8 +151,8 @@ void SpSpectrum::ExtractPeaks(int top_rank) {
   }
   
   // if there's over top_rank peaks, keep only top_rank peaks
-  // quick sort
-  QuickSort(temp_array, temp_idx);
+  // std::sort
+  std::sort(temp_array, temp_array + temp_idx, std::greater<double>());
   
   // set max and cut_off
   double max_intensity = temp_array[0];

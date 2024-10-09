@@ -111,24 +111,6 @@ class SpSpectrum {
   int Random(int i, int j) {
     return i + myrandom_limit(j-i+1);
   }
-
-  void QuickSort(double a[], int left, int right) {
-    int last = left, i;
-
-    if (left >= right) return;
-    
-    SwapQuick(a, left, Random(left, right));
-    for (i = left + 1; i <= right; i++)
-      if (a[i] > a[left]) /// CHECK THIS!!
-        SwapQuick(a, ++last, i);
-    SwapQuick(a, left, last);
-    QuickSort(a, left, last-1);
-    QuickSort(a, last+1, right);
-  }
-
-  void QuickSort(double a[], int array_size) {
-    QuickSort(a, 0, array_size-1);
-  }
   
   // The beta variable = 0.075
   double beta_; 
