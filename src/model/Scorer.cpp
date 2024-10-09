@@ -419,7 +419,7 @@ void Scorer::extractPeaks(
   
   // if there's over top_rank peaks, keep only top_rank peaks
   // std::sort
-  std::sort(temp_array, temp_array + temp_idx);
+  std::sort(temp_array, temp_array + temp_idx, std::greater<double>());
   
   // set max and cut_off
   max_intensity = temp_array[0];
