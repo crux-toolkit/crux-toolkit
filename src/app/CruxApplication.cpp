@@ -192,6 +192,9 @@ void CruxApplication::initializeParams(
       for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {
         carp(CARP_DEBUG, "->: %s", options_index->first.c_str());
       }
+      for (vector<string>::const_iterator it = appOptions.begin(); it != appOptions.end(); ++it) {
+        carp(CARP_DEBUG, "%s options->: %s", appName.c_str(), (*it).c_str());
+      }
 
       /* This loop is intended to check the parameters of the current application against all the appplications in application list*/
       for (map<string, string>::const_iterator options_index = options.begin(); options_index != options.end(); options_index++) {

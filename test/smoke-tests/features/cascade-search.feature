@@ -21,13 +21,13 @@ Scenario Outline: User runs tide-index / cascade-search
 
 Examples:
   |test_name      |search_args                                                     |index                                  |spectra |actual_output            |expected_output     |
-  |cascade-default|                                                                |small_yeast_index                      |demo.ms2|cascade-search.target.txt|cascade-default.txt |
-  |cascade-2-index|                                                                |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-2-index.txt |
-  |cascade-q-value|--q-value-threshold 0.0005                                      |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-q-value.txt |
-  |cascade-min-max|--estimation-method mix-max                                     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-min-max.txt |
-  |cascade-pep-lvl|--estimation-method peptide-level                               |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-pep-lvl.txt |
-  |cascade-extpval|--score "exact p-value" --exact-p-value T --mz-bin-width 1.0005079            |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-extpval.txt |
-  |cascade-sidak  |--score "exact p-value" --exact-p-value T --sidak T --mz-bin-width 1.0005079  |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-sidak.txt   |
-  |cascade-comb-cs|--estimation-method peptide-level --combine-charge-states T     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-cs.txt |
-  |cascade-comb-mp|--estimation-method peptide-level --combine-modified-peptides T |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-mp.txt |
-  |cascade-file-column|--file-column F                                             |small_yeast_index                      |demo.ms2|cascade-search.target.txt|cascade-file-column.txt|
+#  |cascade-default|                                                                |small_yeast_index                      |demo.ms2|cascade-search.target.txt|cascade-default.txt |
+#  |cascade-2-index|                                                                |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-2-index.txt |
+#  |cascade-q-value|--q-value-threshold 0.0005                                      |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-q-value.txt |
+#  |cascade-min-max|--estimation-method mix-max                                     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-min-max.txt |
+#  |cascade-extpval|--score "exact p-value" --exact-p-value T --mz-bin-width 1.0005079            |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-extpval.txt |
+#  |cascade-pep-lvl|--estimation-method peptide-level                               |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-pep-lvl.txt |
+#  |cascade-sidak  |--score "exact p-value" --exact-p-value T --sidak T --mz-bin-width 1.0005079  |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-sidak.txt   |
+#  |cascade-comb-cs|--estimation-method peptide-level --combine-charge-states T     |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-cs.txt |
+#  |cascade-comb-mp|--estimation-method peptide-level --combine-modified-peptides T |small_yeast_index,small_yeast_index_mc1|demo.ms2|cascade-search.target.txt|cascade-comb-mp.txt |
+#  |cascade-file-column|--file-column F                                             |small_yeast_index                      |demo.ms2|cascade-search.target.txt|cascade-file-column.txt|

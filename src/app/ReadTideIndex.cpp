@@ -77,10 +77,10 @@ int ReadTideIndex::main(int argc, char** argv) {
     Peptide peptide(pb_peptide, proteins);
 
     // Output to file
-    *output_stream << peptide.SeqWithMods() << '\t';
+    *output_stream << peptide.SeqWithMods(Params::GetInt("mod-precision")) << '\t';
     string proteinNames;
 
-    peptide.GetLocationStr(proteins, TideMatchSet::decoy_prefix_, proteinNames);
+    peptide.GetLocationStr(TideMatchSet::decoy_prefix_);
     *output_stream << proteinNames << endl;
   }
 

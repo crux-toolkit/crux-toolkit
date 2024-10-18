@@ -22,8 +22,8 @@ class SpectrumZState {
   double neutral_mass_;
 
   /* EZ State fields */
-  FLOAT_T rtime_;
-  FLOAT_T area_;
+  double rtime_;
+  double area_;
  public:
 
   /**
@@ -61,10 +61,10 @@ class SpectrumZState {
   * sets the m/z, charge for this z-state
   */
   void setMZ(
-    FLOAT_T mz,
+    double mz,
     int charge);
 
-  FLOAT_T getMZ() const;
+  double getMZ() const;
 
 
   /**
@@ -84,38 +84,38 @@ class SpectrumZState {
    * Sets the neutral mass for this z-state
    */
   void setNeutralMass(
-    FLOAT_T neutral_mass,
+    double neutral_mass,
     int charge
     );
 
   /**
    * \returns The neutral mass for this z-state
    */
-  FLOAT_T getNeutralMass() const;
+  double getNeutralMass() const;
   
   /** 
    * Sets the retention time for this z-state
    */
   void setRTime(
-    FLOAT_T rtime
+    double rtime
   );
 
   /**
    * \returns The retention time for this z-state
    */
-  FLOAT_T getRTime() const;
+  double getRTime() const;
 
   /**
    * Sets the area for this z-state
    */
   void setArea(
-    FLOAT_T area
+    double area
   );
 
   /**
    * \returns The area for this z-state
    */
-  FLOAT_T getArea() const;
+  double getArea() const;
 
 
 

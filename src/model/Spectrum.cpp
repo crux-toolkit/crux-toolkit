@@ -50,7 +50,8 @@ Spectrum::Spectrum() :
    charge_state_assigned_(false),
    iso_window_lower_mz_(0),
    iso_window_upper_mz_(0),
-   ms1_scan_(0)
+   ms1_scan_(0),
+   retention_time_(0.0)
 {
   mz_peak_array_ = NULL;
 }
@@ -79,7 +80,8 @@ Spectrum::Spectrum (
    sorted_by_mz_(false),
    sorted_by_intensity_(false),
    has_mz_peak_array_(false),
-   charge_state_assigned_(false)
+   charge_state_assigned_(false),
+   retention_time_(0.0)
  {
   mz_peak_array_ = NULL;
 
@@ -291,7 +293,9 @@ void Spectrum::printSqt(
  sorted_by_mz_(old_spectrum.sorted_by_mz_),
  sorted_by_intensity_(old_spectrum.sorted_by_intensity_),
  has_mz_peak_array_(old_spectrum.has_mz_peak_array_),
- charge_state_assigned_(old_spectrum.charge_state_assigned_)
+ charge_state_assigned_(old_spectrum.charge_state_assigned_),
+ retention_time_(old_spectrum.retention_time_)
+
 {
 
   // copy each peak
@@ -323,6 +327,7 @@ void Spectrum::copyFrom(Spectrum *src) {
  sorted_by_intensity_ = src->sorted_by_intensity_;
  has_mz_peak_array_ = src->has_mz_peak_array_;
  charge_state_assigned_ = src->charge_state_assigned_;
+ retention_time_ = src->retention_time_;
  // copy each peak
  for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
    this->addPeak(src->peaks_[peak_idx]->getIntensity(),
@@ -361,15 +366,17 @@ bool Spectrum::parseMstoolkitSpectrum
   last_scan_ = mst_real_spectrum->getScanNumber();
   precursor_mz_ = mst_real_spectrum->getMZ();
 
+  retention_time_ = mst_real_spectrum->getRTime();
+
   // setfilename of empty spectrum
   filename_ = filename;
 
-  //add all peaks.
   for(int peak_idx = 0; peak_idx < (int)mst_real_spectrum->size(); peak_idx++){
     this->addPeak(mst_real_spectrum->at(peak_idx).intensity,
-                   mst_real_spectrum->at(peak_idx).mz);
+                  mst_real_spectrum->at(peak_idx).mz);
   }
-  
+  has_peaks_ = true;
+
   //add possible charge states.
   if(  mst_real_spectrum->sizeZ() > 0 ){
     for (int z_idx = 0; z_idx < mst_real_spectrum -> sizeZ(); z_idx++) {
@@ -380,7 +387,7 @@ bool Spectrum::parseMstoolkitSpectrum
       zstates_.push_back(zstate);
     }
   } else { // if no charge states detected, decide based on spectrum
-	charge_state_assigned_ = assignZState();
+	  charge_state_assigned_ = assignZState();
   }
 
   return true;
@@ -408,24 +415,42 @@ bool Spectrum::parsePwizSpecInfo(
   first_scan_ = firstScan;
   last_scan_ = lastScan;
 
-  // get peaks
+  // Get the retention time
+  //  MS_retention_time = 1000894,
+  /// retention time: A time interval from the start of chromatography when an analyte exits a chromatographic column.
+  if (pwiz_spectrum->hasCVParam(pwiz::msdata::MS_retention_time)) {   
+    retention_time_ = pwiz_spectrum->cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // MS_scan_start_time = 1000016,
+  /// scan start time: The time that an analyzer started a scan, relative to the start of the MS run.    
+  } else if (!pwiz_spectrum->scanList.empty() && pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_scan_start_time)) {   
+    retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_scan_start_time).valueAs<double>();
+  }
+  // The following does not work.
+  // } else if (pwiz_spectrum->scanList.scans[0].hasCVParam(pwiz::msdata::MS_retention_time)) {   
+  //   retention_time_ = pwiz_spectrum->scanList.scans[0].cvParam(pwiz::msdata::MS_retention_time).valueAs<double>();
+  // }
+ // get peaks
   int num_peaks = pwiz_spectrum->defaultArrayLength;
   vector<double> mzs = pwiz_spectrum->getMZArray()->data;
   vector<double> intensities = pwiz_spectrum->getIntensityArray()->data;
-  for(int peak_idx = 0; peak_idx < num_peaks; peak_idx++){
+
+  for (int peak_idx = 0; peak_idx < num_peaks; peak_idx++) {
     addPeak(intensities[peak_idx], mzs[peak_idx]);
   }
   has_peaks_ = true;
+
   carp(CARP_DETAILED_DEBUG, "num of peaks: %d ", getNumPeaks() );
 
   // added by Yang
-  if ( pwiz_spectrum->precursors.size() <= 0 ) {
+  if ( pwiz_spectrum->precursors.size() <= 0 ) {  // TODO: Is this a good way to check if we are dealing with MS1 spectra?? -- AKF
 	  SpectrumZState zstate;
 	  zstate.setMZ(precursor_mz_, 1);
 	  zstates_.push_back(zstate);
 	  return true;
   } // parsing MS1 scan
-  else if ( pwiz_spectrum->precursors.size() > 1 ) { carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_); }
+  else if ( pwiz_spectrum->precursors.size() > 1 ) {
+    carp(CARP_FATAL, "Spectrum %d has more than one precursor.", first_scan_);
+  }
 
   // parsing MS2 scan
   // get precursor m/z and charge
@@ -434,7 +459,7 @@ bool Spectrum::parsePwizSpecInfo(
   // get the isolation window as the precursor m/z
   pzd::IsolationWindow iso_window = pwiz_spectrum->precursors[0].isolationWindow;
   bool have_precursor_mz = iso_window.hasCVParam(pzd::MS_isolation_window_target_m_z);
-  if (have_precursor_mz) { precursor_mz_ =iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
+  if (have_precursor_mz) { precursor_mz_ = iso_window.cvParam(pzd::MS_isolation_window_target_m_z).valueAs<double>(); }
 
   // each charge state(s) stored in selectedIon(s)
   vector<pzd::SelectedIon> ions = pwiz_spectrum->precursors[0].selectedIons;
@@ -929,6 +954,24 @@ void Spectrum::sortPeaks(PEAK_SORT_TYPE_T type)
 }
 
 /**
+ * Put the highest peak to the end
+ */
+void Spectrum::putHighestPeak() {
+  if (sorted_by_mz_ || peaks_.size() < 2) {
+    return;
+  }
+  size_t max_mz_peak_index = 0;
+  for (size_t i = 1; i < peaks_.size(); ++i) {
+    if (Peak::compareByMZ(*peaks_[max_mz_peak_index], *peaks_[i])) {
+      max_mz_peak_index = i;
+    }
+  }
+  Peak* temp = peaks_[max_mz_peak_index];
+  peaks_[max_mz_peak_index] = peaks_.back();
+  peaks_.back() = temp;
+}
+
+/**
  * Populate peaks with rank information.
  */
 void Spectrum::rankPeaks()
@@ -1016,6 +1059,16 @@ const char* Spectrum::getFullFilename(){
   }
   return filename_.c_str();
 }
+
+FLOAT_T Spectrum::getRTime() const {
+
+  return retention_time_;
+}
+
+  void Spectrum::setRTime(double retention_time){
+    retention_time_ = retention_time;
+  }
+
 
 /*
  * Local Variables:

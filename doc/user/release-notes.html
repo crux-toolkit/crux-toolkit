@@ -55,6 +55,9 @@
 <h3>Version 4.2</h3> April 6, 2024
 
 <h4>Major changes</h4>
+  <li>18 Oct 2024: speeded up tide-search, restuctured its code.
+  <li>18 Oct 2024: Added support to produce output in mztab format.
+  <li>18 Oct 2024: tide-index supports unimod codes.  
   <li>6 April 2024: Updated to use Percolator commit d0d48b5.
   <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
   dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
@@ -65,6 +68,10 @@
   </li>
 <h4>Minor changes</h4>
 <ul>
+  <li>18 Oct 2024: terminal amino acids can be modified by terminal modifications and resiudal mods.
+  <li>18 Oct 2024: tide-search reports tailor scores, and statistics about b-y- ions.
+  <li>18 Oct 2024: tide-search runs only combined p-values.
+  <li>18 Oct 2024: non-used options removed from tide-search: --compute-sp, --file-column, --brief-output, --peptide-centric-search, --evidence-granularity, --use-tailor-calibration (it is automatically calculated), From tide-index:--keep-terminal-aminos.  
   <li>15 September 2024: Unify Sorting. Replace quick sort algorithms with std::sort</li>
   <li>11 September 2024: Removed usage plot from Crux website home page.
   <li>06 Auguest 2024: Minor changes to website support.</li>

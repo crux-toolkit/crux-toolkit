@@ -81,7 +81,7 @@ static const int INVALID_ENUM_STRING = -10;
  */
 
 static const char* score_function_strings[NUMBER_SCORE_FUNCTIONS] = {
-  "invalid", "xcorr", "residue-evidence", "both"
+  "invalid", "xcorr", "combined-p-values", "hyperscore", "hyperscore-la"
 };
 
 SCORE_FUNCTION_T string_to_score_function_type(const string& name) {
@@ -521,12 +521,14 @@ char* ion_type_to_string(ION_TYPE_T type) {
  */
 static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "spscore",
-  "xcorr_score",
+  "xcorr score",
   "evalue_score",
 
   "xcorr first",
   "xcorr second",
 
+  "decoy_xcorr_qvalue",
+  "decoy_xcorr_peptide_qvalue",
   "decoy_xcorr_PEP",
 
   "decoy_evalue_qvalue",
@@ -538,17 +540,33 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "percolator_peptide_qvalue",
   "percolator_PEP",
 
-  "deltacn",
-  "deltalcn",
-  "by_ions_matched",
-  "by_ions_total",
-
+  "delta_cn",
+  "delta_lcn",
+  "b/y ions matched",
+  "b/y ions total",
+  "b/y ions fraction",
+  "b/y ion repeat match",
   "exact_pvalue",
   "refactored_xcorr",
   "res-ev score",
   "res-ev p-value",
   "combined p-value",
-  "tailor score" //Added for tailor score calibration method by AKF  
+  "tailor score",
+  "precursor intensity logrank M0",
+  "precursor intensity logrank M1",
+  "precursor intensity logrank M2",
+  "rt-diff",
+  "dynamic fragment p-value",
+  "static fragment p-value",
+  "precursor coelution",
+  "fragment coelution",
+  "precursor fragment coelution",
+  "ensemble score",
+  "Sidak adjusted p-value",
+  "smoothed p-value",
+  "tdc q-value",
+  "mix-max q-value"
+//  "invalid", // This needs to be removed if new score types are added.
 };
 
 bool string_to_scorer_type(const string& name, SCORER_TYPE_T* result) {
@@ -1560,6 +1578,14 @@ std::string generateJSONGA4Data(const std::string appName) {
       << "}";
 
     return jsonGA4Data.str();
+}
+
+std::string getDateFromCurxVersion(){
+  std::string version = std::string(CRUX_VERSION);
+  int len = version.length();
+  int date_len = 10;
+  std::string date = version.substr(len-date_len, date_len);
+  return date;
 }
 
 // Post usage data to Google Analytics 4 using async i/o

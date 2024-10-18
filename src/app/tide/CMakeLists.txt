@@ -42,6 +42,7 @@ set(
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/raw_proteins.pb.cc
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/results.pb.cc
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj/spectrum.pb.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/protoobj/residue_stats.pb.cc
 )
 set(
   proto_files
@@ -50,6 +51,7 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/raw_proteins.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/results.proto
   ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/spectrum.proto
+  ${CMAKE_CURRENT_SOURCE_DIR}/protobuf/residue_stats.proto
 )
 add_custom_command(
   OUTPUT ${proto_files_compiled}
@@ -69,7 +71,7 @@ set(
   tide_lib_files
   ${proto_files_compiled}
   abspath.cc
-  active_peptide_queue.cc
+  ActivePeptideQueue.cc  
   crux_sp_spectrum.cc
   fifo_alloc.cc
   index_settings.cc
@@ -79,7 +81,6 @@ set(
   peptide.cc
   peptide_mods3.cc
   peptide_peaks.cc
-  sp_scorer.cc
   spectrum_collection.cc
   spectrum_preprocess2.cc
 )

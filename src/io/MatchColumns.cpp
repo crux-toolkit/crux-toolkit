@@ -40,6 +40,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "file_idx",
   "scan",
   "charge",
+  "retention time",  
   "spectrum precursor m/z",
   "spectrum neutral mass",
   "peptide mass",
@@ -72,11 +73,14 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "precursor fragment coelution", // added by Yang
   "ensemble score", // added by Yang
 #ifdef NEW_COLUMNS
+  "decoy PSM q-value",
+  "decoy peptide q-value",      // NEW
   "percolator score",
   "percolator rank",
   "percolator PSM q-value",
   "percolator peptide q-value", // NEW
 #else
+  "decoy q-value (xcorr)",
   "decoy PEP (xcorr)",
   "decoy q-value (e-value)",
   "decoy PEP (e-value)",
@@ -90,6 +94,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "b/y ions matched",
   "b/y ions total",
   "b/y ions fraction",
+  "b/y ion repeat match",
   "total matches/spectrum",
   "distinct matches/spectrum",
   "sequence",
@@ -141,7 +146,44 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "q-value",
   "posterior_error_prob",
   "peptide",
-  "proteinIds"
+  "proteinIds",
+ // mzTab Headers
+  "PSH",
+  "sequence",
+  "PSM_ID",
+  "accession",
+  "unique",
+  "database",
+  "database_version",
+  "search_engine",
+  "search_engine_score[1]",   // [MS, MS:1001155, The SEQUEST result 'XCorr']
+  "search_engine_score[2]",  // [MS, MS:1003366, tailor score]
+  "search_engine_score[3]",   // [MS, MS:1001143, The SEQUEST result 'DeltaCn']
+  "search_engine_score[4]",   // [MS, MS:1003358, XCorr rank]
+  "search_engine_score[5]",   // [MS, MS:1003360, refactored XCorr]
+  "search_engine_score[6]",   // [MS, MS:1003359, exact p-value]
+  "search_engine_score[7]",   // [MS, MS:1003361, res-ev score]
+  "search_engine_score[8]",   // [MS, MS:1003363, res-ev p-value]
+  "search_engine_score[9]",   // [MS, MS:1003364, combined p-value]
+  "search_engine_score[10]",  // [MS, MS:1003365, combined p-value rank]
+  "search_engine_score[11]",  // [MS, MS:1002354, PSM-level q-value]
+  "modifications",
+  "retention_time",
+  "charge",
+  "exp_mass_to_charge",
+  "calc_mass_to_charge",
+  "spectra_ref",
+  "pre",
+  "post",
+  "start",
+  "end",
+  "opt_ms_run[1]_spectrum_neutral_mass",
+  "opt_ms_run[1]_delta_lcn",
+  "opt_ms_run[1]_distinct_matches_per_spectrum",
+  "opt_ms_run[1]_target_or_decoy",
+  "opt_ms_run[1]_original_target_sequence",
+  "opt_ms_run[1]_decoy_index",
+
 };
 
 /**

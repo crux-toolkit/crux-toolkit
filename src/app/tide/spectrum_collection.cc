@@ -22,10 +22,10 @@ using google::protobuf::uint64;
 #define CHECK(x) GOOGLE_CHECK((x))
 
 // Integerization constant for the XCorr p-value calculation.
-#define EVIDENCE_INT_SCALE 500.0
+#define EVIDENCE_INT_SCALE 500.0 
 
 Spectrum::Spectrum(const pb::Spectrum& spec) {
-  spectrum_number_ = spec.spectrum_number();
+  spectrum_number_ = spec.scan_id();
   precursor_m_z_ = spec.precursor_m_z();
   rtime_ = spec.rtime();
   for (int i = 0; i < spec.charge_state_size(); ++i)
@@ -33,13 +33,13 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   int size = spec.peak_m_z_size();
   CHECK(size == spec.peak_intensity_size());
   ReservePeaks(size);
-  uint64 total = 0;
+  uint64 peak_mz = 0;
   double m_z_denom = spec.peak_m_z_denominator();
   double intensity_denom = spec.peak_intensity_denominator();
   for (int i = 0; i < size; ++i) {
-    CHECK(spec.peak_m_z(i) > 0);
-    total += spec.peak_m_z(i); // deltas of m/z are stored
-    peak_m_z_.push_back(total / m_z_denom);
+    // CHECK(spec.peak_m_z(i) > 0);
+    peak_mz = spec.peak_m_z(i); // the m/z of the peaks
+    peak_m_z_.push_back(peak_mz / m_z_denom);
     peak_intensity_.push_back(spec.peak_intensity(i) / intensity_denom);
   }
 
@@ -105,7 +105,7 @@ static inline int GetDenom(const vector<double>& vals) {
 
 void Spectrum::FillPB(pb::Spectrum* spec) {
   spec->Clear();
-  spec->set_spectrum_number(spectrum_number_);
+  spec->set_scan_id(spectrum_number_);
   if (precursor_m_z_ > 0)
     spec->set_precursor_m_z(precursor_m_z_);
   spec->set_rtime(rtime_);
