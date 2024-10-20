@@ -171,8 +171,6 @@ vector<string> CruxLFQApplication::getArgs() const {
 
 vector<string> CruxLFQApplication::getOptions() const {
     string arr[] = {
-        "score",
-        "threshold",
         "fileroot",
         "output-dir",
         "overwrite",
@@ -189,6 +187,8 @@ vector<string> CruxLFQApplication::getOptions() const {
         "quantify-ambiguous-peptides",
         "use-shared-peptides-for-protein-quant",
         "normalize",
+        "psm-file-format",
+        "is-rt-seconds",
         "spectrum-parser",
         "num-threads"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));

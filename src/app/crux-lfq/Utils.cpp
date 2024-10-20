@@ -604,7 +604,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
  * @return A pointer to the indexed mass spectral peak, or nullptr if not found.
  */
 
-IndexedMassSpectralPeak* getIndexedPeak(
+IndexedMassSpectralPeak*  getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState) {
     auto metaData = &LFQMetaData::getInstance();
