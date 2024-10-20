@@ -311,6 +311,9 @@ Params::Params() : finalized_(false) {
   InitBoolParam("pin-output", false,
     "Output a Percolator input (PIN) file to the output directory.",
     "Available for tide-search.", true);
+  InitBoolParam("mztab-output", false,
+    "Output results in mzTab file to the output directory.",
+    "Available for tide-search.", true);    
   InitBoolParam("pout-output", false,
     "Output a Percolator [[html:<a href=\""
     "https://github.com/percolator/percolator/blob/master/src/xml/percolator_out.xsd\">]]"
@@ -318,7 +321,7 @@ Params::Params() : finalized_(false) {
     "Available for percolator.", true);
   InitBoolParam("pepxml-output", false,
     "Output a pepXML results file to the output directory.",
-    "Available for tide-search.", true);
+    "Available for tide-search, percolator.", true);
   InitBoolParam("txt-output", true,
     "Output a tab-delimited results file to the output directory.",
     "Available for tide-search, percolator.", true);
@@ -467,1006 +470,1003 @@ Params::Params() : finalized_(false) {
     "tide-index, tide-search and generate-peptides.",
     true);
 
-    InitIntParam("precision", 8, 1, 100,  // max is arbitrary
-                 "Set the precision for scores written to sqt and text files.",
-                 "Available for all commands.", true);
-    InitIntParam("mass-precision", 4, 1, 100,  // max is arbitrary
-                 "Set the precision for masses and m/z written to sqt and text files.",
-                 "Available for all commands.", true);
-    InitIntParam("print-search-progress", 1000, 0, BILLION,
-                 "Show search progress by printing every n spectra searched. Set to 0 to show no "
-                 "search progress.",
-                 "Available for tide-search", true);
-    // Sp scoring params
-    InitDoubleParam("max-mz", 4000, 0, BILLION,
-                    "Used in scoring sp.",
-                    "Hide from users", false);
-    InitDoubleParam("fraction-top-scores-to-fit", 0.55, 0, 1,
-                    "The fraction of psms per spectrum to use for estimating the "
-                    "score distribution for calculating p-values. "
-                    "Not compatible with 'number-top-scores-to-fig'.",
-                    "For developers/research only.", false);
-    /* analyze-matches options */
-    InitStringParam("algorithm", "percolator", "percolator|curve-fit|none",
-                    "The analysis algorithm to use (percolator, curve-fit, none).",
-                    "Available only for crux-analyze-matches.  Using 'percolator' will "
-                    "assign a q-value to the top-ranking psm for each spectrum based on "
-                    "the decoy searches.  Using 'curve-fit' will assign a q-value to same "
-                    "using the p-values calculated with score-type=<xcorr-pvalue|"
-                    "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
-                    " undefined behavior. Using 'none' will turn the binary .csm files "
-                    "into text.",
-                    false);
-    // **** percolator options. ****
-    InitStringParam("search-input", "auto", "auto|separate|concatenated",
-                    "Specify the type of target-decoy search. Using 'auto', percolator attempts "
-                    "to detect the search type automatically.  Using 'separate' specifies two searches: "
-                    "one against target and one against decoy protein db. Using 'concatenated' "
-                    "specifies a single search on concatenated target-decoy protein db.",
-                    "Available for percolator", true);
-    InitStringParam("percolator-seed", "1",
-                    "When given a unsigned integer value seeds the random number generator with that value. "
-                    "When given the string \"time\" seeds the random number generator with the system time.",
-                    "Available for all percolator", true);
-    InitStringParam("protein-name-separator", ",",
-                    "Determines the character to separate the protein IDs in the tab-delimited output format ",
-                    "Available for all percolator", true);
-    InitBoolParam("feature-file-out", false,
-                  "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]"
-                  "tab-delimited Percolator input (.pin) format[[html:</a>]]. The features will be "
-                  "normalized, using either unit norm or standard deviation normalization (depending "
-                  "upon the value of the unit-norm option).",
-                  "Available for percolator.", true);
-    InitBoolParam("decoy-xml-output", false,
-                  "Include decoys (PSMs, peptides, and/or proteins) in the XML output.",
-                  "Available for percolator", true);
-    InitStringParam("decoy-prefix", "decoy_",
-                    "Specifies the prefix of the protein names that indicate a decoy.",
-                    "Available for tide-index and percolator", true);
-    InitBoolParam("no-terminate", false,
-                  "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
-                  "Available for percolator", true);
-    InitBoolParam("output-weights", false,
-                  "Output final weights to a file named \"percolator.weights.txt\".",
-                  "Available for percolator", true);
-    InitStringParam("init-weights", "",
-                    "Read the unnormalized initial weights from the third line of the given "
-                    "file. This can be the output of the --output-weights option from a "
-                    "previous Percolator analysis. Note that the weights must be in the same "
-                    "order as features in the PSM input file(s)",
-                    "Available for percolator", true);
-    InitBoolParam("static", false,
-                  "Use the provided initial weights as a static model. If used, the "
-                  "--init-weights option must be specified.",
-                  "Available for percolator", true);
-    InitIntParam("subset-max-train", 0,
-                 "Only train Percolator on a subset of PSMs, and use the resulting score "
-                 "vector to evaluate the other PSMs. Recommended when analyzing huge numbers "
-                 "(>1 million) of PSMs. When set to 0, all PSMs are used for training as "
-                 "normal.",
-                 "Available for percolator", true);
-    InitDoubleParam("c-pos", 0.00,
-                    "Penalty for mistakes made on positive examples. If this value is set to 0, "
-                    "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
-                    "value that yields the largest number of PSMs identified at the q-value threshold "
-                    "set via the --test-fdr parameter.",
-                    "Available for percolator", true);
-    InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
-                    "Penalty for mistake made on negative examples. If not specified, then "
-                    "this value is set by cross validation over {0.1, 1, 10}.",
-                    "Available for percolator", true);
-    InitDoubleParam("train-fdr", 0.01, 0, BILLION,
-                    "False discovery rate threshold to define positive examples in training.",
-                    "Available for percolator", true);
-    InitDoubleParam("test-fdr", 0.01, 0.0, 1.0,
-                    "False discovery rate threshold used in selecting hyperparameters during internal "
-                    "cross-validation and for reporting the final results.",
-                    "Available for percolator.", true);
-    InitDoubleParam("fido-fast-gridsearch", 0.0, 0.0, 1.0,
-                    "Apply the specified threshold to PSM, peptide and protein probabilities to "
-                    "obtain a faster estimate of the alpha, beta and gamma parameters.",
-                    "Available for percolator.", true);
-    InitBoolParam("fido-no-split-large-components", false,
-                  "Do not approximate the posterior distribution by allowing large graph "
-                  "components to be split into subgraphs. The splitting is done by "
-                  "duplicating peptides with low probabilities. Splitting continues "
-                  "until the number of possible configurations of each subgraph is "
-                  "below 2^18",
-                  "Available for percolator", true);
-    InitDoubleParam("fido-protein-truncation-threshold", 0.01, 0.0, 1.0,
-                    "To speed up inference, proteins for which none of the associated "
-                    "peptides has a probability exceeding the specified threshold will "
-                    "be assigned probability = 0.",
-                    "Available for percolator", true);
-    InitBoolParam("tdc", true,
-                  "Use target-decoy competition to assign q-values and PEPs. When set to F, "
-                  "the mix-max method, which estimates the proportion pi0 of incorrect target "
-                  "PSMs, is used instead.",
-                  "Available for percolator", true);
-    InitIntParam("maxiter", 10, 0, 100000000,
-                 "Maximum number of iterations for training.",
-                 "Available for percolator", true);
-    InitBoolParam("quick-validation", false,
-                  "Quicker execution by reduced internal cross-validation.",
-                  "Available for percolator", true);
-    InitStringParam("default-direction", "",
-                    "In its initial round of training, Percolator uses one feature to induce a ranking "
-                    "of PSMs. By default, Percolator will select the feature that produces the largest "
-                    "set of target PSMs at a specified FDR threshold (cf. --train-fdr). This option "
-                    "allows the user to specify which feature is used for the initial ranking, using the "
-                    "name as a string[[html: from <a href=\"../file-formats/features.html\">this table</a>]]. The name "
-                    "can be preceded by a hyphen (e.g. \"-XCorr\") to indicate that a lower value is "
-                    "better.",
-                    "Available for percolator", true);
-    InitBoolParam("unitnorm", false,
-                  "Use unit normalization (i.e., linearly rescale each PSM's feature vector to have a "
-                  "Euclidean length of 1), instead of standard deviation normalization.",
-                  "Available for percolator.", true);
-    InitBoolParam("test-each-iteration", false,
-                  "Measure performance on test set each iteration.",
-                  "Available for percolator.", true);
-    InitStringParam("picked-protein", "",
-                    "Use the picked protein-level FDR to infer protein probabilities, provide the "
-                    "fasta file as the argument to this flag.",
-                    "Available for percolator", true);
-    InitStringParam("protein-enzyme", "trypsin",
-                    "no_enzyme|elastase|pepsin|proteinasek|"
-                    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|lysarginase|trypsin",
-                    "Type of enzyme",
-                    "Available for percolator", true);
-    InitBoolParam("protein-report-fragments", false,
-                  "By default, if the peptides associated with protein A are a proper subset "
-                  "of the peptides associated with protein B, then protein A is eliminated and "
-                  "all the peptides are considered as evidence for protein B. Note that this "
-                  "filtering is done based on the complete set of peptides in the database, not "
-                  "based on the identified peptides in the search results. Alternatively, if this "
-                  "option is set and if all of the identified peptides associated with protein B "
-                  "are also associated with protein A, then Percolator will report a comma-"
-                  "separated list of protein IDs, where the full-length protein B is first in the "
-                  "list and the fragment protein A is listed second. Not available for Fido.",
-                  "Available for percolator", true);
-    InitBoolParam("protein-report-duplicates", false,
-                  "If multiple database proteins contain exactly the same set of peptides, then "
-                  "Percolator will randomly discard all but one of the proteins. If this option "
-                  "is set, then the IDs of these duplicated proteins will be reported as a comma-"
-                  "separated list. Not available for Fido.",
-                  "Available for percolator", true);
-    InitBoolParam("protein", false,
-                  "Use the Fido algorithm to infer protein probabilities. Must be true to use any of the Fido options.",
-                  "Available for percolator", true);
-    InitDoubleParam("fido-alpha", 0.0, 0.0, 1.0,
-                    "Specify the probability with which a present protein emits an associated peptide. "
-                    "Set by grid search (see --fido-gridsearch-depth parameter) if not specified.",
-                    "Available for percolator if --protein T is set.", true);
-    InitDoubleParam("fido-beta", 0.0, 0.0, 10.0,
-                    "Specify the probability of the creation of a peptide from noise. Set by grid "
-                    "search (see --fido-gridsearch-depth parameter) if not specified.",
-                    "Available for percolator if --protein T is set.", true);
-    InitDoubleParam("fido-gamma", 0.0, 0.0, 10.0,
-                    "Specify the prior probability that a protein is present in the sample. Set by grid "
-                    "search (see --fido-gridsearch-depth parameter) if not specified.",
-                    "Available for percolator if --protein T is set.", true);
-    InitBoolParam("fido-empirical-protein-q", false,
-                  "Estimate empirical p-values and q-values for proteins using target-decoy analysis.",
-                  "Available for percolator if --protein T is set.", true);
-    InitIntParam("fido-gridsearch-depth", 0, 0, 2,
-                 "Set depth of the grid search for alpha, beta and gamma estimation.[[html: The values "
-                 "considered, for each possible value of the --fido-gridsearch-depth parameter, are as follows:<ul>"
-                 "<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5}; beta = {0.0, 0.01, 0.15, "
-                 "0.025, 0.035, 0.05, 0.1}; gamma = {0.1, 0.25, 0.5, 0.75}.</li><li>1: alpha = {0.01, "
-                 "0.04, 0.09, 0.16, 0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05}; gamma = "
-                 "{0.1, 0.25, 0.5}.</li><li>2: alpha = {0.01, 0.04, 0.16, 0.25, 0.36}; beta = {0.0, "
-                 "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
-                 "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
-                 "Available for percolator if --protein T is set.", true);
-    InitDoubleParam("fido-gridsearch-mse-threshold", 0.05, 0, 1,
-                    "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
-                    "score in the grid search.",
-                    "Available for percolator if --protein T is set.", true);
-    InitBoolParam("override", false,
-                  "By default, Percolator will examine the learned weights for each feature, and if "
-                  "the weight appears to be problematic, then percolator will discard the learned "
-                  "weights and instead employ a previously trained, static score vector. This switch "
-                  "allows this error checking to be overriden.",
-                  "Available for percolator.", true);
-    InitBoolParam("klammer", false,
-                  "Use retention time features calculated as in \"Improving tandem mass spectrum "
-                  "identification using peptide retention time prediction across diverse chromatography "
-                  "conditions\" by Klammer AA, Yi X, MacCoss MJ and Noble WS. ([[html:<em>]]Analytical "
-                  "Chemistry[[html:</em>]]. 2007 Aug 15;79(16):6111-8.).",
-                  "Available for percolator", true);
-    InitBoolParam("only-psms", false,
-                  "Report results only at the PSM level.  This flag causes Percolator to skip the "
-                  "step that selects the top-scoring PSM per peptide; hence, peptide-level results "
-                  "are left out and only PSM-level results are reported.",
-                  "Available for percolator", true);
-    InitBoolParam("train-best-positive", false,
-                  "Enforce that, for each spectrum, at most one PSM is included in the "
-                  "positive set during each training iteration. Note that if the user only "
-                  "provides one PSM per spectrum, then this option will have no effect.",
-                  "Available for percolator", true);
-    InitDoubleParam("spectral-counting-fdr", 0, 0, 1,
-                    "Report the number of unique PSMs and total (including shared peptides) "
-                    "PSMs as two extra columns in the protein tab-delimited output.",
-                    "Available for percolator", true);
-    // **** Tide arguments ****
-    InitArgParam("spectrum records file",
-                 "A spectrum records file generated by a previous run of crux tide-search "
-                 "using the store-spectra parameter.");
-    InitArgParam("tide spectra file",
-                 "The name of one or more files from which to parse the fragmentation spectra, in any "
-                 "of the file formats supported by ProteoWizard. Alternatively, the argument "
-                 "may be one or more binary spectrum files produced by a previous run of crux "
-                 "tide-search using the store-spectra parameter. Multiple files can be included "
-                 "on the command line (space delimited), prior to the name of the database.");
-    InitArgParam("tide database",
-                 "Either a FASTA file or a directory containing a database index created by a previous "
-                 "run of crux tide-index.");
-    // **** Tide options ****
-    InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse",
-                    "Include a decoy version of every peptide by shuffling or reversing the "
-                    "target sequence or protein. In shuffle or peptide-reverse mode, each peptide is "
-                    "either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in "
-                    "place. Note that peptides appear multiple times in the target database are only "
-                    "shuffled once. In peptide-reverse mode, palindromic peptides are shuffled. Also, if a "
-                    "shuffled peptide produces an overlap with the target or decoy database, then the "
-                    "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
-                    "homopolymers will appear in both the target and decoy database.",
-                    "Available for tide-index", true);
-    InitStringParam("mods-spec", "C+57.02146",
-                    "[[nohtml:Expression for static and variable mass modifications to include. "
-                    "Specify a comma-separated list of modification sequences of the form: "
-                    "C+57.02146,2M+15.9949,1STY+79.966331,...]][[html:The general form of a modification "
-                    "specification has three components, as exemplified by <span style=\"color: red;\">1"
-                    "</span><span style=\"color: green;\">STY</span>+<span style=\"color: blue\">79.966331"
-                    "</span>.<br>The three components are: [<span style=\"color: red;\">max_per_peptide"
-                    "</span>]<span style=\"color: green;\">residues</span>[+/-]<span style-\"color: blue;\">"
-                    "mass_change</span><br>In the example, <span style=\"color: red;\">max_per_peptide"
-                    "</span> is <span style=\"color: red;\">1</span>, <span style=\"color: green;\">"
-                    "residues</span> are <span style=\"color: green;\">STY</span>, and "
-                    "<span style=\"color: blue;\">mass_change</span> is <span style=\"color: blue;\">"
-                    "+79.966331</span>. To specify a static modification, the number preceding the amino "
-                    "acid must be omitted; i.e., <span style=\"color: green;\">C</span>+<span "
-                    "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
-                    "Da to cysteine. Note that Tide allows at most one modification per amino "
-                    "acid.  Also, the default modification (C+57.02146) will be added to "
-                    "every mods-spec string unless an explicit C+0 is included.]]",
-                    "Available for tide-index.", true);
-    InitStringParam("nterm-peptide-mods-spec", "",
-                    "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
-                    "Specify a comma-separated list of N-terminal modification sequences of the form: "
-                    "1E-18.0106,C-17.0265]][[html:Specify peptide n-terminal modifications. Like "
-                    "--mods-spec, this specification has three components, but with a slightly different "
-                    "syntax. The <span style=\"color: red;\">max_per_peptide</span> can be either \"1\", "
-                    "in which case it defines a variable terminal modification, or missing, in which case "
-                    "the modification is static. The <span style=\"color: green;\">residues</span> field "
-                    "indicates which amino acids are subject to the modification, with the residue <span "
-                    "style=\"color: green;\">X</span> corresponding to any amino acid. Finally, <span "
-                    "style=\"color: blue;\">added_mass</span> is defined as before.]]",
-                    "Available for tide-index", true);
-    InitStringParam("cterm-peptide-mods-spec", "",
-                    "[[nohtml:Specifies C-terminal static and variable mass modifications on peptides. "
-                    "Specify a comma-separated list of C-terminal modification sequences of the form: "
-                    "X+21.9819]][[html:Specify peptide c-terminal modifications. See "
-                    "nterm-peptide-mods-spec for syntax.]]",
-                    "Available for tide-index", true);
-    InitStringParam("cterm-protein-mods-spec", "",
-                    "[[nohtml:Specifies static and variable mass modifications on proteins' C-terminal. ]]"
-                    "[[html:Specifies C-terminal static and variable mass modifications on proteins."
-                    "Mod specification syntax is the same as for peptide mods (see nterm-peptide-mods-spec option),"
-                    "but these mods are applied only to peptide C-terminals that are also protein terminals."
-                    "If variable modification are provided for both peptide and protein terminal, they will be "
-                    "applied one at a time. ",
-                    "Available for tide-index", true);
-    InitStringParam("nterm-protein-mods-spec", "",
-                    "[[nohtml:Specifies static and variable mass modifications on proteins N-terminal.]] "
-                    "[[html:Same as cterm-protein-mods-spec, but for  the protein N-terminal.",
-                    "Available for tide-index", true);
-    InitStringParam("store-spectra", "",
-                    "Specify the name of the file where the binarized fragmentation spectra "
-                    "will be stored. Subsequent runs of crux tide-search will execute more quickly if "
-                    "provided with the spectra in binary format. The filename is specified relative to "
-                    "the current working directory, not the Crux output directory (as specified by "
-                    "--output-dir). This option is not valid if multiple input spectrum files are given.",
-                    "Available for tide-search", true);
-    InitBoolParam("exact-p-value", false,
-                  "Enable the calculation of exact p-values for the XCorr score[[html: as described in "
-                  "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/24895379\">this article</a>]]. Calculation "
-                  "of p-values increases the running time but increases the number of identifications at a "
-                  "fixed confidence threshold. The p-values will be reported in a new column with header "
-                  "\"exact p-value\", and the \"xcorr score\" column will be replaced with a \"refactored "
-                  "xcorr\" column. Note that, currently, p-values can only be computed when the "
-                  "mz-bin-width parameter is set to its default value. Variable and static mods are allowed "
-                  "on non-terminal residues in conjunction with p-value computation, but currently only "
-                  "static mods are allowed on the N-terminus, and no mods on the C-terminus.",
+  InitIntParam("precision", 8, 1, 100, //max is arbitrary
+    "Set the precision for scores written to sqt and text files.",
+    "Available for all commands.", true);
+  InitIntParam("mass-precision", 4, 1, 100, // max is arbitrary
+    "Set the precision for masses and m/z written to sqt and text files.",
+    "Available for all commands.", true);
+  InitIntParam("print-search-progress", 1000, 0, BILLION,
+    "Show search progress by printing every n spectra searched. Set to 0 to show no "
+    "search progress.",
+    "Available for tide-search", true);
+  // Sp scoring params
+  InitDoubleParam("max-mz", 4000, 0, BILLION,
+    "Used in scoring sp.",
+    "Hide from users", false);
+  InitDoubleParam("fraction-top-scores-to-fit", 0.55, 0, 1,
+    "The fraction of psms per spectrum to use for estimating the "
+    "score distribution for calculating p-values. "
+    "Not compatible with 'number-top-scores-to-fig'.",
+    "For developers/research only.", false);
+  /* analyze-matches options */
+  InitStringParam("algorithm", "percolator", "percolator|curve-fit|none",
+    "The analysis algorithm to use (percolator, curve-fit, none).",
+    "Available only for crux-analyze-matches.  Using 'percolator' will "
+    "assign a q-value to the top-ranking psm for each spectrum based on "
+    "the decoy searches.  Using 'curve-fit' will assign a q-value to same "
+    "using the p-values calculated with score-type=<xcorr-pvalue|"
+    "sq-pvalue>.  Incorrect combinations of score-type and algorithm cause"
+    " undefined behavior. Using 'none' will turn the binary .csm files "
+    "into text.", false);
+  // **** percolator options. ****
+  InitStringParam("search-input", "auto", "auto|separate|concatenated",
+    "Specify the type of target-decoy search. Using 'auto', percolator attempts "
+    "to detect the search type automatically.  Using 'separate' specifies two searches: "
+    "one against target and one against decoy protein db. Using 'concatenated' "
+    "specifies a single search on concatenated target-decoy protein db.",
+    "Available for percolator", true);
+  InitStringParam("percolator-seed", "1",
+    "When given a unsigned integer value seeds the random number generator with that value. "
+    "When given the string \"time\" seeds the random number generator with the system time.",
+    "Available for all percolator", true);
+InitStringParam("protein-name-separator", ",",
+    "Determines the character to separate the protein IDs in the tab-delimited output format ",
+    "Available for all percolator", true);
+  InitBoolParam("feature-file-out", false,
+    "Output the computed features in [[html:<a href=\"../file-formats/features.html\">]]"
+    "tab-delimited Percolator input (.pin) format[[html:</a>]]. The features will be "
+    "normalized, using either unit norm or standard deviation normalization (depending "
+    "upon the value of the unit-norm option).",
+    "Available for percolator.", true);
+  InitBoolParam("decoy-xml-output", false,
+    "Include decoys (PSMs, peptides, and/or proteins) in the XML output.",
+    "Available for percolator", true);
+  InitStringParam("decoy-prefix", "decoy_",
+    "Specifies the prefix of the protein names that indicate a decoy.",
+    "Available for tide-index and percolator", true);
+  InitBoolParam("no-terminate", false,
+    "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
+    "Available for percolator", true); 
+  InitBoolParam("output-weights", false,
+    "Output final weights to a file named \"percolator.weights.txt\".",
+    "Available for percolator", true);
+  InitStringParam("init-weights", "",
+    "Read the unnormalized initial weights from the third line of the given "
+    "file. This can be the output of the --output-weights option from a "
+    "previous Percolator analysis. Note that the weights must be in the same "
+    "order as features in the PSM input file(s)",
+    "Available for percolator", true);
+  InitBoolParam("static", false,
+    "Use the provided initial weights as a static model. If used, the "
+    "--init-weights option must be specified.",
+    "Available for percolator", true);
+  InitIntParam("subset-max-train", 0,
+    "Only train Percolator on a subset of PSMs, and use the resulting score "
+    "vector to evaluate the other PSMs. Recommended when analyzing huge numbers "
+    "(>1 million) of PSMs. When set to 0, all PSMs are used for training as "
+    "normal.",
+    "Available for percolator", true);
+  InitDoubleParam("c-pos", 0.00,
+    "Penalty for mistakes made on positive examples. If this value is set to 0, "
+    "then it is set via cross validation over the values {0.1, 1, 10}, selecting the "
+    "value that yields the largest number of PSMs identified at the q-value threshold "
+    "set via the --test-fdr parameter.",
+    "Available for percolator", true);
+  InitDoubleParam("c-neg", 0.0, 0.0, 0.90,
+    "Penalty for mistake made on negative examples. If not specified, then "
+    "this value is set by cross validation over {0.1, 1, 10}.",
+    "Available for percolator", true);
+  InitDoubleParam("train-fdr", 0.01, 0, BILLION,
+    "False discovery rate threshold to define positive examples in training.",
+    "Available for percolator", true);
+  InitDoubleParam("test-fdr", 0.01, 0.0, 1.0,
+    "False discovery rate threshold used in selecting hyperparameters during internal "
+    "cross-validation and for reporting the final results.",
+    "Available for percolator.", true);
+  InitDoubleParam("fido-fast-gridsearch", 0.0, 0.0, 1.0,
+    "Apply the specified threshold to PSM, peptide and protein probabilities to "
+    "obtain a faster estimate of the alpha, beta and gamma parameters.",
+    "Available for percolator.", true);
+  InitBoolParam("fido-no-split-large-components", false,
+    "Do not approximate the posterior distribution by allowing large graph "
+    "components to be split into subgraphs. The splitting is done by "
+    "duplicating peptides with low probabilities. Splitting continues "
+    "until the number of possible configurations of each subgraph is "
+    "below 2^18",
+    "Available for percolator", true);
+  InitDoubleParam("fido-protein-truncation-threshold", 0.01, 0.0, 1.0,
+    "To speed up inference, proteins for which none of the associated "
+    "peptides has a probability exceeding the specified threshold will "
+    "be assigned probability = 0.",
+    "Available for percolator", true);
+  InitBoolParam("tdc", true,
+    "Use target-decoy competition to assign q-values and PEPs. When set to F, "
+    "the mix-max method, which estimates the proportion pi0 of incorrect target "
+    "PSMs, is used instead.",
+    "Available for percolator", true);
+  InitIntParam("maxiter", 10, 0, 100000000,
+    "Maximum number of iterations for training.",
+    "Available for percolator", true);
+  InitBoolParam("quick-validation", false,
+    "Quicker execution by reduced internal cross-validation.",
+    "Available for percolator", true);
+  InitStringParam("default-direction", "",
+    "In its initial round of training, Percolator uses one feature to induce a ranking "
+    "of PSMs. By default, Percolator will select the feature that produces the largest "
+    "set of target PSMs at a specified FDR threshold (cf. --train-fdr). This option "
+    "allows the user to specify which feature is used for the initial ranking, using the "
+    "name as a string[[html: from <a href=\"../file-formats/features.html\">this table</a>]]. The name "
+    "can be preceded by a hyphen (e.g. \"-XCorr\") to indicate that a lower value is "
+    "better.",
+    "Available for percolator", true);
+  InitBoolParam("unitnorm", false,
+    "Use unit normalization (i.e., linearly rescale each PSM's feature vector to have a "
+    "Euclidean length of 1), instead of standard deviation normalization.",
+    "Available for percolator.", true);
+  InitBoolParam("test-each-iteration", false,
+    "Measure performance on test set each iteration.",
+    "Available for percolator.", true);
+  InitStringParam("picked-protein", "",
+    "Use the picked protein-level FDR to infer protein probabilities, provide the "
+    "fasta file as the argument to this flag.",
+    "Available for percolator", true);
+  InitStringParam("protein-enzyme", "trypsin", "no_enzyme|elastase|pepsin|proteinasek|"
+    "thermolysin|trypsinp|chymotrypsin|lys-n|lys-c|arg-c|asp-n|glu-c|lysarginase|trypsin",
+    "Type of enzyme",
+    "Available for percolator", true);
+  InitBoolParam("protein-report-fragments", false,
+    "By default, if the peptides associated with protein A are a proper subset "
+    "of the peptides associated with protein B, then protein A is eliminated and "
+    "all the peptides are considered as evidence for protein B. Note that this "
+    "filtering is done based on the complete set of peptides in the database, not "
+    "based on the identified peptides in the search results. Alternatively, if this "
+    "option is set and if all of the identified peptides associated with protein B "
+    "are also associated with protein A, then Percolator will report a comma-"
+    "separated list of protein IDs, where the full-length protein B is first in the "
+    "list and the fragment protein A is listed second. Not available for Fido.",
+    "Available for percolator", true);
+  InitBoolParam("protein-report-duplicates", false,
+    "If multiple database proteins contain exactly the same set of peptides, then "
+    "Percolator will randomly discard all but one of the proteins. If this option "
+    "is set, then the IDs of these duplicated proteins will be reported as a comma-"
+    "separated list. Not available for Fido.",
+    "Available for percolator", true);
+  InitBoolParam("protein", false,
+    "Use the Fido algorithm to infer protein probabilities. Must be true to use any of the Fido options.",
+    "Available for percolator", true);
+  InitDoubleParam("fido-alpha", 0.0, 0.0, 1.0,
+    "Specify the probability with which a present protein emits an associated peptide. "
+    "Set by grid search (see --fido-gridsearch-depth parameter) if not specified.",
+    "Available for percolator if --protein T is set.", true);
+  InitDoubleParam("fido-beta", 0.0, 0.0, 10.0,
+    "Specify the probability of the creation of a peptide from noise. Set by grid "
+    "search (see --fido-gridsearch-depth parameter) if not specified.",
+    "Available for percolator if --protein T is set.", true);
+  InitDoubleParam("fido-gamma", 0.0, 0.0, 10.0,
+    "Specify the prior probability that a protein is present in the sample. Set by grid "
+    "search (see --fido-gridsearch-depth parameter) if not specified.",
+    "Available for percolator if --protein T is set.", true);
+  InitBoolParam("fido-empirical-protein-q", false,
+    "Estimate empirical p-values and q-values for proteins using target-decoy analysis.",
+    "Available for percolator if --protein T is set.", true);
+  InitIntParam("fido-gridsearch-depth", 0, 0, 2,
+    "Set depth of the grid search for alpha, beta and gamma estimation.[[html: The values "
+    "considered, for each possible value of the --fido-gridsearch-depth parameter, are as follows:<ul>"
+    "<li>0: alpha = {0.01, 0.04, 0.09, 0.16, 0.25, 0.36, 0.5}; beta = {0.0, 0.01, 0.15, "
+    "0.025, 0.035, 0.05, 0.1}; gamma = {0.1, 0.25, 0.5, 0.75}.</li><li>1: alpha = {0.01, "
+    "0.04, 0.09, 0.16, 0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.025, 0.035, 0.05}; gamma = "
+    "{0.1, 0.25, 0.5}.</li><li>2: alpha = {0.01, 0.04, 0.16, 0.25, 0.36}; beta = {0.0, "
+    "0.01, 0.15, 0.030, 0.05}; gamma = {0.1, 0.5}.</li><li>3: alpha = {0.01, 0.04, 0.16, "
+    "0.25, 0.36}; beta = {0.0, 0.01, 0.15, 0.030, 0.05}; gamma = {0.5}.</li></ul>]]",
+    "Available for percolator if --protein T is set.", true);
+  InitDoubleParam("fido-gridsearch-mse-threshold", 0.05, 0, 1,
+    "Q-value threshold that will be used in the computation of the MSE and ROC AUC "
+    "score in the grid search.",
+    "Available for percolator if --protein T is set.", true);
+  InitBoolParam("override", false,
+    "By default, Percolator will examine the learned weights for each feature, and if "
+    "the weight appears to be problematic, then percolator will discard the learned "
+    "weights and instead employ a previously trained, static score vector. This switch "
+    "allows this error checking to be overriden.",
+    "Available for percolator.", true);
+  InitBoolParam("klammer", false,
+    "Use retention time features calculated as in \"Improving tandem mass spectrum "
+    "identification using peptide retention time prediction across diverse chromatography "
+    "conditions\" by Klammer AA, Yi X, MacCoss MJ and Noble WS. ([[html:<em>]]Analytical "
+    "Chemistry[[html:</em>]]. 2007 Aug 15;79(16):6111-8.).",
+    "Available for percolator", true);
+  InitBoolParam("only-psms", false,
+    "Report results only at the PSM level.  This flag causes Percolator to skip the "
+    "step that selects the top-scoring PSM per peptide; hence, peptide-level results "
+    "are left out and only PSM-level results are reported.",
+    "Available for percolator", true);
+  InitBoolParam("train-best-positive", false,
+    "Enforce that, for each spectrum, at most one PSM is included in the "
+    "positive set during each training iteration. Note that if the user only "
+    "provides one PSM per spectrum, then this option will have no effect.",
+    "Available for percolator", true);
+  InitDoubleParam("spectral-counting-fdr", 0, 0, 1,
+    "Report the number of unique PSMs and total (including shared peptides) "
+    "PSMs as two extra columns in the protein tab-delimited output.",
+    "Available for percolator", true);
+  // **** Tide arguments ****
+  InitArgParam("spectrum records file",
+    "A spectrum records file generated by a previous run of crux tide-search "
+    "using the store-spectra parameter.");
+  InitArgParam("tide spectra file",
+    "The name of one or more files from which to parse the fragmentation spectra, in any "
+    "of the file formats supported by ProteoWizard. Alternatively, the argument "
+    "may be one or more binary spectrum files produced by a previous run of crux "
+    "tide-search using the store-spectra parameter. Multiple files can be included "
+    "on the command line (space delimited), prior to the name of the database.");
+  InitArgParam("tide database",
+    "Either a FASTA file or a directory containing a database index created by a previous "
+    "run of crux tide-index.");
+  // **** Tide options ****
+  InitStringParam("decoy-format", "shuffle", "none|shuffle|peptide-reverse",
+    "Include a decoy version of every peptide by shuffling or reversing the "
+    "target sequence or protein. In shuffle or peptide-reverse mode, each peptide is "
+    "either reversed or shuffled, leaving the N-terminal and C-terminal amino acids in "
+    "place. Note that peptides appear multiple times in the target database are only "
+    "shuffled once. In peptide-reverse mode, palindromic peptides are shuffled. Also, if a "
+    "shuffled peptide produces an overlap with the target or decoy database, then the "
+    "peptide is re-shuffled up to 5 times. Note that, despite this repeated shuffling, "
+    "homopolymers will appear in both the target and decoy database.",
+    "Available for tide-index", true);
+  InitStringParam("mods-spec", "C+57.02146",
+    "[[nohtml:Expression for static and variable mass modifications to include. "
+    "Specify a comma-separated list of modification sequences of the form: "
+    "C+57.02146,2M+15.9949,1STY+79.966331,...]][[html:The general form of a modification "
+    "specification has three components, as exemplified by <span style=\"color: red;\">1"
+    "</span><span style=\"color: green;\">STY</span>+<span style=\"color: blue\">79.966331"
+    "</span>.<br>The three components are: [<span style=\"color: red;\">max_per_peptide"
+    "</span>]<span style=\"color: green;\">residues</span>[+/-]<span style-\"color: blue;\">"
+    "mass_change</span><br>In the example, <span style=\"color: red;\">max_per_peptide"
+    "</span> is <span style=\"color: red;\">1</span>, <span style=\"color: green;\">"
+    "residues</span> are <span style=\"color: green;\">STY</span>, and "
+    "<span style=\"color: blue;\">mass_change</span> is <span style=\"color: blue;\">"
+    "+79.966331</span>. To specify a static modification, the number preceding the amino "
+    "acid must be omitted; i.e., <span style=\"color: green;\">C</span>+<span "
+    "style=\"color: blue;\">57.02146</span> specifies a static modification of 57.02146 "
+    "Da to cysteine. Note that Tide allows at most one modification per amino "
+    "acid.  Also, the default modification (C+57.02146) will be added to "
+    "every mods-spec string unless an explicit C+0 is included.]]",
+    "Available for tide-index.", true);
+  InitStringParam("nterm-peptide-mods-spec", "",
+    "[[nohtml:Specifies N-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of N-terminal modification sequences of the form: "
+    "1E-18.0106,C-17.0265]][[html:Specify peptide n-terminal modifications. Like "
+    "--mods-spec, this specification has three components, but with a slightly different "
+    "syntax. The <span style=\"color: red;\">max_per_peptide</span> can be either \"1\", "
+    "in which case it defines a variable terminal modification, or missing, in which case "
+    "the modification is static. The <span style=\"color: green;\">residues</span> field "
+    "indicates which amino acids are subject to the modification, with the residue <span "
+    "style=\"color: green;\">X</span> corresponding to any amino acid. Finally, <span "
+    "style=\"color: blue;\">added_mass</span> is defined as before.]]",
+    "Available for tide-index", true);
+  InitStringParam("cterm-peptide-mods-spec", "",
+    "[[nohtml:Specifies C-terminal static and variable mass modifications on peptides. "
+    "Specify a comma-separated list of C-terminal modification sequences of the form: "
+    "X+21.9819]][[html:Specify peptide c-terminal modifications. See "
+    "nterm-peptide-mods-spec for syntax.]]",
+    "Available for tide-index", true);
+  InitStringParam("cterm-protein-mods-spec", "",
+    "[[nohtml:Specifies static and variable mass modifications on proteins' C-terminal. ]]"
+    "[[html:Specifies C-terminal static and variable mass modifications on proteins."
+    "Mod specification syntax is the same as for peptide mods (see nterm-peptide-mods-spec option),"
+    "but these mods are applied only to peptide C-terminals that are also protein terminals."
+    "If variable modification are provided for both peptide and protein terminal, they will be "
+    "applied one at a time. ",
+    "Available for tide-index", true);
+  InitStringParam("nterm-protein-mods-spec", "",
+    "[[nohtml:Specifies static and variable mass modifications on proteins N-terminal.]] "
+    "[[html:Same as cterm-protein-mods-spec, but for  the protein N-terminal.",
+    "Available for tide-index", true);
+  InitStringParam("store-spectra", "",
+    "Specify the name of the file where the binarized fragmentation spectra "
+    "will be stored. Subsequent runs of crux tide-search will execute more quickly if "
+    "provided with the spectra in binary format. The filename is specified relative to "
+    "the current working directory, not the Crux output directory (as specified by "
+    "--output-dir). This option is not valid if multiple input spectrum files are given.",
+    "Available for tide-search", true);
+  InitBoolParam("exact-p-value", false,
+    "Enable the calculation of exact p-values for the XCorr score[[html: as described in "
+    "<a href=\"http://www.ncbi.nlm.nih.gov/pubmed/24895379\">this article</a>]]. Calculation "
+    "of p-values increases the running time but increases the number of identifications at a "
+    "fixed confidence threshold. The p-values will be reported in a new column with header "
+    "\"exact p-value\", and the \"xcorr score\" column will be replaced with a \"refactored "
+    "xcorr\" column. Note that, currently, p-values can only be computed when the "
+    "mz-bin-width parameter is set to its default value. Variable and static mods are allowed "
+    "on non-terminal residues in conjunction with p-value computation, but currently only "
+    "static mods are allowed on the N-terminus, and no mods on the C-terminus.",
+    "Available for tide-search", true);
+  //Added for tailor score calibration method by AKF
+  InitBoolParam("use-tailor-calibration", false,
+    "Fast, but heuristic PSM score calibration[[html: as described in "
+    "<a href=\"https://pubmed.ncbi.nlm.nih.gov/32175744/\">this article</a>]].",
+    "Available for tide-search", true);    
+  InitStringParam("store-index", "",
+    "When providing a FASTA file as the index, the generated binary index will be stored at "
+    "the given path. This option has no effect if a binary index is provided as the index.",
+    "Available for tide-search", true);
+  InitBoolParam("concat", false,
+    "When set to T, target and decoy search results are reported in a single file, and only "
+    "the top-scoring N matches (as specified via --top-match) are reported for each spectrum, "
+    "irrespective of whether the matches involve target or decoy peptides.",
+    "Available for tide-search", true);
+  InitBoolParam("file-column", true,
+    "Include the file column in tab-delimited output.",
+    "Available for tide-search", true);
+  // Same as remove_precursor_peak and remove_precursor tolerance in Comet
+  InitBoolParam("remove-precursor-peak", false,
+    "If true, all peaks around the precursor m/z will be removed, within a range "
+    "specified by the --remove-precursor-tolerance option.",
+    "Available for tide-search.", true);
+  InitDoubleParam("remove-precursor-tolerance", 1.5, 0, BILLION,
+    "This parameter specifies the tolerance (in Th) around each precursor m/z that is "
+    "removed when the --remove-precursor-peak option is invoked.",
+    "Available for print-processed spectra and tide-search.", true);
+  InitBoolParam("clip-nterm-methionine", false,
+    "When set to T, for each protein that begins with methionine, tide-index will "
+    "put two copies of the leading peptide into the index, with and without the N-terminal "
+    "methionine.",
+    "Available for tide-index.", true);
+  InitBoolParam("allow-dups", false,
+    "Prevent duplicate peptides between the target and decoy databases. When set to \"F\", "
+    "the program keeps all target and previously generated decoy peptides in memory. A shuffled "
+    "decoy will be re-shuffled multiple times to avoid duplication. If a non-duplicated peptide "
+    "cannot be generated, the decoy is skipped entirely. When set to \"T\", every decoy is added to "
+    "the database without checking for duplication. This option reduces the memory requirements "
+    "significantly.",
+    "Available for tide-index.", true);
+  InitBoolParam("use-neutral-loss-peaks", true,
+    "Controls whether neutral loss ions are considered in the search. "
+    "For XCorr, the loss of ammonia (NH3, 17.0086343 Da) is applied to singly "
+    "charged b- and y-ions, and the loss of water (H2O; 18.0091422) is applied "
+    "to b-ions. If the precursor charge is >=3, then a doubly-charged version of "
+    "each ion is added. For XCorr p-value, three types of neutral losses are included. "
+    "Loss of ammonia and water are applied to b- and y-ions, and a carbon monoxide "
+    "loss (CO, 27.9949) is also applied to b-ions. Higher charge fragments are "
+    "included for all possible charges less than the precursor charge. All "
+    "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
+    "are not yet implemented for the res-ev score function.",
+    "Available for tide-search.", true);
+  InitIntParam("min-precursor-charge", 1, 1, BILLION,
+    "The minimum charge state of a spectra to consider in search.",
+    "Available for tide-search.", true);
+  InitIntParam("max-precursor-charge", 5, 1, BILLION,
+    "The maximum charge state of a spectra to consider in search.",
+    "Available for tide-search.", true);
+  InitBoolParam("peptide-centric-search", false,
+    "Carries out a peptide-centric search. For each peptide the top-scoring spectra "
+    "are reported, in contrast to the standard spectrum-centric search where the top-"
+    "scoring peptides are reported. Note that in this case the \"xcorr rank\" column "
+    "will contain the rank of the given spectrum with respect to the given candidate "
+    "peptide, rather than vice versa (which is the default).",
+    "Available for tide-search.", true);
+  InitIntParam("elution-window-size", 0, 0, 10,
+    "Size of the elution window used in smoothing score in DIA mode. "
+    "Used only with peptide-centric-search if greater than 0. A score of a psms "
+    "centred in the window is substituted by the geometric mean of the scores "
+    "in the window. If windows size is even, then it is increased by 1.",
+    "Available for tide-search.", false);
+  InitBoolParam("skip-decoys", true,
+    "Skips decoys when reading a Tide index.",
+    "Available for read-tide-index", false);
+  InitBoolParam("skip-preprocessing", false,
+    "Skip preprocessing steps on spectra. Default = F.",
+    "Available for tide-search", true);
+  InitStringParam("score-function", "xcorr", "xcorr|combined-p-values|hyperscore|hyperscore-la",
+    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST;"
+    "`combined-p-values` combined (1) exact-p-value: a calibrated version of XCorr that uses "
+    "dynamic programming and (2) residue-evidence-pvalue: a valibarated version of the  ResEV "
+    "that considers pairs of peaks, rather than single peaks; "
+    "`hyperscore` is the score function used in X!Tandem; `hyperscore-la` is a variant of the "
+    "hyperscore designed for open modification searching.",
+    "Available for tide-search.", true);
+  InitDoubleParam("fragment-tolerance", .02, 0, 2,
+    "Mass tolerance (in Da) for scoring pairs of peaks when creating the residue evidence matrix. "
+    "This parameter only makes sense when score-function is 'residue-evidence' or 'both'.",
+    "Available for tide-search.", true);
+  InitIntParam("evidence-granularity", 25, 1, 100,
+    "This parameter controls the granularity of the entries in the dynamic programming matrix used in residue-evidence scoring."
+    "Smaller values make the program run faster but give less accurate p-values; "
+    "larger values make the program run more slowly but give more accurate p-values.",
+    "Available for tide-search", true);
+  InitStringParam("isotope-error", "",
+                  "List of positive, non-zero integers.",
+                  "Isotope errors to include. "
+                  "Specify a comma-separated list of isotope errors of the form: "
+                  "1,2,3,..."
                   "Available for tide-search", true);
-    // Added for tailor score calibration method by AKF
-    InitBoolParam("use-tailor-calibration", false,
-                  "Fast, but heuristic PSM score calibration[[html: as described in "
-                  "<a href=\"https://pubmed.ncbi.nlm.nih.gov/32175744/\">this article</a>]].",
-                  "Available for tide-search", true);
-    InitStringParam("store-index", "",
-                    "When providing a FASTA file as the index, the generated binary index will be stored at "
-                    "the given path. This option has no effect if a binary index is provided as the index.",
-                    "Available for tide-search", true);
-    InitBoolParam("concat", false,
-                  "When set to T, target and decoy search results are reported in a single file, and only "
-                  "the top-scoring N matches (as specified via --top-match) are reported for each spectrum, "
-                  "irrespective of whether the matches involve target or decoy peptides.",
-                  "Available for tide-search", true);
-    InitBoolParam("file-column", true,
-                  "Include the file column in tab-delimited output.",
-                  "Available for tide-search", true);
-    // Same as remove_precursor_peak and remove_precursor tolerance in Comet
-    InitBoolParam("remove-precursor-peak", false,
-                  "If true, all peaks around the precursor m/z will be removed, within a range "
-                  "specified by the --remove-precursor-tolerance option.",
-                  "Available for tide-search.", true);
-    InitDoubleParam("remove-precursor-tolerance", 1.5, 0, BILLION,
-                    "This parameter specifies the tolerance (in Th) around each precursor m/z that is "
-                    "removed when the --remove-precursor-peak option is invoked.",
-                    "Available for print-processed spectra and tide-search.", true);
-    InitBoolParam("clip-nterm-methionine", false,
-                  "When set to T, for each protein that begins with methionine, tide-index will "
-                  "put two copies of the leading peptide into the index, with and without the N-terminal "
-                  "methionine.",
-                  "Available for tide-index.", true);
-    InitBoolParam("allow-dups", false,
-                  "Prevent duplicate peptides between the target and decoy databases. When set to \"F\", "
-                  "the program keeps all target and previously generated decoy peptides in memory. A shuffled "
-                  "decoy will be re-shuffled multiple times to avoid duplication. If a non-duplicated peptide "
-                  "cannot be generated, the decoy is skipped entirely. When set to \"T\", every decoy is added to "
-                  "the database without checking for duplication. This option reduces the memory requirements "
-                  "significantly.",
-                  "Available for tide-index.", true);
-    InitBoolParam("use-neutral-loss-peaks", true,
-                  "Controls whether neutral loss ions are considered in the search. "
-                  "For XCorr, the loss of ammonia (NH3, 17.0086343 Da) is applied to singly "
-                  "charged b- and y-ions, and the loss of water (H2O; 18.0091422) is applied "
-                  "to b-ions. If the precursor charge is >=3, then a doubly-charged version of "
-                  "each ion is added. For XCorr p-value, three types of neutral losses are included. "
-                  "Loss of ammonia and water are applied to b- and y-ions, and a carbon monoxide "
-                  "loss (CO, 27.9949) is also applied to b-ions. Higher charge fragments are "
-                  "included for all possible charges less than the precursor charge. All "
-                  "neutral loss peaks have an intensity 1/10 of the primary peak. Neutral losses "
-                  "are not yet implemented for the res-ev score function.",
-                  "Available for tide-search.", true);
-    InitIntParam("min-precursor-charge", 1, 1, BILLION,
-                 "The minimum charge state of a spectra to consider in search.",
-                 "Available for tide-search.", true);
-    InitIntParam("max-precursor-charge", 5, 1, BILLION,
-                 "The maximum charge state of a spectra to consider in search.",
-                 "Available for tide-search.", true);
-    InitBoolParam("peptide-centric-search", false,
-                  "Carries out a peptide-centric search. For each peptide the top-scoring spectra "
-                  "are reported, in contrast to the standard spectrum-centric search where the top-"
-                  "scoring peptides are reported. Note that in this case the \"xcorr rank\" column "
-                  "will contain the rank of the given spectrum with respect to the given candidate "
-                  "peptide, rather than vice versa (which is the default).",
-                  "Available for tide-search.", true);
-    InitIntParam("elution-window-size", 0, 0, 10,
-                 "Size of the elution window used in smoothing score in DIA mode. "
-                 "Used only with peptide-centric-search if greater than 0. A score of a psms "
-                 "centred in the window is substituted by the geometric mean of the scores "
-                 "in the window. If windows size is even, then it is increased by 1.",
-                 "Available for tide-search.", false);
-    InitBoolParam("skip-decoys", true,
-                  "Skips decoys when reading a Tide index.",
-                  "Available for read-tide-index", false);
-    InitBoolParam("skip-preprocessing", false,
-                  "Skip preprocessing steps on spectra. Default = F.",
-                  "Available for tide-search", true);
-    InitStringParam("score-function", "xcorr", "xcorr|residue-evidence|both",
-                    "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST; "
-                    "'residue-evidence' is designed to score high-resolution MS2 spectra; and 'both' calculates "
-                    "both scores. The latter requires that exact-p-value=T.",
-                    "Available for tide-search.", true);
-    InitDoubleParam("fragment-tolerance", .02, 0, 2,
-                    "Mass tolerance (in Da) for scoring pairs of peaks when creating the residue evidence matrix. "
-                    "This parameter only makes sense when score-function is 'residue-evidence' or 'both'.",
-                    "Available for tide-search.", true);
-    InitIntParam("evidence-granularity", 25, 1, 100,
-                 "This parameter controls the granularity of the entries in the dynamic programming matrix used in residue-evidence scoring."
-                 "Smaller values make the program run faster but give less accurate p-values; "
-                 "larger values make the program run more slowly but give more accurate p-values.",
-                 "Available for tide-search", true);
-    InitStringParam("isotope-error", "",
-                    "List of positive, non-zero integers.",
-                    "Isotope errors to include. "
-                    "Specify a comma-separated list of isotope errors of the form: "
-                    "1,2,3,..."
-                    "Available for tide-search",
-                    true);
-    InitIntParam("num-threads", 1, 0, 64,
-                 "0=poll CPU to set num threads; else specify num threads directly.",
-                 "Available for tide-search and crux-lfq tab-delimited files only.", true);
-    InitBoolParam("brief-output", false,
-                  "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
-                  "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
-                  "Available for tide-search", true);
-    /*
-     * Comet parameters
-     */
-    InitArgParam("input spectra",
-                 "The name of one or more files from which to parse the spectra. Valid formats include mzXML, "
-                 "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
-                 "RAW files can be parsed only under windows and if the appropriate libraries were "
-                 "included at compile time. Multiple files can be included on the command line "
-                 "(space delimited), prior to the name of the database.");
-    /* Comet - Database */
-    InitArgParam("database_name",
-                 "A full or relative path to the sequence database, "
-                 "in FASTA or PEFF format, to search. Example databases include "
-                 "RefSeq or UniProt.  The database can contain amino acid "
-                 "sequences or nucleic acid sequences. If sequences are "
-                 "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
-                 "If the sequences are nucleic acid sequences, you must instruct Comet to "
-                 "translate these to amino acid sequences. Do this by setting "
-                 "nucleotide_reading_frame\" to a value between 1 and 9.");
-    InitIntParam("decoy_search", 0, 0, 2,
-                 "0=no, 1=concatenated search, 2=separate search.",
-                 "Available for comet.", true);
-    InitIntParam("peff_format", 0, 0, 5,
-                 "0=normal FASTA format,"
-                 "1=PEFF PSI-MOD modifications and amino acid variants,"
-                 "2=PEFF Unimod modifications and amino acid variants,"
-                 "3=PEFF PSI-MOD modifications, skipping amino acid variants,"
-                 "4=PEFF Unimod modifications, skipping amino acid variants,"
-                 "5=PEFF amino acid variants, skipping PEFF modifications.",
-                 "Available for comet.", true);
-    InitStringParam("peff_obo", "",
-                    "A full or relative path to the OBO file used with a PEFF search. "
-                    "Supported OBO formats are PSI-Mod and Unimod OBO files. "
-                    "Which OBO file you use depends on your PEFF input file. "
-                    "This parameter is ignored if \"peff_format = 0\". "
-                    "There is no default value if this parameter is missing.",
-                    "Available for comet.", true);
-    /* Comet - CPU threads */
-    InitIntParam("num_threads", 0, -64, 64,
-                 "0=poll CPU to set num threads; else specify num threads directly.",
-                 "Available for comet.", true);
-    /* Comet - Masses */
-    InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
-                    "Controls the mass tolerance value.  The mass tolerance "
-                    "is set at +/- the specified number i.e. an entered value "
-                    "of \"1.0\" applies a -1.0 to +1.0 tolerance. "
-                    "The units of the mass tolerance is controlled by the parameter "
-                    "\"peptide_mass_units\". ",
-                    "Available for comet.", true);
-    InitIntParam("peptide_mass_units", 0, 0, 2,
-                 "0=amu, 1=mmu, 2=ppm.",
-                 "Available for comet.", true);
-    InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
-                    "Automatically estimate optimal value for the peptide_mass_tolerance parameter "
-                    "from the spectra themselves. false=no estimation, warn=try to estimate "
-                    "but use the default value in case of failure, fail=try to estimate and "
-                    "quit in case of failure.",
-                    "Available for comet.", true);
-    InitIntParam("mass_type_parent", 1, 0, 1,
-                 "0=average masses, 1=monoisotopic masses.",
-                 "Available for comet.", true);
-    InitIntParam("mass_type_fragment", 1, 0, 1,
-                 "0=average masses, 1=monoisotopic masses.",
-                 "Available for comet.", true);
-    InitIntParam("precursor_tolerance_type", 0, 0, 1,
-                 "0=singly charged peptide mass, 1=precursor m/z.",
-                 "Available for comet.", true);
-    InitIntParam("isotope_error", 0, 0, 5,
-                 "0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, "
-                 "4=--8/-4/0/4/8 (for +4/+8 labeling), "
-                 "5=-1/0/1/2/3.",
-                 "Available for comet.", true);
-    /* Comet - Search enzyme */
-    InitIntParam("search_enzyme_number", 1, 0, BILLION,
-                 "Specify a search enzyme from the end of the parameter file.",
-                 "Available for comet.", true);
-    InitIntParam("search_enzyme2_number", 0, 0, BILLION,
-                 "Specify a second search enzyme from the end of the parameter file.",
-                 "Available for comet.", true);
-    InitIntParam("num_enzyme_termini", 2, 1, 9,
-                 "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
-                 "Available for comet.", true);
-    InitIntParam("allowed_missed_cleavage", 2, 0, 5,
-                 "Maximum value is 5; for enzyme search.",
-                 "Available for comet.", true);
-    /* Comet - Fragment ions */
-    InitDoubleParam("fragment_bin_tol", 1.000507, 0, BILLION,
-                    "Binning to use on fragment ions.",
-                    "Available for comet.", true);
-    InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
-                    "Offset position to start the binning (0.0 to 1.0).",
-                    "Available for comet and kojak.", true);
-    InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
-                    "Automatically estimate optimal value for the fragment_bin_tol parameter "
-                    "from the spectra themselves. false=no estimation, warn=try to estimate "
-                    "but use the default value in case of failure, fail=try to estimate and "
-                    "quit in case of failure.",
-                    "Available for comet.", true);
-    InitBoolParam("auto_modifications", false,
-                  "Automatically infer modifications from the spectra themselves.",
+  InitIntParam("num-threads", 1, 0, 64,
+               "0=poll CPU to set num threads; else specify num threads directly.",
+               "Available for tide-search tab-delimited files only.", true);
+  InitBoolParam("brief-output", false,
+    "Output in tab-delimited text only the file name, scan number, charge, score and peptide."
+    "Incompatible with mzid-output=T, pin-output=T, pepxml-output=T or txt-output=F.",
+    "Available for tide-search", true);
+  InitBoolParam("override-charges", false,
+    "If this is set to T, then all spectra are searched in all charge states from min-charge to max-charge. "
+    "Otherwise, the default behavior is to search with all charge states only if a spectrum has no charge "
+    "or charge=0.",
+    "Available for tide-search", true);
+  /*
+   * Comet parameters
+   */
+  InitArgParam("input spectra",
+    "The name of one or more files from which to parse the spectra. Valid formats include mzXML, "
+    "mzML, mz5, raw, ms2, and cms2. Files in mzML or mzXML may be compressed with gzip. "
+    "RAW files can be parsed only under windows and if the appropriate libraries were "
+    "included at compile time. Multiple files can be included on the command line "
+    "(space delimited), prior to the name of the database.");
+  /* Comet - Database */
+  InitArgParam("database_name",
+    "A full or relative path to the sequence database, "
+    "in FASTA or PEFF format, to search. Example databases include "
+    "RefSeq or UniProt.  The database can contain amino acid "
+    "sequences or nucleic acid sequences. If sequences are "
+    "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
+    "If the sequences are nucleic acid sequences, you must instruct Comet to "
+    "translate these to amino acid sequences. Do this by setting "
+    "nucleotide_reading_frame\" to a value between 1 and 9.");
+  InitIntParam("decoy_search", 0, 0, 2,
+    "0=no, 1=concatenated search, 2=separate search.",
+    "Available for comet.", true);
+  InitIntParam("peff_format", 0, 0, 5,
+    "0=normal FASTA format,"
+    "1=PEFF PSI-MOD modifications and amino acid variants,"
+    "2=PEFF Unimod modifications and amino acid variants,"
+    "3=PEFF PSI-MOD modifications, skipping amino acid variants,"
+    "4=PEFF Unimod modifications, skipping amino acid variants,"
+    "5=PEFF amino acid variants, skipping PEFF modifications.",
+    "Available for comet.", true);
+  InitStringParam("peff_obo", "",
+    "A full or relative path to the OBO file used with a PEFF search. "
+    "Supported OBO formats are PSI-Mod and Unimod OBO files. "
+    "Which OBO file you use depends on your PEFF input file. "
+    "This parameter is ignored if \"peff_format = 0\". "
+    "There is no default value if this parameter is missing.",
+    "Available for comet.", true);
+  /* Comet - CPU threads */
+  InitIntParam("num_threads", 0, -64, 64,
+    "0=poll CPU to set num threads; else specify num threads directly.",
+    "Available for comet.", true);
+  /* Comet - Masses */
+  InitDoubleParam("peptide_mass_tolerance", 3.0, 0, BILLION,
+    "Controls the mass tolerance value.  The mass tolerance "
+    "is set at +/- the specified number i.e. an entered value "
+    "of \"1.0\" applies a -1.0 to +1.0 tolerance. "
+    "The units of the mass tolerance is controlled by the parameter "
+    "\"peptide_mass_units\". ",
+    "Available for comet.", true);
+  InitIntParam("peptide_mass_units", 0, 0, 2,
+    "0=amu, 1=mmu, 2=ppm.",
+    "Available for comet.", true);
+  InitStringParam("auto_peptide_mass_tolerance", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the peptide_mass_tolerance parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for comet.", true);
+  InitIntParam("mass_type_parent", 1, 0, 1,
+    "0=average masses, 1=monoisotopic masses.",
+    "Available for comet.", true);
+  InitIntParam("mass_type_fragment", 1, 0, 1,
+    "0=average masses, 1=monoisotopic masses.",
+    "Available for comet.", true);
+  InitIntParam("precursor_tolerance_type", 0, 0, 1,
+    "0=singly charged peptide mass, 1=precursor m/z.",
+    "Available for comet.", true);
+  InitIntParam("isotope_error", 0, 0, 5,
+    "0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, " 
+    "4=--8/-4/0/4/8 (for +4/+8 labeling), "
+    "5=-1/0/1/2/3.",
+    "Available for comet.", true);
+  /* Comet - Search enzyme */
+  InitIntParam("search_enzyme_number", 1, 0, BILLION,
+    "Specify a search enzyme from the end of the parameter file.",
+    "Available for comet.", true);
+  InitIntParam("search_enzyme2_number", 0, 0, BILLION,
+    "Specify a second search enzyme from the end of the parameter file.",
+    "Available for comet.", true);
+  InitIntParam("num_enzyme_termini", 2, 1, 9,
+    "valid values are 1 (semi-digested), 2 (fully digested), 8 N-term, 9 C-term.",
+    "Available for comet.", true);
+  InitIntParam("allowed_missed_cleavage", 2, 0, 5,
+    "Maximum value is 5; for enzyme search.",
+    "Available for comet.", true);
+  /* Comet - Fragment ions */
+  InitDoubleParam("fragment_bin_tol", 1.000507, 0, BILLION,
+    "Binning to use on fragment ions.",
+    "Available for comet.", true);
+  InitDoubleParam("fragment_bin_offset", 0.40, 0, 1.0,
+    "Offset position to start the binning (0.0 to 1.0).",
+    "Available for comet and kojak.", true);
+  InitStringParam("auto_fragment_bin_tol", "false", "false|warn|fail",
+    "Automatically estimate optimal value for the fragment_bin_tol parameter "
+    "from the spectra themselves. false=no estimation, warn=try to estimate "
+    "but use the default value in case of failure, fail=try to estimate and "
+    "quit in case of failure.",
+    "Available for comet.", true);
+  InitBoolParam("auto_modifications", false,
+    "Automatically infer modifications from the spectra themselves.",
+    "Available for comet.", true);
+  InitIntParam("theoretical_fragment_ions", 1, 0, 1,
+    "0=default peak shape, 1=M peak only.",
+    "Available for comet.", true);
+  InitIntParam("use_A_ions", 0, 0, 1,
+    "Controls whether or not A-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_B_ions", 1, 0, 1,
+    "Controls whether or not B-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_C_ions", 0, 0, 1,
+    "Controls whether or not C-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_X_ions", 0, 0, 1,
+    "Controls whether or not X-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_Y_ions", 1, 0, 1,
+    "Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_Z_ions", 0, 0, 1,
+    "Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  InitIntParam("use_NL_ions", 1, 0, 1,
+    "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
+    "Available for comet.", true);
+  InitIntParam("use_Z1_ions", 0, 0, 1,
+    "Controls whether or not Z1-ions are considered in the search (0 - no, 1 - yes).",
+    "Available for comet.", true);
+  /* Comet - Output */
+  InitIntParam("output_mzidentmlfile", 0, 0, 1,
+    "0=no, 1=yes  write mzIdentML file.",
+    "Available for comet.", true);
+  InitIntParam("output_sqtstream", 0, 0, 1,
+    "0=no, 1=yes  write sqt file.",
+    "Available for comet.", true);
+  InitIntParam("output_sqtfile", 0, 0, 1,
+    "0=no, 1=yes  write sqt file.",
+    "Available for comet.", true);
+  InitIntParam("output_txtfile", 1, 0, 1,
+    "0=no, 1=yes  write tab-delimited text file.",
+    "Available for comet.", true);
+  InitIntParam("output_pepxmlfile", 1, 0, 1,
+    "0=no, 1=yes  write pep.xml file.",
+    "Available for comet.", true);
+  InitIntParam("output_percolatorfile", 0, 0, 1,
+    "0=no, 1=yes write percolator file.",
+     "Available for comet.", true);
+  InitIntParam("print_expect_score", 1, 0, 1,
+    "0=no, 1=yes to replace Sp with expect in out & sqt.",
+    "Available for comet.", true);
+  InitIntParam("num_output_lines", 5, 1, BILLION,
+    "num peptide results to show.",
+    "Available for comet.", true);
+  InitIntParam("show_fragment_ions", 0, 0, 1,
+    "0=no, 1=yes for out files only.",
+    "Available for comet.", true);
+  InitIntParam("sample_enzyme_number", 1, 0, 10,
+    "Sample enzyme which is possibly different than the one applied to the search. "
+    "Used to calculate NTT & NMC in pepXML output.",
+    "Available for comet. ", true);
+  /* Comet - mzXML/mzML parameters */
+  InitStringParam("scan_range", "0 0",
+    "Start and scan scan range to search; 0 as first entry ignores parameter.",
+    "Available for comet.", true);
+  InitStringParam("precursor_charge", "0 0",
+    "Precursor charge range to analyze; does not override "
+    "mzXML charge; 0 as first entry ignores parameter.",
+    "Available for comet.", true);
+  InitIntParam("override_charge", 0, 0, 3,
+    "Specifies the whether to override existing precursor charge state information when present "
+    "in the files with the charge range specified by the \"precursor_charge\" parameter.",
+    "Available for comet.", true);
+  InitIntParam("ms_level", 2, 2, 3,
+    "MS level to analyze, valid are levels 2 or 3.",
+    "Available for comet. ", true);
+  InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD+SA|ETD|PQD|HCD|IRMPD",
+    "Specifies which scan types are searched.",
+    "Available for comet. ", true);
+  /* Comet - Misc. parameters */
+  InitStringParam("digest_mass_range", "600.0 5000.0",
+    "MH+ peptide mass range to analyze.",
+    "Available for comet.", true);
+  InitIntParam("num_results", 50, 0, BILLION,
+    "Number of search hits to store internally.",
+    "Available for comet.", true);
+  InitIntParam("skip_researching", 1, 0, 1,
+    "For '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
+    "Available for comet.", true);
+  InitIntParam("max_fragment_charge", 3, 1, 5,
+    "Set maximum fragment charge state to analyze (allowed max 5).",
+    "Available for comet.", true);
+  InitIntParam("max_index_runtime", 0, 0, BILLION,
+    "Sets the maximum indexed database search run time for a scan/query. "
+    "Valid values are integers 0 or higher representing the maximum run time "
+    "in milliseconds. "
+    "As Comet loops through analyzing peptides from the database index file, "
+    "it checks the cummulative run time of that spectrum search after each "
+    "peptide is analyzed. If the run time exceeds the value set for this "
+    "parameter, the search is aborted and the best peptide result analyzed "
+    "up to that point is returned. "
+    "To have no maximum search time, set this parameter value to \"0\". "
+    "The default value is \"0\".",
+    "Available for comet.", true);
+  InitIntParam("max_precursor_charge", 6, 1, 9,
+    "Set maximum precursor charge state to analyze (allowed max 9).",
+    "Available for comet.", true);
+  InitIntParam("nucleotide_reading_frame", 0, 0, 9,
+    "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six.",
+    "Available for comet.", true);
+  InitIntParam("clip_nterm_methionine", 0, 0, 1,
+    "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
+    "Available for comet.", true);
+  InitIntParam("explicit_deltacn", 0, 0, 1,
+    "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide, "
+    "1=Comet deltaCn reported between the top two peptides.",
+    "Available for comet.", true);
+  InitIntParam("old_mods_encoding", 0, 0, 1,
+    "0=Comet will use mass based modification encodings, "
+    "1=Comet will use the old character based modification encodings.",
+    "Available for comet.", true);
+  InitIntParam("spectrum_batch_size", 0, 0, BILLION,
+    "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
+    "Available for comet.", true);
+  InitStringParam("decoy_prefix", "decoy_",
+    "Specifies the prefix of the protein names that indicates a decoy.",
+    "Available for comet.", true);
+  InitStringParam("text_file_extension", "",
+    "Specifies the a custom extension for output text file.",
+    "Available for comet.", true);
+  InitStringParam("output_suffix", "",
+    "Specifies the suffix string that is appended to the base output name "
+    "for the pep.xml, pin.xml, txt and sqt output files.",
+    "Available for comet.", true);
+  InitIntParam("peff_verbose_output", 0, 0, 1,
+    "Specifies whether the verbose output is reported during a PEFF search. "
+    "To show verbose output, set the value to 1. "
+    "The default value is 0 if this parameter is missing.",
+    "Available for comet.", false);
+  InitStringParam("peptide_length_range", "1 63",
+    "Defines the length range of peptides to search. "
+    "This parameter has two integer values. "
+    "The first value is the minimum length cutoff and the second value is "
+    "the maximum length cutoff. Only peptides within the specified length "
+    "range are analyzed. The maximum peptide length that Comet can analyze is 63. "
+    "The default values are \"1 63\".",
+    "Available for comet.", true);
+  InitStringParam("precursor_NL_ions", "",
+    "Controls whether or not precursor neutral loss peaks are considered in "
+    "the xcorr scoring. If left blank, this parameter is ignored.  To consider "
+    "precursor neutral loss peaks, add one or more neutral loss mass value "
+    "separated by a space.  Each entered mass value will be subtracted from "
+    "the experimentral precursor mass and resulting neutral loss m/z values "
+    "for all charge states (from 1 to precursor charge) will be analyzed. "
+    "As these neutral loss peaks are analyzed along side fragment ion peaks, "
+    "the fragment tolerance settings (fragment_bin_tol, fragment_bin_offset, "
+    "theoretical_fragment_ion) apply to the precursor neutral loss peaks. "
+    "The default value is blank/unused.",
+    "Available for comet.", true);
+  InitIntParam("equal_I_and_L", 1, 0, 1,
+    "This parameter controls whether the Comet treats isoleucine (I) and "
+    "leucine (L) as the same/equivalent with respect to a peptide identification. "
+    "0 treats I and L as different, 1 treats I and L as the same. "
+    "The default value is \"1\"",
+    "Available for comet.", true);
+  InitStringParam("mass_offsets", "",
+    "Specifies one or more mass offsets to apply. This value(s) are effectively "
+    "subtracted from each precursor mass such that peptides that are smaller "
+    "than the precursor mass by the offset value can still be matched to the "
+    "respective spectrum.",
+    "Available for comet.", true);
+  InitIntParam("max_duplicate_proteins", 20, -1, BILLION,
+    "defines the maximum number of proteins (identifiers/accessions) to report. "
+    "If a peptide is present in 6 total protein sequences, there is one (first) "
+    "reference protein and 5 additional duplicate proteins. This parameter "
+    "controls how many of those 5 additional duplicate proteins are reported."
+    "If \"decoy_search = 2\" is set to report separate target and decoy results, "
+    "this parameter will be applied to the target and decoy outputs separately. "
+    "If set to \"-1\", there will be no limit on the number of reported additional proteins. "
+    "The default value is \"20\" if this parameter is missing.",
+    "Available for comet.", true);
+  /* Comet - Spectral processing */
+  InitIntParam("minimum_peaks", 10, 1, BILLION,
+    "Minimum number of peaks in spectrum to search.",
+    "Available for comet.", true);
+  InitDoubleParam("minimum_intensity", 0, 0, BILLION,
+    "Minimum intensity value to read in.",
+    "Available for comet. ", true);
+  InitIntParam("remove_precursor_peak", 0, 0, 2,
+    "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD).",
+    "Available for comet. ", true);
+  InitDoubleParam("remove_precursor_tolerance", 1.5, -BILLION, BILLION,
+    "+- Da tolerance for precursor removal.",
+    "Available for comet. ", true);
+  InitStringParam("clear_mz_range", "0.0 0.0",
+    "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
+    "Available for comet.", true);
+  /* Comet - Variable modifications */
+  InitStringParam("variable_mod01", "0.0 null 0 4 -1 0 0",
+                  "Up to 9 variable modifications are supported. Each modification "
+                  "is specified using seven entries: "
+                  "\"[[html:&lt;mass&gt;]][[nohtml:<mass>]] "
+                  "[[html:&lt;residues&gt;]][[nohtml:<residues>]] "
+                  "[[html:&lt;type&gt;]][[nohtml:<type>]] "
+                  "[[html:&lt;max&gt;]][[nohtml:<max>]] "
+                  "[[html:&lt;distance&gt;]][[nohtml:<distance>]] "
+                  "[[html:&lt;terminus&gt;]][[nohtml:<terminus>]] "
+                  "[[html:&lt;force&gt;]][[nohtml:<force>]].\" "
+                  "Type is 0 for static mods and non-zero for variable mods. "
+                  "Note that that if you set the same type value on multiple "
+                  "modification entries, Comet will treat those variable modifications "
+                  "as a binary set. This means that all modifiable residues in the "
+                  "binary set must be unmodified or modified. Multiple binary sets "
+                  "can be specified by setting a different binary modification value. "
+                  "Max is an integer specifying the maximum number of modified "
+                  "residues possible in a peptide for this modification entry. "
+                  "Distance specifies the distance the modification is applied to "
+                  "from the respective terminus: -1 = no distance contraint; "
+                  "0 = only applies to terminal residue; N = only applies to "
+                  "terminal residue through next N residues. "
+                  "Terminus specifies which terminus the distance constraint is "
+                  "applied to: 0 = protein N-terminus; 1 = protein C-terminus; "
+                  "2 = peptide N-terminus; 3 = peptide C-terminus."
+                  "Force specifies whether peptides must contain this modification: "
+                  "0 = not forced to be present; 1 = modification is required.",
                   "Available for comet.", true);
-    InitIntParam("theoretical_fragment_ions", 1, 0, 1,
-                 "0=default peak shape, 1=M peak only.",
-                 "Available for comet.", true);
-    InitIntParam("use_A_ions", 0, 0, 1,
-                 "Controls whether or not A-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_B_ions", 1, 0, 1,
-                 "Controls whether or not B-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_C_ions", 0, 0, 1,
-                 "Controls whether or not C-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_X_ions", 0, 0, 1,
-                 "Controls whether or not X-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_Y_ions", 1, 0, 1,
-                 "Controls whether or not Y-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_Z_ions", 0, 0, 1,
-                 "Controls whether or not Z-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    InitIntParam("use_NL_ions", 1, 0, 1,
-                 "0=no, 1= yes to consider NH3/H2O neutral loss peak.",
-                 "Available for comet.", true);
-    InitIntParam("use_Z1_ions", 0, 0, 1,
-                 "Controls whether or not Z1-ions are considered in the search (0 - no, 1 - yes).",
-                 "Available for comet.", true);
-    /* Comet - Output */
-    InitIntParam("output_mzidentmlfile", 0, 0, 1,
-                 "0=no, 1=yes  write mzIdentML file.",
-                 "Available for comet.", true);
-    InitIntParam("output_sqtstream", 0, 0, 1,
-                 "0=no, 1=yes  write sqt file.",
-                 "Available for comet.", true);
-    InitIntParam("output_sqtfile", 0, 0, 1,
-                 "0=no, 1=yes  write sqt file.",
-                 "Available for comet.", true);
-    InitIntParam("output_txtfile", 1, 0, 1,
-                 "0=no, 1=yes  write tab-delimited text file.",
-                 "Available for comet.", true);
-    InitIntParam("output_pepxmlfile", 1, 0, 1,
-                 "0=no, 1=yes  write pep.xml file.",
-                 "Available for comet.", true);
-    InitIntParam("output_percolatorfile", 0, 0, 1,
-                 "0=no, 1=yes write percolator file.",
-                 "Available for comet.", true);
-    InitIntParam("print_expect_score", 1, 0, 1,
-                 "0=no, 1=yes to replace Sp with expect in out & sqt.",
-                 "Available for comet.", true);
-    InitIntParam("num_output_lines", 5, 1, BILLION,
-                 "num peptide results to show.",
-                 "Available for comet.", true);
-    InitIntParam("show_fragment_ions", 0, 0, 1,
-                 "0=no, 1=yes for out files only.",
-                 "Available for comet.", true);
-    InitIntParam("sample_enzyme_number", 1, 0, 10,
-                 "Sample enzyme which is possibly different than the one applied to the search. "
-                 "Used to calculate NTT & NMC in pepXML output.",
-                 "Available for comet. ", true);
-    /* Comet - mzXML/mzML parameters */
-    InitStringParam("scan_range", "0 0",
-                    "Start and scan scan range to search; 0 as first entry ignores parameter.",
+  for (int i = 2; i <= 9; i++) {
+    InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
+                    "See syntax for variable_mod01.",
                     "Available for comet.", true);
-    InitStringParam("precursor_charge", "0 0",
-                    "Precursor charge range to analyze; does not override "
-                    "mzXML charge; 0 as first entry ignores parameter.",
+  }
+  InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
+    "Specifies the total/maximum number of residues that can be modified in a peptide.",
+    "Available for comet.", true);
+  InitIntParam("require_variable_mod", 0, 0, 1,
+    "Controls whether the analyzed peptides must contain at least one variable modification.",
+    "Available for comet.", true);
+  /* Comet - Static modifications */
+  InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
+    "Specifiy a static modification to the c-terminus of all peptides.",
+    "Available for comet.", true);
+  InitDoubleParam("add_Nterm_peptide", 0, 0, BILLION,
+    "Specify a static modification to the n-terminus of all peptides.",
+    "Available for comet.", true);
+  InitDoubleParam("add_Cterm_protein", 0, 0, BILLION,
+    "Specify a static modification to the c-terminal peptide of each protein.",
+    "Available for comet.", true);
+  InitDoubleParam("add_Nterm_protein", 0, 0, BILLION,
+    "Specify a static modification to the n-terminal peptide of each protein.",
+    "Available for comet.", true);
+  for (char c = 'A'; c <= 'Z'; c++) {
+    InitDoubleParam(CometApplication::staticModParam(c),
+                    c != 'C' ? 0 : CYSTEINE_DEFAULT, 
+                    -std::numeric_limits<double>::max(), 
+                    std::numeric_limits<double>::max(),
+                    "Specify a static modification to the residue " + string(1, c) + ".",
                     "Available for comet.", true);
-    InitIntParam("override_charge", 0, 0, 3,
-                 "Specifies the whether to override existing precursor charge state information when present "
-                 "in the files with the charge range specified by the \"precursor_charge\" parameter.",
-                 "Available for comet.", true);
-    InitIntParam("ms_level", 2, 2, 3,
-                 "MS level to analyze, valid are levels 2 or 3.",
-                 "Available for comet. ", true);
-    InitStringParam("activation_method", "ALL", "ALL|CID|ECD|ETD+SA|ETD|PQD|HCD|IRMPD",
-                    "Specifies which scan types are searched.",
-                    "Available for comet. ", true);
-    /* Comet - Misc. parameters */
-    InitStringParam("digest_mass_range", "600.0 5000.0",
-                    "MH+ peptide mass range to analyze.",
-                    "Available for comet.", true);
-    InitIntParam("num_results", 50, 0, BILLION,
-                 "Number of search hits to store internally.",
-                 "Available for comet.", true);
-    InitIntParam("skip_researching", 1, 0, 1,
-                 "For '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
-                 "Available for comet.", true);
-    InitIntParam("max_fragment_charge", 3, 1, 5,
-                 "Set maximum fragment charge state to analyze (allowed max 5).",
-                 "Available for comet.", true);
-    InitIntParam("max_index_runtime", 0, 0, BILLION,
-                 "Sets the maximum indexed database search run time for a scan/query. "
-                 "Valid values are integers 0 or higher representing the maximum run time "
-                 "in milliseconds. "
-                 "As Comet loops through analyzing peptides from the database index file, "
-                 "it checks the cummulative run time of that spectrum search after each "
-                 "peptide is analyzed. If the run time exceeds the value set for this "
-                 "parameter, the search is aborted and the best peptide result analyzed "
-                 "up to that point is returned. "
-                 "To have no maximum search time, set this parameter value to \"0\". "
-                 "The default value is \"0\".",
-                 "Available for comet.", true);
-    InitIntParam("max_precursor_charge", 6, 1, 9,
-                 "Set maximum precursor charge state to analyze (allowed max 9).",
-                 "Available for comet.", true);
-    InitIntParam("nucleotide_reading_frame", 0, 0, 9,
-                 "0=proteinDB, 1-6, 7=forward three, 8=reverse three, 9=all six.",
-                 "Available for comet.", true);
-    InitIntParam("clip_nterm_methionine", 0, 0, 1,
-                 "0=leave sequences as-is; 1=also consider sequence w/o N-term methionine.",
-                 "Available for comet.", true);
-    InitIntParam("explicit_deltacn", 0, 0, 1,
-                 "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide, "
-                 "1=Comet deltaCn reported between the top two peptides.",
-                 "Available for comet.", true);
-    InitIntParam("old_mods_encoding", 0, 0, 1,
-                 "0=Comet will use mass based modification encodings, "
-                 "1=Comet will use the old character based modification encodings.",
-                 "Available for comet.", true);
-    InitIntParam("spectrum_batch_size", 0, 0, BILLION,
-                 "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
-                 "Available for comet.", true);
-    InitStringParam("decoy_prefix", "decoy_",
-                    "Specifies the prefix of the protein names that indicates a decoy.",
-                    "Available for comet.", true);
-    InitStringParam("text_file_extension", "",
-                    "Specifies the a custom extension for output text file.",
-                    "Available for comet.", true);
-    InitStringParam("output_suffix", "",
-                    "Specifies the suffix string that is appended to the base output name "
-                    "for the pep.xml, pin.xml, txt and sqt output files.",
-                    "Available for comet.", true);
-    InitIntParam("peff_verbose_output", 0, 0, 1,
-                 "Specifies whether the verbose output is reported during a PEFF search. "
-                 "To show verbose output, set the value to 1. "
-                 "The default value is 0 if this parameter is missing.",
-                 "Available for comet.", false);
-    InitStringParam("peptide_length_range", "1 63",
-                    "Defines the length range of peptides to search. "
-                    "This parameter has two integer values. "
-                    "The first value is the minimum length cutoff and the second value is "
-                    "the maximum length cutoff. Only peptides within the specified length "
-                    "range are analyzed. The maximum peptide length that Comet can analyze is 63. "
-                    "The default values are \"1 63\".",
-                    "Available for comet.", true);
-    InitStringParam("precursor_NL_ions", "",
-                    "Controls whether or not precursor neutral loss peaks are considered in "
-                    "the xcorr scoring. If left blank, this parameter is ignored.  To consider "
-                    "precursor neutral loss peaks, add one or more neutral loss mass value "
-                    "separated by a space.  Each entered mass value will be subtracted from "
-                    "the experimentral precursor mass and resulting neutral loss m/z values "
-                    "for all charge states (from 1 to precursor charge) will be analyzed. "
-                    "As these neutral loss peaks are analyzed along side fragment ion peaks, "
-                    "the fragment tolerance settings (fragment_bin_tol, fragment_bin_offset, "
-                    "theoretical_fragment_ion) apply to the precursor neutral loss peaks. "
-                    "The default value is blank/unused.",
-                    "Available for comet.", true);
-    InitIntParam("equal_I_and_L", 1, 0, 1,
-                 "This parameter controls whether the Comet treats isoleucine (I) and "
-                 "leucine (L) as the same/equivalent with respect to a peptide identification. "
-                 "0 treats I and L as different, 1 treats I and L as the same. "
-                 "The default value is \"1\"",
-                 "Available for comet.", true);
-    InitStringParam("mass_offsets", "",
-                    "Specifies one or more mass offsets to apply. This value(s) are effectively "
-                    "subtracted from each precursor mass such that peptides that are smaller "
-                    "than the precursor mass by the offset value can still be matched to the "
-                    "respective spectrum.",
-                    "Available for comet.", true);
-    InitIntParam("max_duplicate_proteins", 20, -1, BILLION,
-                 "defines the maximum number of proteins (identifiers/accessions) to report. "
-                 "If a peptide is present in 6 total protein sequences, there is one (first) "
-                 "reference protein and 5 additional duplicate proteins. This parameter "
-                 "controls how many of those 5 additional duplicate proteins are reported."
-                 "If \"decoy_search = 2\" is set to report separate target and decoy results, "
-                 "this parameter will be applied to the target and decoy outputs separately. "
-                 "If set to \"-1\", there will be no limit on the number of reported additional proteins. "
-                 "The default value is \"20\" if this parameter is missing.",
-                 "Available for comet.", true);
-    /* Comet - Spectral processing */
-    InitIntParam("minimum_peaks", 10, 1, BILLION,
-                 "Minimum number of peaks in spectrum to search.",
-                 "Available for comet.", true);
-    InitDoubleParam("minimum_intensity", 0, 0, BILLION,
-                    "Minimum intensity value to read in.",
-                    "Available for comet. ", true);
-    InitIntParam("remove_precursor_peak", 0, 0, 2,
-                 "0=no, 1=yes, 2=all charge reduced precursor peaks (for ETD).",
-                 "Available for comet. ", true);
-    InitDoubleParam("remove_precursor_tolerance", 1.5, -BILLION, BILLION,
-                    "+- Da tolerance for precursor removal.",
-                    "Available for comet. ", true);
-    InitStringParam("clear_mz_range", "0.0 0.0",
-                    "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
-                    "Available for comet.", true);
-    /* Comet - Variable modifications */
-    InitStringParam("variable_mod01", "0.0 null 0 4 -1 0 0",
-                    "Up to 9 variable modifications are supported. Each modification "
-                    "is specified using seven entries: "
-                    "\"[[html:&lt;mass&gt;]][[nohtml:<mass>]] "
-                    "[[html:&lt;residues&gt;]][[nohtml:<residues>]] "
-                    "[[html:&lt;type&gt;]][[nohtml:<type>]] "
-                    "[[html:&lt;max&gt;]][[nohtml:<max>]] "
-                    "[[html:&lt;distance&gt;]][[nohtml:<distance>]] "
-                    "[[html:&lt;terminus&gt;]][[nohtml:<terminus>]] "
-                    "[[html:&lt;force&gt;]][[nohtml:<force>]].\" "
-                    "Type is 0 for static mods and non-zero for variable mods. "
-                    "Note that that if you set the same type value on multiple "
-                    "modification entries, Comet will treat those variable modifications "
-                    "as a binary set. This means that all modifiable residues in the "
-                    "binary set must be unmodified or modified. Multiple binary sets "
-                    "can be specified by setting a different binary modification value. "
-                    "Max is an integer specifying the maximum number of modified "
-                    "residues possible in a peptide for this modification entry. "
-                    "Distance specifies the distance the modification is applied to "
-                    "from the respective terminus: -1 = no distance contraint; "
-                    "0 = only applies to terminal residue; N = only applies to "
-                    "terminal residue through next N residues. "
-                    "Terminus specifies which terminus the distance constraint is "
-                    "applied to: 0 = protein N-terminus; 1 = protein C-terminus; "
-                    "2 = peptide N-terminus; 3 = peptide C-terminus."
-                    "Force specifies whether peptides must contain this modification: "
-                    "0 = not forced to be present; 1 = modification is required.",
-                    "Available for comet.", true);
-    for (int i = 2; i <= 9; i++) {
-        InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
-                        "See syntax for variable_mod01.",
-                        "Available for comet.", true);
-    }
-    InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
-                 "Specifies the total/maximum number of residues that can be modified in a peptide.",
-                 "Available for comet.", true);
-    InitIntParam("require_variable_mod", 0, 0, 1,
-                 "Controls whether the analyzed peptides must contain at least one variable modification.",
-                 "Available for comet.", true);
-    /* Comet - Static modifications */
-    InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
-                    "Specifiy a static modification to the c-terminus of all peptides.",
-                    "Available for comet.", true);
-    InitDoubleParam("add_Nterm_peptide", 0, 0, BILLION,
-                    "Specify a static modification to the n-terminus of all peptides.",
-                    "Available for comet.", true);
-    InitDoubleParam("add_Cterm_protein", 0, 0, BILLION,
-                    "Specify a static modification to the c-terminal peptide of each protein.",
-                    "Available for comet.", true);
-    InitDoubleParam("add_Nterm_protein", 0, 0, BILLION,
-                    "Specify a static modification to the n-terminal peptide of each protein.",
-                    "Available for comet.", true);
-    for (char c = 'A'; c <= 'Z'; c++) {
-        InitDoubleParam(CometApplication::staticModParam(c),
-                        c != 'C' ? 0 : CYSTEINE_DEFAULT,
-                        -std::numeric_limits<double>::max(),
-                        std::numeric_limits<double>::max(),
-                        "Specify a static modification to the residue " + string(1, c) + ".",
-                        "Available for comet.", true);
-    }
-    InitBoolParam("list-of-files", false,
-                  "Specify that the search results are provided as lists of files, rather than as "
-                  "individual files.",
-                  "Available for assign-confidence.", true);
-    /* analyze-matches parameter options */
-    InitArgParam("target input",
-                 "One or more files, each containing a collection of peptide-spectrum matches (PSMs) "
-                 "in [[html:<a href=\"../file-formats/txt-format.html\">]]tab-delimited text[[html:</a>]], [[html:<a "
-                 "href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">]]PepXML"
-                 "[[html:</a>]], or [[html:<a href=\"http://www.psidev.info/mzidentml\">]]mzIdentML"
-                 "[[html:</a>]] format. In tab-delimited text format, only the specified score column "
-                 "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
-                 "\"charge\" are required, as well as \"protein ID\" if the search was run with "
-                 "concat=F. Furthermore, if the --estimation-method is specified to peptide-level "
-                 "is set to T, then the column "
-                 "\"peptide\" must be included, and if --sidak is set to T, then the \"distinct "
-                 "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
-                 "also be provided either on the command line or using the --list-of-files option.<br>"
-                 "Decoys can be provided in two ways: either as a separate file or embedded within the "
-                 "same file as the targets. Crux will first search the given file for decoys using a "
-                 "prefix (specified via --decoy-prefix) on the protein name. If no decoys are found, "
-                 "then Crux will search for decoys in a separate file. The decoy file name is constructed "
-                 "from the target file name by replacing \"target\" with \"decoy\". For example, if "
-                 "tide-search.target.txt is provided as input, then Crux will search for a corresponding "
-                 "file named \"tide-search.decoy.txt.\"<br>Note that if decoys are provided in a separate "
-                 "file, then assign-confidence will first carry out a target-decoy competition, "
-                 "identifying corresponding pairs of targets and decoys and eliminating the one with "
-                 "the worse score. In this case, the column/tag called \"delta_cn\" will be eliminated "
-                 "from the output.]]");
-    InitDoubleParam("pi-zero", 1.0, 0, 1,
-                    "The estimated percent of target scores that are drawn from the "
-                    "null distribution.",
-                    "Used by assign-confidence and percolator", false);
-    InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
-                    "Specify the method used to estimate q-values.  The mix-max procedure or target-decoy "
-                    "competition apply to PSMs. The peptide-level option eliminates any PSM for which there "
-                    "exists a better scoring PSM involving the same peptide, and then uses decoys to "
-                    "assign confidence estimates.",
-                    "Used by assign-confidence.", true);
-    InitBoolParam("sidak", false,
-                  "Adjust the score using the Sidak adjustment and reports them in a new column in the "
-                  "output file. Note that this adjustment only makes sense if the given scores are "
-                  "p-values, and that it requires the presence of the \"distinct matches/spectrum\" "
-                  "feature for each PSM.",
-                  "Used by assign-confidence.", true);
-    InitStringParam("score", "",
-                    "Specify the column (for tab-delimited input) or tag (for XML input) "
-                    "used as input to the q-value estimation procedure. If this parameter is unspecified, "
-                    "then the program searches for \"xcorr score\", \"evalue\" (comet), "
-                    "\"exact p-value\" score fields in this order in the input file. ",
-                    "Used by assign-confidence.", true);
-    InitBoolParam("combine-charge-states", false,
-                  "Specify this parameter to T in order to combine charge states with peptide sequences"
-                  "in peptide-centric search. Works only if estimation-method = peptide-level.",
-                  "Used by assign-confidence.", true);
-    InitBoolParam("combine-modified-peptides", false,
-                  "Specify this parameter to T in order to treat peptides carrying different or "
-                  "no modifications as being the same. Works only if estimation = peptide-level.",
-                  "Used by assign-confidence.", true);
-    InitStringParam("percolator-intraset-features", "F",
-                    "Set a feature for percolator that in later versions is not an option.",
-                    "Shouldn't be variable; hide from user.", false);
-    InitBoolParam("use-old-atdc", false,
-                  "Use the originally described version of aTDC, rather than the improved one.",
-                  "Used by assign-confidence.", false);
-    /* Cascade-Search parameters */
-    InitDoubleParam("q-value-threshold", 0.01, 0, 1.0,
-                    "The q-value threshold used by cascade search. Each spectrum identified in one search "
-                    "with q-value less than this threshold will be excluded from all subsequent searches. "
-                    "Note that the threshold is not applied to the final database in the cascade.",
-                    "Used by cascade-search.", true);
-    InitArgParam("database-series",
-                 "A comma-separated list of databases, each generated by tide-index. "
-                 "Cascade-search will search the given spectra against these databases in the given order.");
-    InitIntParam("cascade-termination", 20, 0, BILLION,
-                 "The minimum number of accepted PSMs required for cascade-search to continue to the "
-                 "next database in the given series",
-                 "Used by cascade-search.", false);
-    /*Subtract-index parameters*/
-    InitArgParam("tide index 1", "A peptide index produced using tide-index");
-    InitArgParam("tide index 2", "A second peptide index, to be subtracted from the first index.");
-    InitArgParam("output index",
-                 "A new peptide index containing all peptides that occur in the"
-                 "first index but not the second.");
-    //  InitArgParam("index name", "output tide index");
-    // **** predict-peptide-ions options. ****
-    InitStringParam("primary-ions", "by", "a|b|y|by|bya",
-                    "Predict the specified primary ion series. 'a' indicates a-ions only, 'b' indicates "
-                    "b-ions only, 'y' indicates y-ions only, 'by' indicates both b and y, 'bya' "
-                    "indicates b, y, and a.",
-                    "Only available for crux-predict-peptide-ions. Set automatically to "
-                    "'by' for searching.",
-                    true);
-    InitBoolParam("precursor-ions", false,
-                  "Predict the precursor ions, and all associated ions (neutral losses, multiple "
-                  "charge states) consistent with the other specified options.",
-                  "Only available for crux-predict-peptide-ions.", true);
-    InitIntParam("isotope", 0, 0, 2,
-                 "Predict the given number of isotope peaks (0|1|2).",
-                 "Only available for crux-predict-peptide-ion.  Automatically set to "
-                 "0 for Sp scoring and 1 for xcorr scoring.",
-                 true);
-    InitBoolParam("flanking", false,
-                  "Predict flanking peaks for b- and y ions.",
-                  "Only available for crux-predict-peptide-ion.", true);
-    InitStringParam("max-ion-charge", "peptide",
-                    "Predict theoretical ions up to max charge state (1, 2, ... ,6) or up to the charge state "
-                    "of the peptide (\"peptide\"). If the max-ion-charge is greater than the "
-                    "charge state of the peptide, then the maximum is the peptide charge. ",
-                    "Available for predict-peptide-ions. "
-                    "Set to 'peptide' for search.",
-                    true);
-    InitIntParam("nh3", 0, -100, BILLION,
-                 "Include among the predicted peaks b/y ions with up to n losses of nh3. For example, "
-                 "for --nh3 2, predict a peak for each b- and y-ion with the loss of one nh3 group and "
-                 "predict a second peak for each b- and y-ion with the loss of two nh3 groups. These "
-                 "peaks will have 1 and 2, respectively, in the NH3 column of the output.",
-                 "Only available for crux-predict-peptide-ions.", true);
-    InitIntParam("h2o", 0, -100, BILLION,
-                 "Include in the predicted peaks, b/y ions with the loss of 1 to n water molecules. See "
-                 "--nh3 for an example.",
-                 "Only available for crux-predict-peptide-ions.", true);
-    // ***** spectral-counts aguments *****
-    InitArgParam("input PSMs",
-                 "A PSM file that has been produced by Percolator or assign-confidence.");
-    // also uses "protein-database"
-    // ***** spectral-counts options *****
-    InitStringParam("protein-database", "",
-                    "The name of the file in FASTA format.",
-                    "Option for spectral-counts", true);
-    InitStringParam("measure", "NSAF", "RAW|NSAF|dNSAF|SIN|EMPAI",
-                    "Type of analysis to make on the match results: "
-                    "(RAW|NSAF|dNSAF|SIN|EMPAI). With exception of the RAW metric, the database of "
-                    "sequences need to be provided using --protein-database.",
-                    "Available for spectral-counts.  RAW is raw counts, "
-                    "NSAF is Normalized Spectral Abundance Factor, "
-                    "dNSAF is Distributed Spectral Abundance Factor, "
-                    "SIN is Spectral Index Normalized and EMPAI is "
-                    "Exponentially Modified Protein Abundance Index",
-                    true);
-    InitBoolParam("unique-mapping", false,
-                  "Ignore peptides that map to multiple proteins.",
-                  "Available for spectral-counts.", true);
-    InitStringParam("quant-level", "protein", "protein|peptide",
-                    "Quantification at protein or peptide level.",
-                    "Available for spectral-counts and either NSAF and SIN.", true);
-    InitStringParam("parsimony", "none", "none|simple|greedy",
-                    "Perform a parsimony analysis on the proteins, and report a "
-                    "\"parsimony rank\" column in the output file. This column contains "
-                    "integers indicating the protein's rank in a list sorted by spectral "
-                    "counts. If the parsimony analysis results in two proteins being merged, "
-                    "then their parsimony rank is the same. In such a case, the rank is "
-                    "assigned based on the largest spectral count of any protein in the merged "
-                    "meta-protein. The \"simple\" parsimony algorithm only merges two proteins "
-                    "A and B if the peptides identified in protein A are the same as or a "
-                    "subset of the peptides identified in protein B. The \"greedy\" parsimony "
-                    "algorithm does additional merging, by identifying the longest protein "
-                    "(i.e., the protein with the most peptides) that contains one or more "
-                    "shared peptides. The shared peptides are assigned to the identified "
-                    "protein and removed from any other proteins that contain them, and the "
-                    "process is then repeated. Note that, with this option, some proteins end "
-                    "up being assigned no peptides at all; these orphan proteins are not "
-                    "reported in the output.",
-                    "Available for spectral-counts.", true);
-    InitStringParam("threshold-type", "qvalue", "none|qvalue|custom",
-                    "Determines what type of threshold to use when filtering matches. none : read all "
-                    "matches, qvalue : use calculated q-value from percolator, custom : use "
-                    "--custom-threshold-name and --custom-threshold-min parameters.",
-                    "used for crux spectral-counts", true);
-    InitDoubleParam("threshold", 0.01,
-                    "Only consider PSMs with a threshold value. By default, q-values "
-                    "are thresholded using a specified threshold value. This behavior can be "
-                    "changed using the --custom-threshold and --threshold-min "
-                    "parameters.",
-                    "Available for spectral-counts. All PSMs with higher (or lower) than "
-                    "this will be ignored.",
-                    true);
-    InitStringParam("custom-threshold-name", "",
-                    "Specify which field to apply the threshold to. The direction of the threshold "
-                    "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
-                    "applies to the percolator q-value, specified by \"percolator q-value\".",
-                    "Available for spectral-counts.", true);
-    InitBoolParam("custom-threshold-min", true,
-                  "When selecting matches with a custom threshold, custom-threshold-min determines "
-                  "whether to filter matches with custom-threshold-name values that are greater-than or "
-                  "equal (F) or less-than or equal (T) than the threshold.",
-                  "Available for spectral-counts.", true);
-    InitStringParam("input-ms2", "",
-                    "MS2 file corresponding to the psm file. Required to measure the SIN. Ignored for "
-                    "NSAF, dNSAF and EMPAI.",
-                    "Available for spectral-counts with measure=SIN.", true);
-    InitBoolParam("mzid-use-pass-threshold", false,
-                  "Use mzid's passThreshold attribute to filter matches.",
-                  "Used when parsing mzIdentML files.", true);
-    InitBoolParam("find-peptides", true,
-                  "Validate peptides by finding them in the given FASTA file.",
-                  "Only available for spectral-counts.", false);
-    // ***** static mods *****
-    for (char c = 'A'; c <= 'Z'; c++) {
-        double deltaMass = (c != 'C') ? 0 : CYSTEINE_DEFAULT;
-        bool visible = (c != 'B' && c != 'J' && c != 'O' && c != 'U' && c != 'X' && c != 'Z');
-        InitDoubleParam(string(1, c), deltaMass,
-                        "Change the mass of all amino acids '" + string(1, c) +
-                            "' by the "
-                            "given amount.",
-                        "", visible);
-    }
-    /* psm-convert options */
-    InitStringParam("input-format", "auto", "auto|tsv|sqt|pepxml|mzidentml",
-                    "Legal values are auto, tsv, sqt, pepxml or mzidentml format.",
-                    "option, for psm-convert", true);
-    InitBoolParam("distinct-matches", true,
-                  "Whether matches/ion are distinct (as opposed to total).",
-                  "option, for psm-convert.", true);
-    /* get-ms2-spectrum options */
-    InitBoolParam("stats", false,
-                  "Rather than the spectrum, output summary statistics to standard output. Each statistic "
-                  "is placed on a separate line, in the format <name>:<value> (e.g. \"TIC:1000.0\")."
-                  "[[html:<br>The following statistics are reported for the entire spectrum:<ul><li>"
-                  "Precursor m/z</li><li>Total Ion Current</li><li>Base Peak Intensity</li><li>Number of "
-                  "peaks</li><li>Minimum m/z</li><li>Maximum m/z</li></ul>In addition, for each possible "
-                  "spectrum charge state, the following statistics are reported:<ul><li>Charge state</li>"
-                  "<li>Neutral mass</li><li>Charged mass</li><li>M+H+ mass</li></ul>]]",
-                  "Available only for crux-get-ms2-spectrum.  Does not affect contents "
-                  "of the output file.",
-                  true);
+  }
+  InitBoolParam("list-of-files", false,
+    "Specify that the search results are provided as lists of files, rather than as "
+    "individual files.",
+    "Available for assign-confidence.", true);
+  /* analyze-matches parameter options */
+  InitArgParam("target input",
+    "One or more files, each containing a collection of peptide-spectrum matches (PSMs) "
+    "in [[html:<a href=\"../file-formats/txt-format.html\">]]tab-delimited text[[html:</a>]], [[html:<a "
+    "href=\"http://tools.proteomecenter.org/wiki/index.php?title=Formats:pepXML\">]]PepXML"
+    "[[html:</a>]], or [[html:<a href=\"http://www.psidev.info/mzidentml\">]]mzIdentML"
+    "[[html:</a>]] format. In tab-delimited text format, only the specified score column "
+    "is required. However if --estimation-method is tdc, then the columns \"scan\" and "
+    "\"charge\" are required, as well as \"protein ID\" if the search was run with "
+    "concat=F. Furthermore, if the --estimation-method is specified to peptide-level "
+    "is set to T, then the column "
+    "\"peptide\" must be included, and if --sidak is set to T, then the \"distinct "
+    "matches/spectrum\" column must be included.[[html:<br>Note that multiple files can "
+    "also be provided either on the command line or using the --list-of-files option.<br>"
+    "Decoys can be provided in two ways: either as a separate file or embedded within the "
+    "same file as the targets. Crux will first search the given file for decoys using a "
+    "prefix (specified via --decoy-prefix) on the protein name. If no decoys are found, "
+    "then Crux will search for decoys in a separate file. The decoy file name is constructed "
+    "from the target file name by replacing \"target\" with \"decoy\". For example, if "
+    "tide-search.target.txt is provided as input, then Crux will search for a corresponding "
+    "file named \"tide-search.decoy.txt.\"<br>Note that if decoys are provided in a separate "
+    "file, then assign-confidence will first carry out a target-decoy competition, "
+    "identifying corresponding pairs of targets and decoys and eliminating the one with "
+    "the worse score. In this case, the column/tag called \"delta_cn\" will be eliminated "
+    "from the output.]]");
+  InitDoubleParam("pi-zero", 1.0, 0, 1,
+    "The estimated percent of target scores that are drawn from the "
+    "null distribution.",
+    "Used by assign-confidence and percolator", false);
+  InitStringParam("estimation-method", "tdc", "mix-max|tdc|peptide-level",
+    "Specify the method used to estimate q-values.  The mix-max procedure or target-decoy "
+    "competition apply to PSMs. The peptide-level option eliminates any PSM for which there "
+    "exists a better scoring PSM involving the same peptide, and then uses decoys to "
+    "assign confidence estimates.",
+    "Used by assign-confidence.", true);
+  InitBoolParam("sidak", false,
+    "Adjust the score using the Sidak adjustment and reports them in a new column in the "
+    "output file. Note that this adjustment only makes sense if the given scores are "
+    "p-values, and that it requires the presence of the \"distinct matches/spectrum\" "
+    "feature for each PSM.",
+    "Used by assign-confidence.", true);
+  InitStringParam("score", "",
+    "Specify the column (for tab-delimited input) or tag (for XML input) "
+    "used as input to the q-value estimation procedure. If this parameter is unspecified, "
+    "then the program searches for \"xcorr score\", \"evalue\" (comet), "
+    "\"exact p-value\" score fields in this order in the input file. ",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-charge-states", false,
+    "Specify this parameter to T in order to combine charge states with peptide sequences"
+    "in peptide-centric search. Works only if estimation-method = peptide-level.",
+    "Used by assign-confidence.", true);
+  InitBoolParam("combine-modified-peptides", false,
+    "Specify this parameter to T in order to treat peptides carrying different or "
+    "no modifications as being the same. Works only if estimation = peptide-level.",
+    "Used by assign-confidence.", true);
+  InitStringParam("percolator-intraset-features", "F",
+    "Set a feature for percolator that in later versions is not an option.",
+    "Shouldn't be variable; hide from user.", false);
+  InitBoolParam("use-old-atdc", false,
+                "Use the originally described version of aTDC, rather than the improved one.",
+                "Used by assign-confidence.", false);
+  /* Cascade-Search parameters */
+  InitDoubleParam("q-value-threshold", 0.01, 0, 1.0,
+    "The q-value threshold used by cascade search. Each spectrum identified in one search "
+    "with q-value less than this threshold will be excluded from all subsequent searches. "
+    "Note that the threshold is not applied to the final database in the cascade.",
+    "Used by cascade-search.", true);
+  InitArgParam("database-series",
+    "A comma-separated list of databases, each generated by tide-index. "
+    "Cascade-search will search the given spectra against these databases in the given order.");
+  InitIntParam("cascade-termination", 20, 0, BILLION,
+    "The minimum number of accepted PSMs required for cascade-search to continue to the "
+    "next database in the given series",
+    "Used by cascade-search.", false);
+  /*Subtract-index parameters*/
+  InitArgParam("tide index 1", "A peptide index produced using tide-index");
+  InitArgParam("tide index 2", "A second peptide index, to be subtracted from the first index.");
+  InitArgParam("output index", "A new peptide index containing all peptides that occur in the"
+    "first index but not the second.");
+//  InitArgParam("index name", "output tide index");
+  // **** predict-peptide-ions options. ****
+  InitStringParam("primary-ions", "by", "a|b|y|by|bya",
+    "Predict the specified primary ion series. 'a' indicates a-ions only, 'b' indicates "
+    "b-ions only, 'y' indicates y-ions only, 'by' indicates both b and y, 'bya' "
+    "indicates b, y, and a.",
+    "Only available for crux-predict-peptide-ions. Set automatically to "
+    "'by' for searching.", true);
+  InitBoolParam("precursor-ions", false,
+    "Predict the precursor ions, and all associated ions (neutral losses, multiple "
+    "charge states) consistent with the other specified options.",
+    "Only available for crux-predict-peptide-ions.", true);
+  InitIntParam("isotope", 0, 0, 2,
+    "Predict the given number of isotope peaks (0|1|2).",
+    "Only available for crux-predict-peptide-ion.  Automatically set to "
+    "0 for Sp scoring and 1 for xcorr scoring.", true);
+  InitBoolParam("flanking", false,
+    "Predict flanking peaks for b- and y ions.",
+    "Only available for crux-predict-peptide-ion.", true);
+  InitStringParam("max-ion-charge", "peptide",
+    "Predict theoretical ions up to max charge state (1, 2, ... ,6) or up to the charge state "
+    "of the peptide (\"peptide\"). If the max-ion-charge is greater than the "
+    "charge state of the peptide, then the maximum is the peptide charge. ",
+    "Available for predict-peptide-ions. "
+    "Set to 'peptide' for search.", true);
+  InitIntParam("nh3", 0, -100, BILLION,
+    "Include among the predicted peaks b/y ions with up to n losses of nh3. For example, "
+    "for --nh3 2, predict a peak for each b- and y-ion with the loss of one nh3 group and "
+    "predict a second peak for each b- and y-ion with the loss of two nh3 groups. These "
+    "peaks will have 1 and 2, respectively, in the NH3 column of the output.",
+    "Only available for crux-predict-peptide-ions.", true);
+  InitIntParam("h2o", 0, -100, BILLION,
+    "Include in the predicted peaks, b/y ions with the loss of 1 to n water molecules. See "
+    "--nh3 for an example.",
+    "Only available for crux-predict-peptide-ions.", true);
+  // ***** spectral-counts aguments *****
+  InitArgParam("input PSMs",
+    "A PSM file in either tab delimited text format (as produced by percolator), or pepXML format.");
+  // also uses "protein-database"
+  // ***** spectral-counts options *****
+  InitStringParam("protein-database", "",
+    "The name of the file in FASTA format.",
+    "Option for spectral-counts", true);
+  InitStringParam("measure", "NSAF", "RAW|NSAF|dNSAF|SIN|EMPAI",
+    "Type of analysis to make on the match results: "
+    "(RAW|NSAF|dNSAF|SIN|EMPAI). With exception of the RAW metric, the database of "
+    "sequences need to be provided using --protein-database.",
+    "Available for spectral-counts.  RAW is raw counts, "
+    "NSAF is Normalized Spectral Abundance Factor, "
+    "dNSAF is Distributed Spectral Abundance Factor, "
+    "SIN is Spectral Index Normalized and EMPAI is "
+    "Exponentially Modified Protein Abundance Index", true);
+  InitBoolParam("unique-mapping", false,
+    "Ignore peptides that map to multiple proteins.",
+    "Available for spectral-counts.", true);
+  InitStringParam("quant-level", "protein", "protein|peptide",
+    "Quantification at protein or peptide level.",
+    "Available for spectral-counts and either NSAF and SIN.", true);
+  InitStringParam("parsimony", "none", "none|simple|greedy",
+    "Perform a parsimony analysis on the proteins, and report a "
+    "\"parsimony rank\" column in the output file. This column contains "
+    "integers indicating the protein's rank in a list sorted by spectral "
+    "counts. If the parsimony analysis results in two proteins being merged, "
+    "then their parsimony rank is the same. In such a case, the rank is "
+    "assigned based on the largest spectral count of any protein in the merged "
+    "meta-protein. The \"simple\" parsimony algorithm only merges two proteins "
+    "A and B if the peptides identified in protein A are the same as or a "
+    "subset of the peptides identified in protein B. The \"greedy\" parsimony "
+    "algorithm does additional merging, by identifying the longest protein "
+    "(i.e., the protein with the most peptides) that contains one or more "
+    "shared peptides. The shared peptides are assigned to the identified "
+    "protein and removed from any other proteins that contain them, and the "
+    "process is then repeated. Note that, with this option, some proteins end "
+    "up being assigned no peptides at all; these orphan proteins are not "
+    "reported in the output.", 
+    "Available for spectral-counts.", true);
+  InitStringParam("threshold-type", "qvalue", "none|qvalue|custom",
+    "Determines what type of threshold to use when filtering matches. none : read all "
+    "matches, qvalue : use calculated q-value from percolator, custom : use "
+    "--custom-threshold-name and --custom-threshold-min parameters.",
+    "used for crux spectral-counts", true);
+  InitDoubleParam("threshold", 0.01,
+    "Only consider PSMs with a threshold value. By default, q-values "
+    "are thresholded using a specified threshold value. This behavior can be "
+    "changed using the --custom-threshold and --threshold-min "
+    "parameters.",
+    "Available for spectral-counts. All PSMs with higher (or lower) than "
+    "this will be ignored.", true);
+  InitStringParam("custom-threshold-name", "",
+    "Specify which field to apply the threshold to. The direction of the threshold "
+    "(<= or >=) is governed by --custom-threshold-min. By default, the threshold "
+    "applies to the q-value, specified by \"percolator q-value\", "
+    "\"decoy q-value (xcorr)\".",
+    "Available for spectral-counts.", true);
+  InitBoolParam("custom-threshold-min", true,
+    "When selecting matches with a custom threshold, custom-threshold-min determines "
+    "whether to filter matches with custom-threshold-name values that are greater-than or "
+    "equal (F) or less-than or equal (T) than the threshold.",
+    "Available for spectral-counts.", true);
+  InitStringParam("input-ms2", "",
+    "MS2 file corresponding to the psm file. Required to measure the SIN. Ignored for "
+    "NSAF, dNSAF and EMPAI.",
+    "Available for spectral-counts with measure=SIN.", true);
+  InitBoolParam("mzid-use-pass-threshold", false,
+    "Use mzid's passThreshold attribute to filter matches.",
+    "Used when parsing mzIdentML files.", true);
+  InitBoolParam("find-peptides", true,
+                "Validate peptides by finding them in the given FASTA file.",
+                "Only available for spectral-counts.", false);
+  // ***** static mods *****
+  for (char c = 'A'; c <= 'Z'; c++) {
+    double deltaMass = (c != 'C') ? 0 : CYSTEINE_DEFAULT;
+    bool visible = (c != 'B' && c != 'J' && c != 'O' && c != 'U' && c != 'X' && c != 'Z');
+    InitDoubleParam(string(1, c), deltaMass,
+      "Change the mass of all amino acids '" + string(1, c) + "' by the "
+      "given amount.", "", visible);
+  }
+  /* psm-convert options */
+  InitStringParam("input-format", "auto", "auto|tsv|sqt|pepxml|mzidentml",
+    "Legal values are auto, tsv, sqt, pepxml or mzidentml format.",
+    "option, for psm-convert", true);
+  InitBoolParam("distinct-matches", true,
+    "Whether matches/ion are distinct (as opposed to total).",
+    "option, for psm-convert.", true);
+  /* get-ms2-spectrum options */
+  InitBoolParam("stats", false,
+    "Rather than the spectrum, output summary statistics to standard output. Each statistic "
+    "is placed on a separate line, in the format <name>:<value> (e.g. \"TIC:1000.0\")."
+    "[[html:<br>The following statistics are reported for the entire spectrum:<ul><li>"
+    "Precursor m/z</li><li>Total Ion Current</li><li>Base Peak Intensity</li><li>Number of "
+    "peaks</li><li>Minimum m/z</li><li>Maximum m/z</li></ul>In addition, for each possible "
+    "spectrum charge state, the following statistics are reported:<ul><li>Charge state</li>"
+    "<li>Neutral mass</li><li>Charged mass</li><li>M+H+ mass</li></ul>]]",
+    "Available only for crux-get-ms2-spectrum.  Does not affect contents "
+    "of the output file.", true);
 
     /* hardklor parameters */
     InitStringParam("hardklor-algorithm", "version1", "basic|version1|version2",
@@ -2288,34 +2288,35 @@ void Params::Categorize() {
     items.insert("precursor-window-type");
     AddCategory("Precursor selection", items);
 
-    items.clear();
-    items.insert("auto-mz-bin-width");
-    items.insert("compute-sp");
-    items.insert("deisotope");
-    items.insert("exact-p-value");
-    items.insert("fragment-mass");
-    items.insert("isotope-error");
-    items.insert("max-ion-charge");
-    items.insert("min-peaks");
-    items.insert("mod-mass-format");
-    items.insert("mz-bin-offset");
-    items.insert("mz-bin-width");
-    items.insert("peptide-centric-search");
-    items.insert("remove-precursor-peak");
-    items.insert("remove-precursor-tolerance");
-    items.insert("scan-number");
-    items.insert("skip-preprocessing");
-    items.insert("spectrum-charge");
-    items.insert("spectrum-max-mz");
-    items.insert("spectrum-min-mz");
-    items.insert("use-flanking-peaks");
-    items.insert("use-neutral-loss-peaks");
-    items.insert("score-function");
-    items.insert("fragment-tolerance");
-    items.insert("evidence-granularity");
-    items.insert("top_count");
-    items.insert("e_value_depth");
-    AddCategory("Search parameters", items);
+  items.clear();
+  items.insert("auto-mz-bin-width");
+  items.insert("compute-sp");
+  items.insert("deisotope");
+  items.insert("exact-p-value");
+  items.insert("fragment-mass");
+  items.insert("isotope-error");
+  items.insert("max-ion-charge");
+  items.insert("min-peaks");
+  items.insert("mod-mass-format");
+  items.insert("mz-bin-offset");
+  items.insert("mz-bin-width");
+  items.insert("peptide-centric-search");
+  items.insert("remove-precursor-peak");
+  items.insert("remove-precursor-tolerance");
+  items.insert("scan-number");
+  items.insert("skip-preprocessing");
+  items.insert("spectrum-charge");
+  items.insert("spectrum-max-mz");
+  items.insert("spectrum-min-mz");
+  items.insert("use-flanking-peaks");
+  items.insert("use-neutral-loss-peaks");
+  items.insert("score-function");
+  items.insert("fragment-tolerance");
+  items.insert("evidence-granularity");
+  items.insert("top_count");
+  items.insert("e_value_depth");
+  items.insert("override-charges");
+  AddCategory("Search parameters", items);
 
     items.clear();
     items.insert("picked-protein");

@@ -53,6 +53,7 @@ void MatchCollection::init() {
   exact_pval_search_ = false;
   has_distinct_matches_ = false;
   has_decoy_indexes_ = false;
+  has_mulitple_decoys_ = false;
 }
 
 /**
@@ -122,6 +123,8 @@ void MatchCollection::sort(
     smaller_is_better = true;
     break;
 
+  case DECOY_XCORR_QVALUE:
+  case DECOY_XCORR_PEPTIDE_QVALUE:
   case DECOY_XCORR_PEP:
     smaller_is_better = false;
     sort_by = XCORR;
@@ -347,8 +350,32 @@ bool MatchCollection::hasDecoyIndexes() const {
   return has_decoy_indexes_;
 }
 
-void MatchCollection::setHasDecoyIndexes(bool value) {
-  has_decoy_indexes_ = value;
+void MatchCollection::setHasDecoyIndexes(bool distinct) {
+  has_decoy_indexes_ = distinct;
+}
+
+bool MatchCollection::hasMulitpleDecoys()  {
+
+  if (has_mulitple_decoys_ == true)
+    return has_mulitple_decoys_;
+  
+  if (has_decoy_indexes_ == false) {
+    has_mulitple_decoys_ = false;
+    return has_mulitple_decoys_;
+  }
+  
+  for (std::vector<Crux::Match*>::iterator itr = match_.begin(); itr != match_.end(); itr++) {
+    if ((*itr)->decoyIndex()>0){
+      has_mulitple_decoys_ = true;
+      return true;
+    }
+
+  }
+  return false;
+}
+
+void MatchCollection::setHasMulitpleDecoys(bool value) {
+  has_mulitple_decoys_ = value;
 }
 
 void MatchCollection::setExperimentSize(int size) {

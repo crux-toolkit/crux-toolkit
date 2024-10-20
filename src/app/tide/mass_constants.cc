@@ -8,7 +8,7 @@
 
 using namespace std;
 
-double const MassConstants::kFixedPointScalar = 1e5;
+double const MassConstants::kFixedPointScalar = 1e5; 
 
 const double MassConstants::elts_mono[] = {
   1.007825035, // H
@@ -103,6 +103,11 @@ MassConstants::FixPtTableSet MassConstants::avg_tables{MassConstants::fixp_avg_t
                       MassConstants::fixp_nprotterm_avg_table,
                       MassConstants::fixp_cprotterm_avg_table  };
 
+const pb::ModTable* MassConstants::mod_table_ = NULL; 
+const pb::ModTable* MassConstants::n_mod_table_ = NULL; 
+const pb::ModTable* MassConstants::c_mod_table_ = NULL; 
+const pb::ModTable* MassConstants::nprot_mod_table_ = NULL; 
+const pb::ModTable* MassConstants::cprot_mod_table_ = NULL;  
 
 ModCoder MassConstants::mod_coder_;
 vector<double> MassConstants::unique_deltas_;
@@ -182,10 +187,21 @@ bool MassConstants::Init(const pb::ModTable* mod_table,
   for (int i = 0; i < 256; ++i) {
     mono_table[i] = avg_table[i] = nterm_mono_table[i] = 
     cterm_mono_table[i] = nterm_avg_table[i] = cterm_avg_table[i] = 0;
-    if(nprot_mod_table != nullptr && cprot_mod_table != nullptr)
-      nprotterm_avg_table[i] = cprotterm_avg_table[i] = 
-      nprotterm_mono_table[i] = cprotterm_mono_table[i] = 0;
+    if(nprot_mod_table != nullptr && cprot_mod_table != nullptr) {
+      nprotterm_avg_table[i] = 0;
+      cprotterm_avg_table[i] = 0;
+      nprotterm_mono_table[i] = 0;
+      cprotterm_mono_table[i] = 0;
+    }
   }
+
+  // Store the modification tables. Thay are used in reporting peptide modifications in TideMatchSet
+  mod_table_ = mod_table; 
+  n_mod_table_ = n_mod_table; 
+  c_mod_table_ = c_mod_table; 
+  nprot_mod_table_ = nprot_mod_table; 
+  cprot_mod_table_ = cprot_mod_table;  
+
 
   //initialize all tables with unmodified AA MW
   FillMassTable(elts_mono, mono_table);

@@ -16,6 +16,12 @@
 #endif
 
 int SpectrumRecordWriter::scanCounter_ = 0;
+unsigned long SpectrumRecordWriter::scan_index_ = 0;
+std::string SpectrumRecordWriter::version_date_ = "";
+
+bool cmp_pbspectra(pb::Spectrum& a1, pb::Spectrum& a2) {
+  return a1.neutral_mass() < a2.neutral_mass();
+}
 
 /**
  * Converts a spectra file to spectrumrecords format for use with tide-search.
@@ -24,11 +30,14 @@ int SpectrumRecordWriter::scanCounter_ = 0;
 bool SpectrumRecordWriter::convert(
   const string& infile, ///< spectra file to convert
   string outfile,  ///< spectrumrecords file to output
+  int &spectra_converted, //output variable that tells the number of spectra converted  
   int ms_level,   /// MS level to extract (1 or 2)
   bool dia_mode  /// whether it's used in DIAmeter
 ) {
-  carp(CARP_INFO, "Converting ms_level %d ... ", ms_level);
+  carp(CARP_DEBUG, "Converting ms_level %d ... ", ms_level);
   auto_ptr<Crux::SpectrumCollection> spectra(SpectrumCollectionFactory::create(infile.c_str()));
+  version_date_ = getDateFromCurxVersion();
+  scan_index_ = 0;
 
   // added by Yang
   if ( ms_level < 1 || ms_level > 2 ) { carp(CARP_FATAL, "ms_level must be 1 or 2 instead of %d.", ms_level); }
@@ -56,7 +65,8 @@ bool SpectrumRecordWriter::convert(
   string extension = (pos == string::npos) ? "UNKNOWN" : infile.substr(pos + 1);
   source->set_filetype(extension);
 
-  header.mutable_spectra_header()->set_sorted(false);
+  header.mutable_spectra_header()->set_sorted(true);
+  header.mutable_spectra_header()->set_version(version_date_);
 
   HeadedRecordWriter writer(outfile, header);
   if (!writer.OK()) {
@@ -64,19 +74,34 @@ bool SpectrumRecordWriter::convert(
   }
 
   scanCounter_ = 0;
-  carp(CARP_DETAILED_DEBUG, "Starting to convert spectrum to pb..." );
-  // Go through the spectrum list and write each spectrum
+  carp(CARP_DETAILED_DEBUG, "starting to convert spectrum to pb..." );
+  // go through the spectrum list and write each spectrum
+
+  vector<pb::Spectrum> all_spectra; 
+
   for (SpectrumIterator i = spectra->begin(); i != spectra->end(); ++i) {
-	(*i)->sortPeaks(_PEAK_LOCATION); // Sort by m/z
+
+  	(*i)->putHighestPeak(); // Sort peaks by m/z
 
     vector<pb::Spectrum> pb_spectra = getPbSpectra(*i);
     for (vector<pb::Spectrum>::const_iterator j = pb_spectra.begin();
          j != pb_spectra.end();
          ++j) { 
-      writer.Write(&*j);
+        assert(j->has_neutral_mass());
+        all_spectra.push_back(*j);
     }
   }
+  // sort all spectra by neutral mass.
+  std::sort(all_spectra.begin(), all_spectra.end(), cmp_pbspectra);
+  
+  spectra_converted = all_spectra.size();
 
+  // Write the spectra to spectrum protocol buffer in spectrum records format.
+  for (vector<pb::Spectrum>::const_iterator j = all_spectra.begin();
+         j != all_spectra.end();
+         ++j) { 
+      writer.Write(&*j); 
+  }
   return true;
 }
 
@@ -112,9 +137,12 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     newSpectrum.set_iso_window_lower_mz(s->getIsoWindowLowerMZ());
     newSpectrum.set_iso_window_upper_mz(s->getIsoWindowUpperMZ());
 
-    newSpectrum.set_spectrum_number(scan_num);
+    newSpectrum.set_scan_id(scan_num);
+    newSpectrum.set_rtime(s->getRTime());
     newSpectrum.set_precursor_m_z(i->getMZ());
     newSpectrum.mutable_charge_state()->Add(i->getCharge());
+    newSpectrum.set_neutral_mass(i->getNeutralMass());
+    newSpectrum.set_scan_index(++scan_index_);
     addPeaks(&newSpectrum, s);
     if (newSpectrum.peak_m_z_size() == 0) {
       spectra.pop_back();
@@ -131,74 +159,32 @@ void SpectrumRecordWriter::addPeaks(
   pb::Spectrum* spectrum,
   const Crux::Spectrum* s
 ) {
-  int mz_denom, intensity_denom;
-  getDenoms(s, &mz_denom, &intensity_denom);
+  const int kMaxPrecision = 10000; // store at most 4 digits of precision
+  int mz_denom = kMaxPrecision;
+  int intensity_denom = kMaxPrecision;
   spectrum->set_peak_m_z_denominator(mz_denom);
   spectrum->set_peak_intensity_denominator(intensity_denom);
-  uint64_t last = 0;
-  int last_index = -1;
+  // uint64_t last = 0;
+  // int last_index = -1;
   uint64_t intensity_sum = 0;
 
   for (PeakIterator i = s->begin(); i != s->end(); ++i) {
     FLOAT_T peakMz = (*i)->getLocation();
     uint64_t mz = peakMz * mz_denom + 0.5;
     uint64_t intensity = (*i)->getIntensity() * intensity_denom + 0.5;
+    /*
     if (mz < last) {
       // Unsorted peaks, this should never happen since peaks get sorted earlier
       carp(CARP_FATAL, "Peaks are not sorted");
-    } else if (mz == last) {
+    }
+    if (mz == last) {
       intensity_sum += intensity;
       spectrum->set_peak_intensity(last_index, intensity_sum);
-    } else {
-      spectrum->add_peak_m_z(mz - last);
-      spectrum->add_peak_intensity(intensity);
-      last = mz;
-      intensity_sum = intensity;
-      ++last_index;
     }
-  }
-}
-
-/**
- * See how much precision is given in the peak data
- */
-void SpectrumRecordWriter::getDenoms(
-  const Crux::Spectrum* s,  ///< spectra with peaks to check
-  int* mzDenom, ///< out parameter for m/z denom
-  int* intensityDenom ///< out parameter for intensity denom
-) {
-  const int kMaxPrecision = 10000; // store at most 4 digits of precision
-  *mzDenom = kMaxPrecision;
-  *intensityDenom = kMaxPrecision;
-  for (int precision = 1; precision < kMaxPrecision; precision *= 10) {
-    bool mzDenomOk = (*mzDenom == kMaxPrecision);
-    bool intensityDenomOk = (*intensityDenom == kMaxPrecision);
-    if (!mzDenomOk && !intensityDenomOk) {
-      return;
-    }
-    for (PeakIterator i = s->begin(); i != s->end(); ++i) {
-      if (mzDenomOk) {
-        double mzX = (*i)->getLocation() * precision;
-        if (fabs(mzX - google::protobuf::uint64(mzX + 0.5)) >= 0.001) {
-          mzDenomOk = false;
-        }
-      }
-      if (intensityDenomOk) {
-        double intensityX = (*i)->getIntensity() * precision;
-        if (fabs(intensityX - google::protobuf::uint64(intensityX + 0.5)) >= 0.001) {
-          intensityDenomOk = false;
-        }
-      }
-      if (!mzDenomOk && !intensityDenomOk) {
-        break;
-      }
-    }
-    if (mzDenomOk) {
-      *mzDenom = precision;
-    }
-    if (intensityDenomOk) {
-      *intensityDenom = precision;
-    }
+    */
+    spectrum->add_peak_m_z(mz);
+    spectrum->add_peak_intensity(intensity);
+    intensity_sum = intensity;
   }
 }
 

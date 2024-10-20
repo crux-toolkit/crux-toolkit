@@ -26,4 +26,4 @@ Examples:
  |spectral-counts-tsv-nodb      |--parameter-file params/raw                                            |sample.target.psms.txt     |spectral-counts.raw.nodb.txt         |
   #|spectral-counts-mzid          |--threshold-type none --measure RAW                                    |Sequest_example_ver1.1.mzid|spectral-counts.mzid.txt             |
  |spectral-counts-barista       |--parameter-file params/nsaf --protein-database small-yeast.fasta      |sample2.target.psms.txt    |spectral-counts.barista.txt          |
-  |spectral-counts-peptides      |--protein-database tubulins.fasta --quant-level peptide --measure RAW  |three_psms.psms.txt        |three_psms.spectral-counts.target.txt|
+ |spectral-counts-peptides      |--protein-database tubulins.fasta --quant-level peptide --measure RAW  |three_psms.psms.txt        |three_psms.spectral-counts.target.txt|

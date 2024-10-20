@@ -11,8 +11,8 @@
 #include "parameter.h"
 #include <iostream>
 #include "pwiz/data/msdata/SpectrumInfo.hpp"
-#if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
 #include "pwiz/data/msdata/DefaultReaderList.hpp"
+#if defined (_MSC_VER) &&  defined(INCLUDE_VENDOR_LIBRARIES)
 //#include "pwiz/data/vendor_readers/ABI/Reader_ABI.hpp"
 //#include "pwiz/data/vendor_readers/ABI/T2D/Reader_ABI_T2D.hpp"
 #include "pwiz/data/vendor_readers/Agilent/Reader_Agilent.hpp"
@@ -49,7 +49,8 @@ PWIZSpectrumCollection::PWIZSpectrumCollection(
 #else
   carp(CARP_DETAILED_INFO, "Support for vendor specific formats not enabled.");  
   try {
-    reader_ = new pwiz::msdata::MSDataFile(filename_);
+    pwiz::msdata::DefaultReaderList readerList;
+    reader_ = new pwiz::msdata::MSDataFile(filename_, &readerList);
   }
   catch (const runtime_error& error) {
     carp(CARP_FATAL, "Unable to parse spectrum file %s. Error: %s.", filename_.c_str(), error.what());  
@@ -145,6 +146,7 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
   if(is_parsed_) {
     return false;
   }
+  carp(CARP_DEBUG, "ms level: %d", ms_level );
 
   carp(CARP_DEBUG, "Using proteowizard to parse spectra.");
 
@@ -265,7 +267,6 @@ bool PWIZSpectrumCollection::parse(int ms_level, bool dia_mode) {
     }
   }
 
-  // carp(CARP_DETAILED_DEBUG, "spectra_ size:%d", spectra_.size() );
   is_parsed_ = true;
   return true;
 }

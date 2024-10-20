@@ -1,9 +1,9 @@
 #ifndef TIDESEARCHAPPLICATION_H
 #define TIDESEARCHAPPLICATION_H
 
-#include "CruxApplication.h"
+#include "CruxApplication.h" 
 #include "TideMatchSet.h"
-
+ 
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -13,54 +13,133 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
 #include "util/MathUtil.h"
+#include "tide/ActivePeptideQueue.h"
+#include "TideIndexApplication.h"
+#include "TideMatchSet.h"
 
 using namespace std;
 
-/**
- * Locks for multi-threading in Tide.
- */
-enum _tide_search_lock {
-  LOCK_RESULTS,       // Results file output
-  LOCK_CASCADE,       // Only used by cascade-search on spectrum_flag (map)
-  LOCK_CANDIDATES,    // Updating # of candidate peptides
-  LOCK_REPORTING,     // Updating sc_index and reporting progress
-  NUMBER_LOCK_TYPES   // always keep this last so the value
-                      // changes as cmds are added
-};
 
-typedef enum _tide_search_lock TIDE_SEARCH_LOCK_T;
-
-
-struct InputFile {
-  std::string OriginalName;
-  std::string SpectrumRecords;
-  bool Keep;
-  InputFile(const std::string& name,
-            const std::string& spectrumrecords,
-            bool keep):
-    OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
-};
-
-struct ScSortByMz {
-  explicit ScSortByMz(double precursor_window) { precursor_window_ = precursor_window; }
-  bool operator() (const SpectrumCollection::SpecCharge x, const SpectrumCollection::SpecCharge y) {
-      return (x.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * x.charge <
-             (y.spectrum->PrecursorMZ() - MASS_PROTON - precursor_window_) * y.charge;
-  }
-  double precursor_window_;
-};
 
 class TideSearchApplication : public CruxApplication {
-  private:
+ private:
+  struct InputFile {
+    std::string OriginalName;
+    std::string SpectrumRecords;
+    bool Keep;
+    InputFile(const std::string& name,
+              const std::string& spectrumrecords,
+              bool keep):
+      OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
+  };
+ protected:
+  static const double XCORR_SCALING;
+  static const double RESCALE_FACTOR;
+  static const double TAILOR_QUANTILE_TH;
+  static const double TAILOR_OFFSET;
+
+  map<pair<string, unsigned int>, bool>* spectrum_flag_;
+  string output_file_name_;
+  std::string remove_index_;  
+  double bin_width_;
+  double bin_offset_;
+  bool use_neutral_loss_peaks_;
+  bool use_flanking_peaks_;
+
+  long int num_range_skipped_;
+  long int num_precursors_skipped_;
+  long int num_isotopes_skipped_;
+  long int num_retained_;
+  long int total_candidate_peptides_;
+  long int num_spectra_;
+  long int num_spectra_searched_;
+  int print_interval_;
+  vector<int> negative_isotope_errors_;
+  WINDOW_TYPE_T window_type_;
+  double precursor_window_;
+  double spectrum_min_mz_;
+  double spectrum_max_mz_;
+  double min_scan_;
+  double max_scan_;
+  double min_peaks_;
+  double min_precursor_charge_;
+  double max_precursor_charge_;
+  int num_threads_;
+  double fragTol_;
+  int granularityScale_;  
+  int total_spectra_num_;
+  string tide_index_mzTab_file_path_;
+
+  ofstream* out_tsv_target_; // original tide-search output format in tab-delimited text files (txt)
+  ofstream* out_tsv_decoy_;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only
+  ofstream* out_mztab_target_;      // mzTAB output format
+  ofstream* out_mztab_decoy_;      // mzTAB output format for the decoy psms only
+  ofstream* out_pin_target_;        // pin output format for percolator
+  ofstream* out_pin_decoy_;        // pin output format for percolator for the decoy psms only
+
+  vector<boost::mutex *> locks_array_;  
+
+  //vector<TideSearchApplication::InputFile> getInputFiles(const vector<string>& filepaths) const;
+  void getInputFiles(int thread_id);
+  // static SpectrumCollection* loadSpectra(const std::string& file);
+  void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
+  void createOutputFiles();
+
+  void PrintResults(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt, TideMatchSet* psm_scores);
+
+
+  vector<pair<pb::Spectrum, int>> spectrum_heap_; // vector -> first = neutral_mass, second = file number
+  vector<HeadedRecordReader*> spectrum_reader_; // map -> key = file number, value = pointer to source file
+  vector<InputFile> inputFiles_;
+
+  // sprectrum search executed in parallel threads
+  void spectrum_search(void *threadarg);  
+  
+  // comparition of Spectrum data, based on neutral mass
+  struct compare_spectrum{
+    bool operator()(pair<pb::Spectrum, int> &spec_1, pair<pb::Spectrum, int> &spec_2){
+      
+      return spec_1.first.neutral_mass() > spec_2.first.neutral_mass();
+    }
+  };
+
+   // Struct holding necessary information for each thread to run.
+  struct thread_data {
+    ActivePeptideQueue* active_peptide_queue_;
+    int thread_id_;
+    thread_data (ActivePeptideQueue* active_peptide_queue, int thread_id) {
+      active_peptide_queue_ = active_peptide_queue;
+      thread_id_ = thread_id;
+    }
+  };
+
+  void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
+
+  void computeWindow(
+      const SpectrumCollection::SpecCharge& sc,
+      vector<double>* out_min,
+      vector<double>* out_max,
+      double* min_range,
+      double* max_range
+    );
+  vector<double> dAAFreqN_;
+  vector<double> dAAFreqI_;
+  vector<double> dAAFreqC_;
+  vector<double> dAAMass_;
+  vector<int> iAAMass_;
+  map<double, std::string> mMass2AA_;
+
+  // Terminal mass bins for RES-EV
+  int nTermMassBin_;
+  double nTermMass_;
+  int cTermMassBin_;
+  double cTermMass_;
+
+
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
-  void getMassBin (
-    vector<int>& pepMassInt,
-    vector<int>& pepMassIntUnique,
-    ActivePeptideQueue* active_peptide_queue,
-    vector<bool>* candidatePeptideStatus
-  );
-
+  void getMassBin (vector<int>& pepMassInt, vector<int>& pepMassIntUnique, ActivePeptideQueue* active_peptide_queue); 
+  int calcScoreCount(vector<int>& pepMassIntUnique, vector<vector<int>>& evidenceObs, vector<double>& nullDistribution);
   //Added by Andy Lin in March 2016
   //function gets the max evidence of each mass bin(column)
   //up to mass bin of candidate precursor
@@ -76,105 +155,39 @@ class TideSearchApplication : public CruxApplication {
   //residue evidence matrix and a theoretical spectrum
   int calcResEvScore(
     const vector<vector<double> >& curResidueEvidenceMatrix,
-    const vector<unsigned int>& intensArrayTheor,
-    const vector<double>& aaMassDouble,
     Peptide* curPeptide
   );
 
-  friend class SubtractIndexApplication;
-
- protected:
-
-  /**
-  brief This variable is used with Cascade Search.
-  This map contains a flag for each spectrum whether
-  a spectrum has not been identified in a prior cycle (0) or not (1).
-  The spectrum ID is a pair containing the ordinal number of the
-  input file in the first component and a scanId-charge-state in the second component.
-  The scanID and the charge state is combined into a single number
-  as scanID*10 + charge_state. Charge state is required to be less than 10.
-  */
-  map<pair<string, unsigned int>, bool>* spectrum_flag_;
-  string output_file_name_;
-
-  static bool HAS_DECOYS;
-  static bool PROTEIN_LEVEL_DECOYS;
-
-  vector<InputFile> getInputFiles(const vector<string>& filepaths) const;
-  static SpectrumCollection* loadSpectra(const std::string& file);
-
-  /**
-   * Function that contains the search algorithm and performs the search
-   */
-  void search(void *threadarg);
-
-  /**
-    * Calls search(threadarg), and if threading, creates threads calling
-    * search(threadarg)
-    *
-    * Call structure:
-    * main -> [this function] -> search(void* threadarg)
-    *                 |
-    *   (if threading)|
-    *                 |
-    *                 -> Per Thread:
-    *                           -> search(void* threadarg)
-    */
-  void search(
-    const string& spectrum_filename,
-    const vector<SpectrumCollection::SpecCharge>* spec_charges,
-    vector<ActivePeptideQueue*> active_peptide_queue,
-    ProteinVec& proteins,
-    double precursor_window,
-    WINDOW_TYPE_T window_type,
-    double spectrum_min_mz,
-    double spectrum_max_mz,
-    int min_scan,
-    int max_scan,
-    int min_peaks,
-    int top_matches,
-    double highest_mz,
-    ofstream* target_file,
-    ofstream* decoy_file,
-    bool compute_sp,
-    int nAA,
-    double* aaFreqN,
-    double* aaFreqI,
-    double* aaFreqC,
-    int* aaMass,
-    int nAARes,
-    const vector<double>& dAAFreqN,
-    const vector<double>& dAAFreqI,
-    const vector<double>& dAAFreqC,
-    const vector<double>& dAAMass,
-    const pb::ModTable& mod_table,
-    const pb::ModTable& nterm_mod_table,
-    const pb::ModTable& cterm_mod_table,
-    int numDecoys,
-    vector<int>* negative_isotope_errors
+  //Added by Andy Lin in Dec 2016
+  //Function takes a value, which results from multiplying various p-values together,
+  //and computes a new p-value from the distribution of correlated p-values
+  //Use eqn 3 from Tim Baily and Bill Noble Grundy RECOMB99 paper
+  void calcResidueScoreCount (
+    int pepMassInt,
+    vector<vector<double> >& residueEvidenceMatrix,
+    int maxEvidence,
+    int maxScore,
+    vector<double>& scoreCount, //this is returned for later use
+    int& scoreOffset //this is returned for later use
   );
-
-
-
-  void convertResults() const;
-
-  double bin_width_;
-  double bin_offset_;
-
-  std::string remove_index_;
-
-  // this map can be used to preload spectra
-  // <spectrumrecords file> -> SpectrumCollection
-  // the SpectrumCollection must be sorted
-  std::map<std::string, SpectrumCollection*> spectra_;
+  double calcCombinedPval(
+    double m, //parameter
+    double p, //value is the multiplication of p-values that will be combined,
+    int numPval //number of p-values to combine
+  );
 
  public:
 
-  // See TideSearchApplication.cpp for descriptions of these two constants
-  static const double XCORR_SCALING;
-  static const double RESCALE_FACTOR;
+  SCORE_FUNCTION_T curScoreFunction_;
+  int decoy_num_;  // Number of decoys per peptide;
+  int top_matches_;
+  
+  // These are public functions to be accessed from diameter application.
+  static vector<int> getNegativeIsotopeErrors();
+  static void XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
+  static int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
+  void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
 
-  bool exact_pval_search_;
 
   /**
    * Constructor
@@ -186,40 +199,14 @@ class TideSearchApplication : public CruxApplication {
    */
   ~TideSearchApplication();
 
-  unsigned int NUM_THREADS;
-
   /**
-   * Main method
+   * Main methods
    */
   virtual int main(int argc, char** argv);
 
   int main(const vector<string>& input_files);
 
   int main(const vector<string>& input_files, const string input_index);
-
-  static bool proteinLevelDecoys();
-
-  static vector<int> getNegativeIsotopeErrors();
-
-  static void computeWindow(
-      const SpectrumCollection::SpecCharge& sc,
-      WINDOW_TYPE_T window_type,
-      double precursor_window,
-      vector<int>* negative_isotope_errors,
-      vector<double>* out_min,
-      vector<double>* out_max,
-      double* min_range,
-      double* max_range
-    );
-
-  static void collectScoresCompiled(
-      ActivePeptideQueue* active_peptide_queue,
-      const Spectrum* spectrum,
-      const ObservedPeakSet& observed,
-      TideMatchSet::Arr2* match_arr,
-      int queue_size,
-      int charge
-    );
 
   /**
    * Returns the command name
@@ -251,122 +238,21 @@ class TideSearchApplication : public CruxApplication {
    */
   virtual bool needsOutputDirectory() const;
 
+  /**
+   * Returns the command ID 
+   */
   virtual COMMAND_T getCommand() const;
 
   /**
-   * Struct holding necessary information for each thread to run.
+   * Processes the output file names
    */
-  struct thread_data {
-
-    string spectrum_filename;
-    const vector<SpectrumCollection::SpecCharge>* spec_charges;
-    ActivePeptideQueue* active_peptide_queue;
-    ProteinVec proteins;
-    double precursor_window;
-    WINDOW_TYPE_T window_type;
-    double spectrum_min_mz;
-    double spectrum_max_mz;
-    int min_scan;
-    int max_scan;
-    int min_peaks;
-    int top_matches;
-    double highest_mz;
-    ofstream* target_file;
-    ofstream* decoy_file;
-    bool compute_sp;
-    int64_t thread_num;
-    int64_t num_threads;
-    int nAA;
-    double* aaFreqN;
-    double* aaFreqI;
-    double* aaFreqC;
-    int* aaMass;
-    int nAARes;
-    const vector<double>* dAAFreqN;
-    const vector<double>* dAAFreqI;
-    const vector<double>* dAAFreqC;
-    const vector<double>* dAAMass;
-    const pb::ModTable* mod_table;
-    const pb::ModTable* nterm_mod_table;
-    const pb::ModTable* cterm_mod_table;
-    int decoysPerTarget;
-    vector<boost::mutex*> locks_array;
-    double bin_width;
-    double bin_offset;
-    bool exact_pval_search;
-    map<pair<string, unsigned int>, bool>* spectrum_flag;
-    int* sc_index;
-    long* total_candidate_peptides;
-    vector<int>* negative_isotope_errors;
-
-    thread_data (const string& spectrum_filename_, const vector<SpectrumCollection::SpecCharge>* spec_charges_,
-            ActivePeptideQueue* active_peptide_queue_, ProteinVec proteins_, double precursor_window_,
-            WINDOW_TYPE_T window_type_, double spectrum_min_mz_, double spectrum_max_mz_,
-            int min_scan_, int max_scan_, int min_peaks_, int top_matches_,
-            double highest_mz_, ofstream* target_file_,
-            ofstream* decoy_file_, bool compute_sp_, int64_t thread_num_, int64_t num_threads_, int nAA_,
-            double* aaFreqN_, double* aaFreqI_, double* aaFreqC_, int* aaMass_, int nAARes_,
-            const vector<double>* dAAFreqN_, const vector<double>* dAAFreqI_,
-            const vector<double>* dAAFreqC_, const vector<double>* dAAMass_,
-            const pb::ModTable* mod_table_, const pb::ModTable* nterm_mod_table_, const pb::ModTable* cterm_mod_table_, const int decoysPerTarget_,
-            vector<boost::mutex*> locks_array_, double bin_width_, double bin_offset_, bool exact_pval_search_,
-            map<pair<string, unsigned int>, bool>* spectrum_flag_, int* sc_index_, long* total_candidate_peptides_,
-            vector<int>* negative_isotope_errors_) :
-            spectrum_filename(spectrum_filename_), spec_charges(spec_charges_), active_peptide_queue(active_peptide_queue_),
-            proteins(proteins_), precursor_window(precursor_window_), window_type(window_type_),
-            spectrum_min_mz(spectrum_min_mz_), spectrum_max_mz(spectrum_max_mz_), min_scan(min_scan_), max_scan(max_scan_),
-            min_peaks(min_peaks_), top_matches(top_matches_), highest_mz(highest_mz_),
-            target_file(target_file_), decoy_file(decoy_file_), compute_sp(compute_sp_),
-            thread_num(thread_num_), num_threads(num_threads_), nAA(nAA_), aaFreqN(aaFreqN_), aaFreqI(aaFreqI_), aaFreqC(aaFreqC_),
-            aaMass(aaMass_), nAARes(nAARes_), dAAFreqN(dAAFreqN_), dAAFreqI(dAAFreqI_), dAAFreqC(dAAFreqC_), dAAMass(dAAMass_),
-            mod_table(mod_table_), nterm_mod_table(nterm_mod_table_), cterm_mod_table(cterm_mod_table_), decoysPerTarget(decoysPerTarget_),
-            locks_array(locks_array_), bin_width(bin_width_), bin_offset(bin_offset_), exact_pval_search(exact_pval_search_),
-            spectrum_flag(spectrum_flag_), sc_index(sc_index_), total_candidate_peptides(total_candidate_peptides_), negative_isotope_errors(negative_isotope_errors_) {}
-  };
-
-  int calcScoreCount(
-    int numelEvidenceObs,
-    int* evidenceObs,
-    int pepMassInt,
-    int maxEvidence,
-    int minEvidence,
-    int maxScore,
-    int minScore,
-    int nAA,
-    double* aaFreqN,
-    double* aaFreqI,
-    double* aaFreqC,
-    int* aaMass,
-    double* pValueScoreObs
-  );
-
-  void calcResidueScoreCount (
-    int nAa,
-    int pepMassInt,
-    vector<vector<double> >& residueEvidenceMatrix,
-    vector<int>& aaMass,
-    const vector<double>& aaFreqN,
-    const vector<double>& aaFreqI,
-    const vector<double>& aaFreqC,
-    int NTermMass,
-    int CTermMass,
-    int minAaMass,
-    int maxAaMass,
-    int maxEvidence,
-    int maxScore,
-    vector<double>& scoreCount, //this is returned for later use
-    int& scoreOffSet //this is returned for later use
-  );
-
-  double calcCombinedPval( //calculates combined p-value
-    double m,
-    double p,
-    int numPval
-  );
-
-  void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
-  virtual void processParams();
   string getOutputFileName();
+
+  /**
+   * Processes the parameters
+   */
+  virtual void processParams();
+
 };
 
 #endif

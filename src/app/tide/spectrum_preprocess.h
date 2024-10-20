@@ -117,19 +117,41 @@ class Spectrum;
 class ObservedPeakSet {
  public:
 
-  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
+  // This constructor is to be removed when marging TideSearchLite into the main branch.
+/*  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
      double bin_offset = MassConstants::bin_offset_,
      bool NL = false, bool FP = false)
-    : peaks_(new double[MaxBin::Global().BackgroundBinEnd()]),
-    cache_(new int[MaxBin::Global().CacheBinEnd()*NUM_PEAK_TYPES]) {
+    : peaks_(NULL),
+    cache_(NULL) {
 
     bin_width_  = bin_width;
     bin_offset_ = bin_offset;
     NL_ = NL; //NL means neutral loss
     FP_ = FP; //FP means flanking peaks
+    background_bin_end_ = 0;
+    cache_end_ = 0;
   }
 
-  ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
+  // Keep this constructor when TideSearchLite is accepted.
+*/  ObservedPeakSet( bool NL = false, bool FP = false) {
+    peaks_ = NULL;
+    cache_ = NULL;
+
+    bin_width_  = MassConstants::bin_width_;
+    bin_offset_ = MassConstants::bin_offset_;
+    NL_ = NL; //NL means neutral loss
+    FP_ = FP; //FP means flanking peaks
+    background_bin_end_ = 0;
+    cache_end_ = 0;
+  }
+
+//  ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
+  ~ObservedPeakSet() { 
+    if (peaks_ != NULL)
+      delete peaks_;
+    if (cache_ != NULL)
+    delete[] cache_; 
+  }
 
   const int* GetCache() const { return cache_; } //TODO 261: access restriction?
 
@@ -175,43 +197,13 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
                     const double residueToleranceMass,
                     vector< vector<double> >& residueEvidenceMatrix);
 
-  // For debugging
-/*  void Show(const string& name, TheoreticalPeakType peak_type, bool cache_end) {
-    int end = cache_end ? max_mz_.CacheBinEnd() : max_mz_.BackgroundBinEnd();
-    for (int i = 0; i < end; ++i) {
-      double peak = Peak(peak_type, i);
-      if (peak != 0)
-        cout << name << "[" << i << "] = " << peak << endl;
-    }
-  }
 
-#define SHOW(x, y) Show(#x, x, y);
-
-  // For debugging
-  void ShowCache() {
-    SHOW(PeakMain, false);
-    SHOW(LossPeak, false);
-    SHOW(FlankingPeak, false);
-    SHOW(PrimaryPeak, false);
-    SHOW(PeakCombinedB1, true);
-    SHOW(PeakCombinedY1, true);
-    SHOW(PeakCombinedB2, true);
-    SHOW(PeakCombinedY2, true);
-//    SHOW(PeakCombinedB2b, true);
-//    SHOW(PeakCombinedY2b, true);
-  }
-
-  // For debugging
-  void ShowPeaks() {
-    for (int i = 0; i < max_mz_.BackgroundBinEnd(); ++i)
-      if (peaks_[i] != 0)
-        cout << "peaks_[" << i << "] = " << peaks_[i] << endl;
-  }
-*/
   // added by Yang
   int LargestMzbin() const { return largest_mzbin_; };
   int SmallestMzbin() const { return smallest_mzbin_; };
   vector<pair<int, double>>& FilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
+  int getBackgroundBinEnd() {return background_bin_end_; }
+  int getCacheEnd() {return cache_end_; }
 
  private:
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
@@ -224,8 +216,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   bool FP_;
   double bin_width_;
   double bin_offset_;
-
-//  MaxBin max_mz_;
+  int background_bin_end_;
   int cache_end_;
 
   // added by Yang

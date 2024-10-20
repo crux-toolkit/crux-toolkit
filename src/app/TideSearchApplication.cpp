@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstdio>
 #include "app/tide/abspath.h"
 #include "app/tide/records_to_vector-inl.h"
@@ -11,24 +12,29 @@
 #include "PSMConvertApplication.h"
 #include "tide/mass_constants.h"
 #include "TideMatchSet.h"
+#include "tide/spectrum_collection.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
-#include <math.h> //Added by Andy Lin
-#include <map> //Added by Andy Lin
+#include <math.h> 
+#include <map>
+#include "tide/ActivePeptideQueue.h"
+#include "residue_stats.pb.h"
+#include "crux_version.h"
 
-#define TAILOR_QUANTILE_TH 0.01
-#define TAILOR_OFFSET 5.0
-
-bool TideSearchApplication::HAS_DECOYS = false;
-bool TideSearchApplication::PROTEIN_LEVEL_DECOYS = false;
-
+//here :O
+//#include <iostream>
+//#include <set>
+/*
+#include <vector>
+#include <queue>
+#include <sstream>
+#include <cstdlib>
+*/
 /* This constant is the product of the original "magic number" (10000,
  * on line 4622 of search28.c) that was used to rescale the XCorr
  * score, and the integerization constant used by Benjamin Diament in
  * Tide.  In the Tide publication, that constant was reported as 10^7.
- * However, here it appears to be only 10^4.
- *
  * --WSN, 10 March 2015 */
 const double TideSearchApplication::XCORR_SCALING = 100000000.0;
 
@@ -38,387 +44,1122 @@ const double TideSearchApplication::XCORR_SCALING = 100000000.0;
  * tide/spectrum_preprocess2.cc). */
 const double TideSearchApplication::RESCALE_FACTOR = 20.0;
 
-/* There is a macro defined in ./tide/theoretical_peak_set.h and called CPP_SCORING
- * which controls  whether the XCorr scoring should be executed by the original assembly code  
- * defined in collectScoresCompiled implemented by Benjamin, or it should be executed by a plain C++ code. 
- * The macro appears in active_peptide_queue.cc and peptide.cc. The code in  
- * assembly is faster albeit is segfaults in multi-threading. See: 
- * https://github.com/crux-toolkit/crux-toolkit/issues/407
- */
+// Things done:
+// -- handle terminal mod structure in the peptides internally. GH issue: #639
+// -- missing charge states, 0 charege states,, override charge states handled. --> need to update doc. GH issue: #557, #607
 
-TideSearchApplication::TideSearchApplication():
-  exact_pval_search_(false), remove_index_(""), spectrum_flag_(NULL) {
+#define CHECK(x) GOOGLE_CHECK(x)
+
+TideSearchApplication::TideSearchApplication() {
+  remove_index_ = "";
+  spectrum_flag_ = NULL;
+  decoy_num_ = 0;
+  num_range_skipped_ = 0;
+  num_precursors_skipped_ = 0;
+  num_isotopes_skipped_ = 0;
+  num_retained_ = 0;
+  num_spectra_ = 0;
+  num_spectra_searched_ = 0;
+  total_candidate_peptides_ = 0;
+  precursor_window_ = 0;
+  spectrum_min_mz_ = 0; 
+  spectrum_max_mz_ = 0;
+  min_scan_ = 0;
+  max_scan_ = 0;
+  min_peaks_ = 0;
+  min_precursor_charge_ = 0;
+  max_precursor_charge_ = 0;
+  out_tsv_target_  = NULL; // original tide-search output format in tab-delimited text files (txt)
+  out_tsv_decoy_ = NULL;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only
+  out_mztab_target_ = NULL;      // mzTAB output format
+  out_mztab_decoy_ = NULL;      // mzTAB output format for the decoy psms only
+  out_pin_target_ = NULL;        // pin output format for percolator
+  out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
+  total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
+
+  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
+    locks_array_.push_back(new boost::mutex());
+  }
 }
 
 TideSearchApplication::~TideSearchApplication() {
-  if (!remove_index_.empty()) {
-    carp(CARP_DEBUG, "Removing temp index '%s'", remove_index_.c_str());
-    FileUtils::Remove(remove_index_);
+  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
+    delete locks_array_[i];
   }
 }
 
 int TideSearchApplication::main(int argc, char** argv) {
   return main(Params::GetStrings("tide spectra file"));
 }
+
 int TideSearchApplication::main(const vector<string>& input_files) {
   return main(input_files, Params::GetString("tide database"));
 }
 
 int TideSearchApplication::main(const vector<string>& input_files, const string input_index) {
+
   carp(CARP_INFO, "Running tide-search...");
 
-  // Brief output only works with text-format.
-  if ( Params::GetBool("brief-output") ) {
-    if ( !Params::GetBool("txt-output") ||
-         Params::GetBool("mzid-output") ||
-         Params::GetBool("pin-output") ||
-         Params::GetBool("pepxml-output") ) {
-      carp(CARP_FATAL, "The brief-output option is only compatible with text output.");
-    }
-  }
-
-
-  // prevent different output formats from using threading
-  if (!Params::GetBool("peptide-centric-search")) {
-    NUM_THREADS = Params::GetInt("num-threads");
-  } else {
-    carp(CARP_INFO, "Threading for peptide-centric formats is not yet supported.");
-    NUM_THREADS = 1;
-  }
-  if (NUM_THREADS < 1) {
-    NUM_THREADS = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
-    // (Meaning just main thread) Do not make this value below 1.
-  } else if (NUM_THREADS > 64) {
-    // make sure that number of threads are reasonable, e.g. user did not specify millions of threads...
-    carp(CARP_FATAL, "Requested more than 64 threads.");
-  }
-  carp(CARP_INFO, "Number of Threads: %d", NUM_THREADS);
-
-  const string index = input_index;
-  string peptides_file = FileUtils::Join(index, "pepix");
-  string proteins_file = FileUtils::Join(index, "protix");
-  string auxlocs_file = FileUtils::Join(index, "auxlocs");
-
-  // Check scan-number parameter
-  string scan_range = Params::GetString("scan-number");
-  int min_scan, max_scan;
-  if (scan_range.empty()) {
-    min_scan = 0;
-    max_scan = BILLION;
-    carp(CARP_DEBUG, "Searching all scans");
-  } else if (scan_range.find('-') == string::npos) {
-    // Single scan
-    min_scan = max_scan = atoi(scan_range.c_str());
-    carp(CARP_INFO, "Searching single scan %d", min_scan);
-  } else {
-    if (!get_range_from_string(scan_range.c_str(), min_scan, max_scan)) {
-      carp(CARP_FATAL, "The scan number range '%s' is invalid. "
-           "Must be of the form <first>-<last>.", scan_range.c_str());
-    }
-    if (min_scan > max_scan) {
-      carp(CARP_FATAL, "Invalid scan range: %d to %d.", min_scan, max_scan);
-    }
-    carp(CARP_INFO, "Searching scan range %d to %d.", min_scan, max_scan);
-  }
-
-  // check to compute exact p-value
-  exact_pval_search_ = Params::GetBool("exact-p-value");
+  print_interval_ = Params::GetInt("print-search-progress");  
+  
   bin_width_  = Params::GetDouble("mz-bin-width");
   bin_offset_ = Params::GetDouble("mz-bin-offset");
 
-  // for now don't allow XCorr p-value or combined p-values
-  // searches with variable bin width
-  if (exact_pval_search_ && bin_width_ != MassConstants::bin_width_) {
-    carp(CARP_FATAL, "Computing exact p-value (i.e setting exact-p-value=T) requires that mz-bin-width be set to 1.0005079");
+  use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
+  use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
+
+  negative_isotope_errors_ = getNegativeIsotopeErrors();  
+
+  window_type_= string_to_window_type(Params::GetString("precursor-window-type"));
+  precursor_window_ = Params::GetDouble("precursor-window");
+
+  spectrum_min_mz_ =  Params::GetDouble("spectrum-min-mz") ;
+  spectrum_max_mz_ = Params::GetDouble("spectrum-max-mz") ;
+  min_peaks_ = Params::GetInt("min-peaks");
+  min_precursor_charge_ = Params::GetInt("min-precursor-charge");
+  max_precursor_charge_ = Params::GetInt("max-precursor-charge");  
+
+  fragTol_ = Params::GetDouble("fragment-tolerance");
+  granularityScale_ = Params::GetInt("evidence-granularity");  
+
+  top_matches_ = Params::GetInt("top-match");  
+  num_threads_ = Params::GetInt("num-threads");
+  if (num_threads_ < 1) {
+    num_threads_ = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
+    // (Meaning just main thread) Do not make this value below 1.
+  } else if (num_threads_ > 64) {
+    // make sure that number of threads are reasonable, e.g. user did not specify millions of threads...
+    carp(CARP_FATAL, "Requested more than 64 threads.");
   }
+  carp(CARP_INFO, "Number of Threads: %d", num_threads_);
 
-  // Check that combined p-value is with exact-p-value=T
-  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
-  if (curScoreFunction == BOTH_SCORE && !exact_pval_search_) {
-    carp(CARP_FATAL, "--score-function 'both' must be run with exact-p-value=T");
-  }
 
-  // TODO res-ev not implemented with flanking_peak, neutral_loss_peak,
-  // and dynamic CTerm and NTerm mass
-  bool use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
-  bool use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
-  if (use_flanking_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
-    carp(CARP_FATAL, "--score-function 'residue-evidence' with "
-                    "--use-flanking-peaks true is not implemented yet");
-  }
-  if (use_neutral_loss_peaks_ && curScoreFunction == RESIDUE_EVIDENCE_MATRIX) {
-    carp(CARP_FATAL, "--score-function 'residue-evidence' with "
-                    "--use-neutral-loss-peaks 'true' is not implemented yet");
-  }
-  
-  //Tailor score calibration does not support res-ev scores or refactored xcorrs //Added by AKF
-  if (Params::GetBool("use-tailor-calibration") && exact_pval_search_ )
-    carp(CARP_FATAL, "--exact-p-value T is not implemented with the Tailor score "
-                    "calibration method");
-
-  if (Params::GetBool("use-tailor-calibration") && curScoreFunction == RESIDUE_EVIDENCE_MATRIX )
-    carp(CARP_FATAL, "--score-function 'residue-evidence' is not implemented "
-                    "with the Tailor score calibration method");
-
-  if (Params::GetBool("use-tailor-calibration") && Params::GetBool("peptide-centric-search") )
-    carp(CARP_FATAL, "--peptide-centric-search is not implemented "
-                    "with the Tailor score calibration method");
-
-  // Check compute-sp parameter
-  bool compute_sp = Params::GetBool("compute-sp");
-  if (Params::GetBool("sqt-output") && !compute_sp) {
-    compute_sp = true;
-    carp(CARP_INFO, "Setting compute-sp=T because SQT output is enabled.");
-  }
-
-  vector<int> negative_isotope_errors = getNegativeIsotopeErrors();
-
-  ProteinVec proteins;
-  carp(CARP_INFO, "Reading index %s", index.c_str());
-  
-  // Read proteins index file
-  pb::Header protein_header;
-  if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins,
-      proteins_file, &protein_header)) {
-    carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
-  }
-  // There shouldn't be more than one header in the protein pb.
-  pb::Header_Source headerSource = protein_header.source(0);  
-  string decoy_prefix = "";
-  if (headerSource.has_decoy_prefix()){
-    decoy_prefix = headerSource.decoy_prefix();
+  // Check scan-number parameter
+  string scan_range = Params::GetString("scan-number");
+  if (scan_range.empty()) {
+    min_scan_ = 0;
+    max_scan_ = BILLION;
+    carp(CARP_DEBUG, "Searching all scans");
+  } else if (scan_range.find('-') == string::npos) {
+    // Single scan
+    min_scan_ = max_scan_ = atoi(scan_range.c_str());
+    carp(CARP_INFO, "Searching single scan %d", min_scan_);
   } else {
-    carp(CARP_WARNING, "You are using an index generated by an old version of tide-index."
-                       "This will not affect your results, but this index may need to be "
-                       "re-created to work with future versions of tide-index. ");
-  }
-  TideMatchSet::decoy_prefix_ = decoy_prefix;
-  
-  int64_t targetProteinCount = 0;
-  for (ProteinVec::const_iterator i = proteins.begin(); i != proteins.end(); i++) {
-    if (!(*i)->has_target_pos()) {
-      ++targetProteinCount;
+    if (!get_range_from_string(scan_range.c_str(), min_scan_, max_scan_)) {
+      carp(CARP_FATAL, "The scan number range '%s' is invalid. "
+           "Must be of the form <first>-<last>.", scan_range.c_str());
     }
-  }
-  carp(CARP_INFO, "Read %d target proteins", targetProteinCount);
-
-  // Open a copy of peptide buffer for Amino Acid Frequency (AAF) calculation.
-  // Is used for curScoreFunction = XCORR_SCORE
-  // contains frequency of amino acid masses (masses are binned)
-  double* aaFreqN = NULL;
-  double* aaFreqI = NULL;
-  double* aaFreqC = NULL;
-  int* aaMass = NULL;
-  int nAA = 0;
-
-  // Is used for curScoreFunction = RESIDUE_EVIDENCE_MATRIX
-  // contains frequency of amino acid masses (masses are not binned)
-  vector<double> dAAFreqN;
-  vector<double> dAAFreqI;
-  vector<double> dAAFreqC;
-  vector<double> dAAMass;
-  int nAARes = 0;
-
-  if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX || curScoreFunction == BOTH_SCORE) {
-    pb::Header aaf_peptides_header;
-    HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
-
-    if (aaf_peptides_header.file_type() != pb::Header::PEPTIDES ||
-        !aaf_peptides_header.has_peptides_header()) {
-      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+    if (min_scan_ > max_scan_) {
+      carp(CARP_FATAL, "Invalid scan range: %d to %d.", min_scan_, max_scan_);
     }
-
-    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
-                        &aaf_peptides_header.peptides_header().nterm_mods(),
-                        &aaf_peptides_header.peptides_header().cterm_mods(),
-                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
-                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
-                        bin_width_, bin_offset_);
-
-    ActivePeptideQueue* active_peptide_queue =
-      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
-
-    nAARes = active_peptide_queue->CountAAFrequencyRes(bin_width_, bin_offset_,
-                                                       dAAFreqN, dAAFreqI, dAAFreqC, dAAMass);
-    delete active_peptide_queue;
+    carp(CARP_INFO, "Searching scan range %d to %d.", min_scan_, max_scan_);
   }
 
-  // For SCORE_FUNCTION=="XCORR_SCORE" with p-val=T or SCORE_FUNCTION=="BOTH_SCORE"
-  if (exact_pval_search_ && (curScoreFunction == XCORR_SCORE || curScoreFunction == BOTH_SCORE)) {
-    pb::Header aaf_peptides_header;
-    HeadedRecordReader aaf_peptide_reader(peptides_file, &aaf_peptides_header);
+  // Determine which score function to use for scoring PSMs and store in SCORE_FUNCTION enum. Change this in ./src/util/crux-utils.cpp: 68
+  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));  
 
-    if (( aaf_peptides_header.file_type() != pb::Header::PEPTIDES) ||
-         !aaf_peptides_header.has_peptides_header()) {
-      carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
-    }
-
-    MassConstants::Init(&aaf_peptides_header.peptides_header().mods(),
-                        &aaf_peptides_header.peptides_header().nterm_mods(),
-                        &aaf_peptides_header.peptides_header().cterm_mods(),
-                        &aaf_peptides_header.peptides_header().nprotterm_mods(),
-                        &aaf_peptides_header.peptides_header().cprotterm_mods(),
-                        bin_width_, bin_offset_);
-
-    ActivePeptideQueue* active_peptide_queue =
-      new ActivePeptideQueue(aaf_peptide_reader.Reader(), proteins);
-
-    nAA = active_peptide_queue->CountAAFrequency(bin_width_, bin_offset_,
-                                                 &aaFreqN, &aaFreqI, &aaFreqC, &aaMass);
-    delete active_peptide_queue;
-  } // End calculation of amino acid frequencies.
-  
-  // Read auxlocs index file
+  if (curScoreFunction_ == PVALUES && bin_width_ < 1.0) {
+    carp(CARP_FATAL, "Tide-search does not support P-value calculation with bin-width less than 1.0 Da.");
+  }
+ 
+  // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
+  vector<const pb::Protein*> proteins;
   vector<const pb::AuxLocation*> locations;
-  if (ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file)) {
-    carp(CARP_INFO, "Read %d auxiliary locations.", locations.size());
-  }  
-
-  // Read peptides index file
   pb::Header peptides_header;
-  carp(CARP_INFO, "Reading peptide_header.");  
-  vector<HeadedRecordReader*> peptide_reader;
-  for (int i = 0; i < NUM_THREADS; i++) {
-    peptide_reader.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
+  string peptides_file = FileUtils::Join(input_index, "pepix");  
+  HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
+  getPeptideIndexData(input_index, proteins, locations, peptides_header);
+  tide_index_mzTab_file_path_ = FileUtils::Join(input_index, TideIndexApplication::tide_index_mzTab_filename_);
+
+  TideMatchSet::curScoreFunction_ = curScoreFunction_;
+  TideMatchSet::top_matches_ = top_matches_;
+  TideMatchSet::decoy_num_ = decoy_num_;
+  TideMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
+  TideMatchSet::score_precision_ = Params::GetInt("precision");
+  TideMatchSet::mod_precision_ = Params::GetInt("mod-precision");
+  TideMatchSet::concat_ = Params::GetBool("concat");  
+
+  // Create the output files, print headers
+  createOutputFiles(); 
+
+  // Convert the original file names into spectrum records if needed 
+  // Update the file names in the variable inputFiles_ locally.
+  // Run spectrum file convertion in parallel.
+  for (vector<string>::const_iterator original_file_name = input_files.begin(); original_file_name != input_files.end(); ++original_file_name) {
+    inputFiles_.push_back(TideSearchApplication::InputFile(*original_file_name, *original_file_name, false));
+  }
+  // Launch threads to convert files
+  boost::thread_group threadgroup_input_files;
+  for (int t = 1; t < num_threads_; ++t) {
+    boost::thread * currthread = new boost::thread(boost::bind(&TideSearchApplication::getInputFiles, this, t));
+    threadgroup_input_files.add_thread(currthread);
+  }
+  getInputFiles(0);
+  // Join threads
+  threadgroup_input_files.join_all();
+
+  if (total_spectra_num_ > 0) {
+    carp(CARP_INFO, "There were a total of %d spectrum conversions from %d input spectrum files.",
+         total_spectra_num_, inputFiles_.size());
+  }
+  carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
+
+  // Create the active_peptide_queues and peptide_readers for each threads
+  vector<HeadedRecordReader*> peptide_reader_threads;
+  vector<ActivePeptideQueue*> APQ;
+  for (int i = 0; i < num_threads_; i++) {
+    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
+    APQ.push_back(new ActivePeptideQueue(peptide_reader_threads.back()->Reader(), proteins, &locations));
   }
 
-  if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
-      !peptides_header.has_peptides_header()) {
-    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
-  }
+  carp(CARP_INFO, "Starting search.");
+  // Read the first spectrum records from each input files 
+  int file_cnt = 0;
+  pb::Spectrum pb_spectrum; // spectrum message struct
+  for (vector<InputFile>::iterator spectrum_file = inputFiles_.begin(); spectrum_file != inputFiles_.end(); ++spectrum_file, ++file_cnt) {
 
-  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  DECOY_TYPE_T headerDecoyType = (DECOY_TYPE_T)pepHeader.decoys();
-  int decoysPerTarget = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
-  if (headerDecoyType != NO_DECOYS) {
-    HAS_DECOYS = true;
-  }
+    string spectrum_records_file = spectrum_file->SpectrumRecords;
+    spectrum_reader_.push_back(new HeadedRecordReader(spectrum_records_file));
 
-  MassConstants::Init(&pepHeader.mods(), 
-      &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
-      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(),
-      bin_width_, bin_offset_);
-  ModificationDefinition::ClearAll();
-  TideMatchSet::initModMap(pepHeader.mods(), ANY);
-  TideMatchSet::initModMap(pepHeader.nterm_mods(), PEPTIDE_N);
-  TideMatchSet::initModMap(pepHeader.cterm_mods(), PEPTIDE_C);
-  TideMatchSet::initModMap(pepHeader.nprotterm_mods(), PROTEIN_N);
-  TideMatchSet::initModMap(pepHeader.cprotterm_mods(), PROTEIN_C);
-
-  ofstream* target_file = NULL;
-  ofstream* decoy_file = NULL;
-
-  bool overwrite = Params::GetBool("overwrite");
-  stringstream ss;
-  ss << Params::GetString("enzyme") << '-' << Params::GetString("digestion");
-  TideMatchSet::CleavageType = ss.str();
-  if (!Params::GetBool("concat")) {
-    string target_file_name = make_file_path("tide-search.target.txt");
-    target_file = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-    output_file_name_ = target_file_name;
-    if (HAS_DECOYS) {
-      string decoy_file_name = make_file_path("tide-search.decoy.txt");
-      decoy_file = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+    if (!spectrum_reader_.back()->Done() ) {
+      spectrum_reader_.back()->Read(&pb_spectrum);
+      spectrum_heap_.push_back(make_pair(pb_spectrum, file_cnt));
     }
+    if ( !spectrum_reader_.back()->OK() ){
+      carp(CARP_FATAL, "Spectrum records file %s is corrupt.", spectrum_records_file.c_str());
+    }
+
+  }
+  // make a heap with the spectrum records 
+  make_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+
+  // Create thread data
+  vector<thread_data> thread_data_array;
+  for (int t = 0; t < num_threads_; ++t) {
+      thread_data_array.push_back(thread_data(APQ[t], t));
+  }
+
+  // Launch threads
+  boost::thread_group threadgroup;
+  for (int t = 1; t < num_threads_; ++t) {
+    boost::thread * currthread = new boost::thread(boost::bind(&TideSearchApplication::spectrum_search, this, (void *) &(thread_data_array[t])));
+    threadgroup.add_thread(currthread);
+  }
+
+  // Searches through part of the spec charge vector while waiting for threads are busy
+  spectrum_search( (void *)  &(thread_data_array[0]) );
+
+  // Join threads
+  threadgroup.join_all();
+
+  // Print statistics
+  long int total_peaks = num_precursors_skipped_ + num_isotopes_skipped_ + num_range_skipped_ + num_retained_;
+  if (total_peaks == 0) {
+    carp(CARP_INFO, "Warning: no peaks found.");
   } else {
-    string concat_file_name = make_file_path("tide-search.txt");
-    target_file = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
-    output_file_name_ = concat_file_name;
+    carp(CARP_INFO,
+          "Deleted %d precursor, %d isotope and %d out-of-range peaks.",
+          num_precursors_skipped_, num_isotopes_skipped_, num_range_skipped_);
+  }
+  if (num_retained_ == 0) {
+    carp(CARP_INFO, "Warning: no peaks retained.");
+  } else {
+    carp(CARP_INFO, "Retained %g%% of peaks.", (100.0 * num_retained_) / total_peaks);
+  }
+  
+  carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*num_spectra_searched_));
+  carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
+    ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
+  carp(CARP_INFO, "%d spectrum-charge combinations loaded, %d spectrum-charge combinations searched. ", num_spectra_, num_spectra_searched_);
+  
+
+  // Delete temporary spectrumrecords file
+ for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
+    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+    remove((*original_file_name).SpectrumRecords.c_str());
   }
 
-  if (target_file) {
-    TideMatchSet::writeHeaders(target_file, false, decoysPerTarget > 1, compute_sp);
-    TideMatchSet::writeHeaders(decoy_file, true, decoysPerTarget > 1, compute_sp);
+  // Delete stuffs
+  if (out_tsv_target_ != NULL)
+    delete out_tsv_target_;
+  if (out_tsv_decoy_ != NULL)
+    delete out_tsv_decoy_;
+  if (out_mztab_target_ != NULL)
+    delete out_mztab_target_;
+  if (out_mztab_decoy_ != NULL)
+    delete out_mztab_decoy_;
+  if (out_pin_target_ != NULL)
+    delete out_pin_target_;
+  if (out_pin_decoy_ != NULL)
+    delete out_pin_decoy_;
+
+  return 0;
+}
+
+void TideSearchApplication::spectrum_search(void *threadarg) {  
+  struct thread_data *my_data = (struct thread_data *) threadarg;
+
+  ActivePeptideQueue* active_peptide_queue = my_data->active_peptide_queue_;
+  int thread_id = my_data->thread_id_;
+
+  int input_file_source;
+  pb::Spectrum pb_spectrum;  
+  while (true){
+
+    // Get the next spectrum records with the smallest neutral mass from the heap and load the next spectrum records from the input files.
+    locks_array_[LOCK_SPECTRUM_READING]->lock();
+    if (spectrum_heap_.size() == 0) {
+      locks_array_[LOCK_SPECTRUM_READING]->unlock();
+      return;
+    }
+    // access the lightest spectra in the heap
+    auto spectrum_pair = spectrum_heap_.front();   
+    input_file_source = spectrum_pair.second;
+    string spectrum_file_name = inputFiles_[input_file_source].OriginalName;
+
+    // remove the lightest spectra from the heap.
+    pop_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+    spectrum_heap_.pop_back();   
+
+    // read the next spectra from the input files and put it in the heap
+    if (!spectrum_reader_[input_file_source]->Done()) {
+      spectrum_reader_[input_file_source]->Read(&pb_spectrum);
+      spectrum_heap_.push_back(make_pair(pb_spectrum, input_file_source));
+      push_heap(spectrum_heap_.begin(), spectrum_heap_.end(), compare_spectrum());
+    }
+    if ( !spectrum_reader_[input_file_source]->OK() ){
+      carp(CARP_FATAL, "Spectrum records file %s is corrupt.", spectrum_file_name.c_str());
+    }
+    ++num_spectra_;
+    if (print_interval_ > 0 && num_spectra_ > 0 && num_spectra_ % print_interval_ == 0) {
+      carp(CARP_INFO, "%d spectrum-charge combinations searched.", num_spectra_);
+    }
+
+    pb_spectrum = spectrum_pair.first;
+    // carp(CARP_INFO, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
+    locks_array_[LOCK_SPECTRUM_READING]->unlock();
+    
+    Spectrum* spectrum = new Spectrum(pb_spectrum); 
+    
+    int charge = spectrum->ChargeState(0);
+    double neutral_mass = pb_spectrum.neutral_mass();
+    SpectrumCollection::SpecCharge* sc = new SpectrumCollection::SpecCharge(neutral_mass, charge, spectrum, 0);
+   
+    // Search one spectrum against its candidate peptides
+
+    double precursor_mz = spectrum->PrecursorMZ();
+    int scan_num = spectrum->SpectrumNumber();
+
+    if (precursor_mz < spectrum_min_mz_|| 
+        precursor_mz > spectrum_max_mz_ || 
+        scan_num < min_scan_ || 
+        scan_num > max_scan_ ||
+        spectrum->Size() < min_peaks_  ||
+        charge < min_precursor_charge_ || 
+        charge >max_precursor_charge_ ) {
+      continue; 
+   }
+
+    if (spectrum_flag_ != NULL) {  // TODO: Do something, possibly for cascade search
+    }
+
+    double min_range, max_range;
+    vector<double>* min_mass = new vector<double>();
+    vector<double>* max_mass = new vector<double>();
+    
+    computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
+    active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+    delete min_mass;
+    delete max_mass;
+
+    if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
+      continue; 
+    }
+    locks_array_[LOCK_CANDIDATES]->lock();
+    total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
+    ++num_spectra_searched_;    
+    locks_array_[LOCK_CANDIDATES]->unlock();  
+
+    // allocate PSMscores for N scores
+    TideMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
+
+    // Calculate the scores needed
+    switch (curScoreFunction_) {
+      case PVALUES:
+        PValueScoring(sc, active_peptide_queue, psm_scores);
+        //break; // Run standard xcorr scoring in case of combined p-value calculations
+      case XCORR_SCORE:
+        // Spectrum preprocessing for xcorr scoring
+        long num_range_skipped = 0;
+        long num_precursors_skipped = 0;
+        long num_isotopes_skipped = 0;
+        long num_retained = 0;
+
+        ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
+        observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
+          &num_precursors_skipped,
+          &num_isotopes_skipped, &num_retained);
+
+        locks_array_[LOCK_REPORTING]->lock();
+        num_range_skipped_ += num_range_skipped;
+        num_precursors_skipped_ += num_precursors_skipped;
+        num_isotopes_skipped_ += num_isotopes_skipped;
+        num_retained_ += num_retained;
+        locks_array_[LOCK_REPORTING]->unlock();
+
+        XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
+        break;
+      // case HYPERSCOR: TODO add noew scoring functinos here
+    } 
+    // Print the top-N results to the output files, 
+    // The delta_cn, delta_lcn, and tailor score calulation happens in PrintResults
+
+    PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
+    delete spectrum;
+    delete sc;
+
+  }
+}
+
+void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores){
+
+  // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
+  // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
+  bool score_inactive_peptides = true;
+  if (active_peptide_queue->min_candidates_ < active_peptide_queue->nCandPeptides_)
+    score_inactive_peptides = false;
+  
+  //Actual Xcorr Scoring        
+  int cnt = 0;
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+    iter != active_peptide_queue->end_;
+    ++iter, ++cnt) {
+    if (active_peptide_queue->candidatePeptideStatus_[cnt] == false && score_inactive_peptides == false) 
+      continue;
+    int xcorr = 0;
+    int match_cnt = 0;
+    int temp = 0;
+    int repeat_ion_match = 0;
+  
+    // Score with single charged b-y ion theoretical peaks
+    xcorr += PeakMatching(observed, (*iter)->peaks_0, match_cnt, temp);
+    // Count the repeating matching ions. This was used in SP scoring
+    temp = PeakMatching(observed, (*iter)->peaks_1b, temp, repeat_ion_match);
+    temp = PeakMatching(observed, (*iter)->peaks_1y, temp, repeat_ion_match);
+
+    if (charge > 2){
+      // Score with double charged b-y ion theoretical peaks
+      xcorr += PeakMatching(observed, (*iter)->peaks_1, match_cnt, temp);      
+      // Count the repeating matching ions. This was used in SP scoring      
+      temp = PeakMatching(observed, (*iter)->peaks_2b, temp, repeat_ion_match);
+      temp = PeakMatching(observed, (*iter)->peaks_2y, temp, repeat_ion_match);
+    }
+    psm_scores.psm_scores_[cnt].ordinal_ = cnt;    
+    psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
+    psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
+    psm_scores.psm_scores_[cnt].repeat_ion_match_ = repeat_ion_match;
+    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].by_ion_total_ = (*iter)->peaks_0.size();
+    if (charge > 2){
+      psm_scores.psm_scores_[cnt].by_ion_total_ += (*iter)->peaks_1.size();
+    }
+  } 
+}
+
+int TideSearchApplication::PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks) {
+  bool previous_ion_matched = false;
+  int score = 0;
+  const int* cache = observed.GetCache(); 
+  int end = observed.getCacheEnd();  
+
+  for (vector<unsigned int>::const_iterator iter_uint = peak_list.begin(); iter_uint != peak_list.end(); iter_uint++) {
+    if (*iter_uint >= end)
+      continue;
+    score += cache[*iter_uint];    // sum of the intensity of matching peaks, the xcorr score
+    if (previous_ion_matched && cache[*iter_uint] > 0) {
+      ++repeat_matching_peaks;
+    }
+    if (cache[*iter_uint] > 0) {
+      previous_ion_matched = true;
+      ++matching_peaks;
+    } else {
+      previous_ion_matched = false;
+    }
+  }
+  return score;
+}
+
+void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores){
+  // 1. Calculate the REFACTORED XCORR SCORE and its EXACT P-VALUE
+
+  // preprocess spectrum for refactored XCorr score calculation
+  long num_range_skipped = 0;
+  long num_precursors_skipped = 0;
+  long num_isotopes_skipped = 0;
+  long num_retained = 0;
+
+  //For each candidate peptide, determine which discretized mass bin it is in
+  //pepMassInt contains the corresponding mass bin for each candidate peptide
+  //pepMassIntUnique contains the unique set of mass bins that candidate peptides fall in 
+  vector<int> pepMassInt;
+  pepMassInt.reserve(active_peptide_queue->nPeptides_);
+  vector<int> pepMassIntUnique;
+  pepMassIntUnique.reserve(active_peptide_queue->nPeptides_);
+  getMassBin(pepMassInt, pepMassIntUnique, active_peptide_queue);
+  int nPepMassIntUniq = (int)pepMassIntUnique.size();
+  int maxPrecurMassBin = MassConstants::mass2bin(sc->neutral_mass + 250);
+
+  vector< vector<int> > evidenceObs(nPepMassIntUniq, vector<int>(maxPrecurMassBin, 0));
+  for (int pe = 0; pe < nPepMassIntUniq; pe++) {
+    int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
+
+    //preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
+    double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset_) * bin_width_;
+    evidenceObs[pe] = sc->spectrum->CreateEvidenceVectorDiscretized(
+      bin_width_, bin_offset_, sc->charge, pepMassMonoMean, maxPrecurMassBin,
+      &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
+  }
+  // The num_range_skipped etc. counts are counted only in the XCorr scoring. 
+
+  // Calculate the null distribution OF PSM scores with dynamic programming method
+  vector<double> nullDistribution;  // The score null distribution comes to this vector.
+  //Score offset indicates the position in the vector corresponding to the score value 0.
+  int score_offset = calcScoreCount(pepMassIntUnique, evidenceObs, nullDistribution);   
+
+  // Calculate refactored XCorr scores
+  // between a spectrum and all possible peptide candidates
+  int scoreRefactInt;
+  int cnt = 0;
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
+      ++iter, ++cnt) {
+
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
+      continue;
+
+    int pepMassIntIdx = 0;
+    int curPepMassInt;
+    for (int ma = 0; ma < nPepMassIntUniq; ++ma ) { //TODO should probably use iterator instead
+      if (pepMassIntUnique[ma] == pepMassInt[cnt]) { //TODO pepMassIntUnique should be accessed with an interator
+        pepMassIntIdx = ma;
+        curPepMassInt = pepMassIntUnique[ma];
+        break;
+      }
+    }
+    // The actual scoring. Refactored XCorr Score calculation
+    scoreRefactInt = 0;
+    for (vector<unsigned int>::const_iterator iter_uint = (*iter)->peaks_1b.begin(); iter_uint != (*iter)->peaks_1b.end(); iter_uint++) {
+      if (*iter_uint < maxPrecurMassBin)
+        scoreRefactInt += evidenceObs[pepMassIntIdx][*iter_uint];
+    }
+
+    // Get the p-value of the refactored xcorr score 
+    double pValue_xcorr = 1.0;
+    if ((int)(scoreRefactInt) + score_offset >= 0) {
+      pValue_xcorr = nullDistribution[(int)(scoreRefactInt) + score_offset];
+    }
+
+    // Store the scores. 
+    psm_scores.psm_scores_[cnt].ordinal_ = cnt;
+    psm_scores.psm_scores_[cnt].refactored_xcorr_ = scoreRefactInt / RESCALE_FACTOR;
+    psm_scores.psm_scores_[cnt].exact_pval_ = pValue_xcorr;
+    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
   }
 
-  vector<InputFile> sr = getInputFiles(input_files);
+  // // 2. Calculate the RES-EV SCORE and its RES-EV P-VALUE, developed by Andy Lin
+  //TODO so this includes ALL amino acids seen (including modified, NTerm mod, CTerm Mod)
+  //as a result -- we will look for NTerm mod amino acids throughout spectrum instead of
+  //just amino acids without NTerm mod
 
-  // Loop through spectrum files
-  for (vector<InputFile>::const_iterator f = sr.begin(); f != sr.end(); f++) {
-    if (!peptide_reader[0]) {
-      for (int i = 0; i < NUM_THREADS; i++) {
-        peptide_reader[i] = new HeadedRecordReader(peptides_file, &peptides_header);
+  //Creates a 3D vector representing 3D matrix
+  //nPepMassIntUniq: number of mass bins candidate are in
+  //nAARes: number of amino acids
+  //maxPrecurMassBin: max number of mass bins
+  int nAARes = iAAMass_.size();
+  vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
+      vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin, 0)));
+
+  //Stores the score offset needed calculating res-ev p-values
+  vector<int> scoreResidueOffsetObs(nPepMassIntUniq, -1);
+
+  //For each mass bin, a vector hold the p-values for each corresponding res-ev score
+  vector<vector<double> > pValuesResidueObs(maxPrecurMassBin);
+
+//  map<int, bool> calcDPMatrix; //for each precursor mass bin, bool determines whether to calc DP matrix
+  vector<bool> calcDPMatrix(nPepMassIntUniq, false); //for each precursor mass bin, bool determines whether to calc DP matrix
+
+  //Create a residue evidence matrix and evidence vector
+  //for each mass bin candidate peptides are in
+  ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
+
+  for (int pe = 0; pe < nPepMassIntUniq; pe++) {
+    // note: dAAMass_ contains amino acids masses in double form
+    // precursorMass is the neutral mass
+    observed.CreateResidueEvidenceMatrix(*(sc->spectrum), sc->charge, maxPrecurMassBin, sc->neutral_mass,
+                                          nAARes, dAAMass_, fragTol_, granularityScale_,
+                                          nTermMass_, cTermMass_, &num_range_skipped, 
+                                          &num_precursors_skipped, &num_isotopes_skipped, &num_retained,
+                                          residueEvidenceMatrix[pe]);
+    vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+
+    //Get rid of values larger than curPepMassInt
+    int curPepMassInt = pepMassIntUnique[pe];
+    for (int i = 0; i < curResidueEvidenceMatrix.size(); i++) {
+      curResidueEvidenceMatrix[i].resize(curPepMassInt);
+    }
+    residueEvidenceMatrix[pe] = curResidueEvidenceMatrix;
+  }
+
+  //Calculates a residue evidence score 
+  //between a spectrum and all possible peptide candidates
+  //based upon the residue evidence matrix and the theoretical spectrum
+  int scoreResidueEvidence;
+  vector<int> resEvScores;
+  cnt = 0;
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
+      ++iter, ++cnt) {
+
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt]) {
+      resEvScores.push_back(-1);
+      continue;
+    }
+
+    int pepMassIntIdx = 0;
+    int curPepMassInt = 0;
+    for (int ma = 0; ma < nPepMassIntUniq; ma++ ) { //TODO should probably use iterator instead
+      if (pepMassIntUnique[ma] == pepMassInt[cnt]) { //TODO pepMassIntUnique should be accessed with an interator
+        pepMassIntIdx = ma;
+        curPepMassInt = pepMassIntUnique[ma];
+        break;
+      }
+    }     
+
+    vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
+    scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix, (*iter));
+    resEvScores.push_back(scoreResidueEvidence);
+
+    if (scoreResidueEvidence > 0) { // if > 0, set bool to true to create DP matrix
+      calcDPMatrix[pepMassIntIdx] = true;
+    }
+  }
+  //Create dyanamic programming matrix if there is a res-ev score greater than 0
+  //and if user specified as a score function either 'residue-evidence matrix' or 'both'
+  for (int pe=0 ; pe < nPepMassIntUniq; pe++) {
+    int curPepMassInt = pepMassIntUnique[pe];
+    if (calcDPMatrix[pe] == false) {
+      continue;
+    }
+
+    vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
+    vector<int> maxColEvidence(curPepMassInt, 0);
+
+    //maxColEvidence is edited by reference
+    int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix, maxColEvidence, curPepMassInt);
+    int maxNResidue = floor((double)curPepMassInt / dAAMass_[0]); // dAAMass_[0] is the mass of the lightest amino acid Glutamine, (i.e. Glutamine 57)
+
+    std::sort(maxColEvidence.begin(), maxColEvidence.end(), greater<int>());
+    int maxScore = 0;
+    for(int i = 0; i < maxNResidue; i++) { //maxColEvidence has been sorted
+      maxScore += maxColEvidence[i];
+    }
+
+    int scoreOffset;
+    vector<double> scoreResidueCount;
+
+    calcResidueScoreCount(curPepMassInt, curResidueEvidenceMatrix, maxEvidence, maxScore,
+                          scoreResidueCount, scoreOffset);
+    scoreResidueOffsetObs[pe] = scoreOffset;
+
+    double totalCount = 0;
+    for (int i=scoreOffset ; i < scoreResidueCount.size(); i++) {
+      totalCount += scoreResidueCount[i];
+    }
+    for (int i=scoreResidueCount.size()-2 ; i > -1; i--) {
+      scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
+    }
+    for (int i = 0; i < scoreResidueCount.size(); i++) {
+      //Avoid potential underflow
+      scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
+    }
+    pValuesResidueObs[curPepMassInt] = scoreResidueCount;
+  }
+
+  /************ calculate p-values for PSMs using residue evidence matrix ****************/
+  int curPepMassInt;
+  double pValue_xcorr;
+  double pValue_resEv;
+  double pValue_combined = 0.3;
+
+  cnt = 0;
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+      iter != active_peptide_queue->end_; 
+      ++iter, ++cnt) {
+
+    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
+      continue;
+
+    int pepMassIntIdx = 0;
+
+    for (int ma = 0; ma < nPepMassIntUniq; ma++ ) { //TODO should probably use iterator instead
+      if (pepMassIntUnique[ma] == pepMassInt[cnt]) { //TODO pepMassIntUnique should be accessed with an interator
+        pepMassIntIdx = ma;
+        curPepMassInt = pepMassIntUnique[ma];
+        break;
       }
     }
 
-    string spectra_file = f->SpectrumRecords;
-    SpectrumCollection* spectra = NULL;
-    map<string, SpectrumCollection*>::iterator spectraIter = spectra_.find(spectra_file);
-    if (spectraIter == spectra_.end()) {
-      carp(CARP_INFO, "Reading spectrum file %s.", spectra_file.c_str());
-      spectra = loadSpectra(spectra_file);
-      carp(CARP_INFO, "Read %d spectra.", spectra->Size());
+    int scoreCountIdx;
+
+    scoreResidueEvidence = resEvScores[cnt];
+    if (calcDPMatrix[pepMassIntIdx]) {
+      scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[pepMassIntIdx];
+      pValue_resEv = pValuesResidueObs[curPepMassInt][scoreCountIdx];
     } else {
-      spectra = spectraIter->second;
+      pValue_resEv = 1.0;
+    }
+    // if (pValue_resEv == 0.0)
+    //   carp(CARP_FATAL, "PSM Res-EV p-value should not be equal to 0.0");
+
+    /************ calculate comnbined p-values  ****************/    
+    pValue_xcorr = psm_scores.psm_scores_[cnt].exact_pval_;  // get the p-value od the XCorr from previous calculations
+    if (pValue_resEv > 0.0) {
+      double cPval = pValue_xcorr * pValue_resEv;    
+      pValue_combined = calcCombinedPval(1.2, cPval, 2); //2 is the # of p-values that are combined // 1.2 value has been empircally determined for combining two independent p-values
+    } else {
+      pValue_combined = pValue_xcorr; //in case resEV pval == 0
     }
 
-    double highest_mz = spectra->FindHighestMZ();
-    unsigned int spectrum_num = spectra->SpecCharges()->size();
-    if (spectrum_num > 0 &&
-        (exact_pval_search_ || curScoreFunction == RESIDUE_EVIDENCE_MATRIX || curScoreFunction == BOTH_SCORE)) {
-      highest_mz = spectra->SpecCharges()->at(spectrum_num - 1).neutral_mass;
+    // Store the scores. 
+    psm_scores.psm_scores_[cnt].resEv_score_   = scoreResidueEvidence;
+    psm_scores.psm_scores_[cnt].resEv_pval_    = pValue_resEv;
+    psm_scores.psm_scores_[cnt].combined_pval_ = pValue_combined;
+    psm_scores.psm_scores_[cnt].ordinal_       = cnt;
+    psm_scores.psm_scores_[cnt].active_        = active_peptide_queue->candidatePeptideStatus_[cnt];  
+  }
+}
+
+//Added by Andy Lin in March 2016
+//Functions returns max value in curResidueEvidenceMatrix
+//Function assumes that all values in curResidueEvidenceMatrix have been rounded to int
+//Once function runs, maxColEvidence will contain the max evidence in
+//each column of curResidueEvidenceMatrix
+int TideSearchApplication::getMaxColEvidence(
+  const vector<vector<double> >& curResidueEvidenceMatrix,
+  vector<int>& maxColEvidence,
+  int pepMassInt
+) {
+  assert(maxColEvidence.size() == curResidueEvidenceMatrix[0].size());
+
+  int maxEvidence = -1;
+
+  for (int curAA = 0; curAA < curResidueEvidenceMatrix.size(); curAA++) {
+    for (int curMassBin = 0; curMassBin < pepMassInt; curMassBin++) {
+      if (curResidueEvidenceMatrix[curAA][curMassBin] > maxColEvidence[curMassBin]) {
+        maxColEvidence[curMassBin] = curResidueEvidenceMatrix[curAA][curMassBin];
+      }
+      if (curResidueEvidenceMatrix[curAA][curMassBin] > maxEvidence) {
+        maxEvidence = curResidueEvidenceMatrix[curAA][curMassBin];
+      }
     }
-    carp(CARP_DEBUG, "Maximum observed m/z = %f.", highest_mz);
-    MaxBin::SetGlobalMax(highest_mz);
-    // Do the search
-    carp(CARP_INFO, "Starting search.");
-    if (spectrum_flag_ == NULL) {
-      resetMods();
-    }
-    vector<ActivePeptideQueue*> active_peptide_queue;
-    for (int i = 0; i < NUM_THREADS; i++) {
-      active_peptide_queue.push_back(new ActivePeptideQueue(peptide_reader[i]->Reader(), proteins, &locations));
-      active_peptide_queue[i]->SetBinSize(bin_width_, bin_offset_);
+  }
+  assert(maxEvidence >= 0);
+  return maxEvidence;
+}
+
+//Added by Andy Lin in Nov 2016
+//Calculates residue evidence score given a
+//residue evidence matrix and a theoretical spectrum
+int TideSearchApplication::calcResEvScore(
+  const vector<vector<double> >& curResidueEvidenceMatrix,
+  Peptide* curPeptide
+) {
+  //Make sure the number of theoretical peaks match pepLen
+  int pepLen = curPeptide->Len();
+
+  int scoreResidueEvidence = 0;
+  vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
+  for (int res = 0; res < pepLen - 1; res++) {
+    // Perform some rounding, because the AA masses are rounded in dAAMass
+    double tmpAAMass = MassConstants::ToDouble(MassConstants::ToFixPt(residueMasses[res]));  
+
+    vector<double>::const_iterator mass_itr = find(dAAMass_.begin(), dAAMass_.end(), tmpAAMass);
+
+    if (mass_itr == dAAMass_.end()){
+      // for (vector<double>::const_iterator mass_itr = dAAMass_.begin(); mass_itr != dAAMass_.end(); ++mass_itr) {
+      //   carp(CARP_INFO, "AA mass: %lf", *mass_itr);
+      // }
+      carp(CARP_FATAL, "'%lf' does not exist. residue mass: %lf", tmpAAMass, residueMasses[res]);
     }
     
-    search(f->OriginalName, spectra->SpecCharges(), active_peptide_queue, proteins,
-           Params::GetDouble("precursor-window"),
-           string_to_window_type(Params::GetString("precursor-window-type")),
-           Params::GetDouble("spectrum-min-mz"), Params::GetDouble("spectrum-max-mz"),
-           min_scan, max_scan, Params::GetInt("min-peaks"), 
-           Params::GetInt("top-match"), spectra->FindHighestMZ(),
-           target_file, decoy_file, compute_sp,
-           nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
-           nAARes, dAAFreqN, dAAFreqI, dAAFreqC, dAAMass,
-           pepHeader.mods(), pepHeader.nterm_mods(), pepHeader.cterm_mods(),
-           decoysPerTarget, &negative_isotope_errors);
-
-    if (spectraIter == spectra_.end()) {
-      delete spectra;
-    }
-    // convert tab delimited to other file formats.
-    convertResults();
-
-    // Delete temporary spectrumrecords file
-    if (!f->Keep) {
-      carp(CARP_DEBUG, "Deleting %s", spectra_file.c_str());
-      remove(spectra_file.c_str());
-    }
-
-    // Clean up
-    for (int i = 0; i < NUM_THREADS; i++) {
-      delete active_peptide_queue[i];
-      delete peptide_reader[i];
-      peptide_reader[i] = NULL;
-    }
-
-  } // End of spectrum file loop
-
-  for (ProteinVec::iterator i = proteins.begin(); i != proteins.end(); ++i) {
-    delete *i;
-  }
-  if (target_file) {
-    delete target_file;
-    if (decoy_file) {
-      delete decoy_file;
+    int tmpAA = mass_itr - dAAMass_.begin();
+    if ( curPeptide->peaks_1b.size() > res && curResidueEvidenceMatrix[tmpAA].size() >  curPeptide->peaks_1b[res]-1) {
+      scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][curPeptide->peaks_1b[res]-1];
     }
   }
-  delete[] aaFreqN;
-  delete[] aaFreqI;
-  delete[] aaFreqC;
-  delete[] aaMass;
+  return scoreResidueEvidence;
+}
 
-  return 0;
+
+
+// Calculate the null distribution with dynamic programming
+int TideSearchApplication::calcScoreCount(vector<int>& pepMassIntUnique, vector<vector<int>>& evidenceObs, vector<double>& nullDistribution) {
+  const int nDeltaMass = iAAMass_.size();
+  int minDeltaMass = iAAMass_[0];
+  int maxDeltaMass = iAAMass_[nDeltaMass - 1];
+
+  int nPepMassIntUniq = evidenceObs.size();
+  int maxPrecurMassBin = evidenceObs[0].size();
+  // local variables
+  int row;
+  int col;
+  int ma;
+  int evidence;
+  int de;
+  int evidenceRow;
+  double sumScore;
+
+  // For each Unique Mass Int we calculate different 
+  int* nRows = new int[nPepMassIntUniq];   // Stores the length (rows) of the dynamic programming table
+  int* scoreOffsets = new int[nPepMassIntUniq];
+  double** pValueScoreObs = new double*[nPepMassIntUniq];
+
+  for (int pe = 0; pe < nPepMassIntUniq; ++pe) { 
+    int pepMassInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
+
+    // NOTE: will have to go back to separate dynamic programming for
+    //       target and decoy if they have different probNI and probC
+    int maxEvidence = *std::max_element(evidenceObs[pe].begin(), evidenceObs[pe].end());
+    int minEvidence = *std::min_element(evidenceObs[pe].begin(), evidenceObs[pe].end());
+
+    // estimate maxScore and minScore
+    int maxNResidue = (int)floor((double)pepMassInt / (double)minDeltaMass);
+    vector<int> sortEvidenceObs(evidenceObs[pe].begin(), evidenceObs[pe].end());
+    std::sort(sortEvidenceObs.begin(), sortEvidenceObs.end(), greater<int>());
+    int maxScore = 0;
+    int minScore = 0;
+    for (int sc = 0; sc < maxNResidue; sc++) {
+      maxScore += sortEvidenceObs[sc];
+    }
+    for (int sc = maxPrecurMassBin - maxNResidue; sc < maxPrecurMassBin; sc++) {
+      minScore += sortEvidenceObs[sc];
+    }
+
+    // Initialize variables for the dynamic programming table
+    int bottomRowBuffer = maxEvidence + 1;
+    int topRowBuffer = -minEvidence;
+    int colBuffer = maxDeltaMass;
+    int colStart = MassConstants::mass2bin(MassConstants::mono_h);
+    int scoreOffsetObs = bottomRowBuffer - minScore;
+
+    int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
+    int nCol = colBuffer + pepMassInt;
+    int rowFirst = bottomRowBuffer;
+    int rowLast = rowFirst - minScore + maxScore;
+    int colFirst = colStart + MassConstants::mass2bin(MassConstants::mono_h);
+    int colLast = MassConstants::mass2bin(MassConstants::bin2mass(pepMassInt)
+      - MassConstants::mono_oh);
+    int initCountRow = bottomRowBuffer - minScore;
+    int initCountCol = maxDeltaMass + colStart;
+
+    // Allocate memory for the DP table
+    double** dynProgArray = new double*[nCol];
+    for (col = 0; col < colFirst+maxDeltaMass; col++) {
+      dynProgArray[col] = new double[nRow];
+      memset(dynProgArray[col], 0.0, nRow*sizeof(double));
+    }
+    dynProgArray[colStart][initCountRow] = 1.0; // initial count of peptides with mass = 1 
+    vector<int> deltaMassCol(nDeltaMass);
+    // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
+    for (de = 0; de < nDeltaMass; de++) {
+      ma = iAAMass_[de];
+      col = colStart + ma;
+      row = initCountRow + evidenceObs[pe][col];
+      if (col <= maxDeltaMass + colLast) {
+        dynProgArray[col][row] += dynProgArray[colStart][initCountRow] * dAAFreqN_[de];
+      }
+    }
+    for (ma = 0; ma < colFirst; ++ma )
+        delete dynProgArray[ma];
+    for (ma = colFirst; ma < colLast; ma++) {
+      dynProgArray[ma+maxDeltaMass ] = new double[nRow];
+      memset(dynProgArray[ma+maxDeltaMass], 0.0, nRow*sizeof(double));
+      
+      for (de = 0; de < nDeltaMass; de++) {
+        deltaMassCol[de] = ma + iAAMass_[de];
+      }
+      for (row = rowFirst; row <= rowLast; row++) {
+        if (dynProgArray[ma][row] == 0.0) {
+          continue;
+        }
+        for (de = 0; de < nDeltaMass; de++) {
+          col = deltaMassCol[de];
+          if (col < colLast) {
+            evidenceRow = row + evidenceObs[pe][col];
+            dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*dAAFreqI_[de]; 
+          } else if (col == colLast) { 
+            evidenceRow = row;
+            dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*dAAFreqC_[de]; 
+          }
+        }
+      }
+      delete dynProgArray[ma];
+    }
+    // The final null distribution is stored in pValueScoreObs[pe]
+    nRows[pe] = nRow;
+    pValueScoreObs[pe] = new double[nRow];
+    scoreOffsets[pe] = scoreOffsetObs;
+    for (row = 0; row < nRow; ++row) {
+      pValueScoreObs[pe][row] = dynProgArray[colLast][row];
+    }
+    // clean up
+    for (col = colLast; col < colLast+maxDeltaMass; ++col) {
+      delete [] dynProgArray[col];    
+    }
+    delete [] dynProgArray;
+  }
+
+  // Merge separate score distirbutions.
+  int max_offset = 0;
+  int max_row = 0;
+  for (int pe = 0; pe < nPepMassIntUniq; ++pe) {
+    if (max_offset < scoreOffsets[pe] )
+      max_offset = scoreOffsets[pe];
+    if (max_row < nRows[pe])
+      max_row = nRows[pe];
+  }
+  
+  int score_idx;        
+  max_row += 1;
+  nullDistribution.reserve(max_row*2);
+  for (int i = 0; i < max_row*2; ++i)
+    nullDistribution[i] = 0.0;
+  std::fill(nullDistribution.begin(), nullDistribution.begin()+max_row*2, 0);
+  double *scoreCountBinAdjust = new double[max_row*2];
+  memset(scoreCountBinAdjust, 0.0, sizeof(double)*max_row*2);
+  
+  // Merges the separated partial score histograms.
+  double totalCount = 0.0;
+  for (int pe = 0 ; pe < nPepMassIntUniq; ++pe) {
+    int offset_diff = max_offset - scoreOffsets[pe];
+    for (score_idx = 0; score_idx < nRows[pe]; ++score_idx) {
+      nullDistribution[score_idx + offset_diff] += pValueScoreObs[pe][score_idx];
+      totalCount += pValueScoreObs[pe][score_idx];
+    }
+  }
+
+  if (totalCount == 0.0) {
+    for (score_idx = 0; score_idx < max_row*2; score_idx++) {
+      nullDistribution[score_idx] = 1.0;
+    }
+  } else {      
+    // Normalize the raw score histogram to get a probabilisitc distribution
+    double logTotalCount = log(totalCount);
+    for (score_idx = max_row*2-2; score_idx >= 0; --score_idx) {
+      scoreCountBinAdjust[score_idx] = nullDistribution[score_idx]/2.0;
+      nullDistribution[score_idx] += nullDistribution[score_idx + 1];
+    }
+    for (score_idx = max_row*2-2; score_idx >= 0; --score_idx) {
+      nullDistribution[score_idx] -= scoreCountBinAdjust[score_idx];
+    }
+    // normalize distribution; use exp( log ) to avoid potential underflow
+    for (score_idx = max_row*2-2; score_idx >= 0; --score_idx) {
+      if (nullDistribution[score_idx] > 0.0) {
+        nullDistribution[score_idx] = exp(log(nullDistribution[score_idx]) - logTotalCount);
+      }
+    }
+  }
+  delete [] scoreCountBinAdjust;  
+  delete [] nRows;
+  delete [] scoreOffsets;
+  for (int pe = 0; pe < nPepMassIntUniq; ++pe)
+    delete [] pValueScoreObs[pe];
+  delete [] pValueScoreObs;
+  return max_offset;
+}
+
+/*
+ * Calculates counts of peptides with various residue evidence scores, given
+ * a preprocessed residue evidence matrix, using dynamic programming
+ *
+ * This version:
+ *  - calculates most of dimension and inexing variables required or
+ *    dynamic programming inside of function, instead of externally
+ *    in MATLAB
+ *  - uses uniform amino acid probabilities for all positions in peptide
+ *
+ * This used to be a MEX-file to be called in MATLAB
+ *  - has been incorporated into Tide/Crux
+ *
+ * Written by Jeff Howbert, August, 2015.
+ *
+ * Added by Andy Lin, March 2-16
+ * Edited to work within Crux code instead of with original MATLAB code
+ */
+void TideSearchApplication::calcResidueScoreCount (
+  int pepMassInt,
+  vector<vector<double> >& residueEvidenceMatrix,
+  int maxEvidence,
+  int maxScore,
+  vector<double>& scoreCount, //this is returned for later use
+  int& scoreOffset //this is returned for later use
+) {
+  const int nAa = iAAMass_.size();
+  int minAaMass = iAAMass_[0];
+  int maxAaMass = iAAMass_[nAa - 1];
+
+  int minEvidence  = 0;
+  int minScore     = 0;
+
+  int row;
+  int col;
+  int ma;
+  int evid;
+  int de;
+  int evidRow;
+  double sumScore;
+
+  int bottomRowBuffer = maxEvidence;
+  int topRowBuffer = -minEvidence;
+  int colBuffer = maxAaMass;
+  int colStart = nTermMassBin_;
+  int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
+  int nCol = colBuffer + pepMassInt + maxAaMass;
+  int rowFirst = bottomRowBuffer + 1;
+  int rowLast = rowFirst - minScore + maxScore;
+  int colFirst = colStart + 1;
+  int colLast = pepMassInt - cTermMassBin_;
+  int initCountRow = bottomRowBuffer - minScore + 1;
+  int initCountCol = colStart;
+
+  // convert to zero-based indexing
+  rowFirst = rowFirst - 1;
+  rowLast = rowLast - 1;
+  colFirst = colFirst - 1;
+  colLast = colLast - 1;
+  initCountRow = initCountRow - 1;
+  initCountCol = initCountCol - 1;
+
+  double** dynProgArray = 0;
+  dynProgArray = new double*[nRow];
+  for (row = 0; row < nRow; row++) {
+    dynProgArray[row] = new double[nCol];
+    for (col = 0; col < nCol; col++) {
+      dynProgArray[row][col] = 0.0;
+    }
+  }
+
+  // initial count of peptides with mass = nTermMass
+  dynProgArray[initCountRow][initCountCol] = 1.0;
+
+  int* aaMassCol = new int[nAa];
+  // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
+  for (de = 0; de < nAa; de++) {
+    ma = iAAMass_[de];
+
+    //&& -1 is to account for zero-based indexing in evidence vector
+    //row = initCountRow + residueEvidueMatrix[ de ][ ma + nTermMass - 1 ]; //original
+    row = initCountRow + residueEvidenceMatrix[de][ma + nTermMassBin_ - 1]; //+nTermMassBin for N-Term mod and -1 for 0 indexing
+
+    //TODO need to change this to based off bool
+    // if (nTermMassBin_ == 1) { //N-Term not modified
+    //   col = initCountCol + ma;
+    // } else { //N-Term is modified
+    //   col = initCountCol + ma - nTermMassBin_ + 1;
+    // }
+    col = initCountCol + ma - nTermMassBin_ + 1;
+
+    if (col <= maxAaMass + colLast && col >= initCountCol) { //TODO not sure if below or above is correct
+      dynProgArray[row][col] += dynProgArray[initCountRow][initCountCol] * dAAFreqN_[de];
+    }
+  }
+
+  // Set to zero now that score counts for first amino acid are in matrix
+  dynProgArray[initCountRow][initCountCol] = 0.0;
+
+  //  The following code was reorganized by AKF to make the DP calculation ~3 times faster
+  int newCol;
+  for (ma = initCountCol+1; ma < colLast; ++ma) {
+    col = ma;  
+    for (de = 0; de < nAa; de++) {
+      aaMassCol[de] = col + iAAMass_[de];
+    }
+    for (row = rowFirst; row <= rowLast; ++row) {
+      if (dynProgArray[row][col] == 0.0) {
+        continue;
+      }
+      for (de = 0; de < nAa; de++) {
+        newCol = aaMassCol[de];
+        if (newCol < colLast) {
+          evidRow = row + residueEvidenceMatrix[de][newCol];
+          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * dAAFreqI_[de];
+        } else if (newCol == colLast) {
+          evidRow = row;
+          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * dAAFreqC_[de];            
+        } 
+      }        
+    }      
+  } 
+  int colScoreCount = colLast;
+
+  scoreCount.resize(nRow);
+  for (int row = 0; row < nRow; row++) {
+    scoreCount[row] = dynProgArray[row][colScoreCount];
+  }
+  scoreOffset = initCountRow;
+
+  // clean up
+  for (int row = 0; row < nRow; row++) {
+    delete [] dynProgArray[row];
+  }
+  delete [] dynProgArray;
+  delete [] aaMassCol;
+}
+
+
+void TideSearchApplication::computeWindow(
+  const SpectrumCollection::SpecCharge& sc,
+  vector<double>* out_min,
+  vector<double>* out_max,
+  double* min_range,
+  double* max_range
+) {
+  double unit_dalton = BIN_WIDTH;
+  switch (window_type_) {
+  case WINDOW_MASS:
+    for (vector<int>::const_iterator ie = negative_isotope_errors_.begin(); ie != negative_isotope_errors_.end(); ++ie) {
+      out_min->push_back(sc.neutral_mass + (*ie * unit_dalton) - precursor_window_);
+      out_max->push_back(sc.neutral_mass + (*ie * unit_dalton) + precursor_window_);
+    }
+    *min_range = (sc.neutral_mass + (negative_isotope_errors_.front() * unit_dalton)) - precursor_window_;
+    *max_range = (sc.neutral_mass + (negative_isotope_errors_.back() * unit_dalton)) + precursor_window_;
+    break;
+  case WINDOW_MZ: {
+    double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
+    for (vector<int>::const_iterator ie = negative_isotope_errors_.begin(); ie != negative_isotope_errors_.end(); ++ie) {
+      out_min->push_back((mz_minus_proton - precursor_window_) * sc.charge + (*ie * unit_dalton));
+      out_max->push_back((mz_minus_proton + precursor_window_) * sc.charge + (*ie * unit_dalton));
+    }
+    // N.B. Next two lines used to have max_charge instead of sc.charge. Not sure why. --WSN 9 Jun 2021
+    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors_.front() * unit_dalton)) - precursor_window_*sc.charge;
+    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors_.back() * unit_dalton)) + precursor_window_*sc.charge;
+    break;
+  }
+  case WINDOW_PPM: {
+    double tiny_precursor = precursor_window_ * 1e-6;
+    for (vector<int>::const_iterator ie = negative_isotope_errors_.begin(); ie != negative_isotope_errors_.end(); ++ie) {
+      out_min->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 - tiny_precursor));
+      out_max->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 + tiny_precursor));
+    }
+    *min_range = (sc.neutral_mass + (negative_isotope_errors_.front() * unit_dalton)) * (1.0 - tiny_precursor);
+    *max_range = (sc.neutral_mass + (negative_isotope_errors_.back() * unit_dalton)) * (1.0 + tiny_precursor);
+    break;
+  }
+  default:
+    carp(CARP_FATAL, "Invalid window type");
+  }
+  carp(CARP_DETAILED_DEBUG, "Scan=%d Charge=%d Mass window=[%f, %f]",
+       sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
 }
 
 vector<int> TideSearchApplication::getNegativeIsotopeErrors() {
@@ -450,1157 +1191,284 @@ vector<int> TideSearchApplication::getNegativeIsotopeErrors() {
   return negative_isotope_errors;
 }
 
-vector<InputFile> TideSearchApplication::getInputFiles(
-  const vector<string>& filepaths
-) const {
-  // Try to read all spectrum files as spectrumrecords, convert those that fail
-  vector<InputFile> input_sr;
-  for (vector<string>::const_iterator f = filepaths.begin(); f != filepaths.end(); f++) {
-    SpectrumCollection spectra;
-    pb::Header spectrum_header;
-    string spectrumrecords = *f;
-    bool keepSpectrumrecords = true;
-    if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
-      // Failed, try converting to spectrumrecords file
-      carp(CARP_INFO, "Converting %s to spectrumrecords format", f->c_str());
-      carp(CARP_INFO, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
-      spectrumrecords = Params::GetString("store-spectra");
-      keepSpectrumrecords = !spectrumrecords.empty();
-      if (!keepSpectrumrecords) {
-        spectrumrecords = make_file_path(FileUtils::BaseName(*f) + ".spectrumrecords.tmp");
-      } else if (filepaths.size() > 1) {
-        carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
-                         "spectrum files");
-      }
-      carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
-      if (!SpectrumRecordWriter::convert(*f, spectrumrecords)) {
-        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", f->c_str());
-      }
-      carp(CARP_DEBUG, "Reading converted spectrum file %s", spectrumrecords.c_str());
-      // Re-read converted file as spectrumrecords file
-      if (!spectra.ReadSpectrumRecords(spectrumrecords, &spectrum_header)) {
-        carp(CARP_DEBUG, "Deleting %s", spectrumrecords.c_str());
-        FileUtils::Remove(spectrumrecords);
-        carp(CARP_FATAL, "Error reading spectra file %s", spectrumrecords.c_str());
-      }
-    }
-    input_sr.push_back(InputFile(*f, spectrumrecords, keepSpectrumrecords));
-  }
-  return input_sr;
-}
 
-SpectrumCollection* TideSearchApplication::loadSpectra(const string& file) {
-  SpectrumCollection* spectra = new SpectrumCollection();
-  pb::Header header;
-  if (!spectra->ReadSpectrumRecords(file, &header)) {
-    carp(CARP_FATAL, "Error reading spectrum file %s", file.c_str());
+void TideSearchApplication::getPeptideIndexData(const string input_index, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header){
+
+  string peptides_file = FileUtils::Join(input_index, "pepix");  
+  string proteins_file = FileUtils::Join(input_index, "protix");
+  string auxlocs_file = FileUtils::Join(input_index, "auxlocs");  
+  string residue_stats_file = FileUtils::Join(input_index, "residue_stat");  
+
+  // Read protein index file
+  carp(CARP_INFO, "Reading index %s", input_index.c_str());
+
+  pb::Header protein_header;
+
+  if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins, proteins_file, &protein_header)) {
+    carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
-  if (string_to_window_type(Params::GetString("precursor-window-type")) != WINDOW_MZ) {
-    spectra->Sort();
+  // There shouldn't be more than one header in the protein pb.
+  pb::Header_Source headerSource = protein_header.source(0);  
+  string decoy_prefix = "";
+  if (headerSource.has_decoy_prefix()){
+    decoy_prefix = headerSource.decoy_prefix();
   } else {
-    spectra->Sort<ScSortByMz>(ScSortByMz(Params::GetDouble("precursor-window")));
+    carp(CARP_WARNING, "You are using an index generated by an old version of tide-index."
+                       "This will not affect your results, but this index may need to be "
+                       "re-created to work with future versions of tide-index. ");
   }
-  return spectra;
-}
-
-void TideSearchApplication::search(void* threadarg) {
-  struct thread_data *my_data = (struct thread_data *) threadarg;
-
-  const string& spectrum_filename = my_data->spectrum_filename;
-  const vector<SpectrumCollection::SpecCharge>* spec_charges = my_data->spec_charges;
-  ActivePeptideQueue* active_peptide_queue = my_data->active_peptide_queue;
-  ProteinVec& proteins = my_data->proteins;
-  double precursor_window = my_data->precursor_window;
-  WINDOW_TYPE_T window_type = my_data->window_type;
-  double spectrum_min_mz = my_data->spectrum_min_mz;
-  double spectrum_max_mz = my_data->spectrum_max_mz;
-  int min_scan = my_data->min_scan;
-  int max_scan = my_data->max_scan;
-  int min_peaks = my_data->min_peaks;
-  int top_matches = my_data->top_matches;
-  double highest_mz = my_data->highest_mz;
-  ofstream* target_file = my_data->target_file;
-  ofstream* decoy_file = my_data->decoy_file;
-  bool compute_sp = my_data->compute_sp;
-  int64_t thread_num = my_data->thread_num;
-  int64_t num_threads = my_data->num_threads;
-  int nAA = my_data->nAA;
-  double* aaFreqN = my_data->aaFreqN;
-  double* aaFreqI = my_data->aaFreqI;
-  double* aaFreqC = my_data->aaFreqC;
-  int* aaMass = my_data->aaMass;
-  int nAARes = my_data->nAARes;
-  const vector<double> dAAFreqN = *(my_data->dAAFreqN);
-  const vector<double> dAAFreqI = *(my_data->dAAFreqI);
-  const vector<double> dAAFreqC = *(my_data->dAAFreqC);
-  const vector<double> aaMassDouble = *(my_data->dAAMass);
-  const pb::ModTable mod_table = *(my_data->mod_table);
-  const pb::ModTable nterm_mod_table = *(my_data->nterm_mod_table);
-  const pb::ModTable cterm_mod_table = *(my_data->cterm_mod_table);
-  const int numDecoys = my_data->decoysPerTarget;
-
-  vector<boost::mutex*> locks_array = my_data->locks_array;
-  vector<int>* negative_isotope_errors = my_data->negative_isotope_errors;
-
-  double bin_width = my_data->bin_width;
-  double bin_offset = my_data->bin_offset;
-  bool exact_pval_search = my_data->exact_pval_search;
-  map<pair<string, unsigned int>, bool>* spectrum_flag = my_data->spectrum_flag;
-
-  int* sc_index = my_data->sc_index;
-  long* total_candidate_peptides = my_data->total_candidate_peptides;
-
-  // params
-  bool peptide_centric = Params::GetBool("peptide-centric-search");
-  bool use_neutral_loss_peaks = Params::GetBool("use-neutral-loss-peaks");
-  bool use_flanking_peaks = Params::GetBool("use-flanking-peaks");
-  int max_charge = Params::GetInt("max-precursor-charge");
-  int min_charge = Params::GetInt("min-precursor-charge");
-  // Added by Andy Lin on 2/9/2016
-  // Determines which score function to use for scoring PSMs and store in SCORE_FUNCTION enum
-  SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));
-
-  // This is the main search loop.
-  ObservedPeakSet observed(bin_width, bin_offset,
-                           use_neutral_loss_peaks,
-                           use_flanking_peaks);
-
-  // Keep track of observed peaks that get filtered out in various ways.
-  long int num_range_skipped = 0;
-  long int num_precursors_skipped = 0;
-  long int num_isotopes_skipped = 0;
-  long int num_retained = 0;
-
-  // cycle through spectrum-charge pairs, sorted by neutral mass
-  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
-  int print_interval = Params::GetInt("print-search-progress");
-
-  for (vector<SpectrumCollection::SpecCharge>::const_iterator sc = spec_charges->begin()+thread_num;
-       sc < spec_charges->begin() + (spec_charges->size());
-       sc = sc + num_threads) {
-    locks_array[LOCK_REPORTING]->lock();
-    ++(*sc_index);
-    if (print_interval > 0 && *sc_index > 0 && *sc_index % print_interval == 0) {
-      carp(CARP_INFO, "%d spectrum-charge combinations searched, %.0f%% complete",
-           *sc_index, *sc_index / sc_total * 100);
-    }
-    locks_array[LOCK_REPORTING]->unlock();
-
-    Spectrum* spectrum = sc->spectrum;
-    double precursor_mz = spectrum->PrecursorMZ();
-    double precursorMass = sc->neutral_mass;  //Added by Andy Lin (needed for residue evidence)
-    int charge = sc->charge;
-
-    int scan_num = spectrum->SpectrumNumber();
-    if (spectrum_flag != NULL) {
-      locks_array[LOCK_CASCADE]->lock();
-      map<pair<string, unsigned int>, bool>::iterator spectrum_id;
-      spectrum_id = spectrum_flag->find(pair<string, unsigned int>(
-        spectrum_filename, scan_num * 10 + charge));
-      if (spectrum_id != spectrum_flag->end()) {
-        locks_array[LOCK_CASCADE]->unlock();
-        continue;
-      }
-      locks_array[LOCK_CASCADE]->unlock();
-    }
-
-    if (precursor_mz < spectrum_min_mz || precursor_mz > spectrum_max_mz ||
-        scan_num < min_scan || scan_num > max_scan ||
-        spectrum->Size() < min_peaks ||
-        charge > max_charge || charge < min_charge) {
-      continue;
-    }
-    // The active peptide queue holds the candidate peptides for spectrum.
-    // Calculate and set the window, depending on the window type.
-    vector<double>* min_mass = new vector<double>();
-    vector<double>* max_mass = new vector<double>();
-    vector<bool>* candidatePeptideStatus = new vector<bool>();
-    double min_range, max_range;
-    computeWindow(*sc, window_type, precursor_window,
-                  negative_isotope_errors, min_mass, max_mass, &min_range, &max_range);
-
-    //TODO throw error when fragment-tolerance and evidence-granularity parameters are defined
-
-    if (curScoreFunction == XCORR_SCORE && !exact_pval_search_) {  //execute original tide-search program
-      // Normalize the observed spectrum and compute the cache of
-      // frequently-needed values for taking dot products with theoretical
-      // spectra.
-      observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped,
-                                  &num_precursors_skipped,
-                                  &num_isotopes_skipped, &num_retained);
-      int nCandPeptide = active_peptide_queue->SetActiveRange(
-        min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
-      if (nCandPeptide == 0) {
-        continue;
-      }
-      locks_array[LOCK_CANDIDATES]->lock();
-      *total_candidate_peptides += nCandPeptide;
-      locks_array[LOCK_CANDIDATES]->unlock();
-
-      int candidatePeptideStatusSize = candidatePeptideStatus->size();
-      TideMatchSet::Arr2 match_arr2(candidatePeptideStatusSize); // Scored peptides will go here.
+  TideMatchSet::decoy_prefix_ = decoy_prefix;  
+  if (headerSource.has_filename()){
+    TideMatchSet::fasta_file_name_ = headerSource.filename();
+  }
   
+  // Read auxlocs index file
+  ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file);
 
-      // Programs for taking the dot-product with the observed spectrum are laid
-      // out in memory managed by the active_peptide_queue, one program for each
-      // candidate peptide. The programs will store the results directly into
-      // match_arr. We now pass control to those programs.
+  // Read peptides index file
 
-      collectScoresCompiled(active_peptide_queue, spectrum, observed, &match_arr2,
-                            candidatePeptideStatusSize, charge);
+  if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
+      !peptides_header.has_peptides_header()) {
+    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
+  }
 
-      // matches will arrange the results in a heap by score, return the top
-      // few, and recover the association between counter and peptide. We output
-      // the top matches.
-      if (peptide_centric) {
-        int peptide_idx = 0;        
-        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-        TideMatchSet::Arr2::iterator it = match_arr2.begin();
-        for (; it != match_arr2.end(); ++iter_, ++peptide_idx, ++it) {
-          if ((*candidatePeptideStatus)[peptide_idx]) {
-            (*iter_)->AddHit(spectrum, it->first, 0.0, candidatePeptideStatusSize - peptide_idx, charge);
-          }
-        }
-      } else {  //spectrum centric match report.
-        //Implementation of the Tailor score calibration method, by AKF
-        double quantile_score = 1.0;
-        if (Params::GetBool("use-tailor-calibration")) {
-          vector<double> scores;
-          // Collect the scores for the score tail distribution
-          for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
-            it != match_arr2.end();
-            ++it) {
-            scores.push_back((double)(it->first / XCORR_SCALING));
-          }
-          sort(scores.begin(), scores.end(), greater<double>());  //sort in decreasing order
-          int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)scores.size()+0.5);
+  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
+  decoy_num_ = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
 
-          if (quantile_pos < 3) quantile_pos = 3;
+  // Initizalize the Mass Constants class
+  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
+      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(), bin_width_, bin_offset_);
 
-          if (quantile_pos >= scores.size()) { quantile_pos = scores.size()-1; }
+  if (curScoreFunction_ == PVALUES) {
 
-          quantile_score = scores[quantile_pos]+TAILOR_OFFSET; // Make sure scores positive
-        }  //End of Tailor
-        TideMatchSet::Arr match_arr(nCandPeptide);
-        int peptide_idx = 0;
-        deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-        for (TideMatchSet::Arr2::iterator it = match_arr2.begin();
-             it != match_arr2.end();
-             ++it, ++peptide_idx, ++iter_) {
-          if ((*candidatePeptideStatus)[peptide_idx]) {
-            TideMatchSet::Scores curScore;
-            curScore.xcorr_score = (double)(it->first / XCORR_SCALING);
-            curScore.by_ion_matched = it->second;
-            curScore.by_ion_total = (*iter_)->peaks_0.size();
-            if (charge > 2) {
-              curScore.by_ion_total += (*iter_)->peaks_1.size();
-            }
-            curScore.rank = candidatePeptideStatusSize - peptide_idx;
-            //Added for tailor score calibration method by AKF
-            if (Params::GetBool("use-tailor-calibration")) {
-              curScore.tailor = ((double)(it->first / XCORR_SCALING) + TAILOR_OFFSET) / quantile_score;
-            }            
-            match_arr.push_back(curScore);
-          }
-        }
-        TideMatchSet matches(&match_arr, highest_mz);
+    // Get the terminal mass bins for RES-EV
+    //TODO assumption is that there is one nterm static mod per peptide
+    if (pepHeader.nterm_mods().static_mod_size() > 0) {
+      nTermMassBin_ = MassConstants::mass2bin(
+                        MassConstants::mono_h + pepHeader.nterm_mods().static_mod(0).delta());
+      nTermMass_ = MassConstants::mono_h + pepHeader.nterm_mods().static_mod(0).delta();
+    } else {
+      nTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_h);
+      nTermMass_ = MassConstants::mono_h;
+    }
 
-        matches.exact_pval_search_ = exact_pval_search;
-        matches.cur_score_function_ = curScoreFunction;
+    //TODO assumption is that there is one cterm mod per peptide
+    if (pepHeader.cterm_mods().static_mod_size() > 0) {
+      cTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_oh + pepHeader.cterm_mods().static_mod(0).delta());
+      cTermMass_ = MassConstants::mono_oh + pepHeader.cterm_mods().static_mod(0).delta();
+    } else {
+      cTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_oh);
+      cTermMass_ = MassConstants::mono_oh;
+    }
 
-        matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
-                       spectrum, charge, active_peptide_queue, proteins,
-                       compute_sp, true, locks_array[LOCK_RESULTS]);      
-					   
-      }  //end peptide_centric == false
-    } else { //This runs curScoreFunction=BOTH_SCORE, curScoreFunction=RESIUDUE_EVIDENCE_MATRIX, and xcorr p-val
-
-      int nCandPeptide = active_peptide_queue->SetActiveRangeBIons(min_mass, max_mass, min_range, max_range, candidatePeptideStatus);
-      int candidatePeptideStatusSize = candidatePeptideStatus->size();
-      if (nCandPeptide == 0) {
-        continue;
+    if (FileUtils::Exists(residue_stats_file)) {  // The amino acid frequency calculation is done in tide-index.
+      RecordReader residue_stat_reader = RecordReader(residue_stats_file);
+      bool done;
+      while (!(done = residue_stat_reader.Done())) {
+        pb::ResidueStats last_residue_stat;
+        residue_stat_reader.Read(&last_residue_stat);    
+        double aa_mass = last_residue_stat.aamass();
+        dAAMass_.push_back(aa_mass);
+        dAAFreqN_.push_back(last_residue_stat.aafreqn());
+        dAAFreqI_.push_back(last_residue_stat.aafreqi());
+        dAAFreqC_.push_back(last_residue_stat.aafreqc());
+        iAAMass_.push_back(MassConstants::mass2bin(aa_mass));
+        string aa_str = last_residue_stat.aa_str();
+        mMass2AA_[aa_mass] = aa_str;
       }
+    } else {
+      carp(CARP_INFO, "You are using an old format of the peptide index data. Please recreate your peptide index data");
+      // The following (this whole else branch) part should be removed later.
+      // Calculate the Amino Acid Frequencies for the P-value calculation if it wasn't done with tide-index.
+      unsigned int len;
+      unsigned int i;
+      unsigned int cntTerm = 0;
+      unsigned int cntInside = 0;
+      string peptide_seq;
+      unsigned int residue_bin;
+      string tempAA;
+      int mod_precision  = Params::GetInt("mod-precision");
+      const unsigned int MaxModifiedAAMassBin = MassConstants::ToFixPt(2000.0);;   //2000 is the maximum mass of a modified amino acid
+      unsigned int* nvAAMassCounterN = new unsigned int[MaxModifiedAAMassBin];   //N-terminal amino acids
+      unsigned int* nvAAMassCounterC = new unsigned int[MaxModifiedAAMassBin];   //C-terminal amino acids
+      unsigned int* nvAAMassCounterI = new unsigned int[MaxModifiedAAMassBin];   //inner amino acids in the peptides
+      memset(nvAAMassCounterN, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
+      memset(nvAAMassCounterC, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
+      memset(nvAAMassCounterI, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
 
-      locks_array[LOCK_CANDIDATES]->lock();
-      *total_candidate_peptides += (long)nCandPeptide;
-      locks_array[LOCK_CANDIDATES]->unlock();
+      pb::Peptide current_pb_peptide_;
+      HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
+      while (!(peptide_reader.Done())) { //read all peptides form index
+        peptide_reader.Read(&current_pb_peptide_);
+        Peptide peptide(current_pb_peptide_, proteins);
+        vector<double> residue_masses = peptide.getAAMasses(); //retrieves the amino acid masses, modifications included
+        peptide_seq = peptide.Seq();
+        len = current_pb_peptide_.length();
 
-      //TODO so this includes ALL amino acids seen (including modified, NTerm mod, CTerm Mod)
-      //as a result -- we will look for NTerm mod amino acids throughout spectrum instead of
-      //just amino acids without NTerm mod
-      vector<int> aaMassInt;
-      if (curScoreFunction != XCORR_SCORE) {
-        for (int i = 0; i < aaMassDouble.size(); i++) {
-          int tmpMass = MassConstants::mass2bin(aaMassDouble[i]);
-          aaMassInt.push_back(tmpMass);
-        }
-      }
-      int maxPrecurMassBin = floor(MaxBin::Global().CacheBinEnd() + 50.0);
-      double fragTol = Params::GetDouble("fragment-tolerance");
-      int granularityScale = Params::GetInt("evidence-granularity");
-
-      //TODO look at this
-      int minDeltaMass;
-      int maxDeltaMass;
-      if (curScoreFunction == XCORR_SCORE) {
-        minDeltaMass = aaMass[0];
-        maxDeltaMass = aaMass[nAA - 1];
-      } else {
-        minDeltaMass = aaMassInt[0];
-        maxDeltaMass = aaMassInt[nAARes - 1];
-      }
-
-      TideMatchSet::Arr match_arr(nCandPeptide); // scored peptides will go here.
-
-      // iterators needed at multiple places in following code
-      deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-      deque<TheoreticalPeakSetBIons>::const_iterator iter1_ = active_peptide_queue->iter1_;
-
-      //************************************************************************
-      /* For one observed spectrum, calculates:
-       *  - vector of cleavage evidence
-       *  - score count vectors for a range of integer masses
-       *  - p-values of XCorr match scores between spectrum and all selected candidate target and decoy peptides
-       * Written by Jeff Howbert, October 2013.
-       * Ported to and integrated with Tide by Jeff Howbert, November 2013.
-       *
-       * In addition calculates:
-       *   - a residue evidence matrix for a range of int masses
-       *   - score count vectors for range of int masses (using res-ev matrix)
-       *   - p-values of residue-evidence match between spectrum and all selected target and decoy peptides
-       * Written by Jeff Howbert
-       * Ported to and integrated with Tide by Andy Lin, Nov 2016
-       */
-      int peidx, pe, ma;
-      vector<int> pepMassInt;
-      pepMassInt.reserve(nCandPeptide);
-      vector<int> pepMassIntUnique;
-      pepMassIntUnique.reserve(nCandPeptide);
-
-      //For each candidate peptide, determine which discretized mass bin it is in
-      //pepMassInt contains the corresponding mass bin for each candidate peptide
-      //pepMassIntUnique contains the unique set of mass bins that candidate peptides fall in
-      getMassBin(pepMassInt, pepMassIntUnique, active_peptide_queue, candidatePeptideStatus);
-      int nPepMassIntUniq = (int)pepMassIntUnique.size();
-
-      //XCORR
-      vector< vector<int> > evidenceObs(nPepMassIntUniq, vector<int>(maxPrecurMassBin, 0));
-      int* scoreOffsetObs = new int[nPepMassIntUniq];
-      double** pValueScoreObs = new double*[nPepMassIntUniq];
-      int* intensArrayTheor = new int[maxPrecurMassBin]; // initialized later in loop
-      //END XCORR
-
-      //RES-EV
-      //Creates a 3D vector representing 3D matrix
-      //nPepMassIntUniq: number of mass bins candidate are in
-      //nAARes: number of amino acids
-      //maxPrecurMassBin: max number of mass bins
-      vector<vector<vector<double> > > residueEvidenceMatrix(nPepMassIntUniq,
-         vector<vector<double> >(nAARes, vector<double>(maxPrecurMassBin, 0)));
-
-      //Stores the score offset needed calculating res-ev p-values
-      vector<int> scoreResidueOffsetObs(maxPrecurMassBin, -1);
-
-      //For each mass bin, a vector hold the p-values for each corresponding res-ev score
-      vector<vector<double> > pValuesResidueObs(maxPrecurMassBin);
-
-      //TODO assumption is that there is one nterm mod per peptide
-      int nTermMassBin;
-      double nTermMass;
-      if (nterm_mod_table.static_mod_size() > 0) {
-        nTermMassBin = MassConstants::mass2bin(
-                         MassConstants::mono_h + nterm_mod_table.static_mod(0).delta());
-        nTermMass = MassConstants::mono_h + nterm_mod_table.static_mod(0).delta();
-      } else {
-        nTermMassBin = MassConstants::mass2bin(MassConstants::mono_h);
-        nTermMass = MassConstants::mono_h;
-      }
-
-      //TODO assumption is that there is one cterm mod per peptide
-      int cTermMassBin;
-      double cTermMass;
-      if (cterm_mod_table.static_mod_size() > 0) {
-        cTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta());
-        cTermMass = MassConstants::mono_oh + cterm_mod_table.static_mod(0).delta();
-      } else {
-        cTermMassBin = MassConstants::mass2bin(MassConstants::mono_oh);
-        cTermMass = MassConstants::mono_oh;
-      }
-
-      map<int, bool> calcDPMatrix; //for each precursor mass bin, bool determines whether to calc DP matrix
-      //END RES-EV
-
-      //Create a residue evidence matrix and evidence vector
-      //for each mass bin candidate peptides are in
-      for (pe = 0; pe < nPepMassIntUniq; pe++) {
-        //XCORR
-        if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
-          scoreOffsetObs[pe] = 0;
-          int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
-
-          //preprocess to create one integerized evidence vector for each cluster of masses among selected peptides
-          double pepMassMonoMean = (pepMaInt - 0.5 + bin_offset_) * bin_width_;
-          evidenceObs[pe] = spectrum->CreateEvidenceVectorDiscretized(
-            bin_width, bin_offset, charge, pepMassMonoMean, maxPrecurMassBin,
-            &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained);
-        }
-        //END XCORR
-
-        //RES-EV
-        if (curScoreFunction != XCORR_SCORE) {
-          // note: aaMassDouble differs from aaMass
-          // aaMassDouble contains amino acids masses in float form
-          // aaMass contains amino acid asses in integer form
-          // precursorMass is the neutral mass
-          observed.CreateResidueEvidenceMatrix(*spectrum, charge, maxPrecurMassBin, precursorMass,
-                                               nAARes, aaMassDouble, fragTol, granularityScale,
-                                               nTermMass, cTermMass, &num_range_skipped, 
-                                               &num_precursors_skipped, &num_isotopes_skipped, &num_retained,
-                                               residueEvidenceMatrix[pe]);
-          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
-
-          //Get rid of values larger than curPepMassInt
-          int curPepMassInt = pepMassIntUnique[pe];
-          for (int i = 0; i < curResidueEvidenceMatrix.size(); i++) {
-            curResidueEvidenceMatrix[i].resize(curPepMassInt);
-          }
-          residueEvidenceMatrix[pe] = curResidueEvidenceMatrix;
-          calcDPMatrix[curPepMassInt] = false;
-        }
-        //END RES-Ev
-      }
-
-      //Calculates a residue evidence score and a xcorr score
-      //between a spectrum and all possible peptide candidates
-      //based upon the residue evidence matrix and the theoretical spectrum
-      int scoreResidueEvidence;
-      int scoreRefactInt;
-      vector<int> resEvScores;
-      vector<int> xcorrScores;
-      pe = 0;
-      for (peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
-        if ((*candidatePeptideStatus)[peidx]) {
-          int pepMassIntIdx = 0;
-          int curPepMassInt;
-          for (ma = 0; ma < nPepMassIntUniq; ma++ ) { //TODO should probably use iterator instead
-            if (pepMassIntUnique[ma] == pepMassInt[pe]) { //TODO pepMassIntUnique should be accessed with an interator
-              pepMassIntIdx = ma;
-              curPepMassInt = pepMassIntUnique[ma];
-              break;
-            }
-          }
-
-          //XCORR
-          // score XCorr for target peptide with integerized evidenceObs array
-          int match_num = 0;
-          if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
-            scoreRefactInt = 0;
-            for (vector<unsigned int>::const_iterator iter_uint = iter1_->unordered_peak_list_.begin();
-                 iter_uint != iter1_->unordered_peak_list_.end();
-                 iter_uint++) {
-              scoreRefactInt += evidenceObs[pepMassIntIdx][*iter_uint];
-              if (evidenceObs[pepMassIntIdx][*iter_uint] > 0)
-                ++match_num;
-            }
-
-            xcorrScores.push_back(scoreRefactInt);
-          }
-          //END XCORR
-
-          //RES-EV
-          if (curScoreFunction != XCORR_SCORE) {
-            vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pepMassIntIdx];
-            Peptide* curPeptide = (*iter_);
-
-            vector<unsigned int> intensArrayTheorResEv;
-            for (vector<unsigned int>::const_iterator iter_uint = iter1_->unordered_peak_list_.begin();
-                 iter_uint != iter1_->unordered_peak_list_.end();
-                 iter_uint++) {
-              intensArrayTheorResEv.push_back(*iter_uint);
-            }
-
-            scoreResidueEvidence = calcResEvScore(curResidueEvidenceMatrix, intensArrayTheorResEv, aaMassDouble, curPeptide);
-            resEvScores.push_back(scoreResidueEvidence);
-
-            if (scoreResidueEvidence > 0) { // if > 0, set bool to true to create DP matrix
-              calcDPMatrix[curPepMassInt] = true;
-            }
-          }
-          //END RES-EV
-          pe++;
-        }
-        ++iter_;
-        ++iter1_;
-      }
-
-      if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX || curScoreFunction == BOTH_SCORE) {
-        assert(resEvScores.size() == nCandPeptide);
-      }
-      if (curScoreFunction == XCORR_SCORE || curScoreFunction == BOTH_SCORE) {
-        assert(xcorrScores.size() == nCandPeptide);
-      }
-
-      //XCORR
-      //Create a dynamic programming vector is there is a xcorr
-      //and if user specified as a score function either 'xcorr' or 'both'
-      double* pValueDist = NULL; // Added by AKF 
-      int* nRows = new int[nPepMassIntUniq];  // Added by AKF
-      int max_offset = 0;   // Added by AKF for merging exact score distirbutinos
-      if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
-        int pValueDistLen = 1; // Added by AKF
-        for (pe = 0; pe < nPepMassIntUniq; pe++) { // TODO should probably instead use iterator over pepMassIntUnique
-          int pepMaInt = pepMassIntUnique[pe]; // TODO should be accessed with an iterator
-
-          // NOTE: will have to go back to separate dynamic programming for
-          //       target and decoy if they have different probNI and probC
-          int maxEvidence = *std::max_element(evidenceObs[pe].begin(), evidenceObs[pe].end());
-          int minEvidence = *std::min_element(evidenceObs[pe].begin(), evidenceObs[pe].end());
-
-          // estimate maxScore and minScore
-          int maxNResidue = (int)floor((double)pepMaInt / (double)minDeltaMass);
-          vector<int> sortEvidenceObs(evidenceObs[pe].begin(), evidenceObs[pe].end());
-          std::sort(sortEvidenceObs.begin(), sortEvidenceObs.end(), greater<int>());
-          int maxScore = 0;
-          int minScore = 0;
-          for (int sc = 0; sc < maxNResidue; sc++) {
-            maxScore += sortEvidenceObs[sc];
-          }
-
-          for (int sc = maxPrecurMassBin - maxNResidue; sc < maxPrecurMassBin; sc++) {
-            minScore += sortEvidenceObs[sc];
-          }
-
-          int bottomRowBuffer = maxEvidence + 1;
-          int topRowBuffer = -minEvidence;
-          int nRowDynProg = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
-          pValueScoreObs[pe] = new double[nRowDynProg];
-          //Added by AKF
-          if (nRowDynProg > pValueDistLen) {
-              pValueDistLen = nRowDynProg;              
-          }
-          nRows[pe] = nRowDynProg; //Added by AKF          
-
-          scoreOffsetObs[pe] = calcScoreCount(maxPrecurMassBin, &evidenceObs[pe][0], pepMaInt,
-                               maxEvidence, minEvidence, maxScore, minScore,
-                               nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
-                               pValueScoreObs[pe]);
-        }
-        // Merge separate score distirbutions. The following lines added by AKF
-        for (pe = 0; pe < nPepMassIntUniq; ++pe) {
-          if (max_offset < scoreOffsetObs[pe] ) {
-            max_offset = scoreOffsetObs[pe];
-          }
-        }
-        int row;
-        int score_idx;        
-        pValueDistLen += 1;
-        pValueDist = new double[pValueDistLen*2];
-        double *scoreCountBinAdjust = new double[pValueDistLen*2];
-        memset(pValueDist, 0.0, sizeof(double)*pValueDistLen*2);
-        memset(scoreCountBinAdjust, 0.0, sizeof(double)*pValueDistLen*2);
+        vector<double> residue_mods(len, 0);  // Initialize a vecotr of peptide length  with zeros. 
         
-        // Merges the separated partial score histograms.
-        double totalCount = 0.0;
-        for (pe = 0 ; pe < nPepMassIntUniq; ++pe) {
-          int offset_diff = max_offset - scoreOffsetObs[pe];
-          for (score_idx = 0; score_idx < nRows[pe]; ++score_idx) {
-            pValueDist[score_idx + offset_diff] += pValueScoreObs[pe][score_idx];
-            totalCount += pValueScoreObs[pe][score_idx];
-          }
+        // Handle variable modifications
+        if (current_pb_peptide_.has_nterm_mod()){ // Handle N-terminal modifications
+          int index;
+          double delta;
+          MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide_.nterm_mod()), &index, &delta);
+          residue_mods[index] = delta;
         }
 
-        if (totalCount == 0.0) {
-          for (score_idx = 0; score_idx < pValueDistLen*2; score_idx++) {
-            pValueDist[score_idx] = 1.0;
+        for (i = 0; i < current_pb_peptide_.modifications_size(); ++i) {
+          int index;
+          double delta;
+          MassConstants::DecodeMod(current_pb_peptide_.modifications(i), &index, &delta);
+          residue_mods[index] = delta;
+        }
+        if (current_pb_peptide_.has_cterm_mod()){  // Handle C-terminal modifications
+          int index;
+          double delta;
+          MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide_.cterm_mod()), &index, &delta);
+          residue_mods[index] = delta;
+        }
+        // count AA masses
+        residue_bin = MassConstants::ToFixPt(residue_masses[0]);
+        ++nvAAMassCounterN[residue_bin];  // N-temrianl
+        if (nvAAMassCounterN[residue_bin] == 1){
+          tempAA = peptide_seq[0];
+          if (residue_mods[0] != 0) {
+            tempAA += "[" + StringUtils::ToString(residue_mods[0], mod_precision) + ']';
           }
-        } else {      
-          // Normalize the raw score histogram to get a probabilisitc distribution
-          double logTotalCount = log(totalCount);
-          for (score_idx = pValueDistLen*2-2; score_idx >= 0; --score_idx) {
-            scoreCountBinAdjust[score_idx] = pValueDist[score_idx]/2.0;
-            pValueDist[score_idx] += pValueDist[score_idx + 1];
-          }
-          for (score_idx = pValueDistLen*2-2; score_idx >= 0; --score_idx) {
-            pValueDist[score_idx] -= scoreCountBinAdjust[score_idx];
-          }
-          // normalize distribution; use exp( log ) to avoid potential underflow
-          for (score_idx = pValueDistLen*2-2; score_idx >= 0; --score_idx) {
-            if (pValueDist[score_idx] > 0.0) {
-              pValueDist[score_idx] = exp(log(pValueDist[score_idx]) - logTotalCount);
+          mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+        }
+        for (i = 1; i < len-1; ++i) {
+          residue_bin = MassConstants::ToFixPt(residue_masses[i]);
+          ++nvAAMassCounterI[residue_bin];  // non-terminal
+          if (nvAAMassCounterI[residue_bin] == 1){
+            tempAA = peptide_seq[i];
+            if (residue_mods[i] != 0) {
+              tempAA += "[" + StringUtils::ToString(residue_mods[i], mod_precision) + ']';
             }
-          }
+            mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+          }		
+          ++cntInside;
         }
-        delete [] scoreCountBinAdjust;  
-        // Finished merging score distributions.        
+        residue_bin = MassConstants::ToFixPt(residue_masses[len - 1]);
+        ++nvAAMassCounterC[residue_bin];  // C-temrinal
+        if (nvAAMassCounterC[residue_bin] == 1){
+          tempAA = peptide_seq[len - 1];
+          if (residue_mods[len - 1] != 0) {
+            tempAA += "[" + StringUtils::ToString(residue_mods[len - 1], mod_precision) + ']';
+          }
+          mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+        }
+        ++cntTerm;
       }
-      //END XCORR
-
-      //RES-EV
-      //Create dyanamic programming matrix if there is a res-ev score greater than 0
-      //and if user specified as a score function either 'residue-evidence matrix' or 'both'
-      if (curScoreFunction != XCORR_SCORE) {
-        for (pe=0 ; pe < nPepMassIntUniq ; pe++) {
-          int curPepMassInt = pepMassIntUnique[pe];
-          if (calcDPMatrix[curPepMassInt] == false) {
-            continue;
-          }
-
-          vector<vector<double> > curResidueEvidenceMatrix = residueEvidenceMatrix[pe];
-          vector<int> maxColEvidence(curPepMassInt, 0);
-
-          //maxColEvidence is edited by reference
-          int maxEvidence = getMaxColEvidence(curResidueEvidenceMatrix, maxColEvidence, curPepMassInt);
-          int maxNResidue = floor((double)curPepMassInt / 57.0);
-
-          std::sort(maxColEvidence.begin(), maxColEvidence.end(), greater<int>());
-          int maxScore = 0;
-          for(int i = 0; i < maxNResidue; i++) { //maxColEvidence has been sorted
-            maxScore += maxColEvidence[i];
-          }
-
-          int scoreOffset;
-          vector<double> scoreResidueCount;
-
-          calcResidueScoreCount(nAARes, curPepMassInt, curResidueEvidenceMatrix, aaMassInt,
-                                dAAFreqN, dAAFreqI, dAAFreqC, nTermMassBin, cTermMassBin,
-                                minDeltaMass, maxDeltaMass, maxEvidence, maxScore,
-                                scoreResidueCount, scoreOffset);
-          scoreResidueOffsetObs[curPepMassInt] = scoreOffset;
-
-          double totalCount = 0;
-          for (int i=scoreOffset ; i < scoreResidueCount.size() ; i++) {
-            totalCount += scoreResidueCount[i];
-          }
-          for (int i=scoreResidueCount.size()-2 ; i > -1; i--) {
-            scoreResidueCount[i] = scoreResidueCount[i] + scoreResidueCount[i+1];
-          }
-          for (int i = 0; i < scoreResidueCount.size(); i++) {
-            //Avoid potential underflow
-            scoreResidueCount[i] = exp(log(scoreResidueCount[i]) - log(totalCount));
-          }
-          pValuesResidueObs[curPepMassInt] = scoreResidueCount;
+      unsigned int uiUniqueMasses = 0;
+      double aa_mass;
+      for (i = 0; i < MaxModifiedAAMassBin; ++i) {
+        if (nvAAMassCounterN[i] || nvAAMassCounterI[i] || nvAAMassCounterC[i]) {
+          ++uiUniqueMasses;
+          aa_mass = MassConstants::ToDouble(i);
+          dAAMass_.push_back(aa_mass);
+          dAAFreqN_.push_back((double)nvAAMassCounterN[i] / cntTerm);
+          dAAFreqI_.push_back((double)nvAAMassCounterI[i] / cntInside);
+          dAAFreqC_.push_back((double)nvAAMassCounterC[i] / cntTerm);
+          iAAMass_.push_back(MassConstants::mass2bin(aa_mass));          
         }
       }
-      //END RES-EV
-
-      /************ calculate p-values for PSMs using residue evidence matrix ****************/
-      iter_ = active_peptide_queue->iter_;
-      iter1_ = active_peptide_queue->iter1_;
-      int curPepMassInt;
-      double pValue_xcorr;
-      double pValue_resEv;
-      double pValue_both;
-      pe = 0;
-      for (peidx = 0; peidx < candidatePeptideStatusSize; peidx++) {
-        if ((*candidatePeptideStatus)[peidx]) {
-          int pepMassIntIdx = 0;
-
-          for (ma = 0; ma < nPepMassIntUniq; ma++ ) { //TODO should probably use iterator instead
-            if (pepMassIntUnique[ma] == pepMassInt[pe]) { //TODO pepMassIntUnique should be accessed with an interator
-              pepMassIntIdx = ma;
-              curPepMassInt = pepMassIntUnique[ma];
-              break;
-            }
-          }
-
-          int scoreCountIdx;
-          //XCORR
-          if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
-            scoreRefactInt = xcorrScores[pe];
-            pValue_xcorr = 0.0;
-            if ((int)(scoreRefactInt) + max_offset > 0) {
-              pValue_xcorr = pValueDist[(int)(scoreRefactInt) + max_offset];
-            }
-            if (pValue_xcorr == 0.0) {
-              pValue_xcorr = 1.0;
-            }            
-          }
-          //END XCORR
-
-          //RES-EV
-          if (curScoreFunction != XCORR_SCORE) {
-            scoreResidueEvidence = resEvScores[pe];
-            if (calcDPMatrix[curPepMassInt]) {
-              scoreCountIdx = scoreResidueEvidence + scoreResidueOffsetObs[curPepMassInt];
-              pValue_resEv = pValuesResidueObs[curPepMassInt][scoreCountIdx];
-            } else {
-              pValue_resEv = 1.0;
-            }
-          }
-          //END RES-EV
-
-          //BOTH SCORE
-          if (curScoreFunction == BOTH_SCORE) {
-            double cPval = pValue_xcorr * pValue_resEv;
-
-            double m = 1.2; // This value has been empircally determined
-            pValue_both = calcCombinedPval(m, cPval, 2); //2 is the # of p-values that are combined
-          }
-          //END BOTH_SCORE
-
-          if (curScoreFunction == XCORR_SCORE && pValue_xcorr == 0.0) {
-            carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
-          } else if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && pValue_resEv == 0.0) {
-            carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
-          } else if (curScoreFunction == BOTH_SCORE && pValue_both == 0.0) {
-            carp(CARP_FATAL, "PSM p-value should not be equal to 0.0");
-          }
-
-          if (peptide_centric) {
-            carp(CARP_FATAL, "residue-evidence has not been implemented with 'peptide-centric-search T' yet.");
-          } else {
-            TideMatchSet::Scores curScore;
-            curScore.xcorr_score = (double)scoreRefactInt / RESCALE_FACTOR;
-            curScore.xcorr_pval = pValue_xcorr;
-            curScore.resEv_pval = pValue_resEv;
-            curScore.resEv_score = scoreResidueEvidence;
-            curScore.combinedPval = pValue_both;
-            //TODO ugly hack to conform with the way these indices are generated in standard tide-search
-            curScore.rank = candidatePeptideStatusSize - peidx;
-            match_arr.push_back(curScore);
-          }
-          pe++;
-        }
-        ++iter_;
-        ++iter1_;
-      }
-
-      //clean up
-      if (curScoreFunction != RESIDUE_EVIDENCE_MATRIX) {
-        for (pe = 0; pe < nPepMassIntUniq; pe++) {
-          delete [] pValueScoreObs[pe];
-        }
-      }
-      delete [] scoreOffsetObs;
-      delete [] pValueScoreObs;
-      delete [] intensArrayTheor;
-      if (pValueDist != NULL)
-        delete [] pValueDist;
-      delete [] nRows;
-      
-
-      if (!peptide_centric) {
-        // below text is copied from text above in the exact-p-value XCORR case
-        // matches will arrange the results in a heap by score, return the top
-        // few, and recover the association between counter and peptide. We output
-        // the top matches.
-        TideMatchSet matches(&match_arr, highest_mz);
-        matches.exact_pval_search_ = exact_pval_search_;
-        matches.cur_score_function_ = curScoreFunction;
-
-        if (curScoreFunction == RESIDUE_EVIDENCE_MATRIX && exact_pval_search_ == false) {
-          matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
-                         spectrum, charge, active_peptide_queue, proteins,
-                         compute_sp, true, locks_array[LOCK_RESULTS]);
-        } else {
-          matches.report(target_file, decoy_file, top_matches, numDecoys, spectrum_filename,
-                         spectrum, charge, active_peptide_queue, proteins,
-                         compute_sp, false, locks_array[LOCK_RESULTS]);
-        }
-      } //end peptide_centric == false
-    }
-    delete min_mass;
-    delete max_mass;
-    delete candidatePeptideStatus;
-  }
-
-  if (!Params::GetBool("skip-preprocessing")) {
-    locks_array[LOCK_REPORTING]->lock();
-    if (curScoreFunction == BOTH_SCORE) {
-      num_precursors_skipped = num_precursors_skipped / 2;
-      num_isotopes_skipped = num_isotopes_skipped / 2;
-      num_range_skipped = num_range_skipped / 2;
-      num_retained = num_retained / 2;
-    }
-
-    long int total_peaks = num_precursors_skipped + num_isotopes_skipped + num_range_skipped + num_retained;
-    if (total_peaks == 0) {
-      carp(CARP_INFO, "[Thread %d]: Warning: no peaks found.", thread_num);
-    } else {
-      carp(CARP_INFO,
-           "[Thread %d]: Deleted %d precursor, %d isotope and %d out-of-range peaks.",
-           thread_num, num_precursors_skipped, num_isotopes_skipped, num_range_skipped);
-    }
-    if (num_retained == 0) {
-      carp(CARP_INFO, "[Thread %d]: Warning: no peaks retained.", thread_num);
-    } else {
-      carp(CARP_INFO, "[Thread %d]: Retained %g%% of peaks.",
-           thread_num, (100.0 * num_retained) / total_peaks);
-    }
-    locks_array[LOCK_REPORTING]->unlock();
-  }
+      // Write the statistics to a Protocol Buffer, so that next time it is at hand
+      RecordWriter residue_stat_writer = RecordWriter(residue_stats_file);
+      CHECK(residue_stat_writer.OK());  
+      for (int i = 0; i < dAAMass_.size(); ++i){
+        pb::ResidueStats last_residue_stat;
+        last_residue_stat.set_aamass(dAAMass_[i]);
+        last_residue_stat.set_aafreqn(dAAFreqN_[i]);
+        last_residue_stat.set_aafreqi(dAAFreqI_[i]);
+        last_residue_stat.set_aafreqc(dAAFreqC_[i]);
+        string aa_str = mMass2AA_[dAAMass_[i]];
+        last_residue_stat.set_aa_str(aa_str);
+        CHECK(residue_stat_writer.Write(&last_residue_stat));
+      }       
+      delete[] nvAAMassCounterN;
+      delete[] nvAAMassCounterI;
+      delete[] nvAAMassCounterC;
+    } // Finished calculating AA frequencies
+  }  
 }
 
-void TideSearchApplication::search(
-  const string& spectrum_filename,
-  const vector<SpectrumCollection::SpecCharge>* spec_charges,
-  vector<ActivePeptideQueue*> active_peptide_queue,
-  ProteinVec& proteins,
-  double precursor_window,
-  WINDOW_TYPE_T window_type,
-  double spectrum_min_mz,
-  double spectrum_max_mz,
-  int min_scan,
-  int max_scan,
-  int min_peaks,
-  int top_matches,
-  double highest_mz,
-  ofstream* target_file,
-  ofstream* decoy_file,
-  bool compute_sp,
-  int nAA,
-  double* aaFreqN,
-  double* aaFreqI,
-  double* aaFreqC,
-  int* aaMass,
-  int nAARes,
-  const vector<double>& dAAFreqN,
-  const vector<double>& dAAFreqI,
-  const vector<double>& dAAFreqC,
-  const vector<double>& dAAMass,
-  const pb::ModTable& mod_table,
-  const pb::ModTable& nterm_mod_table,
-  const pb::ModTable& cterm_mod_table,
-  int numDecoys,
-  vector<int>* negative_isotope_errors
-) {
-  // Create an array of locks.
-  vector<boost::mutex *> locks_array;
-  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
-    locks_array.push_back(new boost::mutex());
-  }
-
-  int elution_window = Params::GetInt("elution-window-size");
-  bool peptide_centric = Params::GetBool("peptide-centric-search");
-
-  // initialize fields required for output
-  int* sc_index = new int(-1);
-  long* total_candidate_peptides = new long(0);
-  FLOAT_T sc_total = (FLOAT_T)spec_charges->size();
-
-  if (peptide_centric == false) {
-    elution_window = 0;
-  }
-
-  for (int i = 0; i < NUM_THREADS; i++) {
-    active_peptide_queue[i]->setElutionWindow(elution_window);
-    active_peptide_queue[i]->setPeptideCentric(peptide_centric);
-  }
-
-  if (elution_window > 0 && elution_window % 2 == 0) {
-    for (int i = 0; i < NUM_THREADS; i++) {
-      active_peptide_queue[i]->setElutionWindow(elution_window+1);
-    }
-  }
-
-  if (!peptide_centric || !exact_pval_search_) {
-    for (int i = 0; i < NUM_THREADS; i++) {
-      active_peptide_queue[i]->setElutionWindow(0);
-    }
-  }
-
-  for (int i = 0; i < NUM_THREADS; i++) {
-    active_peptide_queue[i]->SetOutputs(
-      NULL, top_matches, compute_sp, target_file, decoy_file, highest_mz);
-  }
-
-  // Creating structs to hold information required for each thread to search through
-  // a spec charge
-
-  vector<thread_data> thread_data_array;
-  for (int i= 0; i < NUM_THREADS; i++) {
-      thread_data_array.push_back(thread_data(spectrum_filename, spec_charges, active_peptide_queue[i],
-      proteins, precursor_window, window_type, spectrum_min_mz,
-      spectrum_max_mz, min_scan, max_scan, min_peaks, top_matches,
-      highest_mz, target_file, decoy_file, compute_sp,
-      i, NUM_THREADS, nAA, aaFreqN, aaFreqI, aaFreqC, aaMass,
-      nAARes, &dAAFreqN, &dAAFreqI, &dAAFreqC, &dAAMass,
-      &mod_table, &nterm_mod_table, &cterm_mod_table, numDecoys, locks_array, //TODO do I need to delete pointer somewhere?
-      bin_width_, bin_offset_, exact_pval_search_, spectrum_flag_, sc_index, total_candidate_peptides, negative_isotope_errors));
-  }
-
-  boost::thread_group threadgroup;
-
-  // Launch threads
-  for (int64_t t = 1; t < NUM_THREADS; t++) {
-    boost::thread * currthread = new boost::thread(boost::bind(&TideSearchApplication::search, this, (void *) &(thread_data_array[t])));
-    threadgroup.add_thread(currthread);
-  }
-
-  // Searches through part of the spec charge vector while waiting for threads are busy
-  search( (void *) &(thread_data_array[0]) );
-
-  // Join threads
-  threadgroup.join_all();
-
-  carp(CARP_INFO, "Time per spectrum-charge combination: %lf s.", wall_clock() / (1e6*sc_total));
-  carp(CARP_INFO, "Average number of candidates per spectrum-charge combination: %lf ",
-                  (*total_candidate_peptides) / sc_total);
-  for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {
-    delete locks_array[i];
-  }
-  delete sc_index;
-  delete total_candidate_peptides;
-
+string TideSearchApplication::getOutputFileName() {
+  return output_file_name_;
 }
 
-#ifdef _WIN64
-#pragma optimize( "g", off )
-#endif
-void TideSearchApplication::collectScoresCompiled(
-  ActivePeptideQueue* active_peptide_queue,
-  const Spectrum* spectrum,
-  const ObservedPeakSet& observed,
-  TideMatchSet::Arr2* match_arr,
-  int queue_size,
-  int charge
-) {
-#ifdef CPP_SCORING
-  //Scoring in C++		
-  deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-  TideMatchSet::Arr2::iterator it = match_arr->begin();
-  const int* cache = observed.GetCache();        
-  int cnt = 0;
-  for (; iter_ != active_peptide_queue->end_; ++iter_, ++it, ++cnt) {
-    int xcorr = 0;
-    int match_cnt = 0;
-
-    // Score with single charged theoretical peaks
-    for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_0.begin();
-      iter_uint != (*iter_)->peaks_0.end();
-      iter_uint++) {
-      xcorr += cache[*iter_uint];
-      if (cache[*iter_uint] > 0) {
-        ++match_cnt;
-      }
-
-    }
-    // Score with double charged theoretical peaks
-    if (charge > 2){
-      for (vector<unsigned int>::const_iterator iter_uint = (*iter_)->peaks_1.begin();
-        iter_uint != (*iter_)->peaks_1.end();
-        iter_uint++) {
-        xcorr += cache[*iter_uint];
-        if (cache[*iter_uint] > 0) {
-          ++match_cnt;
-        }
-      }
-    }
-
-    it->first = xcorr;
-    it->second = match_cnt; //queue_size - cnt;
-  } 
-  match_arr-> set_size(queue_size);
-  // End Scoring in C++
-#else
-	
-  if (!active_peptide_queue->HasNext()) {
-    return;
-  }
-  // prog gets the address of the dot-product program for the first peptide
-  // in the active queue.
-  const void* prog = active_peptide_queue->NextPeptide()->Prog(charge);
-  const int* cache = observed.GetCache();
-  // results will get (score, counter) pairs, where score is the dot product
-  // of the observed peak set with a candidate peptide. The candidate
-  // peptide is given by counter, which refers to the index within the
-  // ActivePeptideQueue, counting from the back. This complication
-  // simplifies the generated programs, which now simply dump the counter.
-  pair<int, int>* results = match_arr->data();
-
-  // See compiler.h for a description of the programs beginning at prog and
-  // how they are generated. Here we initialize certain registers to the
-  // values expected by the programs and call the first one (*prog).
-  //
-  // See gnu assembler format for more on this format. We tell the compiler
-  // to set these registers:
-  // edx/rdx points to the cache.
-  // eax/rax points to the first program.
-  // ecx/rcx is the counter and gets the size of the active queue.
-  // edi/rdi points to the results buffer.
-  //
-  // The push and pop operations are a workaround for a compiler that
-  // doesn't understand that %ecx and %edi (or %rcx and %rdi) get
-  // clobbered. Since they're already input registers, they can't be
-  // included in the clobber list.
-
-#ifdef _MSC_VER
-#ifdef _WIN64
-  DWORD64 rcx;
-  DWORD64 rdi;
-  volatile bool restored = false;
-  CONTEXT context;
-  RtlCaptureContext(&context);
-  if (!restored) {
-    rcx = context.Rcx;
-    rdi = context.Rdi;
-
-    context.Rdx = (DWORD64)cache;
-    context.Rax = (DWORD64)prog;
-    context.Rcx = (DWORD64)queue_size;
-    context.Rdi = (DWORD64)results;
-
-    restored = true;
-    RtlRestoreContext(&context, NULL);
-  } else {
-    ((void(*)(void))prog)();
-  }
-
-  restored = false;
-  RtlCaptureContext(&context);
-  if (!restored) {
-    context.Rcx = rcx;
-    context.Rdi = rdi;
-
-    restored = true;
-    RtlRestoreContext(&context, NULL);
-  }
-#else
-  __asm {
-    cld
-    push ecx
-    push edi
-    mov edx, cache
-    mov eax, prog
-    mov ecx, queue_size
-    mov edi, results
-    call eax
-    pop edi
-    pop ecx
-  }
-#endif
-#else
-  __asm__ __volatile__("cld\n" // stos operations increment edi
-#ifdef __x86_64__
-                       "push %%rcx\n"
-                       "push %%rdi\n"
-                       "call *%%rax\n"
-                       "pop %%rdi\n"
-                       "pop %%rcx\n"
-#else
-                       "push %%ecx\n"
-                       "push %%edi\n"
-                       "call *%%eax\n"
-                       "pop %%edi\n"
-                       "pop %%ecx\n"
-#endif
-                       : // no outputs
-                       : "d" (cache),
-                         "a" (prog),
-                         "c" (queue_size),
-                         "D" (results)
-  );
-#endif
-
-  // match_arr is filled by the compiled programs, not by calls to
-  // push_back(). We have to set the final size explicitly.
-  match_arr->set_size(queue_size);
-#endif
+// In order to add more options, you need to add them to ./src/util/Params.cpp
+vector<string> TideSearchApplication::getOptions() const {
+  string arr[] = {
+    "auto-mz-bin-width",
+    "auto-precursor-window",
+    "concat",
+    "deisotope",
+    "elution-window-size",
+    "fileroot",
+    "fragment-tolerance",
+    "isotope-error",
+    "mass-precision",
+    "max-precursor-charge",
+    "min-precursor-charge",
+    "min-peaks",
+    "mod-precision",
+    "mz-bin-offset",
+    "mz-bin-width",
+    "mzid-output",
+    "mztab-output",
+    "num-threads",
+    "output-dir",
+    "override-charges",
+    "overwrite",
+    "parameter-file",
+    "pepxml-output",
+    "pin-output",
+    "pm-charges",
+    "pm-max-frag-mz",
+    "pm-max-precursor-delta-ppm",
+    "pm-max-precursor-mz",
+    "pm-max-scan-separation",
+    "pm-min-common-frag-peaks",
+    "pm-min-frag-mz",
+    "pm-min-peak-pairs",
+    "pm-min-precursor-mz",
+    "pm-min-scan-frag-peaks",
+    "pm-pair-top-n-frag-peaks",
+    "pm-top-n-frag-peaks",
+    "precision",
+    "precursor-window",
+    "precursor-window-type",
+    "print-search-progress",
+    "remove-precursor-peak",
+    "remove-precursor-tolerance",
+    "scan-number",
+    "score-function",
+    "skip-preprocessing",
+    "spectrum-max-mz",
+    "spectrum-min-mz",
+    "spectrum-parser",
+    "sqt-output",
+    "store-index",
+    "store-spectra",
+    "top-match",
+    "txt-output",
+    "use-flanking-peaks",
+    "use-neutral-loss-peaks",
+    "use-z-line",
+    "verbosity"
+  };
+  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
-#ifdef _WIN64
-#pragma optimize( "g", on )
-#endif
-
-void TideSearchApplication::convertResults() const {
-  PSMConvertApplication converter;
-  if (!Params::GetBool("concat")) {
-    string target_file_name = make_file_path("tide-search.target.txt");
-    if (Params::GetBool("pin-output")) {
-      converter.convertFile("tsv", "pin", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("pepxml-output")) {
-      converter.convertFile("tsv", "pepxml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("mzid-output")) {
-      converter.convertFile("tsv", "mzidentml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("sqt-output")) {
-      converter.convertFile("tsv", "sqt", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
-    }
-
-    if (HAS_DECOYS) {
-      string decoy_file_name = make_file_path("tide-search.decoy.txt");
-      if (Params::GetBool("pin-output")) {
-        converter.convertFile("tsv", "pin", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
-      }
-      if (Params::GetBool("pepxml-output")) {
-        converter.convertFile("tsv", "pepxml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
-      }
-      if (Params::GetBool("mzid-output")) {
-        converter.convertFile("tsv", "mzidentml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
-      }
-      if (Params::GetBool("sqt-output")) {
-        converter.convertFile("tsv", "sqt", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
-      }
-    }
-  } else {
-    string concat_file_name = make_file_path("tide-search.txt");
-    if (Params::GetBool("pin-output")) {
-      converter.convertFile("tsv", "pin", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("pepxml-output")) {
-      converter.convertFile("tsv", "pepxml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("mzid-output")) {
-      converter.convertFile("tsv", "mzidentml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
-    }
-    if (Params::GetBool("sqt-output")) {
-      converter.convertFile("tsv", "sqt", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
-    }
-  }
-}
-
-void TideSearchApplication::computeWindow(
-  const SpectrumCollection::SpecCharge& sc,
-  WINDOW_TYPE_T window_type,
-  double precursor_window,
-  vector<int>* negative_isotope_errors,
-  vector<double>* out_min,
-  vector<double>* out_max,
-  double* min_range,
-  double* max_range
-) {
-  double unit_dalton = BIN_WIDTH;
-  switch (window_type) {
-  case WINDOW_MASS:
-    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
-      out_min->push_back(sc.neutral_mass + (*ie * unit_dalton) - precursor_window);
-      out_max->push_back(sc.neutral_mass + (*ie * unit_dalton) + precursor_window);
-    }
-    *min_range = (sc.neutral_mass + (negative_isotope_errors->front() * unit_dalton)) - precursor_window;
-    *max_range = (sc.neutral_mass + (negative_isotope_errors->back() * unit_dalton)) + precursor_window;
-    break;
-  case WINDOW_MZ: {
-    double mz_minus_proton = sc.spectrum->PrecursorMZ() - MASS_PROTON;
-    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
-      out_min->push_back((mz_minus_proton - precursor_window) * sc.charge + (*ie * unit_dalton));
-      out_max->push_back((mz_minus_proton + precursor_window) * sc.charge + (*ie * unit_dalton));
-    }
-    // N.B. Next two lines used to have max_charge instead of sc.charge. Not sure why. --WSN 9 Jun 2021
-    *min_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->front() * unit_dalton)) - precursor_window*sc.charge;
-    *max_range = (mz_minus_proton*sc.charge + (negative_isotope_errors->back() * unit_dalton)) + precursor_window*sc.charge;
-    break;
-  }
-  case WINDOW_PPM: {
-    double tiny_precursor = precursor_window * 1e-6;
-    for (vector<int>::const_iterator ie = negative_isotope_errors->begin(); ie != negative_isotope_errors->end(); ++ie) {
-      out_min->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 - tiny_precursor));
-      out_max->push_back((sc.neutral_mass + (*ie * unit_dalton)) * (1.0 + tiny_precursor));
-    }
-    *min_range = (sc.neutral_mass + (negative_isotope_errors->front() * unit_dalton)) * (1.0 - tiny_precursor);
-    *max_range = (sc.neutral_mass + (negative_isotope_errors->back() * unit_dalton)) * (1.0 + tiny_precursor);
-    break;
-  }
-  default:
-    carp(CARP_FATAL, "Invalid window type");
-  }
-  carp(CARP_DETAILED_DEBUG, "Scan=%d Charge=%d Mass window=[%f, %f]",
-       sc.spectrum->SpectrumNumber(), sc.charge, (*out_min)[0], (*out_max)[0]);
-}
-
-bool TideSearchApplication::proteinLevelDecoys() {
-  return PROTEIN_LEVEL_DECOYS;
-}
+/*
+Parameters to be removed from ./Params.cpp"
+brief-output
+peptide-centric-search
+use-tailor-calibration
+exact-p-value
+charge-state
+evidence-granularity
+*/
 
 string TideSearchApplication::getName() const {
   return "tide-search";
@@ -1649,73 +1517,6 @@ vector<string> TideSearchApplication::getArgs() const {
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
-vector<string> TideSearchApplication::getOptions() const {
-  string arr[] = {
-    "auto-mz-bin-width",
-    "auto-precursor-window",
-    "compute-sp",
-    "concat",
-    "deisotope",
-    "elution-window-size",
-    "exact-p-value",
-    "file-column",
-    "fileroot",
-    "isotope-error",
-    "mass-precision",
-    "max-precursor-charge",
-    "min-precursor-charge",
-    "min-peaks",
-    "mod-precision",
-    "mz-bin-offset",
-    "mz-bin-width",
-    "mzid-output",
-    "num-threads",
-    "output-dir",
-    "overwrite",
-    "parameter-file",
-    "peptide-centric-search",
-    "score-function",
-    "fragment-tolerance",
-    "evidence-granularity",
-    "pepxml-output",
-    "pin-output",
-    "pm-charges",
-    "pm-max-frag-mz",
-    "pm-max-precursor-delta-ppm",
-    "pm-max-precursor-mz",
-    "pm-max-scan-separation",
-    "pm-min-common-frag-peaks",
-    "pm-min-frag-mz",
-    "pm-min-peak-pairs",
-    "pm-min-precursor-mz",
-    "pm-min-scan-frag-peaks",
-    "pm-pair-top-n-frag-peaks",
-    "pm-top-n-frag-peaks",
-    "precision",
-    "precursor-window",
-    "precursor-window-type",
-    "print-search-progress",
-    "remove-precursor-peak",
-    "remove-precursor-tolerance",
-    "scan-number",
-    "skip-preprocessing",
-    "spectrum-max-mz",
-    "spectrum-min-mz",
-    "spectrum-parser",
-    "sqt-output",
-    "store-index",
-    "store-spectra",
-    "top-match",
-    "txt-output",
-    "brief-output",
-    "use-flanking-peaks",
-    "use-neutral-loss-peaks",
-    "use-z-line",
-    "use-tailor-calibration",    
-    "verbosity"
-  };
-  return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
-}
 
 vector< pair<string, string> > TideSearchApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
@@ -1743,278 +1544,15 @@ COMMAND_T TideSearchApplication::getCommand() const {
   return TIDE_SEARCH_COMMAND;
 }
 
-/* Calculates counts of peptides with various XCorr scores, given a preprocessed
- * MS2 spectrum, using dynamic programming.
- * Written by Jeff Howbert, October, 2012 (as function calcScoreCount).
- * Ported to and integrated with Tide by Jeff Howbert, November, 2013.
- * The code has been modified by AKF. The main changes:
- * A. The dynamic programming tables is only partially stored in the memory. 
- *    It uses now much less memory. 
- * B. The for loops to fill the DP table has been rearranged in order to 
- *    avoid the processing of the cells of the DP table with 0 values. This
- *    changes made the code ~3 times faster.
- */
-int TideSearchApplication::calcScoreCount(
-  int numelEvidenceObs,
-  int* evidenceObs,
-  int pepMassInt,
-  int maxEvidence,
-  int minEvidence,
-  int maxScore,
-  int minScore,
-  int nAA,
-  double* aaFreqN,
-  double* aaFreqI,
-  double* aaFreqC,
-  int* aaMass,
-  double* pValueScoreObs
-) {
-  const int nDeltaMass = nAA;
-  int minDeltaMass = aaMass[0];
-  int maxDeltaMass = aaMass[nDeltaMass - 1];
-
-  // internal variables
-  int row;
-  int col;
-  int ma;
-  int evidence;
-  int de;
-  int evidenceRow;
-  double sumScore;
-
-  int bottomRowBuffer = maxEvidence + 1;
-  int topRowBuffer = -minEvidence;
-  int colBuffer = maxDeltaMass;
-  int colStart = MassConstants::mass2bin(MassConstants::mono_h);
-  int scoreOffsetObs = bottomRowBuffer - minScore;
-
-  int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
-  int nCol = colBuffer + pepMassInt;
-  int rowFirst = bottomRowBuffer;
-  int rowLast = rowFirst - minScore + maxScore;
-  int colFirst = colStart + MassConstants::mass2bin(MassConstants::mono_h);
-  int colLast = MassConstants::mass2bin(MassConstants::bin2mass(pepMassInt)
-    - MassConstants::mono_oh);
-  int initCountRow = bottomRowBuffer - minScore;
-  int initCountCol = maxDeltaMass + colStart;
-
-  double** dynProgArray = new double*[nCol];
-  for (col = 0; col < colFirst+maxDeltaMass; col++) {
-    dynProgArray[col] = new double[nRow];
-    memset(dynProgArray[col], 0.0, nRow*sizeof(double));
-  }
-  
-  double* scoreCountBinAdjust = new double[nRow];
-  memset(scoreCountBinAdjust, 0.0, nRow*sizeof(double));
-  
-  // This part, below, is added by AKF. This must provide exactly the 
-  // same results as the original XPV implementation by Jeff Howbert, 
-  // albeit 2-3 times faster.
-  
-  dynProgArray[colStart][initCountRow] = 1.0; // initial count of peptides with mass = 1   // Modified by AKF
-  vector<int> deltaMassCol(nDeltaMass);
-  // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
-  for (de = 0; de < nDeltaMass; de++) {
-    ma = aaMass[de];
-    col = colStart + ma;
-    row = initCountRow + evidenceObs[col];
-    if (col <= maxDeltaMass + colLast) {
-      dynProgArray[col][row] += dynProgArray[colStart][initCountRow] * aaFreqN[de];
-    }
-  }
-  for (ma = 0; ma < colFirst; ++ma )
-      delete dynProgArray[ma];
-  for (ma = colFirst; ma < colLast; ma++) {
-    dynProgArray[ma+maxDeltaMass ] = new double[nRow];
-    memset(dynProgArray[ma+maxDeltaMass], 0.0, nRow*sizeof(double));
-    
-    for (de = 0; de < nDeltaMass; de++) {
-      deltaMassCol[de] = ma + aaMass[de];
-    }
-    for (row = rowFirst; row <= rowLast; row++) {
-      if (dynProgArray[ma][row] == 0.0) {
-        continue;
-      }
-      for (de = 0; de < nDeltaMass; de++) {
-        col = deltaMassCol[de];
-        if (col < colLast) {
-          evidenceRow = row + evidenceObs[col];
-          dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqI[de]; 
-        } else if (col == colLast) { 
-          evidenceRow = row;
-          dynProgArray[col][evidenceRow] += dynProgArray[ma][row]*aaFreqC[de]; 
-        }
-      }
-    }
-    delete dynProgArray[ma];
-  }
- 
-  for (row = 0; row < nRow; ++row) {
-    pValueScoreObs[row] = dynProgArray[colLast][row];
-  }
-  // The calculation of the null distribution has been removed from here,
-  // and now the partial raw distribtuion is merged in the main code
-  // in order to use a single/unique/merged null distribution.
-  // clean up
-  for (col = colLast; col < colLast+maxDeltaMass; ++col) {
-    delete [] dynProgArray[col];    
-  }
-  delete [] dynProgArray;
-  delete [] scoreCountBinAdjust;
-
-  return scoreOffsetObs;
-}
-
-/*
- * Calculates counts of peptides with various residue evidence scores, given
- * a preprocessed residue evidence matrix, using dynamic programming
- *
- * This version:
- *  - calculates most of dimension and inexing variables required or
- *    dynamic programming inside of function, instead of externally
- *    in MATLAB
- *  - uses uniform amino acid probabilities for all positions in peptide
- *
- * This used to be a MEX-file to be called in MATLAB
- *  - has been incorporated into Tide/Crux
- *
- * Written by Jeff Howbert, August, 2015.
- *
- * Added by Andy Lin, March 2-16
- * Edited to work within Crux code instead of with original MATLAB code
- */
-void TideSearchApplication::calcResidueScoreCount (
-  int nAa,
-  int pepMassInt,
-  vector<vector<double> >& residueEvidenceMatrix,
-  vector<int>& aaMass,
-  const vector<double>& aaFreqN,
-  const vector<double>& aaFreqI,
-  const vector<double>& aaFreqC,
-  int nTermMass, //this is nTermMassBin
-  int cTermMass, //this is cTermMassBin
-  int minAaMass,
-  int maxAaMass,
-  int maxEvidence,
-  int maxScore,
-  vector<double>& scoreCount, //this is returned for later use
-  int& scoreOffset //this is returned for later use
-) {
-  int minEvidence  = 0;
-  int minScore     = 0;
-
-  int row;
-  int col;
-  int ma;
-  int evid;
-  int de;
-  int evidRow;
-  double sumScore;
-
-  int bottomRowBuffer = maxEvidence;
-  int topRowBuffer = -minEvidence;
-  int colBuffer = maxAaMass;
-  int colStart = nTermMass;
-  int nRow = bottomRowBuffer - minScore + 1 + maxScore + topRowBuffer;
-  int nCol = colBuffer + pepMassInt + maxAaMass;
-  int rowFirst = bottomRowBuffer + 1;
-  int rowLast = rowFirst - minScore + maxScore;
-  int colFirst = colStart + 1;
-  int colLast = pepMassInt - cTermMass;
-  int initCountRow = bottomRowBuffer - minScore + 1;
-  int initCountCol = colStart;
-
-  // convert to zero-based indexing
-  rowFirst = rowFirst - 1;
-  rowLast = rowLast - 1;
-  colFirst = colFirst - 1;
-  colLast = colLast - 1;
-  initCountRow = initCountRow - 1;
-  initCountCol = initCountCol - 1;
-
-  double** dynProgArray = 0;
-  dynProgArray = new double*[nRow];
-  for (row = 0; row < nRow; row++) {
-    dynProgArray[row] = new double[nCol];
-    for (col = 0; col < nCol; col++) {
-      dynProgArray[row][col] = 0.0;
-    }
-  }
-
-  // initial count of peptides with mass = nTermMass
-  dynProgArray[initCountRow][initCountCol] = 1.0;
-
-  int* aaMassCol = new int[nAa];
-  // populate matrix with scores for first (i.e. N-terminal) amino acid in sequence
-  for (de = 0; de < nAa; de++) {
-    ma = aaMass[de];
-
-    //&& -1 is to account for zero-based indexing in evidence vector
-    //row = initCountRow + residueEvidueMatrix[ de ][ ma + nTermMass - 1 ]; //original
-    row = initCountRow + residueEvidenceMatrix[de][ma + 1 - 1]; //+1 for N-Term H and -1 for 0 indexing
-
-    //TODO need to change this to based off bool
-    if (nTermMass == 1) { //N-Term not modified
-      col = initCountCol + ma;
-    } else { //N-Term is modified
-      col = initCountCol + ma - nTermMass + 1;
-    }
-
-//    if ( col <= maxAaMass + colLast ) { //original
-    if (col <= maxAaMass + colLast && col >= initCountCol) { //TODO not sure if below or above is correct
-      //dynProgArray[ row ][ col ] += dynProgArray[ initCountRow ][ initCountCol ];
-      dynProgArray[row][col] += dynProgArray[initCountRow][initCountCol] * aaFreqN[de];
-    }
-  }
-
-  //set to zero now that score counts for first amino acid are in matrix
-  dynProgArray[initCountRow][initCountCol] = 0.0;
-
-//The following code was added by AKF to make the DP calculation faster
-  int newCol;
-  for (ma = initCountCol+1; ma < colLast; ++ma) {
-    col = ma;  
-    for (de = 0; de < nAa; de++) {
-      aaMassCol[de] = col + aaMass[de];
-    }
-    for (row = rowFirst; row <= rowLast; ++row) {
-      if (dynProgArray[row][col] == 0.0) {
-        continue;
-      }
-      for (de = 0; de < nAa; de++) {
-        newCol = aaMassCol[de];
-        if (newCol < colLast) {
-          evidRow = row + residueEvidenceMatrix[de][newCol];
-          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqI[de];
-        } else if (newCol == colLast) {
-          evidRow = row;
-          dynProgArray[evidRow][newCol] += dynProgArray[row][col] * aaFreqC[de];            
-        } 
-      }        
-    }      
-  } 
-  int colScoreCount = colLast;
-
-  scoreCount.resize(nRow);
-  for (int row = 0; row < nRow; row++) {
-    scoreCount[row] = dynProgArray[row][colScoreCount];
-  }
-  scoreOffset = initCountRow;
-
-  // clean up
-  for (int row = 0; row < nRow; row++) {
-    delete [] dynProgArray[row];
-  }
-  delete [] dynProgArray;
-  delete [] aaMassCol;
-}
-
 void TideSearchApplication::processParams() {
   const string index = Params::GetString("tide database");
+
   if (!FileUtils::Exists(index)) {
     carp(CARP_FATAL, "'%s' does not exist", index.c_str());
+  
   } else if (FileUtils::IsRegularFile(index)) {
     // Index is FASTA file
+
     carp(CARP_INFO, "Creating index from '%s'", index.c_str());
     string targetIndexName = Params::GetString("store-index");
     if (targetIndexName.empty()) {
@@ -2028,8 +1566,10 @@ void TideSearchApplication::processParams() {
       carp(CARP_FATAL, "tide-index failed.");
     }
     Params::Set("tide database", targetIndexName);
+  
   } else {
     // Index is Tide index directory
+
     pb::Header peptides_header;
     string peptides_file = FileUtils::Join(index, "pepix");
     HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
@@ -2089,15 +1629,162 @@ void TideSearchApplication::processParams() {
              "failed to calculate fragment error: %s", fail.c_str());
       }
     }
+  }  
+  
+}
+void TideSearchApplication::getInputFiles(int thread_id) {
+  // Try to read all spectrum files as spectrumrecords, convert those that fail
+  if (thread_id > inputFiles_.size())
+    return;
+  for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin()+thread_id; 
+       original_file_name < inputFiles_.begin() + (inputFiles_.size()); 
+       original_file_name = original_file_name + num_threads_) 
+    {
+    carp(CARP_DEBUG, "Start processing input files");
+    bool keepSpectrumrecords = true;
+    string original_name = (*original_file_name).OriginalName;
+    string spectrumrecords = original_name;
+    // Check if the input file is spectrum records of google protocol buffer
+    pb::Header header;
+    HeadedRecordReader reader(original_name, &header);
+    if (header.file_type() != pb::Header::SPECTRA) {
+      // converting to spectrumrecords file 
+
+      carp(CARP_INFO, "Converting %s to spectrumrecords format", original_name.c_str());
+      carp(CARP_DEBUG, "Elapsed time starting conversion: %.3g s", wall_clock() / 1e6);
+      
+      spectrumrecords = Params::GetString("store-spectra");
+      keepSpectrumrecords = !spectrumrecords.empty();
+      if (!keepSpectrumrecords) {
+        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords.tmp");
+      } else if (inputFiles_.size() > 1) {
+        carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
+                         "spectrum files");
+      }
+      carp(CARP_DEBUG, "New spectrumrecords filename: %s", spectrumrecords.c_str());
+      int spectra_num = 0;
+      if (!SpectrumRecordWriter::convert(original_name, spectrumrecords, spectra_num)) {
+        carp(CARP_FATAL, "Error converting %s to spectrumrecords format", original_name.c_str());
+      }
+      locks_array_[LOCK_SPECTRUM_READING]->lock();
+      total_spectra_num_ += spectra_num;
+      locks_array_[LOCK_SPECTRUM_READING]->unlock();
+
+    }
+    (*original_file_name).SpectrumRecords  = spectrumrecords;
+    (*original_file_name).Keep = keepSpectrumrecords;
+    carp(CARP_DEBUG, "Finish converting");
   }
 }
 
-void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag) {
-  spectrum_flag_ = spectrum_flag;
+void TideSearchApplication::createOutputFiles() {
+  
+  // Create output files for the search results
+   
+  bool overwrite = Params::GetBool("overwrite");  
+  bool concat = Params::GetBool("concat");
+
+  string concat_file_name;
+  string target_file_name;
+  string decoy_file_name;
+
+  // Get output files for tsv format
+  concat_file_name = make_file_path("tide-search.txt");
+  target_file_name = make_file_path("tide-search.target.txt");
+  decoy_file_name  = make_file_path("tide-search.decoy.txt");
+
+  if (overwrite) {
+    remove(concat_file_name.c_str());  
+    remove(target_file_name.c_str());  
+    remove(decoy_file_name.c_str());  
+  }
+
+  if (Params::GetBool("txt-output") == true) {  // original tide-search output format in tab-delimited text files (txt)
+    string header = TideMatchSet::getHeader(TIDE_SEARCH_TSV, tide_index_mzTab_file_path_);
+
+    if (concat) {
+
+      out_tsv_target_ = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = concat_file_name;
+      *out_tsv_target_ << header; 
+
+    } else {
+
+      out_tsv_target_ = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = target_file_name;
+      *out_tsv_target_ << header; 
+      if (decoy_num_ > 0) {
+        out_tsv_decoy_ = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+        *out_tsv_decoy_ << header;
+      }
+    }  
+  }
+
+  // Get output files for mzTAB format
+  concat_file_name = make_file_path("tide-search.mzTab");
+  target_file_name = make_file_path("tide-search.target.mzTab");
+  decoy_file_name  = make_file_path("tide-search.decoy.mzTab");
+
+  if (overwrite) {
+    remove(concat_file_name.c_str());  
+    remove(target_file_name.c_str());  
+    remove(decoy_file_name.c_str());  
+  }
+
+  if ( Params::GetBool("mztab-output") == true) {   // mzTAB output format
+
+    // Get column headers
+    string header = TideMatchSet::getHeader(TIDE_SEARCH_MZTAB_TSV, tide_index_mzTab_file_path_);  // Gets the column headers
+    if (concat) {
+
+      out_mztab_target_ = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = concat_file_name;
+      *out_mztab_target_ << header; 
+
+    } else {
+
+      out_mztab_target_ = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
+      output_file_name_ = target_file_name;
+      *out_mztab_target_ << header; 
+
+      if (decoy_num_ > 0) {
+        out_mztab_decoy_ = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
+        *out_mztab_decoy_ << header;
+      }
+    }  
+  }
+
 }
 
-string TideSearchApplication::getOutputFileName() {
-  return output_file_name_;
+void TideSearchApplication::PrintResults(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt, TideMatchSet* psm_scores) {
+  string concat_or_target_report;
+  string decoy_report;
+
+  if (out_mztab_target_ != NULL) {
+    psm_scores->getReport(TIDE_SEARCH_MZTAB_TSV, spectrum_file_name, sc, spectrum_file_cnt, concat_or_target_report, decoy_report); 
+    locks_array_[LOCK_RESULTS]->lock();
+    *out_mztab_target_ << concat_or_target_report;
+    locks_array_[LOCK_RESULTS]->unlock();
+
+    if (out_mztab_decoy_ != NULL) {
+      locks_array_[LOCK_RESULTS]->lock();
+      *out_mztab_decoy_ << decoy_report;
+      locks_array_[LOCK_RESULTS]->unlock();
+    }
+  }
+
+  if ( out_tsv_target_ != NULL) {
+    psm_scores->getReport(TIDE_SEARCH_TSV, spectrum_file_name, sc, spectrum_file_cnt, concat_or_target_report, decoy_report); 
+    locks_array_[LOCK_RESULTS]->lock();
+    *out_tsv_target_ << concat_or_target_report;
+    locks_array_[LOCK_RESULTS]->unlock();
+    
+    if (out_tsv_decoy_ != NULL) {
+      locks_array_[LOCK_RESULTS]->lock();
+      *out_tsv_decoy_ << decoy_report;
+      locks_array_[LOCK_RESULTS]->unlock();
+    }
+  }
 }
 
 //Added by Andy Lin in Feb 2016
@@ -2109,23 +1796,19 @@ string TideSearchApplication::getOutputFileName() {
 void TideSearchApplication::getMassBin(
   vector<int>& pepMassInt,
   vector<int>& pepMassIntUnique,
-  ActivePeptideQueue* active_peptide_queue,
-  vector<bool>* candidatePeptideStatus
+  ActivePeptideQueue* active_peptide_queue
 ) {
   int pe = 0;
-  int peidx = 0;
-
-  deque<Peptide*>::const_iterator iter_ = active_peptide_queue->iter_;
-
-  for (iter_ = active_peptide_queue->iter_; iter_ != active_peptide_queue->end_; ++iter_) {
-    if ((*candidatePeptideStatus)[peidx]) {
-      double pepMass = (*iter_)->Mass();
-      int pepMaInt = MassConstants::mass2bin(pepMass);
-      pepMassInt[pe] = pepMaInt;
+  for (deque<Peptide*>::const_iterator iter_ = active_peptide_queue->begin_;
+      iter_ != active_peptide_queue->end_; 
+      ++iter_) {
+    double pepMass = (*iter_)->Mass();
+    int pepMaInt = MassConstants::mass2bin(pepMass);
+    pepMassInt[pe] = pepMaInt;
+    if (active_peptide_queue->candidatePeptideStatus_[pe]) {
       pepMassIntUnique.push_back(pepMaInt);
-      pe++;
     }
-    peidx++;
+    pe++;
   }
 
   //For pepMassIntUnique vector
@@ -2134,57 +1817,6 @@ void TideSearchApplication::getMassBin(
   vector<int>::iterator last = std::unique(pepMassIntUnique.begin(),
                                            pepMassIntUnique.end());
   pepMassIntUnique.erase(last, pepMassIntUnique.end());
-}
-
-//Added by Andy Lin in March 2016
-//Functions returns max value in curResidueEvidenceMatrix
-//Function assumes that all values in curResidueEvidenceMatrix have been rounded to int
-//Once function runs, maxColEvidence will contain the max evidence in
-//each column of curResidueEvidenceMatrix
-int TideSearchApplication::getMaxColEvidence(
-  const vector<vector<double> >& curResidueEvidenceMatrix,
-  vector<int>& maxColEvidence,
-  int pepMassInt
-) {
-  assert(maxColEvidence.size() == curResidueEvidenceMatrix[0].size());
-
-  int maxEvidence = -1;
-
-  for (int curAA = 0; curAA < curResidueEvidenceMatrix.size(); curAA++) {
-    for (int curMassBin = 0; curMassBin < pepMassInt; curMassBin++) {
-      if (curResidueEvidenceMatrix[curAA][curMassBin] > maxColEvidence[curMassBin]) {
-        maxColEvidence[curMassBin] = curResidueEvidenceMatrix[curAA][curMassBin];
-      }
-      if (curResidueEvidenceMatrix[curAA][curMassBin] > maxEvidence) {
-        maxEvidence = curResidueEvidenceMatrix[curAA][curMassBin];
-      }
-    }
-  }
-  assert(maxEvidence >= 0);
-  return maxEvidence;
-}
-
-//Added by Andy Lin in Nov 2016
-//Calculates residue evidence score given a
-//residue evidence matrix and a theoretical spectrum
-int TideSearchApplication::calcResEvScore(
-  const vector<vector<double> >& curResidueEvidenceMatrix,
-  const vector<unsigned int>& intensArrayTheor,
-  const vector<double>& aaMassDouble,
-  Peptide* curPeptide
-) {
-  //Make sure the number of theoretical peaks match pepLen
-  int pepLen = curPeptide->Len();
-  assert(intensArrayTheor.size() == pepLen - 1);
-
-  int scoreResidueEvidence = 0;
-  vector<double> residueMasses = curPeptide->getAAMasses(); //retrieves the amino acid masses, modifications included
-  for (int res = 0; res < pepLen - 1; res++) {
-    double tmpAAMass = residueMasses[res];
-    int tmpAA = find(aaMassDouble.begin(), aaMassDouble.end(), tmpAAMass) - aaMassDouble.begin();
-    scoreResidueEvidence += curResidueEvidenceMatrix[tmpAA][intensArrayTheor[res]-1];
-  }
-  return scoreResidueEvidence;
 }
 
 //Added by Andy Lin in Dec 2016
@@ -2215,9 +1847,6 @@ double TideSearchApplication::calcCombinedPval(
   return firstTerm + secondTerm;
 }
 
-/*
- * Local Variables:
- * mode: c
- * c-basic-offset: 2
- * End:
- */
+void TideSearchApplication::setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag) {
+  spectrum_flag_ = spectrum_flag;
+}

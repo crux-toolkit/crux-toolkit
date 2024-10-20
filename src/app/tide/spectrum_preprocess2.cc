@@ -71,16 +71,22 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
     debug = true; // allows a breakpoint
 #endif
   double precursor_mz = spectrum.PrecursorMZ();
-  double experimental_mass_cut_off = (precursor_mz-MASS_PROTON)*charge+MASS_PROTON + 50;
+  double experimental_mass_cut_off = (precursor_mz - MASS_PROTON)*charge + MASS_PROTON + 50;
   double max_peak_mz = spectrum.M_Z(spectrum.Size()-1);
+  
+  background_bin_end_ = MassConstants::mass2bin(max_peak_mz + MAX_XCORR_OFFSET + 1, 1);
+  cache_end_ = MassConstants::mass2bin(max_peak_mz + MAX_XCORR_OFFSET + 30, 1)*NUM_PEAK_TYPES;
 
-  assert(MaxBin::Global().MaxBinEnd() > 0);
-
-//  max_mz_.InitBin(min(experimental_mass_cut_off, max_peak_mz));
-  cache_end_ = MaxBin::Global().CacheBinEnd();
-  memset(peaks_, 0, sizeof(double) * MaxBin::Global().BackgroundBinEnd());
-  memset(cache_, 0, sizeof(int) * cache_end_*NUM_PEAK_TYPES);
-
+  if (peaks_ != NULL)
+    delete peaks_;
+  if (cache_ != NULL)
+    delete[] cache_; 
+  
+  peaks_ = new double[background_bin_end_];
+  cache_ = new int[cache_end_];
+  memset(peaks_, 0, sizeof(double) * background_bin_end_);
+  memset(cache_, 0, sizeof(int) * cache_end_);
+  
   // added by Yang
   largest_mzbin_ = 0;
   smallest_mzbin_ = MassConstants::mass2bin(max_peak_mz);
@@ -120,7 +126,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
         continue;
       }
       //denoising-related, added by Yang
-      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
+      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) {
+        continue;
+      }
 
       // Remove precursor peaks.
       if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
@@ -205,19 +213,8 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       sort(dyn_filtered_peak_tuples_.begin(), dyn_filtered_peak_tuples_.end(), [](const pair<int, double> &left, const pair<int, double> &right) { return left.first < right.first; });
     }
 
-#ifdef DEBUG
-    if (debug) {
-      cout << "GLOBAL MAX MZ: " << MaxMZ::Global().MaxBin() << ", " << MaxMZ::Global().BackgroundBinEnd()
-           << ", " << MaxMZ::Global().CacheBinEnd() << endl;
-      cout << "MAX MZ: " << max_mz_.MaxBin() << ", " << max_mz_.BackgroundBinEnd()
-           << ", " << max_mz_.CacheBinEnd() << endl;
-      ShowPeaks();
-      cout << "====== SUBTRACTING BACKGROUND ======" << endl;
-    }
-#endif
   }
-  int largest_mz = min(MaxBin::Global().BackgroundBinEnd(), largest_mzbin_ + MAX_XCORR_OFFSET+1);
-  SubtractBackground(peaks_, largest_mz);
+  SubtractBackground(peaks_, background_bin_end_);
   
   // The cache has been modified. It is used to keep track of the types of 
   // peaks as originally implemented by Benjamin Diament. This has been changed by AKF 
@@ -231,9 +228,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   int nh3_bin = int(MassConstants::BIN_NH3);
   int h2o_bin = int(MassConstants::BIN_H2O);
   int j;
-  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
+//  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
   // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
-  for(int i = 1; i < largest_mz; ++i) {
+  for(int i = 1; i < background_bin_end_; ++i) {
     j = i+i;
     intensity = peaks_[i];
     if ( FP_ == true) {
@@ -283,7 +280,9 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       int newResMassBin = bIonMassBin + aaMassBin[curAaMass];
       
       // Find all ion mass bins that match newResMassBin
-      int index = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin) - ionMassBin.begin();
+      vector<int>::iterator ionMassBinItr = find(ionMassBin.begin(), ionMassBin.end(), newResMassBin);
+  
+      int index = ionMassBinItr - ionMassBin.begin();
       double score = 0.0;
       for (int i = index; i < ionMasses.size(); i++) {
         if (newResMassBin != ionMassBin[i]) {
@@ -291,7 +290,6 @@ void ObservedPeakSet::addEvidToResEvMatrix(
         } 
        
         double ionMassDiff = ionMass[i] - bIonMass;
-        //double aaTolScore = residueToleranceMass - std::abs(ionMassDiff - aaMass[curAaMass]);
         double aaTolScore = 1.0 - (std::abs(ionMassDiff - aaMass[curAaMass]) / residueToleranceMass);
 
         if (aaTolScore > 0.0) {
@@ -319,7 +317,7 @@ void ObservedPeakSet::addEvidToResEvMatrix(
       // When assuming each fragment peak is a 2+ charge, it is possible
       // to have a fragment peak larger than precursor mass (ie why
       // bounds check is needed).
-      if (newResMassBin <= maxPrecurMassBin) {
+      if (newResMassBin <= maxPrecurMassBin && newResMassBin > 0) {
         residueEvidenceMatrix[curAaMass][newResMassBin-1] += score;
       }
     }
@@ -346,7 +344,7 @@ void ObservedPeakSet::CreateResidueEvidenceMatrix(
   vector<vector<double> >& residueEvidenceMatrix
   ) {
 
-  assert(MaxBin::Global().MaxBinEnd() > 0);
+  // assert(MaxBin::Global().MaxBinEnd() > 0);
 
   //TODO move to constants file?
   const double massHMono = MassConstants::mono_h;  // mass of hydrogen (monoisotopic)

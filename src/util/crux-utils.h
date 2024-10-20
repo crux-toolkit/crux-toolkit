@@ -248,11 +248,6 @@ std::ofstream* create_stream_in_path(
 bool valid_peptide_sequence(const std::string& sequence);
 
 /**
- * quickSort for FLOAT_Ts
- */
-void quicksort(FLOAT_T numbers[], int array_size);
-
-/**
  * User define our upper and our lower bounds.
  * The random number will always be 
  * between low and high, inclusive.
@@ -445,6 +440,10 @@ void get_files_from_list(
   std::vector<std::string> &outpaths ///< paths of all search results -out
 );
 
+bool parseUrl(std::string url, std::string* host, std::string* path);
+std::string httpRequest(const std::string& url, const std::string& data = "", bool waitForResponse = true);
+void postToAnalytics(const std::string& appName);
+std::string getDateFromCurxVersion();
 void postToGA4(const std::string& appName);
 
 #endif

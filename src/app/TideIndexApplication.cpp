@@ -27,12 +27,13 @@
 #include "util/StringUtils.h"
 #include "GeneratePeptides.h"
 #include "TideIndexApplication.h"
-#include "TideMatchSet.h"
 #include "app/tide/modifications.h"
 #include "app/tide/records_to_vector-inl.h"
 #include "ParamMedicApplication.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include "residue_stats.pb.h"
+#include "crux_version.h"
 
 #include <regex>
 #include <assert.h>
@@ -43,6 +44,7 @@
 #define CHECK(x) GOOGLE_CHECK(x)
 
 std::string peptideFile = "pepTarget.txt";
+string TideIndexApplication::tide_index_mzTab_filename_ = "tide-index.params.mztab";
 
 extern void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
                                 const string& input_filename,
@@ -133,26 +135,44 @@ int TideIndexApplication::main(
 */    
   string out_proteins = FileUtils::Join(index, "protix");
   string out_peptides = FileUtils::Join(index, "pepix");
+  string out_residue_stats = FileUtils::Join(index, "residue_stat");
   string modless_peptides = out_peptides + ".nomods.tmp";
   string peakless_peptides = out_peptides + ".nopeaks.tmp";
   string pathPeptideFile = FileUtils::Join(index, peptideFile);
+  string pathMZTabFile = FileUtils::Join(index, tide_index_mzTab_filename_);
+
 
   if (create_output_directory(index.c_str(), overwrite) != 0) {
     carp(CARP_FATAL, "Error creating index directory");
   } else if (FileUtils::Exists(out_proteins) ||
-             FileUtils::Exists(out_peptides)) {
+             FileUtils::Exists(out_peptides) ||
+             FileUtils::Exists(out_residue_stats)) {
     if (overwrite) {
       carp(CARP_DEBUG, "Removing old index file(s)");
       FileUtils::Remove(out_proteins);
       FileUtils::Remove(out_peptides);
+      FileUtils::Remove(out_residue_stats);
       FileUtils::Remove(modless_peptides);
       FileUtils::Remove(peakless_peptides);
       FileUtils::Remove(pathPeptideFile);
+      FileUtils::Remove(pathMZTabFile);      
     } else {
       carp(CARP_FATAL, "Index file(s) already exist, use --overwrite T or a "
                        "different index name");
     }
   }
+  // Define variables for calculating amino acid frequencies (used in tide-search for exact p-value calculation)
+  const unsigned int MaxModifiedAAMassBin = MassConstants::ToFixPt(2000.0);   //2000 is the maximum mass of a modified amino acid
+  nvAAMassCounterN_ = new unsigned int[MaxModifiedAAMassBin];   //N-terminal amino acids
+  nvAAMassCounterC_ = new unsigned int[MaxModifiedAAMassBin];   //C-terminal amino acids
+  nvAAMassCounterI_ = new unsigned int[MaxModifiedAAMassBin];   //inner amino acids in the peptides
+  memset(nvAAMassCounterN_, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
+  memset(nvAAMassCounterC_, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
+  memset(nvAAMassCounterI_, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
+  cntTerm_ = 0;
+  cntInside_ = 0;
+  mod_precision_  = Params::GetInt("mod-precision");
+
   int numDecoys;
   switch (decoy_type) {
     case NO_DECOYS:
@@ -749,6 +769,9 @@ int TideIndexApplication::main(
       }
       current_pb_peptide_.set_decoy_index(-1);  //restore the source id and use the decoy index as planned
 
+      // Get the amino acid frequencies from the peptides
+      getAAFrequencies(current_pb_peptide_, vProteinHeaderSequence);
+
       // Get the peptide sequence with modifications
       if (out_target_decoy_list) {
         target_peptide_with_mods = getModifiedPeptideSeq(&current_pb_peptide_, &vProteinHeaderSequence);
@@ -812,22 +835,7 @@ int TideIndexApplication::main(
 
           //report the decoy peptide if needed.
           if (out_target_decoy_list) {
-            decoy_peptide_str_with_mods = decoy_peptide_str;
-            if (decoy_current_pb_peptide_.modifications_size() > 0) {
-              mod_pos_offset = 0;
-              vector<double> deltas(decoy_peptide_str.length());
-              for (int m = 0; m < decoy_current_pb_peptide_.modifications_size(); ++m) {
-                mod_code = decoy_current_pb_peptide_.modifications(m);
-                MassConstants::DecodeMod(mod_code, &mod_index, &delta);
-                deltas[mod_index] = delta;
-              }
-              for (int d = 0; d < deltas.size(); ++d) {
-                if (deltas[d] == 0.0) continue;
-                mod_str = '[' + StringUtils::ToString(deltas[d], mod_precision) + ']';
-                decoy_peptide_str_with_mods.insert(d + 1 + mod_pos_offset, mod_str);
-                mod_pos_offset += mod_str.length();
-              }
-            }            
+            decoy_peptide_str_with_mods = getModifiedPeptideSeq(&decoy_current_pb_peptide_,  &vProteinHeaderSequence);
             *out_target_decoy_list << decoy_peptide_str_with_mods.c_str();
           }
         }
@@ -869,6 +877,37 @@ int TideIndexApplication::main(
       carp(CARP_INFO, "Failed to generate decoys for %lu low complexity peptides.", failedDecoyCnt);
     }
   }
+  // Write the amino acid frequencies
+  vector<double> dAAFreqN;
+  vector<double> dAAFreqI;
+  vector<double> dAAFreqC;
+  vector<double> dAAMass;
+
+  unsigned int uiUniqueMasses = 0;
+  for (int i = 0; i < MaxModifiedAAMassBin; ++i) {
+    if (nvAAMassCounterN_[i] || nvAAMassCounterI_[i] || nvAAMassCounterC_[i]) {
+      ++uiUniqueMasses;
+      dAAMass.push_back(MassConstants::ToDouble(i));
+      dAAFreqN.push_back((double)nvAAMassCounterN_[i] / cntTerm_);
+      dAAFreqI.push_back((double)nvAAMassCounterI_[i] / cntInside_);
+      dAAFreqC.push_back((double)nvAAMassCounterC_[i] / cntTerm_);
+    }
+  }
+  RecordWriter residue_stat_wirter = RecordWriter(out_residue_stats);
+  CHECK(residue_stat_wirter.OK());  
+  for (int i = 0; i < dAAMass.size(); ++i){
+    pb::ResidueStats last_residue_stat;
+    last_residue_stat.set_aamass(dAAMass[i]);
+    last_residue_stat.set_aafreqn(dAAFreqN[i]);
+    last_residue_stat.set_aafreqi(dAAFreqI[i]);
+    last_residue_stat.set_aafreqc(dAAFreqC[i]);
+    string aa_str = mMass2AA_[dAAMass[i]];
+    last_residue_stat.set_aa_str(aa_str);
+    CHECK(residue_stat_wirter.Write(&last_residue_stat));
+    // printf("%lf, %lf, %lf, %lf, %s\n", dAAMass[i], dAAFreqN[i], dAAFreqI[i], dAAFreqC[i], aa_str.c_str());
+
+  }
+
   carp(CARP_INFO, "Generated %lu target peptides.", peptide_cnt);
   carp(CARP_INFO, "Generated %lu decoy peptides.", decoy_count);
   carp(CARP_INFO, "Generated %lu peptides in total.", peptide_cnt + decoy_count);
@@ -879,6 +918,54 @@ int TideIndexApplication::main(
   FileUtils::Remove(modless_peptides);
   FileUtils::Remove(peakless_peptides);
   
+  delete nvAAMassCounterN_;   //N-terminal amino acids
+  delete nvAAMassCounterC_;   //C-terminal amino acids
+  delete nvAAMassCounterI_;   //inner amino acids in the peptides
+
+  // Dump the parameters in mzTAB format
+  try {
+    int cnt = 1;
+    ofstream mzTabStream(pathMZTabFile);
+   
+    mzTabStream << "MTD\tsoftware[1]\t[MS, MS:1002575, tide-index, " << CRUX_VERSION << "]\n";    
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tauto-modifications-spectra = " << Params::GetString("auto-modifications-spectra") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tclip-nterm-methionine = " << Params::GetString("clip-nterm-methionine") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tisotopic-mass = " << Params::GetString("isotopic-mass") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmax-length = " << Params::GetInt("max-length") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmax-mass = " << Params::GetDouble("max-mass") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmin-length = " << Params::GetInt("min-length") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmin-mass = " << Params::GetDouble("min-mass") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tcterm-peptide-mods-spec = " << Params::GetString("cterm-peptide-mods-spec") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tcterm-protein-mods-spec = " << Params::GetString("cterm-protein-mods-spec") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmax-mods = " << Params::GetInt("max-mods") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmin-mods = " << Params::GetInt("min-mods") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmod-precision = " << Params::GetInt("mod-precision") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmods-spec = " << Params::GetString("mods-spec") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tnterm-peptide-mods-spec = " << Params::GetString("nterm-peptide-mods-spec") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tnterm-protein-mods-spec = " << Params::GetString("nterm-protein-mods-spec") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tauto-modifications = " << Params::GetString("auto-modifications") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tallow-dups = " << Params::GetString("allow-dups") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tdecoy-format = " << Params::GetString("decoy-format") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tkeep-terminal-aminos = " << Params::GetString("keep-terminal-aminos") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tnum-decoys-per-target = " << numDecoys <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tseed = " << Params::GetString("seed") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tcustom-enzyme = " << Params::GetString("custom-enzyme") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tdigestion = " << Params::GetString("digestion") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tenzyme = " << Params::GetString("enzyme") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmissed-cleavages = " << Params::GetInt("missed-cleavages") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tdecoy-prefix = " << Params::GetString("decoy-prefix") <<"\n";
+    mzTabStream << "MTD\tsoftware[1]-setting[" << cnt++ << "]\tmass-precision = " << Params::GetInt("mass-precision") <<"\n";
+
+    mzTabStream.close();
+
+  } catch (...){
+    carp(CARP_INFO, "mzTab file was not created");
+  }
+  
+  // Recover stderr
+  cerr.rdbuf(old);
+
+
   return 0;
 }
 
@@ -929,7 +1016,7 @@ vector<string> TideIndexApplication::getOptions() const {
     "digestion",
     "enzyme",
     "isotopic-mass",
-    "keep-terminal-aminos",
+    "keep-terminal-aminos",  //TODO: remove this option. handled in GeneratePeptides.Cpp
     "mass-precision",
     "max-length",
     "max-mass",
@@ -1107,7 +1194,7 @@ void TideIndexApplication::processParams() {
   }
 
   // Update mods-spec parameter for default cysteine mod
-  string default_cysteine = "C+" + StringUtils::ToString(CYSTEINE_DEFAULT);
+  string default_cysteine = "C[Unimod:4]"; //+ StringUtils::ToString(CYSTEINE_DEFAULT);
   string mods_spec = Params::GetString("mods-spec");
   if (mods_spec.find('C') == string::npos) {
     mods_spec = mods_spec.empty() ?
@@ -1130,31 +1217,57 @@ string getModifiedPeptideSeq(const pb::Peptide* peptide,
   const ProteinVec* proteins) {
   int mod_index;
   double mod_delta;
-  stringstream mod_stream;
+  // stringstream mod_stream;
+  int mod_pos_offset = 0;
+  int index;
+  double delta;
+  int modPrecision = Params::GetInt("mod-precision");
+
   const pb::Location& location = peptide->first_location();
   const pb::Protein* protein = proteins->at(location.protein_id());
-  // Get peptide sequence without mods
-  string pep_str = protein->residues().substr(location.pos(), peptide->length());
+  string mod_str;
+  string seq_with_mods ;
+  // Get peptide sequence without mods, 
+  if (peptide->has_decoy_sequence()){  // decoy or target
+    seq_with_mods = peptide->decoy_sequence();
+  } else {
+    seq_with_mods = protein->residues().substr(location.pos(), peptide->length());
+  }
 
-  // Store all mod indices/deltas
-  map<int, double> mod_map;
-  set<int> mod_indices;
-  for (int j = 0; j < peptide->modifications_size(); ++j) {
-    MassConstants::DecodeMod(ModCoder::Mod(peptide->modifications(j)),
-      &mod_index, &mod_delta);
-    mod_indices.insert(mod_index);
-    mod_map[mod_index] = mod_delta;
+  if (peptide->has_nterm_mod()){ // Handle N-terminal modifications
+    MassConstants::DecodeMod(ModCoder::Mod(peptide->nterm_mod()), &index, &delta);
+    mod_str = "[" + StringUtils::ToString(delta, modPrecision) + "]-";
+    seq_with_mods.insert(0, mod_str);
+    mod_pos_offset += mod_str.length();
   }
-  int modPrecision = Params::GetInt("mod-precision");
-  for (set<int>::const_reverse_iterator j = mod_indices.rbegin();
-    j != mod_indices.rend();
-    ++j) {
-    // Insert the modification string into the peptide sequence
-    mod_stream << '[' << StringUtils::ToString(mod_map[*j], modPrecision) << ']';
-    pep_str.insert(*j + 1, mod_stream.str());
-    mod_stream.str("");
+
+  int num_mods = peptide->modifications_size();
+  if (num_mods > 0) {
+    vector<int> mod;
+    
+    for (int i = 0; i < num_mods; ++i) {
+      mod.push_back(peptide->modifications(i));
+    }
+    
+    sort(mod.begin(), mod.end());
+    
+    for (int i = 0; i < num_mods; ++i) {
+      int index;
+      double delta;
+      MassConstants::DecodeMod(mod[i], &index, &delta);
+      mod_str = "[" + StringUtils::ToString(delta, modPrecision) + "]";
+      seq_with_mods.insert(index + 1 + mod_pos_offset, mod_str);
+      mod_pos_offset += mod_str.length();
+    }
   }
-  return pep_str;
+  if (peptide->has_cterm_mod()){  // Handle C-terminal modifications
+    MassConstants::DecodeMod(ModCoder::Mod(peptide->cterm_mod()), &index, &delta);
+    mod_str = "-[" + StringUtils::ToString(delta, modPrecision) + "]";
+    seq_with_mods.insert(index + 1 + mod_pos_offset, mod_str);
+    mod_pos_offset += mod_str.length();
+  }
+
+  return seq_with_mods;  
 }
 
 TideIndexApplication::TideIndexPeptide* TideIndexApplication::readNextPeptide(FILE* fp, ProteinVec& vProteinHeaderSequence, int sourceId) {
@@ -1220,9 +1333,72 @@ void TideIndexApplication::dump_peptides_to_binary_file(vector<TideIndexPeptide>
   fclose(fp);    
 
 }
-/*
-* Local Variables:
-* mode: c
-* c-basic-offset: 2
-* End:
-*/
+
+void TideIndexApplication::getAAFrequencies(pb::Peptide& current_pb_peptide, ProteinVec& vProteinHeaderSequence){
+  unsigned int len;
+  unsigned int i;
+  unsigned int residue_bin;  
+  string tempAA;
+
+  Peptide peptide(current_pb_peptide, vProteinHeaderSequence);
+  vector<double> residue_masses = peptide.getAAMasses(); //retrieves the amino acid masses, modifications included
+  string peptide_seq = peptide.Seq();
+  len = current_pb_peptide.length();
+  vector<double> residue_mods(len, 0);  // Initialize a vecotr of peptide length  with zeros.   
+
+  // Handle variable modifications
+  if (current_pb_peptide.has_nterm_mod()){ // Handle N-terminal modifications
+    int index;
+    double delta;
+    MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide.nterm_mod()), &index, &delta);
+    residue_mods[index] = delta;
+  }
+
+  for (i = 0; i < current_pb_peptide.modifications_size(); ++i) {
+    int index;
+    double delta;
+    MassConstants::DecodeMod(current_pb_peptide.modifications(i), &index, &delta);
+    residue_mods[index] = delta;
+  }
+  
+  if (current_pb_peptide.has_cterm_mod()){  // Handle C-terminal modifications
+    int index;
+    double delta;
+    MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide.cterm_mod()), &index, &delta);
+    residue_mods[index] = delta;
+  }
+
+  // count AA masses
+  residue_bin = MassConstants::ToFixPt(residue_masses[0]);  
+  ++nvAAMassCounterN_[residue_bin];  // N-temrianl
+  if (nvAAMassCounterN_[residue_bin] == 1){
+    tempAA = peptide_seq[0];
+    if (residue_mods[0] != 0) {
+      tempAA += "[" + StringUtils::ToString(residue_mods[0], mod_precision_) + ']';
+    }
+    mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+  }
+  for (i = 1; i < len-1; ++i) {
+    residue_bin = MassConstants::ToFixPt(residue_masses[i]);
+    ++nvAAMassCounterI_[residue_bin];  // non-terminal
+    if (nvAAMassCounterI_[residue_bin] == 1){
+      tempAA = peptide_seq[i];
+      if (residue_mods[i] != 0) {
+        tempAA += "[" + StringUtils::ToString(residue_mods[i], mod_precision_) + ']';
+      }
+      mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+    }		
+    ++cntInside_;
+  }
+  residue_bin = MassConstants::ToFixPt(residue_masses[len - 1]);
+  ++nvAAMassCounterC_[residue_bin];  // C-temrinal
+  if (nvAAMassCounterC_[residue_bin] == 1){
+    tempAA = peptide_seq[len - 1];
+    if (residue_mods[len - 1] != 0) {
+      tempAA += "[" + StringUtils::ToString(residue_mods[len - 1], mod_precision_) + ']';
+    }
+    mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
+  }
+  ++cntTerm_;
+}
+
