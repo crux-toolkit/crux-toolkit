@@ -18,6 +18,7 @@ follow the instructions below:
 #include <algorithm>
 #include <climits>
 #include <iostream>
+#include <sstream>
 #if defined(_MSC_VER) || defined(DARWIN)
 #include <unordered_map>
 #else
@@ -63,14 +64,13 @@ inline void ShowAll(const T& x) {
 
 struct first_eq : public binary_function<pair<int, int>, pair<int, int>, bool> {
     bool operator()(pair<int, int> x, pair<int, int> y) {
-      return x.first == y.first;
+        return x.first == y.first;
     }
 };
 
 static bool IsAA(char c) {
     const char* AA = "ACDEFGHIKJLMNOPQRSTUVWYX";
-    for (; (*AA != '\0') && (*AA != c); ++AA)
-        ;
+    for (; (*AA != '\0') && (*AA != c); ++AA);
     return (*AA == c);
 }
 
@@ -190,7 +190,7 @@ class VariableModTable {
                         actual_data = actual_data + new_spec_text + ",";
                     }
                     std::string unimod_title = mod.getTitle();
-                    std::string _pb_data = "UNIMOD, UNIMOD:" + std::to_string(unimod_id) + ", " + unimod_title  + ", " + std::to_string(mass);
+                    std::string _pb_data = "UNIMOD, UNIMOD:" + std::to_string(unimod_id) + ", " + unimod_title + ", " + std::to_string(mass);
                     pb_data.push_back(_pb_data);
                 }
             } else {
@@ -204,7 +204,7 @@ class VariableModTable {
                     mod_spec = mod_spec.substr(pos);
                     if (!mod_spec.empty()) {
                         char firstChar = mod_spec[0];
-                        if(firstChar == '+') {
+                        if (firstChar == '+') {
                             mod_spec.erase(0, 1);  // Remove the plus sign
                         }
                     }
