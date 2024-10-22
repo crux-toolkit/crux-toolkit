@@ -530,13 +530,13 @@ typedef enum _protein_scorer_type PROTEIN_SCORER_TYPE_T;
 enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
                        XCORR_SCORE, //original SEQUEST score fxn
                        PVALUES, // combined p-values
-                       PVALUES_HR, // combined p-values for high resolution, including Res-EV,
-                       PVALUES_LR, // combined p-values for low  resolution, including only exact p-value,
-                       HYPERSCORE, // HyperScore from X!tandem
-                       HYPERSCORE_LA, // hyperscore-la 
-                       DIAMETER, // Diameter scoring 
-                       RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data
-                       BOTH_SCORE, //use both score fxns from above
+                      //  PVALUES_HR, // combined p-values for high resolution, including Res-EV,   TODO: Implement these score functions later
+                      //  PVALUES_LR, // combined p-values for low  resolution, including only exact p-value,
+                      //  HYPERSCORE, // HyperScore from X!tandem
+                      //  HYPERSCORE_LA, // hyperscore-la 
+                      //  DIAMETER, // Diameter scoring 
+                      //  RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data
+                      //  BOTH_SCORE, //use both score fxns from above
                        NUMBER_SCORE_FUNCTIONS };
 
 /**
