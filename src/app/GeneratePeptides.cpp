@@ -228,7 +228,7 @@ bool GeneratePeptides::canGenerateDecoyProteins() {
  * Returns false if no more proteins in stream
  */
 bool GeneratePeptides::getNextProtein(
-  ifstream& fasta,  ///< FASTA stream
+  istream& fasta,  ///< FASTA stream
   string* outId,  ///< string to store protein ID
   string* outSequence ///< string to store sequence
 ) {
