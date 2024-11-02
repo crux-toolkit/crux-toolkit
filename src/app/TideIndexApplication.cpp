@@ -39,6 +39,7 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include <regex>
 #include <assert.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #include <io.h>
@@ -262,7 +263,7 @@ int TideIndexApplication::main(
   ifstream file(fasta.c_str(), ifstream::in);
   boost::iostreams::filtering_istreambuf in;
   in.push(boost::iostreams::zlib_decompressor());
-  if (Params::GetBool("gz-file")) {
+  if (std::filesystem::path(fasta).extension() == "gz") {
     in.push(boost::iostreams::zlib_decompressor());
   }
   in.push(file);

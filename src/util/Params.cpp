@@ -1805,9 +1805,6 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("export_mzID", false,
     "Exports results in mzID format.",
     "Available for kojak", true);
-  InitBoolParam("gz-file", false,
-    "Read fasta from .gz file.",
-    "Available for kojak", true);
   InitStringParam("percolator_version", "3",
     "Changes percolator output to the format necessary for different versions of Percolator.",
     "Available for kojak", false);
@@ -2520,7 +2517,6 @@ void Params::Categorize() {
   items.insert("export_percolator");
   items.insert("export_pepXML");
   items.insert("export_mzID");
-  items.insert("gz-file");
   AddCategory("Input and output", items);
 
 }
