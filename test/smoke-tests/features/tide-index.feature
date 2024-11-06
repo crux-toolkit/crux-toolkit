@@ -27,3 +27,4 @@ Examples:
   |tide-partial    |--digestion partial-digest                               |small-yeast.fasta|tide_test_index|tide-index.peptides.txt|tide-index-partial.peptides.txt|
   |tide-non-spec   |--digestion non-specific-digest  --max-mass 3500         |small-yeast.fasta|tide_test_index|tide-index.peptides.txt|tide-index-nonspec.peptides.txt|
   |tide-mc4        |--missed-cleavages 4                                     |small-yeast.fasta|tide_test_index|tide-index.peptides.txt|tide-index-mc4.peptides.txt|
+  |tide-default-gz |                                                         |small-yeast.fasta.gz|tide_test_index|tide-index.peptides.txt|tide-default.peptides.txt|

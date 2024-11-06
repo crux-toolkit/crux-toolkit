@@ -36,7 +36,7 @@
 #include "crux_version.h"
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <regex>
 #include <assert.h>
 #include <filesystem>
@@ -262,9 +262,8 @@ int TideIndexApplication::main(
   FixPt maxMassFixPt = MassConstants::ToFixPt(max_mass);
   ifstream file(fasta.c_str(), ifstream::in);
   boost::iostreams::filtering_istreambuf in;
-  in.push(boost::iostreams::zlib_decompressor());
-  if (std::filesystem::path(fasta).extension() == "gz") {
-    in.push(boost::iostreams::zlib_decompressor());
+  if (boost::filesystem::extension(fasta) == ".gz") {
+    in.push(boost::iostreams::gzip_decompressor());
   }
   in.push(file);
   istream fastaStream(&in);
