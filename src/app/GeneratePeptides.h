@@ -86,7 +86,7 @@ class GeneratePeptides : public CruxApplication {
    * Returns false if no more proteins in stream
    */
   static bool getNextProtein(
-    std::ifstream& fasta,  ///< FASTA stream
+    std::istream& fasta,  ///< FASTA stream
     std::string* outId,  ///< string to store protein ID
     std::string* outSequence ///< string to store sequence
   );
