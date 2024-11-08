@@ -32,6 +32,7 @@ follow the instructions below:
 #include "mod_coder.h"
 #include "model/Unimod.h"
 #include "util/Params.h"
+#include <sstream>
 
 using namespace std;
 
