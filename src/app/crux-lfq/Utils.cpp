@@ -92,6 +92,41 @@ vector<PSM> create_psm(const string& psm_file,
                                   retention_time,
                                   protein_id);
         }
+    }
+    else if (psm_file_format == "percolator") {
+        io::CSVReader<10, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
+            matchFileReader(psm_file);
+        matchFileReader.read_header(io::ignore_extra_column,
+            "peptide",
+            "proteinIds"); 
+
+        while (matchFileReader.read_row(scan_col,
+                                        charge_col,
+                                        spectrum_precursor_mz_col,
+                                        peptide_mass_col,
+                                        sequence_col,
+                                        unmodified_sequence,
+                                        spectrum_neutral_mass_col,
+                                        retention_time,
+                                        q_value,
+                                        protein_id)) {
+            if (!filtered && q_value > q_value_threshold) {
+                continue;
+            }
+            if (is_rt_seconds) {
+                retention_time = retention_time / 60.0;
+            }
+
+            psm_data.emplace_back(sequence_col,
+                                  scan_col,
+                                  charge_col,
+                                  peptide_mass_col,
+                                  peptide_mass_col,
+                                  unmodified_sequence,
+                                  retention_time,
+                                  protein_id);
+        }   
+        
     } else {
         carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
     }
