@@ -110,7 +110,7 @@ void CometApplication::setVarMod(const string& param) {
       case 3: m.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(field); break;
       case 4: m.iVarModTermDistance = StringUtils::FromString<int>(field); break;
       case 5: m.iWhichTerm = StringUtils::FromString<int>(field); break;
-      case 6: m.bRequireThisMod = StringUtils::FromString<int>(field); break;
+      case 6: m.iRequireThisMod = StringUtils::FromString<int>(field); break;
     }
   }
   searchManager_.SetParam(param, Params::GetString(param), m);

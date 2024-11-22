@@ -17,6 +17,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
 set(
   COMETSEARCH
   CometSearch/Threading.cpp 
+  CometSearch/CombinatoricsUtils.cpp
+  CometSearch/CometFragmentIndex.cpp
   CometSearch/CometInterfaces.cpp 
   CometSearch/CometSearch.cpp 
   CometSearch/CometPreprocess.cpp 
@@ -29,7 +31,7 @@ set(
   CometSearch/CometWritePercolator.cpp 
   CometSearch/CometWriteTxt.cpp 
   CometSearch/CometSearchManager.cpp 
-  CometSearch/CometCheckForUpdates.cpp
+  CometSearch/ModificationsPermuter.cpp 
 )
  
 add_library(
