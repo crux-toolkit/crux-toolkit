@@ -38,6 +38,7 @@ struct PbPeptideSortGreater {
 class TideIndexApplication : public CruxApplication {
 
   friend class TideSearchApplication;
+  friend class SpectrumConvertApplication;
   friend class DIAmeterApplication;
  public:
 
