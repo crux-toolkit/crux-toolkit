@@ -6,47 +6,13 @@
 #include "io/carp.h"
 #include "parameter.h"
 #include "io/SpectrumRecordWriter.h"
-#include "TideIndexApplication.h"
 #include "SpectrumConvertApplication.h"
-#include "ParamMedicApplication.h"
-#include "PSMConvertApplication.h"
-#include "tide/mass_constants.h"
-#include "TideMatchSet.h"
-#include "tide/spectrum_collection.h"
 #include "util/Params.h"
 #include "util/FileUtils.h"
 #include "util/StringUtils.h"
 #include <math.h> 
 #include <map>
-#include "tide/ActivePeptideQueue.h"
-#include "residue_stats.pb.h"
 #include "crux_version.h"
-
-//here :O
-//#include <iostream>
-//#include <set>
-/*
-#include <vector>
-#include <queue>
-#include <sstream>
-#include <cstdlib>
-*/
-/* This constant is the product of the original "magic number" (10000,
- * on line 4622 of search28.c) that was used to rescale the XCorr
- * score, and the integerization constant used by Benjamin Diament in
- * Tide.  In the Tide publication, that constant was reported as 10^7.
- * --WSN, 10 March 2015 */
-const double SpectrumConvertApplication::XCORR_SCALING = 100000000.0;
-
-/* This constant is used to put the refactored XCorr back into the
- * same range as the original XCorr score.  It is the XCorr "magic
- * number" (10000) divided by the EVIDENCE_SCALE_INT (defined in
- * tide/spectrum_preprocess2.cc). */
-const double SpectrumConvertApplication::RESCALE_FACTOR = 20.0;
-
-// Things done:
-// -- handle terminal mod structure in the peptides internally. GH issue: #639
-// -- missing charge states, 0 charege states,, override charge states handled. --> need to update doc. GH issue: #557, #607
 
 #define CHECK(x) GOOGLE_CHECK(x)
 
