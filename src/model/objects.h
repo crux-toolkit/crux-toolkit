@@ -673,8 +673,9 @@ enum _command {
   VERSION_COMMAND,      ///< just print the version number
   TIDE_LITE_SEARCH_COMMAND, ///< Tide-lite
   MISC_COMMAND,         ///< miscellaneous command
-  NUMBER_COMMAND_TYPES  ///< always keep this last so the value
+  NUMBER_COMMAND_TYPES,  ///< always keep this last so the value
                         /// changes as cmds are added
+  SPECTRUM_CONVERT_COMMAND
 };
 
 typedef enum _command COMMAND_T;
