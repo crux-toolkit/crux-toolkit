@@ -51,7 +51,7 @@ const double SpectrumConvertApplication::RESCALE_FACTOR = 20.0;
 #define CHECK(x) GOOGLE_CHECK(x)
 
 SpectrumConvertApplication::SpectrumConvertApplication() {
-  remove_index_ = "";
+/*  remove_index_ = "";
   spectrum_flag_ = NULL;
   decoy_num_ = 0;
   num_range_skipped_ = 0;
@@ -76,7 +76,7 @@ SpectrumConvertApplication::SpectrumConvertApplication() {
   out_pin_target_ = NULL;        // pin output format for percolator
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
   total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
-
+*/
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
   }
@@ -93,35 +93,9 @@ int SpectrumConvertApplication::main(int argc, char** argv) {
 }
 
 int SpectrumConvertApplication::main(const vector<string>& input_files) {
-  return main(input_files, Params::GetString("tide database"));
-}
-
-int SpectrumConvertApplication::main(const vector<string>& input_files, const string input_index) {
 
   carp(CARP_INFO, "Running spectrum-convert...");
 
-  
-  bin_width_  = Params::GetDouble("mz-bin-width");
-  bin_offset_ = Params::GetDouble("mz-bin-offset");
-
-  use_neutral_loss_peaks_ = Params::GetBool("use-neutral-loss-peaks");
-  use_flanking_peaks_ = Params::GetBool("use-flanking-peaks");
-
-  negative_isotope_errors_ = getNegativeIsotopeErrors();  
-
-  window_type_= string_to_window_type(Params::GetString("precursor-window-type"));
-  precursor_window_ = Params::GetDouble("precursor-window");
-
-  spectrum_min_mz_ =  Params::GetDouble("spectrum-min-mz") ;
-  spectrum_max_mz_ = Params::GetDouble("spectrum-max-mz") ;
-  min_peaks_ = Params::GetInt("min-peaks");
-  min_precursor_charge_ = Params::GetInt("min-precursor-charge");
-  max_precursor_charge_ = Params::GetInt("max-precursor-charge");  
-
-  fragTol_ = Params::GetDouble("fragment-tolerance");
-  granularityScale_ = Params::GetInt("evidence-granularity");  
-
-  top_matches_ = Params::GetInt("top-match");  
   num_threads_ = Params::GetInt("num-threads");
   if (num_threads_ < 1) {
     num_threads_ = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
@@ -132,57 +106,6 @@ int SpectrumConvertApplication::main(const vector<string>& input_files, const st
   }
   carp(CARP_INFO, "Number of Threads: %d", num_threads_);
 
-
-  // Check scan-number parameter
-  string scan_range = Params::GetString("scan-number");
-  if (scan_range.empty()) {
-    min_scan_ = 0;
-    max_scan_ = BILLION;
-    carp(CARP_DEBUG, "Searching all scans");
-  } else if (scan_range.find('-') == string::npos) {
-    // Single scan
-    min_scan_ = max_scan_ = atoi(scan_range.c_str());
-    carp(CARP_INFO, "Searching single scan %d", min_scan_);
-  } else {
-    if (!get_range_from_string(scan_range.c_str(), min_scan_, max_scan_)) {
-      carp(CARP_FATAL, "The scan number range '%s' is invalid. "
-           "Must be of the form <first>-<last>.", scan_range.c_str());
-    }
-    if (min_scan_ > max_scan_) {
-      carp(CARP_FATAL, "Invalid scan range: %d to %d.", min_scan_, max_scan_);
-    }
-    carp(CARP_INFO, "Searching scan range %d to %d.", min_scan_, max_scan_);
-  }
-
-  // Determine which score function to use for scoring PSMs and store in SCORE_FUNCTION enum. Change this in ./src/util/crux-utils.cpp: 68
-  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));  
-
-  if (curScoreFunction_ == PVALUES && bin_width_ < 1.0) {
-    carp(CARP_FATAL, "Tide-convert does not support P-value calculation with bin-width less than 1.0 Da.");
-  }
-  if (curScoreFunction_ >= NUMBER_SCORE_FUNCTIONS) {
-    carp(CARP_FATAL, "Invalid score function.");
-  }
- 
-  // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
-  vector<const pb::Protein*> proteins;
-  vector<const pb::AuxLocation*> locations;
-  pb::Header peptides_header;
-  string peptides_file = FileUtils::Join(input_index, "pepix");  
-  HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
-  getPeptideIndexData(input_index, proteins, locations, peptides_header);
-  tide_index_mzTab_file_path_ = FileUtils::Join(input_index, TideIndexApplication::tide_index_mzTab_filename_);
-
-  TideMatchSet::curScoreFunction_ = curScoreFunction_;
-  TideMatchSet::top_matches_ = top_matches_;
-  TideMatchSet::decoy_num_ = decoy_num_;
-  TideMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
-  TideMatchSet::score_precision_ = Params::GetInt("precision");
-  TideMatchSet::mod_precision_ = Params::GetInt("mod-precision");
-  TideMatchSet::concat_ = Params::GetBool("concat");  
-
-  // Create the output files, print headers
-  createOutputFiles(); 
 
   // Convert the original file names into spectrum records if needed 
   // Update the file names in the variable inputFiles_ locally.
@@ -206,261 +129,7 @@ int SpectrumConvertApplication::main(const vector<string>& input_files, const st
   }
   carp(CARP_INFO, "Elapsed time: %.3g s", wall_clock() / 1e6);
 
-  // Create the active_peptide_queues and peptide_readers for each threads
-  vector<HeadedRecordReader*> peptide_reader_threads;
-  vector<ActivePeptideQueue*> APQ;
-  for (int i = 0; i < num_threads_; i++) {
-    peptide_reader_threads.push_back(new HeadedRecordReader(peptides_file, &peptides_header));
-    APQ.push_back(new ActivePeptideQueue(peptide_reader_threads.back()->Reader(), proteins, &locations));
-  }
-
-  // Delete stuffs
-  if (out_tsv_target_ != NULL)
-    delete out_tsv_target_;
-  if (out_tsv_decoy_ != NULL)
-    delete out_tsv_decoy_;
-  if (out_mztab_target_ != NULL)
-    delete out_mztab_target_;
-  if (out_mztab_decoy_ != NULL)
-    delete out_mztab_decoy_;
-  if (out_pin_target_ != NULL)
-    delete out_pin_target_;
-  if (out_pin_decoy_ != NULL)
-    delete out_pin_decoy_;
-
   return 0;
-}
-
-
-vector<int> SpectrumConvertApplication::getNegativeIsotopeErrors() {
-  string isotope_errors_string = Params::GetString("isotope-error");
-  if (isotope_errors_string[0] == ',') {
-    carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s)",
-         isotope_errors_string.c_str());
-  }
-  for (string::const_iterator i = isotope_errors_string.begin(); i != isotope_errors_string.end(); i++) {
-    if (*i == ',' && (i+1 == isotope_errors_string.end() || *(i+1) == ',')) {
-      carp(CARP_FATAL, "Error in isotope_error parameter formatting: (%s) ", isotope_errors_string.c_str());
-    }
-  }
-
-  vector<int> negative_isotope_errors(1, 0);
-  if (!isotope_errors_string.empty()) {
-    vector<int> isotope_errors = StringUtils::Split<int>(isotope_errors_string, ',');
-    for (vector<int>::iterator i = isotope_errors.begin(); i != isotope_errors.end(); i++) {
-      if (*i < 0) {
-        carp(CARP_FATAL, "Found a negative isotope error: %d.", *i);
-      } else if (find(negative_isotope_errors.begin(), negative_isotope_errors.end(),
-                      -(*i)) != negative_isotope_errors.end()) {
-        carp(CARP_FATAL, "Found duplicate when parsing isotope_error parameter: %d", *i);
-      }
-      negative_isotope_errors.push_back(-(*i));
-    }
-  }
-  sort(negative_isotope_errors.begin(), negative_isotope_errors.end());
-  return negative_isotope_errors;
-}
-
-
-void SpectrumConvertApplication::getPeptideIndexData(const string input_index, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header){
-
-  string peptides_file = FileUtils::Join(input_index, "pepix");  
-  string proteins_file = FileUtils::Join(input_index, "protix");
-  string auxlocs_file = FileUtils::Join(input_index, "auxlocs");  
-  string residue_stats_file = FileUtils::Join(input_index, "residue_stat");  
-
-  // Read protein index file
-  carp(CARP_INFO, "Reading index %s", input_index.c_str());
-
-  pb::Header protein_header;
-
-  if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins, proteins_file, &protein_header)) {
-    carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
-  }
-  // There shouldn't be more than one header in the protein pb.
-  pb::Header_Source headerSource = protein_header.source(0);  
-  string decoy_prefix = "";
-  if (headerSource.has_decoy_prefix()){
-    decoy_prefix = headerSource.decoy_prefix();
-  } else {
-    carp(CARP_WARNING, "You are using an index generated by an old version of tide-index."
-                       "This will not affect your results, but this index may need to be "
-                       "re-created to work with future versions of tide-index. ");
-  }
-  TideMatchSet::decoy_prefix_ = decoy_prefix;  
-  if (headerSource.has_filename()){
-    TideMatchSet::fasta_file_name_ = headerSource.filename();
-  }
-  
-  // Read auxlocs index file
-  ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file);
-
-  // Read peptides index file
-
-  if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
-      !peptides_header.has_peptides_header()) {
-    carp(CARP_FATAL, "Error reading index (%s)", peptides_file.c_str());
-  }
-
-  const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-  decoy_num_ = pepHeader.has_decoys_per_target() ? pepHeader.decoys_per_target() : 0;
-
-  // Initizalize the Mass Constants class
-  MassConstants::Init(&pepHeader.mods(), &pepHeader.nterm_mods(), &pepHeader.cterm_mods(),
-      &pepHeader.nprotterm_mods(), &pepHeader.cprotterm_mods(), bin_width_, bin_offset_);
-
-  if (curScoreFunction_ == PVALUES) {
-
-    // Get the terminal mass bins for RES-EV
-    //TODO assumption is that there is one nterm static mod per peptide
-    if (pepHeader.nterm_mods().static_mod_size() > 0) {
-      nTermMassBin_ = MassConstants::mass2bin(
-                        MassConstants::mono_h + pepHeader.nterm_mods().static_mod(0).delta());
-      nTermMass_ = MassConstants::mono_h + pepHeader.nterm_mods().static_mod(0).delta();
-    } else {
-      nTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_h);
-      nTermMass_ = MassConstants::mono_h;
-    }
-
-    //TODO assumption is that there is one cterm mod per peptide
-    if (pepHeader.cterm_mods().static_mod_size() > 0) {
-      cTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_oh + pepHeader.cterm_mods().static_mod(0).delta());
-      cTermMass_ = MassConstants::mono_oh + pepHeader.cterm_mods().static_mod(0).delta();
-    } else {
-      cTermMassBin_ = MassConstants::mass2bin(MassConstants::mono_oh);
-      cTermMass_ = MassConstants::mono_oh;
-    }
-
-    if (FileUtils::Exists(residue_stats_file)) {  // The amino acid frequency calculation is done in tide-index.
-      RecordReader residue_stat_reader = RecordReader(residue_stats_file);
-      bool done;
-      while (!(done = residue_stat_reader.Done())) {
-        pb::ResidueStats last_residue_stat;
-        residue_stat_reader.Read(&last_residue_stat);    
-        double aa_mass = last_residue_stat.aamass();
-        dAAMass_.push_back(aa_mass);
-        dAAFreqN_.push_back(last_residue_stat.aafreqn());
-        dAAFreqI_.push_back(last_residue_stat.aafreqi());
-        dAAFreqC_.push_back(last_residue_stat.aafreqc());
-        iAAMass_.push_back(MassConstants::mass2bin(aa_mass));
-        string aa_str = last_residue_stat.aa_str();
-        mMass2AA_[aa_mass] = aa_str;
-      }
-    } else {
-      carp(CARP_INFO, "You are using an old format of the peptide index data. Please recreate your peptide index data");
-      // The following (this whole else branch) part should be removed later.
-      // Calculate the Amino Acid Frequencies for the P-value calculation if it wasn't done with tide-index.
-      unsigned int len;
-      unsigned int i;
-      unsigned int cntTerm = 0;
-      unsigned int cntInside = 0;
-      string peptide_seq;
-      unsigned int residue_bin;
-      string tempAA;
-      int mod_precision  = Params::GetInt("mod-precision");
-      const unsigned int MaxModifiedAAMassBin = MassConstants::ToFixPt(2000.0);;   //2000 is the maximum mass of a modified amino acid
-      unsigned int* nvAAMassCounterN = new unsigned int[MaxModifiedAAMassBin];   //N-terminal amino acids
-      unsigned int* nvAAMassCounterC = new unsigned int[MaxModifiedAAMassBin];   //C-terminal amino acids
-      unsigned int* nvAAMassCounterI = new unsigned int[MaxModifiedAAMassBin];   //inner amino acids in the peptides
-      memset(nvAAMassCounterN, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
-      memset(nvAAMassCounterC, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
-      memset(nvAAMassCounterI, 0, MaxModifiedAAMassBin * sizeof(unsigned int));
-
-      pb::Peptide current_pb_peptide_;
-      HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
-      while (!(peptide_reader.Done())) { //read all peptides form index
-        peptide_reader.Read(&current_pb_peptide_);
-        Peptide peptide(current_pb_peptide_, proteins);
-        vector<double> residue_masses = peptide.getAAMasses(); //retrieves the amino acid masses, modifications included
-        peptide_seq = peptide.Seq();
-        len = current_pb_peptide_.length();
-
-        vector<double> residue_mods(len, 0);  // Initialize a vecotr of peptide length  with zeros. 
-        
-        // Handle variable modifications
-        if (current_pb_peptide_.has_nterm_mod()){ // Handle N-terminal modifications
-          int index;
-          double delta;
-          MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide_.nterm_mod()), &index, &delta);
-          residue_mods[index] = delta;
-        }
-
-        for (i = 0; i < current_pb_peptide_.modifications_size(); ++i) {
-          int index;
-          double delta;
-          MassConstants::DecodeMod(current_pb_peptide_.modifications(i), &index, &delta);
-          residue_mods[index] = delta;
-        }
-        if (current_pb_peptide_.has_cterm_mod()){  // Handle C-terminal modifications
-          int index;
-          double delta;
-          MassConstants::DecodeMod(ModCoder::Mod(current_pb_peptide_.cterm_mod()), &index, &delta);
-          residue_mods[index] = delta;
-        }
-        // count AA masses
-        residue_bin = MassConstants::ToFixPt(residue_masses[0]);
-        ++nvAAMassCounterN[residue_bin];  // N-temrianl
-        if (nvAAMassCounterN[residue_bin] == 1){
-          tempAA = peptide_seq[0];
-          if (residue_mods[0] != 0) {
-            tempAA += "[" + StringUtils::ToString(residue_mods[0], mod_precision) + ']';
-          }
-          mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
-        }
-        for (i = 1; i < len-1; ++i) {
-          residue_bin = MassConstants::ToFixPt(residue_masses[i]);
-          ++nvAAMassCounterI[residue_bin];  // non-terminal
-          if (nvAAMassCounterI[residue_bin] == 1){
-            tempAA = peptide_seq[i];
-            if (residue_mods[i] != 0) {
-              tempAA += "[" + StringUtils::ToString(residue_mods[i], mod_precision) + ']';
-            }
-            mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
-          }		
-          ++cntInside;
-        }
-        residue_bin = MassConstants::ToFixPt(residue_masses[len - 1]);
-        ++nvAAMassCounterC[residue_bin];  // C-temrinal
-        if (nvAAMassCounterC[residue_bin] == 1){
-          tempAA = peptide_seq[len - 1];
-          if (residue_mods[len - 1] != 0) {
-            tempAA += "[" + StringUtils::ToString(residue_mods[len - 1], mod_precision) + ']';
-          }
-          mMass2AA_[MassConstants::ToDouble(residue_bin)] = tempAA;
-        }
-        ++cntTerm;
-      }
-      unsigned int uiUniqueMasses = 0;
-      double aa_mass;
-      for (i = 0; i < MaxModifiedAAMassBin; ++i) {
-        if (nvAAMassCounterN[i] || nvAAMassCounterI[i] || nvAAMassCounterC[i]) {
-          ++uiUniqueMasses;
-          aa_mass = MassConstants::ToDouble(i);
-          dAAMass_.push_back(aa_mass);
-          dAAFreqN_.push_back((double)nvAAMassCounterN[i] / cntTerm);
-          dAAFreqI_.push_back((double)nvAAMassCounterI[i] / cntInside);
-          dAAFreqC_.push_back((double)nvAAMassCounterC[i] / cntTerm);
-          iAAMass_.push_back(MassConstants::mass2bin(aa_mass));          
-        }
-      }
-      // Write the statistics to a Protocol Buffer, so that next time it is at hand
-      RecordWriter residue_stat_writer = RecordWriter(residue_stats_file);
-      CHECK(residue_stat_writer.OK());  
-      for (int i = 0; i < dAAMass_.size(); ++i){
-        pb::ResidueStats last_residue_stat;
-        last_residue_stat.set_aamass(dAAMass_[i]);
-        last_residue_stat.set_aafreqn(dAAFreqN_[i]);
-        last_residue_stat.set_aafreqi(dAAFreqI_[i]);
-        last_residue_stat.set_aafreqc(dAAFreqC_[i]);
-        string aa_str = mMass2AA_[dAAMass_[i]];
-        last_residue_stat.set_aa_str(aa_str);
-        CHECK(residue_stat_writer.Write(&last_residue_stat));
-      }       
-      delete[] nvAAMassCounterN;
-      delete[] nvAAMassCounterI;
-      delete[] nvAAMassCounterC;
-    } // Finished calculating AA frequencies
-  }  
 }
 
 string SpectrumConvertApplication::getOutputFileName() {
@@ -470,62 +139,11 @@ string SpectrumConvertApplication::getOutputFileName() {
 // In order to add more options, you need to add them to ./src/util/Params.cpp
 vector<string> SpectrumConvertApplication::getOptions() const {
   string arr[] = {
-    "auto-mz-bin-width",
-    "auto-precursor-window",
-    "concat",
-    "deisotope",
-    "elution-window-size",
     "fileroot",
-    "fragment-tolerance",
-    "isotope-error",
-    "mass-precision",
-    "max-precursor-charge",
-    "min-precursor-charge",
-    "min-peaks",
-    "mod-precision",
-    "mz-bin-offset",
-    "mz-bin-width",
-    "mzid-output",
-    "mztab-output",
     "num-threads",
     "output-dir",
-    "override-charges",
     "overwrite",
     "parameter-file",
-    "pepxml-output",
-    "pin-output",
-    "pm-charges",
-    "pm-max-frag-mz",
-    "pm-max-precursor-delta-ppm",
-    "pm-max-precursor-mz",
-    "pm-max-scan-separation",
-    "pm-min-common-frag-peaks",
-    "pm-min-frag-mz",
-    "pm-min-peak-pairs",
-    "pm-min-precursor-mz",
-    "pm-min-scan-frag-peaks",
-    "pm-pair-top-n-frag-peaks",
-    "pm-top-n-frag-peaks",
-    "precision",
-    "precursor-window",
-    "precursor-window-type",
-    "print-search-progress",
-    "remove-precursor-peak",
-    "remove-precursor-tolerance",
-    "scan-number",
-    "score-function",
-    "skip-preprocessing",
-    "spectrum-max-mz",
-    "spectrum-min-mz",
-    "spectrum-parser",
-    "sqt-output",
-    "store-index",
-    "store-spectra",
-    "top-match",
-    "txt-output",
-    "use-flanking-peaks",
-    "use-neutral-loss-peaks",
-    "use-z-line",
     "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
@@ -541,12 +159,12 @@ evidence-granularity
 */
 
 string SpectrumConvertApplication::getName() const {
-  return "tide-search";
+  return "spectrum-converter";
 }
 
 string SpectrumConvertApplication::getDescription() const {
   return
-    "[[nohtml:Search a collection of spectra against a sequence database, "
+    "[[nohtml:TO BE UPDATED!!!!!! Search a collection of spectra against a sequence database, "
     "returning a collection of peptide-spectrum matches (PSMs). This is a "
     "fast search engine but requires that you first build an index with "
     "tide-index.]]"
@@ -581,8 +199,7 @@ string SpectrumConvertApplication::getDescription() const {
 
 vector<string> SpectrumConvertApplication::getArgs() const {
   string arr[] = {
-    "tide spectra file+",
-    "tide database"
+    "tide spectra file+"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
@@ -590,18 +207,12 @@ vector<string> SpectrumConvertApplication::getArgs() const {
 
 vector< pair<string, string> > SpectrumConvertApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("tide-search.target.txt",
-    "a tab-delimited text file containing the target PSMs. See <a href=\""
-    "../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
-  outputs.push_back(make_pair("tide-search.decoy.txt",
-    "a tab-delimited text file containing the decoy PSMs. This file will only "
-    "be created if the index was created with decoys."));
-  outputs.push_back(make_pair("tide-search.params.txt",
+  outputs.push_back(make_pair("spectrum-converter.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
     "the operation. The resulting file can be used with the --parameter-file "
     "option for other Crux programs."));
-  outputs.push_back(make_pair("tide-search.log.txt",
+  outputs.push_back(make_pair("spectrum-converter.log.txt",
     "a log file containing a copy of all messages that were printed to the "
     "screen during execution."));
   return outputs;
@@ -611,97 +222,12 @@ bool SpectrumConvertApplication::needsOutputDirectory() const {
 }
 
 COMMAND_T SpectrumConvertApplication::getCommand() const {
-  return TIDE_SEARCH_COMMAND;
+  return TIDE_SEARCH_COMMAND;  // TODO: VLAD you need to create a spectrum_convert_command
 }
 
 void SpectrumConvertApplication::processParams() {
-  const string index = Params::GetString("tide database");
-
-  if (!FileUtils::Exists(index)) {
-    carp(CARP_FATAL, "'%s' does not exist", index.c_str());
-  
-  } else if (FileUtils::IsRegularFile(index)) {
-    // Index is FASTA file
-
-    carp(CARP_INFO, "Creating index from '%s'", index.c_str());
-    string targetIndexName = Params::GetString("store-index");
-    if (targetIndexName.empty()) {
-      targetIndexName = FileUtils::Join(Params::GetString("output-dir"),
-                                        "tide-search.tempindex");
-      remove_index_ = targetIndexName;
-    }
-    TideIndexApplication indexApp;
-    indexApp.processParams();
-    if (indexApp.main(index, targetIndexName) != 0) {
-      carp(CARP_FATAL, "tide-index failed.");
-    }
-    Params::Set("tide database", targetIndexName);
-  
-  } else {
-    // Index is Tide index directory
-
-    pb::Header peptides_header;
-    string peptides_file = FileUtils::Join(index, "pepix");
-    HeadedRecordReader peptide_reader(peptides_file, &peptides_header);
-    if ((peptides_header.file_type() != pb::Header::PEPTIDES) ||
-        !peptides_header.has_peptides_header()) {
-      carp(CARP_FATAL, "Error reading index (%s).", peptides_file.c_str());
-    }
-
-    const pb::Header::PeptidesHeader& pepHeader = peptides_header.peptides_header();
-
-    Params::Set("enzyme", pepHeader.enzyme());
-    const char* digestString =
-      digest_type_to_string(pepHeader.full_digestion() ? FULL_DIGEST : PARTIAL_DIGEST);
-    Params::Set("digestion", digestString);
-    Params::Set("isotopic-mass", pepHeader.monoisotopic_precursor() ? "mono" : "average");
-  }
-  // run param-medic?
-  const string autoPrecursor = Params::GetString("auto-precursor-window");
-  const string autoFragment = Params::GetString("auto-mz-bin-width");
-  if (autoPrecursor != "false" || autoFragment != "false") {
-    if (autoPrecursor != "false" && Params::GetString("precursor-window-type") != "ppm") {
-      carp(CARP_FATAL, "Automatic peptide mass tolerance detection is only supported with ppm "
-                       "units. Please re-run with auto-precursor-window set to 'false' or "
-                       "precursor-window-type set to 'ppm'.");
-    }
-    ParamMedic::RunAttributeResult errorCalcResult;
-    ParamMedicApplication::processFiles(Params::GetStrings("tide spectra file"),
-      true, false, &errorCalcResult, NULL);
-
-    if (autoPrecursor != "false") {
-      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_FAILURE);
-      if (fail.empty()) {
-        double sigma = StringUtils::FromString<double>(
-          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_SIGMA));
-        double prediction = StringUtils::FromString<double>(
-          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_PRECURSOR_PREDICTION));
-        carp(CARP_INFO, "precursor ppm standard deviation: %f", sigma);
-        carp(CARP_INFO, "precursor error estimate (ppm): %.2f", prediction);
-        Params::Set("precursor-window", prediction);
-      } else {
-        carp(autoPrecursor == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate precursor error: %s", fail.c_str());
-      }
-    }
-    if (autoFragment != "false") {
-      string fail = errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_FAILURE);
-      if (fail.empty()) {
-        double sigma = StringUtils::FromString<double>(
-          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_SIGMA));
-        double prediction = StringUtils::FromString<double>(
-          errorCalcResult.getValue(ParamMedic::ErrorCalc::KEY_FRAGMENT_PREDICTION));
-        carp(CARP_INFO, "fragment ppm standard deviation: %f", sigma);
-        carp(CARP_INFO, "Fragment bin size estimate (Th): %.4f", prediction);
-        Params::Set("mz-bin-width", prediction);
-      } else {
-        carp(autoFragment == "fail" ? CARP_FATAL : CARP_ERROR,
-             "failed to calculate fragment error: %s", fail.c_str());
-      }
-    }
-  }  
-  
 }
+
 void SpectrumConvertApplication::getInputFiles(int thread_id) {
   // Try to read all spectrum files as spectrumrecords, convert those that fail
   if (thread_id > inputFiles_.size())
@@ -749,79 +275,4 @@ void SpectrumConvertApplication::getInputFiles(int thread_id) {
 
 void SpectrumConvertApplication::createOutputFiles() {
   
-  // Create output files for the search results
-   
-  bool overwrite = Params::GetBool("overwrite");  
-  bool concat = Params::GetBool("concat");
-
-  string concat_file_name;
-  string target_file_name;
-  string decoy_file_name;
-
-  // Get output files for tsv format
-  concat_file_name = make_file_path("tide-search.txt");
-  target_file_name = make_file_path("tide-search.target.txt");
-  decoy_file_name  = make_file_path("tide-search.decoy.txt");
-
-  if (overwrite) {
-    remove(concat_file_name.c_str());  
-    remove(target_file_name.c_str());  
-    remove(decoy_file_name.c_str());  
-  }
-
-  if (Params::GetBool("txt-output") == true) {  // original tide-search output format in tab-delimited text files (txt)
-    string header = TideMatchSet::getHeader(TIDE_SEARCH_TSV, tide_index_mzTab_file_path_);
-
-    if (concat) {
-
-      out_tsv_target_ = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = concat_file_name;
-      *out_tsv_target_ << header; 
-
-    } else {
-
-      out_tsv_target_ = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = target_file_name;
-      *out_tsv_target_ << header; 
-      if (decoy_num_ > 0) {
-        out_tsv_decoy_ = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
-        *out_tsv_decoy_ << header;
-      }
-    }  
-  }
-
-  // Get output files for mzTAB format
-  concat_file_name = make_file_path("tide-search.mzTab");
-  target_file_name = make_file_path("tide-search.target.mzTab");
-  decoy_file_name  = make_file_path("tide-search.decoy.mzTab");
-
-  if (overwrite) {
-    remove(concat_file_name.c_str());  
-    remove(target_file_name.c_str());  
-    remove(decoy_file_name.c_str());  
-  }
-
-  if ( Params::GetBool("mztab-output") == true) {   // mzTAB output format
-
-    // Get column headers
-    string header = TideMatchSet::getHeader(TIDE_SEARCH_MZTAB_TSV, tide_index_mzTab_file_path_);  // Gets the column headers
-    if (concat) {
-
-      out_mztab_target_ = create_stream_in_path(concat_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = concat_file_name;
-      *out_mztab_target_ << header; 
-
-    } else {
-
-      out_mztab_target_ = create_stream_in_path(target_file_name.c_str(), NULL, overwrite);
-      output_file_name_ = target_file_name;
-      *out_mztab_target_ << header; 
-
-      if (decoy_num_ > 0) {
-        out_mztab_decoy_ = create_stream_in_path(decoy_file_name.c_str(), NULL, overwrite);
-        *out_mztab_decoy_ << header;
-      }
-    }  
-  }
-
 }
