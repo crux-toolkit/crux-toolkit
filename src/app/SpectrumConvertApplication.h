@@ -34,6 +34,8 @@ class SpectrumConvertApplication : public CruxApplication {
   };
  protected:
 
+  int num_threads_;
+  
   map<pair<string, unsigned int>, bool>* spectrum_flag_;
 
   int total_spectra_num_;

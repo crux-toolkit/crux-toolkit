@@ -13,7 +13,7 @@
 #include <math.h> 
 #include <map>
 #include "crux_version.h"
-
+using namespace std;
 #define CHECK(x) GOOGLE_CHECK(x)
 
 SpectrumConvertApplication::SpectrumConvertApplication() {
@@ -98,9 +98,6 @@ int SpectrumConvertApplication::main(const vector<string>& input_files) {
   return 0;
 }
 
-string SpectrumConvertApplication::getOutputFileName() {
-  return output_file_name_;
-}
 
 // In order to add more options, you need to add them to ./src/util/Params.cpp
 vector<string> SpectrumConvertApplication::getOptions() const {
@@ -188,7 +185,7 @@ bool SpectrumConvertApplication::needsOutputDirectory() const {
 }
 
 COMMAND_T SpectrumConvertApplication::getCommand() const {
-  return TIDE_SEARCH_COMMAND;  // TODO: VLAD you need to create a spectrum_convert_command
+  return SPECTRUM_CONVERT_COMMAND;
 }
 
 void SpectrumConvertApplication::processParams() {
@@ -237,8 +234,4 @@ void SpectrumConvertApplication::getInputFiles(int thread_id) {
     (*original_file_name).Keep = keepSpectrumrecords;
     carp(CARP_DEBUG, "Finish converting");
   }
-}
-
-void SpectrumConvertApplication::createOutputFiles() {
-  
 }
