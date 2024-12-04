@@ -33,61 +33,16 @@ class SpectrumConvertApplication : public CruxApplication {
       OriginalName(name), SpectrumRecords(spectrumrecords), Keep(keep) {}
   };
  protected:
-  static const double XCORR_SCALING;
-  static const double RESCALE_FACTOR;
-  static const double TAILOR_QUANTILE_TH;
-  static const double TAILOR_OFFSET;
 
   map<pair<string, unsigned int>, bool>* spectrum_flag_;
-  string output_file_name_;
-  std::string remove_index_;  
-  double bin_width_;
-  double bin_offset_;
-  bool use_neutral_loss_peaks_;
-  bool use_flanking_peaks_;
 
-  long int num_range_skipped_;
-  long int num_precursors_skipped_;
-  long int num_isotopes_skipped_;
-  long int num_retained_;
-  long int total_candidate_peptides_;
-  long int num_spectra_;
-  long int num_spectra_searched_;
-  int print_interval_;
-  vector<int> negative_isotope_errors_;
-  WINDOW_TYPE_T window_type_;
-  double precursor_window_;
-  double spectrum_min_mz_;
-  double spectrum_max_mz_;
-  double min_scan_;
-  double max_scan_;
-  double min_peaks_;
-  double min_precursor_charge_;
-  double max_precursor_charge_;
-  int num_threads_;
-  double fragTol_;
-  int granularityScale_;  
   int total_spectra_num_;
-  string tide_index_mzTab_file_path_;
-
-  ofstream* out_tsv_target_; // original tide-search output format in tab-delimited text files (txt)
-  ofstream* out_tsv_decoy_;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only
-  ofstream* out_mztab_target_;      // mzTAB output format
-  ofstream* out_mztab_decoy_;      // mzTAB output format for the decoy psms only
-  ofstream* out_pin_target_;        // pin output format for percolator
-  ofstream* out_pin_decoy_;        // pin output format for percolator for the decoy psms only
 
   vector<boost::mutex *> locks_array_;  
 
   //vector<SpectrumConvertApplication::InputFile> getInputFiles(const vector<string>& filepaths) const;
   void getInputFiles(int thread_id);
-  // static SpectrumCollection* loadSpectra(const std::string& file);
-  void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
-  void createOutputFiles();
-
-
-  vector<pair<pb::Spectrum, int>> spectrum_heap_; // vector -> first = neutral_mass, second = file number
-  vector<HeadedRecordReader*> spectrum_reader_; // map -> key = file number, value = pointer to source file
+ 
   vector<InputFile> inputFiles_;
 
   // sprectrum search executed in parallel threads
@@ -100,39 +55,7 @@ class SpectrumConvertApplication : public CruxApplication {
     }
   };
 
-   // Struct holding necessary information for each thread to run.
-  struct thread_data {
-    ActivePeptideQueue* active_peptide_queue_;
-    int thread_id_;
-    thread_data (ActivePeptideQueue* active_peptide_queue, int thread_id) {
-      active_peptide_queue_ = active_peptide_queue;
-      thread_id_ = thread_id;
-    }
-  };
-
-
-  vector<double> dAAFreqN_;
-  vector<double> dAAFreqI_;
-  vector<double> dAAFreqC_;
-  vector<double> dAAMass_;
-  vector<int> iAAMass_;
-  map<double, std::string> mMass2AA_;
-
-  // Terminal mass bins for RES-EV
-  int nTermMassBin_;
-  double nTermMass_;
-  int cTermMassBin_;
-  double cTermMass_;
-
  public:
-
-  SCORE_FUNCTION_T curScoreFunction_;
-  int decoy_num_;  // Number of decoys per peptide;
-  int top_matches_;
-  
-  // These are public functions to be accessed from diameter application.
-  static vector<int> getNegativeIsotopeErrors();
-
 
   /**
    * Constructor
@@ -150,8 +73,6 @@ class SpectrumConvertApplication : public CruxApplication {
   virtual int main(int argc, char** argv);
 
   int main(const vector<string>& input_files);
-
-  int main(const vector<string>& input_files, const string input_index);
 
   /**
    * Returns the command name
