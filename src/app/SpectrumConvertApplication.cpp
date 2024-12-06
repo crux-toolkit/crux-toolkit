@@ -215,7 +215,7 @@ void SpectrumConvertApplication::getInputFiles(int thread_id) {
       spectrumrecords = Params::GetString("store-spectra");
       keepSpectrumrecords = !spectrumrecords.empty();
       if (!keepSpectrumrecords) {
-        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords.tmp");
+        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords");
       } else if (inputFiles_.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");
