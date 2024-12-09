@@ -527,6 +527,9 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("no-terminate", false,
     "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
     "Available for percolator", true); 
+  InitBoolParam("output-retention-time", false,
+    "Include retention time in percolator output",
+    "Available for percolator.", true);
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
@@ -2490,6 +2493,7 @@ void Params::Categorize() {
   items.insert("output_mzidentmlfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
+  items.insert("output-retention-time");
   items.insert("output_sqtstream");
   items.insert("output_sqtfile");
   items.insert("output_txtfile");
