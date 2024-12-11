@@ -237,6 +237,10 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--maxiter");
   perc_args_vec.push_back(Params::GetString("maxiter"));
 
+  // Retention time is always included in output
+  perc_args_vec.push_back("--output-retention-time");
+
+
   if (!Params::GetString("search-input").empty()) {
     perc_args_vec.push_back("--search-input");
     perc_args_vec.push_back(Params::GetString("search-input"));
@@ -265,10 +269,6 @@ int PercolatorApplication::main(
   if (!Params::GetString("init-weights").empty()) {
     perc_args_vec.push_back("--init-weights");
     perc_args_vec.push_back(Params::GetString("init-weights"));
-  }
-
-  if (Params::GetBool("output-retention-time")) {
-    perc_args_vec.push_back("--output-retention-time");
   }
 
   if (Params::GetBool("static")) {
@@ -525,7 +525,6 @@ vector<string> PercolatorApplication::getOptions() const {
     "no-terminate",
     "only-psms",
     "output-dir",
-    "output-retention-time",
     "output-weights",
     "override",
     "overwrite",
