@@ -16,6 +16,8 @@
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
+#include <fstream>
 
 #include "CMercury8.h"
 #include "CQStatistics.h"
@@ -42,13 +44,16 @@ namespace CruxLFQ {
  * @param psm_file_format The format of the PSM file.
  * @return A PSM containing the PSM data, where the key is the scan column value.
  */
-vector<PSM> create_psm(const string& psm_file,
-                       const string& psm_file_format,
-                       const bool filtered,
-                       const double q_value_threshold, const bool is_rt_seconds) {
+vector<PSM> create_psm(const string& psm_file) {
+
+    string psm_file_format = Params::GetString("psm-file-format");
+    bool is_rt_seconds = Params::GetBool("is-rt-seconds");
+    double q_value_threshold = Params::GetDouble("lfq-q-value-threshold");
+    bool filtered =  Params::GetBool("is-psm-filtered");
+
     vector<PSM> psm_data;
 
-    string sequence_col, modifications_col, unmodified_sequence, protein_id;
+    string sequence_col, modifications_col, unmodified_sequence, protein_id, psm_id;
     int scan_col, charge_col;
     double peptide_mass_col, spectrum_precursor_mz_col, spectrum_neutral_mass_col, q_value, retention_time;
 
@@ -92,42 +97,7 @@ vector<PSM> create_psm(const string& psm_file,
                                   retention_time,
                                   protein_id);
         }
-    }
-    else if (psm_file_format == "percolator") {
-        // io::CSVReader<10, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
-        //     matchFileReader(psm_file);
-        // matchFileReader.read_header(io::ignore_extra_column,
-        //     "peptide",
-        //     "proteinIds"); 
-
-        // while (matchFileReader.read_row(scan_col,
-        //                                 charge_col,
-        //                                 spectrum_precursor_mz_col,
-        //                                 peptide_mass_col,
-        //                                 sequence_col,
-        //                                 unmodified_sequence,
-        //                                 spectrum_neutral_mass_col,
-        //                                 retention_time,
-        //                                 q_value,
-        //                                 protein_id)) {
-        //     if (!filtered && q_value > q_value_threshold) {
-        //         continue;
-        //     }
-        //     if (is_rt_seconds) {
-        //         retention_time = retention_time / 60.0;
-        //     }
-
-        //     psm_data.emplace_back(sequence_col,
-        //                           scan_col,
-        //                           charge_col,
-        //                           peptide_mass_col,
-        //                           peptide_mass_col,
-        //                           unmodified_sequence,
-        //                           retention_time,
-        //                           protein_id);
-        // }   
-        
-    } else {
+    }else {
         carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
     }
     return psm_data;

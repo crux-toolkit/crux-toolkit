@@ -7,6 +7,7 @@
 #include "crux-lfq/Utils.h"
 #include "io/SpectrumCollectionFactory.h"
 #include "model/Spectrum.h"
+#include "model/Modification.h"
 
 using CruxLFQ::BINS_PER_DALTON;
 
@@ -87,4 +88,11 @@ class CruxLFQApplication : public CruxApplication {
     static IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
     static vector<Identification> createIdentifications(const vector<PSM>& psm_data,const string& spectra_file);
+
+    static vector<PSM> create_percolator_psm(const string& psm_file);
+    static void gen_mods(
+        string sequence_col, 
+        ModPosition mod_psn_type,
+        const pb::ModTable* mod_table_,
+        vector<Crux::Modification>& mods);
 };
