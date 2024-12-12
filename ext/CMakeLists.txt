@@ -204,7 +204,8 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
-set(PERCOLATOR_GIT_VERSION d0d48b5)
+#set(PERCOLATOR_GIT_VERSION 310f924)
+set(PERCOLATOR_GIT_VERSION 310f924)
 ExternalProject_Add(
   percolator
   GIT_REPOSITORY https://github.com/percolator/percolator.git
@@ -220,17 +221,11 @@ ExternalProject_Add(
     -DWITHOUT_GTEST=ON
   PATCH_COMMAND
     COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/picked_protein/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/picked_protein
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/fido/CMakeLists.txt
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src/fido
   INSTALL_COMMAND ""
 )
 
