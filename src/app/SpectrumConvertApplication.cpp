@@ -131,33 +131,11 @@ string SpectrumConvertApplication::getDescription() const {
     "returning a collection of peptide-spectrum matches (PSMs). This is a "
     "fast search engine but requires that you first build an index with "
     "tide-index.]]"
-    "[[html:<p>Tide is a tool for identifying peptides from tandem mass "
-    "spectra. It is an independent reimplementation of the SEQUEST<sup>&reg;"
-    "</sup> algorithm, which assigns peptides to spectra by comparing the "
-    "observed spectra to a catalog of theoretical spectra derived from a "
-    "database of known proteins. Tide's primary advantage is its speed. Our "
-    "published paper provides more detail on how Tide works. If you use Tide "
-    "in your research, please cite:</p><blockquote>Benjamin J. Diament and "
-    "William Stafford Noble. <a href=\"http://dx.doi.org/10.1021/pr101196n\">"
-    "&quot;Faster SEQUEST Searching for Peptide Identification from Tandem "
-    "Mass Spectra&quot;</a>. <em>Journal of Proteome Research</em>. "
-    "10(9):3871-9, 2011.</blockquote> "
-    "<p>When <code>tide-search</code> runs, it performs "
-    "several intermediate steps, as follows:</p><ol>"
-    "<li>If a FASTA file was provided, convert it to an index using "
-    "<code>tide-index</code>.</li>"
-    "<li>Convert the given "
-    "fragmentation spectra to a binary format.</li><li>Search the spectra "
-    "against the database and store the results in binary format.</li><li>"
-    "Convert the results to one or more requested output formats.</li></ol><p>"
-    "By default, the intermediate binary files are stored in the output "
-    "directory and deleted when Tide finishes execution. If you plan to search "
-    "against given database more than once or search a given set of spectra "
-    "more than once, then you can direct Tide to save the binary spectrum "
-    "files using the <code>--store-index</code> and "
-    "<code>--store-spectra</code> options. "
-    "Subsequent runs of the program will go faster "
-    "if provided with inputs in binary format.</p>]]";
+    "[[html:<p>This command converts spectrum files into the binary spectrumrecords format "
+    "used by the tide-search command.  Most people will not need to use this command at all, "
+    "because tide-search will do the conversions automatically as needed.  However, if you plan "
+    "to run multiple searches using the same input file, then you can save some time by using this "
+    "command to pre-convert the spectra into spectrumrecords format.</p>]]";
 }
 
 vector<string> SpectrumConvertApplication::getArgs() const {
@@ -170,6 +148,9 @@ vector<string> SpectrumConvertApplication::getArgs() const {
 
 vector< pair<string, string> > SpectrumConvertApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("<fileroot>.spectrumrecords",
+   "The spectra from the input file, written in spectrumrecords format. "
+   "The <fileroot> is taken from the input file."));
   outputs.push_back(make_pair("spectrum-converter.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "
