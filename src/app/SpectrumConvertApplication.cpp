@@ -63,6 +63,12 @@ int SpectrumConvertApplication::main(const vector<string>& input_files) {
   carp(CARP_INFO, "Running spectrum-convert...");
 
   num_threads_ = Params::GetInt("num-threads");
+  output_folder_ = Params::GetString("output-dir");
+  bool overwrite = Params::Exists("overwrite") ? Params::GetBool("overwrite") : false;
+  if (create_output_directory(output_dir, overwrite)) {
+    carp(CARP_FATAL, "Couldn't create output directory");
+  }
+
   if (num_threads_ < 1) {
     num_threads_ = boost::thread::hardware_concurrency(); // MINIMUM # = 1.
     // (Meaning just main thread) Do not make this value below 1.
@@ -196,7 +202,7 @@ void SpectrumConvertApplication::getInputFiles(int thread_id) {
       spectrumrecords = Params::GetString("store-spectra");
       keepSpectrumrecords = !spectrumrecords.empty();
       if (!keepSpectrumrecords) {
-        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords");
+        spectrumrecords = make_file_path(FileUtils::BaseName( original_name) + ".spectrumrecords", output_folder_);
       } else if (inputFiles_.size() > 1) {
         carp(CARP_FATAL, "Cannot use store-spectra option with multiple input "
                          "spectrum files");

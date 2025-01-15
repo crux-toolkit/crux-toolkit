@@ -35,6 +35,7 @@ class SpectrumConvertApplication : public CruxApplication {
  protected:
 
   int num_threads_;
+  std::string output_folder_ = "crux-output";
   
   map<pair<string, unsigned int>, bool>* spectrum_flag_;
 
