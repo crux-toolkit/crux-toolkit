@@ -396,6 +396,9 @@ Params::Params() : finalized_(false) {
   InitStringParam("output-dir", "crux-output",
     "The name of the directory where output files will be created.",
     "Available for most commands.", true);
+  InitStringParam("spectrum-outdir", "crux-output", "The name of the directory where the converted spectrum files will be stored. "
+                  "The reserved word "_original_dir_" can be used to indicate that the output files should reside in "
+                  "the same directory as the corresponding input files.  Default = --output-dir value", true);
   InitStringParam("temp-dir", "",
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",

@@ -63,9 +63,13 @@ int SpectrumConvertApplication::main(const vector<string>& input_files) {
   carp(CARP_INFO, "Running spectrum-convert...");
 
   num_threads_ = Params::GetInt("num-threads");
-  output_folder_ = Params::GetString("output-dir");
-  bool overwrite = Params::Exists("overwrite") ? Params::GetBool("overwrite") : false;
-  if (create_output_directory(output_dir, overwrite)) {
+  if (!Params::Exists("spectrum-outdir")) {
+    output_folder_ = Params::GetString("output-dir");
+  } else {
+    output_folder_ = Params::GetString("spectrum-outdir");
+  }
+  bool overwrite = Params::GetBool("overwrite");
+  if (create_output_directory(output_folder_, overwrite)) {
     carp(CARP_FATAL, "Couldn't create output directory");
   }
 
@@ -111,6 +115,7 @@ vector<string> SpectrumConvertApplication::getOptions() const {
     "fileroot",
     "num-threads",
     "output-dir",
+    "spectrum-outdir",
     "overwrite",
     "parameter-file",
     "verbosity"
