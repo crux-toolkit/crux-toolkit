@@ -55,6 +55,9 @@
 <h3>Version 4.2</h3> April 6, 2024
 
 <h4>Major changes</h4>
+  
+  <li>11 December 2024: Updated to use Percolator rel 3-07-01. Retention time now
+  included in Percolator output.</li>
   <li>18 Oct 2024: speeded up tide-search, restuctured its code.
   <li>18 Oct 2024: Added support to produce output in mztab format.
   <li>18 Oct 2024: tide-index supports unimod codes.  
@@ -68,6 +71,9 @@
   </li>
 <h4>Minor changes</h4>
 <ul>
+  <li>25 Oct 2024: Fixed bug in parameter handling for spectral-counts inside of the pipeline command.</li>
+  <li>25 Oct 2024: add .gz format as read fasta file option.
+  <li>22 Oct 2024: added error message when user specifies non-supported score functions. fixed bug that prevented building on windows/mac.
   <li>18 Oct 2024: terminal amino acids can be modified by terminal modifications and resiudal mods.
   <li>18 Oct 2024: tide-search reports tailor scores, and statistics about b-y- ions.
   <li>18 Oct 2024: tide-search runs only combined p-values.

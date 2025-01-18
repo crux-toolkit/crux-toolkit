@@ -161,6 +161,9 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   if (curScoreFunction_ == PVALUES && bin_width_ < 1.0) {
     carp(CARP_FATAL, "Tide-search does not support P-value calculation with bin-width less than 1.0 Da.");
   }
+  if (curScoreFunction_ >= NUMBER_SCORE_FUNCTIONS) {
+    carp(CARP_FATAL, "Invalid score function.");
+  }
  
   // Get a peptide reader to the peptide index datasets along with proteins, auxlocs. 
   vector<const pb::Protein*> proteins;

@@ -34,9 +34,12 @@
 #include <boost/filesystem.hpp>
 #include "residue_stats.pb.h"
 #include "crux_version.h"
-
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <regex>
 #include <assert.h>
+#include <filesystem>
 
 #ifdef _MSC_VER
 #include <io.h>
@@ -257,9 +260,13 @@ int TideIndexApplication::main(
 
   FixPt minMassFixPt = MassConstants::ToFixPt(min_mass);
   FixPt maxMassFixPt = MassConstants::ToFixPt(max_mass);
-   
-  ifstream fastaStream(fasta.c_str(), ifstream::in);
-
+  ifstream file(fasta.c_str(), ifstream::in);
+  boost::iostreams::filtering_istreambuf in;
+  if (boost::filesystem::extension(fasta) == ".gz") {
+    in.push(boost::iostreams::gzip_decompressor());
+  }
+  in.push(file);
+  istream fastaStream(&in);
   unsigned long long invalidPepCnt = 0;
   unsigned long long failedDecoyCnt = 0;
 

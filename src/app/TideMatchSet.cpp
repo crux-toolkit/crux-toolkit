@@ -132,9 +132,9 @@ int* TideMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders){
         case PVALUES:
           numHeaders = sizeof(Pvalues_tsv_cols) / sizeof(int);
           return Pvalues_tsv_cols;
-        case DIAMETER:
-          numHeaders = sizeof(Diameter_tsv_cols) / sizeof(int);
-          return Diameter_tsv_cols;
+        // case DIAMETER:
+        //   numHeaders = sizeof(Diameter_tsv_cols) / sizeof(int);
+        //   return Diameter_tsv_cols;
       }
       break;
     case TIDE_SEARCH_MZTAB_TSV:
@@ -363,7 +363,7 @@ void TideMatchSet::gatherTargetsDecoys() {
   bool (*comp)(const Scores& x, const Scores& y);
 
   switch (curScoreFunction_) {
-  case DIAMETER:
+  // case DIAMETER:
   case XCORR_SCORE:
     comp = &cmpXcorrScore;
     break;
@@ -436,7 +436,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additi
 
   switch (curScoreFunction_) {
   case XCORR_SCORE:
-  case DIAMETER:
+  // case DIAMETER:
     for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
       (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
       (*it).delta_lcn_ = ((*it).xcorr_score_ - (*last_psm_).xcorr_score_)/max((*it).xcorr_score_, 1.0);
@@ -456,10 +456,10 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additi
         (*it).delta_cn_ = 0.0;
     }
     break;
-  case PVALUES_HR:
-  case PVALUES_LR:
-  case HYPERSCORE:
-  case HYPERSCORE_LA:
+  // case PVALUES_HR:
+  // case PVALUES_LR:
+  // case HYPERSCORE:
+  // case HYPERSCORE_LA:
 
     break;
   }

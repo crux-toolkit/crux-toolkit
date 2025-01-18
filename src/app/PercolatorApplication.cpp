@@ -237,6 +237,10 @@ int PercolatorApplication::main(
   perc_args_vec.push_back("--maxiter");
   perc_args_vec.push_back(Params::GetString("maxiter"));
 
+  // Retention time is always included in output
+  perc_args_vec.push_back("--output-retention-time");
+
+
   if (!Params::GetString("search-input").empty()) {
     perc_args_vec.push_back("--search-input");
     perc_args_vec.push_back(Params::GetString("search-input"));
