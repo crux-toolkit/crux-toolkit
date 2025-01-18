@@ -438,6 +438,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
 
         // carp(CARP_INFO, "q_value %f, q_value_threshold %f, filtered %s", q_value, q_value_threshold, booleanText);
         if (!filtered && q_value > q_value_threshold) {
+            // carp(CARP_INFO, "I was passed");
             continue;
         }
         if (is_rt_seconds) {
