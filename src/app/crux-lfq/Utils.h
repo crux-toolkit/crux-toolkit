@@ -29,6 +29,8 @@ using std::vector;
 
 typedef std::tuple<double, double, double> IsotopePeak;
 
+namespace pb { class ModTable; }
+
 namespace CruxLFQ {
 
 const int BINS_PER_DALTON = 100;
@@ -309,10 +311,7 @@ filterResults filterMassShiftToIsotopePeaks(vector<IsotopePeak>& isotopePeaks);
 
 void setToNegativeOneIfNaN(double& value);
 
-vector<PSM> create_psm(const string& psm_file,
-                       const string& psm_file_format = "assign-confidence",
-                       const bool filtered = false,
-                       const double q_value_threshold = 0.01, const bool is_rt_seconds = false);
+vector<PSM> create_psm(const string& psm_file);
 
 void cutPeak(ChromatographicPeak& peak, double identificationTime);
 
