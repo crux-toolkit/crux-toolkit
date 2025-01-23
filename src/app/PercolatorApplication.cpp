@@ -267,6 +267,10 @@ int PercolatorApplication::main(
     perc_args_vec.push_back(Params::GetString("init-weights"));
   }
 
+  if (Params::GetBool("output-retention-time")) {
+    perc_args_vec.push_back("--output-retention-time");
+  }
+
   if (Params::GetBool("static")) {
     perc_args_vec.push_back("--static");
   }
@@ -521,6 +525,7 @@ vector<string> PercolatorApplication::getOptions() const {
     "no-terminate",
     "only-psms",
     "output-dir",
+    "output-retention-time",
     "output-weights",
     "override",
     "overwrite",

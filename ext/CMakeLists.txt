@@ -220,9 +220,6 @@ ExternalProject_Add(
     -DWITHOUT_GTEST=ON
   PATCH_COMMAND
     COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/Normalizer.cpp
-      ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
-    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/percolator/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/percolator/src
     COMMAND ${CMAKE_COMMAND} -E copy
