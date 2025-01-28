@@ -138,6 +138,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         CruxLFQ::runErrorChecking(spectra_file, lfqResults);
 
         carp(CARP_INFO, "Finished processing %s", spectra_file.c_str());
+        delete spectra_ms1;
     }
 
     if (CruxLFQ::NORMALIZE) {
