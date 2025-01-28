@@ -478,7 +478,7 @@ void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_fil
   size_t numHeaders;
   int* header_cols = getColumns(format, numHeaders);
   vector<int> cnt;
-  for (int i=0; i<decoy_num_; ++i) {
+  for (int i=0; i <= decoy_num_; ++i) {
     cnt.push_back(0);
   }
   double predrt;
