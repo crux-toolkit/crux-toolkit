@@ -297,7 +297,7 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod08");
   setVarMod("variable_mod09");
   setInt("max_variable_mods_in_peptide");
-  setInt("require_variable_mod");
+  setString("require_variable_mod");
   // Static modifications
   setDouble("add_Cterm_peptide");
   setDouble("add_Nterm_peptide");

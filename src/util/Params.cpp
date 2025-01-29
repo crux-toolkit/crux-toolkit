@@ -1227,7 +1227,7 @@ InitStringParam("protein-name-separator", ",",
   InitIntParam("max_variable_mods_in_peptide", 5, 0, BILLION,
     "Specifies the total/maximum number of residues that can be modified in a peptide.",
     "Available for comet.", true);
-  InitIntParam("require_variable_mod", 0, 0, 1,
+  InitStringParam("require_variable_mod", "0", "0|1",
     "Controls whether the analyzed peptides must contain at least one variable modification.",
     "Available for comet.", true);
   /* Comet - Static modifications */
