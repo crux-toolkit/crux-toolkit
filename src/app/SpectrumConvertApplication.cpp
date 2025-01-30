@@ -66,11 +66,7 @@ int SpectrumConvertApplication::main(const vector<string>& input_files) {
   if (!Params::Exists("spectrum-outdir")) {
     output_folder_ = Params::GetString("output-dir");
   } else {
-    if (Params::GetString("spectrum-outdir") == "_original_dir_") {
-      output_folder_ = "";
-    } else {
-      output_folder_ = Params::GetString("spectrum-outdir");
-    }
+    output_folder_ = Params::GetString("spectrum-outdir");
   }
   bool overwrite = Params::GetBool("overwrite");
   if (create_output_directory(output_folder_, overwrite)) {
