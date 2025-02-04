@@ -477,6 +477,27 @@ void TideMatchSet::printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_fil
   // The order of the fields of the results is solely based on the column order
   size_t numHeaders;
   int* header_cols = getColumns(format, numHeaders);
+
+/*
+The following counter called cnt, is used to count the PSMs reported. The decoy index of a
+target peptide is -1, and a decoy index of a decoy peptide used to be 0. Later, somebody else
+added an option to make tide-search handle multiple decoy sets (This was developed by Uri for
+the Average TDC method). So, the decoy index has become a zero-based index indicating which 
+decoy set this given decoy peptide is originating from.
+
+Tide-search  supports concatenated search and separated search and it is also able to report 
+the top-N matches per spectrum. Multiple decoy sets are supported only in separated 
+target-decoy search. 
+
+In the case of only target or concatenated target decoy search, the decoy index can be 0 or 1,
+and we use the cnt[0] to count how many target and decoys PSMs have been reported so far. 
+
+In the case of separated target decoy search and this function reports only targets, then cnt[0] 
+counts only targets.
+In the case of separated target decoy search and this function reports only decoys, then the 
+cnt[i] counts only decoys, for i = 0-->decoy_num 
+*/
+
   vector<int> cnt;
   for (int i=0; i <= decoy_num_; ++i) {
     cnt.push_back(0);
