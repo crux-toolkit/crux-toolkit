@@ -17,32 +17,6 @@ using namespace std;
 #define CHECK(x) GOOGLE_CHECK(x)
 
 SpectrumConvertApplication::SpectrumConvertApplication() {
-/*  remove_index_ = "";
-  spectrum_flag_ = NULL;
-  decoy_num_ = 0;
-  num_range_skipped_ = 0;
-  num_precursors_skipped_ = 0;
-  num_isotopes_skipped_ = 0;
-  num_retained_ = 0;
-  num_spectra_ = 0;
-  num_spectra_searched_ = 0;
-  total_candidate_peptides_ = 0;
-  precursor_window_ = 0;
-  spectrum_min_mz_ = 0; 
-  spectrum_max_mz_ = 0;
-  min_scan_ = 0;
-  max_scan_ = 0;
-  min_peaks_ = 0;
-  min_precursor_charge_ = 0;
-  max_precursor_charge_ = 0;
-  out_tsv_target_  = NULL; // original tide-search output format in tab-delimited text files (txt)
-  out_tsv_decoy_ = NULL;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only
-  out_mztab_target_ = NULL;      // mzTAB output format
-  out_mztab_decoy_ = NULL;      // mzTAB output format for the decoy psms only
-  out_pin_target_ = NULL;        // pin output format for percolator
-  out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
-  total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
-*/
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
   }
@@ -63,7 +37,7 @@ int SpectrumConvertApplication::main(const vector<string>& input_files) {
   carp(CARP_INFO, "Running spectrum-convert...");
 
   num_threads_ = Params::GetInt("num-threads");
-  if (!Params::Exists("spectrum-outdir")) {
+  if (Params::IsDefault("spectrum-outdir")) {
     output_folder_ = Params::GetString("output-dir");
   } else {
     output_folder_ = Params::GetString("spectrum-outdir");
@@ -122,15 +96,6 @@ vector<string> SpectrumConvertApplication::getOptions() const {
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
-/*
-Parameters to be removed from ./Params.cpp"
-brief-output
-peptide-centric-search
-use-tailor-calibration
-exact-p-value
-charge-state
-evidence-granularity
-*/
 
 string SpectrumConvertApplication::getName() const {
   return "spectrum-converter";
@@ -138,10 +103,7 @@ string SpectrumConvertApplication::getName() const {
 
 string SpectrumConvertApplication::getDescription() const {
   return
-    "[[nohtml:TO BE UPDATED!!!!!! Search a collection of spectra against a sequence database, "
-    "returning a collection of peptide-spectrum matches (PSMs). This is a "
-    "fast search engine but requires that you first build an index with "
-    "tide-index.]]"
+    "[[nohtml:This command converts spectrum files into the binary spectrumrecords format]]"
     "[[html:<p>This command converts spectrum files into the binary spectrumrecords format "
     "used by the tide-search command.  Most people will not need to use this command at all, "
     "because tide-search will do the conversions automatically as needed.  However, if you plan "
