@@ -53,8 +53,17 @@ int CometApplication::main(const vector<string>& input_files) {
   setCometParameters(input_files, pv_input_files);
   searchManager_.AddInputFiles(pv_input_files);
   
-  /* Run search */
-  bool success = searchManager_.DoSearch();
+  bool success = false;
+  // Create fragment index or run search
+  const bool create_fragment_index = Params::GetBool("create_fragment_index");
+  if (create_fragment_index) {
+    /* Create fragment index */
+   bool success = searchManager_.CreateIndex();
+  }
+  else {
+    /* Run search */
+   bool success = searchManager_.DoSearch();
+  }
 
   /* Recover stderr */
   std::cerr.rdbuf(old);
@@ -310,6 +319,12 @@ void CometApplication::setCometParameters(
   setEnzyme("[COMET_ENZYME_INFO]",
             "search_enzyme_number", "search_enzyme2_number", "sample_enzyme_number",
             "allowed_missed_cleavage");
+
+  // Fragment ion indexing
+  setDouble("fragindex_max_fragmentmass");
+  setDouble("fragindex_min_fragmentmass");
+  setInt("fragindex_min_ions_report");
+  setInt("fragindex_min_ions_score");
 }
 
 string CometApplication::staticModParam(char c) {
@@ -490,6 +505,12 @@ vector<string> CometApplication::getOptions() const {
     "add_J_user_amino_acid",
     "add_X_user_amino_acid",
     "add_Z_user_amino_acid",
+    // Fragment ion indexing
+    "create_fragment_index",
+    "fragindex_max_fragmentmass",
+    "fragindex_min_fragmentmass",
+    "fragindex_min_ions_report",
+    "fragindex_min_ions_score",
     // param-medic
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",

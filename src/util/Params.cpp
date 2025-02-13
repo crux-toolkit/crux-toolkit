@@ -1251,6 +1251,25 @@ InitStringParam("protein-name-separator", ",",
                     "Specify a static modification to the residue " + string(1, c) + ".",
                     "Available for comet.", true);
   }
+  // Comet - Fragment ion indexing
+  InitBoolParam("create_fragment_index", false,
+      "Generate index of ion fragments",
+      "Available for comet.", true);
+  InitDoubleParam("fragindex_max_fragmentmass", 2000.0, 0, BILLION,
+    "This parameter defines the maximum fragment ion mass to include in the fragment ion index.",
+    "Available for comet.", true);
+  InitDoubleParam("fragindex_min_fragmentmass", 200.0, 0, BILLION,
+    "This parameter defines the minimum fragment ion mass to include in the fragment ion index.",
+    "Available for comet.", true);
+  InitIntParam("fragindex_min_ions_report", 3, 1, BILLION,
+    "This parameter sets the minimum number fragment ions a peptide must match against the fragment"
+    " on index in order to report this peptide in the output",
+    "Available for comet.", true);
+  InitIntParam("fragindex_min_ions_score", 3, 1, BILLION,
+    "This parameter sets the minimum number fragment ions a peptide must match against the fragment"
+    "ion index in order to proceed to xcorr scoring.",
+    "Available for comet.", true);
+
   InitBoolParam("list-of-files", false,
     "Specify that the search results are provided as lists of files, rather than as "
     "individual files.",
@@ -2432,6 +2451,14 @@ void Params::Categorize() {
     items.insert("add_" + aaString + "_" + aaName);
   }
   AddCategory("Static modifications", items);
+
+  items.clear();
+  items.insert("create_fragment_index");
+  items.insert("fragindex_max_fragmentmass");
+  items.insert("fragindex_min_fragmentmass");
+  items.insert("fragindex_min_ions_report");
+  items.insert("fragindex_min_ions_score");
+  AddCategory("Fragment ion indexing", items);
 
   items.clear();
   items.insert("only-psms");
