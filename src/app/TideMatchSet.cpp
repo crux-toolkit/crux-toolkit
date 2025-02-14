@@ -5,6 +5,7 @@
 #include "util/StringUtils.h"
 #include "tide/peptide.h"
 #include "crux_version.h"
+#include "TideSearchApplication.h"
 
 // SCORE_FUNCTION_T is defined in ./src/model/objects.h
 SCORE_FUNCTION_T TideMatchSet::curScoreFunction_ = INVALID_SCORE_FUNCTION;
@@ -109,9 +110,11 @@ int TideMatchSet::Pvalues_mzTab_cols[] = {
 //     DECOY_INDEX_COL
 //   };    
 
-TideMatchSet::TideMatchSet(ActivePeptideQueue* active_peptide_queue) {
+TideMatchSet::TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed) {
   psm_scores_processed_ = false;
   active_peptide_queue_ = active_peptide_queue;
+  observed_ = observed;  // Pointer to the experimental spectrum data 
+
   psm_scores_ = PSMScores(active_peptide_queue->nPeptides_);  
 };
 
@@ -339,8 +342,8 @@ void TideMatchSet::getReport(TSV_OUTPUT_FORMATS_T format, string spectrum_filena
   gatherTargetsDecoys(); 
   
   //calculate tailor, delta_cn, and delta_lcn for the top n matches
-  calculateAdditionalScores(concat_or_target_psm_scores_);  
-  calculateAdditionalScores(decoy_psm_scores_);  // decoy_psm_scores is empty in case of concat=T
+  calculateAdditionalScores(concat_or_target_psm_scores_, sc);  
+  calculateAdditionalScores(decoy_psm_scores_, sc);  // decoy_psm_scores is empty in case of concat=T
 
   // Prepare the results in a string
   printResults(format, spectrum_filename, sc, spectrum_file_cnt, true, concat_or_target_psm_scores_, concat_or_target_report);  // true = target
@@ -387,7 +390,9 @@ void TideMatchSet::gatherTargetsDecoys() {
     pop_heap(psm_scores_.begin(), psm_scores_.end()-i, cmpXcorrScore);
     Scores back = psm_scores_[psm_scores_.size()-1-i];
   }
-  quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ +TAILOR_OFFSET; // Make sure scores positive
+  quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ + TAILOR_OFFSET; // Make sure scores positive
+
+  // carp(CARP_INFO, "PSM_scores:  %d Quantile pos: %d , qunatile_score: %lf",psm_scores_.size(), quantile_pos, quantile_score_ );
 
   // get the value of the last score for the delta_lcn scores
   last_psm_ = std::min_element(psm_scores_.begin(), psm_scores_.end(), comp);
@@ -426,42 +431,57 @@ void TideMatchSet::gatherTargetsDecoys() {
   }  
 }
 
-void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores) {  // Additional scores are:  delta_cn, delta_lcn, tailor;
+void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const SpectrumCollection::SpecCharge* sc) {  // Additional scores are:  delta_cn, delta_lcn, tailor;
   // The  gatherTargetsDecoys must be run before calling this function.
   int last_psm_pos = -2;
   if (top_matches_ >= psm_scores.size()) {
     last_psm_pos = -1;
   }
   last_psm_ = psm_scores.end()+last_psm_pos;
+  
+  int temp;
+  int repeat_ion_match;  
+  Peptide* peptide;
 
-  switch (curScoreFunction_) {
-  case XCORR_SCORE:
-  // case DIAMETER:
-    for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
-      (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
+  for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
+    // Count the repeating matching ions. This was used in SP scoring
+    temp = 0;
+    repeat_ion_match = 0;
+//    peptide = active_peptide_queue_->GetPeptide((*it).ordinal_);
+    peptide = (*((*it).peptide_itr_));
+    temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1b, temp, repeat_ion_match);
+    temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1y, temp, repeat_ion_match);
+
+    if (sc->charge > 2) {
+      temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_2b, temp, repeat_ion_match);
+      temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_2y, temp, repeat_ion_match);
+    }
+    (*it).repeat_ion_match_ = repeat_ion_match;
+
+    // Perform Tailor calibration
+    (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
+
+    switch (curScoreFunction_) {
+    case XCORR_SCORE:
       (*it).delta_lcn_ = ((*it).xcorr_score_ - (*last_psm_).xcorr_score_)/max((*it).xcorr_score_, 1.0);
       if (it != psm_scores.end()-1)
         (*it).delta_cn_ = ((*it).xcorr_score_ - (*(it+1)).xcorr_score_)/max((*it).xcorr_score_, 1.0);
       else 
         (*it).delta_cn_ = 0.0;
-    }
-    break;
-  case PVALUES:
-    for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it){
-      (*it).tailor_ = ((*it).xcorr_score_  + TAILOR_OFFSET )/ quantile_score_;
+      break;
+    case PVALUES:
       (*it).delta_lcn_ = -log10((*it).combined_pval_) + log10((*last_psm_).combined_pval_);
       if (it != psm_scores.end()-1)
         (*it).delta_cn_ = -log10((*it).combined_pval_) + log10((*(it+1)).combined_pval_);
       else 
         (*it).delta_cn_ = 0.0;
     }
-    break;
+    // }
+    // break;
   // case PVALUES_HR:
   // case PVALUES_LR:
   // case HYPERSCORE:
   // case HYPERSCORE_LA:
-
-    break;
   }
 
   psm_scores_processed_ = true;

@@ -109,16 +109,18 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     return 0;
   }
 
+  nPeptides_ = 0;
   begin_ = queue_.begin();
-  candidatePeptideStatus_.clear();
+  // candidatePeptideStatus_.clear();
   while (begin_ != queue_.end() && (*begin_)->Mass() < min_mass->front()) {
+    (*begin_)->active_ = false;
     ++begin_;
-    candidatePeptideStatus_.push_back(false);  
+    ++nPeptides_;
+    // candidatePeptideStatus_.push_back(false);  
   }
   end_ = begin_;
   begin_ = queue_.begin();
   int* isotope_idx = new int(0);
-  nPeptides_ = 0;
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
   CandPeptidesDecoy_ = 0;  
@@ -126,14 +128,16 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
     if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
       ++nCandPeptides_;
-      candidatePeptideStatus_.push_back(true);
+      (*end_)->active_ = true;
+//      candidatePeptideStatus_.push_back(true);
       if ((*end_)->IsDecoy()){
         ++CandPeptidesDecoy_;
       } else {
         ++CandPeptidesTarget_;
       }
     } else {
-      candidatePeptideStatus_.push_back(false);
+      (*end_)->active_ = false;
+      // candidatePeptideStatus_.push_back(false);
     }
     ++end_;
     ++nPeptides_;
@@ -143,10 +147,11 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
     return 0;
   }
   for (; end_ != queue_.end(); ++end_) {
-    if ((*end_)->peaks_0.size() == 0 || candidatePeptideStatus_.size() >= min_candidates_-1) {
+    if ((*end_)->peaks_0.size() == 0 || nPeptides_ >= min_candidates_-1) {
       break;
     }
-    candidatePeptideStatus_.push_back(false);
+    (*end_)->active_ = false;
+    // candidatePeptideStatus_.push_back(false);
     ++nPeptides_;
   }
   return nCandPeptides_;
