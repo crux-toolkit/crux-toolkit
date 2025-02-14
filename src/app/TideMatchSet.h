@@ -11,6 +11,7 @@
 #include "tide/sp_scorer.h"
 #include "tide/spectrum_collection.h"
 #include "tide/ActivePeptideQueue.h"
+#include "tide/spectrum_preprocess.h"
 
 #include "model/Modification.h"
 #include "model/PostProcessProtein.h"
@@ -40,6 +41,7 @@ class TideMatchSet {
     double delta_cn_;
     double delta_lcn_;
     bool active_;
+    deque<Peptide*>::const_iterator peptide_itr_;
     Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
       resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
       sp_score_(0), hyper_score_(0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0), active_(false) {}
@@ -75,7 +77,7 @@ class TideMatchSet {
   static int Pvalues_pin_cols[];
 
   // TideMatchSet();
-  TideMatchSet(ActivePeptideQueue* active_peptide_queue);
+  TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed);
   ~TideMatchSet();
 
   static int* getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders);
@@ -84,7 +86,7 @@ class TideMatchSet {
                    const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, 
                    string &concat_or_target_report, string& decoy_report);
   void gatherTargetsDecoys();  // Additional scores are:  delta_cn, delta_lcn, tailor
-  void calculateAdditionalScores(PSMScores& psm_scores);  // Additional scores are:  delta_cn, delta_lcn, tailor; 
+  void calculateAdditionalScores(PSMScores& psm_scores, const SpectrumCollection::SpecCharge* sc);  // Additional scores are:  delta_cn, delta_lcn, tailor; 
   void printResults(TSV_OUTPUT_FORMATS_T format, string spectrum_filename, const SpectrumCollection::SpecCharge* sc, int spectrum_file_cnt, bool target, PSMScores& psm_scores, string& results,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* intensity_map = NULL,
     map<PSMScores::iterator, boost::tuple<double, double, double>>* logrank_map = NULL,
@@ -100,7 +102,14 @@ class TideMatchSet {
   
   PSMScores::iterator last_psm_;
   ActivePeptideQueue* active_peptide_queue_;  
-
+  
+  // Pointer to the experimental spectrum data; This is used here to calculate 
+  // the repeat_ion_match value (part of the SP scoring). Originally, the
+  // repeat_ion_match value was calulated for each PSMs in TideSearch App. 
+  // But it is just needed  only for top-N PSMs. So, we need to used
+  // the observed spectrum vector to calculate the repeat_ion_match here.
+  ObservedPeakSet* observed_;  
+  
   // Global static parameters
   static SCORE_FUNCTION_T curScoreFunction_;
   static int top_matches_;

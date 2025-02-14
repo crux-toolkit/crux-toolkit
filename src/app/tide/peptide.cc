@@ -82,8 +82,21 @@ Peptide::Peptide(const pb::Peptide& peptide,
   protein_id_str_ = string("");
   flankingAAs_ = string("");
   seq_with_mods_ = string("");
-  mod_crux_string_ = string("");
+  mod_crux_string_ = string(""); 
   mod_mztab_string_ = string("");
+  
+  active_ = false;
+
+  peaks_0.resize(2*len_);   // Single charged b-y ions, in case of exact p-value, this contains only the b-ions
+  peaks_1.resize(2*len_);   // Double charged b-y ions
+  peaks_1b.resize(len_);   // Single charged b ions
+  peaks_1y.resize(len_);   // Single charged y ions
+  peaks_2b.resize(len_);   // Double charged b ions
+  peaks_2y.resize(len_);   // Double charged y ions
+  peaks_1b.clear();
+  peaks_1y.clear();
+  peaks_2b.clear();
+  peaks_2y.clear();
 }
 
 template<class W>
@@ -106,11 +119,15 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
   peaks_2b.clear();
   peaks_2y.clear();
 
+  if (peaks_1b.size() > 0) {
+    carp(CARP_FATAL, "Duplicated theoretical fragment ion calculation");
+  }
+
   // Add all charge 1 B ions.
   double total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
-    workspace->AddBIon(total, 1);
-    int index_b = MassConstants::mass2bin(total + MassConstants::B + MASS_PROTON, 1);
+    int index_b = MassConstants::mass2bin(total + MassConstants::B + MASS_PROTON, 1);      // int index_b = MassConstants::mass2bin(mass + MassConstants::B + MASS_PROTON, charge);
+    workspace->AddBIon(index_b, 1);
     peaks_1b.push_back(index_b);
 
     if (dia_mode) {
@@ -123,8 +140,8 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
   // Add all charge 1 Y ions.
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
-    workspace->AddYIon(total, 1);
-    int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 1);
+    int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 1);      // int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MASS_PROTON, charge);
+    workspace->AddYIon(index_y, 1);
     peaks_1y.push_back(index_y);
     if (dia_mode) {
       y_ion_mzbins_.push_back(MassConstants::mass2bin(Peptide::MassToMz(total + MassConstants::Y, 1)));
@@ -138,8 +155,8 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
   max_possible_peak = max_possible_peak*2 + 2;  //adjust for larger charge
   total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
-    workspace->AddBIon(total, 2);
     int index_b = MassConstants::mass2bin(total + MassConstants::B + MASS_PROTON, 2);
+    workspace->AddBIon(index_b, 2);
     peaks_2b.push_back(index_b);
     total += aa_masses[i];
   }
@@ -147,8 +164,8 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
   // Add all charge 2 Y ions.
   total = aa_masses[Len() - 1];
   for (int i = Len()-2; i >= 0 && total <= max_possible_peak; --i) {
-    workspace->AddYIon(total, 2);
     int index_y = MassConstants::mass2bin(total + MassConstants::Y + MASS_PROTON, 2);
+    workspace->AddYIon(index_y, 2);
     peaks_2y.push_back(index_y);
     total += aa_masses[i];
   }
