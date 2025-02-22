@@ -41,6 +41,7 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("Label", true));
   features_.push_back(make_pair("filename", true));
   features_.push_back(make_pair("ScanNr", true));
+  features_.push_back(make_pair("rt", true));
   features_.push_back(make_pair("ExpMass", true));
   features_.push_back(make_pair("CalcMass", true));
   features_.push_back(make_pair("lnrSp", false));
@@ -190,6 +191,7 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("NegLog10ResEvPValue", combine_p);
   setEnabledStatus("NegLog10CombinePValue", combine_p);
   setEnabledStatus("TailorScore", tailor);
+  setEnabledStatus("rt", true);
 
   // DIAmeter related, added by Yang
   if (!MathUtil::AlmostEqual(Params::GetDouble("coeff-precursor"), 0)) {
@@ -274,7 +276,9 @@ void PinWriter::printPSM(
       if (Params::GetBool("unique-scannr")) { fields.push_back(StringUtils::ToString(++scannr_cnt_)); }
       else { fields.push_back(StringUtils::ToString(spectrum->getFirstScan()));  }
 
-    } else if (feature == "ExpMass") {
+    }else if (feature == "rt") {
+      fields.push_back(StringUtils::ToString(spectrum->getRTime(), precision_));
+    }else if (feature == "ExpMass") {
       fields.push_back(StringUtils::ToString(obsMass, mass_precision_));
     } else if (feature == "CalcMass") {
       fields.push_back(StringUtils::ToString(calcMass, mass_precision_));
