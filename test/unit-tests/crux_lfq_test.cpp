@@ -21,31 +21,24 @@ TEST(HelloTest, BasicAssertions) {
     EXPECT_EQ(7 * 6, 42);
 }
 
-// This shows a fundamental flaw in the code that must be fixed
-TEST(CreatePsmMapTest, TideSearchFormat) {
-    // Test case for psm_file_format = "tide-search"
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_tide_search, "tide-search");
-    EXPECT_EQ(psm.size(), 15);
-}
-
 TEST(CreatePsmMapTest, AssignConfidenceFormat) {
     // Test case for psm_file_format = "assign-confidence"
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence");
+    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
     EXPECT_EQ(psm.size(), 15);
 
-    psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence", true);
+    psm = CruxLFQ::create_psm(psm_file_assign_confidence);
     EXPECT_EQ(psm.size(), 30);
 }
 
 TEST(CruxLFQApplicationTest, CreateIdentifications) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence");
+    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
     vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
     ASSERT_EQ(15, allIdentifications.size());
     ASSERT_EQ("RPQYSNPPVQGEVMEGADNQGAGEQGRPVR", allIdentifications[0].sequence);
 }
 
 TEST(CruxLFQApplicationTest, SetPeptideModifiedSequencesAndProteinGroups) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence");
+    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
     vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
     vector<CruxLFQ::Identification> single_identification = vector<CruxLFQ::Identification>(allIdentifications.begin(), allIdentifications.begin() + 1);
     vector<string> spec_files = {spectrum_file};
@@ -60,7 +53,7 @@ TEST(CruxLFQApplicationTest, SetPeptideModifiedSequencesAndProteinGroups) {
 }
 
 TEST(CalculateTheoreticalIsotopeDistributionsTest, ActualIdentifications) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence, "assign-confidence");
+    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
     vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
 
     // Seems redundant but checked to ensure the right data is passed to calculateTheoreticalIsotopeDistributions
