@@ -10,8 +10,6 @@ RUN apt-get update \
       ca-certificates \
       && rm -rf /var/lib/apt/lists/*
 
-FROM base as builder
-
 ###
 # Build the binary. These intermediate layers will be discarded.
 ###
