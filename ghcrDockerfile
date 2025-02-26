@@ -1,4 +1,4 @@
-FROM debian:buster-slim as bulder
+FROM docker.io/library/ubuntu:24.04 as bulder
 ARG crux_cmake_args="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/app"
 
 ###
@@ -60,7 +60,7 @@ RUN make && make install
 LABEL description="crux-toolkit"
 
 
-FROM debian:buster-slim as runtime
+FROM docker.io/library/ubuntu:24.04 as runtime
 
 RUN apt-get update && apt-get -y install \
   libcurl4-openssl-dev \
