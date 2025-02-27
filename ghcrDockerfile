@@ -18,8 +18,9 @@ LABEL description="Build layers - crux-toolkit"
 
 # Required system packages
 RUN apt-get update
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository ppa:kitware/ppa
+RUN apt-get install -y wget software-properties-common
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc | sudo apt-key add -
+RUN apt-add-repository 'deb https://apt.kitware.com/ubuntu/ focal main'
 RUN apt-get update
 RUN apt-get install -y cmake
   
