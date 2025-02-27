@@ -44,8 +44,8 @@ RUN mkdir /app
 
 WORKDIR /src
 
-RUN git config --global user.email "you@example.com" && \
-    git config --global user.name "Your Name"
+#RUN git config --global user.email "you@example.com" && \
+#    git config --global user.name "Your Name"
 
 COPY . /src/crux-toolkit
 
@@ -71,6 +71,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   uuid-runtime \
   zlib1g \
   libpulse0 \
+  libssl1.1 \
   tzdata \
   && rm -rf /var/lib/apt/lists/*
 
