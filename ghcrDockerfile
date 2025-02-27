@@ -1,4 +1,4 @@
-FROM docker.io/library/ubuntu:20.04 as builder
+FROM docker.io/library/ubuntu:20.04 AS builder
 ARG crux_cmake_args="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/app"
 
 ###
@@ -17,9 +17,14 @@ RUN apt-get update \
 LABEL description="Build layers - crux-toolkit"
 
 # Required system packages
+RUN apt-get update
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository ppa:kitware/ppa
+RUN apt-get update
+RUN apt-get install -y cmake
+  
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   build-essential \
-  cmake \
   curl \
   git \
   subversion \
@@ -32,8 +37,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   unzip \
   tzdata \
   && rm -rf /var/lib/apt/lists/*
+
   
-  RUN mkdir /app  
+RUN mkdir /app  
 
 WORKDIR /src
 
@@ -56,7 +62,7 @@ RUN make && make install
 
 LABEL description="crux-toolkit"
 
-FROM docker.io/library/ubuntu:24.04 as runtime
+FROM docker.io/library/ubuntu:24.04 AS runtime
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libcurl4-openssl-dev \
