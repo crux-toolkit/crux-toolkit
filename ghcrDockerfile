@@ -73,6 +73,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libpulse0 \
   tzdata \
   wget \
+  libgomp \
   && rm -rf /var/lib/apt/lists/*
 
 RUN wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
