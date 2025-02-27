@@ -75,9 +75,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   wget \
   && rm -rf /var/lib/apt/lists/*
 
-RUN wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl1.1/libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
-RUN dpkg -i libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb
-RUN rm libssl1.1_1.1.1f-1ubuntu2.19_amd64.deb  
+RUN wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+RUN dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+RUN rm libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
 
 RUN mkdir /app
 # RUN mkdir /home/crux && \
