@@ -658,6 +658,7 @@ enum _command {
   TIDE_SEARCH_COMMAND,  ///< tide-search
   DIAMETER_COMMAND,  ///< tide-search
   COMET_COMMAND,        ///< comet
+  COMET_INDEX_COMMAND,  ///< comet create index
   KOJAK_COMMAND,        ///< kojak
   PSM_CONVERT_COMMAND,  ///< psm-convert
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords
@@ -669,7 +670,6 @@ enum _command {
   PREDICT_PEPTIDE_IONS_COMMAND, ///< predict-peptide-ions
   PIPELINE_COMMAND,     ///< pipeline
   CASCADE_COMMAND,      ///< Cascade Search
-  CASCADE_COMMAND,               ///< Cascade Search
   LOCALIZE_MODIFICATION_COMMAND, ///< localize-modification
   VERSION_COMMAND,      ///< just print the version number
 //  TIDE_LITE_SEARCH_COMMAND, ///< Tide-lite
