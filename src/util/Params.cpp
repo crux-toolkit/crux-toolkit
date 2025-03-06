@@ -11,6 +11,7 @@
 
 using namespace std;
 #include "app/CometApplication.h"
+#include "app/CometIndexApplication.h"
 
 /**
  * \file Params.cpp
