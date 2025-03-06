@@ -34,7 +34,7 @@
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
 #include "DIAmeterApplication.h"
-
+#include "app/SpectrumConvertApplication.h"
 using namespace std;
 
 CreateDocs::CreateDocs() {
@@ -69,6 +69,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
   apps.add(new DIAmeterApplication());
+  apps.add(new SpectrumConvertApplication());
   
   string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {

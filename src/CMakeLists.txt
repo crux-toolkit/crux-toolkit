@@ -203,6 +203,7 @@ set (
   io/SQTWriter.cpp
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
+  app/SpectrumConvertApplication.cpp
   app/TideSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
   io/DIAmeterPSMFilter.cpp

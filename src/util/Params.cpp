@@ -397,6 +397,8 @@ Params::Params() : finalized_(false) {
   InitStringParam("output-dir", "crux-output",
     "The name of the directory where output files will be created.",
     "Available for most commands.", true);
+  InitStringParam("spectrum-outdir", "--output-dir value", "The name of the directory where the converted "
+                  "spectrum files will be stored.", "Available for spectrum-converter", true);
   InitStringParam("temp-dir", "",
     "The name of the directory where temporary files will be created. If this "
     "parameter is blank, then the system temporary directory will be used",
@@ -528,9 +530,6 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("no-terminate", false,
     "Do not stop execution when encountering questionable SVM inputs or results. \"percolator.weights.txt\".",
     "Available for percolator", true); 
-  InitBoolParam("output-retention-time", false,
-    "Include retention time in percolator output",
-    "Available for percolator.", true);
   InitBoolParam("output-weights", false,
     "Output final weights to a file named \"percolator.weights.txt\".",
     "Available for percolator", true);
@@ -2521,7 +2520,6 @@ void Params::Categorize() {
   items.insert("output_mzidentmlfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
-  items.insert("output-retention-time");
   items.insert("output_sqtstream");
   items.insert("output_sqtfile");
   items.insert("output_txtfile");
