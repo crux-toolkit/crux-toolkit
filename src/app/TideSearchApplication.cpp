@@ -339,7 +339,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     }
 
     pb_spectrum = spectrum_pair.first;
-    // carp(CARP_INFO, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
     locks_array_[LOCK_SPECTRUM_READING]->unlock();
     
     Spectrum* spectrum = new Spectrum(pb_spectrum); 
@@ -439,7 +438,6 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
     iter != active_peptide_queue->end_;
     ++iter, ++cnt) {
     if ((*iter)->active_ == false && score_inactive_peptides == false) 
-//      if (active_peptide_queue->candidatePeptideStatus_[cnt] == false && score_inactive_peptides == false) 
       continue;
     int xcorr = 0;
     int match_cnt = 0;
@@ -448,22 +446,15 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
   
     // Score with single charged b-y ion theoretical peaks
     xcorr += PeakMatching(observed, (*iter)->peaks_0, match_cnt, temp);
-    // // Count the repeating matching ions. This was used in SP scoring
-    // temp = PeakMatching(observed, (*iter)->peaks_1b, temp, repeat_ion_match);
-    // temp = PeakMatching(observed, (*iter)->peaks_1y, temp, repeat_ion_match);
 
     if (charge > 2){
       // Score with double charged b-y ion theoretical peaks
       xcorr += PeakMatching(observed, (*iter)->peaks_1, match_cnt, temp);      
-      // Count the repeating matching ions. This was used in SP scoring      
-      // temp = PeakMatching(observed, (*iter)->peaks_2b, temp, repeat_ion_match);
-      // temp = PeakMatching(observed, (*iter)->peaks_2y, temp, repeat_ion_match);
     }
     psm_scores.psm_scores_[cnt].peptide_itr_ = iter;
     psm_scores.psm_scores_[cnt].ordinal_ = cnt;    
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
-    // psm_scores.psm_scores_[cnt].repeat_ion_match_ = repeat_ion_match;
     psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
     psm_scores.psm_scores_[cnt].by_ion_total_ = (*iter)->peaks_0.size();
     if (charge > 2){

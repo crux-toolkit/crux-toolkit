@@ -392,8 +392,6 @@ void TideMatchSet::gatherTargetsDecoys() {
   }
   quantile_score_ = psm_scores_[psm_scores_.size()-1-quantile_pos].xcorr_score_ + TAILOR_OFFSET; // Make sure scores positive
 
-  // carp(CARP_INFO, "PSM_scores:  %d Quantile pos: %d , qunatile_score: %lf",psm_scores_.size(), quantile_pos, quantile_score_ );
-
   // get the value of the last score for the delta_lcn scores
   last_psm_ = std::min_element(psm_scores_.begin(), psm_scores_.end(), comp);
   
@@ -447,7 +445,6 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
     // Count the repeating matching ions. This was used in SP scoring
     temp = 0;
     repeat_ion_match = 0;
-//    peptide = active_peptide_queue_->GetPeptide((*it).ordinal_);
     peptide = (*((*it).peptide_itr_));
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1b, temp, repeat_ion_match);
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1y, temp, repeat_ion_match);
