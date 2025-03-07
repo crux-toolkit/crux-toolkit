@@ -279,7 +279,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
             continue; 
           }
           // allocate PSMscores for N scores
-          TideMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
+          TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
 
           TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);
 
@@ -372,8 +372,8 @@ void DIAmeterApplication::reportDIA(
   // vector<TideMatchSet::Arr::iterator> targets, decoys;
   // matches->gatherTargetsAndDecoys(peptides, proteins, targets, decoys, Params::GetInt("top-match"), 1, true);
   matches.gatherTargetsDecoys();
-  matches.calculateAdditionalScores(matches.concat_or_target_psm_scores_);
-  matches.calculateAdditionalScores(matches.decoy_psm_scores_);
+  matches.calculateAdditionalScores(matches.concat_or_target_psm_scores_, &sc);
+  matches.calculateAdditionalScores(matches.decoy_psm_scores_, &sc);
 
   // calculate precursor intensity logrank (ppm-based)
   int peak_num_new = -1; double *mz_arr_new = NULL, *intensity_arr_new = NULL, *intensity_rank_arr_new = NULL;
