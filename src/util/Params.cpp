@@ -1230,6 +1230,12 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("require_variable_mod", "0", "0|1",
     "Controls whether the analyzed peptides must contain at least one variable modification.",
     "Available for comet.", true);
+  InitStringParam("protein_modlist_file", "",
+    "Specify a full or relative path to a protein modifications file. "
+    "If this entry points to a modifications file, Comet will parse the modification numbers and protein strings " 
+    "from the file and limit the application of the specified variable modifications to the sequence entries that "
+    "match the protein string.",
+    "Available for comet.", true);
   /* Comet - Static modifications */
   InitDoubleParam("add_Cterm_peptide", 0, 0, BILLION,
     "Specifiy a static modification to the c-terminus of all peptides.",
@@ -1268,6 +1274,14 @@ InitStringParam("protein-name-separator", ",",
   InitIntParam("fragindex_min_ions_score", 3, 1, BILLION,
     "This parameter sets the minimum number fragment ions a peptide must match against the fragment"
     "ion index in order to proceed to xcorr scoring.",
+    "Available for comet.", true);
+  InitIntParam("fragindex_num_spectrumpeaks", 100, 1, BILLION,
+    "This parameter defines the number of mass/intensity pairs that would be queried "
+    "against the fragment ion index",
+    "Available for comet.", true);
+  InitIntParam("fragindex_skipreadprecursors", 0, 0, 1,
+    "This parameter controls whether or not Comet reads all precursors from the input files. "
+    "It uses this information to limit the peptides that are included in the fragment ion index.",
     "Available for comet.", true);
 
   InitBoolParam("list-of-files", false,
@@ -2437,6 +2451,7 @@ void Params::Categorize() {
   items.insert("auto_modifications");
   items.insert("max_variable_mods_in_peptide");
   items.insert("require_variable_mod");
+  items.insert("protein_modlist_file");
   AddCategory("Variable modifications", items);
 
   items.clear();
@@ -2458,6 +2473,8 @@ void Params::Categorize() {
   items.insert("fragindex_min_fragmentmass");
   items.insert("fragindex_min_ions_report");
   items.insert("fragindex_min_ions_score");
+  items.insert("fragindex_num_spectrumpeaks");
+  items.insert("fragindex_skipreadprecursors");
   AddCategory("Fragment ion indexing", items);
 
   items.clear();

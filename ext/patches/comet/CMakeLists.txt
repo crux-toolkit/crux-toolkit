@@ -21,6 +21,7 @@ set(
   CometSearch/CometFragmentIndex.cpp
   CometSearch/CometInterfaces.cpp 
   CometSearch/CometSearch.cpp 
+  CometSearch/CometPeptideIndex.cpp 
   CometSearch/CometPreprocess.cpp 
   CometSearch/CometPostAnalysis.cpp 
   CometSearch/CometMassSpecUtils.cpp 

@@ -58,7 +58,7 @@ int CometApplication::main(const vector<string>& input_files) {
   const bool create_fragment_index = Params::GetBool("create_fragment_index");
   if (create_fragment_index) {
     /* Create fragment index */
-   bool success = searchManager_.CreateIndex();
+   bool success = searchManager_.CreateFragmentIndex();
   }
   else {
     /* Run search */
@@ -307,6 +307,7 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod09");
   setInt("max_variable_mods_in_peptide");
   setString("require_variable_mod");
+  setString("protein_modlist_file");
   // Static modifications
   setDouble("add_Cterm_peptide");
   setDouble("add_Nterm_peptide");
@@ -325,6 +326,8 @@ void CometApplication::setCometParameters(
   setDouble("fragindex_min_fragmentmass");
   setInt("fragindex_min_ions_report");
   setInt("fragindex_min_ions_score");
+  setInt("fragindex_num_spectrumpeaks");
+  setInt("fragindex_skipreadprecursors");
 }
 
 string CometApplication::staticModParam(char c) {
@@ -474,6 +477,7 @@ vector<string> CometApplication::getOptions() const {
     "auto_modifications",
     "max_variable_mods_in_peptide",
     "require_variable_mod",
+    "protein_modlist_file",
     // Static modifications
     "add_Cterm_peptide",
     "add_Nterm_peptide",
@@ -511,6 +515,8 @@ vector<string> CometApplication::getOptions() const {
     "fragindex_min_fragmentmass",
     "fragindex_min_ions_report",
     "fragindex_min_ions_score",
+    "fragindex_num_spectrumpeaks",
+    "fragindex_skipreadprecursors",
     // param-medic
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",
