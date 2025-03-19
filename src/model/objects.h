@@ -658,6 +658,7 @@ enum _command {
   TIDE_SEARCH_COMMAND,  ///< tide-search
   DIAMETER_COMMAND,  ///< tide-search
   COMET_COMMAND,        ///< comet
+  COMET_INDEX_COMMAND,  ///< comet create index
   KOJAK_COMMAND,        ///< kojak
   PSM_CONVERT_COMMAND,  ///< psm-convert
   READ_SPECTRUMRECORDS_COMMAND, ///< read-spectrumrecords

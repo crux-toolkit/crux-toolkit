@@ -28,6 +28,7 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "CometIndexApplication.h"
 #include "KojakApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
@@ -47,6 +48,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new AssignConfidenceApplication());
   apps.add(new CascadeSearchApplication());  
   apps.add(new CometApplication());
+  apps.add(new CometIndexApplication());
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
   apps.add(new CruxHardklorApplication());

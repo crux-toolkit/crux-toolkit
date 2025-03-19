@@ -110,6 +110,7 @@ set (
   io/carp.cpp
   util/CarpStreamBuf.cpp
   app/CometApplication.cpp
+  app/CometIndexApplication.cpp
   app/ComputeQValues.cpp
   app/CreateDocs.cpp
   ${ASYNCPOST}

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="2025-02-07T11:03:54" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="2025-03-19T12:55:05" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="NA" msManufacturer="NA" msModel="NA" msIonization="NA" raw_data_type="NA" raw_data="NA" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -241,6 +241,7 @@
 <parameter name="variable_mod09" value="0.0 null 0 4 -1 0 0"/>
 <parameter name="max_variable_mods_in_peptide" value="5"/>
 <parameter name="require_variable_mod" value="0"/>
+<parameter name="protein_modlist_file" value=""/>
 <parameter name="add_Cterm_peptide" value="0"/>
 <parameter name="add_Nterm_peptide" value="0"/>
 <parameter name="add_Cterm_protein" value="0"/>
@@ -271,6 +272,13 @@
 <parameter name="add_X_user_amino_acid" value="0"/>
 <parameter name="add_Y_tyrosine" value="0"/>
 <parameter name="add_Z_user_amino_acid" value="0"/>
+<parameter name="create_peptide_index" value="false"/>
+<parameter name="fragindex_max_fragmentmass" value="2000"/>
+<parameter name="fragindex_min_fragmentmass" value="200"/>
+<parameter name="fragindex_min_ions_report" value="3"/>
+<parameter name="fragindex_min_ions_score" value="3"/>
+<parameter name="fragindex_num_spectrumpeaks" value="100"/>
+<parameter name="fragindex_skipreadprecursors" value="0"/>
 <parameter name="list-of-files" value="false"/>
 <parameter name="estimation-method" value="tdc"/>
 <parameter name="sidak" value="false"/>
