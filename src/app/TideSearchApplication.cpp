@@ -339,7 +339,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     }
 
     pb_spectrum = spectrum_pair.first;
-    // carp(CARP_INFO, "neutral mass: %lf\t thread id: %d", pb_spectrum.neutral_mass(), thread_id);
     locks_array_[LOCK_SPECTRUM_READING]->unlock();
     
     Spectrum* spectrum = new Spectrum(pb_spectrum); 
@@ -360,6 +359,9 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         spectrum->Size() < min_peaks_  ||
         charge < min_precursor_charge_ || 
         charge >max_precursor_charge_ ) {
+        delete spectrum;
+        delete sc;
+      
       continue; 
    }
 
@@ -376,15 +378,31 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     delete max_mass;
 
     if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
+      delete spectrum;
+      delete sc;  
       continue; 
     }
+    long num_range_skipped = 0;
+    long num_precursors_skipped = 0;
+    long num_isotopes_skipped = 0;
+    long num_retained = 0;
+
+    ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
+    observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
+      &num_precursors_skipped,
+      &num_isotopes_skipped, &num_retained);
+
     locks_array_[LOCK_CANDIDATES]->lock();
     total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
     ++num_spectra_searched_;    
+    num_range_skipped_ += num_range_skipped;
+    num_precursors_skipped_ += num_precursors_skipped;
+    num_isotopes_skipped_ += num_isotopes_skipped;
+    num_retained_ += num_retained;
     locks_array_[LOCK_CANDIDATES]->unlock();  
-
+ 
     // allocate PSMscores for N scores
-    TideMatchSet psm_scores(active_peptide_queue);  //nPeptides_ includes acitve and inacitve peptides
+    TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
 
     // Calculate the scores needed
     switch (curScoreFunction_) {
@@ -393,34 +411,16 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         //break; // Run standard xcorr scoring in case of combined p-value calculations
       case XCORR_SCORE:
         // Spectrum preprocessing for xcorr scoring
-        long num_range_skipped = 0;
-        long num_precursors_skipped = 0;
-        long num_isotopes_skipped = 0;
-        long num_retained = 0;
-
-        ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
-        observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
-          &num_precursors_skipped,
-          &num_isotopes_skipped, &num_retained);
-
-        locks_array_[LOCK_REPORTING]->lock();
-        num_range_skipped_ += num_range_skipped;
-        num_precursors_skipped_ += num_precursors_skipped;
-        num_isotopes_skipped_ += num_isotopes_skipped;
-        num_retained_ += num_retained;
-        locks_array_[LOCK_REPORTING]->unlock();
-
         XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
         break;
-      // case HYPERSCOR: TODO add noew scoring functinos here
+      // case HYPERSCOR: TODO add new scoring functions here
     } 
     // Print the top-N results to the output files, 
-    // The delta_cn, delta_lcn, and tailor score calulation happens in PrintResults
-
+    // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults
     PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
+
     delete spectrum;
     delete sc;
-
   }
 }
 
@@ -437,31 +437,25 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
   for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
     iter != active_peptide_queue->end_;
     ++iter, ++cnt) {
-    if (active_peptide_queue->candidatePeptideStatus_[cnt] == false && score_inactive_peptides == false) 
+    if ((*iter)->active_ == false && score_inactive_peptides == false) 
       continue;
     int xcorr = 0;
     int match_cnt = 0;
     int temp = 0;
-    int repeat_ion_match = 0;
+    // int repeat_ion_match = 0;
   
     // Score with single charged b-y ion theoretical peaks
     xcorr += PeakMatching(observed, (*iter)->peaks_0, match_cnt, temp);
-    // Count the repeating matching ions. This was used in SP scoring
-    temp = PeakMatching(observed, (*iter)->peaks_1b, temp, repeat_ion_match);
-    temp = PeakMatching(observed, (*iter)->peaks_1y, temp, repeat_ion_match);
 
     if (charge > 2){
       // Score with double charged b-y ion theoretical peaks
       xcorr += PeakMatching(observed, (*iter)->peaks_1, match_cnt, temp);      
-      // Count the repeating matching ions. This was used in SP scoring      
-      temp = PeakMatching(observed, (*iter)->peaks_2b, temp, repeat_ion_match);
-      temp = PeakMatching(observed, (*iter)->peaks_2y, temp, repeat_ion_match);
     }
+    psm_scores.psm_scores_[cnt].peptide_itr_ = iter;
     psm_scores.psm_scores_[cnt].ordinal_ = cnt;    
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
-    psm_scores.psm_scores_[cnt].repeat_ion_match_ = repeat_ion_match;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
     psm_scores.psm_scores_[cnt].by_ion_total_ = (*iter)->peaks_0.size();
     if (charge > 2){
       psm_scores.psm_scores_[cnt].by_ion_total_ += (*iter)->peaks_1.size();
@@ -537,8 +531,9 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
-      continue;
+      // if (!active_peptide_queue->candidatePeptideStatus_[cnt])
+      if (! (*iter)->active_)
+        continue;
 
     int pepMassIntIdx = 0;
     int curPepMassInt;
@@ -566,7 +561,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
     psm_scores.psm_scores_[cnt].ordinal_ = cnt;
     psm_scores.psm_scores_[cnt].refactored_xcorr_ = scoreRefactInt / RESCALE_FACTOR;
     psm_scores.psm_scores_[cnt].exact_pval_ = pValue_xcorr;
-    psm_scores.psm_scores_[cnt].active_ = active_peptide_queue->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
   }
 
   // // 2. Calculate the RES-EV SCORE and its RES-EV P-VALUE, developed by Andy Lin
@@ -623,7 +618,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue->candidatePeptideStatus_[cnt]) {
+    if (!(*iter)->active_) {
       resEvScores.push_back(-1);
       continue;
     }
@@ -699,7 +694,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
-    if (!active_peptide_queue->candidatePeptideStatus_[cnt])
+    if (! (*iter)->active_ )
       continue;
 
     int pepMassIntIdx = 0;
@@ -738,7 +733,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
     psm_scores.psm_scores_[cnt].resEv_pval_    = pValue_resEv;
     psm_scores.psm_scores_[cnt].combined_pval_ = pValue_combined;
     psm_scores.psm_scores_[cnt].ordinal_       = cnt;
-    psm_scores.psm_scores_[cnt].active_        = active_peptide_queue->candidatePeptideStatus_[cnt];  
+    psm_scores.psm_scores_[cnt].active_        = (*iter)->active_;  
   }
 }
 
@@ -1802,13 +1797,13 @@ void TideSearchApplication::getMassBin(
   ActivePeptideQueue* active_peptide_queue
 ) {
   int pe = 0;
-  for (deque<Peptide*>::const_iterator iter_ = active_peptide_queue->begin_;
-      iter_ != active_peptide_queue->end_; 
-      ++iter_) {
-    double pepMass = (*iter_)->Mass();
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_;
+      iter != active_peptide_queue->end_; 
+      ++iter) {
+    double pepMass = (*iter)->Mass();
     int pepMaInt = MassConstants::mass2bin(pepMass);
     pepMassInt[pe] = pepMaInt;
-    if (active_peptide_queue->candidatePeptideStatus_[pe]) {
+    if ( (*iter)->active_) {
       pepMassIntUnique.push_back(pepMaInt);
     }
     pe++;
