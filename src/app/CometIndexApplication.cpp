@@ -46,6 +46,10 @@ int CometIndexApplication::main() {
     searchManager_.AddInputFiles(pv_input_files);
     // Create index 
     bool success = false;
+    // Update the Comet parameters for which type of 
+    // index should be created. Index is either ion fragment
+    // or peptide.But both have to be set,
+    // The create_fragment_index is a hidden parameter for crux.
     if (Params::GetBool("create_peptide_index")) {
       searchManager_.SetParam("create_peptide_index", "1", 1);
       searchManager_.SetParam("create_fragment_index", "0", 0);
@@ -71,7 +75,10 @@ void CometIndexApplication::setCometParameters(
   vector<InputFileInfo*>& pvInputFiles ///<vector of input spectra files
 ) {
   CometApplication::setCometParameters(spec_files, pvInputFiles);
-  // Indexing
+  // Update the Comet parameters for which type of 
+  // index should be created. Index is either ion fragment
+  // or peptide, but both heave to be set.
+  // The create_fragment_index is a hidden parameter for crux.
   if (Params::GetBool("create_fragment_index")) {
     searchManager_.SetParam("create_peptide_index", "0", 0);
     searchManager_.SetParam("create_fragment_index", "1", 0);
