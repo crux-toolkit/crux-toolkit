@@ -53,17 +53,8 @@ int CometApplication::main(const vector<string>& input_files) {
   setCometParameters(input_files, pv_input_files);
   searchManager_.AddInputFiles(pv_input_files);
   
-  bool success = false;
-  // Create fragment index or run search
-  const bool create_fragment_index = Params::GetBool("create_fragment_index");
-  if (create_fragment_index) {
-    /* Create fragment index */
-   bool success = searchManager_.CreateFragmentIndex();
-  }
-  else {
-    /* Run search */
-   bool success = searchManager_.DoSearch();
-  }
+  /* Run search */
+  bool success = searchManager_.DoSearch();
 
   /* Recover stderr */
   std::cerr.rdbuf(old);
@@ -321,7 +312,9 @@ void CometApplication::setCometParameters(
             "search_enzyme_number", "search_enzyme2_number", "sample_enzyme_number",
             "allowed_missed_cleavage");
 
-  // Fragment ion indexing
+  // Indexing
+  searchManager_.SetParam("create_fragment_index", "0", 0);
+  searchManager_.SetParam("create_peptide_index", "0", 0);
   setDouble("fragindex_max_fragmentmass");
   setDouble("fragindex_min_fragmentmass");
   setInt("fragindex_min_ions_report");
@@ -353,7 +346,7 @@ string CometApplication::getDescription() const {
   return
     "[[nohtml:Search a collection of spectra against a sequence database, "
     "returning a collection of PSMs. This search engine runs directly on a "
-    "protein database in FASTA format.]]"
+    "protein database in FASTA format or an index created from a FASTA file.]]"
     "[[html:<p>This command searches a protein database with a set of spectra, "
     "assigning peptide sequences to the observed spectra. This search engine "
     "was developed by Jimmy Eng at the University of Washington Proteomics "
@@ -509,14 +502,6 @@ vector<string> CometApplication::getOptions() const {
     "add_J_user_amino_acid",
     "add_X_user_amino_acid",
     "add_Z_user_amino_acid",
-    // Fragment ion indexing
-    "create_fragment_index",
-    "fragindex_max_fragmentmass",
-    "fragindex_min_fragmentmass",
-    "fragindex_min_ions_report",
-    "fragindex_min_ions_score",
-    "fragindex_num_spectrumpeaks",
-    "fragindex_skipreadprecursors",
     // param-medic
     "pm-min-precursor-mz",
     "pm-max-precursor-mz",
@@ -529,7 +514,14 @@ vector<string> CometApplication::getOptions() const {
     "pm-pair-top-n-frag-peaks",
     "pm-min-common-frag-peaks",
     "pm-max-scan-separation",
-    "pm-min-peak-pairs"
+    "pm-min-peak-pairs",
+  // Fragment ion fragment indexing
+    "fragindex_skipreadprecursors",
+    "fragindex_num_spectrumpeaks",
+    "fragindex_min_ions_score",
+    "fragindex_min_ions_report",
+    "fragindex_min_fragmentmass",
+    "fragindex_max_fragmentmass"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

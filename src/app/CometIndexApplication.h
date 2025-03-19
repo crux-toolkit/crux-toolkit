@@ -35,6 +35,13 @@ public:
   int main(void);
 
   /**
+   * Sets the parameters for the Comet application using the crux parameters
+  */
+  virtual void setCometParameters(
+    const vector<string>& spec_files,
+    vector<InputFileInfo*>& pvInputFiles ///<vector of input spectra files
+  );
+  /**
    * \returns the command name for CometIndexApplication
    */
   virtual std::string getName() const;
@@ -43,6 +50,11 @@ public:
    * \returns the description for CometIndexApplication
    */
   virtual std::string getDescription() const;
+
+  /**
+   * \returns the command options
+   */
+  vector<string> getOptions() const;
 
   /**
    * \returns the command arguments
@@ -56,6 +68,10 @@ public:
 
   virtual COMMAND_T getCommand() const;
 
+  /**
+   * Processes the parameters
+   */
+  virtual void processParams();
 };
 
 #endif

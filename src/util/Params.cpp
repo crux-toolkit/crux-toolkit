@@ -905,14 +905,21 @@ InitStringParam("protein-name-separator", ",",
     "(space delimited), prior to the name of the database.");
   /* Comet - Database */
   InitArgParam("database_name",
-    "A full or relative path to the sequence database, "
-    "in FASTA or PEFF format, to search. Example databases include "
+    "A full or relative path to the sequence database to search."
+    "The database may be in FASTA or PEFF format, or it may be an index "
+    "created with the <code>comet-index</code> command. "
+    "Example databases include "
     "RefSeq or UniProt.  The database can contain amino acid "
     "sequences or nucleic acid sequences. If sequences are "
     "amino acid sequences, set the parameter \"nucleotide_reading_frame = 0\". "
     "If the sequences are nucleic acid sequences, you must instruct Comet to "
     "translate these to amino acid sequences. Do this by setting "
     "nucleotide_reading_frame\" to a value between 1 and 9.");
+  InitArgParam("index_database_name",
+    "A full or relative path to the sequence database to generate "
+    "an index for. The database may be in FASTA or PEFF format. "
+    "The index will be created in the same directory as the database "
+    "and with the same name, but the suffix '.idx'.");
   InitIntParam("decoy_search", 0, 0, 2,
     "0=no, 1=concatenated search, 2=separate search.",
     "Available for comet.", true);
@@ -1257,32 +1264,32 @@ InitStringParam("protein-name-separator", ",",
                     "Specify a static modification to the residue " + string(1, c) + ".",
                     "Available for comet.", true);
   }
-  // Comet - Fragment ion indexing
+  InitBoolParam("create_peptide_index", false,
+    "Create an index of peptides.", "Available for comet-index.", true);
   InitBoolParam("create_fragment_index", false,
-      "Generate index of ion fragments",
-      "Available for comet.", true);
+    "Create an index of ion fragments.","Available for comet-index",  false);
   InitDoubleParam("fragindex_max_fragmentmass", 2000.0, 0, BILLION,
     "This parameter defines the maximum fragment ion mass to include in the fragment ion index.",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
   InitDoubleParam("fragindex_min_fragmentmass", 200.0, 0, BILLION,
     "This parameter defines the minimum fragment ion mass to include in the fragment ion index.",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
   InitIntParam("fragindex_min_ions_report", 3, 1, BILLION,
     "This parameter sets the minimum number fragment ions a peptide must match against the fragment"
     " on index in order to report this peptide in the output",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
   InitIntParam("fragindex_min_ions_score", 3, 1, BILLION,
     "This parameter sets the minimum number fragment ions a peptide must match against the fragment"
     "ion index in order to proceed to xcorr scoring.",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
   InitIntParam("fragindex_num_spectrumpeaks", 100, 1, BILLION,
     "This parameter defines the number of mass/intensity pairs that would be queried "
     "against the fragment ion index",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
   InitIntParam("fragindex_skipreadprecursors", 0, 0, 1,
     "This parameter controls whether or not Comet reads all precursors from the input files. "
     "It uses this information to limit the peptides that are included in the fragment ion index.",
-    "Available for comet.", true);
+    "Available for comet-index.", true);
 
   InitBoolParam("list-of-files", false,
     "Specify that the search results are provided as lists of files, rather than as "
@@ -2468,6 +2475,7 @@ void Params::Categorize() {
   AddCategory("Static modifications", items);
 
   items.clear();
+  items.insert("create_peptide_index");
   items.insert("create_fragment_index");
   items.insert("fragindex_max_fragmentmass");
   items.insert("fragindex_min_fragmentmass");
@@ -2475,7 +2483,7 @@ void Params::Categorize() {
   items.insert("fragindex_min_ions_score");
   items.insert("fragindex_num_spectrumpeaks");
   items.insert("fragindex_skipreadprecursors");
-  AddCategory("Fragment ion indexing", items);
+  AddCategory("Indexing", items);
 
   items.clear();
   items.insert("only-psms");
