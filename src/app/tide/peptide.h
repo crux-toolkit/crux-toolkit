@@ -137,7 +137,9 @@ class Peptide {
   vector<unsigned int> peaks_1b;   // Single charged b ions
   vector<unsigned int> peaks_1y;   // Single charged y ions
   vector<unsigned int> peaks_2b;   // Double charged b ions
-  vector<unsigned int> peaks_2y;   // Double charged y ions
+  vector<unsigned int> peaks_2y;   // Double charged y ions 
+
+  bool active_;
   
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
