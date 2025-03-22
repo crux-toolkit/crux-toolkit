@@ -434,7 +434,7 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
   
   //Actual Xcorr Scoring        
   int cnt = 0;
-  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+  for (list<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
     iter != active_peptide_queue->end_;
     ++iter, ++cnt) {
     if ((*iter)->active_ == false && score_inactive_peptides == false) 
@@ -451,8 +451,7 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
       // Score with double charged b-y ion theoretical peaks
       xcorr += PeakMatching(observed, (*iter)->peaks_1, match_cnt, temp);      
     }
-    psm_scores.psm_scores_[cnt].peptide_itr_ = iter;
-    psm_scores.psm_scores_[cnt].ordinal_ = cnt;    
+    psm_scores.psm_scores_[cnt].peptide_ptr_ = *iter;
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
     psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
@@ -527,7 +526,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
   // between a spectrum and all possible peptide candidates
   int scoreRefactInt;
   int cnt = 0;
-  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+  for (list<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
@@ -558,7 +557,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
     }
 
     // Store the scores. 
-    psm_scores.psm_scores_[cnt].ordinal_ = cnt;
+    psm_scores.psm_scores_[cnt].peptide_ptr_ = *iter;
     psm_scores.psm_scores_[cnt].refactored_xcorr_ = scoreRefactInt / RESCALE_FACTOR;
     psm_scores.psm_scores_[cnt].exact_pval_ = pValue_xcorr;
     psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
@@ -614,7 +613,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
   int scoreResidueEvidence;
   vector<int> resEvScores;
   cnt = 0;
-  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+  for (list<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
@@ -690,7 +689,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
   double pValue_combined = 0.3;
 
   cnt = 0;
-  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+  for (list<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
       iter != active_peptide_queue->end_; 
       ++iter, ++cnt) {
 
@@ -732,7 +731,7 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
     psm_scores.psm_scores_[cnt].resEv_score_   = scoreResidueEvidence;
     psm_scores.psm_scores_[cnt].resEv_pval_    = pValue_resEv;
     psm_scores.psm_scores_[cnt].combined_pval_ = pValue_combined;
-    psm_scores.psm_scores_[cnt].ordinal_       = cnt;
+    psm_scores.psm_scores_[cnt].peptide_ptr_   = *iter;
     psm_scores.psm_scores_[cnt].active_        = (*iter)->active_;  
   }
 }
@@ -1797,7 +1796,7 @@ void TideSearchApplication::getMassBin(
   ActivePeptideQueue* active_peptide_queue
 ) {
   int pe = 0;
-  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_;
+  for (list<Peptide*>::const_iterator iter = active_peptide_queue->begin_;
       iter != active_peptide_queue->end_; 
       ++iter) {
     double pepMass = (*iter)->Mass();
