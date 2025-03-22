@@ -1,4 +1,5 @@
 #include <deque>
+#include <list>
 #include "peptides.pb.h"
 #include "peptide.h"
 #include "theoretical_peak_set.h"
@@ -23,17 +24,13 @@ class ActivePeptideQueue {
   int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, 
         double min_range, double max_range); 
 
-  Peptide* GetPeptide(int index) {
-    return *(begin_ + index); 
-  }
-
   int nPeptides_;
   int nCandPeptides_;
   int CandPeptidesTarget_;
   int CandPeptidesDecoy_;
 
-  deque<Peptide*> queue_;
-  deque<Peptide*>::const_iterator begin_, end_;  
+  list<Peptide*> queue_;
+  list<Peptide*>::iterator begin_, end_;  
   int min_candidates_;
   bool dia_mode_;
 

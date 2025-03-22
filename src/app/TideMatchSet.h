@@ -24,7 +24,6 @@ class TideMatchSet {
  public:
   class Scores {
    public:
-    int ordinal_;
     double xcorr_score_;
     double exact_pval_;
     double refactored_xcorr_;
@@ -41,8 +40,8 @@ class TideMatchSet {
     double delta_cn_;
     double delta_lcn_;
     bool active_;
-    deque<Peptide*>::const_iterator peptide_itr_;
-    Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
+    Peptide* peptide_ptr_;
+    Scores():xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
       resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
       sp_score_(0), hyper_score_(0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0), active_(false) {}
   };

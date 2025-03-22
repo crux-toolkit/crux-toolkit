@@ -504,7 +504,7 @@ void DIAmeterApplication::computePrecIntRank(
   double intercept = slope_intercept_tp.get<1>();
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
+    Peptide& peptide = *(i->peptide_ptr_);
     double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
 
     double intensity_rank_m0 = closestPPMValue(mz_arr, intensity_rank_arr, peak_num, peptide_mz_m0, Params::GetInt("prec-ppm"), noise_intensity_rank, false);
@@ -531,7 +531,7 @@ void DIAmeterApplication::computePrecFragCoelute(
   vector<double> ms1_corrs, ms2_corrs, ms1_ms2_corrs;
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
+    Peptide& peptide = *(i->peptide_ptr_);
     // Precursor signals
     double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
     // Fragment signals
@@ -648,7 +648,7 @@ void DIAmeterApplication::computeMS2Pval(
   vector<double> pvalue_binomial_probs;
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
+    Peptide& peptide = *(i->peptide_ptr_);
     vector<int> ion_mzbins = peptide.IonMzbins();
 
     intersect_mzbins.clear();

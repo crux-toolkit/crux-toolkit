@@ -406,7 +406,7 @@ void TideMatchSet::gatherTargetsDecoys() {
     if ((*i).active_ == false)
       continue;
 
-    Peptide* peptide = active_peptide_queue_->GetPeptide((*i).ordinal_);
+    Peptide* peptide = i->peptide_ptr_;
     if (concat_ || !peptide->IsDecoy()) {
       if (concat_or_target_psm_scores_.size() < gatherSize) {
         concat_or_target_psm_scores_.push_back(*i);
@@ -445,7 +445,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
     // Count the repeating matching ions. This was used in SP scoring
     temp = 0;
     repeat_ion_match = 0;
-    peptide = (*((*it).peptide_itr_));
+    peptide = it->peptide_ptr_;
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1b, temp, repeat_ion_match);
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1y, temp, repeat_ion_match);
 
@@ -522,7 +522,7 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
   double predrt;
   
   for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it) {
-    Peptide* peptide = active_peptide_queue_->GetPeptide((*it).ordinal_);
+    Peptide* peptide = it->peptide_ptr_;
     int decoy_idx = peptide->DecoyIdx();
     decoy_idx = decoy_idx < 0 ? 0 : decoy_idx;
     ++cnt[decoy_idx];
