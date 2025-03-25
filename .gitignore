@@ -1,5 +1,6 @@
 # general patterns
 .DS_Store
+*.swo
 *.swp
 *.a
 CMakeCache.txt
@@ -16,6 +17,9 @@ rules.ninja
 /Makefile
 /crux_version.h
 /crux_version.h.txt
+/build
+/Debug
+/Release
 
 # /doc
 /doc/user/Makefile

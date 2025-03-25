@@ -52,25 +52,16 @@
     <h2>Release notes for Crux</h2>
 
 
-<h3>Version 4.2</h3> April 6, 2024
-
+<h3>Version 4.3</h3> March 25, 2025
 <h4>Major changes</h4>
-  
+  <li>19 March 2025: Updated to use Comet 2025.01.1, including support for indexing 
+  a sequence database.</li>
   <li>11 December 2024: Updated to use Percolator rel 3-07-01. Retention time now
   included in Percolator output.</li>
   <li>18 Oct 2024: speeded up tide-search, restuctured its code.
   <li>18 Oct 2024: Added support to produce output in mztab format.
   <li>18 Oct 2024: tide-index supports unimod codes.  
-  <li>6 April 2024: Updated to use Percolator commit d0d48b5.
-  <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
-  dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
-  issues building Crux on newer releases of Linux and MacOS. The Centos 7
-  build was replaced with Ubuntu 20.04 in GitHub commit action for Master branch.
-  The recommended version of CMake is now 3.24. Earlier versions will work,
-  but you may see some warning messages.
-  </li>
 <h4>Minor changes</h4>
-<ul>
   <li>24 March 2025: Fixed issue #696 failure in pipeline application.</li>
   <li>14 Feb 2025: Improved tide-search run time.</li>
   <li>6 Feb 2025: create Spectrum Convert application.</li>
@@ -87,6 +78,21 @@
   <li>06 Auguest 2024: Minor changes to website support.</li>
   <li>30 July 2024: Modified tool use events to submit via GA4.</li>
   <li>02 July 2024: Typo fix in the documentation of precursor window calculation.</li>
+
+<h3>Version 4.2</h3> April 6, 2024
+
+<h4>Major changes</h4>
+  
+  <li>6 April 2024: Updated to use Percolator commit d0d48b5.
+  <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
+  dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
+  issues building Crux on newer releases of Linux and MacOS. The Centos 7
+  build was replaced with Ubuntu 20.04 in GitHub commit action for Master branch.
+  The recommended version of CMake is now 3.24. Earlier versions will work,
+  but you may see some warning messages.
+  </li>
+<h4>Minor changes</h4>
+<ul>
   <li>12 April 2024: Fixed bug in ArgParser with repeated options and arguments.</li>
   <li>6 April 2024: Updated UNIMOD definitions.</li>
   <li>26 March 2024: Updated smoke tests.</li>

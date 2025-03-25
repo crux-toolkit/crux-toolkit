@@ -33,6 +33,7 @@
 #include "app/ReadTideIndex.h"
 #include "app/TideSearchApplication.h"
 #include "app/CometApplication.h"
+#include "app/CometIndexApplication.h"
 #include "app/PSMConvertApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
@@ -69,6 +70,7 @@ int main(int argc, char** argv) {
     applications.add(new ReadSpectrumRecordsApplication());
     applications.add(new ReadTideIndex());
     applications.add(new CometApplication());
+    applications.add(new CometIndexApplication());
     applications.add(new PercolatorApplication());
     applications.add(new SpectralCounts());
     applications.add(new PipelineApplication());
