@@ -144,7 +144,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
     // Active queue to process the indexed peptides
     HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
-    ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins, NULL, dia_mode);
+    ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins, NULL, dia_mode, 1);
+    ActivePeptideWindow* active_peptide_window = active_peptide_queue->GetActivePeptideWindows()[0];
 
     // Some setup adopted from TideSearch
     const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
@@ -270,20 +271,20 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // values for taking dot products with theoretical spectra.
           // TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
           observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained, dia_mode);
-          active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+          active_peptide_window->SetActiveRange(min_mass, max_mass, min_range, max_range);
 
 
-          if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
+          if (active_peptide_window->nCandPeptides == 0) { // No peptides to score.
             delete min_mass;
             delete max_mass;
             continue; 
           }
           // allocate PSMscores for N scores
-          TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
+          TideMatchSet psm_scores(active_peptide_window, &observed);  //nPeptides_ includes acitve and inacitve peptides
 
-          TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);
+          TideSearchApplication::XCorrScoring(charge, observed, active_peptide_window, psm_scores);
 
-          reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins,
+          reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_window, proteins,
               psm_scores, &observed, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map,
               &ms2scan_mz_intensity_map, &peptide_predrt_map);
 
@@ -354,7 +355,7 @@ void DIAmeterApplication::reportDIA(
   ofstream* output_file,  // output file to write to
   const string& spectrum_filename, // name of spectrum file
   const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
-  ActivePeptideQueue* peptides, // peptide queue
+  ActivePeptideWindow* peptides, // peptide queue
   const ProteinVec& proteins, // proteins corresponding with peptides
   TideMatchSet& matches, // object to manage PSMs
   ObservedPeakSet* observed,
@@ -488,7 +489,7 @@ void DIAmeterApplication::reportDIA(
 
 void DIAmeterApplication::computePrecIntRank(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideQueue* peptides,
+  ActivePeptideWindow* peptides,
   const double* mz_arr,
   const double* intensity_arr,
   const double* intensity_rank_arr,
@@ -522,7 +523,7 @@ void DIAmeterApplication::computePrecIntRank(
 
 void DIAmeterApplication::computePrecFragCoelute(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideQueue* peptides,
+  ActivePeptideWindow* peptides,
   vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
   map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
   int charge
@@ -622,7 +623,7 @@ void DIAmeterApplication::computePrecFragCoelute(
 
 void DIAmeterApplication::computeMS2Pval(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideQueue* peptides,
+  ActivePeptideWindow* peptides,
   ObservedPeakSet* observed,
   map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
 ) {

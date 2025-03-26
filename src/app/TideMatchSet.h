@@ -76,7 +76,7 @@ class TideMatchSet {
   static int Pvalues_pin_cols[];
 
   // TideMatchSet();
-  TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed);
+  TideMatchSet(ActivePeptideWindow* active_peptide_window, ObservedPeakSet* observed);
   ~TideMatchSet();
 
   static int* getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders);
@@ -100,7 +100,7 @@ class TideMatchSet {
   double quantile_score_;
   
   PSMScores::iterator last_psm_;
-  ActivePeptideQueue* active_peptide_queue_;  
+  ActivePeptideWindow* active_peptide_window_;  
   
   // Pointer to the experimental spectrum data; This is used here to calculate 
   // the repeat_ion_match value (part of the SP scoring). Originally, the

@@ -110,12 +110,12 @@ int TideMatchSet::Pvalues_mzTab_cols[] = {
 //     DECOY_INDEX_COL
 //   };    
 
-TideMatchSet::TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed) {
+TideMatchSet::TideMatchSet(ActivePeptideWindow* active_peptide_window, ObservedPeakSet* observed) {
   psm_scores_processed_ = false;
-  active_peptide_queue_ = active_peptide_queue;
+  active_peptide_window_ = active_peptide_window;
   observed_ = observed;  // Pointer to the experimental spectrum data 
 
-  psm_scores_ = PSMScores(active_peptide_queue->nPeptides_);  
+  psm_scores_ = PSMScores(active_peptide_window->nPeptides);
 };
 
 TideMatchSet::~TideMatchSet() {
@@ -663,11 +663,11 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       case MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC:
       case DISTINCT_MATCHES_SPECTRUM_COL:
         if (concat_ == true) {
-          report += StringUtils::ToString(active_peptide_queue_->nCandPeptides_, 0); // Print num of targets and decoys
+          report += StringUtils::ToString(active_peptide_window_->nCandPeptides, 0); // Print num of targets and decoys
         } else if (target) {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesTarget_, 0); // Print num of targets
+          report += StringUtils::ToString(active_peptide_window_->CandPeptidesTarget, 0); // Print num of targets
         } else {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesDecoy_, 0); // Print num of decoys
+          report += StringUtils::ToString(active_peptide_window_->CandPeptidesDecoy, 0); // Print num of decoys
         }
         break;
       case SEQUENCE_COL:

@@ -11,34 +11,46 @@
 #include "compiler.h"
 #include "app/TideMatchSet.h"
 #include <map> 
+#include <limits>
 #define CHECK(x) GOOGLE_CHECK((x))
+
+ActivePeptideWindow::ActivePeptideWindow(ActivePeptideQueue* queue) : queue_(queue) {
+}
+
+bool ActivePeptideWindow::MoveRight() {
+  return queue_->moveForward(end_);
+}
+
+bool ActivePeptideWindow::MoveLeft() {
+  bool moved = queue_->moveForward(begin_);
+  queue_->cleanUp();
+  return moved;
+}
 
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
                                        vector<const pb::AuxLocation*>* locations, 
-                                       bool dia_mode)
+                                       bool dia_mode, int thread_num)
   : reader_(reader),
     proteins_(proteins),
-    theoretical_peak_set_(1000),   // probably overkill, but no harm
     locations_(locations),
-    dia_mode_(dia_mode) {
+    dia_mode_(dia_mode),
+    windows_(thread_num) {
   CHECK(reader_->OK());
   min_candidates_ = 30;
-  nPeptides_ = 0;
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  for (size_t i = 0; i < windows_.size(); ++i) {
+    windows_[i] = new ActivePeptideWindow(this);
+  }
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
 }
 
-// Compute the theoretical peaks of the peptide in the "back" of the queue
-// (i.e. the one most recently read from disk -- the heaviest).
-void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
-  theoretical_peak_set_.Clear();
-  Peptide* peptide = queue_.back();
-  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
+void ActivePeptideQueue::ComputeTheoreticalPeak(size_t i) {
+  static thread_local TheoreticalPeakSetBYSparse theoretical_peak_set(1000); // Probably overkill, but no harm
+  theoretical_peak_set.Clear();
+  Peptide* peptide = getPeptide(i);
+  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set, dia_mode_);
 }
 
 bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
@@ -53,7 +65,11 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
   return false;
 }
 
-int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
+const std::vector<ActivePeptideWindow*> ActivePeptideQueue::GetActivePeptideWindows() const {
+  return windows_;
+}
+
+int ActivePeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -62,15 +78,21 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   // queue front() is lightest; back() is heaviest
 
   // delete anything already loaded that falls below min_range
+  while (!empty() && front()->Mass() < min_range) {
+    assert(MoveLeft());
+  }
+
+  /*
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     queue_.pop_front();
     delete peptide;
   }
-  nPeptides_ = 0;
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  */
+  nPeptides = 0;
+  nCandPeptides = 0;
+  CandPeptidesTarget = 0;
+  CandPeptidesDecoy = 0;
 
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
@@ -78,76 +100,82 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   // fifo_alloc_peptides_.
   bool done = false;
   //Modified for tailor score calibration method by AKF
-  if (queue_.empty() || queue_.back()->Mass() <= max_range || queue_.size() < min_candidates_) {
-    if (!queue_.empty()) {
-      ComputeTheoreticalPeaksBack();
-    }
-    while (!(done = reader_->Done())) {
-      // read all peptides lighter than max_range
-      reader_->Read(&current_pb_peptide_);
-      if (current_pb_peptide_.mass() < min_range) {
-        // we would delete current_pb_peptide_;
-        continue; // skip peptides that fall below min_range
-      }
-      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
-      assert(peptide != NULL);
-      queue_.push_back(peptide);
-      //Modified for tailor score calibration method by AKF
-      if (peptide->Mass() > max_range && queue_.size() > min_candidates_) {
-        break;
-      }
-      ComputeTheoreticalPeaksBack();
+
+  while (size() < queue_->min_candidates_ && back()->Mass() <= max_range) {
+    if (!(done = MoveRight())) { // reader is done
+      break;
     }
   }
   // by now, if not EOF, then the last (and only the last) enqueued
   // peptide is too heavy
-  assert(!queue_.empty() || done);
+  assert(!empty() || done);
 
   // Set up iterator for use with HasNext(),
   // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.
-  if (queue_.empty()) {
+  if (empty()) {
     return 0;
   }
 
-  nPeptides_ = 0;
-  begin_ = queue_.begin();
-  while (begin_ != queue_.end() && (*begin_)->Mass() < min_mass->front()) {
-    (*begin_)->active_ = false;
-    ++begin_;
-    ++nPeptides_;
-  }
-  end_ = begin_;
-  begin_ = queue_.begin();
-  int* isotope_idx = new int(0);
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  nPeptides = 0;
+  active_end_ = begin_;
 
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
-    if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
-      ++nCandPeptides_;
-      (*end_)->active_ = true;
-      if ((*end_)->IsDecoy()){
-        ++CandPeptidesDecoy_;
-      } else {
-        ++CandPeptidesTarget_;
-      }
-    } else {
-      (*end_)->active_ = false;
-    }
-    ++end_;
-    ++nPeptides_;
-  }
-  delete isotope_idx;
-  if (nCandPeptides_ == 0) {
-    return 0;
-  }
-  for (; end_ != queue_.end(); ++end_) {
-    if ((*end_)->peaks_0.size() == 0 || nPeptides_ >= min_candidates_-1) {
+  while (active_end_ < end_) {
+    Peptide* peptide = queue_->getPeptide(active_end_);
+    assert(peptide);
+
+    if (peptide->Mass() >= min_mass->front()) {
       break;
     }
-    (*end_)->active_ = false;
-    ++nPeptides_;
+    peptide->active_ = false;
+    active_end_++;
+    nPeptides++;
   }
-  return nCandPeptides_;
+  active_begin_ = begin_;
+  return nCandPeptides;
+}
+
+bool ActivePeptideQueue::moveForward(size_t& i) {
+  m_.lock();
+  assert(i <= end_);
+  if (i < end_) {
+    i++;
+    m_.unlock();
+    return true;
+  }
+  if (!reader_->Done()) {
+    reader_->Read(&current_pb_peptide_);
+    Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
+    assert(peptide != NULL);
+    queue_.push_back(peptide);
+    end_++;
+    // Modified for tailor score calibration method by AKF
+    ComputeTheoreticalPeak(i);
+    i++;
+    m_.unlock();
+    return true;
+  }
+  m_.unlock();
+  return false;
+}
+
+Peptide* ActivePeptideQueue::getPeptide(size_t i) {
+  m_.lock_shared();
+  Peptide* peptide = queue_.at(i - begin_);
+  m_.unlock_shared();
+  return peptide;
+}
+
+void ActivePeptideQueue::cleanUp() {
+  m_.lock();
+  size_t min_begin = std::numeric_limits<size_t>::max();
+  for (const ActivePeptideWindow* window : windows_) {
+    min_begin = std::min(window->begin_, min_begin);
+  }
+  while (begin_ < min_begin) {
+    Peptide* peptide = queue_.front();
+    queue_.pop_front();
+    delete peptide;
+    begin_++;
+  }
+  m_.unlock();
 }
