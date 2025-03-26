@@ -79,7 +79,7 @@ class DIAmeterApplication : public CruxApplication {
     ofstream* output_file,  // output file to write to
     const string& spectrum_filename, // name of spectrum file
     const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
-    ActivePeptideQueue* peptides, // peptide queue
+    ActivePeptideWindow* peptides, // peptide queue
     const ProteinVec& proteins, // proteins corresponding with peptides
     TideMatchSet& matches, // object to manage PSMs
     ObservedPeakSet* observed,
@@ -91,7 +91,7 @@ class DIAmeterApplication : public CruxApplication {
 
   void computePrecIntRank(
       TideMatchSet::PSMScores& vec,
-      ActivePeptideQueue* peptides,
+      ActivePeptideWindow* peptides,
       const double* mz_arr,
     const double* intensity_arr,
       const double* intensity_rank_arr,
@@ -104,7 +104,7 @@ class DIAmeterApplication : public CruxApplication {
 
   void computePrecFragCoelute(
     TideMatchSet::PSMScores& vec,
-    ActivePeptideQueue* peptides,
+    ActivePeptideWindow* peptides,
     vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
       map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
       int charge
@@ -112,7 +112,7 @@ class DIAmeterApplication : public CruxApplication {
 
   void computeMS2Pval(
     TideMatchSet::PSMScores& vec,
-    ActivePeptideQueue* peptides,
+    ActivePeptideWindow* peptides,
     ObservedPeakSet* observed,
     map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
   );
