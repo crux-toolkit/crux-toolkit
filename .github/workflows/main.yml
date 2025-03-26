@@ -96,29 +96,29 @@ jobs:
         if: (matrix.os == 'macos-13')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.2.${{env.git_short_sha}}.macos
-          path: ${{runner.workspace}}/build/crux-4.2.Darwin.x86_64.zip
+          name: crux-4.3.${{env.git_short_sha}}.macos
+          path: ${{runner.workspace}}/build/crux-4.3.Darwin.x86_64.zip
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-2019')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.2.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-4.2.Windows.AMD64.zip 
+          name: crux-4.3.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-4.3.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-20.04')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.2.${{env.git_short_sha}}.ubuntu.20.04
-          path:  ${{runner.workspace}}/build/crux-4.2.Linux.x86_64.zip
+          name: crux-4.3.${{env.git_short_sha}}.ubuntu.20.04
+          path:  ${{runner.workspace}}/build/crux-4.3.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-20.04')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.2.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-4.2.Source.tar.gz
+          name: crux-4.3.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-4.3.Source.tar.gz
 
       - name: Test
         if: (matrix.os == 'ubuntu-20.04')
