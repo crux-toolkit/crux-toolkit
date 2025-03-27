@@ -110,6 +110,7 @@ set (
   io/carp.cpp
   util/CarpStreamBuf.cpp
   app/CometApplication.cpp
+  app/CometIndexApplication.cpp
   app/ComputeQValues.cpp
   app/CreateDocs.cpp
   ${ASYNCPOST}
@@ -202,6 +203,7 @@ set (
   io/SQTWriter.cpp
   app/TideIndexApplication.cpp
   app/TideMatchSet.cpp
+  app/SpectrumConvertApplication.cpp
   app/TideSearchApplication.cpp
   io/DIAmeterFeatureScaler.cpp
   io/DIAmeterPSMFilter.cpp

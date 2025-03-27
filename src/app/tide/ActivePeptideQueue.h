@@ -24,7 +24,7 @@ class ActivePeptideQueue {
         double min_range, double max_range); 
 
   Peptide* GetPeptide(int index) {
-    return *(begin_ + index);
+    return *(begin_ + index); 
   }
 
   int nPeptides_;
@@ -34,7 +34,6 @@ class ActivePeptideQueue {
 
   deque<Peptide*> queue_;
   deque<Peptide*>::const_iterator begin_, end_;  
-  vector<bool> candidatePeptideStatus_;
   int min_candidates_;
   bool dia_mode_;
 

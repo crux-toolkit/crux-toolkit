@@ -79,9 +79,7 @@ class TideSearchApplication : public CruxApplication {
 
   vector<boost::mutex *> locks_array_;  
 
-  //vector<TideSearchApplication::InputFile> getInputFiles(const vector<string>& filepaths) const;
   void getInputFiles(int thread_id);
-  // static SpectrumCollection* loadSpectra(const std::string& file);
   void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
   void createOutputFiles();
 

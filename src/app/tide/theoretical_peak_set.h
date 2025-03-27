@@ -93,9 +93,8 @@ class TheoreticalPeakSetBYSparse {
     peaks_[1].clear();
   }
 
-  void AddYIon(double mass, int charge) {
-    assert(charge <= 2);
-    int index_y = MassConstants::mass2bin(mass + MassConstants::Y + MASS_PROTON, charge);
+  void AddYIon(int index_y, int charge) {
+      assert(charge <= 2);
     if (index_y >= 0 && index_y < peak_mask_end-1 && !peak_mask[index_y]) {
       peak_mask[index_y] = 1;
       index_y += index_y;
@@ -107,9 +106,8 @@ class TheoreticalPeakSetBYSparse {
     }
   }
 
-  void AddBIon(double mass, int charge) {
+  void AddBIon(int index_b, int charge) {
     assert(charge <= 2);
-    int index_b = MassConstants::mass2bin(mass + MassConstants::B + MASS_PROTON, charge);
     if (index_b >= 0 && index_b < peak_mask_end-1 && !peak_mask[index_b]) {
       peak_mask[index_b] = 1;
       index_b += index_b;
@@ -129,29 +127,6 @@ class TheoreticalPeakSetBYSparse {
     int cache_end = 0;
     TheoreticalPeakArr peaks_[2];
 };
-
-// This class is used to store theoretical b ions only
-// for use in exact p-value calculations.
-class TheoreticalPeakSetBIons {
- public:
-  TheoreticalPeakSetBIons() {}
-  explicit TheoreticalPeakSetBIons(int capacity) {
-    unordered_peak_list_.reserve(capacity);
-  }
-  virtual ~TheoreticalPeakSetBIons() {}
-
-  void Clear() { unordered_peak_list_.clear(); }
-  void AddBIon(double mass) {
-    int index = MassConstants::mass2bin(mass, 1);
-    if (index >= 0) {
-      unordered_peak_list_.push_back((unsigned int)index);
-    }
-  }
-  vector<unsigned int> unordered_peak_list_;
-  double binWidth_;   // TODO: This should be removed from here.
-  double binOffset_;  // TODO: This should be removed from here.
-};
-
 
 #endif // THEORETICAL_PEAK_SET_H
 

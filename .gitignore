@@ -1,5 +1,6 @@
 # general patterns
 .DS_Store
+*.swo
 *.swp
 *.a
 CMakeCache.txt
@@ -16,6 +17,9 @@ rules.ninja
 /Makefile
 /crux_version.h
 /crux_version.h.txt
+/build
+/Debug
+/Release
 
 # /doc
 /doc/user/Makefile
@@ -43,6 +47,7 @@ rules.ninja
 /doc/user/subtract-index.html
 /doc/user/tide-index.html
 /doc/user/tide-search.html
+/doc/user/spectrum-converter.html
 /doc/user/commands/assign-confidence.html
 /doc/user/commands/bullseye.html
 /doc/user/commands/cascade-search.html
@@ -69,6 +74,7 @@ rules.ninja
 /doc/user/commands/subtract-index.html
 /doc/user/commands/tide-index.html
 /doc/user/commands/tide-search.html
+/doc/user/commands/spectrum-converter.html
 
 # /ext
 /ext/Makefile

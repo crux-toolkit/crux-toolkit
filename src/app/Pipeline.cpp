@@ -251,11 +251,18 @@ int PipelineApplication::runSpectralCounts(
   CruxApplication* app,
   COMMAND_T post_processor_command
 ) {
+  string filename;  
+  string fileroot = Params::GetString("fileroot");
+  if (!fileroot.empty()) {
+    fileroot.append(".");
+  }
   if (post_processor_command == PERCOLATOR_COMMAND) {
-    return ((SpectralCounts*)app)->main("pipeline/percolator.target.psms.txt");
+    filename = FileUtils::Join(Params::GetString("output-dir"), fileroot + "percolator.target.psms.txt");
+     return ((SpectralCounts*)app)->main(filename);
   }
   else {
-    return ((SpectralCounts*)app)->main("pipeline/assign-confidence.target.txt");
+    filename = FileUtils::Join(Params::GetString("output-dir"), fileroot + "assign-confidence.target.txt");
+    return ((SpectralCounts*)app)->main(filename);
   }
 }
 
@@ -366,6 +373,9 @@ void PipelineApplication::processParams() {
     apps_.push_back(new PercolatorApplication());
   }
 
+  if (Params::GetString("protein-database").empty()) {
+    Params::Set("protein-database", Params::GetString("peptide source"));
+  }
   apps_.push_back(new SpectralCounts());
 
   for (vector<CruxApplication*>::iterator i = apps_.begin(); i != apps_.end(); i++) {

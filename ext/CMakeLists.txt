@@ -204,7 +204,6 @@ else (UNIX)
   )
 endif (WIN32 AND NOT CYGWIN)
 
-#set(PERCOLATOR_GIT_VERSION 310f924)
 set(PERCOLATOR_GIT_VERSION 310f924)
 ExternalProject_Add(
   percolator
@@ -297,7 +296,7 @@ endif (WIN32 AND NOT CYGWIN)
 ExternalProject_Add(
   comet
   GIT_REPOSITORY https://github.com/UWPR/Comet/
-  GIT_TAG v2022.01.2
+  GIT_TAG v2025.01.1
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
@@ -310,9 +309,6 @@ ExternalProject_Add(
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometData.h
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/CometData.h
     BUILD_IN_SOURCE 1
 )
 

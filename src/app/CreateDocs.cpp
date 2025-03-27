@@ -28,12 +28,13 @@
 #include "TideIndexApplication.h"
 #include "TideSearchApplication.h"
 #include "CometApplication.h"
+#include "CometIndexApplication.h"
 #include "KojakApplication.h"
 #include "app/CascadeSearchApplication.h"
 #include "app/AssignConfidenceApplication.h"
 #include "app/SubtractIndexApplication.h"
 #include "DIAmeterApplication.h"
-
+#include "app/SpectrumConvertApplication.h"
 using namespace std;
 
 CreateDocs::CreateDocs() {
@@ -47,6 +48,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new AssignConfidenceApplication());
   apps.add(new CascadeSearchApplication());  
   apps.add(new CometApplication());
+  apps.add(new CometIndexApplication());
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
   apps.add(new CruxHardklorApplication());
@@ -67,6 +69,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new TideIndexApplication());
   apps.add(new TideSearchApplication());
   apps.add(new DIAmeterApplication());
+  apps.add(new SpectrumConvertApplication());
   
   string targetApp = Params::GetString("tool-name");
   if (targetApp == "list") {
