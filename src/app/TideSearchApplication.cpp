@@ -18,7 +18,7 @@
 #include "util/StringUtils.h"
 #include <math.h> 
 #include <map>
-#include "tide/ActivePeptideQueue.h"
+#include "tide/PeptideDiskLoader.h"
 #include "residue_stats.pb.h"
 #include "crux_version.h"
 
@@ -209,9 +209,9 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Create the active_peptide_window for each threads
 
-  ActivePeptideQueue* APQ = new ActivePeptideQueue(peptide_reader.Reader(), proteins, &locations, false, num_threads_);
+  PeptideDiskLoader* APQ = new PeptideDiskLoader(peptide_reader.Reader(), proteins, &locations, false, num_threads_);
 
-  const std::vector<ActivePeptideWindow*>& APW = APQ->GetActivePeptideWindows();
+  const std::vector<RollingPeptideWindow*>& APW = APQ->GetActivePeptideWindows();
 
   carp(CARP_INFO, "Starting search.");
   // Read the first spectrum records from each input files 
@@ -300,7 +300,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 void TideSearchApplication::spectrum_search(void *threadarg) {  
   struct thread_data *my_data = (struct thread_data *) threadarg;
 
-  ActivePeptideWindow* active_peptide_window = my_data->active_peptide_window_;
+  RollingPeptideWindow* active_peptide_window = my_data->active_peptide_window_;
   int thread_id = my_data->thread_id_;
 
   int input_file_source;
@@ -422,7 +422,7 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
   }
 }
 
-void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideWindow* active_peptide_window, TideMatchSet& psm_scores){
+void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, RollingPeptideWindow* active_peptide_window, TideMatchSet& psm_scores){
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
@@ -482,7 +482,7 @@ int TideSearchApplication::PeakMatching(ObservedPeakSet& observed, vector<unsign
   return score;
 }
 
-void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideWindow* active_peptide_window, TideMatchSet& psm_scores){
+void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* sc, RollingPeptideWindow* active_peptide_window, TideMatchSet& psm_scores){
   // 1. Calculate the REFACTORED XCORR SCORE and its EXACT P-VALUE
 
   // preprocess spectrum for refactored XCorr score calculation
@@ -1785,7 +1785,7 @@ void TideSearchApplication::PrintResults(const SpectrumCollection::SpecCharge* s
 void TideSearchApplication::getMassBin(
   vector<int>& pepMassInt,
   vector<int>& pepMassIntUnique,
-  ActivePeptideWindow* active_peptide_window
+  RollingPeptideWindow* active_peptide_window
 ) {
   int pe = 0;
   for (size_t i = active_peptide_window->active_begin(); i < active_peptide_window->active_end(); ++i) {

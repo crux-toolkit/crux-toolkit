@@ -196,8 +196,16 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks) {
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
+  if (computed_theoretical_peaks.load()) { // avoid unnecessary mutex lock
+    return;
+  }
+  std::lock_guard<boost::shared_mutex> lock(m_);
+  if (computed_theoretical_peaks.load()) { // some threads could sleep on mutex while thread is computing
+    return;
+  }
   AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);   // Generic workspace
   Compile(workspace->GetPeaks());
+  computed_theoretical_peaks.store(true);
 }
 
 // return the amino acid masses in the current peptide

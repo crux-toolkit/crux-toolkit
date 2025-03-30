@@ -10,7 +10,7 @@
 #include "tide/peptide.h"
 #include "tide/sp_scorer.h"
 #include "tide/spectrum_collection.h"
-#include "tide/ActivePeptideQueue.h"
+#include "tide/PeptideDiskLoader.h"
 #include "tide/spectrum_preprocess.h"
 
 #include "model/Modification.h"
@@ -76,7 +76,7 @@ class TideMatchSet {
   static int Pvalues_pin_cols[];
 
   // TideMatchSet();
-  TideMatchSet(ActivePeptideWindow* active_peptide_window, ObservedPeakSet* observed);
+  TideMatchSet(RollingPeptideWindow* active_peptide_window, ObservedPeakSet* observed);
   ~TideMatchSet();
 
   static int* getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders);
@@ -100,7 +100,7 @@ class TideMatchSet {
   double quantile_score_;
   
   PSMScores::iterator last_psm_;
-  ActivePeptideWindow* active_peptide_window_;  
+  RollingPeptideWindow* active_peptide_window_;  
   
   // Pointer to the experimental spectrum data; This is used here to calculate 
   // the repeat_ion_match value (part of the SP scoring). Originally, the

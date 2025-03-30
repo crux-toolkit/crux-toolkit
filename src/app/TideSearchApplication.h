@@ -13,7 +13,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
 #include "util/MathUtil.h"
-#include "tide/ActivePeptideQueue.h"
+#include "tide/PeptideDiskLoader.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
 
@@ -103,15 +103,15 @@ class TideSearchApplication : public CruxApplication {
 
    // Struct holding necessary information for each thread to run.
   struct thread_data {
-    ActivePeptideWindow* active_peptide_window_;
+    RollingPeptideWindow* active_peptide_window_;
     int thread_id_;
-    thread_data (ActivePeptideWindow* active_peptide_window, int thread_id) {
+    thread_data (RollingPeptideWindow* active_peptide_window, int thread_id) {
       active_peptide_window_ = active_peptide_window;
       thread_id_ = thread_id;
     }
   };
 
-  void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideWindow* active_peptide_window, TideMatchSet& psm_scores);
+  void PValueScoring(const SpectrumCollection::SpecCharge* sc, RollingPeptideWindow* active_peptide_window, TideMatchSet& psm_scores);
 
   void computeWindow(
       const SpectrumCollection::SpecCharge& sc,
@@ -136,7 +136,7 @@ class TideSearchApplication : public CruxApplication {
 
   //Added by Andy Lin in Feb 2016
   //function determines which mass bin a precusor mass is in
-  void getMassBin (vector<int>& pepMassInt, vector<int>& pepMassIntUnique, ActivePeptideWindow* active_peptide_window); 
+  void getMassBin (vector<int>& pepMassInt, vector<int>& pepMassIntUnique, RollingPeptideWindow* active_peptide_window); 
   int calcScoreCount(vector<int>& pepMassIntUnique, vector<vector<int>>& evidenceObs, vector<double>& nullDistribution);
   //Added by Andy Lin in March 2016
   //function gets the max evidence of each mass bin(column)
@@ -182,7 +182,7 @@ class TideSearchApplication : public CruxApplication {
   
   // These are public functions to be accessed from diameter application.
   static vector<int> getNegativeIsotopeErrors();
-  static void XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideWindow* active_peptide_window, TideMatchSet& psm_scores);
+  static void XCorrScoring(int charge, ObservedPeakSet& observed, RollingPeptideWindow* active_peptide_window, TideMatchSet& psm_scores);
   static int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
 

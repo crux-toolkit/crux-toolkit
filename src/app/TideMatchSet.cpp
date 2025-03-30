@@ -110,7 +110,7 @@ int TideMatchSet::Pvalues_mzTab_cols[] = {
 //     DECOY_INDEX_COL
 //   };    
 
-TideMatchSet::TideMatchSet(ActivePeptideWindow* active_peptide_window, ObservedPeakSet* observed) {
+TideMatchSet::TideMatchSet(RollingPeptideWindow* active_peptide_window, ObservedPeakSet* observed) {
   psm_scores_processed_ = false;
   active_peptide_window_ = active_peptide_window;
   observed_ = observed;  // Pointer to the experimental spectrum data 

@@ -144,8 +144,8 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 
     // Active queue to process the indexed peptides
     HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
-    ActivePeptideQueue* active_peptide_queue = new ActivePeptideQueue(peptide_reader.Reader(), proteins, NULL, dia_mode, 1);
-    ActivePeptideWindow* active_peptide_window = active_peptide_queue->GetActivePeptideWindows()[0];
+    PeptideDiskLoader* active_peptide_queue = new PeptideDiskLoader(peptide_reader.Reader(), proteins, NULL, dia_mode, 1);
+    RollingPeptideWindow* active_peptide_window = active_peptide_queue->GetActivePeptideWindows()[0];
 
     // Some setup adopted from TideSearch
     const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();
@@ -355,7 +355,7 @@ void DIAmeterApplication::reportDIA(
   ofstream* output_file,  // output file to write to
   const string& spectrum_filename, // name of spectrum file
   const SpectrumCollection::SpecCharge& sc, // spectrum and charge for matches
-  ActivePeptideWindow* peptides, // peptide queue
+  RollingPeptideWindow* peptides, // peptide queue
   const ProteinVec& proteins, // proteins corresponding with peptides
   TideMatchSet& matches, // object to manage PSMs
   ObservedPeakSet* observed,
@@ -489,7 +489,7 @@ void DIAmeterApplication::reportDIA(
 
 void DIAmeterApplication::computePrecIntRank(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideWindow* peptides,
+  RollingPeptideWindow* peptides,
   const double* mz_arr,
   const double* intensity_arr,
   const double* intensity_rank_arr,
@@ -523,7 +523,7 @@ void DIAmeterApplication::computePrecIntRank(
 
 void DIAmeterApplication::computePrecFragCoelute(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideWindow* peptides,
+  RollingPeptideWindow* peptides,
   vector<boost::tuple<double*, double*, int, double*, double*, int>>* mz_intensity_arrs_vector,
   map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double, double>>* coelute_map,
   int charge
@@ -623,7 +623,7 @@ void DIAmeterApplication::computePrecFragCoelute(
 
 void DIAmeterApplication::computeMS2Pval(
   TideMatchSet::PSMScores& vec,
-  ActivePeptideWindow* peptides,
+  RollingPeptideWindow* peptides,
   ObservedPeakSet* observed,
   map<TideMatchSet::PSMScores::iterator, boost::tuple<double, double>>* ms2pval_map
 ) {

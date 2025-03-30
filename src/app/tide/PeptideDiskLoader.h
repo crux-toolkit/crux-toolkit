@@ -14,30 +14,30 @@
 #define ACTIVE_PEPTIDE_QUEUE_H
 
 class TheoreticalPeakCompiler;
-class ActivePeptideWindow;
+class RollingPeptideWindow;
 
-class ActivePeptideQueue {
+class PeptideDiskLoader {
  public:
   using iterator = std::deque<Peptide*>::iterator;
   using const_iterator = std::deque<Peptide*>::const_iterator;
-  friend class ActivePeptideWindow;
-  ActivePeptideQueue(RecordReader* reader,
+  friend class RollingPeptideWindow;
+  PeptideDiskLoader(RecordReader* reader,
         const vector<const pb::Protein*>& proteins,
         vector<const pb::AuxLocation*>* locations=NULL, 
         bool dia_mode = false, int thread_num = 1);
 
-  ~ActivePeptideQueue();
+  ~PeptideDiskLoader();
 
-  const std::vector<ActivePeptideWindow*> GetActivePeptideWindows() const;
+  const std::vector<RollingPeptideWindow*> GetActivePeptideWindows() const;
 
   std::deque<Peptide*> queue_;
   int min_candidates_;
   bool dia_mode_;
 
  private:
-  bool moveForward(size_t& i);
+  bool popFront(RollingPeptideWindow*);
+  bool pushBack(RollingPeptideWindow*);
 
-  void cleanUp();
 
   static bool isWithinIsotope(vector<double>* min_mass,
         vector<double>* max_mass, 
@@ -47,6 +47,8 @@ class ActivePeptideQueue {
   void ComputeTheoreticalPeak(size_t i);
 
   Peptide* getPeptide(size_t i);
+
+  Peptide* getComputedPeptide(size_t i);
   
   boost::shared_mutex m_;
 
@@ -60,17 +62,17 @@ class ActivePeptideQueue {
   
   pb::Peptide current_pb_peptide_;
 
-  std::vector<ActivePeptideWindow*> windows_;
+  std::vector<RollingPeptideWindow*> windows_;
 };
 
-class ActivePeptideWindow {
+class RollingPeptideWindow {
 public:
-  friend class ActivePeptideQueue;
+  friend class PeptideDiskLoader;
 
   int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, 
       double min_range, double max_range);
-  bool MoveRight();
-  bool MoveLeft();
+  bool PushBack();
+  bool PopFront();
 
   inline Peptide* back() { return (begin_ == end_) ? NULL : queue_->getPeptide(end_ - 1); }
   inline Peptide* front() { return (begin_ == end_) ? NULL : queue_->getPeptide(begin_); }
@@ -86,7 +88,7 @@ public:
 
   Peptide* GetPeptide(size_t i) { return queue_->getPeptide(i); }
 
-  ActivePeptideQueue* GetQueue() const { return queue_; }
+  PeptideDiskLoader* GetQueue() const { return queue_; }
 
 
   int nPeptides= 0;
@@ -94,12 +96,12 @@ public:
   int CandPeptidesTarget = 0;
   int CandPeptidesDecoy = 0;
 private:
-  ActivePeptideWindow(ActivePeptideQueue* queue);
+  RollingPeptideWindow(PeptideDiskLoader* queue);
 
   size_t begin_ = 1;
   size_t end_ = 1;
   size_t active_begin_ = 0;
   size_t active_end_ = 0;
-  ActivePeptideQueue* queue_;
+  PeptideDiskLoader* queue_;
 };
 #endif

@@ -5,7 +5,7 @@
 #include "records.h"
 #include "peptides.pb.h"
 #include "peptide.h"
-#include "ActivePeptideQueue.h"
+#include "PeptideDiskLoader.h"
 #include "records_to_vector-inl.h"
 #include "theoretical_peak_set.h"
 #include "compiler.h"
@@ -14,20 +14,19 @@
 #include <limits>
 #define CHECK(x) GOOGLE_CHECK((x))
 
-ActivePeptideWindow::ActivePeptideWindow(ActivePeptideQueue* queue) : queue_(queue) {
+RollingPeptideWindow::RollingPeptideWindow(PeptideDiskLoader* queue) : queue_(queue) {
 }
 
-bool ActivePeptideWindow::MoveRight() {
-  return queue_->moveForward(end_);
+bool RollingPeptideWindow::PushBack() {
+  return queue_->pushBack(this);
 }
 
-bool ActivePeptideWindow::MoveLeft() {
-  bool moved = queue_->moveForward(begin_);
-  queue_->cleanUp();
+bool RollingPeptideWindow::PopFront() {
+  bool moved = queue_->popFront(this);
   return moved;
 }
 
-ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
+PeptideDiskLoader::PeptideDiskLoader(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
                                        vector<const pb::AuxLocation*>* locations, 
                                        bool dia_mode, int thread_num)
@@ -39,21 +38,21 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   CHECK(reader_->OK());
   min_candidates_ = 30;
   for (size_t i = 0; i < windows_.size(); ++i) {
-    windows_[i] = new ActivePeptideWindow(this);
+    windows_[i] = new RollingPeptideWindow(this);
   }
 }
 
-ActivePeptideQueue::~ActivePeptideQueue() {
+PeptideDiskLoader::~PeptideDiskLoader() {
 }
 
-void ActivePeptideQueue::ComputeTheoreticalPeak(size_t i) {
+void PeptideDiskLoader::ComputeTheoreticalPeak(size_t i) {
   static thread_local TheoreticalPeakSetBYSparse theoretical_peak_set(1000); // Probably overkill, but no harm
   theoretical_peak_set.Clear();
   Peptide* peptide = getPeptide(i);
   peptide->ComputeTheoreticalPeaks(&theoretical_peak_set, dia_mode_);
 }
 
-bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
+bool PeptideDiskLoader::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
   for (int i = *isotope_idx; i < min_mass->size(); ++i) {
     if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
       if (i > *isotope_idx) {
@@ -65,11 +64,11 @@ bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double
   return false;
 }
 
-const std::vector<ActivePeptideWindow*> ActivePeptideQueue::GetActivePeptideWindows() const {
+const std::vector<RollingPeptideWindow*> PeptideDiskLoader::GetActivePeptideWindows() const {
   return windows_;
 }
 
-int ActivePeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
+int RollingPeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -79,7 +78,7 @@ int ActivePeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>
 
   // delete anything already loaded that falls below min_range
   while (!empty() && front()->Mass() < min_range) {
-    assert(MoveLeft());
+    assert(PopFront());
   }
 
   /*
@@ -102,7 +101,7 @@ int ActivePeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>
   //Modified for tailor score calibration method by AKF
 
   while (size() < queue_->min_candidates_ && back()->Mass() <= max_range) {
-    if (!(done = MoveRight())) { // reader is done
+    if (!(done = PushBack())) { // reader is done
       break;
     }
   }
@@ -134,12 +133,11 @@ int ActivePeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double>
   return nCandPeptides;
 }
 
-bool ActivePeptideQueue::moveForward(size_t& i) {
-  m_.lock();
-  assert(i <= end_);
-  if (i < end_) {
-    i++;
-    m_.unlock();
+bool PeptideDiskLoader::pushBack(RollingPeptideWindow* window) {
+  std::lock_guard<boost::shared_mutex> lock(m_);
+  assert(window->end_ <= end_);
+  if (window->end_ < end_) {
+    window->end_++;
     return true;
   }
   if (!reader_->Done()) {
@@ -148,34 +146,35 @@ bool ActivePeptideQueue::moveForward(size_t& i) {
     assert(peptide != NULL);
     queue_.push_back(peptide);
     end_++;
-    // Modified for tailor score calibration method by AKF
-    ComputeTheoreticalPeak(i);
-    i++;
-    m_.unlock();
+    window->end_++;
     return true;
   }
-  m_.unlock();
   return false;
 }
 
-Peptide* ActivePeptideQueue::getPeptide(size_t i) {
+bool PeptideDiskLoader::popFront(RollingPeptideWindow* window) {
+  std::lock_guard<boost::shared_mutex> lock(m_);
+  if (window->begin_ == window->end_) {
+    return false;
+  }
+  Peptide* peptide = getPeptide(window->begin_);
+  peptide->Drop();
+
+  if (peptide->GetDropsCounter() == windows_.size()) {
+    delete peptide;
+    queue_.pop_front();
+  }
+  window->begin_++;
+}
+
+Peptide* PeptideDiskLoader::getPeptide(size_t i) {
   m_.lock_shared();
   Peptide* peptide = queue_.at(i - begin_);
   m_.unlock_shared();
   return peptide;
 }
 
-void ActivePeptideQueue::cleanUp() {
-  m_.lock();
-  size_t min_begin = std::numeric_limits<size_t>::max();
-  for (const ActivePeptideWindow* window : windows_) {
-    min_begin = std::min(window->begin_, min_begin);
-  }
-  while (begin_ < min_begin) {
-    Peptide* peptide = queue_.front();
-    queue_.pop_front();
-    delete peptide;
-    begin_++;
-  }
-  m_.unlock();
+Peptide* PeptideDiskLoader::getComputedPeptide(size_t i) {
+  ComputeTheoreticalPeak(i);
+  return getPeptide(i);
 }

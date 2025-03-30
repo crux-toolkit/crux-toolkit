@@ -3,7 +3,7 @@
 // Peptide is a class for managing the representation of a peptide and its
 // associated theoretical peaks for use at search time. It encapsulates a
 // diverse set of functions, interacting closely with TheoreticalPeakSet,
-// TheoreticalPeakCompiler, ActivePeptideQueue, and DotProd() (defined in
+// TheoreticalPeakCompiler, PeptideDiskLoader, and DotProd() (defined in
 // search.cc). At indexing time this class is used with TheoreticalPeakSet to
 // store peaks to a protocol buffer.
 //
@@ -12,7 +12,7 @@
 // Perhaps one way to clean this up would be to make two different Peptide
 // classes: one for indexing and another for searching.
 //
-// At search time, ActivePeptideQueue (see active_peptide_queue.{h,cc})
+// At search time, PeptideDiskLoader (see active_peptide_queue.{h,cc})
 // manages the task of reading Peptides from storage and keeping current
 // candidate Peptides in memory.  Each Peptide knows how to take the dot
 // product of its theoretical peaks with a given observed spectrum.
@@ -30,6 +30,7 @@
 #include "theoretical_peak_set.h"
 #include "mod_coder.h"
 #include "util/Params.h"
+#include "boost/thread/shared_mutex.hpp"
 
 #include "spectrum_collection.h"
 
@@ -146,9 +147,13 @@ class Peptide {
   vector<unsigned int> peaks_2y;   // Double charged y ions 
 
   bool active_;
+  std::atomic_bool computed_theoretical_peaks{false};
+  void Drop() { drops_counter_++; }
+  inline size_t GetDropsCounter() const { return drops_counter_; }
   
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
+  boost::shared_mutex m_;
 
 
   void Compile(const TheoreticalPeakArr* peaks);
@@ -156,6 +161,7 @@ class Peptide {
   bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name); // mod_mass output variable
   
   size_t using_counter_ = 0;
+  size_t drops_counter_ = 0;
   int len_;
   double mass_;
   int id_;
