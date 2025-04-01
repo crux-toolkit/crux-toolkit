@@ -71,7 +71,7 @@ set(
   tide_lib_files
   ${proto_files_compiled}
   abspath.cc
-  ActivePeptideQueue.cc  
+  PeptideDiskLoader.cc  
   crux_sp_spectrum.cc
   fifo_alloc.cc
   index_settings.cc
