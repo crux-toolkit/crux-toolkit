@@ -43,6 +43,9 @@ PeptideDiskLoader::PeptideDiskLoader(RecordReader* reader,
 }
 
 PeptideDiskLoader::~PeptideDiskLoader() {
+  for (size_t i = 0; i < windows_.size(); ++i) {
+    delete windows_[i];
+  }
 }
 
 void PeptideDiskLoader::ComputeTheoreticalPeak(size_t i) {
@@ -64,7 +67,7 @@ bool PeptideDiskLoader::isWithinIsotope(vector<double>* min_mass, vector<double>
   return false;
 }
 
-const std::vector<RollingPeptideWindow*> PeptideDiskLoader::GetActivePeptideWindows() const {
+const std::vector<RollingPeptideWindow*> PeptideDiskLoader::GetRollingPeptideWindows() const {
   return windows_;
 }
 
@@ -116,20 +119,6 @@ int RollingPeptideWindow::SetActiveRange(vector<double>* min_mass, vector<double
   }
 
   nPeptides = 0;
-  active_end_ = begin_;
-
-  while (active_end_ < end_) {
-    Peptide* peptide = queue_->getPeptide(active_end_);
-    assert(peptide);
-
-    if (peptide->Mass() >= min_mass->front()) {
-      break;
-    }
-    peptide->active_ = false;
-    active_end_++;
-    nPeptides++;
-  }
-  active_begin_ = begin_;
   return nCandPeptides;
 }
 
@@ -163,6 +152,7 @@ bool PeptideDiskLoader::popFront(RollingPeptideWindow* window) {
   if (peptide->GetDropsCounter() == windows_.size()) {
     delete peptide;
     queue_.pop_front();
+    begin_++;
   }
   window->begin_++;
 }

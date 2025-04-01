@@ -145,7 +145,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
     // Active queue to process the indexed peptides
     HeadedRecordReader peptide_reader = HeadedRecordReader(peptides_file, &peptides_header);
     PeptideDiskLoader* active_peptide_queue = new PeptideDiskLoader(peptide_reader.Reader(), proteins, NULL, dia_mode, 1);
-    RollingPeptideWindow* active_peptide_window = active_peptide_queue->GetActivePeptideWindows()[0];
+    RollingPeptideWindow* active_peptide_window = active_peptide_queue->GetRollingPeptideWindows()[0];
 
     // Some setup adopted from TideSearch
     const vector<SpectrumCollection::SpecCharge>* spec_charges = spectra->SpecCharges();

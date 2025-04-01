@@ -211,7 +211,7 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   PeptideDiskLoader* APQ = new PeptideDiskLoader(peptide_reader.Reader(), proteins, &locations, false, num_threads_);
 
-  const std::vector<RollingPeptideWindow*>& APW = APQ->GetActivePeptideWindows();
+  const std::vector<RollingPeptideWindow*>& APW = APQ->GetRollingPeptideWindows();
 
   carp(CARP_INFO, "Starting search.");
   // Read the first spectrum records from each input files 
@@ -1788,16 +1788,6 @@ void TideSearchApplication::getMassBin(
   RollingPeptideWindow* active_peptide_window
 ) {
   int pe = 0;
-  for (size_t i = active_peptide_window->active_begin(); i < active_peptide_window->active_end(); ++i) {
-    Peptide* peptide = active_peptide_window->GetPeptide(i);
-    double pepMass = peptide->Mass();
-    int pepMaInt = MassConstants::mass2bin(pepMass);
-    pepMassInt[pe] = pepMaInt;
-    if ( peptide->active_) {
-      pepMassIntUnique.push_back(pepMaInt);
-    }
-    pe++;
-  }
   //For pepMassIntUnique vector
   //Sort vector, take unique of vector, get rid of extra space in vector
   std::sort(pepMassIntUnique.begin(), pepMassIntUnique.end());

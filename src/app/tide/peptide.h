@@ -117,10 +117,6 @@ class Peptide {
   int FirstLocPos() const { return first_loc_pos_; }
   int ProteinLenth() const {return protein_length_;}
 
-  void Retrieve() { using_counter_++; }
-
-  void Release() { using_counter_--; }
-
   vector<ModCoder::Mod> Mods() const {
     return mods_;
   }
@@ -160,7 +156,6 @@ class Peptide {
   bool find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name); // mod_mass output variable
   bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name); // mod_mass output variable
   
-  size_t using_counter_ = 0;
   size_t drops_counter_ = 0;
   int len_;
   double mass_;

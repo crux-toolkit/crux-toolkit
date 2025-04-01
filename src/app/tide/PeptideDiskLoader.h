@@ -10,8 +10,8 @@
 #include "boost/thread/shared_mutex.hpp"
 #include "boost/thread/shared_lock_guard.hpp"
 
-#ifndef ACTIVE_PEPTIDE_QUEUE_H
-#define ACTIVE_PEPTIDE_QUEUE_H
+#ifndef PEPTIDE_DISK_LOADER_H
+#define PEPTIDE_DISK_LOADER_H
 
 class TheoreticalPeakCompiler;
 class RollingPeptideWindow;
@@ -28,7 +28,7 @@ class PeptideDiskLoader {
 
   ~PeptideDiskLoader();
 
-  const std::vector<RollingPeptideWindow*> GetActivePeptideWindows() const;
+  const std::vector<RollingPeptideWindow*> GetRollingPeptideWindows() const;
 
   std::deque<Peptide*> queue_;
   int min_candidates_;
@@ -52,8 +52,8 @@ class PeptideDiskLoader {
   
   boost::shared_mutex m_;
 
-  size_t begin_ = 1;
-  size_t end_ = 1;
+  size_t end_ = 0;
+  size_t begin_ = 0;
 
 
   RecordReader* reader_;
@@ -83,9 +83,6 @@ public:
   inline size_t begin() { return begin_; }
   inline size_t end() { return end_; }
 
-  inline size_t active_begin() { return active_begin_; }
-  inline size_t active_end() { return active_end_;}
-
   Peptide* GetPeptide(size_t i) { return queue_->getPeptide(i); }
 
   PeptideDiskLoader* GetQueue() const { return queue_; }
@@ -98,10 +95,8 @@ public:
 private:
   RollingPeptideWindow(PeptideDiskLoader* queue);
 
-  size_t begin_ = 1;
-  size_t end_ = 1;
-  size_t active_begin_ = 0;
-  size_t active_end_ = 0;
+  size_t begin_ = 0;
+  size_t end_ = 0;
   PeptideDiskLoader* queue_;
 };
 #endif
