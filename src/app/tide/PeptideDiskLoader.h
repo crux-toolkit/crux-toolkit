@@ -39,22 +39,21 @@ class PeptideDiskLoader {
   bool pushBack(RollingPeptideWindow*);
 
 
-  static bool isWithinIsotope(vector<double>* min_mass,
-        vector<double>* max_mass, 
-        double mass,
-        int* isotope_idx);   
+  // static bool isWithinIsotope(vector<double>* min_mass,
+  //       vector<double>* max_mass, 
+  //       double mass,
+  //       int* isotope_idx);   
 
   void ComputeTheoreticalPeak(size_t i);
 
   Peptide* getPeptide(size_t i);
 
-  Peptide* getComputedPeptide(size_t i);
+  // Peptide* getComputedPeptide(size_t i);
   
   boost::shared_mutex m_;
 
   size_t end_ = 0;
   size_t begin_ = 0;
-
 
   RecordReader* reader_;
   const vector<const pb::Protein*>& proteins_; 
@@ -69,8 +68,7 @@ class RollingPeptideWindow {
 public:
   friend class PeptideDiskLoader;
 
-  int SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, 
-      double min_range, double max_range);
+  int SetActiveRange(double min_range, double max_range);
   bool PushBack();
   bool PopFront();
 
@@ -86,7 +84,6 @@ public:
   Peptide* GetPeptide(size_t i) { return queue_->getPeptide(i); }
 
   PeptideDiskLoader* GetQueue() const { return queue_; }
-
 
   int nPeptides= 0;
   int nCandPeptides = 0;

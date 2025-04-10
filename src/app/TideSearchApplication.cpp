@@ -371,9 +371,11 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     vector<double>* max_mass = new vector<double>();
     
     computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
-    active_peptide_window->SetActiveRange(min_mass, max_mass, min_range, max_range);
+    active_peptide_window->SetActiveRange(min_range, max_range);
     delete min_mass;
     delete max_mass;
+
+    break;
 
     if (active_peptide_window->nCandPeptides == 0) { // No peptides to score.
       delete spectrum;
