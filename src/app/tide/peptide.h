@@ -108,14 +108,15 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  std::atomic_bool activated_{false};
   
   int Len() const { return len_; }
   double Mass() const { return mass_; }
   int Id() const { return id_; }
   int FirstLocProteinId() const { return first_loc_protein_id_; }
   int FirstLocPos() const { return first_loc_pos_; }
-  int ProteinLenth() const {return protein_length_;}
+  // int ProteinLenth() const {return protein_length_;}
 
   vector<ModCoder::Mod> Mods() const {
     return mods_;
@@ -143,7 +144,8 @@ class Peptide {
   vector<unsigned int> peaks_2y;   // Double charged y ions 
 
   bool active_;
-  std::atomic_bool computed_theoretical_peaks{false};
+  
+
   void Drop() { drops_counter_++; }
   inline size_t GetDropsCounter() const { return drops_counter_; }
   
@@ -163,6 +165,11 @@ class Peptide {
   int first_loc_protein_id_;
   int first_loc_pos_;
   int protein_length_;
+  
+  vector<const pb::AuxLocation*>* locations_;
+
+  pb::Peptide pb_peptide_;
+
   vector<pb::Location> aux_locations;
   const char* residues_;
   const char* target_residues_;

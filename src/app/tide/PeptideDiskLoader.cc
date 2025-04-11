@@ -41,7 +41,7 @@ void PeptideDiskLoader::ComputeTheoreticalPeak(size_t i) {
   static thread_local TheoreticalPeakSetBYSparse theoretical_peak_set(1000); // Probably overkill, but no harm
   theoretical_peak_set.Clear();
   Peptide* peptide = getPeptide(i);
-  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set, dia_mode_);
+  peptide->Activate(&theoretical_peak_set, dia_mode_);
 }
 
 // bool PeptideDiskLoader::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {

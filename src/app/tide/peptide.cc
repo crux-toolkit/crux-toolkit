@@ -17,29 +17,46 @@ Peptide::Peptide(const pb::Peptide& peptide,
         vector<const pb::AuxLocation*>* locations)
   : len_(peptide.length()), 
   mass_(peptide.mass()), 
-  id_(peptide.id()),
-  mods_(NULL), 
-  num_mods_(0), 
-  proteins_(&proteins),
-  nterm_mod_(0.0),
-  cterm_mod_(0.0),
-  first_loc_protein_id_(peptide.first_location().protein_id()),
-  first_loc_pos_(peptide.first_location().pos()), 
-  protein_length_(proteins[first_loc_protein_id_]->residues().length()),
-  decoyIdx_(peptide.has_decoy_index() ? peptide.decoy_index() : -1) {
-    
+  id_(peptide.id()) {
+
+  pb_peptide_ = peptide;
+  proteins_ = &proteins;
+  locations_ = locations;
+
+  active_ = false;
+
+}
+
+void Peptide::Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
+  if (activated_.load()) { // avoid unnecessary mutex lock
+    return;
+  }
+  std::lock_guard<boost::shared_mutex> lock(m_);
+  if (activated_.load()) { // some threads could sleep on mutex while thread is computing
+    return;
+  }
+
+  // mods_ = NULL;
+  num_mods_ = 0;
+  nterm_mod_ = 0.0;
+  cterm_mod_ = 0.0;
+  first_loc_protein_id_  = pb_peptide_.first_location().protein_id();
+  first_loc_pos_ = pb_peptide_.first_location().pos(); 
+  protein_length_ = proteins_->at(first_loc_protein_id_)->residues().length();
+  decoyIdx_ = pb_peptide_.has_decoy_index() ? pb_peptide_.decoy_index() : -1; 
+
   // Here we make sure that tide-search is compatible with old and new tide-index protocol buffers.
   // Set residues_ by pointing to the first occurrence in proteins.
-  if (peptide.has_decoy_sequence() == true){  //new tide-index format
-    decoy_seq_ = peptide.decoy_sequence();  // Make a copy of the string, because pb::Peptide will be reused.
+  if (pb_peptide_.has_decoy_sequence() == true){  //new tide-index format
+    decoy_seq_ = pb_peptide_.decoy_sequence();  // Make a copy of the string, because pb::Peptide will be reused.
     residues_ = decoy_seq_.data();
-    target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+    target_residues_ = proteins_->at(first_loc_protein_id_)->residues().data() 
                       + first_loc_pos_;
   } else {  //old tide-index format
-    residues_ = proteins[first_loc_protein_id_]->residues().data() 
+    residues_ = proteins_->at(first_loc_protein_id_)->residues().data() 
                     + first_loc_pos_;
     if (IsDecoy()) {
-      target_residues_ = proteins[first_loc_protein_id_]->residues().data() 
+      target_residues_ = proteins_->at(first_loc_protein_id_)->residues().data() 
                         + first_loc_pos_+len_+1;
     } else {
       target_residues_ = residues_;
@@ -48,44 +65,43 @@ Peptide::Peptide(const pb::Peptide& peptide,
                     
   int index;
   double delta;
-  num_mods_ = peptide.modifications_size();
+  num_mods_ = pb_peptide_.modifications_size();
   for (int i = 0; i < num_mods_; ++i)
-    mods_.push_back(ModCoder::Mod(peptide.modifications(i)));
+    mods_.push_back(ModCoder::Mod(pb_peptide_.modifications(i)));
 
-  if (peptide.has_nterm_mod()) {  // Handle N-terminal modifications
-    MassConstants::DecodeMod(ModCoder::Mod(peptide.nterm_mod()), &index, &delta);
+  if (pb_peptide_.has_nterm_mod()) {  // Handle N-terminal modifications
+    MassConstants::DecodeMod(ModCoder::Mod(pb_peptide_.nterm_mod()), &index, &delta);
     nterm_mod_ = delta;
   }
 
-  if (peptide.has_cterm_mod()) {  // Handle C-terminal modifications
-    MassConstants::DecodeMod(ModCoder::Mod(peptide.cterm_mod()), &index, &delta);
+  if (pb_peptide_.has_cterm_mod()) {  // Handle C-terminal modifications
+    MassConstants::DecodeMod(ModCoder::Mod(pb_peptide_.cterm_mod()), &index, &delta);
     cterm_mod_ = delta;
   }
 
 
   // Add auxiliary locations;
   // This handles the old version of tide index in which the aux locations are separately stored in a vector.    
-  if (peptide.aux_locations_index() && locations) {  
-    const pb::AuxLocation* aux_loc = locations->at(peptide.aux_locations_index());
+  if (pb_peptide_.aux_locations_index() && locations_) {  
+    const pb::AuxLocation* aux_loc = locations_->at(pb_peptide_.aux_locations_index());
     for (int i = 0; i < aux_loc->location_size(); ++i) {
       aux_locations.push_back(aux_loc->location(i));
     }
   // this part handles the aux location in the current tide-index.     
   // Here the aux location are merged to the peptide pb.
-  } else if (peptide.has_aux_loc() == true) {   
-    const pb::AuxLocation& aux_loc = peptide.aux_loc();
+  } else if (pb_peptide_.has_aux_loc() == true) {   
+    const pb::AuxLocation& aux_loc = pb_peptide_.aux_loc();
     for (int i = 0; i < aux_loc.location_size(); ++i) {
       aux_locations.push_back(aux_loc.location(i));
     }
   }
-  string scoring_method = Params::GetString("score-function"); // Handle this properly with Get
+  // string scoring_method = Params::GetString("score-function"); // Handle this properly with Get
   protein_id_str_ = string("");
   flankingAAs_ = string("");
   seq_with_mods_ = string("");
   mod_crux_string_ = string(""); 
   mod_mztab_string_ = string("");
   
-  active_ = false;
 
   peaks_0.resize(2*len_);   // Single charged b-y ions, in case of exact p-value, this contains only the b-ions
   peaks_1.resize(2*len_);   // Double charged b-y ions
@@ -97,6 +113,12 @@ Peptide::Peptide(const pb::Peptide& peptide,
   peaks_1y.clear();
   peaks_2b.clear();
   peaks_2y.clear();
+
+  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);   // Generic workspace
+  Compile(workspace->GetPeaks());
+
+  active_ = false;
+  activated_.store(true);
 }
 
 template<class W>
@@ -195,18 +217,7 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks) {
   }
 }
 
-void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
-  if (computed_theoretical_peaks.load()) { // avoid unnecessary mutex lock
-    return;
-  }
-  std::lock_guard<boost::shared_mutex> lock(m_);
-  if (computed_theoretical_peaks.load()) { // some threads could sleep on mutex while thread is computing
-    return;
-  }
-  AddIons<TheoreticalPeakSetBYSparse>(workspace, dia_mode);   // Generic workspace
-  Compile(workspace->GetPeaks());
-  computed_theoretical_peaks.store(true);
-}
+
 
 // return the amino acid masses in the current peptide
 vector<double> Peptide::getAAMasses() const {
