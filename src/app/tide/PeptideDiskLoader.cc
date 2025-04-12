@@ -12,6 +12,7 @@
 #include "app/TideMatchSet.h"
 #include <map> 
 #include <limits>
+#include <iostream>
 #define CHECK(x) GOOGLE_CHECK((x))
 
 PeptideDiskLoader::PeptideDiskLoader(RecordReader* reader,
@@ -44,6 +45,12 @@ void PeptideDiskLoader::ComputeTheoreticalPeak(size_t i) {
   peptide->Activate(&theoretical_peak_set, dia_mode_);
 }
 
+void PeptideDiskLoader::ComputeTheoreticalPeak(Peptide* peptide) {
+  static thread_local TheoreticalPeakSetBYSparse theoretical_peak_set(1000); // Probably overkill, but no harm
+  theoretical_peak_set.Clear();
+  peptide->Activate(&theoretical_peak_set, dia_mode_);
+}
+
 // bool PeptideDiskLoader::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
 //   for (int i = *isotope_idx; i < min_mass->size(); ++i) {
 //     if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
@@ -70,7 +77,7 @@ bool PeptideDiskLoader::pushBack(RollingPeptideWindow* window) {
     queue_.push_back(peptide);
     end_++;
     window->end_++;
-    ComputeTheoreticalPeak(end_);
+    ComputeTheoreticalPeak(peptide);
     return true;
   }
   return false;
@@ -81,7 +88,7 @@ bool PeptideDiskLoader::popFront(RollingPeptideWindow* window) {
   if (window->begin_ == window->end_) {
     return false;
   }
-  Peptide* peptide = getPeptide(window->begin_);
+  Peptide* peptide = getPeptideUnsafe(window->begin_);
   peptide->Drop();
 
   if (peptide->GetDropsCounter() == windows_.size()) {
@@ -90,12 +97,18 @@ bool PeptideDiskLoader::popFront(RollingPeptideWindow* window) {
     begin_++;
   }
   window->begin_++;
+  return true;
 }
 
 Peptide* PeptideDiskLoader::getPeptide(size_t i) {
   m_.lock_shared();
   Peptide* peptide = queue_.at(i - begin_);
   m_.unlock_shared();
+  return peptide;
+}
+
+Peptide* PeptideDiskLoader::getPeptideUnsafe(size_t i) {
+  Peptide* peptide = queue_.at(i - begin_);
   return peptide;
 }
 /*
@@ -125,8 +138,17 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
   // queue front() is lightest; back() is heaviest
 
   // delete anything already loaded that falls below min_range
-  while (!empty() && front()->Mass() < min_range) {
-    assert(PopFront());
+  std::cout << "\n";
+  bool done = false;
+  while (size() < queue_->min_candidates_ || front()->Mass() < min_range || back()->Mass() <= max_range) {
+    if (!empty() && front()->Mass() < min_range) { // should move front end
+      assert(PopFront());
+      continue;
+    }
+    if (!(done = PushBack())) {
+      break;
+    }
+
   }
 
   /*
@@ -145,13 +167,7 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
   // max_range. For each new enqueued peptide compute the corresponding
   // theoretical peaks. Data associated with each peptide is allocated by
   // fifo_alloc_peptides_.
-  bool done = false;
 
-  while (size() < queue_->min_candidates_ && back()->Mass() <= max_range) {
-    if (!(done = PushBack())) { // reader is done
-      break;
-    }
-  }
   // by now, if not EOF, then the last (and only the last) enqueued
   // peptide is too heavy
   assert(!empty() || done);

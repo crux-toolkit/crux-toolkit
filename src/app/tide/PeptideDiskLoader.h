@@ -45,8 +45,10 @@ class PeptideDiskLoader {
   //       int* isotope_idx);   
 
   void ComputeTheoreticalPeak(size_t i);
+  void ComputeTheoreticalPeak(Peptide* peptide);
 
   Peptide* getPeptide(size_t i);
+  Peptide* getPeptideUnsafe(size_t i);
 
   // Peptide* getComputedPeptide(size_t i);
   

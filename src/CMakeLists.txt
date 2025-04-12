@@ -297,6 +297,7 @@ else (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 add_executable(crux crux-main.cpp)
+target_compile_options(crux PRIVATE -g)
 if (WIN32 AND NOT CYGWIN)
   set_property(
     TARGET crux 
