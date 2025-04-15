@@ -37,7 +37,7 @@ PeptideDiskLoader::~PeptideDiskLoader() {
     delete windows_[i];
   }
 }
-
+/*
 void PeptideDiskLoader::ComputeTheoreticalPeak(size_t i) {
   static thread_local TheoreticalPeakSetBYSparse theoretical_peak_set(1000); // Probably overkill, but no harm
   theoretical_peak_set.Clear();
@@ -50,7 +50,7 @@ void PeptideDiskLoader::ComputeTheoreticalPeak(Peptide* peptide) {
   theoretical_peak_set.Clear();
   peptide->Activate(&theoretical_peak_set, dia_mode_);
 }
-
+*/
 // bool PeptideDiskLoader::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
 //   for (int i = *isotope_idx; i < min_mass->size(); ++i) {
 //     if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
@@ -77,7 +77,7 @@ bool PeptideDiskLoader::pushBack(RollingPeptideWindow* window) {
     queue_.push_back(peptide);
     end_++;
     window->end_++;
-    ComputeTheoreticalPeak(peptide);
+    // ComputeTheoreticalPeak(peptide);
     return true;
   }
   return false;
@@ -122,7 +122,9 @@ const std::vector<RollingPeptideWindow*> PeptideDiskLoader::GetRollingPeptideWin
   return windows_;
 }
 
-RollingPeptideWindow::RollingPeptideWindow(PeptideDiskLoader* queue) : queue_(queue) {
+RollingPeptideWindow::RollingPeptideWindow(PeptideDiskLoader* queue) : 
+  theoretical_peak_set_(1000),
+  queue_(queue) {
 }
 
 bool RollingPeptideWindow::PushBack() {
@@ -138,7 +140,7 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
   // queue front() is lightest; back() is heaviest
 
   // delete anything already loaded that falls below min_range
-  std::cout << "\n";
+  // std::cout << "\n";
   bool done = false;
   while (size() < queue_->min_candidates_ || front()->Mass() < min_range || back()->Mass() <= max_range) {
     if (!empty() && front()->Mass() < min_range) { // should move front end
@@ -158,10 +160,10 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
     delete peptide;
   }
   */
-  nPeptides = 0;
-  nCandPeptides = 0;
-  CandPeptidesTarget = 0;
-  CandPeptidesDecoy = 0;
+  nPeptides_ = size();
+  nCandPeptides_ = size();
+  CandPeptidesTarget_ = 0;
+  CandPeptidesDecoy_ = 0;
 
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
@@ -178,7 +180,5 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
     return 0;
   }
 
-  nPeptides = size();
-  nCandPeptides = size();
-  return nCandPeptides;
+  return nCandPeptides_;
 }

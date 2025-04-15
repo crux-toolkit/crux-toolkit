@@ -276,8 +276,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Delete temporary spectrumrecords file
  for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
-    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
-    remove((*original_file_name).SpectrumRecords.c_str());
+    if ((*original_file_name).Keep == false) {
+      carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+      remove((*original_file_name).SpectrumRecords.c_str());
+    }
   }
 
   // Delete stuffs
@@ -375,9 +377,9 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     delete min_mass;
     delete max_mass;
 
-    break;
+    // break;
 
-    if (active_peptide_window->nCandPeptides == 0) { // No peptides to score.
+    if (active_peptide_window->nCandPeptides_ == 0) { // No peptides to score.
       delete spectrum;
       delete sc;  
       continue; 
@@ -393,7 +395,7 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
       &num_isotopes_skipped, &num_retained);
 
     locks_array_[LOCK_CANDIDATES]->lock();
-    total_candidate_peptides_ += active_peptide_window->nCandPeptides;
+    total_candidate_peptides_ += active_peptide_window->nCandPeptides_;
     ++num_spectra_searched_;    
     num_range_skipped_ += num_range_skipped;
     num_precursors_skipped_ += num_precursors_skipped;
@@ -429,15 +431,16 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
   bool score_inactive_peptides = true;
-  if (active_peptide_window->GetQueue()->min_candidates_ < active_peptide_window->nCandPeptides)
+  if (active_peptide_window->GetQueue()->min_candidates_ < active_peptide_window->nCandPeptides_)
     score_inactive_peptides = false;
   
   //Actual Xcorr Scoring        
   int cnt = 0;
   for (size_t i = active_peptide_window->begin(); i < active_peptide_window->end(); ++i, cnt++) {
     Peptide* peptide = active_peptide_window->GetPeptide(i);
-    if (peptide->active_ == false && score_inactive_peptides == false) 
-      continue;
+    peptide->Activate(&active_peptide_window->theoretical_peak_set_);  // This peptide is getting scored, calculate its fragmentation ions
+//    if (peptide->active_ == false && score_inactive_peptides == false) 
+//      continue;
     int xcorr = 0;
     int match_cnt = 0;
     int temp = 0;
@@ -497,9 +500,9 @@ void TideSearchApplication::PValueScoring(const SpectrumCollection::SpecCharge* 
   //pepMassInt contains the corresponding mass bin for each candidate peptide
   //pepMassIntUnique contains the unique set of mass bins that candidate peptides fall in 
   vector<int> pepMassInt;
-  pepMassInt.reserve(active_peptide_window->nPeptides);
+  pepMassInt.reserve(active_peptide_window->size());
   vector<int> pepMassIntUnique;
-  pepMassIntUnique.reserve(active_peptide_window->nPeptides);
+  pepMassIntUnique.reserve(active_peptide_window->size());
   getMassBin(pepMassInt, pepMassIntUnique, active_peptide_window);
   int nPepMassIntUniq = (int)pepMassIntUnique.size();
   int maxPrecurMassBin = MassConstants::mass2bin(sc->neutral_mass + 250);

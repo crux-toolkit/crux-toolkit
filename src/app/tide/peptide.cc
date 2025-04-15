@@ -36,6 +36,8 @@ void Peptide::Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
     return;
   }
 
+  workspace->Clear();
+
   // mods_ = NULL;
   num_mods_ = 0;
   nterm_mod_ = 0.0;

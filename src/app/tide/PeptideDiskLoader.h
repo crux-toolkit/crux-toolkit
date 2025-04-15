@@ -21,6 +21,7 @@ class PeptideDiskLoader {
   using iterator = std::deque<Peptide*>::iterator;
   using const_iterator = std::deque<Peptide*>::const_iterator;
   friend class RollingPeptideWindow;
+
   PeptideDiskLoader(RecordReader* reader,
         const vector<const pb::Protein*>& proteins,
         vector<const pb::AuxLocation*>* locations=NULL, 
@@ -44,8 +45,8 @@ class PeptideDiskLoader {
   //       double mass,
   //       int* isotope_idx);   
 
-  void ComputeTheoreticalPeak(size_t i);
-  void ComputeTheoreticalPeak(Peptide* peptide);
+  // void ComputeTheoreticalPeak(size_t i);
+  // void ComputeTheoreticalPeak(Peptide* peptide);
 
   Peptide* getPeptide(size_t i);
   Peptide* getPeptideUnsafe(size_t i);
@@ -87,10 +88,12 @@ public:
 
   PeptideDiskLoader* GetQueue() const { return queue_; }
 
-  int nPeptides= 0;
-  int nCandPeptides = 0;
-  int CandPeptidesTarget = 0;
-  int CandPeptidesDecoy = 0;
+  int nPeptides_ = 0;
+  int nCandPeptides_ = 0;
+  int CandPeptidesTarget_ = 0;
+  int CandPeptidesDecoy_ = 0;
+
+  TheoreticalPeakSetBYSparse theoretical_peak_set_; // Probably overkill, but no harm    
 private:
   RollingPeptideWindow(PeptideDiskLoader* queue);
 

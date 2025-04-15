@@ -275,7 +275,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           active_peptide_window->SetActiveRange(min_range, max_range);
 
 
-          if (active_peptide_window->nCandPeptides == 0) { // No peptides to score.
+          if (active_peptide_window->nCandPeptides_ == 0) { // No peptides to score.
             delete min_mass;
             delete max_mass;
             continue; 
