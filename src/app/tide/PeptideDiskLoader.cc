@@ -142,12 +142,12 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range) {
   // delete anything already loaded that falls below min_range
   // std::cout << "\n";
   bool done = false;
-  while (size() < queue_->min_candidates_ || front()->Mass() < min_range || back()->Mass() <= max_range) {
-    if (!empty() && front()->Mass() < min_range) { // should move front end
-      assert(PopFront());
+  while (this->size() < queue_->min_candidates_ || this->front()->Mass() < min_range || this->back()->Mass() <= max_range) {
+    if (!this->empty() && this->front()->Mass() < min_range) { // should move front end
+      this->PopFront();
       continue;
     }
-    if (!(done = PushBack())) {
+    if (!(done = this->PushBack())) {
       break;
     }
 

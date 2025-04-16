@@ -78,7 +78,7 @@ public:
   inline Peptide* back() { return (begin_ == end_) ? NULL : queue_->getPeptide(end_ - 1); }
   inline Peptide* front() { return (begin_ == end_) ? NULL : queue_->getPeptide(begin_); }
 
-  inline bool empty() const { return begin_ == end_; }
+  inline bool empty() const { return size() == 0; }
   inline size_t size() const { return end_ - begin_; }
 
   inline size_t begin() { return begin_; }
