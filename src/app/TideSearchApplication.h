@@ -120,6 +120,12 @@ class TideSearchApplication : public CruxApplication {
       double* min_range,
       double* max_range
     );
+
+  static bool isWithinIsotope(vector<double>* min_mass,
+        vector<double>* max_mass, 
+        double mass,
+        int* isotope_idx);   
+
   vector<double> dAAFreqN_;
   vector<double> dAAFreqI_;
   vector<double> dAAFreqC_;

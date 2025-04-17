@@ -272,7 +272,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
           observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained, dia_mode);
           // active_peptide_window->SetActiveRange(min_mass, max_mass, min_range, max_range);
-          active_peptide_window->SetActiveRange(min_range, max_range);
+          active_peptide_window->SetActiveRange(min_range, max_range, min_mass, max_mass);
 
 
           if (active_peptide_window->nCandPeptides_ == 0) { // No peptides to score.

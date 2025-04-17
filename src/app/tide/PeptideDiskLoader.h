@@ -39,12 +39,6 @@ class PeptideDiskLoader {
   bool popFront(RollingPeptideWindow*);
   bool pushBack(RollingPeptideWindow*);
 
-
-  // static bool isWithinIsotope(vector<double>* min_mass,
-  //       vector<double>* max_mass, 
-  //       double mass,
-  //       int* isotope_idx);   
-
   // void ComputeTheoreticalPeak(size_t i);
   // void ComputeTheoreticalPeak(Peptide* peptide);
 
@@ -71,7 +65,7 @@ class RollingPeptideWindow {
 public:
   friend class PeptideDiskLoader;
 
-  int SetActiveRange(double min_range, double max_range);
+  int SetActiveRange(double min_range, double max_range, vector<double>* min_mass, vector<double>* max_mass);
   bool PushBack();
   bool PopFront();
 
@@ -88,10 +82,13 @@ public:
 
   PeptideDiskLoader* GetQueue() const { return queue_; }
 
-  int nPeptides_ = 0;
-  int nCandPeptides_ = 0;
-  int CandPeptidesTarget_ = 0;
-  int CandPeptidesDecoy_ = 0;
+  size_t nPeptides_ = 0;
+  size_t nCandPeptides_ = 0;
+  size_t CandPeptidesTarget_ = 0;
+  size_t CandPeptidesDecoy_ = 0;
+
+  vector<double>* min_mass_;
+  vector<double>* max_mass_;
 
   TheoreticalPeakSetBYSparse theoretical_peak_set_; // Probably overkill, but no harm    
 private:

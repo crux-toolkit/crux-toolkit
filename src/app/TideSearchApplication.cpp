@@ -373,16 +373,18 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     vector<double>* max_mass = new vector<double>();
     
     computeWindow(*sc, min_mass, max_mass, &min_range, &max_range);
-    active_peptide_window->SetActiveRange(min_range, max_range);
-    delete min_mass;
-    delete max_mass;
+    active_peptide_window->SetActiveRange(min_range, max_range, min_mass, max_mass);
+
+    // carp(CARP_INFO, "scan id: %d, cand pepts: %d .",  scan_num, active_peptide_window->nCandPeptides_);
 
     // break;
 
-    if (active_peptide_window->nCandPeptides_ == 0) { // No peptides to score.
+    if (active_peptide_window->size() == 0) { // No peptides to score.
       delete spectrum;
       delete sc;  
-      continue; 
+      delete min_mass;
+      delete max_mass;
+        continue; 
     }
     long num_range_skipped = 0;
     long num_precursors_skipped = 0;
@@ -393,15 +395,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
       &num_precursors_skipped,
       &num_isotopes_skipped, &num_retained);
-
-    locks_array_[LOCK_CANDIDATES]->lock();
-    total_candidate_peptides_ += active_peptide_window->nCandPeptides_;
-    ++num_spectra_searched_;    
-    num_range_skipped_ += num_range_skipped;
-    num_precursors_skipped_ += num_precursors_skipped;
-    num_isotopes_skipped_ += num_isotopes_skipped;
-    num_retained_ += num_retained;
-    locks_array_[LOCK_CANDIDATES]->unlock();  
  
     // allocate PSMscores for N scores
     TideMatchSet psm_scores(active_peptide_window, &observed);  //nPeptides_ includes acitve and inacitve peptides
@@ -417,12 +410,24 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         break;
       // case HYPERSCOR: TODO add new scoring functions here
     } 
+    locks_array_[LOCK_CANDIDATES]->lock();
+    total_candidate_peptides_ += active_peptide_window->nCandPeptides_;   // The number of candidate peptides is counted during scoring
+    ++num_spectra_searched_;    
+    num_range_skipped_ += num_range_skipped;
+    num_precursors_skipped_ += num_precursors_skipped;
+    num_isotopes_skipped_ += num_isotopes_skipped;
+    num_retained_ += num_retained;
+    locks_array_[LOCK_CANDIDATES]->unlock();  
+
     // Print the top-N results to the output files, 
     // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults
     PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
 
     delete spectrum;
     delete sc;
+    delete min_mass;
+    delete max_mass;
+
   }
 }
 
@@ -430,22 +435,52 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
-  bool score_inactive_peptides = true;
-  if (active_peptide_window->GetQueue()->min_candidates_ < active_peptide_window->nCandPeptides_)
-    score_inactive_peptides = false;
+  // bool score_inactive_peptides = true;
+  // if (active_peptide_window->GetQueue()->min_candidates_ < active_peptide_window->nCandPeptides_)
+  //   score_inactive_peptides = false;
   
   //Actual Xcorr Scoring        
   int cnt = 0;
-  for (size_t i = active_peptide_window->begin(); i < active_peptide_window->end(); ++i, cnt++) {
+  int* isotope_idx = new int(0);
+
+  active_peptide_window->nCandPeptides_ = 0;
+  active_peptide_window->CandPeptidesTarget_ = 0;
+  active_peptide_window->CandPeptidesDecoy_ = 0;
+  size_t peptides_scored = 0;
+
+  for (size_t i = active_peptide_window->begin(); i < active_peptide_window->end(); ++i, ++cnt) {
+
     Peptide* peptide = active_peptide_window->GetPeptide(i);
+    
+    if (isWithinIsotope(active_peptide_window->min_mass_, active_peptide_window->max_mass_, peptide->Mass(), isotope_idx)) {  //This peptide is not a candidate peptide
+      psm_scores.psm_scores_[cnt].active_ = true;
+    } else {
+      psm_scores.psm_scores_[cnt].active_ = false;
+    }
+    // score_inactive_peptides = true;
+    // if (active_peptide_window->GetQueue()->min_candidates_ < active_peptide_window->nCandPeptides_)
+    //   score_inactive_peptides = false;
+
+    if (psm_scores.psm_scores_[cnt].active_ == false && active_peptide_window->GetQueue()->min_candidates_ < peptides_scored ) 
+      continue;
+
     peptide->Activate(&active_peptide_window->theoretical_peak_set_);  // This peptide is getting scored, calculate its fragmentation ions
-//    if (peptide->active_ == false && score_inactive_peptides == false) 
-//      continue;
+
+    ++peptides_scored;  // Active or inactive peptides
+
+    if ( psm_scores.psm_scores_[cnt].active_ == true) {
+      ++active_peptide_window->nCandPeptides_;  // number of active peptides, scored
+
+      if (peptide->IsDecoy()) {  // count the targets and decoy only for reporting.
+        ++active_peptide_window->CandPeptidesDecoy_;
+      } else {
+        ++active_peptide_window->CandPeptidesTarget_;
+      }
+    }
+
     int xcorr = 0;
     int match_cnt = 0;
     int temp = 0;
-    // int repeat_ion_match = 0;
-  
     // Score with single charged b-y ion theoretical peaks
     xcorr += PeakMatching(observed, peptide->peaks_0, match_cnt, temp);
 
@@ -456,12 +491,14 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
     psm_scores.psm_scores_[cnt].peptide_ptr_ = peptide;
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
-    psm_scores.psm_scores_[cnt].active_ = peptide->active_;
+//    psm_scores.psm_scores_[cnt].active_ = true;
     psm_scores.psm_scores_[cnt].by_ion_total_ = peptide->peaks_0.size();
     if (charge > 2){
       psm_scores.psm_scores_[cnt].by_ion_total_ += peptide->peaks_1.size();
     }
   } 
+  delete isotope_idx;
+
 }
 
 int TideSearchApplication::PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks) {
@@ -1185,6 +1222,17 @@ vector<int> TideSearchApplication::getNegativeIsotopeErrors() {
   return negative_isotope_errors;
 }
 
+bool TideSearchApplication::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
+  for (int i = *isotope_idx; i < min_mass->size(); ++i) {
+    if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
+      if (i > *isotope_idx) {
+        *isotope_idx = i;
+      }
+      return true;
+    }
+  }
+  return false;
+}
 
 void TideSearchApplication::getPeptideIndexData(const string input_index, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header){
 
