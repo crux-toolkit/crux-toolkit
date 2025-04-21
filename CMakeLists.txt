@@ -6,7 +6,7 @@ endif()
 project(crux)
 
 set (CRUX_VERSION_MAJOR "4")
-set (CRUX_VERSION_MINOR "2")
+set (CRUX_VERSION_MINOR "3")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(

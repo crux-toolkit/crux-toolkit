@@ -110,7 +110,7 @@ void CometApplication::setVarMod(const string& param) {
       case 3: m.iMaxNumVarModAAPerMod = StringUtils::FromString<int>(field); break;
       case 4: m.iVarModTermDistance = StringUtils::FromString<int>(field); break;
       case 5: m.iWhichTerm = StringUtils::FromString<int>(field); break;
-      case 6: m.bRequireThisMod = StringUtils::FromString<int>(field); break;
+      case 6: m.iRequireThisMod = StringUtils::FromString<int>(field); break;
     }
   }
   searchManager_.SetParam(param, Params::GetString(param), m);
@@ -297,7 +297,8 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod08");
   setVarMod("variable_mod09");
   setInt("max_variable_mods_in_peptide");
-  setInt("require_variable_mod");
+  setString("require_variable_mod");
+  setString("protein_modlist_file");
   // Static modifications
   setDouble("add_Cterm_peptide");
   setDouble("add_Nterm_peptide");
@@ -310,6 +311,16 @@ void CometApplication::setCometParameters(
   setEnzyme("[COMET_ENZYME_INFO]",
             "search_enzyme_number", "search_enzyme2_number", "sample_enzyme_number",
             "allowed_missed_cleavage");
+
+  // Indexing
+  searchManager_.SetParam("create_fragment_index", "0", 0);
+  searchManager_.SetParam("create_peptide_index", "0", 0);
+  setDouble("fragindex_max_fragmentmass");
+  setDouble("fragindex_min_fragmentmass");
+  setInt("fragindex_min_ions_report");
+  setInt("fragindex_min_ions_score");
+  setInt("fragindex_num_spectrumpeaks");
+  setInt("fragindex_skipreadprecursors");
 }
 
 string CometApplication::staticModParam(char c) {
@@ -335,7 +346,7 @@ string CometApplication::getDescription() const {
   return
     "[[nohtml:Search a collection of spectra against a sequence database, "
     "returning a collection of PSMs. This search engine runs directly on a "
-    "protein database in FASTA format.]]"
+    "protein database in FASTA format or an index created from a FASTA file.]]"
     "[[html:<p>This command searches a protein database with a set of spectra, "
     "assigning peptide sequences to the observed spectra. This search engine "
     "was developed by Jimmy Eng at the University of Washington Proteomics "
@@ -459,6 +470,7 @@ vector<string> CometApplication::getOptions() const {
     "auto_modifications",
     "max_variable_mods_in_peptide",
     "require_variable_mod",
+    "protein_modlist_file",
     // Static modifications
     "add_Cterm_peptide",
     "add_Nterm_peptide",
@@ -502,7 +514,14 @@ vector<string> CometApplication::getOptions() const {
     "pm-pair-top-n-frag-peaks",
     "pm-min-common-frag-peaks",
     "pm-max-scan-separation",
-    "pm-min-peak-pairs"
+    "pm-min-peak-pairs",
+  // Fragment ion fragment indexing
+    "fragindex_skipreadprecursors",
+    "fragindex_num_spectrumpeaks",
+    "fragindex_min_ions_score",
+    "fragindex_min_ions_report",
+    "fragindex_min_fragmentmass",
+    "fragindex_max_fragmentmass"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

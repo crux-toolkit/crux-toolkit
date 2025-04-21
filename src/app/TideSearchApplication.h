@@ -83,6 +83,8 @@ class TideSearchApplication : public CruxApplication {
   void getPeptideIndexData(string, ProteinVec& proteins, vector<const pb::AuxLocation*>& locations, pb::Header& peptides_header);
   void createOutputFiles();
 
+  void convertResults() const;  
+
   void PrintResults(const SpectrumCollection::SpecCharge* sc, string spectrum_file_name, int spectrum_file_cnt, TideMatchSet* psm_scores);
 
 
