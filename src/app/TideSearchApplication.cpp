@@ -492,7 +492,6 @@ void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, 
     psm_scores.psm_scores_[cnt].peptide_ptr_ = peptide;
     psm_scores.psm_scores_[cnt].xcorr_score_ = (double)xcorr/XCORR_SCALING;
     psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
-//    psm_scores.psm_scores_[cnt].active_ = true;
     psm_scores.psm_scores_[cnt].by_ion_total_ = peptide->peaks_0.size();
     if (charge > 2){
       psm_scores.psm_scores_[cnt].by_ion_total_ += peptide->peaks_1.size();

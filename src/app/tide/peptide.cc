@@ -257,6 +257,9 @@ vector<double> Peptide::getAAMasses() const {
 
 string Peptide::SeqWithMods(int mod_precision) {
   // If the peptide is reported more than once then reuse the strings from previous calculations    
+
+  std::lock_guard<boost::shared_mutex> lock(m_);
+    
   if (seq_with_mods_.empty() == false)
     return seq_with_mods_;
   
@@ -294,6 +297,8 @@ string Peptide::SeqWithMods(int mod_precision) {
  string  Peptide::GetLocationStr(const string& decoy_prefix) {
   // If the peptide is reported more than once then reuse the strings from previous calculations  
 
+  std::lock_guard<boost::shared_mutex> lock(m_);
+
   if (protein_id_str_.empty() == false) 
     return protein_id_str_;
 
@@ -321,6 +326,8 @@ string Peptide::SeqWithMods(int mod_precision) {
  */
 string  Peptide::GetFlankingAAs() {
   // If the peptide is reported more than once then reuse the strings from previous calculations  
+
+  std::lock_guard<boost::shared_mutex> lock(m_);
 
   if (flankingAAs_.empty() == false) 
     return flankingAAs_;
@@ -351,7 +358,11 @@ string  Peptide::GetFlankingAAs() {
 }
 
 void Peptide::getModifications(int mod_precision, string& mod_crux_string, string& mod_mztab_string) {
+
   // If the peptide is reported more than once then reuse the strings from previous calculations  
+
+  std::lock_guard<boost::shared_mutex> lock(m_);
+
   if (mod_mztab_string_.empty() == false)  {
     mod_crux_string  = mod_crux_string_;
     mod_mztab_string = mod_mztab_string_;

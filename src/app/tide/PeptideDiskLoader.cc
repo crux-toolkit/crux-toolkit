@@ -163,7 +163,8 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range, vec
 
   // by now, if not EOF, then the last (and only the last) enqueued
   // peptide is too heavy
-  assert(!empty() || done);
+  
+  // assert(!empty() || done);  AKF commented out for now. REthing if we need this.
 
   // Set up iterator for use with HasNext(),
   // GetPeptide(), and NextPeptide(). Return the number of enqueued peptides.

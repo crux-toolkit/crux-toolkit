@@ -530,13 +530,20 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       continue;
     }
 
+    // std::lock_guard<boost::shared_mutex> lock(m_);
+
     string proteinNames = peptide->GetLocationStr(decoy_prefix_);
     string flankingAAs = peptide->GetFlankingAAs();
     string peptide_with_mods = peptide->SeqWithMods(mod_precision_);
     string crux_modifications;
     string mztab_modifications;
-    peptide->getModifications(mod_precision_, crux_modifications, mztab_modifications); 
-    string peptide_without_mods = peptide->Seq();   
+     peptide->getModifications(mod_precision_, crux_modifications, mztab_modifications); 
+     string peptide_without_mods = peptide->Seq();  
+    //  m_.unlock_shared();
+    // string proteinNames;
+    // string flankingAAs;
+    // string peptide_with_mods;
+    // string peptide_without_mods;
     // The order of the fields depends on the columns defined at the beginning of this file.
     // The fields below can be in arbitrary order.
     for (size_t i = 0; i < numHeaders; ++i) {   

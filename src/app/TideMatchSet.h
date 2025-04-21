@@ -125,6 +125,9 @@ class TideMatchSet {
   PSMScores concat_or_target_psm_scores_;
   PSMScores decoy_psm_scores_;
 
+  boost::shared_mutex m_;
+
+
 
 };
 
