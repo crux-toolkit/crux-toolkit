@@ -109,6 +109,8 @@ class Peptide {
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
   void Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void TryActivate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void ActivateImpl(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
   std::atomic_bool activated_{false};
   
   int Len() const { return len_; }
@@ -144,21 +146,23 @@ class Peptide {
   vector<unsigned int> peaks_2y;   // Double charged y ions 
 
   bool active_;
+
+  std::atomic<Peptide*> next{nullptr};
   
 
-  void Drop() { drops_counter_++; }
-  inline size_t GetDropsCounter() const { return drops_counter_; }
+  size_t Drop() { return drops_counter_.fetch_add(1); }
+  inline size_t GetDropsCounter() const { return drops_counter_.load(); }
   
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
-  boost::shared_mutex m_;
+  std::mutex m_;
 
 
   void Compile(const TheoreticalPeakArr* peaks);
-  bool find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name); // mod_mass output variable
-  bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name); // mod_mass output variable
+  bool find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name) const; // mod_mass output variable
+  bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name) const; // mod_mass output variable
   
-  size_t drops_counter_ = 0;
+  std::atomic<size_t> drops_counter_{0};
   int len_;
   double mass_;
   int id_;

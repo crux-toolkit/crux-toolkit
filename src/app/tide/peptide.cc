@@ -27,14 +27,32 @@ Peptide::Peptide(const pb::Peptide& peptide,
 
 }
 
+void Peptide::TryActivate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
+  if (activated_.load()) { // avoid unnecessary mutex lock
+    return;
+  }
+  if (m_.try_lock()) {
+    if (activated_.load()) {
+      return;
+    }
+    ActivateImpl(workspace, dia_mode);
+    m_.unlock();
+  }
+}
+
 void Peptide::Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
   if (activated_.load()) { // avoid unnecessary mutex lock
     return;
   }
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  std::lock_guard<std::mutex> lock(m_);
   if (activated_.load()) { // some threads could sleep on mutex while thread is computing
     return;
   }
+  ActivateImpl(workspace, dia_mode);
+}
+
+
+void Peptide::ActivateImpl(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
 
   workspace->Clear();
 
@@ -258,7 +276,7 @@ vector<double> Peptide::getAAMasses() const {
 string Peptide::SeqWithMods(int mod_precision) {
   // If the peptide is reported more than once then reuse the strings from previous calculations    
 
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  std::lock_guard<std::mutex> lock(m_);
     
   if (seq_with_mods_.empty() == false)
     return seq_with_mods_;
@@ -297,7 +315,7 @@ string Peptide::SeqWithMods(int mod_precision) {
  string  Peptide::GetLocationStr(const string& decoy_prefix) {
   // If the peptide is reported more than once then reuse the strings from previous calculations  
 
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  std::lock_guard<std::mutex> lock(m_);
 
   if (protein_id_str_.empty() == false) 
     return protein_id_str_;
@@ -327,7 +345,7 @@ string Peptide::SeqWithMods(int mod_precision) {
 string  Peptide::GetFlankingAAs() {
   // If the peptide is reported more than once then reuse the strings from previous calculations  
 
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  std::lock_guard<std::mutex> lock(m_);
 
   if (flankingAAs_.empty() == false) 
     return flankingAAs_;
@@ -361,7 +379,7 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
 
   // If the peptide is reported more than once then reuse the strings from previous calculations  
 
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  std::lock_guard<std::mutex> lock(m_);
 
   if (mod_mztab_string_.empty() == false)  {
     mod_crux_string  = mod_crux_string_;
@@ -481,7 +499,7 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
 
 }
 
-bool Peptide::find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name) {
+bool Peptide::find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name) const {
 
   for (int i = 0; i < mod_table->static_mod_size(); i++) {
     
@@ -506,7 +524,7 @@ bool Peptide::find_static_mod(const pb::ModTable* mod_table, char AA, double& mo
   return false;  //No modification
 }
 
-bool Peptide::find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name) {
+bool Peptide::find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name) const {
 
   for (int i = 0; i < mod_table->variable_mod_size(); i++) {
     

@@ -23,7 +23,7 @@ PeptideDiskLoader::PeptideDiskLoader(RecordReader* reader,
     proteins_(proteins),
     locations_(locations),
     dia_mode_(dia_mode),
-    windows_(thread_num) {
+    windows_(thread_num, nullptr) {
 
   CHECK(reader_->OK());
   min_candidates_ = 30;
@@ -54,10 +54,16 @@ void PeptideDiskLoader::ComputeTheoreticalPeak(Peptide* peptide) {
 
 
 bool PeptideDiskLoader::pushBack(RollingPeptideWindow* window) {
-  std::lock_guard<boost::shared_mutex> lock(m_);
+  if (window->last_ != nullptr && window->last_->next.load() != nullptr) {
+    window->window_.push_back(window->last_->next.load());
+    window->end_++;
+    return true;
+  }
+  std::lock_guard<SpinLock> lock(m_);
   assert(window->end_ <= end_);
   if (window->end_ < end_) {
     window->end_++;
+    window->window_.push_back(getPeptideUnsafe(window->end_ - 1));
     return true;
   }
   if (!reader_->Done()) {
@@ -68,33 +74,29 @@ bool PeptideDiskLoader::pushBack(RollingPeptideWindow* window) {
     end_++;
     window->end_++;
     // ComputeTheoreticalPeak(peptide);
+    window->window_.push_back(getPeptideUnsafe(window->end_ - 1));
     return true;
   }
   return false;
 }
 
 bool PeptideDiskLoader::popFront(RollingPeptideWindow* window) {
-  std::lock_guard<boost::shared_mutex> lock(m_);
   if (window->begin_ == window->end_) {
     return false;
   }
-  Peptide* peptide = getPeptideUnsafe(window->begin_);
-  peptide->Drop();
-
-  if (peptide->GetDropsCounter() == windows_.size()) {
-    delete peptide;
+  assert(window->window_.size() > 0);
+  Peptide* peptide = window->window_.front();
+  assert(peptide);
+  if (peptide->Drop() == windows_.size() - 1) {
+    std::lock_guard<SpinLock> lock(m_);
     queue_.pop_front();
+    delete peptide;
     begin_++;
+    window->last_ = nullptr;
   }
+  window->window_.pop_front();
   window->begin_++;
   return true;
-}
-
-Peptide* PeptideDiskLoader::getPeptide(size_t i) {
-  m_.lock_shared();
-  Peptide* peptide = queue_.at(i - begin_);
-  m_.unlock_shared();
-  return peptide;
 }
 
 Peptide* PeptideDiskLoader::getPeptideUnsafe(size_t i) {
@@ -117,8 +119,25 @@ RollingPeptideWindow::RollingPeptideWindow(PeptideDiskLoader* queue) :
   queue_(queue) {
 }
 
+void RollingPeptideWindow::ActivatePeptides(bool dia_mode) {
+  for (size_t i = begin(); i < end(); ++i) {
+    Peptide* peptide = GetPeptide(i);
+    peptide->TryActivate(&theoretical_peak_set_, dia_mode);
+  }
+}
+
 bool RollingPeptideWindow::PushBack() {
-  return queue_->pushBack(this);
+  if (!queue_->pushBack(this)) {
+    return false;
+  }
+  assert(!window_.empty());
+  last_ = window_.back();
+  window_.pop_back();
+  if (!window_.empty()) {
+    window_.back()->next.store(last_);
+  }
+  window_.push_back(last_);
+  return true;
 }
 
 bool RollingPeptideWindow::PopFront() {
@@ -134,14 +153,14 @@ int RollingPeptideWindow::SetActiveRange(double min_range, double max_range, vec
   CandPeptidesDecoy_ = 0;
 
   // delete anything already loaded that falls below min_range
-  // std::cout << "\n";
   bool done = false;
   while (this->size() < queue_->min_candidates_ || this->front()->Mass() < min_range || this->back()->Mass() <= max_range) {
     if (!this->empty() && this->front()->Mass() < min_range) { // should move front end
       this->PopFront();
       continue;
     }
-    if (!(done = this->PushBack())) {
+    done = this->PushBack();
+    if (!done) {
       break;
     }
 

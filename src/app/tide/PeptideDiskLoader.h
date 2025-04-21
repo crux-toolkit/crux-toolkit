@@ -16,10 +16,37 @@
 class TheoreticalPeakCompiler;
 class RollingPeptideWindow;
 
+class SpinLock {
+public:
+  void lock() {
+    while (acquired_.exchange(true)) {
+      while (acquired_.load(std::memory_order_relaxed)) {
+        // spinning
+      }
+    }
+    assert(acquired_.load());
+  }
+  void unlock() {
+    assert(acquired_.load());
+    acquired_.store(false);
+  }
+private:
+  std::atomic_bool acquired_{false};
+};
+
 class PeptideDiskLoader {
  public:
-  using iterator = std::deque<Peptide*>::iterator;
-  using const_iterator = std::deque<Peptide*>::const_iterator;
+  class Iterator {
+  public:
+    friend class PeptideDiskLoader;
+    Iterator& operator++();
+    Iterator operator++(int);
+    Peptide* operator*() const;
+    friend bool operator==(const Iterator&, const Iterator&);
+    friend bool operator!=(const Iterator&, const Iterator&);
+  private:
+    Iterator(Peptide* peptide);
+  };
   friend class RollingPeptideWindow;
 
   PeptideDiskLoader(RecordReader* reader,
@@ -36,21 +63,25 @@ class PeptideDiskLoader {
   bool dia_mode_;
 
  private:
+  struct Node {
+    Peptide* peptide{nullptr};
+    std::atomic<Node*> next{nullptr};
+  };
   bool popFront(RollingPeptideWindow*);
   bool pushBack(RollingPeptideWindow*);
 
   // void ComputeTheoreticalPeak(size_t i);
   // void ComputeTheoreticalPeak(Peptide* peptide);
 
-  Peptide* getPeptide(size_t i);
   Peptide* getPeptideUnsafe(size_t i);
 
   // Peptide* getComputedPeptide(size_t i);
   
-  boost::shared_mutex m_;
+  SpinLock m_;
 
   size_t end_ = 0;
   size_t begin_ = 0;
+  
 
   RecordReader* reader_;
   const vector<const pb::Protein*>& proteins_; 
@@ -66,11 +97,12 @@ public:
   friend class PeptideDiskLoader;
 
   int SetActiveRange(double min_range, double max_range, vector<double>* min_mass, vector<double>* max_mass);
+  void ActivatePeptides(bool dia_mode = false);
   bool PushBack();
   bool PopFront();
 
-  inline Peptide* back() { return (begin_ == end_) ? NULL : queue_->getPeptide(end_ - 1); }
-  inline Peptide* front() { return (begin_ == end_) ? NULL : queue_->getPeptide(begin_); }
+  inline Peptide* back() { return (begin_ == end_) ? NULL : GetPeptide(end_ - 1); }
+  inline Peptide* front() { return (begin_ == end_) ? NULL : GetPeptide(begin_); }
 
   inline bool empty() const { return size() == 0; }
   inline size_t size() const { return end_ - begin_; }
@@ -78,7 +110,7 @@ public:
   inline size_t begin() { return begin_; }
   inline size_t end() { return end_; }
 
-  Peptide* GetPeptide(size_t i) { return queue_->getPeptide(i); }
+  inline Peptide* GetPeptide(size_t i) { return window_.at(i - begin_); }
 
   PeptideDiskLoader* GetQueue() const { return queue_; }
 
@@ -96,6 +128,8 @@ private:
 
   size_t begin_ = 0;
   size_t end_ = 0;
+  std::deque<Peptide*> window_;
   PeptideDiskLoader* queue_;
+  Peptide* last_ = nullptr;
 };
 #endif
