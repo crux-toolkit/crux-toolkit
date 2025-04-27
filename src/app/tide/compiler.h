@@ -20,7 +20,7 @@
 // contents will have been determined during spectrum preprocessing (see
 // spectrum_preprocess.h).
 //
-// The programs for all peptides in the ActivePeptideQueue appear
+// The programs for all peptides in the PeptideDiskLoader appear
 // consecutively in memory, (but see caveat about FifoAllocator below) and are
 // all run, one right after the other, on the same input.  The input is a
 // buffer pointing to the cache for the observed spectrum. Each program writes
@@ -42,7 +42,7 @@
 //    if (--counter == 0) return;
 //    ...
 //
-// As new peptides enter the ActivePeptideQueue the above program is extended.
+// As new peptides enter the PeptideDiskLoader the above program is extended.
 // As "older" (lighter) peptides are dequeued and discarded corresponding
 // early lines of the generated program are discarded. Each Peptide maintains
 // a pointer to begining of its corresponding line of generated code. A
