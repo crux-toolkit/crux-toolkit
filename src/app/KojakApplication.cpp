@@ -304,20 +304,7 @@ vector<string> KojakApplication::getOptions() const {
    "overwrite",
    "parameter-file",
    "fileroot",
-   "verbosity",
-   // param-medic
-   "pm-min-precursor-mz",
-   "pm-max-precursor-mz",
-   "pm-min-frag-mz",
-   "pm-max-frag-mz",
-   "pm-min-scan-frag-peaks",
-   "pm-max-precursor-delta-ppm",
-   "pm-charges",
-   "pm-top-n-frag-peaks",
-   "pm-pair-top-n-frag-peaks",
-   "pm-min-common-frag-peaks",
-   "pm-max-scan-separation",
-   "pm-min-peak-pairs"
+   "verbosity"
   };
   return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }

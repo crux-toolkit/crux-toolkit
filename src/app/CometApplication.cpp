@@ -219,6 +219,8 @@ void CometApplication::setCometParameters(
   setInt("num_threads");
   // Masses
   setDouble("peptide_mass_tolerance");
+  setDouble("peptide_mass_tolerance_lower");
+  setDouble("peptide_mass_tolerance_upper");
   setInt("peptide_mass_units");
   setInt("mass_type_parent");
   setInt("mass_type_fragment");
@@ -242,6 +244,7 @@ void CometApplication::setCometParameters(
   setInt("use_Z1_ions");
   setInt("use_NL_ions");
   // Output
+  setInt("export_additional_pepxml_scores");
   setInt("output_mzidentmlfile");
   setInt("output_pepxmlfile");
   setInt("output_percolatorfile");
@@ -280,6 +283,8 @@ void CometApplication::setCometParameters(
   setString("text_file_extension");
   setInt("explicit_deltacn");
   setInt( "old_mods_encoding");
+  setInt( "resolve_fullpaths");
+  setString("pinfile_protein_delimiter");
   // Spectral processing
   setInt("minimum_peaks");
   setDouble("minimum_intensity");
@@ -296,6 +301,12 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod07");
   setVarMod("variable_mod08");
   setVarMod("variable_mod09");
+  setVarMod("variable_mod10");
+  setVarMod("variable_mod11");
+  setVarMod("variable_mod12");
+  setVarMod("variable_mod13");
+  setVarMod("variable_mod14");
+  setVarMod("variable_mod15");
   setInt("max_variable_mods_in_peptide");
   setString("require_variable_mod");
   setString("protein_modlist_file");
@@ -389,6 +400,8 @@ vector<string> CometApplication::getOptions() const {
     "num_threads",
     // Masses
     "peptide_mass_tolerance",
+    "peptide_mass_tolerance_lower",
+    "peptide_mass_tolerance_upper",
     "auto_peptide_mass_tolerance",
     "peptide_mass_units",
     "mass_type_parent",
@@ -414,6 +427,7 @@ vector<string> CometApplication::getOptions() const {
     "use_Z1_ions",
     "use_NL_ions",
     // Output
+    "export_additional_pepxml_scores",
     "output_mzidentmlfile",
     "output_pepxmlfile",
     "output_percolatorfile",
@@ -451,6 +465,8 @@ vector<string> CometApplication::getOptions() const {
     "text_file_extension",
     "explicit_deltacn",
     "old_mods_encoding",
+    "resolve_fullpaths", 
+    "pinfile_protein_delimiter",
     // Spectral processing
     "minimum_peaks",
     "minimum_intensity",
@@ -467,6 +483,12 @@ vector<string> CometApplication::getOptions() const {
     "variable_mod07",
     "variable_mod08",
     "variable_mod09",
+    "variable_mod10",
+    "variable_mod11",
+    "variable_mod12",
+    "variable_mod13",
+    "variable_mod14",
+    "variable_mod15",
     "auto_modifications",
     "max_variable_mods_in_peptide",
     "require_variable_mod",
@@ -502,19 +524,6 @@ vector<string> CometApplication::getOptions() const {
     "add_J_user_amino_acid",
     "add_X_user_amino_acid",
     "add_Z_user_amino_acid",
-    // param-medic
-    "pm-min-precursor-mz",
-    "pm-max-precursor-mz",
-    "pm-min-frag-mz",
-    "pm-max-frag-mz",
-    "pm-min-scan-frag-peaks",
-    "pm-max-precursor-delta-ppm",
-    "pm-charges",
-    "pm-top-n-frag-peaks",
-    "pm-pair-top-n-frag-peaks",
-    "pm-min-common-frag-peaks",
-    "pm-max-scan-separation",
-    "pm-min-peak-pairs",
   // Fragment ion fragment indexing
     "fragindex_skipreadprecursors",
     "fragindex_num_spectrumpeaks",

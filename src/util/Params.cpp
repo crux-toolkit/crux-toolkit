@@ -950,6 +950,16 @@ InitStringParam("protein-name-separator", ",",
     "The units of the mass tolerance is controlled by the parameter "
     "\"peptide_mass_units\". ",
     "Available for comet.", true);
+  InitDoubleParam("peptide_mass_tolerance_lower", -3.0, -BILLION, BILLION,
+    "Controls the lower bound of the precursor mass tolerance value."
+    "The units of the mass tolerance is controlled by the parameter "
+    "\"peptide_mass_units\". ",
+    "Available for comet.", true);
+  InitDoubleParam("peptide_mass_tolerance_upper", 3.0, 0, BILLION,
+    "Controls the upper bound of the precursor mass tolerance value."
+    "The units of the mass tolerance is controlled by the parameter "
+    "\"peptide_mass_units\". ",
+    "Available for comet.", true);
   InitIntParam("peptide_mass_units", 0, 0, 2,
     "0=amu, 1=mmu, 2=ppm.",
     "Available for comet.", true);
@@ -968,10 +978,12 @@ InitStringParam("protein-name-separator", ",",
   InitIntParam("precursor_tolerance_type", 0, 0, 1,
     "0=singly charged peptide mass, 1=precursor m/z.",
     "Available for comet.", true);
-  InitIntParam("isotope_error", 0, 0, 5,
+  InitIntParam("isotope_error", 0, 0, 7,
     "0=off, 1=0/1 (C13 error), 2=0/1/2, 3=0/1/2/3, " 
-    "4=--8/-4/0/4/8 (for +4/+8 labeling), "
-    "5=-1/0/1/2/3.",
+    "4=-1/0/1/2/3, "
+    "5=-1/0/1, "
+    "6=-3/-2/-1/0/+1/+2/+3, "
+    "7=-8/-4/0/+4/+8 (for +4/+8 stable isotope labeling).",
     "Available for comet.", true);
   /* Comet - Search enzyme */
   InitIntParam("search_enzyme_number", 1, 0, BILLION,
@@ -1030,6 +1042,9 @@ InitStringParam("protein-name-separator", ",",
     "Controls whether or not Z1-ions are considered in the search (0 - no, 1 - yes).",
     "Available for comet.", true);
   /* Comet - Output */
+  InitIntParam("export_additional_pepxml_scores", 0, 0, 1,
+    "0=no, 1=yes Controls whether to output additional search scores in the pep.xml output.",
+    "Available for comet.", false);
   InitIntParam("output_mzidentmlfile", 0, 0, 1,
     "0=no, 1=yes  write mzIdentML file.",
     "Available for comet.", true);
@@ -1050,17 +1065,17 @@ InitStringParam("protein-name-separator", ",",
      "Available for comet.", true);
   InitIntParam("print_expect_score", 1, 0, 1,
     "0=no, 1=yes to replace Sp with expect in out & sqt.",
-    "Available for comet.", true);
+    "Available for comet.", false);
   InitIntParam("num_output_lines", 5, 1, BILLION,
     "num peptide results to show.",
     "Available for comet.", true);
   InitIntParam("show_fragment_ions", 0, 0, 1,
     "0=no, 1=yes for out files only.",
-    "Available for comet.", true);
+    "Available for comet.", false);
   InitIntParam("sample_enzyme_number", 1, 0, 10,
     "Sample enzyme which is possibly different than the one applied to the search. "
     "Used to calculate NTT & NMC in pepXML output.",
-    "Available for comet. ", true);
+    "Available for comet. ", false);
   /* Comet - mzXML/mzML parameters */
   InitStringParam("scan_range", "0 0",
     "Start and scan scan range to search; 0 as first entry ignores parameter.",
@@ -1088,7 +1103,7 @@ InitStringParam("protein-name-separator", ",",
     "Available for comet.", true);
   InitIntParam("skip_researching", 1, 0, 1,
     "For '.out' file output only, 0=search everything again, 1=don't search if .out exists.",
-    "Available for comet.", true);
+    "Available for comet.", false);
   InitIntParam("max_fragment_charge", 3, 1, 5,
     "Set maximum fragment charge state to analyze (allowed max 5).",
     "Available for comet.", true);
@@ -1103,7 +1118,7 @@ InitStringParam("protein-name-separator", ",",
     "up to that point is returned. "
     "To have no maximum search time, set this parameter value to \"0\". "
     "The default value is \"0\".",
-    "Available for comet.", true);
+    "Available for comet.", false);
   InitIntParam("max_precursor_charge", 6, 1, 9,
     "Set maximum precursor charge state to analyze (allowed max 9).",
     "Available for comet.", true);
@@ -1116,12 +1131,22 @@ InitStringParam("protein-name-separator", ",",
   InitIntParam("explicit_deltacn", 0, 0, 1,
     "0=Comet deltaCn reported between the top peptide and the first dissimilar peptide, "
     "1=Comet deltaCn reported between the top two peptides.",
-    "Available for comet.", true);
+    "Available for comet.", false);
   InitIntParam("old_mods_encoding", 0, 0, 1,
     "0=Comet will use mass based modification encodings, "
     "1=Comet will use the old character based modification encodings.",
+    "Available for comet.", false);
+  InitIntParam("resolve_fullpaths", 0, 0, 1,
+    "Controls whether or not to resolve the full paths of the input files. "
+    "0=Comet will not resolve full paths, "
+    "1=Comet will resolve full paths.",
     "Available for comet.", true);
-  InitIntParam("spectrum_batch_size", 0, 0, BILLION,
+  InitStringParam("pinfile_protein_delimiter", "",
+    "The default delimiter for the protein field is a tab. "
+    "This parameter allows one to specify a different character or string "
+    "If this parameter is left blank or is missing, the default tab delimitter is used.",
+    "Available for comet.", true);
+  InitIntParam("spectrum_batch_size", 20000, 0, BILLION,
     "Maximum number of spectra to search at a time; 0 to search the entire scan range in one loop.",
     "Available for comet.", true);
   InitStringParam("decoy_prefix", "decoy_",
@@ -1139,7 +1164,7 @@ InitStringParam("protein-name-separator", ",",
     "To show verbose output, set the value to 1. "
     "The default value is 0 if this parameter is missing.",
     "Available for comet.", false);
-  InitStringParam("peptide_length_range", "1 63",
+  InitStringParam("peptide_length_range", "6 50",
     "Defines the length range of peptides to search. "
     "This parameter has two integer values. "
     "The first value is the minimum length cutoff and the second value is "
@@ -1198,8 +1223,8 @@ InitStringParam("protein-name-separator", ",",
     "For iTRAQ/TMT type data; will clear out all peaks in the specified m/z range.",
     "Available for comet.", true);
   /* Comet - Variable modifications */
-  InitStringParam("variable_mod01", "0.0 null 0 4 -1 0 0",
-                  "Up to 9 variable modifications are supported. Each modification "
+  InitStringParam("variable_mod01", "0.0 null 0 3 -1 0 0",
+                  "Up to 15 variable modifications are supported. Each modification "
                   "is specified using seven entries: "
                   "\"[[html:&lt;mass&gt;]][[nohtml:<mass>]] "
                   "[[html:&lt;residues&gt;]][[nohtml:<residues>]] "
@@ -1207,7 +1232,7 @@ InitStringParam("protein-name-separator", ",",
                   "[[html:&lt;max&gt;]][[nohtml:<max>]] "
                   "[[html:&lt;distance&gt;]][[nohtml:<distance>]] "
                   "[[html:&lt;terminus&gt;]][[nohtml:<terminus>]] "
-                  "[[html:&lt;force&gt;]][[nohtml:<force>]].\" "
+                  "[[html:&lt;force&gt;]][[nohtml:<force>]]\". "
                   "Type is 0 for static mods and non-zero for variable mods. "
                   "Note that that if you set the same type value on multiple "
                   "modification entries, Comet will treat those variable modifications "
@@ -1227,7 +1252,12 @@ InitStringParam("protein-name-separator", ",",
                   "0 = not forced to be present; 1 = modification is required.",
                   "Available for comet.", true);
   for (int i = 2; i <= 9; i++) {
-    InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 4 -1 0 0",
+    InitStringParam("variable_mod0" + StringUtils::ToString(i), "0.0 null 0 3 -1 0 0",
+                    "See syntax for variable_mod01.",
+                    "Available for comet.", true);
+  }
+  for (int i = 10; i <= 15; i++) {
+    InitStringParam("variable_mod" + StringUtils::ToString(i), "0.0 null 0 3 -1 0 0",
                     "See syntax for variable_mod01.",
                     "Available for comet.", true);
   }
@@ -1766,49 +1796,49 @@ InitStringParam("protein-name-separator", ",",
     "File from which to parse fragmentation spectra.");
   InitBoolParam("pm-ignore-no-charge", true,
     "When parsing spectra for measurement error estimation, ignore those without charge state information.",
-    "Available for param-medic, tide-search, comet, and kojak", false);
+    "Available for param-medic, and tide-search", false);
   InitDoubleParam("pm-min-precursor-mz", 400,
     "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitDoubleParam("pm-max-precursor-mz", 1800,
     "Minimum precursor m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitDoubleParam("pm-min-frag-mz", 150,
     "Minimum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitDoubleParam("pm-max-frag-mz", 1800,
     "Maximum fragment m/z value to use in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-min-scan-frag-peaks", 40,
     "Minimum fragment peaks an MS/MS scan must contain to be used in measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitDoubleParam("pm-max-precursor-delta-ppm", 50,
     "Maximum ppm distance between precursor m/z values to consider two scans "
     "potentially generated by the same peptide for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitStringParam("pm-charges", "0,2,3,4",
     "Precursor charge states to consider MS/MS spectra from, in measurement error estimation, "
     "provided as comma-separated values.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-top-n-frag-peaks", 30,
     "Number of most-intense fragment peaks to consider for measurement error estimation, per MS/MS spectrum.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-pair-top-n-frag-peaks", 5,
     "Number of fragment peaks per spectrum pair to be used in fragment error "
     "estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-min-common-frag-peaks", 20,
     "Number of the most-intense peaks that two spectra must share in order to "
     "potentially be generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-max-scan-separation", 1000,
     "Maximum number of scans two spectra can be separated by in order to be "
     "considered potentially generated by the same peptide, for measurement error estimation.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   InitIntParam("pm-min-peak-pairs", 200,
     "Minimum number of peak pairs (for precursor or fragment) that must be "
     "successfully paired in order to attempt to estimate measurement error distribution.",
-    "Available for param-medic, tide-search, comet, and kojak", true);
+    "Available for param-medic, and tide-search", true);
   // localize-modification
   InitDoubleParam("min-mod-mass", 0, 0, BILLION,
     "Ignore implied modifications where the absolute value of its mass is "
@@ -2364,6 +2394,8 @@ void Params::Categorize() {
   items.insert("mass_type_fragment");
   items.insert("mass_type_parent");
   items.insert("peptide_mass_tolerance");
+  items.insert("peptide_mass_tolerance_lower");
+  items.insert("peptide_mass_tolerance_upper");
   items.insert("peptide_mass_units");
   items.insert("precursor_tolerance_type");
   items.insert("ppm_tolerance_pre");
@@ -2430,6 +2462,8 @@ void Params::Categorize() {
   items.insert("text_file_extension");
   items.insert("explicit_deltacn");
   items.insert("old_mods_encoding");
+  items.insert("resolve_fullpaths");
+  items.insert("pinfile_protein_delimiter");
   AddCategory("Miscellaneous parameters", items);
 
   items.clear();
@@ -2454,6 +2488,9 @@ void Params::Categorize() {
   items.clear();
   for (int i = 1; i <= 9; i++) {
     items.insert("variable_mod0" + StringUtils::ToString(i));
+  }
+  for (int i = 10; i <= 15; i++) {
+    items.insert("variable_mod" + StringUtils::ToString(i));
   }
   items.insert("auto_modifications");
   items.insert("max_variable_mods_in_peptide");
@@ -2542,6 +2579,7 @@ void Params::Categorize() {
   items.insert("num_output_lines");
   items.insert("output-dir");
   items.insert("output-file");
+  items.insert("export_additional_pepxml_scores");
   items.insert("output_mzidentmlfile");
   items.insert("output_pepxmlfile");
   items.insert("output_percolatorfile");
