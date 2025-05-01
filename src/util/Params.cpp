@@ -2591,6 +2591,7 @@ void Params::Categorize() {
   items.insert("peptide-list");
   items.insert("pepxml-output");
   items.insert("pin-output");
+  items.insert("mztab-output");
   items.insert("pout-output");
   items.insert("precision");
   items.insert("print-search-progress");
