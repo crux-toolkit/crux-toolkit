@@ -262,7 +262,7 @@ int TideIndexApplication::main(
   FixPt maxMassFixPt = MassConstants::ToFixPt(max_mass);
   ifstream file(fasta.c_str(), ifstream::in);
   boost::iostreams::filtering_istreambuf in;
-  if (boost::filesystem::extension(fasta) == ".gz") {
+  if (boost::filesystem::path(fasta).extension() == ".gz") {
     in.push(boost::iostreams::gzip_decompressor());
   }
   in.push(file);

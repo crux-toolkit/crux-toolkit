@@ -43,7 +43,7 @@ else (USE_LATEST_PWIZ)
   # Use tarball cached on our server
   set(
       PWIZ_SOURCE
-      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_24044_fd6604f.tar.bz2
+      URL https://noble.gs.washington.edu/crux-downloads/pwiz-src-3_0_25123_b0e5f51.tar.bz2
   )
 endif (USE_LATEST_PWIZ)
 
@@ -79,6 +79,13 @@ if (WIN32 AND NOT CYGWIN)
       ProteoWizard
       ${PWIZ_SOURCE}
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+      PATCH_COMMAND
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/ext-boost.jam
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries
       CONFIGURE_COMMAND
         # We don't need to build the .Net/SWIG or Java bindings
         COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
@@ -98,26 +105,28 @@ if (WIN32 AND NOT CYGWIN)
           -P  ${CMAKE_CURRENT_SOURCE_DIR}/build_pwiz.cmake
       INSTALL_COMMAND
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_86_0/boost/
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        # Pwiz boost doesn't included unordered libraries
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_map.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_set.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
+        # Pwiz boost doesn't included wintls library
         COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/wintls
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/cmath.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/core
         COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/wintls.hpp
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
       BUILD_IN_SOURCE 1
     )
   # On Windows we have to do some extra house keeping
@@ -138,6 +147,13 @@ elseif (APPLE)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    PATCH_COMMAND
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/ext-boost.jam
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries
     CONFIGURE_COMMAND
       COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
       # Use patched Jamroot.jam to turn off unit testing
@@ -154,17 +170,21 @@ elseif (APPLE)
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_86_0/boost/
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
+        # Pwiz boost doesn't included unordered libraries
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_map.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
+        COMMAND ${CMAKE_COMMAND} -E copy
+          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_set.hpp
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
     BUILD_IN_SOURCE 1
   )
 else (UNIX)
@@ -172,6 +192,13 @@ else (UNIX)
     ProteoWizard
     ${PWIZ_SOURCE}
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
+    #PATCH_COMMAND
+    #  COMMAND ${CMAKE_COMMAND} -E copy
+    #    ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
+    #    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard
+    #  COMMAND ${CMAKE_COMMAND} -E copy
+    #    ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/ext-boost.jam
+    #    ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries
     CONFIGURE_COMMAND 
       COMMAND ${CMAKE_COMMAND} -E rm -r 
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
@@ -189,14 +216,25 @@ else (UNIX)
       ${CMAKE_CURRENT_SOURCE_DIR}/create_links.sh
          --prefix=${CMAKE_CURRENT_BINARY_DIR}
       COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_76_0/boost/
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_86_0/boost/
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+      # Pwiz boost doesn't included unordered libraries
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
       COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_map.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_set.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+      # Pwiz boost doesn't included full version of asio library
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
@@ -212,6 +250,7 @@ ExternalProject_Add(
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DCMAKE_VERBOSE_MAKEFILE=ON
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -237,6 +276,7 @@ if (UNIX)
     SOURCE_SUBDIR cmake
     CMAKE_ARGS ${TOOLCHAIN_FILE}
       -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
@@ -256,6 +296,7 @@ elseif (WIN32 AND NOT CYGWIN)
     SOURCE_SUBDIR cmake
     CMAKE_ARGS
       -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
       -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
@@ -283,6 +324,7 @@ ExternalProject_Add(
     -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_PREFIX_PATH=${CMAKE_CURRENT_BINARY_DIR}
     -DCMAKE_BUILD_TYPE=${CMAKE_CFG_INTDIR}
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5
   PATCH_COMMAND ""
 )
 
