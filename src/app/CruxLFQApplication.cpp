@@ -91,6 +91,24 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     }
     std::copy(uniqueIdentifications.begin(), uniqueIdentifications.end(), std::back_inserter(allIdentifications));
 
+    // std::ofstream ofs(output_dir + "/all_identifications.tsv");
+    // ofs << "sequence\tpeptideMass\tmonoIsotopicMass\tpeakFindingMass\tprecursorCharge\tspectralFile\tms2RetentionTimeInMinutes\tscanId\tmodifications\tprotein_id\n";
+    // for (const auto& id : allIdentifications) {
+    //     ofs << id.sequence << '\t'
+    //         << id.peptideMass << '\t'
+    //         << id.monoIsotopicMass << '\t'
+    //         << id.peakFindingMass << '\t'
+    //         << id.precursorCharge << '\t'
+    //         << id.spectralFile << '\t'
+    //         << id.ms2RetentionTimeInMinutes << '\t'
+    //         << id.scanId << '\t'
+    //         << id.modifications << '\t'
+    //         << id.protein_id << '\n';
+    // }
+    // ofs.close();
+
+    // return 0;
+
     lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
 
     unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
@@ -352,13 +370,6 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
     bool filtered = Params::GetBool("is-psm-filtered");
 
     string mods_spec = Params::GetString("mods-spec");
-    // if (!mods_spec.empty()) {
-    //     if (std::isdigit(mods_spec[0])) {
-    //         carp(CARP_FATAL, "mods-spec must be static not variable");
-    //     }
-    // } else {
-    //     carp(CARP_FATAL, "mods-spec can't be empty for percolator PSM file formats");
-    // }
 
     if (mods_spec.empty()) {
         carp(CARP_FATAL, "mods-spec can't be empty for percolator PSM file formats");
@@ -434,6 +445,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
         q_value = std::stod(tokens[3]);
         sequence_col = tokens[5];
         retention_time = std::stod(tokens.back());
+        protein_id = tokens[6];
 
         // const char* booleanText = filtered ? "true" : "false";
 
