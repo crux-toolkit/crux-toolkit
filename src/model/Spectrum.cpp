@@ -1076,4 +1076,3 @@ FLOAT_T Spectrum::getRTime() const {
  * c-basic-offset: 2
  * End:
  */
-
