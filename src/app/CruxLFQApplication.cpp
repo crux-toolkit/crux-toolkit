@@ -6,16 +6,15 @@
 #include <memory>
 #include <sstream>
 
-#include "app/tide/modifications.h"
-#include "app/tide/mass_constants.h"
-#include "model/Peptide.h"
-
 #include "IndexedMassSpectralPeak.h"
 #include "LFQMetaData.h"
+#include "app/tide/mass_constants.h"
+#include "app/tide/modifications.h"
 #include "crux-lfq/IntensityNormalizationEngine.h"
 #include "crux-lfq/Results.h"
 #include "crux-lfq/Utils.h"
 #include "io/carp.h"
+#include "model/Peptide.h"
 #include "util/FileUtils.h"
 #include "util/Params.h"
 #include "util/crux-utils.h"
@@ -76,10 +75,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     vector<CruxLFQ::PSM> psm_data;
     if (psm_file_format == "percolator") {
         psm_data = create_percolator_psm(psm_file);
-    }else{
+    } else {
         psm_data = CruxLFQ::create_psm(psm_file);
     }
-    
+
     CruxLFQ::CruxLFQResults lfqResults(spec_files);
 
     vector<CruxLFQ::Identification> allIdentifications;
@@ -320,47 +319,48 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
 }
 
 void CruxLFQApplication::gen_mods(
-    string sequence_col, 
+    string sequence_col,
     ModPosition mod_psn_type,
     const pb::ModTable* mod_table_,
-    vector<Crux::Modification>& mods){
-
+    vector<Crux::Modification>& mods) {
     double mod_mass;
     ModPosition position = mod_psn_type;
 
     for (size_t i = 0; i < sequence_col.size(); ++i) {
-            char AA = sequence_col[i];
-            for (int i = 0; i < mod_table_->static_mod_size(); i++) {
-                const pb::Modification& mod = mod_table_->static_mod(i);
-                const ModificationDefinition* mod_;
-                if (mod.has_delta() && mod.has_amino_acids() && mod.has_name()) {
-                    string AAs = mod.amino_acids();
-                    int AA_len = AAs.length();
-                    for (int j = 0; j < AA_len; ++j) {
-                        if (AAs[j] == AA || AAs[j] == 'X') { // Found a static mod for Amino acid AA;
-                            mod_mass =  mod.delta();
-                            mod_ = ModificationDefinition::New(string(1, AAs[j]), mod_mass, position, true);
-                            mods.push_back(Crux::Modification(mod_, i));
-                        }
+        char AA = sequence_col[i];
+        for (int i = 0; i < mod_table_->static_mod_size(); i++) {
+            const pb::Modification& mod = mod_table_->static_mod(i);
+            const ModificationDefinition* mod_;
+            if (mod.has_delta() && mod.has_amino_acids() && mod.has_name()) {
+                string AAs = mod.amino_acids();
+                int AA_len = AAs.length();
+                for (int j = 0; j < AA_len; ++j) {
+                    if (AAs[j] == AA || AAs[j] == 'X') {  // Found a static mod for Amino acid AA;
+                        mod_mass = mod.delta();
+                        mod_ = ModificationDefinition::New(string(1, AAs[j]), mod_mass, position, true);
+                        mods.push_back(Crux::Modification(mod_, i));
                     }
                 }
             }
         }
-
+    }
 }
 
-vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
-
+vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
     bool is_rt_seconds = Params::GetBool("is-rt-seconds");
     double q_value_threshold = Params::GetDouble("lfq-q-value-threshold");
-    bool filtered =  Params::GetBool("is-psm-filtered");
+    bool filtered = Params::GetBool("is-psm-filtered");
 
     string mods_spec = Params::GetString("mods-spec");
-    if(!mods_spec.empty()){
-        if(std::isdigit(mods_spec[0])){
-            carp(CARP_FATAL, "mods-spec must be static not variable");
-        }
-    }else{
+    // if (!mods_spec.empty()) {
+    //     if (std::isdigit(mods_spec[0])) {
+    //         carp(CARP_FATAL, "mods-spec must be static not variable");
+    //     }
+    // } else {
+    //     carp(CARP_FATAL, "mods-spec can't be empty for percolator PSM file formats");
+    // }
+
+    if (mods_spec.empty()) {
         carp(CARP_FATAL, "mods-spec can't be empty for percolator PSM file formats");
     }
 
@@ -380,7 +380,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
     VariableModTable var_mod_table;
     var_mod_table.ClearTables();
 
-    //parse regular amino acid modifications
+    // parse regular amino acid modifications
     carp(CARP_DEBUG, "mods_spec='%s'", mods_spec.c_str());
     if (!var_mod_table.Parse(mods_spec.c_str())) {
         carp(CARP_FATAL, "Error parsing mods");
@@ -390,30 +390,30 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
     if (!mods_spec.empty() && !var_mod_table.Parse(mods_spec.c_str(), CTPEP)) {
         carp(CARP_FATAL, "Error parsing c-terminal peptide mods");
     }
-    
+
     mods_spec = Params::GetString("nterm-peptide-mods-spec");
     if (!mods_spec.empty() && !var_mod_table.Parse(mods_spec.c_str(), NTPEP)) {
         carp(CARP_FATAL, "Error parsing n-terminal peptide mods");
     }
-    
+
     // mods_spec = Params::GetString("cterm-protein-mods-spec");
     // if (!mods_spec.empty() && !var_mod_table.Parse(mods_spec.c_str(), CTPRO)) {
     //     carp(CARP_FATAL, "Error parsing c-terminal protein mods");
     // }
-    
+
     // mods_spec = Params::GetString("nterm-protein-mods-spec");
     // if (!mods_spec.empty() && !var_mod_table.Parse(mods_spec.c_str(), NTPRO)) {
     //     carp(CARP_FATAL, "Error parsing n-terminal protein mods");
     // }
     carp(CARP_INFO, "%s", mods_spec.c_str());
     var_mod_table.SerializeUniqueDeltas();
-    if (!MassConstants::Init(var_mod_table.ParsedModTable(), 
-        var_mod_table.ParsedNtpepModTable(), 
-        var_mod_table.ParsedCtpepModTable(),
-        var_mod_table.ParsedNtproModTable(),
-        var_mod_table.ParsedCtproModTable(), 
-        MassConstants::bin_width_, 
-        MassConstants::bin_offset_)) {
+    if (!MassConstants::Init(var_mod_table.ParsedModTable(),
+                             var_mod_table.ParsedNtpepModTable(),
+                             var_mod_table.ParsedCtpepModTable(),
+                             var_mod_table.ParsedNtproModTable(),
+                             var_mod_table.ParsedCtproModTable(),
+                             MassConstants::bin_width_,
+                             MassConstants::bin_offset_)) {
         carp(CARP_FATAL, "Error in MassConstants::Init");
     }
 
@@ -433,7 +433,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
         psm_id = tokens[0];
         q_value = std::stod(tokens[3]);
         sequence_col = tokens[5];
-        retention_time =  std::stod(tokens.back());
+        retention_time = std::stod(tokens.back());
 
         // const char* booleanText = filtered ? "true" : "false";
 
@@ -457,14 +457,14 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
         if (parts.size() == 5) {
             scan_col = std::stoi(parts[2]);
             charge_col = std::stoi(parts[3]);
-        }else {
+        } else {
             carp(CARP_FATAL, "Error: Unexpected PSMId format.");
         }
 
         vector<Crux::Modification> mods;
         Crux::Modification::FromSeq(sequence_col, NULL, &mods);
 
-        if (sequence_col.size() > 4) { // Ensure the string is long enough
+        if (sequence_col.size() > 4) {  // Ensure the string is long enough
             sequence_col = sequence_col.substr(2, sequence_col.size() - 4);
         }
 
@@ -479,18 +479,17 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file){
         peptide_mass_col = peptide->calcModifiedMass();
         // peptide_mass_col = peptide->calcMass(MONO);
         // peptide_mass_col = peptide->calcMass(AVERAGE);
-        
 
         // carp(CARP_INFO, "peptide_mass_col %f", peptide_mass_col);
 
         psm_data.emplace_back(sequence_col,
-                                scan_col,
-                                charge_col,
-                                peptide_mass_col,
-                                peptide_mass_col,
-                                sequence_col,
-                                retention_time,
-                                protein_id);
+                              scan_col,
+                              charge_col,
+                              peptide_mass_col,
+                              peptide_mass_col,
+                              sequence_col,
+                              retention_time,
+                              protein_id);
     }
     return psm_data;
 }
