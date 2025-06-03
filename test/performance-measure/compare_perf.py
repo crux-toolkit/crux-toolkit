@@ -3,19 +3,25 @@ import os
 import time
 
 def run_comparison(args, extra):
-    command = f"{args.stable} tide-search {" ".join(extra[1:])} --num-threads {args.threads[0]} --output-dir {args.output_dir} {args.data_file} {args.index_dir}"
-    start_time = time.time()
-    os.system(command)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"Stable elapsed: {elapsed_time}")
+    print(args.logs_dir)
+    if not os.path.isdir(args.logs_dir):
+        os.makedirs(args.logs_dir)
+    for t in args.threads:
+        command = f"{args.stable} tide-search {" ".join(extra[1:])} --num-threads {t} --output-dir {args.output_dir} {args.data_file} {args.index_dir}"
+        start_time = time.time()
+        command += f" 2> {args.logs_dir}/stable_{t} 1> /dev/null"
+        os.system(command)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Stable elapsed with {t} threads: {elapsed_time}")
 
-    command = f"{args.new} tide-search {" ".join(extra[1:])} --output-dir {args.output_dir} {args.data_file} {args.index_dir}"
-    start_time = time.time()
-    os.system(command)
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f"New version elapsed: {elapsed_time}")
+        command = f"{args.new} tide-search {" ".join(extra[1:])} --num-threads {t} --output-dir {args.output_dir} {args.data_file} {args.index_dir}"
+        start_time = time.time()
+        command += f" 2> {args.logs_dir}/new_{t} 1> /dev/null"
+        os.system(command)
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"New version elapsed with {t} threads: {elapsed_time}")
 
 parser = argparse.ArgumentParser(description="Run performance comparison test.")
 
@@ -59,5 +65,11 @@ parser.add_argument(
     type=str,
     default="./crux-fileroot"
 )
+
+parser.add_argument(
+    "--logs_dir",
+    type=str
+)
+
 args, extra = parser.parse_known_args()
 run_comparison(args, extra)
