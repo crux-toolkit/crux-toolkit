@@ -1607,17 +1607,23 @@ void postToGA4(const std::string& appName) {
         const std::string host = "www.google-analytics.com";
         const std::string protocol = "https";
         boost::asio::io_service io_service;
+        carp(CARP_INFO, "resolver.");
         boost::asio::ip::tcp::resolver resolver(io_service);
+        carp(CARP_INFO, "query.");
         boost::asio::ip::tcp::resolver::query query(host.c_str(), protocol.c_str());
+        carp(CARP_INFO, "iterator.");
         boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
 #ifdef _MSC_VER
+        carp(CARP_INFO, "ctx.");
         boost::wintls::context ctx(boost::wintls::method::system_default);
 #else
         boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
         ctx.set_default_verify_paths();
 #endif       
+        carp(CARP_INFO, "client c.");
 
         Client c(io_service, ctx, iterator, jsonGA4Data);
+        carp(CARP_INFO, "run.");
         io_service.run();
     } 
     catch (system_error &e)

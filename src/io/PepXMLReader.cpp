@@ -42,6 +42,8 @@ void open_handler(void *data, const char *el, const char **attr) {
     reader->searchScoreOpen(attr);
   } else if (strcmp(el, "peptideprophet_result") == 0) {
     reader->peptideProphetResultOpen(attr);
+  } else if (strcmp(el, "msms_run_summary") == 0) {
+    reader->MsmsRunSummaryOpen(attr);
   } else {
     carp(CARP_DEBUG, "Unsupported open tag:%s", el);
   }
@@ -65,6 +67,8 @@ void close_handler(void *data, const char *el) {
     reader->searchScoreClose();
   } else if (strcmp(el, "peptideprophet_result") == 0) {
     reader->peptideProphetResultClose();
+  } else if (strcmp(el, "msms_run_summary") == 0) {
+    reader->MsmsRunSummaryClose();
   } else {
     carp(CARP_DEBUG, "Unsupported close tag:%s", el);
   }
@@ -82,7 +86,7 @@ void PepXMLReader::init() {
   alternative_protein_open_ = false;
   search_score_open_ = false;
   peptideprophet_result_open_ = false;
-
+  msms_run_summary_open_ = false;
   current_spectrum_ = NULL;
 }
 
@@ -214,7 +218,7 @@ void PepXMLReader::spectrumQueryOpen(
   int last_scan = -1;
   double precursor_mass = -1;
   int  charge = -1;
-
+ 
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "start_scan") == 0) {
       first_scan = atoi(attr[i+1]);
@@ -230,7 +234,7 @@ void PepXMLReader::spectrumQueryOpen(
   double precursor_mz = (precursor_mass + (MASS_PROTON * (double) charge)) / (double)charge;
   vector<int> charge_vec;
   charge_vec.push_back(charge);
-  current_spectrum_ = new Crux::Spectrum(first_scan, last_scan, precursor_mz, charge_vec, "");
+  current_spectrum_ = new Crux::Spectrum(first_scan, last_scan, precursor_mz, charge_vec, current_spectrum_filename_);
   current_zstate_.setNeutralMass(precursor_mass, charge);
 }
 
@@ -372,6 +376,8 @@ void PepXMLReader::searchHitOpen(
   } else {
     current_match_->setLnExperimentSize(0);
   }
+  current_match_->setFilePath(current_spectrum_filename_);
+
 }
 
 /**
@@ -639,6 +645,34 @@ MatchCollection* PepXMLReader::parse(
   return reader.parse();
 }
 
+/**
+  * Handles the msms_run_summary open tag event
+  */
+void PepXMLReader::MsmsRunSummaryOpen(
+  const char** attr ///< attribute array for element
+) {
+  if (msms_run_summary_open_) {
+    carp(CARP_FATAL, "msms_run_summary not closed before another was opened!");
+  }
+  msms_run_summary_open_ = true;
+
+  string filename;
+
+  for (int i = 0; attr[i]; i += 2) {
+    if (strcmp(attr[i], "base_name") == 0) {
+      current_spectrum_filename_ = string(attr[i + 1]);
+      break;
+    }
+  }
+}
+
+/**
+ * Handles the msms_run_summary close tag event
+ */
+void PepXMLReader::MsmsRunSummaryClose() {
+  current_spectrum_filename_ = string("");
+  msms_run_summary_open_ = false;
+}
 /*
  * Local Variables:
  * mode: c

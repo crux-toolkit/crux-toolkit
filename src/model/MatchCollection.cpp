@@ -18,6 +18,7 @@
 #include "util/GlobalParams.h"
 #include "util/StringUtils.h"
 #include "util/WinCrux.h"
+#include "util/FileUtils.h"
 
 using namespace std;
 using namespace Crux;
@@ -214,6 +215,35 @@ void MatchCollection::sort(
   Match::ScoreComparer comparer(sort_by, smaller_is_better);
   std::sort(match_.begin(), match_.end(), comparer);
   last_sorted_ = sort_by;
+}
+
+/**
+ * Sort the match collection by the file name of the spectra.
+ */
+void MatchCollection::sortFileCol()
+{
+  carp(CARP_DETAILED_DEBUG, "Sorting match collection by file column.");
+
+    // check if we are allowed to alter match_collection
+    if (iterator_lock_) {
+        carp(CARP_FATAL,
+            "Cannot sort a match collection when a match iterator is already instantiated");
+    }
+    std::sort(match_.begin(), match_.end(), [](Match* a, Match* b) {
+      // 1. Primary key: File path (lexicographical order)
+      if (a->getFilePath() != b->getFilePath()) {
+        return a->getFilePath() < b->getFilePath();
+      }
+
+      // 2. Secondary key: First scan number (ascending)
+      if (a->getSpectrum()->getFirstScan() != b->getSpectrum()->getFirstScan()) {
+        return a->getSpectrum()->getFirstScan() < b->getSpectrum()->getFirstScan();
+      }
+
+      // 3. Tertiary key: Rank (XCORR) (ascending)
+      return a->getRank(XCORR) < b->getRank(XCORR);
+      });
+
 }
 
 /**
@@ -431,55 +461,7 @@ void MatchCollection::printXmlHeader(
     return;
   }
   time_t hold_time;
-  ENZYME_T enzyme = GlobalParams::getEnzyme();
-  const char* enz_str = enzyme_type_to_string(enzyme);
-  string database = Params::GetString("protein-database");
 
-  MASS_TYPE_T isotopic_mass_type = GlobalParams::getIsotopicMass();
-  MASS_TYPE_T fragment_mass_type = GlobalParams::getFragmentMass();
-
-  const char* isotopic_mass;
-  const char* fragment_mass;
-  DIGEST_T digest = GlobalParams::getDigestion();
-  int max_num_internal_cleavages;
-  int min_number_termini;
-  int missed_cleavage = GlobalParams::getMissedCleavages();
-  if (missed_cleavage){
-    max_num_internal_cleavages = GlobalParams::getMaxLength();
-  } else {
-    max_num_internal_cleavages = 0;
-  }
-
-  if (digest == FULL_DIGEST){
-    min_number_termini = 2;
-  } else if (digest == PARTIAL_DIGEST){
-    min_number_termini = 1;
-  } else {
-    min_number_termini = 0;
-  }
-  
-  if (isotopic_mass_type == AVERAGE){
-    isotopic_mass = "average";
-  } else {
-    isotopic_mass = "monoisotopic";
-  }
-
-  if (fragment_mass_type == AVERAGE){
-    fragment_mass =  "average";
-  } else {
-    fragment_mass =  "monoisotopic";
-  }
-
-  char* absolute_database_path = NULL;
-  if (!database.empty()) {
-#if DARWIN
-    char path_buffer[PATH_MAX];
-    absolute_database_path =  realpath(database.c_str(), path_buffer);
-#else
-    absolute_database_path =  realpath(database.c_str(), NULL);
-#endif
-  }
-  
   hold_time = time(0);
   struct tm* time_struct = localtime(&hold_time);
   char hold_time_str[DATE_STRING_SIZE];   //date format YYYY-MM-DDTHH:MM:SS is 19 characters
@@ -495,108 +477,172 @@ void MatchCollection::printXmlHeader(
           " summary_xml=\"\">\n",
           hold_time_str,
           xmlns, xsi, xmlns, schema_location);
-  fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
-          "msModel=\"%s\" msIonization=\"%s\" "
-          "raw_data_type=\"%s\" raw_data=\"%s\" >\n",
-          "NA", // TODO, dummy value
-          "NA", // TODO, dummy value
-          "NA", // TODO, dummy value
-          "NA", // TODO, dummy value
-          "NA", // TODO, dummy value
-          "NA" // TODO, dummy value
-          );
-  fprintf(output, "<sample_enzyme name=\"%s\">\n</sample_enzyme>\n", enz_str);
-  fprintf(output, "<search_summary base_name=\"%s\" search_engine=\"%s\" "
-          "precursor_mass_type=\"%s\" fragment_mass_type=\"%s\" "
-          "out_data_type=\"%s\" out_data=\"%s\" search_id=\"%i\" >\n",
-          "NA", // TODO, dummy value
-          "Crux",
-          isotopic_mass, // isotopic mass type is precursor mass type?
-          fragment_mass,
-          "NA", // TODO, dummy value
-          "NA",
-          1 // TODO, dummy value
-          );
-  fprintf(output, "<search_database local_path=\"%s\" type=\"%s\" />\n", 
-          absolute_database_path, 
-          "AA");
-  fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
-          "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
-          enz_str,
-          max_num_internal_cleavages,
-          min_number_termini);
+  
+}
+
+void MatchCollection::printPepXmlSearchSummary(FILE* output,
+    const string& ms2file
+) {
+    if (output == NULL) {
+        return;
+    }
+    ENZYME_T enzyme = GlobalParams::getEnzyme();
+    const char* enz_str = enzyme_type_to_string(enzyme);
+    string database = Params::GetString("protein-database");
+
+    MASS_TYPE_T isotopic_mass_type = GlobalParams::getIsotopicMass();
+    MASS_TYPE_T fragment_mass_type = GlobalParams::getFragmentMass();
+
+    const char* isotopic_mass;
+    const char* fragment_mass;
+    DIGEST_T digest = GlobalParams::getDigestion();
+    int max_num_internal_cleavages;
+    int min_number_termini;
+    int missed_cleavage = GlobalParams::getMissedCleavages();
+    if (missed_cleavage) {
+        max_num_internal_cleavages = GlobalParams::getMaxLength();
+    }
+    else {
+        max_num_internal_cleavages = 0;
+    }
+
+    if (digest == FULL_DIGEST) {
+        min_number_termini = 2;
+    }
+    else if (digest == PARTIAL_DIGEST) {
+        min_number_termini = 1;
+    }
+    else {
+        min_number_termini = 0;
+    }
+
+    if (isotopic_mass_type == AVERAGE) {
+        isotopic_mass = "average";
+    }
+    else {
+        isotopic_mass = "monoisotopic";
+    }
+
+    if (fragment_mass_type == AVERAGE) {
+        fragment_mass = "average";
+    }
+    else {
+        fragment_mass = "monoisotopic";
+    }
+
+    char* absolute_database_path = NULL;
+    if (!database.empty()) {
+#if DARWIN
+        char path_buffer[PATH_MAX];
+        absolute_database_path = realpath(database.c_str(), path_buffer);
+#else
+        absolute_database_path = realpath(database.c_str(), NULL);
+#endif
+    }
+
+    fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
+        "msModel=\"%s\" msIonization=\"%s\" "
+        "raw_data_type=\"%s\" raw_data=\"%s\" >\n",
+      //ms2file.empty() ? "NA" : (FileUtils::DirName(ms2file) + FileUtils::Stem(ms2file)).c_str(), // spectrum file name
+      ms2file.empty() ? "NA" : ms2file.c_str(), // spectrum file name
+      "NA", // TODO, dummy value
+        "NA", // TODO, dummy value
+        "NA", // TODO, dummy value
+        "NA", // TODO, dummy value
+      ms2file.empty() ? "NA" : FileUtils::Extension(ms2file).c_str() // spectrum file extension
+    );
+    fprintf(output, "<sample_enzyme name=\"%s\">\n</sample_enzyme>\n", enz_str);
+    fprintf(output, "<search_summary base_name=\"%s\" search_engine=\"%s\" "
+        "precursor_mass_type=\"%s\" fragment_mass_type=\"%s\" "
+        "out_data_type=\"%s\" out_data=\"%s\" search_id=\"%i\" >\n",
+        ms2file.empty() ? "NA" : ms2file.c_str(), // spectrum file name
+        "Crux",
+        isotopic_mass, // isotopic mass type is precursor mass type?
+        fragment_mass,
+        "NA", // TODO, dummy value
+        "NA",
+        1 // TODO, dummy value
+    );
+    fprintf(output, "<search_database local_path=\"%s\" type=\"%s\" />\n",
+        absolute_database_path,
+        "AA");
+    fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
+        "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
+        enz_str,
+        max_num_internal_cleavages,
+        min_number_termini);
 #ifndef DARWIN
-  free(absolute_database_path);
+    free(absolute_database_path);
 #endif
 
 
-  char aa_str[2];
-  aa_str[1] = '\0';
-  int alphabet_size = (int)'A'+ ((int)'Z'-(int)'A');
-  MASS_TYPE_T isotopic_type = GlobalParams::getIsotopicMass();
-  int aa = 0;
+    char aa_str[2];
+    aa_str[1] = '\0';
+    int alphabet_size = (int)'A' + ((int)'Z' - (int)'A');
+    MASS_TYPE_T isotopic_type = GlobalParams::getIsotopicMass();
+    int aa = 0;
 
-  // static amino acid modifications
-  for (char aa = 'A'; aa <= 'Z'; aa++) {
-    vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
-    double aaMass = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
-    for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
-         i != staticMods.end();
-         i++) {
-      double modMass = (*i)->DeltaMass();
-      double totalMass = aaMass + modMass;
-      string termString;
-      switch ((*i)->Position()) {
-        case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
-        case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
-        case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
-        case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
-      }
-      fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
-                      "massdiff=\"%s\" variable=\"N\" %s/>\n",
-              aa,
-              StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
-              StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
-              termString.c_str());
+    // static amino acid modifications
+    for (char aa = 'A'; aa <= 'Z'; aa++) {
+        vector<const ModificationDefinition*> staticMods = ModificationDefinition::StaticMods(aa);
+        double aaMass = AminoAcidUtil::GetMass(aa, isotopic_type == MONO);
+        for (vector<const ModificationDefinition*>::const_iterator i = staticMods.begin();
+            i != staticMods.end();
+            i++) {
+            double modMass = (*i)->DeltaMass();
+            double totalMass = aaMass + modMass;
+            string termString;
+            switch ((*i)->Position()) {
+            case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
+            case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
+            case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
+            case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
+            }
+            fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
+                "massdiff=\"%s\" variable=\"N\" %s/>\n",
+                aa,
+                StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
+                StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
+                termString.c_str());
+        }
     }
-  }
 
-  // variable amino acid modifications
-  vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
-  for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
-       i != varMods.end();
-       i++) {
-    for (set<char>::const_iterator j = (*i)->AminoAcids().begin();
-         j != (*i)->AminoAcids().end();
-         j++) {
-      double modMass = (*i)->DeltaMass();
-      double aaMass = AminoAcidUtil::GetMass(*j, isotopic_type == MONO);
-      double totalMass = aaMass + modMass;
-      string termString;
-      switch ((*i)->Position()) {
-        case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
-        case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
-        case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
-        case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
-      }
-      fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
-                      "massdiff=\"%s\" variable=\"Y\" %s/>\n",
-              *j,
-              StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
-              StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
-              termString.c_str());
+    // variable amino acid modifications
+    vector<const ModificationDefinition*> varMods = ModificationDefinition::VarMods();
+    for (vector<const ModificationDefinition*>::const_iterator i = varMods.begin();
+        i != varMods.end();
+        i++) {
+        for (set<char>::const_iterator j = (*i)->AminoAcids().begin();
+            j != (*i)->AminoAcids().end();
+            j++) {
+            double modMass = (*i)->DeltaMass();
+            double aaMass = AminoAcidUtil::GetMass(*j, isotopic_type == MONO);
+            double totalMass = aaMass + modMass;
+            string termString;
+            switch ((*i)->Position()) {
+            case PEPTIDE_N: termString = "peptide_terminus=\"n\" "; break;
+            case PEPTIDE_C: termString = "peptide_terminus=\"c\" "; break;
+            case PROTEIN_N: termString = "protein_terminus=\"n\" "; break;
+            case PROTEIN_C: termString = "protein_terminus=\"c\" "; break;
+            }
+            fprintf(output, "<aminoacid_modification aminoacid=\"%c\" mass=\"%s\" "
+                "massdiff=\"%s\" variable=\"Y\" %s/>\n",
+                *j,
+                StringUtils::ToString(totalMass, Params::GetInt("mass-precision")).c_str(),
+                StringUtils::ToString(modMass, Params::GetInt("mod-precision")).c_str(),
+                termString.c_str());
+        }
     }
-  }
 
-  for (vector<const Param*>::const_iterator i = Params::Begin(); i != Params::End(); i++) {
-    string name = (*i)->GetName();
-    if ((*i)->IsVisible() &&
-        name != "mod" && name != "cmod" && name != "nmod") {
-      fprintf(output, "<parameter name=\"%s\" value=\"%s\"/>\n",
-              name.c_str(), (*i)->GetString().c_str());
+    for (vector<const Param*>::const_iterator i = Params::Begin(); i != Params::End(); i++) {
+        string name = (*i)->GetName();
+        if ((*i)->IsVisible() &&
+            name != "mod" && name != "cmod" && name != "nmod") {
+            fprintf(output, "<parameter name=\"%s\" value=\"%s\"/>\n",
+                name.c_str(), (*i)->GetString().c_str());
+        }
     }
-  }
-  fprintf(output, "</search_summary>\n");
+    fprintf(output, "</search_summary>\n");
 }
 
 /**

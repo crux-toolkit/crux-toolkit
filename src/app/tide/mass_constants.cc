@@ -281,7 +281,7 @@ void MassConstants::ApplyTerminusStaticMods(const pb::ModTable* mod_table,
     char aa = (mod_table->static_mod(i).amino_acids())[0];
     double delta = mod_table->static_mod(i).delta();
     if (aa == 'X') {
-      const char* AA = "ACDEFGHIKLMNPQRSTVWY";
+      const char* AA = "ACDEFGHIJKLMNOPQRSTUVWY";
       for (int currAA = 0; AA[currAA] != '\0'; currAA++) {
         mono_table[AA[currAA]] += delta;
         avg_table[AA[currAA]] += delta;
@@ -313,7 +313,7 @@ static bool CheckModification(const pb::Modification& mod, bool* repeats = NULL)
   if (aa_str.length() != 1)
     return false;
   char aa = aa_str[0];
-  const char* AA = "ACDEFGHIKLMNPQRSTVWY";
+  const char* AA = "ACDEFGHIJKLMNOPQRSTUVWY";
   for (; (*AA != '\0') && (*AA != aa); ++AA); // find aa in AA
   if (*AA == '\0')
     return false;
