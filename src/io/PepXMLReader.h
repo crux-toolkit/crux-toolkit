@@ -28,6 +28,7 @@ class PepXMLReader : public PSMReader {
   Crux::Match* current_match_; ///< keeps track of the current match object
   std::string current_peptide_sequence_; ///< keeps track of the current peptide sequence
   MatchCollection* current_match_collection_; ///< keeps track of the current match collection object
+  string current_spectrum_filename_;
 
   /*State variable for element tags */
   bool aminoacid_modification_open_;
@@ -38,6 +39,7 @@ class PepXMLReader : public PSMReader {
   bool alternative_protein_open_; ///< are we within a alternative_protein element
   bool search_score_open_; ///< are we within a search_score element
   bool peptideprophet_result_open_; ///< are we within a peptideprophet_result element?
+  bool msms_run_summary_open_;
   
   /**
    * /returns the start position of the peptide sequence within the protein
@@ -136,6 +138,17 @@ class PepXMLReader : public PSMReader {
    */
   void peptideProphetResultClose();  
 
+  /**
+   * Handles the msms_run_summary open tag event
+   */
+  void MsmsRunSummaryOpen(
+    const char** attr ///< attribute array for element
+  );
+
+  /**
+   * Handles the msms_run_summary close tag event
+   */
+  void MsmsRunSummaryClose();
   /**
    * Initializes the object
    */
