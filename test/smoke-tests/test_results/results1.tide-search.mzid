@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<MzIdentML id="" creationDate="2025-06-10T07:28:34Z" version="1.1.0" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://psidev.info/files/mzIdentML1.1.0.xsd" xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<MzIdentML id="" creationDate="2025-06-10T07:42:34Z" version="1.1.0" xsi:schemaLocation="http://psidev.info/psi/pi/mzIdentML/1.1 http://psidev.info/files/mzIdentML1.1.0.xsd" xmlns="http://psidev.info/psi/pi/mzIdentML/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <cvList>
     <cv id="MS" fullName="Proteomics Standards Initiative Mass Spectrometry Ontology" version="4.1.136" uri="https://raw.githubusercontent.com/HUPO-PSI/psi-ms-CV/master/psi-ms.obo"/>
     <cv id="UNIMOD" fullName="UNIMOD" version="2023-10-05" uri="http://www.unimod.org/obo/unimod.obo"/>
@@ -1167,18 +1167,6 @@
     <DBSequence id="DBS_386" length="29" accession="decoy_YEL027W">
       <Seq>NQGLSYCVLVSVVLGYIAIIGAMIVPVIK</Seq>
     </DBSequence>
-    <DBSequence id="DBS_387" length="28" accession="YGL009C">
-      <Seq>ELESAAYDHAEPVQPEDAPQDIANDELK</Seq>
-    </DBSequence>
-    <DBSequence id="DBS_388" length="28" accession="decoy_YGL009C">
-      <Seq>ELEDNAIDQPADEPQVPEAHDYAASELK</Seq>
-    </DBSequence>
-    <DBSequence id="DBS_389" length="29" accession="decoy_YOR267C">
-      <Seq>YTSTIVEPALYPDSGVIGHAMTVGDEFPK</Seq>
-    </DBSequence>
-    <DBSequence id="DBS_390" length="29" accession="YOR267C">
-      <Seq>YPFEDGVTMAHGIVGSDPYLAPEVITSTK</Seq>
-    </DBSequence>
     <Peptide id="PEP_0"><PeptideSequence>DSLDQK</PeptideSequence></Peptide>
     <Peptide id="PEP_1"><PeptideSequence>IPSYPK</PeptideSequence></Peptide>
     <Peptide id="PEP_2"><PeptideSequence>IPYSPK</PeptideSequence></Peptide>
@@ -1888,10 +1876,6 @@
     <Peptide id="PEP_393"><PeptideSequence>VMPYSTGLTTPLSNFEAQQNYK</PeptideSequence></Peptide>
     <Peptide id="PEP_394"><PeptideSequence>NIVPVIMAGIIAIYGLVVSVLVCYSLGQK</PeptideSequence></Peptide>
     <Peptide id="PEP_395"><PeptideSequence>NQGLSYCVLVSVVLGYIAIIGAMIVPVIK</PeptideSequence></Peptide>
-    <Peptide id="PEP_396"><PeptideSequence>ELESAAYDHAEPVQPEDAPQDIANDELK</PeptideSequence></Peptide>
-    <Peptide id="PEP_397"><PeptideSequence>ELEDNAIDQPADEPQVPEAHDYAASELK</PeptideSequence></Peptide>
-    <Peptide id="PEP_398"><PeptideSequence>YTSTIVEPALYPDSGVIGHAMTVGDEFPK</PeptideSequence></Peptide>
-    <Peptide id="PEP_399"><PeptideSequence>YPFEDGVTMAHGIVGSDPYLAPEVITSTK</PeptideSequence></Peptide>
     <PeptideEvidence id="PE_0" peptide_ref="PEP_0" dBSequence_ref="DBS_0" start="0" end="6" isDecoy="true"/>
     <PeptideEvidence id="PE_1" peptide_ref="PEP_1" dBSequence_ref="DBS_1" start="0" end="6" isDecoy="true"/>
     <PeptideEvidence id="PE_2" peptide_ref="PEP_2" dBSequence_ref="DBS_2" start="0" end="6" isDecoy="false"/>
@@ -2292,10 +2276,6 @@
     <PeptideEvidence id="PE_397" peptide_ref="PEP_393" dBSequence_ref="DBS_384" start="0" end="22" isDecoy="false"/>
     <PeptideEvidence id="PE_398" peptide_ref="PEP_394" dBSequence_ref="DBS_385" start="0" end="29" isDecoy="false"/>
     <PeptideEvidence id="PE_399" peptide_ref="PEP_395" dBSequence_ref="DBS_386" start="0" end="29" isDecoy="true"/>
-    <PeptideEvidence id="PE_400" peptide_ref="PEP_396" dBSequence_ref="DBS_387" start="0" end="28" isDecoy="false"/>
-    <PeptideEvidence id="PE_401" peptide_ref="PEP_397" dBSequence_ref="DBS_388" start="0" end="28" isDecoy="true"/>
-    <PeptideEvidence id="PE_402" peptide_ref="PEP_398" dBSequence_ref="DBS_389" start="0" end="29" isDecoy="true"/>
-    <PeptideEvidence id="PE_403" peptide_ref="PEP_399" dBSequence_ref="DBS_390" start="0" end="29" isDecoy="false"/>
   </SequenceCollection>
   <AnalysisCollection>
     <SpectrumIdentification id="SpecIdent_1" spectrumIdentificationProtocol_ref="SearchProtocol_1" spectrumIdentificationList_ref="SIL_0" activityDate="">
@@ -8081,214 +8061,6 @@
             <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.691299975"/>
             <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0"/>
             <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="24"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_144" spectrumID="38-38" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_781" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1032.388217221978" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.14817381"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.643848658"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="41"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_782" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1032.388217221978" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.765075028"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.628460705"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="31"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_783" rank="3" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1032.388217221978" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.136614352"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.244640842"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="24"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_784" rank="4" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1032.388217221978" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.10802649"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.128012642"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="25"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_785" rank="5" chargeState="3" peptide_ref="PEP_394" experimentalMassToCharge="1032.388217221978" calculatedMassToCharge="1050.761596679688" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_398"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.236039132"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.146736905"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="25"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_145" spectrumID="18-18" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_786" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1032.398226987603" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.1721437"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.668287873"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="48"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_787" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1032.398226987603" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.720526397"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.722764492"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="39"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_788" rank="3" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1032.398226987603" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.00223809993"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.0692462027"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="29"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_789" rank="4" chargeState="3" peptide_ref="PEP_394" experimentalMassToCharge="1032.398226987603" calculatedMassToCharge="1050.761596679688" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_398"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.0714842975"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.0624346994"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="27"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_790" rank="5" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1032.398226987603" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.133919001"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.0963039175"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="29"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_146" spectrumID="156-156" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_791" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1032.438184669895" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.74509835"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.648901224"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="42"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_792" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1032.438184669895" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.963800669"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.899380565"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="30"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_793" rank="3" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1032.438184669895" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.0644200966"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.0465182513"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="22"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_794" rank="4" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1032.438184669895" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.0179018509"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.257000595"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="20"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_795" rank="5" chargeState="3" peptide_ref="PEP_394" experimentalMassToCharge="1032.438184669895" calculatedMassToCharge="1050.761596679688" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_398"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.239098743"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.196209729"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="16"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_147" spectrumID="108-108" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_796" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1032.498243263645" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.33771467"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.78975004"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="46"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_797" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1032.498243263645" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.491504431"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.294762552"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="27"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_798" rank="3" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1032.498243263645" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.196741864"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.135265082"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="25"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_799" rank="4" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1032.498243263645" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.0614767894"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.387373418"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="23"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_800" rank="5" chargeState="3" peptide_ref="PEP_394" experimentalMassToCharge="1032.498243263645" calculatedMassToCharge="1050.761596679688" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_398"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.325896651"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.0847654864"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="22"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_148" spectrumID="32-32" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_801" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1032.788200945937" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.08197141"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.845823467"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="41"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_802" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1032.788200945937" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.320991129"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.593340337"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="31"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_803" rank="3" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1032.788200945937" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.272349238"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.19398801"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="22"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_804" rank="4" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1032.788200945937" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.466337264"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="19"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
-          </SpectrumIdentificationItem>
-        </SpectrumIdentificationResult>
-        <SpectrumIdentificationResult id="SIR_149" spectrumID="111-111" spectraData_ref="SpectraData_1">
-          <SpectrumIdentificationItem id="SII_805" rank="1" chargeState="3" peptide_ref="PEP_396" experimentalMassToCharge="1033.018181414687" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_400"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="2.77046824"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.818342984"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="48"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="107"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_806" rank="2" chargeState="3" peptide_ref="PEP_397" experimentalMassToCharge="1033.018181414687" calculatedMassToCharge="1033.308837890625" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_401"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.503274977"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.127955258"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="36"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="106"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_807" rank="3" chargeState="3" peptide_ref="PEP_399" experimentalMassToCharge="1033.018181414687" calculatedMassToCharge="1033.340576171875" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_403"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="0.375319719"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0.586835384"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="32"/>
-            <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="110"/>
-          </SpectrumIdentificationItem>
-          <SpectrumIdentificationItem id="SII_808" rank="4" chargeState="3" peptide_ref="PEP_398" experimentalMassToCharge="1033.018181414687" calculatedMassToCharge="1033.340698242188" passThreshold="true">
-            <PeptideEvidenceRef peptideEvidence_ref="PE_402"/>
-            <cvParam cvRef="MS" accession="MS:1001155" name="SEQUEST:xcorr" value="-0.21151568"/>
-            <cvParam cvRef="MS" accession="MS:1001156" name="SEQUEST:deltacn" value="0"/>
-            <cvParam cvRef="MS" accession="MS:1001161" name="SEQUEST:matched ions" value="27"/>
             <cvParam cvRef="MS" accession="MS:1001162" name="SEQUEST:total ions" value="111"/>
           </SpectrumIdentificationItem>
         </SpectrumIdentificationResult>
