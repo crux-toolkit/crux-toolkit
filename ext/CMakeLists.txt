@@ -65,6 +65,9 @@ ExternalProject_Add(
     COMMAND
       tar xvf src/expat-2.2.9.tar.gz -C src
     COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/zlib/zutil.h
+      ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/src/zlib-1.2.11
+    COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_CURRENT_SOURCE_DIR}/patches/MSToolkit/CMakeLists.txt
       ${CMAKE_CURRENT_BINARY_DIR}/build/src/MSToolkit/
     COMMAND ${CMAKE_COMMAND} -E copy
@@ -172,16 +175,10 @@ elseif (APPLE)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_86_0/boost/
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-        # Pwiz boost doesn't included unordered libraries
+        # Pwiz boost doesn't include some libraries
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_map.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
-        COMMAND ${CMAKE_COMMAND} -E copy
-          ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_set.hpp
-          ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
+         ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost
+          ${CMAKE_CURRENT_BINARY_DIR}/include/boost
         COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
           ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility
@@ -218,23 +215,10 @@ else (UNIX)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_1_86_0/boost/
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost
-      # Pwiz boost doesn't included unordered libraries
+      # Pwiz boost doesn't include some libraries
       COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/unordered
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_map.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/unordered_set.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
-      # Pwiz boost doesn't included full version of asio library
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/asio
-      COMMAND ${CMAKE_COMMAND} -E copy
-        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/asio.hpp
-        ${CMAKE_CURRENT_BINARY_DIR}/include/boost/
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost
+        ${CMAKE_CURRENT_BINARY_DIR}/include/boost
       COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/libraries/boost_aux/boost/utility
         ${CMAKE_CURRENT_BINARY_DIR}/include/boost/utility

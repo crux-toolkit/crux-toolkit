@@ -7,8 +7,6 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 typedef struct {
   int atomicNum;
   char symbol[3];
@@ -33,7 +31,7 @@ class CPeriodicTable {
    void loadTable(char*);
 
    //Data Members:
-   vector<element> table;
+   std::vector<element> table;
 
 };
 

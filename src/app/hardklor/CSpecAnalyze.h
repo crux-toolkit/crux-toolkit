@@ -11,7 +11,6 @@
 #include "FFT-HK.h"
 #include <vector>
 #include <cmath>
-using namespace std;
 
 //the following is 8*ln(2)
 #define GAUSSCONST 5.5451774444795623
@@ -34,7 +33,7 @@ class CSpecAnalyze {
   int  FindPeaks();
 	int  FindPeaks(Spectrum& s, int start, int stop);
   //void FindPeptides();
-  void MakePredictions(vector<CHardklorVariant>& var);
+  void MakePredictions(std::vector<CHardklorVariant>& var);
   int  PredictPeptides();
   void removePeaksBelowSN();
   void setSpectrum(Spectrum& s);
@@ -45,13 +44,13 @@ class CSpecAnalyze {
 
   //Data Members
   float                      basePeak;     //most intense peak in peaks spectrum; used for SN cutoff
-  vector<int>                *charges;
+  std::vector<int>                *charges;
   bool                       manyPeps;
   int                        mismatchSize;
   Spectrum                   peaks;        //peaks found in the spectrum
   Spectrum                   peptide;      //peaks that are potential peptides
-  vector<CPeakPrediction>    *predPeak;
-	vector<CPeptidePrediction> *predPep;
+  std::vector<CPeakPrediction>    *predPeak;
+  std::vector<CPeptidePrediction> *predPep;
   float                      S2NCutoff;	
 
  protected:

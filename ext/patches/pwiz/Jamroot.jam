@@ -408,6 +408,9 @@ project pwiz
         <toolset>clang:<cxxflags>-Wno-unused-local-typedef
         <toolset>darwin:<cxxflags>-Wno-unused-local-typedef
 
+        # disable warning that template argument list is expected after a name prefixed by the template keyword warning
+        <toolset>darwin:<cxxflags>-Wno-missing-template-arg-list-after-template-kw
+
         # avoid unused parameter warnings (especially annoying for stub functions)
         <toolset>clang:<cxxflags>-Wunused-parameter
 
