@@ -228,7 +228,7 @@ path-constant PWIZ_ROOT_PATH : . ;
 path-constant PWIZ_LIBRARIES_PATH : $(libraries_path) ;
 
 
-import testing ; # needed to enable unit-test rule
+#import testing ; # needed to enable unit-test rule
 import package ; # needed for package install
 import path ; # needed for glob, exists, etc.
 import project ; # needed for project.current
