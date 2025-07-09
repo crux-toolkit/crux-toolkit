@@ -82,7 +82,8 @@ if (WIN32 AND NOT CYGWIN)
       CONFIGURE_COMMAND
         # We don't need to build the .Net/SWIG or Java bindings
         COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
-        # Delete Bruker testing script
+        # Delete Agilent and Bruker testing scripts
+        COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/vendor_readers/Agilent/Reader_Agilent_Test.cpp
         COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/vendor_readers/Bruker/Reader_Bruker_Test.cpp
         # Use patched Jamroot.jam to turn off unit testing
         COMMAND ${CMAKE_COMMAND} -E copy
