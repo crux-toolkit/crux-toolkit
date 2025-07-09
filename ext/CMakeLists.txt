@@ -81,9 +81,7 @@ if (WIN32 AND NOT CYGWIN)
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
       CONFIGURE_COMMAND
         # We don't need to build the .Net/SWIG or Java bindings
-        COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/SWIG
-        COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings/CLI
-          ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
+        COMMAND ${CMAKE_COMMAND} -E rm -r ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/utility/bindings
         # Use patched Jamroot.jam to turn off unit testing
         COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam

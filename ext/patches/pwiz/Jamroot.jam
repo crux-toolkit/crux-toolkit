@@ -228,7 +228,7 @@ path-constant PWIZ_ROOT_PATH : . ;
 path-constant PWIZ_LIBRARIES_PATH : $(libraries_path) ;
 
 
-#import testing ; # needed to enable unit-test rule
+import testing ; # needed to enable unit-test rule
 import package ; # needed for package install
 import path ; # needed for glob, exists, etc.
 import project ; # needed for project.current
@@ -236,38 +236,6 @@ import errors ;
 
 modules.poke : BOOST_BUILD_PATH : [ modules.peek : BOOST_BUILD_PATH ] $(PWIZ_LIBRARIES_PATH)/predef/check ;
 import $(PWIZ_LIBRARIES_PATH)/predef/check/predef : require check : predef-require predef-check ;
-
-
-if --teamcity-test-decoration in [ modules.peek : ARGV ]
-{
-    if [ modules.peek : NT ]
-    {
-        TEST_PRECOMMAND = "set pp=##\necho %pp%teamcity[testStarted name='%name%']" ;
-        TEST_POSTCOMMAND =
-            "set pp=##\n"
-            "IF %status% NEQ 0"
-                "(echo %pp%teamcity[testFailed name='%name%' message='Exit status: %status%'] )\n" # TODO: does testFailed go to stderr? 1>&2
-            "echo %pp%teamcity[testFinished name='%name%']" ;
-        TEST_POSTCOMMAND = $(TEST_POSTCOMMAND:J=" ") ;
-    }
-    else
-    {
-        TEST_PRECOMMAND = "pp=##\necho $pp\"teamcity[testStarted name='$name']\"" ;
-        TEST_POSTCOMMAND = 
-            "pp=##"
-            "if test $status -ne 0 ; then"
-                "echo $pp\"teamcity[testFailed name='$name' message='Exit status: $status']\" ;"
-            "fi"
-            "echo $pp\"teamcity[testFinished name='$name']\"" ;
-        TEST_POSTCOMMAND = $(TEST_POSTCOMMAND:J=\n) ;
-    }
-    
-    # put raw commands in global module
-    modules.poke : TEST_PRECOMMAND : $(TEST_PRECOMMAND) ;
-    modules.poke : TEST_POSTCOMMAND : $(TEST_POSTCOMMAND) ;
-
-    TEAMCITY_TEST_DECORATION = <testing.arg>--teamcity-test-decoration ;
-}
 
 
 # return the itemname if textonly build is off (the default)
