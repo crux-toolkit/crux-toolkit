@@ -85,6 +85,7 @@ if (WIN32 AND NOT CYGWIN)
         # Delete Agilent and Bruker testing scripts
         COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/vendor_readers/Agilent/Reader_Agilent_Test.cpp
         COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/vendor_readers/Bruker/Reader_Bruker_Test.cpp
+        COMMAND ${CMAKE_COMMAND} -E rm ${CMAKE_CURRENT_BINARY_DIR}/build/src/ProteoWizard/pwiz/data/vendor_readers/Thermo/Reader_Thermo_Test.cpp
         # Use patched Jamroot.jam to turn off unit testing
         COMMAND ${CMAKE_COMMAND} -E copy
           ${CMAKE_CURRENT_SOURCE_DIR}/patches/pwiz/Jamroot.jam
