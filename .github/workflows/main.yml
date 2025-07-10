@@ -61,6 +61,7 @@ jobs:
         shell: powershell
         run: |
           choco install gsudo -y
+          refreshenv
           cmake -E make_directory "${{runner.workspace}}/build"
           cd "${{runner.workspace}}/build"
           C:\msys64\usr\bin\wget.exe http://noble.gs.washington.edu/crux-downloads/Thermo.zip
