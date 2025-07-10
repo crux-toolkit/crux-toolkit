@@ -62,15 +62,15 @@ jobs:
         run: |
              cmake -E make_directory "${{runner.workspace}}/build"
              cd "${{runner.workspace}}/build"
-             C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+             C:\msys64\usr\bin\wget.exe http://noble.gs.washington.edu/crux-downloads/Thermo.zip
              unzip -P iacceptthelicense Thermo.zip -d dlls
              echo "XRawfile2_x64.dll"
              regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
              echo "fregistry_x64.dll"
              regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
              echo "Fileio_x64.dll.dll"
-             regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
-             cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c 
+             regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll
+             cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64
 
       - name: build
         shell: bash
