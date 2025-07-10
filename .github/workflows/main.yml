@@ -60,12 +60,13 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: powershell
         run: |
+          choco install gsudo -y
           cmake -E make_directory "${{runner.workspace}}/build"
           cd "${{runner.workspace}}/build"
           C:\msys64\usr\bin\wget.exe http://noble.gs.washington.edu/crux-downloads/Thermo.zip
           unzip -P iacceptthelicense Thermo.zip -d dlls
           echo "XRawfile2_x64.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
           Write-Host "regsvr32 exit code: $LASTEXITCODE"
           if ($LASTEXITCODE -ne 0) {
             Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
@@ -74,7 +75,7 @@ jobs:
            Write-Host "DLL registered successfully"
           }
           echo "fregistry_x64.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
           Write-Host "regsvr32 exit code: $LASTEXITCODE"
           if ($LASTEXITCODE -ne 0) {
             Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
@@ -83,7 +84,7 @@ jobs:
            Write-Host "DLL registered successfully"
           }
           echo "Fileio_x64.dll.dll"
-          regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll
           Write-Host "regsvr32 exit code: $LASTEXITCODE"
           if ($LASTEXITCODE -ne 0) {
             Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
