@@ -94,6 +94,23 @@ jobs:
           } else {
            Write-Host "DLL registered successfully"
           }
+          # Look for our specific LIBID
+          $libid = "{F0C5F3E3-4F2A-443E-A74D-0AABE3237494}"
+          $ourTypeLib = Get-ItemProperty -Path "HKLM:\SOFTWARE\Classes\TypeLib\$libid" -ErrorAction SilentlyContinue
+          if ($ourTypeLib) {
+           Write-Host "✅ Found our type library!"
+           $ourTypeLib | Format-List
+          } else {
+           Write-Host "❌ Our type library not found" 
+           # Show recently registered type libraries
+           Write-Host "Recently registered type libraries:"
+           Get-ChildItem -Path "HKLM:\SOFTWARE\Classes\TypeLib" | 
+           Sort-Object Name | 
+           Select-Object -Last 5 | 
+           ForEach-Object { 
+             Write-Host "  $($_.PSChildName)"
+           }
+          }
           cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64
 
       - name: build
