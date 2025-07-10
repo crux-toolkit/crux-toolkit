@@ -61,7 +61,7 @@ jobs:
         shell: powershell
         run: |
           choco install gsudo -y
-          refreshenv
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
           cmake -E make_directory "${{runner.workspace}}/build"
           cd "${{runner.workspace}}/build"
           C:\msys64\usr\bin\wget.exe http://noble.gs.washington.edu/crux-downloads/Thermo.zip
