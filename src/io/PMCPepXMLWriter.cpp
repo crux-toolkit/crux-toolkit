@@ -55,6 +55,7 @@ void PMCPepXMLWriter::writePSMs(
 ) {
 
   const map<pair<int, int>, int>& spectrum_counts = collection->getMatchesSpectrum();
+  string prev_file_name;
 
   // iterate over matches
   for (SpectrumMatchIterator spec_iter = collection->spectrumMatchBegin();
@@ -100,6 +101,24 @@ void PMCPepXMLWriter::writePSMs(
     FLOAT_T spec_neutral_mass = zstate.getNeutralMass();
     int spec_charge = zstate.getCharge();
 
+    // For pepXML, the PSMs are sorted by spectrum file name
+    // If the current spectrum file name is different from the
+    // previous file name, then pepXML needs to start a new 
+    // block of <msms_run_summary> .. </msms_run_summary>
+
+    string file_name = string(spec_filename_str);
+    if (file_name != prev_file_name) {
+      // If some PSMs have already printed, then close the 
+      // previous block </ msms_run_summary>
+      if (prev_file_name.empty() == false)
+        writeSummaryFooter();
+      
+      const char* spec_filename_str = spectrum->getFullFilename();
+      match_collection_->printPepXmlSearchSummary(file_, string(spec_filename_str));
+      last_spectrum_printed_ = string();
+    }
+
+    prev_file_name = file_name;
     // get sequence and modified sequence
     char* seq;
     seq = peptide->getSequence();
