@@ -110,12 +110,12 @@ int TideMatchSet::Pvalues_mzTab_cols[] = {
 //     DECOY_INDEX_COL
 //   };    
 
-TideMatchSet::TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed) {
+TideMatchSet::TideMatchSet(RollingPeptideWindow* active_peptide_window, ObservedPeakSet* observed) {
   psm_scores_processed_ = false;
-  active_peptide_queue_ = active_peptide_queue;
+  active_peptide_window_ = active_peptide_window;
   observed_ = observed;  // Pointer to the experimental spectrum data 
 
-  psm_scores_ = PSMScores(active_peptide_queue->nPeptides_);  
+  psm_scores_ = PSMScores(active_peptide_window->size());
 };
 
 TideMatchSet::~TideMatchSet() {
@@ -406,7 +406,7 @@ void TideMatchSet::gatherTargetsDecoys() {
     if ((*i).active_ == false)
       continue;
 
-    Peptide* peptide = active_peptide_queue_->GetPeptide((*i).ordinal_);
+    Peptide* peptide = i->peptide_ptr_;
     if (concat_ || !peptide->IsDecoy()) {
       if (concat_or_target_psm_scores_.size() < gatherSize) {
         concat_or_target_psm_scores_.push_back(*i);
@@ -445,7 +445,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
     // Count the repeating matching ions. This was used in SP scoring
     temp = 0;
     repeat_ion_match = 0;
-    peptide = (*((*it).peptide_itr_));
+    peptide = it->peptide_ptr_;
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1b, temp, repeat_ion_match);
     temp = TideSearchApplication::PeakMatching(*observed_, peptide->peaks_1y, temp, repeat_ion_match);
 
@@ -522,7 +522,7 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
   double predrt;
   
   for (PSMScores::iterator it = psm_scores.begin(); it != psm_scores.end(); ++it) {
-    Peptide* peptide = active_peptide_queue_->GetPeptide((*it).ordinal_);
+    Peptide* peptide = it->peptide_ptr_;
     int decoy_idx = peptide->DecoyIdx();
     decoy_idx = decoy_idx < 0 ? 0 : decoy_idx;
     ++cnt[decoy_idx];
@@ -530,13 +530,20 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       continue;
     }
 
+    // std::lock_guard<boost::shared_mutex> lock(m_);
+
     string proteinNames = peptide->GetLocationStr(decoy_prefix_);
     string flankingAAs = peptide->GetFlankingAAs();
     string peptide_with_mods = peptide->SeqWithMods(mod_precision_);
     string crux_modifications;
     string mztab_modifications;
-    peptide->getModifications(mod_precision_, crux_modifications, mztab_modifications); 
-    string peptide_without_mods = peptide->Seq();   
+     peptide->getModifications(mod_precision_, crux_modifications, mztab_modifications); 
+     string peptide_without_mods = peptide->Seq();  
+    //  m_.unlock_shared();
+    // string proteinNames;
+    // string flankingAAs;
+    // string peptide_with_mods;
+    // string peptide_without_mods;
     // The order of the fields depends on the columns defined at the beginning of this file.
     // The fields below can be in arbitrary order.
     for (size_t i = 0; i < numHeaders; ++i) {   
@@ -663,11 +670,11 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       case MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC:
       case DISTINCT_MATCHES_SPECTRUM_COL:
         if (concat_ == true) {
-          report += StringUtils::ToString(active_peptide_queue_->nCandPeptides_, 0); // Print num of targets and decoys
+          report += StringUtils::ToString(active_peptide_window_->nCandPeptides_, 0); // Print num of targets and decoys
         } else if (target) {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesTarget_, 0); // Print num of targets
+          report += StringUtils::ToString(active_peptide_window_->CandPeptidesTarget_, 0); // Print num of targets
         } else {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesDecoy_, 0); // Print num of decoys
+          report += StringUtils::ToString(active_peptide_window_->CandPeptidesDecoy_, 0); // Print num of decoys
         }
         break;
       case SEQUENCE_COL:

@@ -10,7 +10,7 @@
 #include "tide/peptide.h"
 #include "tide/sp_scorer.h"
 #include "tide/spectrum_collection.h"
-#include "tide/ActivePeptideQueue.h"
+#include "tide/PeptideDiskLoader.h"
 #include "tide/spectrum_preprocess.h"
 
 #include "model/Modification.h"
@@ -24,7 +24,6 @@ class TideMatchSet {
  public:
   class Scores {
    public:
-    int ordinal_;
     double xcorr_score_;
     double exact_pval_;
     double refactored_xcorr_;
@@ -41,8 +40,8 @@ class TideMatchSet {
     double delta_cn_;
     double delta_lcn_;
     bool active_;
-    deque<Peptide*>::const_iterator peptide_itr_;
-    Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
+    Peptide* peptide_ptr_;
+    Scores():xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
       resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
       sp_score_(0), hyper_score_(0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0), active_(false) {}
   };
@@ -77,7 +76,7 @@ class TideMatchSet {
   static int Pvalues_pin_cols[];
 
   // TideMatchSet();
-  TideMatchSet(ActivePeptideQueue* active_peptide_queue, ObservedPeakSet* observed);
+  TideMatchSet(RollingPeptideWindow* active_peptide_window, ObservedPeakSet* observed);
   ~TideMatchSet();
 
   static int* getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders);
@@ -101,7 +100,7 @@ class TideMatchSet {
   double quantile_score_;
   
   PSMScores::iterator last_psm_;
-  ActivePeptideQueue* active_peptide_queue_;  
+  RollingPeptideWindow* active_peptide_window_;  
   
   // Pointer to the experimental spectrum data; This is used here to calculate 
   // the repeat_ion_match value (part of the SP scoring). Originally, the
@@ -125,6 +124,9 @@ class TideMatchSet {
 //  private:
   PSMScores concat_or_target_psm_scores_;
   PSMScores decoy_psm_scores_;
+
+  boost::shared_mutex m_;
+
 
 
 };
