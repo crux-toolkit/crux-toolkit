@@ -133,7 +133,7 @@ jobs:
           path: ${{runner.workspace}}/build/crux-4.3.Darwin.x86_64.zip
         
       - name: archive-windows-package
-        if: (matrix.os == 'windows-2019')
+        if: (matrix.os == 'windows-latest')
         uses: actions/upload-artifact@v4
         with:
           name: crux-4.3.${{env.git_short_sha}}.windows
