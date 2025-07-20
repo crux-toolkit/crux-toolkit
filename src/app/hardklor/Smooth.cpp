@@ -5,7 +5,7 @@
 void SG_Smooth(Spectrum& sp, int m, int p){
 
   if(2*m<p) {
-    cout << "Invalid Smoothing Parameters == Smoothing Skipped!" << endl;
+    std::cout << "Invalid Smoothing Parameters == Smoothing Skipped!" << std::endl;
     return;
   }
  

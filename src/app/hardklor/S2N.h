@@ -5,8 +5,6 @@
 #include "Smooth.h"
 #include <algorithm>
 
-using namespace std;
-
 Spectrum signalToNoise(Spectrum& s, int start, int stop, float sig, float* cutoff, bool skipZero=true, bool subtract=false);
 Spectrum SNPeaks(Spectrum& s, int start, int stop, float SN, float FWHM, float max, float base);
 Spectrum SNSubtracted(Spectrum& s, int start, int stop, float SN, float FWHM, float max, float base);

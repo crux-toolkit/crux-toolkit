@@ -22,8 +22,6 @@
 #include <sys/time.h>
 #endif
 
-using namespace std;
-
 class CHardklor2{
 
  public:
@@ -37,7 +35,7 @@ class CHardklor2{
   //Methods:
   void  Echo(bool b);
   int   GoHardklor(CHardklorSetting sett, Spectrum* s=NULL);
-  void    QuickCharge(Spectrum& s, int index, vector<int>& v);
+  void    QuickCharge(Spectrum& s, int index, std::vector<int>& v);
   void  SetResultsToMemory(bool b);
   int   Size();
 
@@ -48,14 +46,14 @@ class CHardklor2{
   int     BinarySearch(Spectrum& s, double mz, bool floor);
   double  CalcFWHM(double mz,double res,int iType);
   void    Centroid(Spectrum& s, Spectrum& out);
-  bool    CheckForPeak(vector<Result>& vMR, Spectrum& s, int index);
+  bool    CheckForPeak(std::vector<Result>& vMR, Spectrum& s, int index);
   int     CompareData(const void*, const void*);
-  double  LinReg(vector<float>& mer, vector<float>& obs);
+  double  LinReg(std::vector<float>& mer, std::vector<float>& obs);
   bool    MatchSubSpectrum(Spectrum& s, int peakIndex, pepHit& pep);
-  double  PeakMatcher(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, int& indexOverlap, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
-  double  PeakMatcherB(vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, vector<int>& vMatchIndex, vector<float>& vMatchIntensity);
-  void    QuickHardklor(Spectrum& s, vector<pepHit>& vPeps);
-  void    RefineHits(vector<pepHit>& vPeps, Spectrum& s);
+  double  PeakMatcher(std::vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, int& indexOverlap, std::vector<int>& vMatchIndex, std::vector<float>& vMatchIntensity);
+  double  PeakMatcherB(std::vector<Result>& vMR, Spectrum& s, double lower, double upper, double deltaM, int matchIndex, int& matchCount, std::vector<int>& vMatchIndex, std::vector<float>& vMatchIntensity);
+  void    QuickHardklor(Spectrum& s, std::vector<pepHit>& vPeps);
+  void    RefineHits(std::vector<pepHit>& vPeps, Spectrum& s);
   void    ResultToMem(pepHit& ph, Spectrum& s);
   void    WritePepLine(pepHit& ph, Spectrum& s, FILE* fptr, int format=0); 
   void    WriteScanLine(Spectrum& s, FILE* fptr, int format=0); 
@@ -75,7 +73,7 @@ class CHardklor2{
   int               currentScanNumber;
 
   //Vector for holding results in memory should that be needed
-  vector<hkMem> vResults;
+  std::vector<hkMem> vResults;
 
   //Temporary Data Members:
   char bestCh[200];

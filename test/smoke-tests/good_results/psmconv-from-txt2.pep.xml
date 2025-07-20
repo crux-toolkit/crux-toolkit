@@ -145,6 +145,8 @@
 <parameter name="peff_obo" value=""/>
 <parameter name="num_threads" value="0"/>
 <parameter name="peptide_mass_tolerance" value="3"/>
+<parameter name="peptide_mass_tolerance_lower" value="-3"/>
+<parameter name="peptide_mass_tolerance_upper" value="3"/>
 <parameter name="peptide_mass_units" value="0"/>
 <parameter name="auto_peptide_mass_tolerance" value="false"/>
 <parameter name="mass_type_parent" value="1"/>
@@ -174,10 +176,7 @@
 <parameter name="output_txtfile" value="1"/>
 <parameter name="output_pepxmlfile" value="1"/>
 <parameter name="output_percolatorfile" value="0"/>
-<parameter name="print_expect_score" value="1"/>
 <parameter name="num_output_lines" value="5"/>
-<parameter name="show_fragment_ions" value="0"/>
-<parameter name="sample_enzyme_number" value="1"/>
 <parameter name="scan_range" value="0 0"/>
 <parameter name="precursor_charge" value="0 0"/>
 <parameter name="override_charge" value="0"/>
@@ -185,19 +184,17 @@
 <parameter name="activation_method" value="ALL"/>
 <parameter name="digest_mass_range" value="600.0 5000.0"/>
 <parameter name="num_results" value="50"/>
-<parameter name="skip_researching" value="1"/>
 <parameter name="max_fragment_charge" value="3"/>
-<parameter name="max_index_runtime" value="0"/>
 <parameter name="max_precursor_charge" value="6"/>
 <parameter name="nucleotide_reading_frame" value="0"/>
 <parameter name="clip_nterm_methionine" value="0"/>
-<parameter name="explicit_deltacn" value="0"/>
-<parameter name="old_mods_encoding" value="0"/>
-<parameter name="spectrum_batch_size" value="0"/>
+<parameter name="resolve_fullpaths" value="0"/>
+<parameter name="pinfile_protein_delimiter" value=""/>
+<parameter name="spectrum_batch_size" value="20000"/>
 <parameter name="decoy_prefix" value="decoy_"/>
 <parameter name="text_file_extension" value=""/>
 <parameter name="output_suffix" value=""/>
-<parameter name="peptide_length_range" value="1 63"/>
+<parameter name="peptide_length_range" value="6 50"/>
 <parameter name="precursor_NL_ions" value=""/>
 <parameter name="equal_I_and_L" value="1"/>
 <parameter name="mass_offsets" value=""/>
@@ -207,15 +204,21 @@
 <parameter name="remove_precursor_peak" value="0"/>
 <parameter name="remove_precursor_tolerance" value="1.5"/>
 <parameter name="clear_mz_range" value="0.0 0.0"/>
-<parameter name="variable_mod01" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod02" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod03" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod04" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod05" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod06" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod07" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod08" value="0.0 null 0 4 -1 0 0"/>
-<parameter name="variable_mod09" value="0.0 null 0 4 -1 0 0"/>
+<parameter name="variable_mod01" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod02" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod03" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod04" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod05" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod06" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod07" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod08" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod09" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod10" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod11" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod12" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod13" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod14" value="0.0 null 0 3 -1 0 0"/>
+<parameter name="variable_mod15" value="0.0 null 0 3 -1 0 0"/>
 <parameter name="max_variable_mods_in_peptide" value="5"/>
 <parameter name="require_variable_mod" value="0"/>
 <parameter name="protein_modlist_file" value=""/>

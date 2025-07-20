@@ -58,19 +58,52 @@ jobs:
 
       - name: configure-build-for-windows-latest
         if: matrix.os == 'windows-latest'
-        shell: cmd
+        shell: powershell
         run: |
-             cmake -E make_directory "${{runner.workspace}}/build"
-             cd "${{runner.workspace}}/build"
-             C:\msys64\usr\bin\wget.exe  wget http://noble.gs.washington.edu/crux-downloads/Thermo.zip
-             unzip -P iacceptthelicense Thermo.zip -d dlls
-             echo "XRawfile2_x64.dll"
-             regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
-             echo "fregistry_x64.dll"
-             regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
-             echo "Fileio_x64.dll.dll"
-             regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll.dll
-             cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64 -DPERCOLATOR_GIT_VERSION=e806a0c 
+          choco install gsudo -y
+          # Visual C++ Redistributables (often missing in server environments)
+          choco install vcredist-all -y
+          # .NET Framework versions
+          choco install dotnetfx -y
+          # Windows SDK components
+          choco install windows-sdk-10-version-2004-all -y
+          # ATL/MFC redistributables
+          choco install vcredist140 -y
+          Write-Host "Dependencies installed"
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+          refreshenv
+          cmake -E make_directory "${{runner.workspace}}/build"
+          cd "${{runner.workspace}}/build"
+          C:\msys64\usr\bin\wget.exe http://noble.gs.washington.edu/crux-downloads/Thermo.zip
+          unzip -P iacceptthelicense Thermo.zip -d dlls
+          echo "XRawfile2_x64.dll"
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\XRawfile2_x64.dll
+          Write-Host "regsvr32 exit code: $LASTEXITCODE"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
+            exit 1
+          } else {
+           Write-Host "DLL registered successfully"
+          }
+          echo "fregistry_x64.dll"
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\fregistry_x64.dll
+          Write-Host "regsvr32 exit code: $LASTEXITCODE"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
+            exit 1
+          } else {
+           Write-Host "DLL registered successfully"
+          }
+          echo "Fileio_x64.dll.dll"
+          gsudo regsvr32 /S dlls\Thermo\MSFileReader\Fileio_x64.dll
+          Write-Host "regsvr32 exit code: $LASTEXITCODE"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "DLL registration failed with exit code: $LASTEXITCODE"
+            exit 1
+          } else {
+           Write-Host "DLL registered successfully"
+          }
+          cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64
 
       - name: build
         shell: bash

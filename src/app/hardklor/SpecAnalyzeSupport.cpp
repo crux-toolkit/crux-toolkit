@@ -8,12 +8,12 @@
 CPeakPrediction::CPeakPrediction() { 
 	mz=0;
 	intensity=0;
-	charges = new vector<int>; 
+	charges = new std::vector<int>; 
 }
 CPeakPrediction::CPeakPrediction(const CPeakPrediction& p) { 
 	mz = p.mz;
 	intensity = p.intensity;
-	charges = new vector<int>;
+	charges = new std::vector<int>;
 	for(unsigned int i=0;i<p.charges->size();i++) charges->push_back(p.charges->at(i));
 }
 CPeakPrediction::~CPeakPrediction() { 
@@ -26,7 +26,7 @@ CPeakPrediction& CPeakPrediction::operator=(const CPeakPrediction& p){
 		mz = p.mz;
 		intensity = p.intensity;
 		delete charges;
-		charges = new vector<int>;
+		charges = new std::vector<int>;
 		for(unsigned int i=0;i<p.charges->size();i++) charges->push_back(p.charges->at(i));
 	}
 	return *this;
@@ -56,7 +56,7 @@ CPeptideVariant::CPeptideVariant(){
   matchSize=1;
   mismatch = new Peak_T[1];
   mismatchSize=1;
-  extra = new vector<Peak_T>;
+  extra = new std::vector<Peak_T>;
   charge=1;
   monoMass=0;
   distArea=0;
@@ -75,7 +75,7 @@ CPeptideVariant::CPeptideVariant(const CPeptideVariant& p){
 
   match = new Peak_T[matchSize];
   mismatch = new Peak_T[mismatchSize];
-  extra = new vector<Peak_T>;
+  extra = new std::vector<Peak_T>;
 
   for(i=0;i<p.matchSize;i++) match[i]=p.match[i];
   for(i=0;i<p.mismatchSize;i++) mismatch[i]=p.mismatch[i];
@@ -107,7 +107,7 @@ CPeptideVariant& CPeptideVariant::operator=(const CPeptideVariant& p) {
 
     match = new Peak_T[matchSize];
     mismatch = new Peak_T[mismatchSize];
-    extra = new vector<Peak_T>;
+    extra = new std::vector<Peak_T>;
 
     for(i=0;i<p.matchSize;i++) match[i]=p.match[i];
     for(i=0;i<p.mismatchSize;i++) mismatch[i]=p.mismatch[i];
@@ -151,7 +151,7 @@ void CPeptideVariant::Clear(){
 		mismatch[i].mz=0;
 		mismatch[i].intensity=0;
 	}
-	extra = new vector<Peak_T>;
+	extra = new std::vector<Peak_T>;
 	charge=0;
 	monoMass=0;
 	variant=v;
@@ -160,7 +160,7 @@ void CPeptideVariant::Clear(){
 }
 void CPeptideVariant::DeleteExtra(){
 	delete extra;
-	extra = new vector<Peak_T>;
+	extra = new std::vector<Peak_T>;
 }
 double& CPeptideVariant::GetArea() { return distArea; }
 int& CPeptideVariant::GetCharge() { return charge; }
@@ -206,7 +206,7 @@ int CPeptideVariant::SizeExtra() { return extra->size(); }
 
 //Constructors & Destructors
 CPeptidePrediction::CPeptidePrediction(){
-	variantList = new vector<CPeptideVariant>;
+	variantList = new std::vector<CPeptideVariant>;
 	mz=0;
 	intensity=0;
 	bestVar=0;
@@ -217,7 +217,7 @@ CPeptidePrediction::CPeptidePrediction(const CPeptidePrediction& p){
 	intensity=p.intensity;
 	bestVar=p.bestVar;
 	maxPeakIndex=p.maxPeakIndex;
-	variantList = new vector<CPeptideVariant>;
+	variantList = new std::vector<CPeptideVariant>;
 	for(unsigned int i=0;i<p.variantList->size();i++){
 		variantList->push_back(p.variantList->at(i));
 	}
@@ -234,7 +234,7 @@ CPeptidePrediction& CPeptidePrediction::operator=(const CPeptidePrediction& p){
 		bestVar=p.bestVar;
 		maxPeakIndex=p.maxPeakIndex;
 		delete variantList;
-		variantList = new vector<CPeptideVariant>;
+		variantList = new std::vector<CPeptideVariant>;
 		for(unsigned int i=0;i<p.variantList->size();i++){
 			variantList->push_back(p.variantList->at(i));
 		}
@@ -246,7 +246,7 @@ CPeptidePrediction& CPeptidePrediction::operator=(const CPeptidePrediction& p){
 void CPeptidePrediction::AddVariant(CPeptideVariant& var) { variantList->push_back(var); }
 void CPeptidePrediction::Clear() {
 	delete variantList;
-	variantList = new vector<CPeptideVariant>;
+	variantList = new std::vector<CPeptideVariant>;
 	mz=0;
 	intensity=0;
 	bestVar=0;

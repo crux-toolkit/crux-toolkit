@@ -6,8 +6,6 @@
 #include "MSToolkit/Spectrum.h"
 #include <vector>
 
-using namespace std;
-
 class CSplitSpectrum {
  public:
   //Constructors & Destructors
@@ -41,14 +39,14 @@ class CSplitSpectrum {
 	CAveragine *averagine;
 	CMercury8 *mercury;
 
-	vector<CSpecAnalyze> *setA;
-	vector<CSpecAnalyze> *setB;
-	vector<CSpecAnalyze> *finalAnalysis;
+  std::vector<CSpecAnalyze> *setA;
+  std::vector<CSpecAnalyze> *setB;
+  std::vector<CSpecAnalyze> *finalAnalysis;
 
-	vector<float> *s2n;
+  std::vector<float> *s2n;
 
-	vector<int> *aIndex;
-	vector<int> *bIndex;
+  std::vector<int> *aIndex;
+  std::vector<int> *bIndex;
 
 };
 
