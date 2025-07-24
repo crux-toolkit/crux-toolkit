@@ -125,12 +125,14 @@ jobs:
              cd "${{runner.workspace}}/build"
              cmake --build . --config $BUILD_TYPE --target package_source
 
-      - name: archive-macos-package
+      - name: archive-macos-13-package
         if: (matrix.os == 'macos-13')
         uses: actions/upload-artifact@v4
         with:
           name: crux-4.3.${{env.git_short_sha}}.macos-13
           path: ${{runner.workspace}}/build/crux-4.3.Darwin.x86_64.zip
+
+      - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
         uses: actions/upload-artifact@v4
         with:
