@@ -55,82 +55,109 @@
 
 		<p/>
 		This page will walk you through the steps of
-		installing <span class=prog>Crux<span/> on your computer.
+		installing <span class=prog>Crux</span> on your computer.
 		Separate sections describe the installation for 
 		<a href="#LINUX">Linux</a>,
-		<a href="#OSX">OS X</a>,
+		<a href="#MacOS">MacOS</a>,
 		and
 		<a href="#WINDOWS">Windows</a>.
 		You have the choice of installing pre-compiled binaries or building
 		Crux from the source code.
 		The compiled binaries offer the easiest installation option.  
+		Only the Windows version of Crux supports the vendor specific file formats.
+
+		<a name="Downloading"></a>
+		<h3>Downloading</h3>
+		<span class=prog>Crux</span> is freely
+		available for download under an
+		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
+		The current stable and development releases are available from the
+		<a href="http://crux.ms/download.html">download page</a>. Older releases can be found in the
+		<a href="https://github.com/crux-toolkit/crux-toolkit/releases">GitHub releases</a> page.
+		Here we will describe how to download the latest stable or development release
+		from the <a href="http://crux.ms/download.html">download page</a>.
+		<p/>
+		<ol>
+		<li>click on the list box under "Choose Download Type", and select the distribution
+		you want. Available choices are:
+			<ul>
+				<li>Linux X86-64</li>
+				<li>MacOS X86-64</li>
+				<li>MacOS ARM64 </li>
+				<li>Windows X86-64</li>
+				<li>Source</li>
+			</ul>
+		</li>
+		<li>
+		Read the license agreements.
+		</li>
+		<li>
+		At the bottom of the page there are two buttons:
+		<p/>
+		<dl>
+		<dt>
+		<p/>
+		<b>Stable Release</b>
+		</dt>
+		<dd>
+		<p/>
+		Click on the button labeled "I agree to the licensing terms, 
+		download release x.x of Crux" to download the latest stable release
+		of crux.
+		</dd>
+		<dt>
+		<p/>
+		<b>Latest Development Release</b>
+		</dt>
+		<dd>
+		<p/>
+		Click on the button labeled "I agree to the licensing terms, 
+		download the most recent build of Crux" to download the latest development
+		version of crux.
+		</dd>
+		</dl>
+		<p/>
+		If a window pops up on your browser, click on the "Save" button.
+		</ol>
 
 		<a name="LINUX"></a>
 		<h3>Linux</h3>
-		<b>Note:</b> These instructions refer to your home directory as
-		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
-		or you can use the fully qualified path to your home directory which
-		may be something like <code>/home/yourname/</code>.  Note that you can
-		find out the location of your home directory by logging in and
-		typing <code>pwd</code> or <code>echo $HOME</code>.
 		<h3>Installing Pre-compiled Crux Binaries on Linux</h3>
 		<ul>
-    <li>Current versions of Crux require that version 2.17 of the C
-    runtime library be installed.
-    You can determine which version of the C runtime library is installed
-    by running
+    <li>The current Linux binary of Crux is compiled on Ubuntu 22.04 for X86-64,
+		but should work on most Linux distributions.
+		It requires that version 2.39 or later of the C runtime library be installed.
+    	You can determine which version of the C runtime library is installed
+    	by running
 		<div class=code><code>
     ldd --version
     </code></div>
 		<p/>
     </li>
 
-		<li><b>Download the files</b> 
-		<p/>
-		<span class=prog>Crux</span> is freely
-		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
-		On the download page click on the link "Linux [architecture]
-		Build (zipped)" to download them to your computer.
-		If a window pops
-		up, select the "Save" button.
-		To check that the file was
-		transfered correctly, run this command
-
-		<div class=code><code>
-		md5sum <i>[downloaded file]</i></code>
-		</div>
-		<p/>
-		and compare the output to the "MD5 checksum" link next to the file you
-		downloaded.  
-		<p/>
-		</li>
-
 		<li><b>Unpack and install the files</b>
 		<p/>
 		The file you downloaded
 		should be named something like 
-		<span class=file>crux-x.xx-XXXX-GNU-Linux.zip</span>
+		<span class=file>crux-x.xx.Linux.x86_64</span>
 		where <span class=file>x.xx</span>
-		is replaced with the most current release version
-		and 
-		<span class=file>XXXX</span> is either i686 or x86_64.
+		is replaced with the current release version
 		Move this file 
 		to a convenient location and unpack the file with this command:
 
 		<div class=code><code>
-		unzip crux-x.xx-XXXX-GNU-Linux.zip</code>
+		unzip crux-x.xx.Linux.x86_64.zip</code>
 		</div>
 		<p/>
 		You should now have a new directory,
-		<span class=file>crux-x.xx-XXXX-GNU-Linux</span>,
+		<span class=file>crux-x.xx.Linux.x86_64</span>,
 		with two subdirectories, <span class=file>bin</span> and <span
 		class=file>doc</span>.  The <span class=prog>crux</span> programs are
 		in the <span class=file>bin</span> directory. You may want to move 
 		these files somewhere
 		more convenient for you, but otherwise, that completes the
 		installation!  Skip ahead to 
-		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
 		</ul>
 
@@ -143,7 +170,6 @@
 		following software:
 		<ul>
 		<li><code>gcc</code></li>
-    <li><code>version 2.17 or later of the C runtime libraries</code></li>
 		<li><code>g++</code></li>
 		<li><code>cmake</code> (version 3.24 or later recommended)</li>
 		<li><code>make</code></li>
@@ -160,26 +186,11 @@
 		repositories and statically linked into <span class=prog>crux</span>.
     </li>
 
-		<li><b>Download the files</b> 
-		<p/>
-		The <span class=prog>Crux</span> source is freely
-		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
-		On the download page click on the link "Source (tarred, gzipped)",
-		and choose save to disk if prompted. 
-		To check that the file was
-		transferred correctly, run this command
-		<div class=code><code>
-		md5sum <i>[downloaded file]</i></code>
-		</div>
-		<p/>
-		and compare the output to the "MD5 checksum" link next to the file you
-		selected on the Crux download page.  
 		<p/>
 		The file you downloaded should be named something like 
 		<span class=file>crux-x.xx.source.tar.gz</span>, 
 		where <span class=file>x.xx</span>
-		is replaced with the most current release version.
+		is replaced with the current release version.
     </li>
 
     <p/>
@@ -198,6 +209,13 @@
 
 		<p/>
 		<li><b>Configure the build</b> 
+		<p/>
+		<b>Note:</b> These instructions refer to your home directory as
+		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
+		or you can use the fully qualified path to your home directory which
+		may be something like <code>/home/yourname/</code>.  Note that you can
+		find out the location of your home directory by logging in and
+		typing <code>pwd</code> or <code>echo $HOME</code>.
 		<p/>
 		Move into the <span class=file>crux-x.xx.Source</span>
 		directory from step 1.
@@ -240,62 +258,34 @@
 		of the
 		<span class=file>&lt;install directory&gt;</span>
 		That completes the installation!  Skip ahead to 
-		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
 		</ul>
-		<a name="OSX"></a>
-		<h3>OS X</h3>
-		<span class=prog>Crux</span> requires OS X Yosemite or later.
-    While pre-compiled binaries will run on computers with Apple silicon chips,
-    building from source on OS X requires an Intel based Mac.
+		<a name="MacOS"></a>
+		<h3>MacOS</h3>
+    	Pre-compiled binaries of 
+		<span class=prog>Crux</span> are available for both MacOS 13 on X86-64 
+		and MacOS 15 on Apple silicon (ARM64).
 		<p/>
-		<b>Note:</b> 
-		These instructions refer to your home directory as
-		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
-		or you can use the fully qualified path to your home directory which
-		may be something like <code>/home/yourname/</code>.  Note that you can
-		find out the location of your home directory by logging in and
-		typing <code>pwd</code> or <code>echo $HOME</code>.
-		<p/>
-		To install and use <code>crux</code> on OS X
+		To install and use <code>crux</code> on MacOS 
 		you'll need to be familiar with the <span class=code>Terminal</span>
 		application.
-    </li>
-
-		<h3>Installing Pre-compiled Crux Binaries on OS X</h3>
+		<h3>Installing Pre-compiled Crux Binaries on MacOS</h3>
 		<ul>
-    <p/>
-		<li><b>Download the files</b> 
-		<p/>
-		<span class=prog>Crux</span> is freely
-		available for download under an
-		<a href=""http://www.apache.org/licenses/LICENSE-2.0>Apache 2.0 license</a>.  
-		On the download page click on the link "OS X x86_64 Build (zipped)" 
-		to download them to your computer.
-		If a window pops
-		up, select the "Save" button.
-		To check that the file was
-		transferred correctly, run this command
-
-		<div class=code><code>
-		md5 <i>[downloaded file]</i></code>
-		</div>
-		<p/>
-		and compare the output to the "MD5 checksum" link next to the file you
-		downloaded.  
-		<p/>
-		</li>
-
+    	<p/>
 		<li><b>Unpack and install the files</b>
 		<p/>
 		The file you downloaded
-		should be named something like 
-		<span class=file>crux-x.xx.Darwin.x86_64.zip</span>
+		should be named 
+		<span class=file>crux-x.xx.Darwin.x86_64.zip</span>,
+		or
+		<span class=file>crux-x.xx.Darwin.arm64.zip</span>,
 		where <span class=file>x.xx</span>
 		is replaced with the most current release version.
 		Move this file 
-		to a convenient location and unpack the file with this command.
-
+		to a convenient location and unpack the file using the 
+		<code>unzip</code> command.
+		For example,
 		<div class=code><code>
 		unzip crux-x.xx.Darwin.x86_64.zip</code>
 		</div>
@@ -308,17 +298,17 @@
 		these files somewhere
 		more convenient for you, but otherwise, that completes the
 		installation!  Skip ahead to 
-		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
 		</ul>
-		<h3>Building Crux From Source on OS X</h3>
+		<h3>Building Crux From Source on MacOS</h3>
 		<ul>
 		<li><b>Prerequisites</b>
 		<p/>
-		To build Crux from source on OS X you must have installed the
+		To build Crux from source on MacOS you must have installed the
 		following software:
 		<ul>
-		<li><code>OS X Yosemite or later</code></li>
+		<li><code>MacOS 13 (Ventura) or later</code></li>
 		<li><code>XCode Command Line Tools</code></li>
 		<li><code>cmake</code> (version 3.24 or later recommended)</li>
 		<li><code>make</code></li>
@@ -336,10 +326,10 @@
 		and <span class=prog>Percolator</span>
 		repositories and statically linked into <span class=prog>crux</span>.
 		<p />
-		Building <span class=prog>Crux</span> on OS X requires a current version of
+		Building <span class=prog>Crux</span> on MacOS requires a current version of
 		<span class=prog>XCode</span>, and the XCode command line tools.
 		Earlier versions of <span class=prog>Crux</span> 
-		had to be built using the GCC compilers.
+		had to be built using the GCC compilers,
 		which are not supported by Apple.
     If you have the both the GCC and Apple compilers installed, you'll need to
     adjust the <span class=prog>PATH</span> environment variable so that the
@@ -365,27 +355,6 @@
 		or 
 		<a href="http://brew.sh">Homebrew</a>.
 		<p/>
-		<li><b>Download the files</b> 
-		<p/>
-		The <span class=prog>Crux</span> source is freely
-		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
-		On the download page click on the link "Source (tarred, gzipped)",
-		and choose save to disk if prompted. 
-		To check that the file was
-		transferred correctly, run this command
-
-		<div class=code><code>
-		md5sum <i>[downloaded file]</i></code>
-		</div>
-		<p/>
-		and compare the output to the "MD5 checksum" link next to the file you
-		selected on the Crux download page.  
-		<p/>
-		The file you downloaded should be named something like 
-		<span class=file>crux-x.xx.source.tar.gz</span>, 
-		where <span class=file>x.xx</span>
-		is replaced with the most current release version.
 		<li><b>Unpack the files</b>
 		<p/>
 		Move the downloaded file to a
@@ -401,6 +370,14 @@
 		</li>
 
 		<li><b>Configure the build</b> 
+		<p/>
+		<b>Note:</b> 
+		These instructions refer to your home directory as
+		<code>$HOME</code>.  You can type <code>$HOME</code> in the commands
+		or you can use the fully qualified path to your home directory which
+		may be something like <code>/home/yourname/</code>.  Note that you can
+		find out the location of your home directory by logging in and
+		typing <code>pwd</code> or <code>echo $HOME</code>.
 		<p/>
 		Move into the <span class=file>crux-x.xx.Source</span>
 		directory from step 1.
@@ -442,16 +419,16 @@
 		of the
 		<span class=file>&lt;install directory&gt;</span>
 		That completes the installation!  Skip ahead to 
-		<a href="#linux_path">Setting the PATH on Linux and OS X</a>
+		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
 		</ul>
 
 		<a name="linux_path"></a>
-		<h3>Setting the PATH on Linux and OS X</h3>
+		<h3>Setting the PATH on Linux and MacOS</h3>
 		<ul>
 		<li>
 		<p/>
-		On Linux and OS X systems you can always run any of the programs by specifying its full
+		On Linux and MacOS systems you can always run any of the programs by specifying its full
 		path.  For example,</p>
 
 		<div class=code><code>
@@ -523,15 +500,6 @@
     </li>
 		</ul>
 		<p/>
-		<li><b>Download the files</b> 
-		<p/>
-		<span class=prog>Crux</span> is freely
-		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license</a>.  
-		On the download page click on the link "Windows x86
-		Build (zipped)" to download them to your computer.
-		If a window pops up, select the "Save" button.
-		</li>
 		<li><b>Unpack and install the files</b>
 		<p/>
 		Browse to the downloaded file in Windows Explorer.
@@ -557,8 +525,21 @@
 		<ul>
 		<li><code>
 		<a
-		href="https://docs.microsoft.com/en-us/visualstudio/releases/2019/release-notes">Microsoft
-		Visual Studio C++ 2019</a></code></li>
+		href="https://visualstudio.microsoft.com/vs/community/">Microsoft
+		Visual Studio C++ 2022 or later.</a></code></li>
+		When installing Visual Studio check the "Individual Components" tab 
+		and make sure the following are installed:
+		<ul>
+		<li>.NET Framework 4.8 SDK</li>
+		<li>.NET Framework 4.7 target pack</li>
+		<li>Windows Universal C Runtime</li>
+		<li>C++ MFC for latest v143 build tools</li>
+		<li>Windows 11 SDK (10.0.22000..0)</li>
+		<li>v142 - VS 2019 C++ x64/x86 build tools</li>
+		<li>C++ v14.29 (16.11) ATL for v142 build tools</li>
+		<li>C++/CLI support for v142 build tools</li>
+		<li>MSVC v143 VS 2022 C++ x64/x86 build tools</li>
+		</ul>
 		<li><a
     href="http://www.cmake.org/cmake/resources/software.html"><code>CMake
     (version 3.24 or later recommended)</code></a></li>
@@ -574,8 +555,8 @@
 		</ul>
 		<p/>
 		<b>Older versions of Visual Studio will not be able to build Crux!</b>
-		You must have Visual Studio 2019.
-		Visual Studio 2019 Community Edition does work.
+		You must have Visual Studio 2022 or later.
+		Visual Studio 2022 Community Edition does work.
 		<p/>
 		<span class=code>wget</span>,
 		<span class=code>unzip</span>,
@@ -586,12 +567,6 @@
 		See the section <i>Setting the PATH on Windows</i> for more information.
 		<p/>
 		<li><b>Download the file</b> 
-		<p/>
-		The <span class=prog>Crux</span> source is freely
-		available for download under an
-		<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0 license></a>.  
-		On the download page click on the link "Source (zipped)",
-		and choose save to disk if prompted. 
 		<p/>
 		The file you downloaded should be named something like 
 		<span class=file>crux-x.xx.Source.zip</span>, 
@@ -618,9 +593,11 @@
 		<p/>
 		<b>Open the command line development environment.</b>
 		<p/>
-		Under the "Start" button
-		open the "Visual Studio 2019" folder, then open the "Visual Studio Tools"
-		folder, and double-click on "x64 Native Tools Command Prompt for VS2019".
+		In the file explorer, open the open the folder 
+		<code>\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools</code>.
+		Double-click on the <code>LaunchDevCmd.bat</code> file 
+		(you may want to create a shortcut to this file on your desktop).
+		<p/>
 		This will launch a 
 		<span class=file>cmd</span> shell configured to use the 
 		Microsoft development tools.
