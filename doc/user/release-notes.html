@@ -51,41 +51,54 @@
 		<!-- START CONTENT -->
     <h2>Release notes for Crux</h2>
 
+    <h3>Version 4.3.1</h3> August 7, 2025
+    <h4>Major changes</h4>
+    <ul>
+      <li>23 July 2025: Updated to ProteoWizard  3.0.25123.b0e5f51.</li>
+      <li>19 March 2025: Updated to use Comet 2025.01.1, including support for indexing 
+      a sequence database.</li>
+    </ul>
+    <h4>Minor changes</h4>
+    <ul>
+      <li>23 July 2025: Updated GitHub build actions to use windows-latest and added macos-15.</li>
+      <li>23 July 2025: Updated build files to support Visual Studio 2022 and later.</li>
+      <li>23 July 2025: Update <code>crux comet</code> parameter default to match Comet 2025.01.1.</li>
+      <li>10 June 2025: Updated pepXML format.</li>
+      <li>17 April 2025: Fixed a bug in reporting tide-search results in various output formats.</li>
+    </ul>
+
     <h3>Version 4.3</h3> March 25, 2025
+    <h4>Major changes</h4>
+    <ul>
+      <li>19 March 2025: Updated to use Comet 2025.01.1, including support for indexing 
+      a sequence database.</li>
+      <li>11 December 2024: Updated to use Percolator rel 3-07-01. Retention time is now
+      included in the Percolator output.</li>
+      <li>18 Oct 2024: Added support for tide-search to produce output in mztab format.</li>
+      <li>18 Oct 2024: Added tide-index support for unimod codes.</li>
+    </ul>
 
-<h4>Major changes</h4>
-  <li>23 July 2025: Updated to ProteoWizard  3.0.25123.b0e5f51.</li>
-  <li>19 March 2025: Updated to use Comet 2025.01.1, including support for indexing 
-  a sequence database.</li>
-  <li>11 December 2024: Updated to use Percolator rel 3-07-01. Retention time is now
-  included in the Percolator output.</li>
-  <li>18 Oct 2024: Sped up tide-search, restuctured its code.</li>
-  <li>18 Oct 2024: Added support for tide-search to produce output in mztab format.</li>
-  <li>18 Oct 2024: Added tide-index support for unimod codes.</li>
-
-<h4>Minor changes</h4>
-  <li>23 July 2025: Updated GitHub build actions to use windows-latest and added macos-15.</li>
-  <li>23 July 2025: Update <code>crux comet</code> parameter default to match Comet 2025.01.1.</li>
-  <li>10 June 2025: Updated pepXML format.</li>
-  <li>17 April 2025: Fixed a bug in reporting tide-search results in various output formats.</li>
-  <li>6 Feb 2025: Created the spectrum-convert application.</li>
-  <li>28 Jan 2025: Bug fix in tide-search when searching without decoy peptides. </li>
-  <li>25 Oct 2024: Fixed bug in parameter handling for spectral-counts inside of the pipeline command.</li>
-  <li>25 Oct 2024: Added .gz format as read fasta file option.</li>
-  <li>22 Oct 2024: Added error message when user specifies non-supported score functions. Fixed a bug that prevented building on windows and mac.</li>
-  <li>18 Oct 2024: Terminal amino acids can now be modified by terminal modifications and resiudal mods.</li>
-  <li>18 Oct 2024: Tide-search reports tailor scores and statistics about b-y- ions.</li>
-  <li>18 Oct 2024: Tide-search runs only combined p-values.</li>
-  <li>18 Oct 2024: Unused options removed from tide-search: --compute-sp, --file-column, --brief-output, --peptide-centric-search, --evidence-granularity, --use-tailor-calibration (it is automatically calculated), From tide-index:--keep-terminal-aminos.  </li>
-  <li>15 September 2024: Unify sorting, replacing quicksort algorithm with std::sort</li>
-  <li>11 September 2024: Removed usage plot from Crux website home page.</li>
-  <li>30 July 2024: Modified tool use events to submit via GA4.</li>
-  <li>02 July 2024: Typo fix in the documentation of precursor window calculation.</li>
+    <h4>Minor changes</h4>
+    <ul>
+      <li>6 Feb 2025: Created the spectrum-convert application.</li>
+      <li>28 Jan 2025: Bug fix in tide-search when searching without decoy peptides. </li>
+      <li>25 Oct 2024: Fixed bug in parameter handling for spectral-counts inside of the pipeline command.</li>
+      <li>25 Oct 2024: Added .gz format as read fasta file option.</li>
+      <li>22 Oct 2024: Added error message when user specifies non-supported score functions. Fixed a bug that prevented building on windows and mac.</li>
+      <li>18 Oct 2024: Terminal amino acids can now be modified by terminal modifications and resiudal mods.</li>
+      <li>18 Oct 2024: Tide-search reports tailor scores and statistics about b-y- ions.</li>
+      <li>18 Oct 2024: Tide-search runs only combined p-values.</li>
+      <li>18 Oct 2024: Unused options removed from tide-search: --compute-sp, --file-column, --brief-output, --peptide-centric-search, --evidence-granularity, --use-tailor-calibration (it is automatically calculated), From tide-index:--keep-terminal-aminos.  </li>
+      <li>15 September 2024: Unify sorting, replacing quicksort algorithm with std::sort</li>
+      <li>11 September 2024: Removed usage plot from Crux website home page.</li>
+      <li>30 July 2024: Modified tool use events to submit via GA4.</li>
+      <li>02 July 2024: Typo fix in the documentation of precursor window calculation.</li>
+    </ul>
 
 <h3>Version 4.2</h3> April 6, 2024
 
 <h4>Major changes</h4>
-  
+<ul>
   <li>6 April 2024: Updated to use Percolator commit d0d48b5.
   <li>11 March 2024: Updated to use ProteoWizard 3.0.24044.fd6604. This required shifting Crux and
   dependencies to the C++14 standard and disabling the C++11 ABI. This fixed
@@ -94,6 +107,7 @@
   The recommended version of CMake is now 3.24. Earlier versions will work,
   but you may see some warning messages.
   </li>
+</ul>
 <h4>Minor changes</h4>
 <ul>
   <li>12 April 2024: Fixed bug in ArgParser with repeated options and arguments.</li>
