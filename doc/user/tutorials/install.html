@@ -78,8 +78,8 @@
 		from the <a href="http://crux.ms/download.html">download page</a>.
 		<p/>
 		<ol>
-		<li>click on the list box under "Choose Download Type", and select the distribution
-		you want. Available choices are:
+		<li>Click on the list box under "Choose Download Type" and select the distribution
+		you want. Available choices are
 			<ul>
 				<li>Linux X86-64</li>
 				<li>MacOS X86-64</li>
@@ -103,7 +103,7 @@
 		<p/>
 		Click on the button labeled "I agree to the licensing terms, 
 		download release x.x of Crux" to download the latest stable release
-		of crux.
+		of Crux.
 		</dd>
 		<dt>
 		<p/>
@@ -124,14 +124,14 @@
 		<h3>Linux</h3>
 		<h3>Installing Pre-compiled Crux Binaries on Linux</h3>
 		<ul>
-    <li>The current Linux binary of Crux is compiled on Ubuntu 22.04 for X86-64,
+    <li>The current Linux binary of Crux is compiled on Ubuntu 22.04 for X86-64
 		but should work on most Linux distributions.
 		It requires that version 2.39 or later of the C runtime library be installed.
     	You can determine which version of the C runtime library is installed
     	by running
 		<div class=code><code>
     ldd --version
-    </code></div>
+    </code></div>.
 		<p/>
     </li>
 
@@ -152,11 +152,11 @@
 		You should now have a new directory,
 		<span class=file>crux-x.xx.Linux.x86_64</span>,
 		with two subdirectories, <span class=file>bin</span> and <span
-		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		class=file>doc</span>.  The <span class=prog>Crux</span> programs are
 		in the <span class=file>bin</span> directory. You may want to move 
 		these files somewhere
 		more convenient for you, but otherwise, that completes the
-		installation!  Skip ahead to 
+		installation.  Skip ahead to 
 		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
 		</ul>
@@ -176,14 +176,14 @@
 		<li><code>git</code></li>
 		</ul>
 		<p/>
-		Building <span class=prog>crux</span> also requires the
+		Building <span class=prog>Crux</span> also requires the
 		<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
 		and 
 		<a href="http://percolator.ms"><span class=prog>Percolator</span></a>
 		libraries. 
 		These will automatically be copied from the <span class=prog>Proteowizard</span>
 		and <span class=prog>Percolator</span>
-		repositories and statically linked into <span class=prog>crux</span>.
+		repositories and statically linked into <span class=prog>Crux</span>.
     </li>
 
 		<p/>
@@ -226,8 +226,8 @@
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
-		the location where you wish to install the <span class=prog>crux</span> programs. 
-		If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+		the location where you wish to install the <span class=prog>Crux</span> programs. 
+		If you want <span class=prog>Crux</span> to go in <span class=file>$HOME/bin</span>,
 		then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
 		The installation process will automatically put the programs in a directory called
 		<span class=file>bin</span>.
@@ -253,7 +253,7 @@
 		</code>
 		</div>
 		<p/>
-		The <span class=prog>crux</span> programs are
+		The <span class=prog>Crux</span> programs are
 		in the <span class=file>bin</span> subdirectory
 		of the
 		<span class=file>&lt;install directory&gt;</span>
@@ -293,7 +293,7 @@
 		You should now have a new directory,
 		<span class=file>crux-x.xx.Darwin.x86_64</span>,
 		with two subdirectories <span class=file>bin</span>, and <span
-		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		class=file>doc</span>.  The <span class=prog>Crux</span> programs are
 		in the <span class=file>bin</span> directory. You may want to move 
 		these files somewhere
 		more convenient for you, but otherwise, that completes the
@@ -317,25 +317,25 @@
     version of tar)</li>
 		</ul>
 		<p/>
-		Building <span class=prog>crux</span> also requires the
+		Building <span class=prog>Crux</span> also requires the
 		<a href="http://proteowizard.sourceforge.net"><span class=prog>Proteowizard</span></a>
 		and 
 		<a href="http://percolator.ms"><span class=prog>Percolator</span></a>
 		libraries. 
 		These will automatically be copied from the <span class=prog>Proteowizard</span>
 		and <span class=prog>Percolator</span>
-		repositories and statically linked into <span class=prog>crux</span>.
+		repositories and statically linked into <span class=prog>Crux</span>.
 		<p />
 		Building <span class=prog>Crux</span> on MacOS requires a current version of
 		<span class=prog>XCode</span>, and the XCode command line tools.
 		Earlier versions of <span class=prog>Crux</span> 
 		had to be built using the GCC compilers,
 		which are not supported by Apple.
-    If you have the both the GCC and Apple compilers installed, you'll need to
+    If you have both the GCC and Apple compilers installed, you'll need to
     adjust the <span class=prog>PATH</span> environment variable so that the
     Apple compilers are found first.
     Alternatively, you can specify which compilers should be used by setting
-    the <span class=prog>CC</span>, and <span class=prog>CXX</span>.
+    the environment variables <span class=prog>CC</span> and <span class=prog>CXX</span>.
     For example,
 		<div class=code>
     <code>
@@ -364,7 +364,7 @@
 		tar -zxvf crux-x.xx.Source.tar.gz
 		</div>
 		A new directory named <span class=file>crux-x.xx.Source</span> will be
-		created and a long list of files will stream by as they are being put
+		created, and a long list of files will stream by as they are being put
 		into the new directory.
 		<p/>
 		</li>
@@ -388,8 +388,8 @@
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
-		the location where you wish to install the <span class=prog>crux</span> programs. 
-		If you want <span class=prog>crux</span> to go in <span class=file>$HOME/bin</span>,
+		the location where you wish to install the <span class=prog>Crux</span> programs. 
+		If you want <span class=prog>Crux</span> to go in <span class=file>$HOME/bin</span>,
 		then <span class=file>&lt;install directory&gt;</span> would be <span class=file>$HOME</span>.
 		The installation process will automatically put the programs in a directory called
 		<span class=file>bin</span>.
@@ -414,7 +414,7 @@
 		</code>
 		</div>
 		<p/>
-		The <span class=prog>crux</span> programs are
+		The <span class=prog>Crux</span> programs are
 		in the <span class=file>bin</span> subdirectory
 		of the
 		<span class=file>&lt;install directory&gt;</span>
@@ -466,7 +466,7 @@
 		<p>Try '<span class=code>echo $PATH</span>' again to see that the
 		change was made.  <em>&lt;install directory&gt;/bin</em> should be at the end of the
 		list.  Now you can 
-		run the <span class=prog>crux</span> programs by just typing their
+		run the <span class=prog>Crux</span> programs by just typing their
 		names.  Try this.</p>
 
 		<div class=code><code>
@@ -507,7 +507,7 @@
 		You should now have a new directory,
 		<span class=file>crux-x.xx</span>,
 		with two subdirectories <span class=file>bin</span>, and <span
-		class=file>doc</span>.  The <span class=prog>crux</span> programs are
+		class=file>doc</span>.  The <span class=prog>Crux</span> programs are
 		in the <span class=file>bin</span> directory. You may want to move 
 		these files somewhere
 		more convenient for you, but otherwise, that completes the
@@ -615,7 +615,7 @@
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
-		the location where you wish to install the <span class=prog>crux</span> programs. 
+		the location where you wish to install the <span class=prog>Crux</span> programs. 
 		Note that, somewhat confusingly, Visual Studio 2019 is version 16.
 		<p/>
 		If you wish to disable support for vendor specific file formats,
