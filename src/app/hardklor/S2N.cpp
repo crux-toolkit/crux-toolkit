@@ -50,7 +50,7 @@ Spectrum signalToNoise(Spectrum& s, int start, int stop, float sig, float* cutof
   };
 
   //Sort the array
-  sort(sortD,sortD+c);
+  std::sort(sortD,sortD+c);
   
   //Find the number of relative abundances at 1% intervals
   c=0;
@@ -191,7 +191,7 @@ float findSNCutoff(Spectrum& s, int start, int stop, float sig, bool skipZero){
   };
 
   //Sort the array
-  sort(sortD,sortD+c);
+  std::sort(sortD,sortD+c);
   
   //Find the number of relative abundances at 1% intervals
   c=0;
@@ -288,7 +288,7 @@ float findSNCutoff2(Spectrum& s, int start, int stop, float sig, double& max, bo
   };
 
   //Sort the array
-  sort(sortD,sortD+c);
+  std::sort(sortD,sortD+c);
   
   //Find the number of relative abundances at 1% intervals
   c=0;

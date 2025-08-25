@@ -36,10 +36,16 @@ class PepXMLWriter {
   void writeHeader();
 
   /**
-   * Close the msms_run_summaryand msms_pipeline_analysis tags.
+   * Close the msms_pipeline_analysis tags.
    * Requires OpenFile has been called without CloseFile.
    */
   void writeFooter();
+
+  /**
+   * Close the msms_run_summaryand tags.
+   * Requires OpenFile has been called without CloseFile.
+   */
+  void writeSummaryFooter();
 
   /**
    * Write the details for a PSM to be contained in a spectrum_query
@@ -75,7 +81,8 @@ class PepXMLWriter {
                             double spectrum_neutral_mass, 
                             int charge);
   void closeSpectrumElement();
-  std::string getSpectrumTitle(int spectrum_scan_number, 
+  void closePepXmlSearchSummary(MatchCollection* collection);
+  std::string getSpectrumTitle(int spectrum_scan_number,
                                const char* filename,
                                int charge);
   void printPeptideElement(int* rank,

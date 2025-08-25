@@ -3,8 +3,6 @@
 
 #include <vector>
 
-using namespace std;
-
 enum ScanType{
   Zoom,
   UltraZoom,

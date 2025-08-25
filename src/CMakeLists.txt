@@ -351,6 +351,12 @@ if (WIN32 AND NOT CYGWIN)
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
+      libpwiz_analysis_diaumpire
+      libpwiz_analysis_frequency
+      libpwiz_analysis_passive_core
+      libpwiz_analysis_peakdetect
+      libpwiz_analysis_spectrum_processing
+      libpwiz_analysis_spectrum_processing_basic
       libpwiz_data_common.lib
       libpwiz_data_identdata.lib
       libpwiz_data_identdata_examples.lib

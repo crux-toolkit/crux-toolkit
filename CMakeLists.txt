@@ -6,7 +6,7 @@ endif()
 project(crux)
 
 set (CRUX_VERSION_MAJOR "4")
-set (CRUX_VERSION_MINOR "3")
+set (CRUX_VERSION_MINOR "3.1")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -123,6 +123,7 @@ add_dependencies(hardklor ProteoWizard)
 add_dependencies(kojak neopepxmlparser)
 add_dependencies(kojak hardklor)
 add_dependencies(kojak MSToolkit)
+add_dependencies(MSToolkit ProteoWizard)
 add_dependencies(neopepxmlparser MSToolkit)
 add_dependencies(percolator MSToolkit)
 add_dependencies(percolator ProteoWizard)
