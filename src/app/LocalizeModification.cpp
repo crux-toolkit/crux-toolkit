@@ -145,7 +145,7 @@ int LocalizeModificationApplication::main(int argc, char** argv) {
     for (vector<pb::Peptide>::const_iterator i = peptides.begin(); i != peptides.end(); i++) {
       Peptide peptide(*i, proteins);
       tps.Clear();
-      peptide.ComputeTheoreticalPeaks(&tps);
+      peptide.Activate(&tps);
 
       if (i == peptides.begin() + 1) {
         // After we've scored the unmodified peptide, create new evidence vector for scoring the modified peptides

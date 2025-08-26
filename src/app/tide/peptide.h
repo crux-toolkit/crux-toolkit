@@ -3,7 +3,7 @@
 // Peptide is a class for managing the representation of a peptide and its
 // associated theoretical peaks for use at search time. It encapsulates a
 // diverse set of functions, interacting closely with TheoreticalPeakSet,
-// TheoreticalPeakCompiler, ActivePeptideQueue, and DotProd() (defined in
+// TheoreticalPeakCompiler, PeptideDiskLoader, and DotProd() (defined in
 // search.cc). At indexing time this class is used with TheoreticalPeakSet to
 // store peaks to a protocol buffer.
 //
@@ -12,7 +12,7 @@
 // Perhaps one way to clean this up would be to make two different Peptide
 // classes: one for indexing and another for searching.
 //
-// At search time, ActivePeptideQueue (see active_peptide_queue.{h,cc})
+// At search time, PeptideDiskLoader (see active_peptide_queue.{h,cc})
 // manages the task of reading Peptides from storage and keeping current
 // candidate Peptides in memory.  Each Peptide knows how to take the dot
 // product of its theoretical peaks with a given observed spectrum.
@@ -30,6 +30,7 @@
 #include "theoretical_peak_set.h"
 #include "mod_coder.h"
 #include "util/Params.h"
+#include "boost/thread/shared_mutex.hpp"
 
 #include "spectrum_collection.h"
 
@@ -107,14 +108,18 @@ class Peptide {
   // associated virtual method calls. (TODO 256: are virtual method calls indeed
   // avoided?).  The second version also produces the compiled programs for
   // taking dot products.
-  void ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void Activate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void TryActivate(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  void ActivateImpl(TheoreticalPeakSetBYSparse* workspace, bool dia_mode = false);
+  std::atomic_bool activated_{false};
   
   int Len() const { return len_; }
   double Mass() const { return mass_; }
   int Id() const { return id_; }
   int FirstLocProteinId() const { return first_loc_protein_id_; }
   int FirstLocPos() const { return first_loc_pos_; }
-  int ProteinLenth() const {return protein_length_;}
+  // int ProteinLenth() const {return protein_length_;}
+
   vector<ModCoder::Mod> Mods() const {
     return mods_;
   }
@@ -127,6 +132,7 @@ class Peptide {
   static double MassToMz(double mass, int charge) { // Added for Diameter
     return mass / (charge * 1.0) + MASS_PROTON;
   }
+
   vector<int>& IonMzbins() { return ion_mzbins_; }
   vector<int>& BIonMzbins() { return b_ion_mzbins_; }
   vector<int>& YIonMzbins() { return y_ion_mzbins_; }
@@ -140,20 +146,34 @@ class Peptide {
   vector<unsigned int> peaks_2y;   // Double charged y ions 
 
   bool active_;
+
+  std::atomic<Peptide*> next{nullptr};
+  
+
+  size_t Drop() { return drops_counter_.fetch_add(1); }
+  inline size_t GetDropsCounter() const { return drops_counter_.load(); }
   
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
+  std::mutex m_;
+
 
   void Compile(const TheoreticalPeakArr* peaks);
-  bool find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name); // mod_mass output variable
-  bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name); // mod_mass output variable
-          
+  bool find_static_mod(const pb::ModTable* mod_table, char AA, double& mod_mass, string& mod_name) const; // mod_mass output variable
+  bool find_variable_mod(const pb::ModTable* mod_table, char AA, double mod_mass, string& mod_name) const; // mod_mass output variable
+  
+  std::atomic<size_t> drops_counter_{0};
   int len_;
   double mass_;
   int id_;
   int first_loc_protein_id_;
   int first_loc_pos_;
   int protein_length_;
+  
+  vector<const pb::AuxLocation*>* locations_;
+
+  pb::Peptide pb_peptide_;
+
   vector<pb::Location> aux_locations;
   const char* residues_;
   const char* target_residues_;

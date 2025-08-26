@@ -13,7 +13,7 @@
 #include "tide/theoretical_peak_set.h"
 #include "tide/max_mz.h"
 #include "util/MathUtil.h"
-#include "tide/ActivePeptideQueue.h"
+#include "tide/PeptideDiskLoader.h"
 #include "TideIndexApplication.h"
 #include "TideMatchSet.h"
 
