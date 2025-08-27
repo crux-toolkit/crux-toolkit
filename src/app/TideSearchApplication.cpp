@@ -275,14 +275,6 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     ((double)total_candidate_peptides_) /  (double)num_spectra_searched_ );
   carp(CARP_INFO, "%d spectrum-charge combinations loaded, %d spectrum-charge combinations searched. ", num_spectra_, num_spectra_searched_);
   
-  convertResults();
-
-  // Delete temporary spectrumrecords file
- for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
-    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
-    remove((*original_file_name).SpectrumRecords.c_str());
-  }
-
   // Delete stuffs
   if (out_tsv_target_ != NULL)
     delete out_tsv_target_;
@@ -296,6 +288,14 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     delete out_pin_target_;
   if (out_pin_decoy_ != NULL)
     delete out_pin_decoy_;
+  
+  convertResults();
+
+  // Delete temporary spectrumrecords file
+ for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
+    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+    remove((*original_file_name).SpectrumRecords.c_str());
+  }
 
   return 0;
 }
