@@ -129,36 +129,36 @@ jobs:
         if: (matrix.os == 'macos-13')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.3.1.${{env.git_short_sha}}.macos-13
-          path: ${{runner.workspace}}/build/crux-4.3.1.Darwin.x86_64.zip
+          name: crux-4.3.2.${{env.git_short_sha}}.macos-13
+          path: ${{runner.workspace}}/build/crux-4.3.2.Darwin.x86_64.zip
 
       - name: archive-macos-13-package
         if: (matrix.os == 'macos-15')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.3.1.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-4.3.1.Darwin.*.zip
+          name: crux-4.3.2.${{env.git_short_sha}}.macos-15
+          path: ${{runner.workspace}}/build/crux-4.3.2.Darwin.*.zip
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-latest')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.3.1.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-4.3.1.Windows.AMD64.zip 
+          name: crux-4.3.2.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-4.3.2.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.3.1.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-4.3.1.Linux.x86_64.zip
+          name: crux-4.3.2.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-4.3.2.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v4
         with:
-          name: crux-4.3.1.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-4.3.1.Source.tar.gz
+          name: crux-4.3.2.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-4.3.2.Source.tar.gz
 
       - name: Test
         if: (matrix.os == 'ubuntu-22.04')
