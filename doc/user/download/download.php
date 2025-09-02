@@ -47,24 +47,24 @@
   # Set names of files available for download
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
-       "Linux X86-64" => "crux-4.3.1.Linux.x86_64.zip",
-       "MacOS 13 X86-64" => "crux-4.3.1.Darwin.x86_64.zip",
-       "MacOS 15 ARM64" => "crux-4.3.1.Darwin.ARM64.zip",
-       "Windows X86-64" => "crux-4.3.1.Windows.AMD64.zip",
-       "Source" => "crux-4.3.1.Source.tar.gz"
+       "Linux X86-64" => "crux-4.3.2.Linux.x86_64.zip",
+       "MacOS 13 X86-64" => "crux-4.3.2.Darwin.x86_64.zip",
+       "MacOS 15 ARM64" => "crux-4.3.2.Darwin.ARM64.zip",
+       "Windows X86-64" => "crux-4.3.2.Windows.AMD64.zip",
+       "Source" => "crux-4.3.2.Source.tar.gz"
      );
-     $directory = "crux-4.3.1/";
+     $directory = "crux-4.3.2/";
    }
     else {
       # File names for daily build include abbreveiated unique git commit number.
       # Read commit number from file.
       $version = chop(file_get_contents("daily/latest-build.txt"));
       $FileNameBaseArray = array(
-        "Linux X86-64" => "crux-4.3.1.$version.Linux.x86_64.zip",
-        "MacOS 13 X86-64" => "crux-4.3.1.$version.Darwin.x86_64.zip",
-        "MacOS 15 ARM64" => "crux-4.3.1.$version.Darwin.ARM64.zip",
-        "Windows X86-64" => "crux-4.3.1.$version.Windows.AMD64.zip",
-        "Source" => "crux-4.3.1.$version.Source.tar.gz",
+        "Linux X86-64" => "crux-4.3.2.$version.Linux.x86_64.zip",
+        "MacOS 13 X86-64" => "crux-4.3.2.$version.Darwin.x86_64.zip",
+        "MacOS 15 ARM64" => "crux-4.3.2.$version.Darwin.ARM64.zip",
+        "Windows X86-64" => "crux-4.3.2.$version.Windows.AMD64.zip",
+        "Source" => "crux-4.3.2.$version.Source.tar.gz",
       );
       $directory = "daily/";
     }
