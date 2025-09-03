@@ -30,6 +30,7 @@
 #include "theoretical_peak_set.h"
 #include "mod_coder.h"
 #include "util/Params.h"
+#include "IonInvertedIndex.h"
 
 #include "spectrum_collection.h"
 
@@ -174,6 +175,8 @@ class Peptide {
   string seq_with_mods_;
   string mod_crux_string_;
   string mod_mztab_string_;
+
+  IonInvertedIndex ion_inverted_index_;
 };
 
 #endif // PEPTIDE_H
