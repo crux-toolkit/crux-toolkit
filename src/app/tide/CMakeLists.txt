@@ -72,6 +72,7 @@ set(
   ${proto_files_compiled}
   abspath.cc
   ActivePeptideQueue.cc  
+  IonInvertedIndex.cc
   crux_sp_spectrum.cc
   fifo_alloc.cc
   index_settings.cc

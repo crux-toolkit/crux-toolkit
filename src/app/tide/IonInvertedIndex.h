@@ -1,11 +1,11 @@
-#ifndef TOP_N_PEPTIDES_H
-#define TOP_N_PEPTIDES_H
-#include "peptide.h"
+#ifndef ION_INVERTED_INDEX
+#define ION_INVERTED_INDEX
 #include <set>
+class Peptide;
 class IonInvertedIndex {
 public:
     struct Ion {
-        int mzbin;
+        unsigned int mzbin;
         Peptide* peptide;
         friend bool operator<(const Ion& a, const Ion& b) {
             return a.mzbin < b.mzbin;
@@ -17,11 +17,11 @@ public:
     IonInvertedIndex() = default;
     void erase(Peptide* peptide);
     void insert(Peptide* peptide);
-    Iterator lowerBound(int mzbin);
-    Iterator upperBound(int mzbin);
+    Iterator lowerBound(unsigned int peak);
+    Iterator upperBound(unsigned int peak);
 
-    ConstIterator lowerBound(int mzbin) const;
-    ConstIterator upperBound(int mzbin) const;
+    ConstIterator lowerBound(unsigned int peak) const;
+    ConstIterator upperBound(unsigned int peak) const;
 
     Iterator begin() { return ions_.begin(); }
     ConstIterator begin() const { return ions_.begin(); }

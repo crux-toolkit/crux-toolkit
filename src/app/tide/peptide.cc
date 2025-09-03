@@ -193,6 +193,7 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks) {
   for (i = 0; i < peaks[1].size(); ++i) {
     peaks_1.push_back(peaks[1][i]);
   }
+  ion_inverted_index_.insert(this);
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {
