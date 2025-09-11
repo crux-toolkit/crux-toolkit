@@ -1,22 +1,21 @@
 #ifndef ION_INVERTED_INDEX
 #define ION_INVERTED_INDEX
-#include <set>
+#include <map>
+#include <deque>
 class Peptide;
 class IonInvertedIndex {
 public:
-    struct Ion {
-        unsigned int mzbin;
-        Peptide* peptide;
-        friend bool operator<(const Ion& a, const Ion& b) {
-            return a.mzbin < b.mzbin;
-        }
-    };
-    using IonsStorage = std::multiset<Ion>;
+
+    using IonsStorage = std::map<unsigned int, std::deque<Peptide*>>;
     using Iterator = IonsStorage::iterator;
     using ConstIterator = IonsStorage::const_iterator;
+
     IonInvertedIndex() = default;
+
     void erase(Peptide* peptide);
+
     void insert(Peptide* peptide);
+
     Iterator lowerBound(unsigned int peak);
     Iterator upperBound(unsigned int peak);
 
