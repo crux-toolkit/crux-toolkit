@@ -304,6 +304,8 @@ else()
     ${RT_LIBRARY}
     SHA1
     zlib
+    ssl
+    crypto
   )
 endif(WIN32 AND NOT CYGWIN)
 

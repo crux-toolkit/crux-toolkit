@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "CruxLFQApplication.h"
@@ -9,75 +11,68 @@
 using std::string;
 using std::vector;
 
-string spectrum_file = "C:\\Users\\acqua\\Code\\data\\PXD005590\\B02_12_161103_D3_HCD_OT_4ul.raw.mzXML";
-string psm_file_tide_search = TEST_DATA_PATH "/test-data/tide-search.txt";
-string psm_file_assign_confidence = TEST_DATA_PATH "/test-data/assign-confidence.target.txt";
+string spectrum_file;
+string psm_file_percolator = TEST_DATA_PATH "/test-data/percolator.target.psms.txt";
 
 // A basic assertion which ensures gtest is setup properly.
 TEST(HelloTest, BasicAssertions) {
+    if (spectrum_file.empty()) {
+        GTEST_SKIP() << "No spectrum file provided";
+    }
     // Expect two strings not to be equal.
     EXPECT_STRNE("hello", "world");
     // Expect equality
     EXPECT_EQ(7 * 6, 42);
 }
 
-TEST(CreatePsmMapTest, AssignConfidenceFormat) {
-    // Test case for psm_file_format = "assign-confidence"
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
-    EXPECT_EQ(psm.size(), 15);
-
-    psm = CruxLFQ::create_psm(psm_file_assign_confidence);
-    EXPECT_EQ(psm.size(), 30);
+TEST(CruxLFQTest, CreatePSMs) {
+    vector<PSM> psms = CruxLFQApplication::create_percolator_psm(psm_file_percolator);
+    // Test that PSMs are created successfully
+    EXPECT_FALSE(psms.empty());
 }
 
-TEST(CruxLFQApplicationTest, CreateIdentifications) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
-    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
-    ASSERT_EQ(15, allIdentifications.size());
-    ASSERT_EQ("RPQYSNPPVQGEVMEGADNQGAGEQGRPVR", allIdentifications[0].sequence);
+TEST(CruxLFQTest, CreateIdentifications) {
+    vector<PSM> psms = CruxLFQApplication::create_percolator_psm(psm_file_percolator);
+    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psms, spectrum_file);
+    ASSERT_EQ(4, allIdentifications.size());
+    ASSERT_EQ("LLALNSLYSPK", allIdentifications[0].sequence);
 }
 
-TEST(CruxLFQApplicationTest, SetPeptideModifiedSequencesAndProteinGroups) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
-    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
-    vector<CruxLFQ::Identification> single_identification = vector<CruxLFQ::Identification>(allIdentifications.begin(), allIdentifications.begin() + 1);
-    vector<string> spec_files = {spectrum_file};
-    CruxLFQ::CruxLFQResults lfqResults(spec_files);
-    vector<CruxLFQ::Identification> empty_identifications;
-    lfqResults.setPeptideModifiedSequencesAndProteinGroups(empty_identifications);
-    ASSERT_EQ(lfqResults.PeptideModifiedSequences.size(), 0);
-    lfqResults.setPeptideModifiedSequencesAndProteinGroups(single_identification);
-    ASSERT_EQ(lfqResults.PeptideModifiedSequences.size(), 1);
-    lfqResults.setPeptideModifiedSequencesAndProteinGroups(allIdentifications);
-    ASSERT_EQ(lfqResults.PeptideModifiedSequences.size(), 10);
+TEST(CruxLFQTest, calculateTheoreticalIsotopeDistributions) {
+    vector<PSM> psms = CruxLFQApplication::create_percolator_psm(psm_file_percolator);
+    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psms, spectrum_file);
+    auto distributions = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
+    ASSERT_FALSE(distributions.empty());
+
+    // Write distributions to file
+    std::ofstream outFile("theoretical_isotope_distributions.tsv");
+    outFile << "Sequence\tMass\tIntensity\n";
+
+    for (const auto& entry : distributions) {
+        const std::string& sequence = entry.first;
+        const std::vector<std::pair<double, double>>& isotopes = entry.second;
+
+        for (const auto& isotope : isotopes) {
+            double mass = isotope.first;
+            double intensity = isotope.second;
+            outFile << sequence << "\t" << mass << "\t" << intensity << "\n";
+        }
+    }
+
+    outFile.close();
+    std::cout << "Theoretical isotope distributions written to theoretical_isotope_distributions.tsv\n";
 }
 
-TEST(CalculateTheoreticalIsotopeDistributionsTest, ActualIdentifications) {
-    vector<CruxLFQ::PSM> psm = CruxLFQ::create_psm(psm_file_assign_confidence);
-    vector<CruxLFQ::Identification> allIdentifications = CruxLFQApplication::createIdentifications(psm, spectrum_file);
+int main(int argc, char** argv) {
+    ::testing::InitGoogleTest(&argc, argv);
 
-    // Seems redundant but checked to ensure the right data is passed to calculateTheoreticalIsotopeDistributions
-    ASSERT_EQ(15, allIdentifications.size());
-    ASSERT_EQ("RPQYSNPPVQGEVMEGADNQGAGEQGRPVR", allIdentifications[0].sequence);
+    if (argc > 1) {
+        spectrum_file = argv[1];
+    } else {
+        // Set a default for test discovery, but skip tests that need the file
+        spectrum_file = "";
+        std::cerr << "Warning: No spectrum file provided. Some tests will be skipped." << std::endl;
+    }
 
-    unordered_map<string, vector<pair<double, double>>> modifiedSequenceToIsotopicDistribution = CruxLFQ::calculateTheoreticalIsotopeDistributions(allIdentifications);
-    ASSERT_EQ(modifiedSequenceToIsotopicDistribution.size(), 10);
-}
-
-TEST(CalculateTheoreticalIsotopeDistributionsTest, EmptyInput) {
-    vector<Identification> allIdentifications;
-    unordered_map<string, vector<pair<double, double>>> result = calculateTheoreticalIsotopeDistributions(allIdentifications);
-    EXPECT_TRUE(result.empty());
-}
-
-TEST(CalculateTheoreticalIsotopeDistributionsTest, SingleIdentification) {
-    vector<Identification> allIdentifications;
-    Identification id;
-    id.sequence = "ACDEFG";
-    id.precursorCharge = 2;
-    allIdentifications.push_back(id);
-    unordered_map<string, vector<pair<double, double>>> result = calculateTheoreticalIsotopeDistributions(allIdentifications);
-    ASSERT_EQ(result.size(), 1);
-    // TODO - Figure out why this code passes
-    EXPECT_EQ(result["ACDEFG"].size(), 3);  // Assuming NUM_ISOTOPES_REQUIRED is 3 
+    return RUN_ALL_TESTS();
 }

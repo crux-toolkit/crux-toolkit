@@ -417,7 +417,11 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
         carp(CARP_FATAL, "Error in MassConstants::Init");
     }
 
+    int line_number = 0;
     while (std::getline(file, line)) {
+        line_number++;
+        // Skip header
+        if (line_number == 1) continue;
         std::istringstream iss(line);
         std::vector<std::string> tokens;
         std::string token;
@@ -427,12 +431,26 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
             tokens.push_back(token);
         }
 
+        // Debug output for the failing line
+        if (tokens.size() != 8) {
+            carp(CARP_ERROR, "Line %d has %zu tokens (expected 8): [%s]",
+                 line_number, tokens.size(), line.c_str());
+
+            // Print each token with its length
+            for (size_t i = 0; i < tokens.size(); ++i) {
+                carp(CARP_ERROR, "  Token %zu (len=%zu): [%s]",
+                     i, tokens[i].length(), tokens[i].c_str());
+            }
+        }
+
         if (tokens.size() < 8) {
-            carp(CARP_FATAL, "PSM file has malformed data: %s", line);
+            carp(CARP_FATAL, "PSM file has malformed data on line %d: %s",
+                 line_number, line.c_str());
         }
         psm_id = tokens[0];
         q_value = std::stod(tokens[3]);
         sequence_col = tokens[5];
+        protein_id = tokens[6];
         retention_time = std::stod(tokens.back());
 
         // const char* booleanText = filtered ? "true" : "false";
