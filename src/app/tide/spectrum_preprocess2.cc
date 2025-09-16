@@ -115,12 +115,26 @@ double ObservedPeakSet::FillPeaks(const Spectrum& spectrum, int charge,
 }
 
 void ObservedPeakSet::KeepTopNPeaks(size_t n) {
-  std::sort(peaks_, peaks_ + sizeof(double) * background_bin_end_);
-  double highest_intensity = peaks_[background_bin_end_ - 1];
-  std::fill(peaks_, peaks_ + sizeof(double) * (background_bin_end_ - n), 0);
-  std::transform(peaks_, peaks_ + sizeof(double) * background_bin_end_, peaks_,
-    [highest_intensity](double intensity) {
-      return intensity / highest_intensity;
+  std::set<std::pair<double, unsigned int> > top_n;
+  top_N_peaks_.clear();
+  for (unsigned int mz = 0; mz < largest_mzbin_; ++mz) {
+    top_n.insert({peaks_[mz], mz});
+    if (top_n.size() > n) {
+      top_n.erase(top_n.begin());
+    }
+  }
+  if (top_n.empty()) {
+    return;
+  }
+  double highest_intensity = top_n.rbegin()->first;
+  top_N_peaks_.reserve(n);
+
+  // Iterate over (intensity, mz) in top_n,
+  // transform to (mz, normalized intensity)
+  // and push into top_N_peaks_
+  std::transform(top_n.begin(), top_n.end(), std::back_inserter(top_N_peaks_),
+    [highest_intensity](std::pair<double, unsigned int> p) -> std::pair<unsigned int, double> {
+      return {p.second, p.first / highest_intensity};
   });
 }
 

@@ -7,16 +7,16 @@ void IonInvertedIndex::insert_peaks(Peptide* peptide) {
   if (capacity_ < 10)  // If capacity is small, then we are not using hyperscoring with inverted index
     return;
   for (const auto peak : peptide->peaks_1b) {
-    ions_b_[peak].push_back(std::make_pair(peptide->Mass(), peptide));
+    ions_b_.at(peak).emplace_back(peptide->Mass(), peptide);
   }
   for (const auto peak : peptide->peaks_2b) {
-    ions_b_[peak].push_back(std::make_pair(peptide->Mass(), peptide));
+    ions_b_.at(peak).emplace_back(peptide->Mass(), peptide);
   }
   for (const auto peak : peptide->peaks_1y) {
-    ions_y_[peak].push_back(std::make_pair(peptide->Mass(), peptide));
+    ions_y_.at(peak).emplace_back(peptide->Mass(), peptide);
   }
   for (const auto peak : peptide->peaks_2y) {
-    ions_y_[peak].push_back(std::make_pair(peptide->Mass(), peptide));
+    ions_y_.at(peak).emplace_back(peptide->Mass(), peptide);
   }
 }
 void IonInvertedIndex::score_peaks(double min_precursor_mass, unsigned int peak_mz, double peak_int) {

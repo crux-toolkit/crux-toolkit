@@ -399,13 +399,15 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     long num_isotopes_skipped = 0;
     long num_retained = 0;
 
+    size_t top_N = 150; // Default
+
     ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
     if (curScoreFunction_ == HYPERSCORE) {
       observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
         &num_precursors_skipped,
         &num_isotopes_skipped, &num_retained);
     } else {
-      observed.SpectrumTopN(*(sc->spectrum), charge, &num_range_skipped,
+      observed.SpectrumTopN(*(sc->spectrum), top_N, charge, &num_range_skipped,
         &num_precursors_skipped,
         &num_isotopes_skipped, &num_retained);
     } 
@@ -431,7 +433,7 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
         break;
       case HYPERSCORE: // This is implemented with inverted fragmentation index.
-
+        break;
     } 
     // Print the top-N results to the output files, 
     // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults

@@ -12,7 +12,8 @@ class Peptide;
 class IonInvertedIndex {
   public:
     // maps a peak index ix to a list of peptides which contains that peak ix as a theoretical peak.
-    using IonsStorage = std::map<unsigned int, std::deque<std::pair<double, Peptide*>>>;
+    static constexpr size_t kIonStorageSize = 200'000;
+    using IonsStorage = std::array<std::deque<std::pair<double, Peptide*>>, kIonStorageSize + 1>;
 
     IonInvertedIndex(){
       // IonStorage should be a vector with a fixed length, not a map. Each vector component is a dequeue. 
