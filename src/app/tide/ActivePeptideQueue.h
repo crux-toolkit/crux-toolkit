@@ -36,10 +36,10 @@ class ActivePeptideQueue {
   deque<Peptide*> queue_;
   deque<Peptide*>::const_iterator begin_, end_;
 
-  IonInvertedIndex ion_inv_;
-
   int min_candidates_;
   bool dia_mode_;
+
+  IonInvertedIndex ion_inverted_index_;
 
  private:
   bool isWithinIsotope(vector<double>* min_mass,

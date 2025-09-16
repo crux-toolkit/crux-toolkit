@@ -77,6 +77,17 @@ TideSearchApplication::TideSearchApplication() {
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
   total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
 
+  // log (N!) = log (1*2*3*...*N) = log(1)+log(2)+...+log(N)
+  // Log (N!) = logNFakt_[N]
+  logNFakt_.push_back(0.0);  // = log(0!) = log(1) = 0
+  double prev = 0.0;
+  double cur;
+  for (int i = 1; i < 100; ++i){  // 100 for the number of the matchin peaks in hyperscore should be enough
+    cur = prev + log((double)i);
+    logNFakt_.push_back(cur);
+    prev = cur;
+  }
+
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
   }
@@ -389,9 +400,15 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     long num_retained = 0;
 
     ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
-    observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
-      &num_precursors_skipped,
-      &num_isotopes_skipped, &num_retained);
+    if (curScoreFunction_ == HYPERSCORE) {
+      observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
+        &num_precursors_skipped,
+        &num_isotopes_skipped, &num_retained);
+    } else {
+      observed.SpectrumTopN(*(sc->spectrum), charge, &num_range_skipped,
+        &num_precursors_skipped,
+        &num_isotopes_skipped, &num_retained);
+    } 
 
     locks_array_[LOCK_CANDIDATES]->lock();
     total_candidate_peptides_ += active_peptide_queue->nCandPeptides_;
@@ -401,7 +418,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     num_isotopes_skipped_ += num_isotopes_skipped;
     num_retained_ += num_retained;
     locks_array_[LOCK_CANDIDATES]->unlock();  
- 
     // allocate PSMscores for N scores
     TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
 
@@ -414,7 +430,8 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         // Spectrum preprocessing for xcorr scoring
         XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
         break;
-      // case HYPERSCOR: TODO add new scoring functions here
+      case HYPERSCORE: // This is implemented with inverted fragmentation index.
+
     } 
     // Print the top-N results to the output files, 
     // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults
@@ -424,8 +441,11 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     delete sc;
   }
 }
+void TideSearchApplication::HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores) {
 
-void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores){
+}
+
+void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores) {
 
   // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
   // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics

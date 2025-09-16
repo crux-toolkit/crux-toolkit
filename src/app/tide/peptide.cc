@@ -97,6 +97,13 @@ Peptide::Peptide(const pb::Peptide& peptide,
   peaks_1y.clear();
   peaks_2b.clear();
   peaks_2y.clear();
+  
+  // Variables for hyper score scoring with inverted indeces
+  Nb_ = 0;   // Number of matching b-ions
+  Ny_ = 0;   // Number of matching y-ions
+  Ib_ = 0.0;   // Sum intensity of matching b-ions
+  Iy_ = 0.0;   // Sum intensity of matching y-ions
+
 }
 
 template<class W>
@@ -193,7 +200,6 @@ void Peptide::Compile(const TheoreticalPeakArr* peaks) {
   for (i = 0; i < peaks[1].size(); ++i) {
     peaks_1.push_back(peaks[1][i]);
   }
-  ion_inverted_index_.insert(this);
 }
 
 void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, bool dia_mode) {

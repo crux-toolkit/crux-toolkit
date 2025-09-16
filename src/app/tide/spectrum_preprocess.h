@@ -234,6 +234,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   double bin_offset_;
   int background_bin_end_;
   int cache_end_;
+  std::vector<std::pair<unsigned int, double>> top_N_peaks_; 
 
   // added by Yang
   vector<pair<int, double>> dyn_filtered_peak_tuples_;

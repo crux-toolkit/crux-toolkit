@@ -140,6 +140,12 @@ class Peptide {
   vector<unsigned int> peaks_2b;   // Double charged b ions
   vector<unsigned int> peaks_2y;   // Double charged y ions 
 
+  // Variables for hyper score scoring with inverted indeces
+  unsigned int Nb_;   // Number of matching b-ions
+  unsigned int Ny_;   // Number of matching y-ions
+  double Ib_;   // Sum intensity of matching b-ions
+  double Iy_;   // Sum intensity of matching y-ions
+
   bool active_;
   
  private:
@@ -175,8 +181,6 @@ class Peptide {
   string seq_with_mods_;
   string mod_crux_string_;
   string mod_mztab_string_;
-
-  IonInvertedIndex ion_inverted_index_;
 };
 
 #endif // PEPTIDE_H
