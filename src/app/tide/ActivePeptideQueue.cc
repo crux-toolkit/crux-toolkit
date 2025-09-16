@@ -28,6 +28,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
   CandPeptidesDecoy_ = 0;  
+
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
@@ -39,6 +40,7 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
   theoretical_peak_set_.Clear();
   Peptide* peptide = queue_.back();
   peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
+  ion_inverted_index_.insert_peaks(peptide);
 }
 
 bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
@@ -65,12 +67,13 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     queue_.pop_front();
+    // ion_inv_.erase(peptide);
     delete peptide;
   }
   nPeptides_ = 0;
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  CandPeptidesDecoy_ = 0;
 
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
@@ -92,6 +95,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
       Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
       assert(peptide != NULL);
       queue_.push_back(peptide);
+      // ion_inv_.insert(peptide);
       //Modified for tailor score calibration method by AKF
       if (peptide->Mass() > max_range && queue_.size() > min_candidates_) {
         break;

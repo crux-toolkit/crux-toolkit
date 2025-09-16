@@ -532,7 +532,7 @@ enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
                        PVALUES, // combined p-values
                       //  PVALUES_HR, // combined p-values for high resolution, including Res-EV,   TODO: Implement these score functions later
                       //  PVALUES_LR, // combined p-values for low  resolution, including only exact p-value,
-                      //  HYPERSCORE, // HyperScore from X!tandem
+                      HYPERSCORE, // HyperScore from X!tandem
                       //  HYPERSCORE_LA, // hyperscore-la 
                       //  DIAMETER, // Diameter scoring 
                       //  RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data

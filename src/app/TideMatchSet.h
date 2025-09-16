@@ -31,7 +31,7 @@ class TideMatchSet {
     int resEv_score_;
     double resEv_pval_;
     double combined_pval_;
-    double tailor_; 
+    double tailor_;   // tailor score for hyper or XCorr scores
     int by_ion_matched_; 
     int by_ion_total_;    
     int repeat_ion_match_; 

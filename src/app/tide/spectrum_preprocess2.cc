@@ -58,12 +58,110 @@ static void SubtractBackground(double* observed, int end) {
   }
 }
 
-void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
-                                         long int* num_range_skipped,
-                                         long int* num_precursors_skipped,
-                                         long int* num_isotopes_skipped,
-                                         long int* num_retained,
-                                         bool dia_mode) {
+double ObservedPeakSet::FillPeaks(const Spectrum& spectrum, int charge,
+                        long int* num_range_skipped,
+                        long int* num_precursors_skipped,
+                        long int* num_isotopes_skipped,
+                        long int* num_retained) {
+  double precursor_mz = spectrum.PrecursorMZ();
+  double experimental_mass_cut_off = (precursor_mz - MASS_PROTON)*charge + MASS_PROTON + 50;
+  bool remove_precursor = Params::GetBool("remove-precursor-peak");
+  double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");
+  double deisotope_threshold = Params::GetDouble("deisotope");
+  int max_charge = spectrum.MaxCharge();
+
+  // Fill peaks
+  double highest_intensity = 0;
+  for (int i = spectrum.Size() - 1; i >= 0; --i) {
+    double peak_location = spectrum.M_Z(i);
+
+    // Get rid of peaks beyond the possible range, given charge and precursor.
+    if (peak_location >= experimental_mass_cut_off) {
+      (*num_range_skipped)++;
+      continue;
+    }
+    //denoising-related, added by Yang
+    if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) {
+      continue;
+    }
+
+    // Remove precursor peaks.
+    if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
+      (*num_precursors_skipped)++;
+      continue;
+    }
+
+    if (deisotope_threshold != 0.0 && spectrum.Deisotope(i, deisotope_threshold)) {
+      (*num_isotopes_skipped)++;
+      continue;
+    }
+
+    (*num_retained)++;
+
+    int mz = MassConstants::mass2bin(peak_location);
+    double intensity = spectrum.Intensity(i);
+    if ((mz > largest_mzbin_) && (intensity > 0)) { largest_mzbin_ = mz; }
+    if ((mz < smallest_mzbin_) && (intensity > 0)) { smallest_mzbin_ = mz; }
+
+    intensity = sqrt(intensity);
+    if (intensity > highest_intensity) {
+      highest_intensity = intensity;
+    }
+    if (intensity > peaks_[mz]) {
+      peaks_[mz] = intensity;
+    }
+  }
+  return highest_intensity;
+}
+
+void ObservedPeakSet::KeepTopNPeaks(size_t n) {
+  std::set<std::pair<double, unsigned int> > top_n;
+  top_N_peaks_.clear();
+  for (unsigned int mz = 0; mz < largest_mzbin_; ++mz) {
+    top_n.insert({peaks_[mz], mz});
+    if (top_n.size() > n) {
+      top_n.erase(top_n.begin());
+    }
+  }
+  if (top_n.empty()) {
+    return;
+  }
+  double highest_intensity = top_n.rbegin()->first;
+  top_N_peaks_.reserve(n);
+
+  // Iterate over (intensity, mz) in top_n,
+  // transform to (mz, normalized intensity)
+  // and push into top_N_peaks_
+  std::transform(top_n.begin(), top_n.end(), std::back_inserter(top_N_peaks_),
+    [highest_intensity](std::pair<double, unsigned int> p) -> std::pair<unsigned int, double> {
+      return {p.second, p.first / highest_intensity};
+  });
+}
+
+void ObservedPeakSet::FillCache() {
+  cache_[0] = int(peaks_[0]);
+  cache_[1] = int(peaks_[0]);
+  double intensity;
+  int nh3_bin = int(MassConstants::BIN_NH3);
+  int h2o_bin = int(MassConstants::BIN_H2O);
+  int j;
+  //  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
+  // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
+  for(int i = 1; i < background_bin_end_; ++i) {
+    j = i+i;
+    intensity = peaks_[i];
+    if ( FP_ == true) {
+      intensity += 0.5*(peaks_[i-1] + peaks_[i+1]);
+    }
+    cache_[j+1] = int(intensity);
+    if ( NL_ == true && i > h2o_bin ) {
+      intensity += 0.2*(peaks_[i - nh3_bin] + peaks_[i - h2o_bin]);
+    }
+    cache_[j] = int(intensity);
+  }
+}
+
+void ObservedPeakSet::PreparePeaks(const Spectrum& spectrum, int charge) {
 #ifdef DEBUG
   bool debug = (FLAGS_debug_spectrum_id == spectrum.SpectrumNumber()
                 && (FLAGS_debug_charge == 0 || FLAGS_debug_charge == charge));
@@ -91,6 +189,32 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   largest_mzbin_ = 0;
   smallest_mzbin_ = MassConstants::mass2bin(max_peak_mz);
   dyn_filtered_peak_tuples_.clear();
+}
+
+void ObservedPeakSet::SpectrumTopN(const Spectrum& spectrum, size_t n,
+                        int charge,
+                        long int* num_range_skipped,
+                        long int* num_precursors_skipped,
+                        long int* num_isotopes_skipped,
+                        long int* num_retained,
+                        bool dia_mode) {
+  PreparePeaks(spectrum, charge);
+  FillPeaks(spectrum, charge,
+      num_range_skipped, num_precursors_skipped,
+      num_isotopes_skipped, num_retained);
+  KeepTopNPeaks(n);
+  FillCache();
+}
+
+void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
+                                         long int* num_range_skipped,
+                                         long int* num_precursors_skipped,
+                                         long int* num_isotopes_skipped,
+                                         long int* num_retained,
+                                         bool dia_mode) {
+  PreparePeaks(spectrum, charge);
+  double precursor_mz = spectrum.PrecursorMZ();
+  double experimental_mass_cut_off = (precursor_mz - MASS_PROTON)*charge + MASS_PROTON + 50;
 
   if (Params::GetBool("skip-preprocessing")) {
     for (int i = 0; i < spectrum.Size(); ++i) {
@@ -110,52 +234,9 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       }
     }
   } else {
-    bool remove_precursor = Params::GetBool("remove-precursor-peak");
-    double precursor_tolerance = Params::GetDouble("remove-precursor-tolerance");
-    double deisotope_threshold = Params::GetDouble("deisotope");
-    int max_charge = spectrum.MaxCharge();
-
-    // Fill peaks
-    double highest_intensity = 0;
-    for (int i = spectrum.Size() - 1; i >= 0; --i) {
-      double peak_location = spectrum.M_Z(i);
-
-      // Get rid of peaks beyond the possible range, given charge and precursor.
-      if (peak_location >= experimental_mass_cut_off) {
-        (*num_range_skipped)++;
-        continue;
-      }
-      //denoising-related, added by Yang
-      if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) {
-        continue;
-      }
-
-      // Remove precursor peaks.
-      if (remove_precursor && fabs(peak_location - precursor_mz) <= precursor_tolerance ) {
-        (*num_precursors_skipped)++;
-        continue;
-      }
-
-      if (deisotope_threshold != 0.0 && spectrum.Deisotope(i, deisotope_threshold)) {
-        (*num_isotopes_skipped)++;
-        continue;
-      }
-
-      (*num_retained)++;
-
-      int mz = MassConstants::mass2bin(peak_location);
-      double intensity = spectrum.Intensity(i);
-      if ((mz > largest_mzbin_) && (intensity > 0)) { largest_mzbin_ = mz; }
-      if ((mz < smallest_mzbin_) && (intensity > 0)) { smallest_mzbin_ = mz; }
-
-      intensity = sqrt(intensity);
-      if (intensity > highest_intensity) {
-        highest_intensity = intensity;
-      }
-      if (intensity > peaks_[mz]) {
-        peaks_[mz] = intensity;
-      }
-    }
+    double highest_intensity = FillPeaks(spectrum, charge,
+      num_range_skipped, num_precursors_skipped,
+      num_isotopes_skipped, num_retained);
 
     double intensity_cutoff = highest_intensity * 0.05;
     double normalizer = 0.0;
@@ -221,27 +302,7 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
   // in December 2021. Now the cache does not keep track of the experimental peak types,
   // because it is not needed for the scoring; however, omitting this information 
   // can result in 3 times faster scoring.
-  
-  cache_[0] = int(peaks_[0]);
-  cache_[1] = int(peaks_[0]);
-  double intensity;
-  int nh3_bin = int(MassConstants::BIN_NH3);
-  int h2o_bin = int(MassConstants::BIN_H2O);
-  int j;
-//  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
-  // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
-  for(int i = 1; i < background_bin_end_; ++i) {
-    j = i+i;
-    intensity = peaks_[i];
-    if ( FP_ == true) {
-      intensity += 0.5*(peaks_[i-1] + peaks_[i+1]);
-    }
-    cache_[j+1] = int(intensity);
-    if ( NL_ == true && i > h2o_bin ) {
-      intensity += 0.2*(peaks_[i - nh3_bin] + peaks_[i - h2o_bin]);
-    }
-    cache_[j] = int(intensity);
-  }
+  FillCache();
 	  
 #ifdef DEBUG
   if (debug) {

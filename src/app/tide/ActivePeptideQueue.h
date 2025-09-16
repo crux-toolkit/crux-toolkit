@@ -5,6 +5,7 @@
 #include "fifo_alloc.h"
 #include "spectrum_collection.h"
 #include "io/OutputFiles.h"
+#include "IonInvertedIndex.h"
 
 #ifndef ACTIVE_PEPTIDE_QUEUE_H
 #define ACTIVE_PEPTIDE_QUEUE_H
@@ -33,9 +34,12 @@ class ActivePeptideQueue {
   int CandPeptidesDecoy_;
 
   deque<Peptide*> queue_;
-  deque<Peptide*>::const_iterator begin_, end_;  
+  deque<Peptide*>::const_iterator begin_, end_;
+
   int min_candidates_;
   bool dia_mode_;
+
+  IonInvertedIndex ion_inverted_index_;
 
  private:
   bool isWithinIsotope(vector<double>* min_mass,

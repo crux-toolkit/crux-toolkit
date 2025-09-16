@@ -205,7 +205,23 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   int getBackgroundBinEnd() {return background_bin_end_; }
   int getCacheEnd() {return cache_end_; }
 
+  void SpectrumTopN(const Spectrum& spectrum, size_t n, int charge,
+                          long int* num_range_skipped,
+                          long int* num_precursors_skipped,
+                          long int* num_isotopes_skipped,
+                          long int* num_retained,
+                          bool dia_mode = false);
+
  private:
+  void PreparePeaks(const Spectrum& spectrum, int charge);
+  void FillCache();
+  double FillPeaks(const Spectrum& spectrum, int charge,
+                          long int* num_range_skipped,
+                          long int* num_precursors_skipped,
+                          long int* num_isotopes_skipped,
+                          long int* num_retained);
+  
+  void KeepTopNPeaks(size_t n);
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
                           int* intensRegion, int maxPrecurMass, int charge);
 
@@ -218,6 +234,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   double bin_offset_;
   int background_bin_end_;
   int cache_end_;
+  std::vector<std::pair<unsigned int, double>> top_N_peaks_; 
 
   // added by Yang
   vector<pair<int, double>> dyn_filtered_peak_tuples_;
