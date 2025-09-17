@@ -293,8 +293,10 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Delete temporary spectrumrecords file
  for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
-    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
-    remove((*original_file_name).SpectrumRecords.c_str());
+    if ((*original_file_name).Keep == false) {
+      carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+      remove((*original_file_name).SpectrumRecords.c_str());
+    }
   }
 
   return 0;
