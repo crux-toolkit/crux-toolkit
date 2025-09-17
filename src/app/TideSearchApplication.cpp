@@ -21,6 +21,7 @@
 #include "tide/ActivePeptideQueue.h"
 #include "residue_stats.pb.h"
 #include "crux_version.h"
+#include "time.h"
 
 //here :O
 //#include <iostream>
@@ -83,7 +84,7 @@ TideSearchApplication::TideSearchApplication() {
   double prev = 0.0;
   double cur;
   for (int i = 1; i < 100; ++i){  // 100 for the number of the matchin peaks in hyperscore should be enough
-    cur = prev + log((double)i);
+    cur = prev + log10((double)i);
     logNFakt_.push_back(cur);
     prev = cur;
   }
@@ -290,8 +291,8 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
 
   // Delete temporary spectrumrecords file
  for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
-    carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
-    remove((*original_file_name).SpectrumRecords.c_str());
+    // carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+    // remove((*original_file_name).SpectrumRecords.c_str());
   }
 
   // Delete stuffs
@@ -403,11 +404,11 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
 
     ObservedPeakSet observed(use_neutral_loss_peaks_, use_flanking_peaks_);
     if (curScoreFunction_ == HYPERSCORE) {
-      observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
+      observed.SpectrumTopN(*(sc->spectrum), top_N, charge, &num_range_skipped,
         &num_precursors_skipped,
         &num_isotopes_skipped, &num_retained);
     } else {
-      observed.SpectrumTopN(*(sc->spectrum), top_N, charge, &num_range_skipped,
+      observed.PreprocessSpectrum(*(sc->spectrum), charge, &num_range_skipped,
         &num_precursors_skipped,
         &num_isotopes_skipped, &num_retained);
     } 
@@ -433,6 +434,7 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
         XCorrScoring(sc->charge, observed, active_peptide_queue, psm_scores);
         break;
       case HYPERSCORE: // This is implemented with inverted fragmentation index.
+        HyperScoring(sc->charge, observed, active_peptide_queue, psm_scores, min_range);
         break;
     } 
     // Print the top-N results to the output files, 
@@ -443,8 +445,53 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     delete sc;
   }
 }
-void TideSearchApplication::HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores) {
+void TideSearchApplication::HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, double min_precursor_mass) {
+  // Perform the scoring of peptides with respect to experimental spectrum peak
+  int peak_cnt = 0;
+  double scoring_time = 0.0;
+  scoring_time = (double)clock();  
+  for (auto peak : observed.top_N_peaks_){
+    active_peptide_queue->ion_inverted_index_.score_peaks(min_precursor_mass, peak.first, peak.second);
+    ++peak_cnt;
+  }
+  scoring_time = (double)(clock() - scoring_time)/CLOCKS_PER_SEC; 
 
+  // Score the inactive peptides in the peptide queue if the number of nCadPeptides 
+  // is less than the minimum. This is needed for Tailor scoring to get enough PSMS scores for statistics
+  bool score_inactive_peptides = true;
+  if (active_peptide_queue->min_candidates_ < active_peptide_queue->nCandPeptides_)
+    score_inactive_peptides = false;
+    
+  int cnt = 0;
+  double eps =  1e-7;
+  for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; 
+    iter != active_peptide_queue->end_;
+    ++iter, ++cnt) {
+    if ((*iter)->active_ == false && score_inactive_peptides == false) 
+      continue;
+    double hyper_score = 0;
+    int match_cnt = 0;
+    int temp = 0;
+    hyper_score = logNFakt_[(*iter)->Nb_] + logNFakt_[(*iter)->Ny_] + log10((*iter)->Ib_ + eps) + log10((*iter)->Iy_ + eps);
+    match_cnt = (*iter)->Nb_ + (*iter)->Ny_;
+    // Reset the values to 0 for the next scoring
+    (*iter)->Nb_ = 1;
+    (*iter)->Ny_ = 1;
+    (*iter)->Ib_ = 1.0;
+    (*iter)->Iy_ = 1.0;
+    
+    psm_scores.psm_scores_[cnt].peptide_itr_ = iter;
+    psm_scores.psm_scores_[cnt].ordinal_ = cnt;    
+    psm_scores.psm_scores_[cnt].hyper_score_ = hyper_score;
+    psm_scores.psm_scores_[cnt].by_ion_matched_ = match_cnt;
+    psm_scores.psm_scores_[cnt].active_ = (*iter)->active_;
+    psm_scores.psm_scores_[cnt].by_ion_total_ = (*iter)->peaks_0.size();
+    if (charge > 2){
+      psm_scores.psm_scores_[cnt].by_ion_total_ += (*iter)->peaks_1.size();
+    }
+  }   
+
+  // Gather the scores
 }
 
 void TideSearchApplication::XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores) {

@@ -192,6 +192,8 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       vector<SCORER_TYPE_T> scoreTypes;
       scoreTypes.push_back(TAILOR_SCORE); 
       scoreTypes.push_back(XCORR);
+      scoreTypes.push_back(HYPER_SCORE_TAILOR); 
+      scoreTypes.push_back(HYPER_SCORE);
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
       scoreTypes.push_back(RESIDUE_EVIDENCE_PVAL);

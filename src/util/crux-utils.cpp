@@ -81,7 +81,7 @@ static const int INVALID_ENUM_STRING = -10;
  */
 
 static const char* score_function_strings[NUMBER_SCORE_FUNCTIONS] = {
-  "invalid", "xcorr", "combined-p-values" //, "hyperscore", "hyperscore-la"  TODO: implement hyperscore functions later.
+  "invalid", "xcorr", "combined-p-values", "hyperscore"//, "hyperscore-la"  TODO: implement hyperscore functions later.
 };
 
 SCORE_FUNCTION_T string_to_score_function_type(const string& name) {

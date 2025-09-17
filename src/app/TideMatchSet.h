@@ -31,13 +31,14 @@ class TideMatchSet {
     int resEv_score_;
     double resEv_pval_;
     double combined_pval_;
-    double tailor_;   // tailor score for hyper or XCorr scores
+    double tailor_;   // tailor score for HyperScore or XCorr scores
     int by_ion_matched_; 
     int by_ion_total_;    
     int repeat_ion_match_; 
     double sp_score_;
     double hyper_score_;
     double hyper_score_la_; 
+    double hyper_score_tailor; 
     double delta_cn_;
     double delta_lcn_;
     bool active_;
@@ -69,9 +70,11 @@ class TideMatchSet {
   static int XCorr_tsv_cols[];  //these are declared at the beginning of TideMatchSet.cpp
   static int Pvalues_tsv_cols[];
   static int Diameter_tsv_cols[]; 
+  static int HyperScore_tsv_cols[];  //these are declared at the beginning of TideMatchSet.cpp
 
   static int XCorr_mzTab_cols[];  //these are declared at the beginning of TideMatchSet.cpp
   static int Pvalues_mzTab_cols[];  //these are declared at the beginning of TideMatchSet.cpp
+  static int HyperScore_mzTab_cols[];  //these are declared at the beginning of TideMatchSet.cpp
 
   static int XCorr_pin_cols[];  //these are declared at the beginning of TideMatchSet.cpp
   static int Pvalues_pin_cols[];

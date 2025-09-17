@@ -211,6 +211,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
                           long int* num_isotopes_skipped,
                           long int* num_retained,
                           bool dia_mode = false);
+  std::vector<std::pair<unsigned int, double>> top_N_peaks_; 
 
  private:
   void PreparePeaks(const Spectrum& spectrum, int charge);
@@ -234,7 +235,6 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   double bin_offset_;
   int background_bin_end_;
   int cache_end_;
-  std::vector<std::pair<unsigned int, double>> top_N_peaks_; 
 
   // added by Yang
   vector<pair<int, double>> dyn_filtered_peak_tuples_;

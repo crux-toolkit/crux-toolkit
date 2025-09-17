@@ -99,10 +99,10 @@ Peptide::Peptide(const pb::Peptide& peptide,
   peaks_2y.clear();
   
   // Variables for hyper score scoring with inverted indeces
-  Nb_ = 0;   // Number of matching b-ions
-  Ny_ = 0;   // Number of matching y-ions
-  Ib_ = 0.0;   // Sum intensity of matching b-ions
-  Iy_ = 0.0;   // Sum intensity of matching y-ions
+  Nb_ = 1;   // Number of matching b-ions
+  Ny_ = 1;   // Number of matching y-ions
+  Ib_ = 1.0;   // Sum intensity of matching b-ions
+  Iy_ = 1.0;   // Sum intensity of matching y-ions
 
 }
 

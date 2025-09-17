@@ -59,6 +59,9 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "combined p-value rank", //Added by Andy Lin
   "Sidak adjusted p-value",  
   "tailor score",  //Added for tailor score calibration method by AKF  
+  "HyperScore",
+  "HyperScore rank",
+  "HyperScore tailor",
   "e-value",
   "smoothed p-value",
   "distinct matches/peptide",
@@ -167,6 +170,9 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "search_engine_score[9]",   // [MS, MS:1003364, combined p-value]
   "search_engine_score[10]",  // [MS, MS:1003365, combined p-value rank]
   "search_engine_score[11]",  // [MS, MS:1002354, PSM-level q-value]
+  "search_engine_score[12]",  // [MS, MS:1002354, HyperScore value]
+  "search_engine_score[13]",  // [MS, MS:1002354, HyperScore rank]
+  "search_engine_score[14]",  // [MS, MS:1002354, HyperScore tailor]
   "modifications",
   "retention_time",
   "charge",

@@ -12,17 +12,17 @@ class Peptide;
 class IonInvertedIndex {
   public:
     // maps a peak index ix to a list of peptides which contains that peak ix as a theoretical peak.
-    static constexpr size_t kIonStorageSize = 200'000;
+    static constexpr size_t kIonStorageSize = 900000;
     using IonsStorage = std::array<std::deque<std::pair<double, Peptide*>>, kIonStorageSize + 1>;
 
     IonInvertedIndex(){
       // IonStorage should be a vector with a fixed length, not a map. Each vector component is a dequeue. 
       // Each vector index is associated to a peak_mz;
-      capacity_ = 1;
-        SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));  
-      if (curScoreFunction == HYPERSCORE) {
-         capacity_ =  MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1); 
-      }
+       capacity_ = 900000;
+      //   SCORE_FUNCTION_T curScoreFunction = string_to_score_function_type(Params::GetString("score-function"));  
+      // if (curScoreFunction == HYPERSCORE) {
+      //    capacity_ =  MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1); 
+      // }
       // Create a vector with a length of capacity.
     }
 

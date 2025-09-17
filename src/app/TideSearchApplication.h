@@ -190,7 +190,9 @@ class TideSearchApplication : public CruxApplication {
   static void XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
   static int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
-  void HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
+  // void HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
+  void HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, double min_precursor_mass);
+  
 
 
   /**

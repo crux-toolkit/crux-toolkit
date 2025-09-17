@@ -50,6 +50,14 @@ int TideMatchSet::XCorr_tsv_cols[] = {
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL
   };
+int TideMatchSet::HyperScore_tsv_cols[] = {
+    FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, HYPER_SCORE_COL, HYPER_SCORE_TAILOR_COL, 
+    BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
+    HYPER_SCORE_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
+    PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
+    DECOY_INDEX_COL
+  };    
 
 int TideMatchSet::XCorr_mzTab_cols[] = {
     MZTAB_PSH, MZTAB_SEQUENCE, MZTAB_PSM_ID, MZTAB_ACCESSION, MZTAB_UNIQUE, MZTAB_DATABASE,
@@ -92,6 +100,27 @@ int TideMatchSet::Pvalues_mzTab_cols[] = {
     MZTAB_OPT_MS_RUN_1_TARGET_DECOY, MZTAB_OPT_MS_RUN_1_ORIGINAL_TARGET_SEQUENCE_COL, 
     MZTAB_OPT_MS_RUN_1_DECOY_INDEX
   };    
+  int TideMatchSet::HyperScore_mzTab_cols[] = {
+    MZTAB_PSH, MZTAB_SEQUENCE, MZTAB_PSM_ID, MZTAB_ACCESSION, MZTAB_UNIQUE, MZTAB_DATABASE,
+    MZTAB_DATABASE_VERSION, MZTAB_SEARCH_ENGINE, 
+    MZTAB_SEARCH_ENGINE_SCORE_12,  // [MS, MS:1001155, HyperScore val.]
+    MZTAB_SEARCH_ENGINE_SCORE_14,  // [MS, MS:1003366, HyperScore tailor.]
+    MZTAB_SEARCH_ENGINE_SCORE_3,  // [MS, MS:1001143, The SEQUEST result 'DeltaCn'.]
+    MZTAB_SEARCH_ENGINE_SCORE_13,  // [MS, MS:1003358, HyperScore rank]
+    // MZTAB_SEARCH_ENGINE_SCORE_5,  // [MS, MS:1003360, refactored XCorr'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_6,  // [MS, MS:1003359, exact p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_7,  // [MS, MS:1003361, res-ev score'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_8,  // [MS, MS:1003363, res-ev p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_9,  // [MS, MS:1003364, combined p-value'.]
+    // MZTAB_SEARCH_ENGINE_SCORE_10, // [MS, MS:1003365, combined p-value rank'.]
+    MZTAB_MODIFICATIONS, MZTAB_RETENTION_TIME,
+    MZTAB_CHARGE, MZTAB_EXP_MASS_TO_CHARGE, MZTAB_CALC_MASS_TO_CHARGE, MZTAB_SPECTRA_REF,
+    MZTAB_PRE, MZTAB_POST, MZTAB_START, MZTAB_END, MZTAB_OPT_MS_RUN_1_SPECTRUM_NEUTRAL_MASS,
+    MZTAB_OPT_MS_RUN_1_DELTA_LCN, MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC,
+    MZTAB_OPT_MS_RUN_1_TARGET_DECOY, MZTAB_OPT_MS_RUN_1_ORIGINAL_TARGET_SEQUENCE_COL, 
+    MZTAB_OPT_MS_RUN_1_DECOY_INDEX
+  };    
+
 
 // int TideMatchSet::XCorr_pin_cols[] = {
 //     POUT_PSMID_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
@@ -135,6 +164,9 @@ int* TideMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders){
         case PVALUES:
           numHeaders = sizeof(Pvalues_tsv_cols) / sizeof(int);
           return Pvalues_tsv_cols;
+        case HYPERSCORE:
+          numHeaders = sizeof(HyperScore_tsv_cols) / sizeof(int);
+          return HyperScore_tsv_cols;
         // case DIAMETER:
         //   numHeaders = sizeof(Diameter_tsv_cols) / sizeof(int);
         //   return Diameter_tsv_cols;
@@ -148,6 +180,9 @@ int* TideMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders){
         case PVALUES:
           numHeaders = sizeof(Pvalues_mzTab_cols) / sizeof(int);
           return Pvalues_mzTab_cols;
+        case HYPERSCORE:
+          numHeaders = sizeof(HyperScore_mzTab_cols) / sizeof(int);
+          return HyperScore_mzTab_cols;
         // case DIAMETER:
         //   numHeaders = sizeof(Diameter_mzTab_cols) / sizeof(int);
         //   return Diameter_mzTab_cols;
@@ -156,6 +191,8 @@ int* TideMatchSet::getColumns(TSV_OUTPUT_FORMATS_T format, size_t& numHeaders){
     case TIDE_SEARCH_PIN_TSV:  // Consider to print pin format directly, so that MakePinApplication can be removed.
       break;
   }
+  carp(CARP_FATAL, "Search output for the specified format is not implemented.");
+  return NULL; // This will cause FATAL,
 }
 
 string TideMatchSet::getHeader(TSV_OUTPUT_FORMATS_T format, string tide_index_mztab_param_file) { 
@@ -575,12 +612,9 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       case XCORR_SCORE_COL:
         report += StringUtils::ToString((*it).xcorr_score_, score_precision_);      // xcorr score
         break;       
-      case MZTAB_SEARCH_ENGINE_SCORE_5:   // refactored XCorr
-        if (curScoreFunction_ == PVALUES) {
-          report += StringUtils::ToString((*it).refactored_xcorr_, score_precision_, false);      // refactored XCorr
-        } else {
-          report += "null";       // refactored XCorr
-        }
+      case HYPER_SCORE_COL:
+      case MZTAB_SEARCH_ENGINE_SCORE_12:   // HyperScore
+        report += StringUtils::ToString((*it).hyper_score_, score_precision_, false);      // hyper_score_
         break;
       case REFACTORED_SCORE_COL:
         report += StringUtils::ToString((*it).refactored_xcorr_, score_precision_);      // refactored xcorr score
@@ -629,6 +663,10 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       case TAILOR_COL:
         report += StringUtils::ToString((*it).tailor_, score_precision_);           // tailor score
         break;
+      case MZTAB_SEARCH_ENGINE_SCORE_14:
+      case HYPER_SCORE_TAILOR_COL:
+        report += StringUtils::ToString((*it).tailor_, score_precision_);           // tailor score
+        break;
       case BY_IONS_MATCHED_COL:
         report += StringUtils::ToString((*it).by_ion_matched_, score_precision_);   // by ions matched
         break;
@@ -657,6 +695,8 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
         }
         break;
       case BOTH_PVALUE_RANK:    // combined p-value rank
+      case HYPER_SCORE_RANK_COL:
+      case MZTAB_SEARCH_ENGINE_SCORE_13:
       case XCORR_RANK_COL:
         report += StringUtils::ToString(cnt[decoy_idx], 0);
         break;
