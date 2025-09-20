@@ -46,10 +46,11 @@ CruxLFQApplication::~CruxLFQApplication() {}
 int CruxLFQApplication::main(int argc, char** argv) {
     string psm_file = Params::GetString("lfq-peptide-spectrum matches");
     vector<string> spec_files = Params::GetStrings("spectrum files");
-    return main(psm_file, spec_files);
+    string specfile_replicates = Params::GetString("spectrum file replicates");
+    return main(psm_file, spec_files, specfile_replicates);
 }
 
-int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_files) {
+int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates) {
     carp(CARP_INFO, "Running crux-lfq...");
 
     CruxLFQ::NUM_ISOTOPES_REQUIRED = Params::GetInt("num-isotopes-required");                                   // Default value is 2
@@ -80,6 +81,11 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     }
 
     CruxLFQ::CruxLFQResults lfqResults(spec_files);
+    if (CruxLFQ::NORMALIZE && !FileUtils::Exists(specfile_replicates)) {
+        carp(CARP_INFO, "Spectrum file replicates file %s not found", specfile_replicates.c_str());
+        carp(CARP_FATAL, "Normalization requires a spectrum file replicates file.");
+        lfqResults = CruxLFQ::CruxLFQResults(specfile_replicates);
+    }
 
     vector<CruxLFQ::Identification> allIdentifications;
     std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
@@ -104,7 +110,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
-        // TODO Continue from this function
         vector<CruxLFQ::Identification> filteredIdentifications;
 
         std::copy_if(
@@ -175,7 +180,8 @@ string CruxLFQApplication::getDescription() const {
 vector<string> CruxLFQApplication::getArgs() const {
     string arr[] = {
         "lfq-peptide-spectrum matches",
-        "spectrum files+"};
+        "spectrum files+",
+        "spectrum file replicates"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 

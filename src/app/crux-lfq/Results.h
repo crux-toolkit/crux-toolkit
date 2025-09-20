@@ -40,6 +40,70 @@ class CruxLFQResults {
         }
     }
 
+    CruxLFQResults(const string &specfile_replicates) {
+        vector<SpectraFileInfo> spectra_file_infos;
+
+        // read tsv file and create CruxLFQResults with replicates
+        std::ifstream file(specfile_replicates);
+        if (!file.is_open()) {
+            carp(CARP_FATAL, "Error: Could not open the spectrum file replicates file!");
+        } else {
+            string line;
+            bool isFirstLine = true;
+
+            while (std::getline(file, line)) {
+                // Skip header line if present
+                if (isFirstLine) {
+                    isFirstLine = false;
+                    // Check if this looks like a header (contains non-numeric data in expected numeric columns)
+                    std::istringstream checkIss(line);
+                    std::vector<std::string> checkTokens;
+                    std::string checkToken;
+                    while (std::getline(checkIss, checkToken, '\t')) {
+                        checkTokens.push_back(checkToken);
+                    }
+                    // If third token (replicate) is not numeric, assume it's a header
+                    if (checkTokens.size() >= 3 && !std::isdigit(checkTokens[2][0])) {
+                        continue;
+                    }
+                }
+
+                std::istringstream iss(line);
+                std::vector<std::string> tokens;
+                std::string token;
+
+                // Split line by tabs
+                while (std::getline(iss, token, '\t')) {
+                    tokens.push_back(token);
+                }
+
+                if (tokens.size() < 5) {
+                    carp(CARP_FATAL, "Spectrum file replicates file has malformed data (expected 5 columns): %s", line.c_str());
+                }
+
+                try {
+                    SpectraFileInfo spectraFileInfo;
+                    spectraFileInfo.FullFilePathWithExtension = tokens[0];
+                    spectraFileInfo.Condition = tokens[1];
+                    spectraFileInfo.BiologicalReplicate = std::stoi(tokens[2]);
+                    spectraFileInfo.Fraction = std::stoi(tokens[3]);
+                    spectraFileInfo.TechnicalReplicate = std::stoi(tokens[4]);
+
+                    spectra_file_infos.push_back(spectraFileInfo);
+                } catch (const std::exception &e) {
+                    carp(CARP_FATAL, "Error parsing numeric values in line: %s", line.c_str());
+                }
+            }
+            file.close();
+        }
+
+        // Initialize Peaks map and spectraFiles vector
+        for (const SpectraFileInfo &spectra_file_info : spectra_file_infos) {
+            Peaks[spectra_file_info.FullFilePathWithExtension] = vector<ChromatographicPeak>();
+            spectraFiles.push_back(spectra_file_info);
+        }
+    }
+
     // void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
     void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
         carp(CARP_INFO, "Writing output...");

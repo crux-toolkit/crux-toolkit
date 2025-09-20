@@ -6,8 +6,8 @@
 #include "CruxApplication.h"
 #include "crux-lfq/Utils.h"
 #include "io/SpectrumCollectionFactory.h"
-#include "model/Spectrum.h"
 #include "model/Modification.h"
+#include "model/Spectrum.h"
 
 using CruxLFQ::BINS_PER_DALTON;
 
@@ -20,8 +20,6 @@ using std::pair;
 using std::string;
 using std::unordered_map;
 using std::vector;
-
-
 
 /**
  * \class CruxLFQApplication
@@ -44,7 +42,7 @@ class CruxLFQApplication : public CruxApplication {
      */
     virtual int main(int argc, char** argv);
 
-    int main(const string& psm_file, const vector<string>& spec_files);
+    int main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates);
 
     /**
      * \returns the name of the subclassed application
@@ -87,11 +85,11 @@ class CruxLFQApplication : public CruxApplication {
 
     static IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
-    static vector<Identification> createIdentifications(const vector<PSM>& psm_data,const string& spectra_file);
+    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
 
     static vector<PSM> create_percolator_psm(const string& psm_file);
     static void gen_mods(
-        string sequence_col, 
+        string sequence_col,
         ModPosition mod_psn_type,
         const pb::ModTable* mod_table_,
         vector<Crux::Modification>& mods);

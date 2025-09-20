@@ -2263,6 +2263,8 @@ Params::Params() : finalized_(false) {
                  "A file in mzTab or Percolator tab-delimited format listing peptide-spectrum matches.");
     InitArgParam("spectrum files",
                  "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
+    InitArgParam("spectrum file replicates",
+                 "The file containing spectrum file replicates used in normalization.");
     InitIntParam("num-isotopes-required", 2, 1, 100000000,
                  "The number of isotopic peaks required to be present in the spectrum for a peptide to be considered.  Default = 2.",
                  "Used by LFQ.", true);
