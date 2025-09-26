@@ -25,45 +25,46 @@ void IonInvertedIndex::score_peaks(double min_precursor_mass, unsigned int peak_
     return;
 
   // Remove peptides from the inverted index, whose precursor mass in smaller than the lower precursor mass tolerance
-  std::deque<std::pair<double, Peptide*>>* queue_ = &(ions_b_.at(peak_mz));
-  while (!queue_->empty()) {
-    double pept_mass = queue_->front().first;
+  auto begin_b = ions_b_.at(peak_mz).begin();
+  while (begin_b != ions_b_.at(peak_mz).end()) {
+    double pept_mass = begin_b->first;
     if (pept_mass >= min_precursor_mass) {
       break;
     }
-    queue_->pop_front();
+    begin_b++;
   }
-  queue_ = &(ions_y_.at(peak_mz));
-  while (!queue_->empty()) {
-    double pept_mass = queue_->front().first;
+  auto begin_y = ions_y_.at(peak_mz).begin();
+  while (begin_y != ions_y_.at(peak_mz).end()) {
+    double pept_mass = begin_y->first;
     if (pept_mass >= min_precursor_mass) {
       break;
     }
-    queue_->pop_front();
+    begin_y++;
   }
   // Do the scoring
-  for (auto peptide_pair : ions_b_.at(peak_mz) ) {
-    Peptide* pept = peptide_pair.second;
+  for (auto it = begin_b; it != ions_b_.at(peak_mz).end(); ++it) {
+    Peptide* pept = it->second;
     ++pept->Nb_;
-    pept->Ib_ += peak_int;  
+    pept->Ib_ += peak_int; 
   }
-  for (auto peptide_pair : ions_y_.at(peak_mz) ) {
-    Peptide* pept = peptide_pair.second;
+
+  for (auto it = begin_y; it != ions_y_.at(peak_mz).end(); ++it) {
+    Peptide* pept = it->second;
     ++pept->Ny_;
-    pept->Iy_ += peak_int;  
+    pept->Iy_ += peak_int; 
   }
 }
 
-// void IonInvertedIndex::erase(Peptide* peptide) {
-//     for (const auto peak : peptide->peaks_0) {
-//         assert(ions_.at(peak).front() == peptide);
-//         ions_[peak].pop_front();
-//     }
-//     for (const auto peak : peptide->peaks_1) {
-//         assert(ions_.at(peak).front() == peptide);
-//         ions_[peak].pop_front();
-//     }
-// }
+void IonInvertedIndex::pop_peaks(Peptide* peptide) {
+    for (const auto peak : peptide->peaks_1b) {
+        assert(ions_b_.at(peak).front().second == peptide);
+        ions_b_[peak].pop_front();
+    }
+    for (const auto peak : peptide->peaks_1y) {
+        assert(ions_y_.at(peak).front().second == peptide);
+        ions_y_[peak].pop_front();
+    }
+}
 
 // IonInvertedIndex::Iterator IonInvertedIndex::lowerBound(unsigned int peak) {
 //     return ions_.lower_bound(peak);

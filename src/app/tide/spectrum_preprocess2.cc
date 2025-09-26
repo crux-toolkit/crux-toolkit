@@ -119,7 +119,7 @@ void ObservedPeakSet::KeepTopNPeaks(size_t n) {
   top_N_peaks_.clear();
   for (unsigned int mz = 0; mz < largest_mzbin_; ++mz) {
     top_n.insert({peaks_[mz], mz});
-    if (top_n.size() > n) {
+    while (top_n.size() > n) {
       top_n.erase(top_n.begin());
     }
   }
@@ -136,6 +136,10 @@ void ObservedPeakSet::KeepTopNPeaks(size_t n) {
     [highest_intensity](std::pair<double, unsigned int> p) -> std::pair<unsigned int, double> {
       return {p.second, p.first / highest_intensity};
   });
+  if (top_N_peaks_.size() > n) {
+    carp(CARP_INFO, "top n: ", top_N_peaks_.size());
+  }
+  assert(top_N_peaks_.size() <= n);
 }
 
 void ObservedPeakSet::FillCache() {
@@ -204,6 +208,7 @@ void ObservedPeakSet::SpectrumTopN(const Spectrum& spectrum, size_t n,
       num_isotopes_skipped, num_retained);
   KeepTopNPeaks(n);
   FillCache();
+  assert(top_N_peaks_.size() <= n);
 }
 
 void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,

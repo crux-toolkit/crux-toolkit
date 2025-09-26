@@ -67,7 +67,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     queue_.pop_front();
-    // ion_inv_.erase(peptide);
+    ion_inverted_index_.pop_peaks(peptide);
     delete peptide;
   }
   nPeptides_ = 0;

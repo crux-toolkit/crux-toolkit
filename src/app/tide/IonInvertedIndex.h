@@ -27,6 +27,8 @@ class IonInvertedIndex {
     }
 
     void insert_peaks(Peptide* peptide);
+
+    void pop_peaks(Peptide* peptide);
     
     // Scoring with hyperscore
     void score_peaks(double min_precursor_mass, unsigned int peak_mz, double peak_int);  
