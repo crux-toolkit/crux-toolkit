@@ -118,7 +118,15 @@ void ObservedPeakSet::KeepTopNPeaks(size_t n) {
   std::set<std::pair<double, unsigned int> > top_n;
   top_N_peaks_.clear();
   for (unsigned int mz = 0; mz < largest_mzbin_; ++mz) {
-    top_n.insert({peaks_[mz], mz});
+    if (peaks_[mz] < 0.0001) {
+      continue;
+    }
+    auto least = top_n.begin();
+    std::pair<double, unsigned int> p = {peaks_[mz], mz};
+    if (top_n.size() == n && p <= *least) {
+      continue;
+    }
+    top_n.insert(p);
     while (top_n.size() > n) {
       top_n.erase(top_n.begin());
     }
