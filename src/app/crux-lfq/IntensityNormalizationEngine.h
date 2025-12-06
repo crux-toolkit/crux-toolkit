@@ -507,8 +507,23 @@ class IntensityNormalizationEngine {
             auto filesForThisCondition = std::vector<SpectraFileInfo>();
             std::copy_if(spectraFiles.begin(), spectraFiles.end(), std::back_inserter(filesForThisCondition),
                          [&condition](const SpectraFileInfo& p) { return p.Condition == condition; });
-            auto numB = std::count_if(filesForThisCondition.begin(), filesForThisCondition.end(),
-                                      [&condition](const SpectraFileInfo& p) { return p.BiologicalReplicate == 0; });
+
+            // ***********************************************
+
+            // auto numB = std::count_if(filesForThisCondition.begin(), filesForThisCondition.end(),
+            //                           [&condition](const SpectraFileInfo& p) { return p.BiologicalReplicate == 0; });
+
+            // deduce the BiologicalReplicate type in a safe, compile-time way
+            using RepT = std::decay_t<decltype(std::declval<SpectraFileInfo>().BiologicalReplicate)>;
+
+            // use unordered_set for O(1) average insert/lookup (falls back to std::set if type is not hashable)
+            std::unordered_set<RepT> reps;
+            reps.reserve(filesForThisCondition.size());
+            for (auto const& p : filesForThisCondition) {
+                reps.insert(p.BiologicalReplicate);
+            }
+            auto numB = reps.size();  // same as C#: filesForThisCondition.Select(p => p.BiologicalReplicate).Distinct().Count()
+            // ***********************************************
 
             for (int b = 0; b < numB; ++b) {
                 if (b == 0 && condition == conditions[0]) {
@@ -523,12 +538,33 @@ class IntensityNormalizationEngine {
                     filesForThisCondition.end(),
                     std::back_inserter(filesForThisBiorep),
                     [&b](const SpectraFileInfo& p) { return p.BiologicalReplicate == b && p.TechnicalReplicate == 0; });
-                auto numF = std::max_element(
-                                filesForCond1Biorep1.begin(),
-                                filesForCond1Biorep1.end(),
-                                [](const SpectraFileInfo& a, const SpectraFileInfo& b) { return a.Fraction < b.Fraction; })
-                                ->Fraction +
-                            1;
+
+                //***************************************************** */
+                // auto numF = std::max_element(
+                //                 filesForCond1Biorep1.begin(),
+                //                 filesForCond1Biorep1.end(),
+                //                 [](const SpectraFileInfo& a, const SpectraFileInfo& b) { return a.Fraction < b.Fraction; })
+                //                 ->Fraction +
+                //             1;
+
+                // assume SpectraFileInfo has a member named Fraction
+                using FractionT = decltype(std::declval<SpectraFileInfo>().Fraction);
+
+                auto max_fraction = [](const std::vector<SpectraFileInfo>& v) -> FractionT {
+                    if (v.empty()) throw std::runtime_error("sequence contains no elements");
+                    return std::max_element(
+                               v.begin(), v.end(),
+                               [](const SpectraFileInfo& a, const SpectraFileInfo& b) {
+                                   return a.Fraction < b.Fraction;
+                               })
+                        ->Fraction;
+                };
+
+                FractionT max1 = max_fraction(filesForCond1Biorep1);
+                FractionT max2 = max_fraction(filesForThisBiorep);
+                auto numF = std::max(max1, max2) + static_cast<FractionT>(1);
+
+                //***************************************************** */
 
                 auto seenInBothBioreps = std::vector<Peptides>();
                 for (auto& peptide : peptides) {
