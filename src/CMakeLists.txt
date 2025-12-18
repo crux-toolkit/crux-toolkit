@@ -37,6 +37,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/AScorePro)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
@@ -452,6 +453,7 @@ else()
     crux-support
     tide-support
     cometsearch
+    ascorepro
     kojaksearch
     libneopepxmlparser.a
     gflags
