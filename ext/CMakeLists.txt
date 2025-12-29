@@ -324,6 +324,18 @@ ExternalProject_Add(
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometData.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometInterfaces.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearchManager.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearchManager.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch
     BUILD_IN_SOURCE 1
 )
 

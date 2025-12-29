@@ -22,14 +22,28 @@ class CruxTester
     end
     Open3.popen3(@crux_path + " " + cmd + " --no-analytics T " + @crux_args.join(" ")) do | stdin, stdout, stderr, thread |
       @last_stdout = ""
-      while line = stdout.gets
-        @last_stdout << line
+      
+      # Read stdout and stderr concurrently to avoid deadlock
+      # Previously we read stdout until EOF, then stderr until EOF,
+      # but if one of the streams filled its buffer while we were reading
+      # the other, the process would block and we would deadlock.
+      stdout_thread = Thread.new do
+        while line = stdout.gets
+          @last_stdout << line
+        end
       end
+      
+      stderr_thread = Thread.new do
+        while line = stderr.gets
+          #puts("2>" + line)
+        end
+      end
+      
+      stdout_thread.join
+      stderr_thread.join
+      
       if @last_stdout.empty?
         @last_stdout = nil
-      end
-      while line = stderr.gets
-        #puts("2>" + line)
       end
       @crux_args = Array.new
       return 0
