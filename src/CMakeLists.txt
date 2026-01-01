@@ -421,8 +421,8 @@ if (WIN32 AND NOT CYGWIN)
     debug libboost_serialization-mt-gd
     optimized libboost_system-mt
     debug libboost_system-mt-gd
-    optimized libboost_thread-mt.lib
-    debug libboost_thread-vc142-mt-gd
+    optimized libboost_thread-mt
+    debug libboost_thread-mt-gd
   )
   target_link_libraries(
     crux
