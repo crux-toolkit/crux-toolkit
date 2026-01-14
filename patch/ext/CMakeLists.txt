@@ -311,8 +311,7 @@ endif (WIN32 AND NOT CYGWIN)
 ExternalProject_Add(
   comet
   GIT_REPOSITORY https://github.com/UWPR/Comet/
-  GIT_TAG  v2026.01.0
-  # GIT_TAG ce5caac454f193637ebac3b7754500cc3adab6d6
+  GIT_TAG ce5caac454f193637ebac3b7754500cc3adab6d6
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
