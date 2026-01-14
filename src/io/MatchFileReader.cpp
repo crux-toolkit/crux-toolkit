@@ -494,7 +494,7 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
     {
         tokens.push_back(intermediate);
     }
-    carp(CARP_INFO, "chrage state: %d", stoi(tokens[3]));
+    carp(CARP_INFO, "charge state: %d", stoi(tokens[3]));
     Crux::Spectrum* new_spectrum = new Crux::Spectrum(stoi(tokens[2]),
                               stoi(tokens[2]),
                               getFloat(SPECTRUM_PRECURSOR_MZ_COL),
