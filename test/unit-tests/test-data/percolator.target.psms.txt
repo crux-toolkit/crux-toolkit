@@ -1,0 +1,6 @@
+PSMId	filename	score	q-value	posterior_error_prob	peptide	proteinIds	rt
+target_12_53550_2_1	/home/acquayefrank/CruxLFQ-publication-experiments/data/spectrum_files/B02_24_161103_C1_HCD_OT_4ul.mzML	0.510218	9.3326e-06	7.20649e-05	R.LLALNSLYSPK.I	sp|P78527|PRKDC_HUMAN	103.698
+target_4_53892_2_1	/home/acquayefrank/CruxLFQ-publication-experiments/data/spectrum_files/B02_20_161103_E4_HCD_OT_4ul.mzML	0.492937	9.3326e-06	8.95015e-05	R.LLALNSLYSPK.I	sp|P78527|PRKDC_HUMAN	104.447
+target_16_53577_2_1	/home/acquayefrank/CruxLFQ-publication-experiments/data/spectrum_files/B02_22_161103_D1_HCD_OT_4ul.mzML	0.472293	1.42076e-05	0.000115805	R.LLALNSLYSPK.I	sp|P78527|PRKDC_HUMAN	103.676
+target_5_56314_2_1	/home/acquayefrank/CruxLFQ-publication-experiments/data/spectrum_files/B02_08_161103_B2_HCD_OT_4ul.mzML	0.470315	1.42076e-05	0.000118691	R.LLALNSLYSPK.I	sp|P78527|PRKDC_HUMAN	108.372
+target_9_56031_2_1	/home/acquayefrank/CruxLFQ-publication-experiments/data/spectrum_files/B02_10_161103_E2_HCD_OT_4ul.mzML	0.453967	1.64339e-05	0.000145372	R.LLALNSLYSPK.I	sp|P78527|PRKDC_HUMAN	108.005

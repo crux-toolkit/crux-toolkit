@@ -166,6 +166,7 @@ int MakePinApplication::main(const vector<string>& paths) {
   }
   writer.setEnabledStatus("EnsembleScore", target_collection->getScoredType(ENSEMBLE_SCORE));
 
+  writer.setEnabledStatus("rt", true);
 
   //write .pin file 
   writer.printHeader();
