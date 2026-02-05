@@ -336,6 +336,7 @@ if (WIN32 AND NOT CYGWIN)
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
+      libpwiz_analysis_common.lib
       libpwiz_analysis_diaumpire
       libpwiz_analysis_frequency
       libpwiz_analysis_passive_core
@@ -421,7 +422,7 @@ if (WIN32 AND NOT CYGWIN)
     optimized libboost_system-mt
     debug libboost_system-mt-gd
     optimized libboost_thread-mt.lib
-    debug libboost_thread-vc142-mt-gd
+    debug libboost_thread-mt-gd
   )
   target_link_libraries(
     crux
