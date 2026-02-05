@@ -58,7 +58,7 @@ class Peptide {
   // Peptide exists, so that residues_ can refer to the amino acid sequence.
   Peptide(const pb::Peptide& peptide,
           const vector<const pb::Protein*>& proteins,
-          vector<const pb::AuxLocation*>* locations = NULL);
+          SCORE_FUNCTION_T curScoreFunction = XCORR_SCORE, vector<const pb::AuxLocation*>* locations = NULL);
 
   // CAUTION: We do NOT expect this destructor to get called when FIFO 
   // allocation is used. It will get called only when normal system memory
@@ -123,6 +123,7 @@ class Peptide {
 
   bool IsDecoy() const { return decoyIdx_ >= 0; }
   int DecoyIdx() const { return decoyIdx_; }
+  Peptide* get_this() { return this;}
   vector<double> getAAMasses() const;
 
   static double MassToMz(double mass, int charge) { // Added for Diameter
@@ -147,6 +148,7 @@ class Peptide {
   double Iy_;   // Sum intensity of matching y-ions
 
   bool active_;
+  SCORE_FUNCTION_T curScoreFunction_;    
   
  private:
   template<class W> void AddIons(W* workspace, bool dia_mode = false) ;
@@ -161,7 +163,9 @@ class Peptide {
   int first_loc_protein_id_;
   int first_loc_pos_;
   int protein_length_;
-  vector<pb::Location> aux_locations;
+  vector<pb::Location> aux_locations_;
+  vector<char> mutations_;
+  vector<pb::Mutation> pb_mutations_;
   const char* residues_;
   const char* target_residues_;
   int num_mods_;

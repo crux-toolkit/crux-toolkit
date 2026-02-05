@@ -117,23 +117,7 @@ class Spectrum;
 class ObservedPeakSet {
  public:
 
-  // This constructor is to be removed when marging TideSearchLite into the main branch.
-/*  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
-     double bin_offset = MassConstants::bin_offset_,
-     bool NL = false, bool FP = false)
-    : peaks_(NULL),
-    cache_(NULL) {
-
-    bin_width_  = bin_width;
-    bin_offset_ = bin_offset;
-    NL_ = NL; //NL means neutral loss
-    FP_ = FP; //FP means flanking peaks
-    background_bin_end_ = 0;
-    cache_end_ = 0;
-  }
-
-  // Keep this constructor when TideSearchLite is accepted.
-*/  ObservedPeakSet( bool NL = false, bool FP = false) {
+ ObservedPeakSet( bool NL = false, bool FP = false) {
     peaks_ = NULL;
     cache_ = NULL;
 
@@ -145,7 +129,6 @@ class ObservedPeakSet {
     cache_end_ = 0;
   }
 
-//  ~ObservedPeakSet() { delete[] peaks_; delete[] cache_; }
   ~ObservedPeakSet() { 
     if (peaks_ != NULL)
       delete peaks_;
@@ -203,7 +186,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
   int SmallestMzbin() const { return smallest_mzbin_; };
   vector<pair<int, double>>& FilteredPeakTuples() { return dyn_filtered_peak_tuples_; }
   int getBackgroundBinEnd() {return background_bin_end_; }
-  int getCacheEnd() {return cache_end_; }
+  const int getCacheEnd() const {return cache_end_; }
 
   void SpectrumTopN(const Spectrum& spectrum, size_t n, int charge,
                           long int* num_range_skipped,
@@ -222,7 +205,7 @@ void addEvidToResEvMatrix(vector<double>& ionMass,
                           long int* num_isotopes_skipped,
                           long int* num_retained);
   
-  void KeepTopNPeaks(size_t n);
+  void KeepTopNPeaks(size_t n, double highest_intensity);
   void PreprocessSpectrum(const Spectrum& spectrum, double* intensArrayObs,
                           int* intensRegion, int maxPrecurMass, int charge);
 

@@ -100,6 +100,10 @@ double ObservedPeakSet::FillPeaks(const Spectrum& spectrum, int charge,
 
     int mz = MassConstants::mass2bin(peak_location);
     double intensity = spectrum.Intensity(i);
+    if (mz >= background_bin_end_){
+      carp(CARP_FATAL, "Illegal memory ops in Fill peaks. background_bin_end_: %d, mz:%d", background_bin_end_, mz);
+    }
+
     if ((mz > largest_mzbin_) && (intensity > 0)) { largest_mzbin_ = mz; }
     if ((mz < smallest_mzbin_) && (intensity > 0)) { smallest_mzbin_ = mz; }
 
@@ -110,31 +114,37 @@ double ObservedPeakSet::FillPeaks(const Spectrum& spectrum, int charge,
     if (intensity > peaks_[mz]) {
       peaks_[mz] = intensity;
     }
+
   }
   return highest_intensity;
 }
 
-void ObservedPeakSet::KeepTopNPeaks(size_t n) {
+void ObservedPeakSet::KeepTopNPeaks(size_t n, double highest_intensity) {
   std::set<std::pair<double, unsigned int> > top_n;
   top_N_peaks_.clear();
+  int cnt = 0;
+  double intensity_cutoff = highest_intensity * 0.05;
   for (unsigned int mz = 0; mz < largest_mzbin_; ++mz) {
-    if (peaks_[mz] < 0.0001) {
-      continue;
-    }
-    auto least = top_n.begin();
-    std::pair<double, unsigned int> p = {peaks_[mz], mz};
-    if (top_n.size() == n && p <= *least) {
-      continue;
-    }
-    top_n.insert(p);
-    while (top_n.size() > n) {
-      top_n.erase(top_n.begin());
+    if (peaks_[mz] <= intensity_cutoff)
+      continue; 
+    // cnt++;
+    // carp(CARP_INFO, "top n,cnt: %d,  mz: %d intens: %lf ", cnt, mz, peaks_[mz]);
+
+    if (top_n.size() < n) {
+
+      top_n.insert({peaks_[mz], mz});
+    
+    } else { //top_n.size() == n
+      if (top_n.begin()->first < peaks_[mz] ) {
+        top_n.erase(top_n.begin());
+        top_n.insert({peaks_[mz], mz});
+      }
     }
   }
   if (top_n.empty()) {
     return;
   }
-  double highest_intensity = top_n.rbegin()->first;
+  highest_intensity = top_n.rbegin()->first/100.0;
   top_N_peaks_.reserve(n);
 
   // Iterate over (intensity, mz) in top_n,
@@ -144,27 +154,36 @@ void ObservedPeakSet::KeepTopNPeaks(size_t n) {
     [highest_intensity](std::pair<double, unsigned int> p) -> std::pair<unsigned int, double> {
       return {p.second, p.first / highest_intensity};
   });
-  if (top_N_peaks_.size() > n) {
+/*  cnt = 0;
+  for (auto it = top_N_peaks_.begin(); it != top_N_peaks_.end(); ++it){
+    carp(CARP_INFO, "final, cnt: %d, mz: %d intens: %lf ", cnt++, (*it).second, (*it).first);
+  }
+  */if (top_N_peaks_.size() > n) {
     carp(CARP_INFO, "top n: ", top_N_peaks_.size());
   }
   assert(top_N_peaks_.size() <= n);
+  // exit(0);
 }
 
 void ObservedPeakSet::FillCache() {
   cache_[0] = int(peaks_[0]);
   cache_[1] = int(peaks_[0]);
   double intensity;
-  int nh3_bin = int(MassConstants::BIN_NH3);
-  int h2o_bin = int(MassConstants::BIN_H2O);
+  int nh3_bin = int(MassConstants::BIN_NH3);  // ~17
+  int h2o_bin = int(MassConstants::BIN_H2O);  // ~18
   int j;
   //  largest_mz = min(largest_mz+h2o_bin, MaxBin::Global().BackgroundBinEnd())-1;    // This line is added to make this code equivalent
   // to the previous tide.xcorr, athough this is incorrect, and it seems to be a bug. AKF
-  for(int i = 1; i < background_bin_end_; ++i) {
+  for(int i = 1; i < background_bin_end_-1; ++i) {
     j = i+i;
     intensity = peaks_[i];
     if ( FP_ == true) {
       intensity += 0.5*(peaks_[i-1] + peaks_[i+1]);
     }
+    if (j+1 > cache_end_) {
+      carp(CARP_FATAL, "Illegal memory ops in Fill cache. cache_end_: %d, mz:%d", cache_end_, j+1 );    
+    }
+
     cache_[j+1] = int(intensity);
     if ( NL_ == true && i > h2o_bin ) {
       intensity += 0.2*(peaks_[i - nh3_bin] + peaks_[i - h2o_bin]);
@@ -211,10 +230,10 @@ void ObservedPeakSet::SpectrumTopN(const Spectrum& spectrum, size_t n,
                         long int* num_retained,
                         bool dia_mode) {
   PreparePeaks(spectrum, charge);
-  FillPeaks(spectrum, charge,
+  double highest_intensity = FillPeaks(spectrum, charge,
       num_range_skipped, num_precursors_skipped,
       num_isotopes_skipped, num_retained);
-  KeepTopNPeaks(n);
+  KeepTopNPeaks(n, highest_intensity);
   FillCache();
   assert(top_N_peaks_.size() <= n);
 }
@@ -241,10 +260,14 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       if (Params::GetBool("spectra-denoising") && !spectrum.Is_supported(i)) { continue; }
 
       int mz = MassConstants::mass2bin(peak_location);
+      if (mz >= background_bin_end_){
+        carp(CARP_FATAL, "Illegal memory ops. background_bin_end_: %d, mz:%d", background_bin_end_, mz);
+      }
       double intensity = spectrum.Intensity(i);
       if (intensity > peaks_[mz]) {
         peaks_[mz] = intensity;
       }
+      // carp(CARP_INFO, "prespe skip preproc. peak mz %d, intensity: %lf", mz,peaks_[mz] );
     }
   } else {
     double highest_intensity = FillPeaks(spectrum, charge,
@@ -263,6 +286,10 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       int high_index = i;
       for (int j = 0; j < dyn_region_size; ++j) {
         int index = i * dyn_region_size + j;
+        if (index >= background_bin_end_){
+          carp(CARP_FATAL, "Illegal memory ops in region norm 1. background_bin_end_: %d, index:%d", background_bin_end_, index);
+        }
+
         if (peaks_[index] <= intensity_cutoff) {
           peaks_[index] = 0;
         }
@@ -287,6 +314,10 @@ void ObservedPeakSet::PreprocessSpectrum(const Spectrum& spectrum, int charge,
       normalizer = 25000000.0 / highest_intensity;
       for (int j = 0; j < dyn_region_size; ++j) {
         int index = i * dyn_region_size + j;
+        if (index >= background_bin_end_){
+          carp(CARP_FATAL, "Illegal memory ops in region norm 2. background_bin_end_: %d, index:%d", background_bin_end_, index);
+        }
+
         if (peaks_[index] != 0) {
           peaks_[index] *= normalizer;
         }

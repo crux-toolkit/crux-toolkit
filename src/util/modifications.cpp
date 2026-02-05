@@ -471,6 +471,7 @@ char* modified_aa_to_unmodified_string(MODIFIED_AA_T* aa_string, int length) {
 int convert_to_mod_aa_seq(const string& sequence, 
                           MODIFIED_AA_T** mod_sequence,
                           MASS_FORMAT_T mass_format) {
+  // carp(CARP_INFO, "sequence::%s", sequence.c_str());
 
   if( sequence.empty() ){
     carp(CARP_ERROR, "Cannot convert NULL sequence to modifiable characters"); 
@@ -707,15 +708,20 @@ AA_MOD_T multi_mod;
 const AA_MOD_T* get_aa_mod_from_mass(FLOAT_T mass) {
   // find the identifier for this mass shift
   MODIFIED_AA_T id = get_mod_identifier(mass);
-
+  
   if (id == 0) { // get_mod_id already warned
     //here we are creating a modification.  Hopefully
     //this will only get used when post-processing search
     //results, maybe we will need to check that at some point
     //SJM 2013_10_10.
-    carp(CARP_INFO, "Creating modification for %f", mass);
+    // carp(CARP_INFO, "Creating modification for %f", mass);
     AA_MOD_T** mods = NULL;
     int num_mods = get_all_aa_mod_list(&mods);
+    if (num_mods == MAX_AA_MODS) {
+      // TODO: MAX_AA_MODS = 11, Need to increase this limit somehow. This is an ugly solution
+      resetMods();
+      num_mods = get_all_aa_mod_list(&mods);
+    }
     mods[num_mods]->setMassChange(mass);
     incrementNumMods(); 
     initialize_aa_mod_combinations_array();

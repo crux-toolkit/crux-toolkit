@@ -504,6 +504,7 @@ std::string Peptide::getDecoyType() {
  * \returns A newly allocated copy of the sequence of MODIFIED_AA_Ts.
  */
 MODIFIED_AA_T* Peptide::getModifiedAASequence() {
+  resetMods();  
   MODIFIED_AA_T* seq_copy = NULL;
   char* seq = getSequence();
   if (!varMods_.empty()) {

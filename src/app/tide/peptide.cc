@@ -14,6 +14,7 @@
 
 Peptide::Peptide(const pb::Peptide& peptide,
         const vector<const pb::Protein*>& proteins,
+        SCORE_FUNCTION_T curScoreFunction,
         vector<const pb::AuxLocation*>* locations)
   : len_(peptide.length()), 
   mass_(peptide.mass()), 
@@ -68,17 +69,28 @@ Peptide::Peptide(const pb::Peptide& peptide,
   if (peptide.aux_locations_index() && locations) {  
     const pb::AuxLocation* aux_loc = locations->at(peptide.aux_locations_index());
     for (int i = 0; i < aux_loc->location_size(); ++i) {
-      aux_locations.push_back(aux_loc->location(i));
+      aux_locations_.push_back(aux_loc->location(i));
     }
   // this part handles the aux location in the current tide-index.     
   // Here the aux location are merged to the peptide pb.
-  } else if (peptide.has_aux_loc() == true) {   
-    const pb::AuxLocation& aux_loc = peptide.aux_loc();
-    for (int i = 0; i < aux_loc.location_size(); ++i) {
-      aux_locations.push_back(aux_loc.location(i));
+  // } else if (peptide.has_aux_loc() == true) {   
+  //   const pb::AuxLocation& aux_loc = peptide.aux_loc();
+  //   for (int i = 0; i < aux_loc.location_size(); ++i) {
+  //     aux_locations_.push_back(aux_loc.location(i));
+  //   }
+  // }
+  } else { 
+    for (int i = 0; i < peptide.aux_loc_size(); ++i) {
+      aux_locations_.push_back(peptide.aux_loc(i));
     }
   }
-  string scoring_method = Params::GetString("score-function"); // Handle this properly with Get
+  mutations_.resize(len_);
+  for (int i = 0; i < peptide.mutations_size(); ++i){   //Store locally the mutations
+    mutations_[peptide.mutations(i).position()] = peptide.mutations(i).mutation();
+    pb_mutations_.push_back( peptide.mutations(i));
+  }
+  //   
+  // string scoring_method = Params::GetString("score-function"); // Handle this properly with Get
   protein_id_str_ = string("");
   flankingAAs_ = string("");
   seq_with_mods_ = string("");
@@ -86,21 +98,25 @@ Peptide::Peptide(const pb::Peptide& peptide,
   mod_mztab_string_ = string("");
   
   active_ = false;
+  
+  curScoreFunction_ = curScoreFunction;  
 
   peaks_0.resize(2*len_);   // Single charged b-y ions, in case of exact p-value, this contains only the b-ions
   peaks_1.resize(2*len_);   // Double charged b-y ions
   peaks_1b.resize(len_);   // Single charged b ions
   peaks_1y.resize(len_);   // Single charged y ions
-  peaks_2b.resize(len_);   // Double charged b ions
-  peaks_2y.resize(len_);   // Double charged y ions
+  if (curScoreFunction_ != HYPERSCORE) {
+    peaks_2b.resize(len_);   // Double charged b ions
+    peaks_2y.resize(len_);   // Double charged y ions
+  }
   peaks_1b.clear();
   peaks_1y.clear();
   peaks_2b.clear();
   peaks_2y.clear();
   
   // Variables for hyper score scoring with inverted indeces
-  Nb_ = 1;   // Number of matching b-ions
-  Ny_ = 1;   // Number of matching y-ions
+  Nb_ = 0;   // Number of matching b-ions
+  Ny_ = 0;   // Number of matching y-ions
   Ib_ = 1.0;   // Sum intensity of matching b-ions
   Iy_ = 1.0;   // Sum intensity of matching y-ions
 
@@ -157,8 +173,18 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
     }
     total += aa_masses[i];
   }
+  // added by Yang
+  if (dia_mode) {
+    sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
+    sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
+    sort(ion_mzbins_.begin(), ion_mzbins_.end());
+    sort(ion_mzs_.begin(), ion_mzs_.end());
+  }
 
-  // Add all charge 2 B ions.
+  if (curScoreFunction_ == HYPERSCORE)    // Double charged theoretical peaks are not used in hyper scoring.
+    return;
+
+    // Add all charge 2 B ions.
   max_possible_peak = max_possible_peak*2 + 2;  //adjust for larger charge
   total = aa_masses[0];
   for (int i = 1; i < Len() && total <= max_possible_peak; ++i) {
@@ -177,13 +203,7 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
     total += aa_masses[i];
   }
 
-  // added by Yang
-  if (dia_mode) {
-    sort(b_ion_mzbins_.begin(), b_ion_mzbins_.end());
-    sort(y_ion_mzbins_.begin(), y_ion_mzbins_.end());
-    sort(ion_mzbins_.begin(), ion_mzbins_.end());
-    sort(ion_mzs_.begin(), ion_mzs_.end());
-  }
+
 }
 
 void Peptide::Compile(const TheoreticalPeakArr* peaks) {
@@ -210,23 +230,42 @@ void Peptide::ComputeTheoreticalPeaks(TheoreticalPeakSetBYSparse* workspace, boo
 // return the amino acid masses in the current peptide
 vector<double> Peptide::getAAMasses() const {
   vector<double> masses_charge(Len());
+  vector<double> mutations(Len());
+ // Overwirte the mass of mutated amino acids
+
   const char* residue = residues_;
+  int mut_cnt = 0;
   for (int i = 0; i < Len(); ++i, ++residue) {
+    char AA = *residue; 
+    if (mut_cnt < pb_mutations_.size()) {
+      if (pb_mutations_[mut_cnt].position() == i ) {
+        AA = pb_mutations_[mut_cnt].mutation();
+        ++mut_cnt;
+      }
+    }
+
+    // if (mutations_[i] != 0){ // there is a mutations at this position
+    //   AA = &mutations_[i];
+    // } else {
+    //   AA = residue;
+    // }
+
     if (i == 0) { // nterm static pep
       if(first_loc_pos_ == 0)
-        masses_charge[i] = MassConstants::nprotterm_mono_table[*residue];
+        masses_charge[i] = MassConstants::nprotterm_mono_table[AA];
       else
-        masses_charge[i] = MassConstants::nterm_mono_table[*residue];
+        masses_charge[i] = MassConstants::nterm_mono_table[AA];
     } else if (i == Len() - 1) { // cterm static pep
       if(first_loc_pos_ + len_ == protein_length_ - 1)
-        masses_charge[i] = MassConstants::cprotterm_mono_table[*residue];
+        masses_charge[i] = MassConstants::cprotterm_mono_table[AA];
       else
-        masses_charge[i] = MassConstants::cterm_mono_table[*residue];
+        masses_charge[i] = MassConstants::cterm_mono_table[AA];
     } else { // all other mods
-      masses_charge[i] = MassConstants::mono_table[*residue];
+      masses_charge[i] = MassConstants::mono_table[AA];
     }
   }
 
+  // Add the veriable modifications to the amino acid masses.
   for (int i = 0; i < num_mods_; ++i) {
     int index;
     double delta;
@@ -251,19 +290,47 @@ string Peptide::SeqWithMods(int mod_precision) {
   int mod_pos_offset = 0;
   string mod_str;
   sort(mods_.begin(), mods_.end());
-  int index;
-  double delta;
-  
+
   if (nterm_mod_ != 0.0){
     mod_str = "[" + StringUtils::ToString(nterm_mod_, mod_precision) + "]-";
     seq_with_mods_.insert(0, mod_str);
     mod_pos_offset += mod_str.length();
   }
-  for (int i = 0; i < num_mods_; ++i) {
-    MassConstants::DecodeMod(mods_[i], &index, &delta);
-    mod_str = '[' + StringUtils::ToString(delta, mod_precision) + ']';
-    seq_with_mods_.insert(index + 1 + mod_pos_offset, mod_str);
-    mod_pos_offset += mod_str.length();
+  int mut_cnt = 0;
+  int mod_cnt = 0;
+  int index = -1;
+  double delta;
+  if (num_mods_ > 0)
+    MassConstants::DecodeMod(mods_[mod_cnt], &index, &delta);  // Get the first modification
+
+  double mut_delta_mass = 0.0;
+  double mod_delta_mass = 0.0;
+  bool has_mod = false;
+  for (int i = 0; i < Len(); ++i) {
+    has_mod = false;
+    if (mut_cnt < pb_mutations_.size()) {
+      if (pb_mutations_[mut_cnt].position() == i ) {
+        mut_delta_mass = pb_mutations_[mut_cnt].delta_mass();
+        ++mut_cnt;
+        has_mod = true;
+      }
+    }
+    if (mod_cnt < num_mods_) {
+      if (index == i) { // there is a modification at this AA in this position
+        mod_delta_mass = delta;
+        has_mod = true;
+        ++mod_cnt;
+        if (mod_cnt < num_mods_){
+          MassConstants::DecodeMod(mods_[mod_cnt], &index, &delta);  // Get the next modification
+        }
+      }
+    }
+    if (has_mod) {
+      mod_str = '[' + StringUtils::ToString(mod_delta_mass + mut_delta_mass, mod_precision) + ']';
+      seq_with_mods_.insert(i + 1 + mod_pos_offset, mod_str);
+      mod_pos_offset += mod_str.length();
+    }
+    mod_delta_mass = mut_delta_mass = 0.0;
   }
 
   if (cterm_mod_ != 0.0){
@@ -289,8 +356,8 @@ string Peptide::SeqWithMods(int mod_precision) {
     "(" + std::to_string(FirstLocPos()+1) + ")";
   
   for (vector<pb::Location>::const_iterator 
-    loc = aux_locations.begin(); 
-    loc != aux_locations.end();
+    loc = aux_locations_.begin(); 
+    loc != aux_locations_.end();
     ++loc
   ) {
     const pb::Protein* protein = proteins_->at((*loc).protein_id());
@@ -321,8 +388,8 @@ string  Peptide::GetFlankingAAs() {
     proteins_->at(FirstLocProteinId())->residues().substr(prot_pos+Len(),1) : "-");
     
   for (vector<pb::Location>::const_iterator
-    loc = aux_locations.begin();
-    loc != aux_locations.end();
+    loc = aux_locations_.begin();
+    loc != aux_locations_.end();
     ++loc
   ) {
     const pb::Protein* protein = proteins_->at((*loc).protein_id());
@@ -354,9 +421,21 @@ void Peptide::getModifications(int mod_precision, string& mod_crux_string, strin
   double mod_mass;
   int var_mod_idx = 0;
   string mod_name;
+  int mut_cnt = 0;
+
   
   for (int i = 0; i < len_; ++i) {
     char AA = residues_[i];
+    if (mut_cnt < pb_mutations_.size()) {
+      if (pb_mutations_[mut_cnt].position() == i ) {
+        string mut_str =std::to_string(i+1) + sep + string("M") +  sep + StringUtils::ToString(pb_mutations_[mut_cnt].delta_mass(), mod_precision);
+        mods_list.push_back(mut_str);
+        mut_str = std::to_string(i) + mztab_sep + "Mutation";  // TODO: We need to get the UniMOD ID of this mutation
+        mztab_mod_list.push_back(mut_str);
+        ++mut_cnt;
+      }
+    }
+
     // Find static modifications 
 
     if (i == 0) {// peptide N-term

@@ -12,6 +12,7 @@
 #include "tide/spectrum_collection.h"
 #include "tide/ActivePeptideQueue.h"
 #include "tide/spectrum_preprocess.h"
+#include <queue>
 
 #include "model/Modification.h"
 #include "model/PostProcessProtein.h"
@@ -38,18 +39,46 @@ class TideMatchSet {
     double sp_score_;
     double hyper_score_;
     double hyper_score_la_; 
-    double hyper_score_tailor; 
+    double hyper_score_tailor_; 
+    double hyper_poisson_;
     double delta_cn_;
     double delta_lcn_;
     bool active_;
-    deque<Peptide*>::const_iterator peptide_itr_;
+    Peptide* peptide_ptr_;
     Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
       resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
-      sp_score_(0), hyper_score_(0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0), active_(false) {}
+      sp_score_(0), hyper_score_(0.0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0),
+      hyper_poisson_(0.0), hyper_score_tailor_(0.0), active_(false) {}
   };
-//   typedef FixedCapacityArray<Scores> PSMScores;
-  typedef vector<Scores> PSMScores;
-  PSMScores psm_scores_;   // This one is used to gather psms during scoring.
+  // We need a prioirty queue and store and collect the top-N scoring PSMs during search. 
+  // We need this priority queue to tell us the smalles XCorr score among the top N matches. 
+  // If the current PSM scor is higher then the minimal PSM score in the PQ, then we remove the minimal, and add the current PSM.
+  // This the minimal PSM score in the PQ is increasing. 
+  // Using a custom function object to compare elements.
+  static SCORE_FUNCTION_T curScoreFunction_;
+  // struct CompareScoresReverse {     
+  //   bool operator()(const Scores& x, const Scores& y) const {
+  //     switch (TideMatchSet::curScoreFunction_) {
+  //       case HYPERSCORE:
+  //             return x.hyper_score_ > y.hyper_score_;  // Min-heap for hyper scores
+  //       case XCORR_SCORE:
+  //             return x.xcorr_score_ > y.xcorr_score_;  // Min-heap for xcorr scores  
+  //       case PVALUES:
+  //           return x.combined_pval_ < y.combined_pval_;  // Max-heap for p-values
+  //       }
+  //     return false;
+  //   }
+  // };
+
+  // typedef std::priority_queue<Scores, vector<Scores>, CompareScoresReverse> PSMScoresQueue;
+  typedef std::vector<Scores> PSMScores;
+  PSMScores psm_scores_;   // This one is used to gather all psms during scoring. Used in DIAmeter, and p-value calculation
+
+  // void add_PSM(Scores& psm_score, bool target);
+  // double get_min_PSM(bool target);
+  // bool is_PQ_full(bool target);
+  // PSMScoresQueue concat_or_target_psm_scores_pq_;  // With priority queue
+  // PSMScoresQueue decoy_psm_scores_pq_;  // With priority queue
 
   int n_concat_or_target_matches_;  // concat or target
   int n_decoy_matches_;
@@ -102,6 +131,7 @@ class TideMatchSet {
   const double TAILOR_QUANTILE_TH = 0.01;
   const double TAILOR_OFFSET = 5.0 ;
   double quantile_score_;
+  double possion_lambda_;
   
   PSMScores::iterator last_psm_;
   ActivePeptideQueue* active_peptide_queue_;  
@@ -114,7 +144,7 @@ class TideMatchSet {
   ObservedPeakSet* observed_;  
   
   // Global static parameters
-  static SCORE_FUNCTION_T curScoreFunction_;
+
   static int top_matches_;
   static int decoy_num_;
   static int mass_precision_;
@@ -125,11 +155,8 @@ class TideMatchSet {
   static int psm_id_mzTab_;
   static string fasta_file_name_;
 
-//  private:
   PSMScores concat_or_target_psm_scores_;
   PSMScores decoy_psm_scores_;
-
-
 };
 
 #endif

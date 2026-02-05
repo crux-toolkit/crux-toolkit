@@ -70,6 +70,14 @@ class TideSearchApplication : public CruxApplication {
   int total_spectra_num_;
   string tide_index_mzTab_file_path_;
 
+  // double previous_min_range_;
+  // double previous_max_range_;
+  // double previous_precurMZ_;
+  // double previous_charge_;
+  // double previouse_neutral_mass_;
+  // int isotope_idx_;
+  inline static bool isWithinIsotope(double mass, int& isotope_idx, const vector<pair<double,double>>& mass_tol_windows); 
+
   ofstream* out_tsv_target_; // original tide-search output format in tab-delimited text files (txt)
   ofstream* out_tsv_decoy_;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only
   ofstream* out_mztab_target_;      // mzTAB output format
@@ -115,13 +123,8 @@ class TideSearchApplication : public CruxApplication {
 
   void PValueScoring(const SpectrumCollection::SpecCharge* sc, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
 
-  void computeWindow(
-      const SpectrumCollection::SpecCharge& sc,
-      vector<double>* out_min,
-      vector<double>* out_max,
-      double* min_range,
-      double* max_range
-    );
+  void computeWindow(const SpectrumCollection::SpecCharge& sc, vector<pair<double,double>>& mass_tol_windows);
+
   vector<double> dAAFreqN_;
   vector<double> dAAFreqI_;
   vector<double> dAAFreqC_;
@@ -179,6 +182,22 @@ class TideSearchApplication : public CruxApplication {
     int numPval //number of p-values to combine
   );
 
+  struct alignas(64) Scores_TS {
+    double score_;
+    int by_ion_matched_; 
+    Peptide* peptide_ptr_;
+  };
+  typedef std::vector<Scores_TS> PSMScores_TS;
+  // static std::vector<Scores_TS> top_N_PSMs;  // a heap for storing the top N PSMs;
+  
+  struct cmpScoreRev{
+    bool operator()(const Scores_TS& x, const Scores_TS& y){     
+      return x.score_ > y.score_;  // Can be Xcorr or Hyper score. Works with either way. Both scores are higher the better. 
+    }
+  };
+
+
+
  public:
 
   SCORE_FUNCTION_T curScoreFunction_;
@@ -187,11 +206,13 @@ class TideSearchApplication : public CruxApplication {
   
   // These are public functions to be accessed from diameter application.
   static vector<int> getNegativeIsotopeErrors();
-  static void XCorrScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
-  static int PeakMatching(ObservedPeakSet& observed, vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
+  static void XCorrScoring(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows);
+  static int PeakMatching(const ObservedPeakSet& observed, const vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks);
   void setSpectrumFlag(map<pair<string, unsigned int>, bool>* spectrum_flag);
   // void HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores);
-  void HyperScoring(int charge, ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, double min_precursor_mass);
+  void HyperScoring(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows);
+  void HyperScoringKeepTop(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows);
+  void XCorrScoringInvertedIDX(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows);
   
 
 

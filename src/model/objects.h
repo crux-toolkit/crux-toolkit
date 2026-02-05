@@ -453,6 +453,7 @@ enum _scorer_type {
   
   HYPER_SCORE,
   HYPER_SCORE_TAILOR,
+  HYPER_SCORE_POISSON,
 
   DECOY_XCORR_QVALUE,  ///< q-value derived from decoys
   DECOY_XCORR_PEPTIDE_QVALUE,

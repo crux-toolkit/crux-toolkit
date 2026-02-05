@@ -23,12 +23,58 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     locations_(locations),
     dia_mode_(dia_mode) {
   CHECK(reader_->OK());
-  min_candidates_ = 30;
+  min_candidates_ = 1000;
   nPeptides_ = 0;
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
   CandPeptidesDecoy_ = 0;  
 
+
+  score_histogram_offset_= 10;   // This should be ok for XCorr. It does not matter for HyperScore; TAILOR_OFFSET
+  score_scale_factor_ = 100;   // TODO: may be fine-tuned experimentally.
+  max_score_ = 100;
+  highest_bin_ = 0;
+  score_count_ = 1; // so that the score histogram vector will be set to zero.
+  score_histogram_.reserve((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
+  ResetHist();
+  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function")); 
+}
+
+void ActivePeptideQueue::AddScoreToHist(double score, int match_cnt) {
+  int bin = round( (score + score_histogram_offset_)*score_scale_factor_ );
+  score_histogram_[bin] += 1;
+  ++score_count_;
+  total_match_ += match_cnt;
+  if (highest_bin_ < bin)
+    highest_bin_ = bin;
+}
+
+void ActivePeptideQueue::ResetHist() {
+  total_match_ = 0;
+  highest_bin_ = 0;
+  if (score_count_ == 0)
+    return;
+  memset(score_histogram_.data(), 0, score_histogram_.capacity() * sizeof(int));
+  // std::fill(score_histogram_.begin(), score_histogram_.end(), 0); // reset the values of the score histogram    
+  score_count_ = 0;
+}
+
+double ActivePeptideQueue::getTailorQuantileFromHistogram(){
+  int bin = highest_bin_+1; //score_histogram_.capacity()-1;
+  int count = 0;
+  double quantile_score_ = 1.0;
+
+  int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)score_count_+0.5)-1; // zero indexed
+  if (quantile_pos < 2) 
+    quantile_pos = 2;  // the third element
+  if (quantile_pos >= score_count_) 
+    quantile_pos = score_count_-1; // the last element
+
+  while (count < quantile_pos ) {
+    count += score_histogram_[bin--];
+  }
+  ++bin;
+  return (double)bin/score_scale_factor_ - score_histogram_offset_; // Make sure scores positive in case of XCorr;
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
@@ -43,19 +89,11 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
   ion_inverted_index_.insert_peaks(peptide);
 }
 
-bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
-  for (int i = *isotope_idx; i < min_mass->size(); ++i) {
-    if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
-      if (i > *isotope_idx) {
-        *isotope_idx = i;
-      }
-      return true;
-    }
-  }
-  return false;
-}
+int ActivePeptideQueue::SetActiveRange(double min_range, double max_range) {
 
-int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
+  // Reset the score histograms
+  ResetHist();
+
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -92,7 +130,7 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
         // we would delete current_pb_peptide_;
         continue; // skip peptides that fall below min_range
       }
-      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
+      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, curScoreFunction_, locations_);
       assert(peptide != NULL);
       queue_.push_back(peptide);
       // ion_inv_.insert(peptide);
@@ -114,44 +152,11 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   }
 
   nPeptides_ = 0;
-  begin_ = queue_.begin();
-  while (begin_ != queue_.end() && (*begin_)->Mass() < min_mass->front()) {
-    (*begin_)->active_ = false;
-    ++begin_;
-    ++nPeptides_;
-  }
-  end_ = begin_;
-  begin_ = queue_.begin();
-  int* isotope_idx = new int(0);
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  begin_ = queue_.begin();  
+  end_ = queue_.end();
+  return queue_.size();
 
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
-    if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
-      ++nCandPeptides_;
-      (*end_)->active_ = true;
-      if ((*end_)->IsDecoy()){
-        ++CandPeptidesDecoy_;
-      } else {
-        ++CandPeptidesTarget_;
-      }
-    } else {
-      (*end_)->active_ = false;
-    }
-    ++end_;
-    ++nPeptides_;
-  }
-  delete isotope_idx;
-  if (nCandPeptides_ == 0) {
-    return 0;
-  }
-  for (; end_ != queue_.end(); ++end_) {
-    if ((*end_)->peaks_0.size() == 0 || nPeptides_ >= min_candidates_-1) {
-      break;
-    }
-    (*end_)->active_ = false;
-    ++nPeptides_;
-  }
-  return nCandPeptides_;
 }
+
+
+

@@ -62,6 +62,7 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "HyperScore",
   "HyperScore rank",
   "HyperScore tailor",
+  "HyperScore Poisson Eval",
   "e-value",
   "smoothed p-value",
   "distinct matches/peptide",

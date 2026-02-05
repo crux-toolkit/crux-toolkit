@@ -527,6 +527,10 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "xcorr first",
   "xcorr second",
 
+  "HyperScore",
+  "HyperScore tailor",
+  "HyperScore Poisson Eval",
+
   "decoy_xcorr_qvalue",
   "decoy_xcorr_peptide_qvalue",
   "decoy_xcorr_PEP",

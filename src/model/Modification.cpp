@@ -447,13 +447,22 @@ string Modification::String() const {
 
 vector<Modification> Modification::Parse(const string& modString, const string* unmodifiedSequence) {
   vector<Modification> mods;
+ 
   vector<string> all = StringUtils::Split(modString, ',');
   for (vector<string>::const_iterator i = all.begin(); i != all.end(); i++) {
     if (*i == "-") {
       continue;
     }
     try {
-      mods.push_back(ParseOne(StringUtils::Trim(*i), unmodifiedSequence));
+      // vector<string> pieces = StringUtils::Split(StringUtils::Trim(*i), '_');
+      // if (3 > pieces.size() || pieces.size() > 4) {
+      //   throw runtime_error("Could not parse modification string '" + modString + "'");
+      // }
+      // if (StringUtils::IEquals(pieces[1], "M")) { // It is a mutation
+      //   bool isMutation = true;
+      // } else { // it is not a mutation, but a modification
+        mods.push_back(ParseOne(StringUtils::Trim(*i), unmodifiedSequence));
+      // }
     } catch (runtime_error& e) {
       carp(CARP_ERROR, "Error parsing modification string: %s", e.what());
     }
@@ -468,7 +477,11 @@ Modification Modification::ParseOne(const string& modString, const string* unmod
   }
   unsigned char index = (unsigned char)StringUtils::FromString<unsigned int>(pieces[0]) - 1;
   bool isStatic = false;
-  if (StringUtils::IEquals(pieces[1], "S")) {
+  bool isMutation = false;
+  
+  if (StringUtils::IEquals(pieces[1], "M")) {
+    isMutation = true;
+  } else if (StringUtils::IEquals(pieces[1], "S")) {
     isStatic = true;
   } else if (!StringUtils::IEquals(pieces[1], "V")) {
     throw runtime_error("Could not parse modification string '" + modString + "'");
@@ -691,6 +704,7 @@ void Modification::FromSeq(MODIFIED_AA_T* seq, int length,
 // TODO Remove this
 MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>& mods) {
   MODIFIED_AA_T* modSeq = newModSeq();
+
   for (unsigned i = 0; i < seq.length(); i++) {
     modSeq[i] = char_aa_to_modified(seq[i]);
   }
@@ -700,6 +714,7 @@ MODIFIED_AA_T* Modification::ToSeq(const string& seq, const vector<Modification>
     if (!i->Static()) {
       get_aa_mod_from_mass((FLOAT_T)i->DeltaMass())->modify(&modSeq[i->Index()]);
     }
+
   }
 
   return modSeq;

@@ -406,6 +406,9 @@ Params::Params() : finalized_(false) {
   InitIntParam("memory-limit", 4, 1, BILLION, 
     "The maximum amount of memory (i.e., RAM), in GB, to be used by tide-index.",
     "Available for tide-index.", true);
+  InitBoolParam("add-snvs", false, 
+    "Include amino acid mutations which can be optained with SNP.",
+    "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"

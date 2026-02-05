@@ -270,7 +270,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // values for taking dot products with theoretical spectra.
           // TODO: Note that here each specturm might be preprocessed multiple times, one for each charge, potentially can be improved!
           observed.PreprocessSpectrum(*spectrum, charge, &num_range_skipped, &num_precursors_skipped, &num_isotopes_skipped, &num_retained, dia_mode);
-          active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);
+//          active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);  FIXME AKF
 
 
           if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
@@ -281,7 +281,7 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
           // allocate PSMscores for N scores
           TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
 
-          TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);
+          // TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);  FIXME AKF
 
           reportDIA(output_file, origin_file, spec_charge_chunk.at(chunk_idx), active_peptide_queue, proteins,
               psm_scores, &observed, &ms1scan_mz_intensity_rank_map, &ms1scan_slope_intercept_map,
@@ -504,8 +504,8 @@ void DIAmeterApplication::computePrecIntRank(
   double intercept = slope_intercept_tp.get<1>();
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
-    double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
+    Peptide* peptide = (*i).peptide_ptr_;
+    double peptide_mz_m0 = Peptide::MassToMz(peptide->Mass(), charge);
 
     double intensity_rank_m0 = closestPPMValue(mz_arr, intensity_rank_arr, peak_num, peptide_mz_m0, Params::GetInt("prec-ppm"), noise_intensity_rank, false);
     double intensity_rank_m1 = closestPPMValue(mz_arr, intensity_rank_arr, peak_num, peptide_mz_m0 + 1.0/(charge * 1.0), Params::GetInt("prec-ppm"), noise_intensity_rank, false);
@@ -531,11 +531,11 @@ void DIAmeterApplication::computePrecFragCoelute(
   vector<double> ms1_corrs, ms2_corrs, ms1_ms2_corrs;
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
+    Peptide* peptide = (*i).peptide_ptr_;
     // Precursor signals
-    double peptide_mz_m0 = Peptide::MassToMz(peptide.Mass(), charge);
+    double peptide_mz_m0 = Peptide::MassToMz(peptide->Mass(), charge);
     // Fragment signals
-    vector<double> ion_mzs = peptide.IonMzs();
+    vector<double> ion_mzs = peptide->IonMzs();
     // Precursor and fragment chromatograms
     vector<double*> ms1_chroms, ms2_chroms;
 
@@ -648,8 +648,8 @@ void DIAmeterApplication::computeMS2Pval(
   vector<double> pvalue_binomial_probs;
 
   for (TideMatchSet::PSMScores::iterator i = vec.begin(); i != vec.end(); ++i) {
-    Peptide& peptide = *(peptides->GetPeptide((*i).ordinal_));
-    vector<int> ion_mzbins = peptide.IonMzbins();
+    Peptide* peptide = (*i).peptide_ptr_;
+    vector<int> ion_mzbins = peptide->IonMzbins();
 
     intersect_mzbins.clear();
     // sort(ion_mzbins.begin(), ion_mzbins.end()); // sort the vector for calculating the intersection lateron
@@ -667,8 +667,8 @@ void DIAmeterApplication::computeMS2Pval(
     double ms2pval2 = 0.0, intensitysum = 0.0;
 
     // deal with another alternative
-    vector<int> b_ion_mzbins = peptide.BIonMzbins();
-    vector<int> y_ion_mzbins = peptide.YIonMzbins();
+    vector<int> b_ion_mzbins = peptide->BIonMzbins();
+    vector<int> y_ion_mzbins = peptide->YIonMzbins();
 
     intersect_mzbins.clear(); intensitysum = 0.0;
     set_intersection(filtered_peak_mzbins.begin(), filtered_peak_mzbins.end(), b_ion_mzbins.begin(), b_ion_mzbins.end(), back_inserter(intersect_mzbins));
