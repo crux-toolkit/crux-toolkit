@@ -337,6 +337,7 @@ if (WIN32 AND NOT CYGWIN)
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
+      libpwiz_analysis_common.lib
       libpwiz_analysis_diaumpire
       libpwiz_analysis_frequency
       libpwiz_analysis_passive_core
