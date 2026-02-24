@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <iostream>
 #include <random>
 #include <stdexcept>
@@ -390,11 +391,69 @@ class IntensityNormalizationEngine {
    private:
     static const int numPeptidesDesiredFromEachFraction = 500;
     static const int numPeptidesDesiredInMatrix = 5000;
-    CruxLFQResults results;
+    CruxLFQResults& results;
     bool integrate;
     bool quantifyAmbiguousPeptides;
+    std::string outputDir;
+
+    // Helper function to write 2D vector to CSV
+    void writeVectorToCSV(const std::string& filename, const std::vector<std::vector<double>>& data, const std::vector<std::string>& headers = {}) {
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            carp(CARP_WARNING, "Could not open CSV file: %s", filename.c_str());
+            return;
+        }
+        
+        // Write headers if provided
+        if (!headers.empty()) {
+            for (size_t i = 0; i < headers.size(); ++i) {
+                file << headers[i];
+                if (i < headers.size() - 1) file << ",";
+            }
+            file << "\n";
+        }
+        
+        // Write data
+        for (const auto& row : data) {
+            for (size_t i = 0; i < row.size(); ++i) {
+                file << row[i];
+                if (i < row.size() - 1) file << ",";
+            }
+            file << "\n";
+        }
+        file.close();
+        carp(CARP_INFO, "Wrote CSV: %s", filename.c_str());
+    }
+    
+    // Helper function to write 1D vector to CSV
+    void writeVector1DToCSV(const std::string& filename, const std::vector<double>& data, const std::string& header = "value") {
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            carp(CARP_WARNING, "Could not open CSV file: %s", filename.c_str());
+            return;
+        }
+        
+        file << header << "\n";
+        for (const auto& val : data) {
+            file << val << "\n";
+        }
+        file.close();
+        carp(CARP_INFO, "Wrote CSV: %s", filename.c_str());
+    }
+    
+    // Helper to create full path in output directory
+    std::string makeOutputPath(const std::string& filename) {
+        if (outputDir.empty()) {
+            return filename;
+        }
+        return outputDir + "/" + filename;
+    }
 
     void NormalizeTechreps() {
+        // CSV logging: collect all inputs and outputs
+        std::vector<std::vector<double>> techrepInputs;  // fold changes
+        std::vector<std::vector<double>> techrepOutputs; // normalization factors
+        
         std::vector<CruxLFQ::Peptides> peptides;
         peptides.reserve(results.PeptideModifiedSequences.size());
 
@@ -448,6 +507,10 @@ class IntensityNormalizationEngine {
 
                         double medianFoldChange = Median(foldChanges);
                         double normalizationFactor = 1.0 / medianFoldChange;
+                        
+                        // CSV logging: store inputs and outputs
+                        techrepInputs.push_back(foldChanges);
+                        techrepOutputs.push_back({medianFoldChange, normalizationFactor});
 
                         // normalize to median fold-change
                         for (auto& peak : results.Peaks[techreps[t].FullFilePathWithExtension]) {
@@ -462,9 +525,14 @@ class IntensityNormalizationEngine {
                 }
             }
         }
+        
     }
 
     void NormalizeFractions() {
+        // CSV logging: collect all inputs and outputs
+        std::vector<std::vector<double>> fractionInputsFlat;  // peptide intensities
+        std::vector<std::vector<double>> fractionOutputs;     // normalization factors
+        
         auto& spectraFiles = results.spectraFiles;
         auto& peaks = results.Peaks;
         if (std::max_element(
@@ -603,7 +671,20 @@ class IntensityNormalizationEngine {
                     }
                 }
 
+                // CSV logging: flatten myIntensityArray for input logging
+                std::vector<double> flattenedInput;
+                for (const auto& peptide : myIntensityArray) {
+                    for (const auto& biorep : peptide) {
+                        for (const auto& fraction : biorep) {
+                            flattenedInput.push_back(fraction);
+                        }
+                    }
+                }
+                fractionInputsFlat.push_back(flattenedInput);
+                
                 auto normFactors = GetNormalizationFactors(myIntensityArray, numP, numF);
+                fractionOutputs.push_back(normFactors);
+                
                 carp(CARP_INFO, "Normalization factors for condition \"%s\" biorep %d:", condition.c_str(), b + 1);
 
                 for (const auto& spectraFile : filesForThisBiorep) {
@@ -617,13 +698,29 @@ class IntensityNormalizationEngine {
                 }
             }
         }
+        
+        // Write CSV files for fraction normalization
+        if (!fractionInputsFlat.empty()) {
+            writeVectorToCSV(makeOutputPath("NormalizeFractions_input.csv"), fractionInputsFlat, {"peptide_intensities"});
+            writeVectorToCSV(makeOutputPath("NormalizeFractions_output.csv"), fractionOutputs, {"normalization_factors"});
+        }
     }
 
     void NormalizeBioreps() {
+        carp(CARP_INFO, "[NORM] === NormalizeBioreps() ENTRY ===");
+        carp(CARP_INFO, "[NORM] results.spectraFiles.size() = %zu", results.spectraFiles.size());
+        carp(CARP_INFO, "[NORM] results.PeptideModifiedSequences.size() = %zu", results.PeptideModifiedSequences.size());
+        
+        // CSV logging: collect all inputs and outputs
+        std::vector<std::vector<double>> biorepInputs;  // fold changes
+        std::vector<std::vector<double>> biorepOutputs; // median fold change, normalization factor
+        
         vector<Peptides> peptides;
         for (const auto& v : results.PeptideModifiedSequences) {
             peptides.push_back(v.second);
         }
+
+        carp(CARP_INFO, "[NORM] Copied %zu peptides", peptides.size());
 
         std::vector<std::vector<SpectraFileInfo>> conditions;
         std::map<std::string, std::vector<SpectraFileInfo>> grouped;
@@ -632,9 +729,20 @@ class IntensityNormalizationEngine {
             grouped[v.Condition].push_back(v);
         }
 
+        carp(CARP_INFO, "[NORM] Grouped into %zu condition groups", grouped.size());
+
         for (const auto& group : grouped) {
             conditions.push_back(group.second);
         }
+
+        carp(CARP_INFO, "[NORM] Created %zu condition vectors", conditions.size());
+        
+        if (conditions.empty()) {
+            carp(CARP_INFO, "[NORM] No conditions found, returning");
+            return;
+        }
+
+        carp(CARP_INFO, "[NORM] Found %zu peptides, %zu conditions", peptides.size(), conditions.size());
 
         vector<vector<double>> biorepIntensityPair(peptides.size(), vector<double>(2));
 
@@ -644,69 +752,114 @@ class IntensityNormalizationEngine {
                 firstConditionFirstBiorep.push_back(v);
             }
         }
+        
         for (const auto& file : firstConditionFirstBiorep) {
             for (size_t p = 0; p < peptides.size(); ++p) {
-                biorepIntensityPair[p][0] += peptides[p].getIntensity(file.FullFilePathWithExtension);
-            }
-        }
-        for (auto& condition : conditions) {
-            std::map<int, std::vector<SpectraFileInfo>> bioreps;
-            for (auto& v : condition) {
-                bioreps[v.BiologicalReplicate].push_back(v);
-                for (auto& biorep : bioreps) {
-                    for (size_t p = 0; p < peptides.size(); ++p) {
-                        biorepIntensityPair[p][1] = 0;
-                    }
-
-                    std::map<int, std::vector<SpectraFileInfo>> fractions;
-                    for (auto& v : biorep.second) {
-                        fractions[v.Fraction].push_back(v);
-                    }
-
-                    for (auto& fraction : fractions) {
-                        SpectraFileInfo firstTechrep;
-                        for (auto& v : fraction.second) {
-                            if (v.TechnicalReplicate == 0) {
-                                firstTechrep = v;
-                                break;
-                            }
-                        }
-
-                        for (size_t p = 0; p < peptides.size(); ++p) {
-                            biorepIntensityPair[p][1] += peptides[p].getIntensity(firstTechrep.FullFilePathWithExtension);
-                        }
-                    }
-
-                    std::vector<double> foldChanges;
-
-                    for (size_t p = 0; p < peptides.size(); ++p) {
-                        if (biorepIntensityPair[p][0] > 0 && biorepIntensityPair[p][1] > 0) {
-                            foldChanges.push_back(biorepIntensityPair[p][1] / biorepIntensityPair[p][0]);
-                        }
-                    }
-
-                    if (foldChanges.empty()) {
-                        // TODO: throw an exception?
-                        return;
-                    }
-
-                    double medianFoldChange = Median(foldChanges);
-                    double normalizationFactor = 1.0 / medianFoldChange;
-
-                    // normalize to median fold-change
-                    for (auto& file : biorep.second) {
-                        for (auto& peak : results.Peaks[file.FullFilePathWithExtension]) {
-                            for (auto& isotopeEnvelope : peak.isotopicEnvelopes) {
-                                isotopeEnvelope.Normalize(normalizationFactor);
-                            }
-
-                            // recalculate intensity after normalization
-                            peak.calculateIntensityForThisFeature(integrate);
-                        }
-                    }
+                double intensity = peptides[p].getIntensity(file.FullFilePathWithExtension);
+                biorepIntensityPair[p][0] += intensity;
+                if (p == 0) {
+                    carp(CARP_INFO, "[NORM] Ref intensity: %.2f from %s", intensity, file.FullFilePathWithExtension.c_str());
                 }
             }
         }
+        
+        for (size_t condIdx = 0; condIdx < conditions.size(); ++condIdx) {
+            auto& condition = conditions[condIdx];
+            std::map<int, std::vector<SpectraFileInfo>> bioreps;
+            for (auto& v : condition) {
+                bioreps[v.BiologicalReplicate].push_back(v);
+            }
+            
+            carp(CARP_INFO, "[NORM] Condition %zu has %zu bioreps", condIdx, bioreps.size());
+            
+            for (auto& biorep : bioreps) {
+                carp(CARP_INFO, "[NORM] Processing biorep %d", biorep.first);
+                
+                for (size_t p = 0; p < peptides.size(); ++p) {
+                    biorepIntensityPair[p][1] = 0;
+                }
+
+                std::map<int, std::vector<SpectraFileInfo>> fractions;
+                for (auto& v : biorep.second) {
+                    fractions[v.Fraction].push_back(v);
+                }
+
+                for (auto& fraction : fractions) {
+                    SpectraFileInfo firstTechrep;
+                    for (auto& v : fraction.second) {
+                        if (v.TechnicalReplicate == 0) {
+                            firstTechrep = v;
+                            break;
+                        }
+                    }
+
+                    for (size_t p = 0; p < peptides.size(); ++p) {
+                        double intensity = peptides[p].getIntensity(firstTechrep.FullFilePathWithExtension);
+                        biorepIntensityPair[p][1] += intensity;
+                        if (p == 0) {
+                            carp(CARP_INFO, "[NORM] Target intensity: %.2f from %s", intensity, firstTechrep.FullFilePathWithExtension.c_str());
+                        }
+                    }
+                }
+
+                std::vector<double> foldChanges;
+
+                for (size_t p = 0; p < peptides.size(); ++p) {
+                    if (biorepIntensityPair[p][0] > 0 && biorepIntensityPair[p][1] > 0) {
+                        double fc = biorepIntensityPair[p][1] / biorepIntensityPair[p][0];
+                        foldChanges.push_back(fc);
+                        if (p == 0) {
+                            carp(CARP_INFO, "[NORM] FoldChange: %.2f / %.2f = %.4f", 
+                                 biorepIntensityPair[p][1], biorepIntensityPair[p][0], fc);
+                        }
+                    }
+                }
+
+                if (foldChanges.empty()) {
+                    carp(CARP_INFO, "[NORM] No fold changes, skipping");
+                    continue;  // Skip this biorep
+                }
+
+                double medianFoldChange = Median(foldChanges);
+                double normalizationFactor = 1.0 / medianFoldChange;
+                
+                // CSV logging: store inputs and outputs
+                biorepInputs.push_back(foldChanges);
+                biorepOutputs.push_back({medianFoldChange, normalizationFactor});
+                
+                carp(CARP_INFO, "[NORM] Biorep %d: medianFC=%.4f, normFactor=%.4f", 
+                     biorep.first, medianFoldChange, normalizationFactor);
+
+                // normalize to median fold-change
+                int peaksNormalized = 0;
+                for (auto& file : biorep.second) {
+                    carp(CARP_INFO, "[NORM] Normalizing file: %s (%zu peaks)", 
+                         file.FullFilePathWithExtension.c_str(), 
+                         results.Peaks[file.FullFilePathWithExtension].size());
+                    
+                    for (auto& peak : results.Peaks[file.FullFilePathWithExtension]) {
+                        double oldIntensity = peak.intensity;
+                        for (auto& isotopeEnvelope : peak.isotopicEnvelopes) {
+                            isotopeEnvelope.Normalize(normalizationFactor);
+                        }
+
+                        // recalculate intensity after normalization
+                        peak.calculateIntensityForThisFeature(integrate);
+                        carp(CARP_INFO, "[NORM] Peak intensity: %.2f -> %.2f", oldIntensity, peak.intensity);
+                        peaksNormalized++;
+                    }
+                }
+                carp(CARP_INFO, "[NORM] Normalized %d peaks for biorep %d", peaksNormalized, biorep.first);
+            }
+        }
+        
+        // Write CSV files for biorep normalization
+        if (!biorepInputs.empty()) {
+            writeVectorToCSV(makeOutputPath("NormalizeBioreps_input.csv"), biorepInputs, {"fold_changes"});
+            writeVectorToCSV(makeOutputPath("NormalizeBioreps_output.csv"), biorepOutputs, {"median_fold_change", "normalization_factor"});
+        }
+        
+        carp(CARP_INFO, "[NORM] NormalizeBioreps() completed");
     }
 
     double CalculateNormalizationFactorError(vector<double>& reference, vector<vector<double>>& sampleToNormalize, vector<double>& normalizationFactors, int numP, int numF) {
@@ -729,18 +882,38 @@ class IntensityNormalizationEngine {
     }
 
     vector<double> GetNormalizationFactors(std::vector<std::vector<std::vector<double>>> peptideIntensities, int numP, int numF) {
+        
+        // CSV logging: flatten input peptideIntensities
+        std::vector<std::vector<double>> inputData;
+        for (const auto& peptide : peptideIntensities) {
+            std::vector<double> flatRow;
+            for (const auto& biorep : peptide) {
+                for (const auto& fraction : biorep) {
+                    flatRow.push_back(fraction);
+                }
+            }
+            inputData.push_back(flatRow);
+        }
+        
         std::vector<double> referenceSample(numP, 0.0);
         std::vector<std::vector<double>> sampleToNormalize(numP, std::vector<double>(numF, 0.0));
+        
+        // populate the peptide sample quantity array for normalization calculations
         for (int p = 0; p < numP; ++p) {
             for (int f = 0; f < numF; ++f) {
                 referenceSample[p] += peptideIntensities[p][0][f];
                 sampleToNormalize[p][f] = peptideIntensities[p][1][f];
             }
         }
+        
+        // initialize normalization factors to 1.0
+        // normalization factor optimization must improve on these to be valid
         std::vector<double> bestNormFactors(numF, 1.0);
 
+        // calculate the error between bioreps if all normalization factors are 1 (initial error)
         std::vector<double> initialErrors(numP, 0.0);
         double bestError = CalculateNormalizationFactorError(referenceSample, sampleToNormalize, bestNormFactors, numP, numF);
+        
         // constraint (normalization factors must be >0.3 and <3)
         std::vector<ParameterBounds> parameterArray(numF);
         for (int f = 0; f < numF; f++) {
@@ -763,6 +936,7 @@ class IntensityNormalizationEngine {
                     bestNormFactors[f] = factors[f];
                 }
             }
+            
         }
 
         // find the best normalization factors (minimize error)
@@ -777,7 +951,20 @@ class IntensityNormalizationEngine {
         };
 
         // create optimizer
-        NelderMeadWithStartPoints optimizer(parameterArray, bestNormFactors, 10);
+        // C++ with all parameters explicitly specified - matches C# exactly
+        NelderMeadWithStartPoints optimizer(
+            parameterArray,                 // parameters
+            bestNormFactors,                // startingValue
+            8,                              // maxRestarts (C# default)
+            0.001,                          // noImprovementThreshold (C# default)
+            10,                             // maxIterationsWithoutImprovement (from C# call)
+            0,                              // maxIterationsPrRestart (C# default)
+            0,                              // maxFunctionEvaluations (C# default)
+            1.0,                            // alpha (C# default)
+            2.0,                            // gamma (C# default)
+            -0.5,                           // rho (C# default)
+            0.5                             // sigma (C# default)
+        );
         OptimizerResult result = optimizer.OptimizeBest(minimize);
 
         double sampleError = result.Error;
@@ -790,12 +977,20 @@ class IntensityNormalizationEngine {
             }
         }
 
+        // Write CSV files for GetNormalizationFactors
+        static int gnfCallCount = 0;
+        gnfCallCount++;
+        std::string inputFile = makeOutputPath("GetNormalizationFactors_input_" + std::to_string(gnfCallCount) + ".csv");
+        std::string outputFile = makeOutputPath("GetNormalizationFactors_output_" + std::to_string(gnfCallCount) + ".csv");
+        writeVectorToCSV(inputFile, inputData, {"peptide_intensities"});
+        writeVector1DToCSV(outputFile, bestNormFactors, "normalization_factor");
+
         return bestNormFactors;
     }
 
    public:
-    IntensityNormalizationEngine(CruxLFQResults results, bool integrate, bool quantifyAmbiguousPeptides = false)
-        : results(results), integrate(integrate), quantifyAmbiguousPeptides(quantifyAmbiguousPeptides) {}
+    IntensityNormalizationEngine(CruxLFQResults& results, bool integrate, bool quantifyAmbiguousPeptides = false, const std::string& outputDir = "")
+        : results(results), integrate(integrate), quantifyAmbiguousPeptides(quantifyAmbiguousPeptides), outputDir(outputDir) {}
 
     void NormalizeResults() {
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
@@ -806,11 +1001,30 @@ class IntensityNormalizationEngine {
 
         carp(CARP_INFO, "Normalizing bioreps and conditions");
         NormalizeBioreps();
+        
+        // DEBUG: Check peak values right after biorep normalization
+        carp(CARP_INFO, "[VERIFY] Checking peaks after biorep normalization:");
+        for (const auto& filePeaks : results.Peaks) {
+            if (!filePeaks.second.empty()) {
+                carp(CARP_INFO, "[VERIFY]   File: %s, Peak[0].intensity = %.2f", 
+                     filePeaks.first.c_str(), filePeaks.second[0].intensity);
+            }
+        }
+        
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
 
         carp(CARP_INFO, "Normalizing techreps");
         NormalizeTechreps();
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
+        
+        // DEBUG: Final check
+        carp(CARP_INFO, "[VERIFY] Final peak check:");
+        for (const auto& filePeaks : results.Peaks) {
+            if (!filePeaks.second.empty()) {
+                carp(CARP_INFO, "[VERIFY]   File: %s, Peak[0].intensity = %.2f", 
+                     filePeaks.first.c_str(), filePeaks.second[0].intensity);
+            }
+        }
     }
 };
 }  // namespace CruxLFQ
