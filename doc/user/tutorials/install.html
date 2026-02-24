@@ -495,8 +495,8 @@
 		<code>Thermo MSFileReader V3.0 SP3</code></a>
     </li>
 		<li>
-		<a href="https://www.microsoft.com/en-us/download/details.aspx?id=40784">
-		<code>Visual Studio C++ 2019 Runtime Libraries</code></a>
+		<a href="https://aka.ms/vc14/vc_redist.x64.exe">
+		<code>Visual Studio C++ 2022 Runtime Libraries</code></a>
     </li>
 		</ul>
 		<p/>
@@ -610,20 +610,20 @@
 		Run the command
 		<div class=code><code>
 		cmake -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -G "Visual Studio
-		16" -A X64 .
+		17 2022" -A X64 .
 		</code>
 		</div>
 		<p/>
 		where <span class=file>&lt;install directory&gt;</span> is
 		the location where you wish to install the <span class=prog>Crux</span> programs. 
-		Note that, somewhat confusingly, Visual Studio 2019 is version 16.
+		Note that, somewhat confusingly, Visual Studio 2022 is version 17.
 		<p/>
 		If you wish to disable support for vendor specific file formats,
 		use this command instead
 		<p/>
 		<div class=code><code>
 		cmake 
-		-DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -DINCLUDE_VENDOR_LIBRARIES=FALSE -G "Visual Studio 15 Win64" .
+		-DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; -DINCLUDE_VENDOR_LIBRARIES=FALSE -G "Visual Studio 17 2022" -A X64 .
 		</code>
 		</div>
 		<p/>
