@@ -26,6 +26,15 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
+namespace {
+    string fileNameWithoutExtension(const string& path) {
+        size_t lastSlash = path.find_last_of("/\\");
+        string name = (lastSlash == string::npos) ? path : path.substr(lastSlash + 1);
+        size_t lastDot = name.find_last_of('.');
+        return (lastDot == string::npos) ? name : name.substr(0, lastDot);
+    }
+}
+
 int CruxLFQ::NUM_ISOTOPES_REQUIRED = 2;                       // Default value is 2
 double CruxLFQ::PEAK_FINDING_PPM_TOLERANCE = 20.0;            // Default value is 20.0
 double CruxLFQ::PPM_TOLERANCE = 10.0;                         // Default value is 10.0
@@ -89,11 +98,9 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     vector<CruxLFQ::Identification> allIdentifications;
     std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
-    for (const string& spectra_file : spec_files) {
-        vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_data, spectra_file);
-        for (auto& id : tempIdentifications) {
-            uniqueIdentifications.insert(id);
-        }
+    vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_data, spec_files);
+    for (auto& id : tempIdentifications) {
+        uniqueIdentifications.insert(id);
     }
     std::copy(uniqueIdentifications.begin(), uniqueIdentifications.end(), std::back_inserter(allIdentifications));
 
@@ -119,6 +126,8 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             [&spectra_file](const Identification& identification) {
                 return identification.spectralFile == spectra_file;
             });
+        carp(CARP_INFO, "Filtered %zu identifications out of %zu total for '%s'",
+             filteredIdentifications.size(), allIdentifications.size(), spectra_file.c_str());
 
         vector<vector<CruxLFQ::IndexedMassSpectralPeak>*> convertedPeaks;
 
@@ -149,7 +158,8 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         CruxLFQ::IntensityNormalizationEngine intensityNormalizationEngine(
             lfqResults,
             CruxLFQ::INTEGRATE,
-            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES);
+            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES,
+            output_dir);
         intensityNormalizationEngine.NormalizeResults();
     }
 
@@ -271,10 +281,10 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
     }
 
     int scanIndex = 0;
-    int oneBasedScanNumber = 1;
     for (auto spectrum = spectrum_collection->begin(); spectrum != spectrum_collection->end(); ++spectrum) {
         if (*spectrum != nullptr) {
             double retentionTime = (*spectrum)->getRTime();
+            int nativeScanNumber = (*spectrum)->getFirstScan();  // Native scan number from mzML
             for (auto peak = (*spectrum)->begin(); peak != (*spectrum)->end(); ++peak) {
                 if (*peak != nullptr) {
                     double mz = (*peak)->getLocation();
@@ -289,13 +299,13 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
                         mz,                       // mz value
                         (*peak)->getIntensity(),  // intensity
                         scanIndex,                // zeroBasedMs1ScanIndex
+                        nativeScanNumber,         // nativeScanNumber from mzML
                         retentionTime             // retentionTime
                     );
                 }
             }
-            index_results._ms1Scans[spectra_file].emplace_back(oneBasedScanNumber, scanIndex, retentionTime);
+            index_results._ms1Scans[spectra_file].emplace_back(nativeScanNumber, scanIndex, retentionTime);
             scanIndex++;
-            oneBasedScanNumber++;
         }
     }
 
@@ -303,23 +313,39 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
 }
 
 // Make this a multithreaded process
-vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const string& spectra_file) {
-    carp(CARP_INFO, "Creating indentifications, this may take a bit of time, do not terminate the process...");
+vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files) {
+    carp(CARP_INFO, "Creating identifications, this may take a bit of time, do not terminate the process...");
+
+    // Build a map from file stem -> CLI spectra file path (like C# FindMatchingSpecFile)
+    unordered_map<string, string> stemToSpecFile;
+    for (const auto& spec_file : spec_files) {
+        stemToSpecFile[fileNameWithoutExtension(spec_file)] = spec_file;
+    }
 
     vector<Identification> allIdentifications;
 
     for (const auto& psm : psm_data) {
+        string psmStem = fileNameWithoutExtension(psm.file_name);
+        auto it = stemToSpecFile.find(psmStem);
+        if (it == stemToSpecFile.end()) {
+            // PSM is from a file we're not processing — skip it
+            continue;
+        }
+
         allIdentifications.emplace_back(
             psm.sequence_col,
             psm.monoisotopic_mass_col,
             psm.peptide_mass_col,
             psm.charge_col,
-            spectra_file,
+            it->second,  // resolved CLI spectra file path
             psm.retention_time,
             psm.scan_col,
             psm.modifications,
             psm.protein_id);
     }
+
+    carp(CARP_INFO, "Created %zu identifications matching %zu spectra files (from %zu total PSMs)",
+         allIdentifications.size(), spec_files.size(), psm_data.size());
 
     return allIdentifications;
 }
@@ -376,7 +402,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
         carp(CARP_FATAL, "Error: Could not open the PSM file!");
     }
 
-    string sequence_col, protein_id, line, psm_id;
+    string sequence_col, protein_id, line, psm_id, file_name_col;
     int scan_col, charge_col;
     double peptide_mass_col, q_value, retention_time;
 
@@ -454,6 +480,7 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
                  line_number, line.c_str());
         }
         psm_id = tokens[0];
+        file_name_col = tokens[1];
         q_value = std::stod(tokens[3]);
         sequence_col = tokens[5];
         protein_id = tokens[6];
@@ -513,7 +540,8 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
                               peptide_mass_col,
                               sequence_col,
                               retention_time,
-                              protein_id);
+                              protein_id,
+                              file_name_col);
     }
     return psm_data;
 }

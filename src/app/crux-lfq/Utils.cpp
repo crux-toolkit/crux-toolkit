@@ -53,12 +53,12 @@ vector<PSM> create_psm(const string& psm_file) {
 
     vector<PSM> psm_data;
 
-    string sequence_col, modifications_col, unmodified_sequence, protein_id, psm_id;
+    string sequence_col, modifications_col, unmodified_sequence, protein_id, psm_id, file_col;
     int scan_col, charge_col;
     double peptide_mass_col, spectrum_precursor_mz_col, spectrum_neutral_mass_col, q_value, retention_time;
 
     if (psm_file_format == "assign-confidence") {
-        io::CSVReader<10, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
+        io::CSVReader<11, io::trim_chars<' ', '\t'>, io::no_quote_escape<'\t'>>
             matchFileReader(psm_file);
         matchFileReader.read_header(io::ignore_extra_column,
                                     "scan",
@@ -70,7 +70,8 @@ vector<PSM> create_psm(const string& psm_file) {
                                     "spectrum neutral mass",
                                     "retention time",
                                     "tdc q-value",
-                                    "protein id");
+                                    "protein id",
+                                    "file");
         while (matchFileReader.read_row(scan_col,
                                         charge_col,
                                         spectrum_precursor_mz_col,
@@ -80,7 +81,8 @@ vector<PSM> create_psm(const string& psm_file) {
                                         spectrum_neutral_mass_col,
                                         retention_time,
                                         q_value,
-                                        protein_id)) {
+                                        protein_id,
+                                        file_col)) {
             if (!filtered && q_value > q_value_threshold) {
                 continue;
             }
@@ -95,7 +97,8 @@ vector<PSM> create_psm(const string& psm_file) {
                                   peptide_mass_col,
                                   unmodified_sequence,
                                   retention_time,
-                                  protein_id);
+                                  protein_id,
+                                  file_col);
         }
     }else {
         carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
@@ -497,6 +500,7 @@ void processRange(int start, int end,
             msmsFeature.isotopicEnvelopes.end());
 
         msmsFeature.calculateIntensityForThisFeature(INTEGRATE);
+
         // May need to change this
         {
             std::lock_guard<std::mutex> lock(mtx);
@@ -668,6 +672,16 @@ vector<IndexedMassSpectralPeak*> peakFind(
             } else {
                 break;
             }
+        }
+    } else {
+        static int missCount = 0;
+        if (missCount < 5) {
+            carp(CARP_WARNING, "peakFind: ms1ScansMap lookup FAILED for key '%s'. Map has %zu entries:",
+                 spectra_file.c_str(), ms1ScansMap.size());
+            for (const auto& kv : ms1ScansMap) {
+                carp(CARP_WARNING, "  map key: '%s'", kv.first.c_str());
+            }
+            missCount++;
         }
     }
 

@@ -85,7 +85,7 @@ class CruxLFQApplication : public CruxApplication {
 
     static IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
-    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const string& spectra_file);
+    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files);
 
     static vector<PSM> create_percolator_psm(const string& psm_file);
     static void gen_mods(

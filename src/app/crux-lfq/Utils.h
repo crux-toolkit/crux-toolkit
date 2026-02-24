@@ -224,6 +224,7 @@ struct PSM {
     string modifications;
     double retention_time;
     string protein_id;
+    string file_name;
 
     PSM(string seq,
         int scan,
@@ -232,14 +233,16 @@ struct PSM {
         double mmass,
         string mod,
         double rt,
-        string prot_id = "") : sequence_col(seq),
-                               scan_col(scan),
-                               charge_col(charge),
-                               peptide_mass_col(pmass),
-                               monoisotopic_mass_col(mmass),
-                               modifications(mod),
-                               retention_time(rt),
-                               protein_id(prot_id) {}
+        string prot_id = "",
+        string fname = "") : sequence_col(seq),
+                              scan_col(scan),
+                              charge_col(charge),
+                              peptide_mass_col(pmass),
+                              monoisotopic_mass_col(mmass),
+                              modifications(mod),
+                              retention_time(rt),
+                              protein_id(prot_id),
+                              file_name(fname) {}
 };
 
 enum class DetectionType {
