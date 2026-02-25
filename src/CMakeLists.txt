@@ -473,7 +473,6 @@ else()
     crux-lfq-support
     cometsearch
     kojaksearch
-    crux-lfq-support
     libneopepxmlparser.a
     gflags
     bullseye

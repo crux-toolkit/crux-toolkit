@@ -268,7 +268,7 @@ struct ChromatographicPeak {
             }
 
             // Recalculate intensity for this feature
-            calculateIntensityForThisFeature(INTEGRATE);
+            calculateIntensityForThisFeature(integrate);
         }
     }
 };

@@ -25,7 +25,7 @@ namespace CruxLFQ {
 class CruxLFQResults {
    public:
     map<string, std::vector<ChromatographicPeak>> Peaks;
-    map<string, Peptides> PeptideModifiedSequences;
+    map<string, LFQPeptides> PeptideModifiedSequences;
     map<string, ProteinGroup> ProteinGroups;
     vector<SpectraFileInfo> spectraFiles;
 
@@ -106,6 +106,7 @@ class CruxLFQResults {
 
     // void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
     void writeResults(const string &mod_pep_results_file, const string &peak_results_file, const vector<std::string> &rawFiles) {
+        
         carp(CARP_INFO, "Writing output...");
 
         string prf = peak_results_file;
@@ -143,16 +144,17 @@ class CruxLFQResults {
         } else {
             carp(CARP_FATAL, "Failed to open peptides results file for writing.");
         }
+        
     }
 
     void setPeptideModifiedSequencesAndProteinGroups(const vector<Identification> &identifications) {
         for (const Identification &id : identifications) {
             auto it = PeptideModifiedSequences.find(id.sequence);
             if (it == PeptideModifiedSequences.end()) {
-                Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups, id.protein_id);
+                LFQPeptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups, id.protein_id);
                 PeptideModifiedSequences[id.sequence] = peptide;
             } else {
-                Peptides &peptide = it->second;
+                LFQPeptides &peptide = it->second;
                 for (const ProteinGroup &proteinGroup : id.proteinGroups) {
                     peptide.insertProteinGroup(proteinGroup);
                 }
@@ -168,6 +170,7 @@ class CruxLFQResults {
     }
 
     void calculatePeptideResults(bool quantifyAmbiguousPeptides) {
+        
         for (auto &sequence : PeptideModifiedSequences) {
             for (auto &file : spectraFiles) {
                 sequence.second.setDetectionType(file.FullFilePathWithExtension, DetectionType::NotDetected);
@@ -210,6 +213,8 @@ class CruxLFQResults {
 
                 PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, detectionType);
                 PeptideModifiedSequences[sequence].setIntensity(filePeaks.first, intensity);
+                carp(CARP_INFO, "[CALC] Set peptide '%s' intensity for file '%s': %.2f", 
+                     sequence.c_str(), filePeaks.first.c_str(), intensity);
             }
 
             // report ambiguous quantification
@@ -244,10 +249,12 @@ class CruxLFQResults {
         if (!quantifyAmbiguousPeptides) {
             handleAmbiguityInFractions();
         }
+        
     }
 
     // May be redundant with our current implementation
     void handleAmbiguityInFractions() {
+        
         // handle ambiguous peaks in fractionated data
         // if the largest fraction intensity is ambiguous, zero out the other fractions for the sample
         map<string, vector<SpectraFileInfo>> sampleGroups;
@@ -285,7 +292,7 @@ class CruxLFQResults {
                         }
                     }
 
-                    vector<Peptides> peptides;
+                    vector<LFQPeptides> peptides;
                     for (auto &item : PeptideModifiedSequences) {
                         peptides.push_back(item.second);
                     }
@@ -340,9 +347,11 @@ class CruxLFQResults {
                 }
             }
         }
+        
     }
 
     void calculateProteinResultsMedianPolish(bool useSharedPeptides) {
+        
         // Reset protein intensities to 0
         for (auto &proteinGroup : ProteinGroups) {
             for (const auto &file : spectraFiles) {
@@ -350,16 +359,16 @@ class CruxLFQResults {
             }
         }
 
-        vector<Peptides> peptides;
+        vector<LFQPeptides> peptides;
         for (auto &item : PeptideModifiedSequences) {
             if (item.second.UnambiguousPeptideQuant()) {
                 peptides.push_back(item.second);
             }
         }
 
-        std::unordered_map<ProteinGroup, vector<Peptides>> proteinGroupToPeptides;
+        std::unordered_map<ProteinGroup, vector<LFQPeptides>> proteinGroupToPeptides;
 
-        for (Peptides &peptide : peptides) {
+        for (LFQPeptides &peptide : peptides) {
             if (!peptide.getUseForProteinQuant() || (peptide.getProteinGroups().size() > 1 && !useSharedPeptides)) {
                 continue;
             }
@@ -407,7 +416,7 @@ class CruxLFQResults {
                 int sampleN = 0;
                 for (const auto &group : filesGroupedByCondition) {
                     for (const auto &sample : groupedByBiologicalReplicate) {
-                        for (Peptides &peptide : it->second) {
+                        for (LFQPeptides &peptide : it->second) {
                             double sampleIntensity = 0;
                             double highestFractionIntensity = 0;
 
@@ -498,7 +507,7 @@ class CruxLFQResults {
                             if (std::any_of(
                                     peptidesForThisProtein.begin(),
                                     peptidesForThisProtein.end(),
-                                    [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                    [&](LFQPeptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
                                 isMissingValue = false;
                                 break;
                             }
@@ -530,7 +539,7 @@ class CruxLFQResults {
                         for (SpectraFileInfo spectraFile : sample.second) {
                             if (std::any_of(
                                     peptidesForThisProtein.begin(),
-                                    peptidesForThisProtein.end(), [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                    peptidesForThisProtein.end(), [&](LFQPeptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
                                 isMissingValue = false;
                                 break;
                             }
@@ -549,9 +558,11 @@ class CruxLFQResults {
                 }
             }
         }
+        
     };
 
     void MedianPolish(std::vector<vector<double>> &table, int maxIterations = 10, double improvementCutoff = 0.0001) {
+        
         // technically, this is weighted mean polish and not median polish.
         // but it should give similar results while being more robust to issues
         // arising from missing values.
@@ -640,6 +651,7 @@ class CruxLFQResults {
 
             sumAbsoluteResiduals = iterationSumAbsoluteResiduals;
         }
+        
     }
 };
 
