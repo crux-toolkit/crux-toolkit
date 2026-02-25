@@ -37,6 +37,7 @@ endmacro(use_cxx14)
 add_subdirectory(doc/user)
 add_subdirectory(ext)
 add_subdirectory(src)
+add_subdirectory(test/unit-tests)
 
 
 # Only process smoke tests directory if it exiists
@@ -130,6 +131,10 @@ add_dependencies(tide-support gflags-2.2.2)
 add_dependencies(tide-support MSToolkit)
 add_dependencies(tide-support ProteoWizard)
 add_dependencies(tide-support protobuf-3.19.4)
+add_dependencies(crux-lfq-support MSToolkit)
+add_dependencies(crux-lfq-support protobuf-3.19.4)
+add_dependencies(crux_lfq_test crux-lfq-support)
+add_dependencies(crux crux-lfq-support)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)
