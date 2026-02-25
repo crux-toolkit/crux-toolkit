@@ -27,19 +27,9 @@ using std::vector;
  */
 class CruxLFQApplication : public CruxApplication {
    public:
-    /**
-     * Constructor
-     */
     CruxLFQApplication();
-
-    /**
-     * Destructor
-     */
     ~CruxLFQApplication();
 
-    /**
-     * Main method
-     */
     virtual int main(int argc, char** argv);
 
     int main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates);

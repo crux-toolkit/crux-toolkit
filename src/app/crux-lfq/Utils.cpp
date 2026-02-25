@@ -34,16 +34,6 @@ std::mutex mtx;  // Declare a mutex
 
 namespace CruxLFQ {
 
-/**
- * @brief Creates a map of PSM (Peptide-Spectrum Match) data from a given file.
- *
- * This function reads a PSM file in a specific format and creates a map of PSM objects.
- * The PSM file format can be either "tide-search", "assign-confidence", or "percolator".
- *
- * @param psm_file The path to the PSM file.
- * @param psm_file_format The format of the PSM file.
- * @return A PSM containing the PSM data, where the key is the scan column value.
- */
 vector<PSM> create_psm(const string& psm_file) {
 
     string psm_file_format = Params::GetString("psm-file-format");
@@ -602,18 +592,7 @@ int binarySearchForIndexedPeak(const vector<IndexedMassSpectralPeak>* indexedPea
     return m;
 }
 
-/**
- * Retrieves the indexed peak for a given theoretical mass, scan index, tolerance, charge state, and indexed peaks map.
- *
- * @param theorMass The theoretical mass of the peak.
- * @param zeroBasedScanIndex The zero-based index of the scan.
- * @param tolerance The tolerance for matching the peak mass.
- * @param chargeState The charge state of the peak.
- * @param indexedPeaks The map of indexed peaks.
- * @return A pointer to the indexed mass spectral peak, or nullptr if not found.
- */
-
-IndexedMassSpectralPeak*  getIndexedPeak(
+IndexedMassSpectralPeak* getIndexedPeak(
     const double& theorMass, int zeroBasedScanIndex, PpmTolerance tolerance,
     int chargeState) {
     auto metaData = &LFQMetaData::getInstance();

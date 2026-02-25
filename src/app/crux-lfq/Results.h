@@ -25,7 +25,7 @@ namespace CruxLFQ {
 class CruxLFQResults {
    public:
     map<string, std::vector<ChromatographicPeak>> Peaks;
-    map<string, Peptides> PeptideModifiedSequences;
+    map<string, LFQPeptides> PeptideModifiedSequences;
     map<string, ProteinGroup> ProteinGroups;
     vector<SpectraFileInfo> spectraFiles;
 
@@ -151,10 +151,10 @@ class CruxLFQResults {
         for (const Identification &id : identifications) {
             auto it = PeptideModifiedSequences.find(id.sequence);
             if (it == PeptideModifiedSequences.end()) {
-                Peptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups, id.protein_id);
+                LFQPeptides peptide(id.sequence, id.modifications, id.useForProteinQuant, id.proteinGroups, id.protein_id);
                 PeptideModifiedSequences[id.sequence] = peptide;
             } else {
-                Peptides &peptide = it->second;
+                LFQPeptides &peptide = it->second;
                 for (const ProteinGroup &proteinGroup : id.proteinGroups) {
                     peptide.insertProteinGroup(proteinGroup);
                 }
@@ -292,7 +292,7 @@ class CruxLFQResults {
                         }
                     }
 
-                    vector<Peptides> peptides;
+                    vector<LFQPeptides> peptides;
                     for (auto &item : PeptideModifiedSequences) {
                         peptides.push_back(item.second);
                     }
@@ -359,16 +359,16 @@ class CruxLFQResults {
             }
         }
 
-        vector<Peptides> peptides;
+        vector<LFQPeptides> peptides;
         for (auto &item : PeptideModifiedSequences) {
             if (item.second.UnambiguousPeptideQuant()) {
                 peptides.push_back(item.second);
             }
         }
 
-        std::unordered_map<ProteinGroup, vector<Peptides>> proteinGroupToPeptides;
+        std::unordered_map<ProteinGroup, vector<LFQPeptides>> proteinGroupToPeptides;
 
-        for (Peptides &peptide : peptides) {
+        for (LFQPeptides &peptide : peptides) {
             if (!peptide.getUseForProteinQuant() || (peptide.getProteinGroups().size() > 1 && !useSharedPeptides)) {
                 continue;
             }
@@ -416,7 +416,7 @@ class CruxLFQResults {
                 int sampleN = 0;
                 for (const auto &group : filesGroupedByCondition) {
                     for (const auto &sample : groupedByBiologicalReplicate) {
-                        for (Peptides &peptide : it->second) {
+                        for (LFQPeptides &peptide : it->second) {
                             double sampleIntensity = 0;
                             double highestFractionIntensity = 0;
 
@@ -507,7 +507,7 @@ class CruxLFQResults {
                             if (std::any_of(
                                     peptidesForThisProtein.begin(),
                                     peptidesForThisProtein.end(),
-                                    [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                    [&](LFQPeptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
                                 isMissingValue = false;
                                 break;
                             }
@@ -539,7 +539,7 @@ class CruxLFQResults {
                         for (SpectraFileInfo spectraFile : sample.second) {
                             if (std::any_of(
                                     peptidesForThisProtein.begin(),
-                                    peptidesForThisProtein.end(), [&](Peptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
+                                    peptidesForThisProtein.end(), [&](LFQPeptides p) { return p.getIntensity(spectraFile.FullFilePathWithExtension) != 0; })) {
                                 isMissingValue = false;
                                 break;
                             }

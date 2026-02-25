@@ -454,14 +454,14 @@ class IntensityNormalizationEngine {
         std::vector<std::vector<double>> techrepInputs;  // fold changes
         std::vector<std::vector<double>> techrepOutputs; // normalization factors
         
-        std::vector<CruxLFQ::Peptides> peptides;
+        std::vector<CruxLFQ::LFQPeptides> peptides;
         peptides.reserve(results.PeptideModifiedSequences.size());
 
         std::transform(
             results.PeptideModifiedSequences.begin(),
             results.PeptideModifiedSequences.end(),
             std::back_inserter(peptides),
-            [](const std::pair<const std::string, CruxLFQ::Peptides>& pair) {
+            [](const std::pair<const std::string, CruxLFQ::LFQPeptides>& pair) {
                 return pair.second;
             });
 
@@ -544,13 +544,13 @@ class IntensityNormalizationEngine {
                 ->Fraction == 0) {
             return;
         }
-        vector<CruxLFQ::Peptides> peptides;
+        vector<CruxLFQ::LFQPeptides> peptides;
         peptides.reserve(results.PeptideModifiedSequences.size());
         std::transform(
             results.PeptideModifiedSequences.begin(),
             results.PeptideModifiedSequences.end(),
             std::back_inserter(peptides),
-            [](const std::pair<const std::string, CruxLFQ::Peptides>& pair) {
+            [](const std::pair<const std::string, CruxLFQ::LFQPeptides>& pair) {
                 return pair.second;
             });
 
@@ -634,7 +634,7 @@ class IntensityNormalizationEngine {
 
                 //***************************************************** */
 
-                auto seenInBothBioreps = std::vector<Peptides>();
+                auto seenInBothBioreps = std::vector<LFQPeptides>();
                 for (auto& peptide : peptides) {
                     bool seenInBiorep1 = false;
                     bool seenInBiorep2 = false;
@@ -715,7 +715,7 @@ class IntensityNormalizationEngine {
         std::vector<std::vector<double>> biorepInputs;  // fold changes
         std::vector<std::vector<double>> biorepOutputs; // median fold change, normalization factor
         
-        vector<Peptides> peptides;
+        vector<LFQPeptides> peptides;
         for (const auto& v : results.PeptideModifiedSequences) {
             peptides.push_back(v.second);
         }

@@ -71,7 +71,8 @@ struct first_eq : public binary_function<pair<int, int>, pair<int, int>, bool> {
 
 static bool IsAA(char c) {
     const char* AA = "ACDEFGHIKJLMNOPQRSTUVWYX";
-    for (; (*AA != '\0') && (*AA != c); ++AA);
+    for (; (*AA != '\0') && (*AA != c); ++AA)
+      ;
     return (*AA == c);
 }
 

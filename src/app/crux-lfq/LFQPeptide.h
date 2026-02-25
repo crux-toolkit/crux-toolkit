@@ -30,7 +30,7 @@ inline std::string PeptidesTabSeperatedHeader(const std::vector<std::string>& ra
     return result;
 }
 
-class Peptides {
+class LFQPeptides {
    private:
     string sequence;
     string modified_sequence;
@@ -41,8 +41,8 @@ class Peptides {
     string protein_id;
 
    public:
-    Peptides() = default;
-    Peptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<ProteinGroup> ProteinGroups, string protein_id = "") {
+    LFQPeptides() = default;
+    LFQPeptides(const string sequence, const string modified_sequence, const bool useForProteinQuant, const std::unordered_set<ProteinGroup> ProteinGroups, string protein_id = "") {
         this->sequence = sequence;
         this->modified_sequence = modified_sequence;
         this->useForProteinQuant = useForProteinQuant;
@@ -124,7 +124,7 @@ class Peptides {
         return this->proteinGroups;
     }
 
-    bool operator==(const Peptides& other) const {
+    bool operator==(const LFQPeptides& other) const {
         return this->sequence == other.sequence;
     }
 

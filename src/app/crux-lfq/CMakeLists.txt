@@ -19,7 +19,6 @@ if (WIN32 AND NOT CYGWIN)
     ${CMAKE_CURRENT_BINARY_DIR}/protoobj
     ${CMAKE_BINARY_DIR}/ext/build/src/protobuf-2.5.0/src
     ${CMAKE_BINARY_DIR}/ext/build/src/google-gflags/src/windows
-    ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_76_0
     ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
   )
   # On windows set static linking of runtime libraries
@@ -34,7 +33,6 @@ include_directories(
   ${CMAKE_BINARY_DIR}/ext/include
   ${CMAKE_CURRENT_BINARY_DIR}/protoobj
   ${CMAKE_BINARY_DIR}/ext/build/src/ProtocolBuffers/src
-  ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_1_76_0
   ${CMAKE_BINARY_DIR}/ext/build/src/ProteoWizard/libraries/boost_aux
 )
 endif (WIN32 AND NOT CYGWIN)
