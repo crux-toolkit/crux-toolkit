@@ -7,6 +7,7 @@ on:
 
 env:
   BUILD_TYPE: Release
+  CRUX_VERSION: 4.3.2
 
 jobs:
   build-distributions:
@@ -130,29 +131,29 @@ jobs:
         if: (matrix.os == 'macos-15')
         uses: actions/upload-artifact@v6
         with:
-          name: crux-4.3.2.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-4.3.2.Darwin.*.zip
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.macos-15
+          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Darwin.*.zip
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-latest')
         uses: actions/upload-artifact@v6
         with:
-          name: crux-4.3.2.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-4.3.2.Windows.AMD64.zip 
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v6
         with:
-          name: crux-4.3.2.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-4.3.2.Linux.x86_64.zip
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-$CRUX_VERSION.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v6
         with:
-          name: crux-4.3.2.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-4.3.2.Source.tar.gz
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Source.tar.gz
 
       - name: Test
         if: (matrix.os == 'ubuntu-22.04')
