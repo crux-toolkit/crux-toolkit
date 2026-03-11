@@ -6,6 +6,8 @@ project(cometsearch)
 include_directories(
   ${BASE_INCLUDE_PATH}
   ${MSTOOLKIT_INCLUDE_PATH}
+  ${CMAKE_CURRENT_SOURCE_DIR}/CometSearch
+  ${CMAKE_CURRENT_SOURCE_DIR}/AScorePro/include
   ${CMAKE_CURRENT_BINARY_DIR}/CometSearch
   ${CMAKE_CURRENT_BINARY_DIR}/AScorePro/include
 )

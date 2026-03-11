@@ -308,7 +308,7 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod14");
   setVarMod("variable_mod15");
   setInt("max_variable_mods_in_peptide");
-  setString("require_variable_mod");
+  setInt("require_variable_mod");
   setString("protein_modlist_file");
   // Static modifications
   setDouble("add_Cterm_peptide");
@@ -553,7 +553,7 @@ vector<string> CometApplication::getOptions() const {
  */
 vector< pair<string, string> > CometApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("comet.target.txt",
+  outputs.push_back(make_pair("comet.txt",
     "a tab-delimited text file containing the target PSMs. See <a href=\""
     "../file-formats/txt-format.html\">"
     "txt file format</a> for a list of the fields."));

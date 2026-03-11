@@ -230,6 +230,16 @@ add_library(
   ${crux_lib_files}
 )
 
+# Make sure crux-support links against AScorePro
+target_link_libraries(crux-support
+  PUBLIC
+    cometsearch
+    ascorepro
+)
+
+# Ensure AScorePro is built before crux-support
+#add_dependencies(crux-support ascorepro)
+
 if (APPLE)
   set(OPENMP_FOUND FALSE)
 else(APPLE)
@@ -337,7 +347,6 @@ if (WIN32 AND NOT CYGWIN)
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
-      libpwiz_analysis_common.lib
       libpwiz_analysis_diaumpire
       libpwiz_analysis_frequency
       libpwiz_analysis_passive_core
@@ -422,14 +431,15 @@ if (WIN32 AND NOT CYGWIN)
     debug libboost_serialization-mt-gd
     optimized libboost_system-mt
     debug libboost_system-mt-gd
-    optimized libboost_thread-mt
-    debug libboost_thread-mt-gd
+    optimized libboost_thread-mt.lib
+    debug libboost_thread-vc142-mt-gd
   )
   target_link_libraries(
     crux
     bullseye
     hardklor
     cometsearch
+    ascorepro
     kojaksearch
     neopepxmlparser.lib
     perclibrary
