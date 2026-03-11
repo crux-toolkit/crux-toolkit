@@ -55,6 +55,33 @@ jobs:
              echo Building in $(pwd)
              cmake --build . --config $BUILD_TYPE 
 
+      - name: build-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package
+
+      - name: build-source-package
+        if: (matrix.os == 'ubuntu-22.04')
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package_source
+
+      - name: archive-ubuntu-package
+        if: (matrix.os == 'ubuntu-22.04')
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-4.3.2.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-4.3.2.Linux.x86_64.zip
+          
+      - name: Archive source package
+        if: (matrix.os == 'ubuntu-22.04')
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-4.3.2.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-4.3.2.Source.tar.gz
+
       - name: Test
         if: (matrix.os == 'ubuntu-22.04')
         shell: bash
