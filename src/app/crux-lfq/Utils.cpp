@@ -30,7 +30,8 @@ using std::string;
 using std::unordered_map;
 using std::vector;
 
-std::mutex mtx;  // Declare a mutex
+std::mutex mtx;          // Declare a mutex
+std::mutex csvWriteMtx;  // Mutex for CSV file writes
 
 namespace CruxLFQ {
 
@@ -295,31 +296,85 @@ calculateTheoreticalIsotopeDistributions(
         vector<pair<double, double>> isotopicMassesAndNormalizedAbundances;
 
         string formula = calcFormula(peptide_sequence);
-        char* char_array = new char[formula.length() + 1];
         char* fn = nullptr;
-        strcpy(char_array, formula.c_str());
-        CMercury8 dist(fn);
-        // dist.Echo(true);
-        dist.GoMercury(char_array, charge);
-        // identification.monoIsotopicMass = dist.getMonoMass();
+        char baseFormula[512];
+        strncpy(baseFormula, formula.c_str(), sizeof(baseFormula) - 1);
+        baseFormula[sizeof(baseFormula) - 1] = '\0';
+        CMercury8 baseDist(fn);
+        baseDist.GoMercury(baseFormula, charge);
+
         double monoisotopic = identification.monoIsotopicMass;
+
+        // Averagine correction for modifications (mirrors C# FlashLFQ)
+        static const double kAvgC = 4.9384, kAvgH = 7.7583, kAvgO = 1.4773;
+        static const double kAvgN = 1.3577, kAvgS = 0.0417;
+        static const double kAvgMass = 12.011 * kAvgC + 1.00794 * kAvgH +
+                                       15.999 * kAvgO + 14.007 * kAvgN +
+                                       32.065 * kAvgS;
+
+        double massDiff = monoisotopic - baseDist.getMonoMass();
+        double distMonoMass;
         vector<double> masses;
         vector<double> abundances;
-        for (auto i : dist.FixedData) {
-            masses.push_back(i.mass);
-            abundances.push_back(i.data);
+
+        if (std::abs(massDiff) > 20.0) {
+            // Parse element counts from base formula string (e.g. "C45H72N12O15S2")
+            int fC = 0, fH = 0, fN = 0, fO = 0, fS = 0;
+            for (const char* p = baseFormula; *p; p++) {
+                if      (*p == 'C') fC = atoi(p + 1);
+                else if (*p == 'H') fH = atoi(p + 1);
+                else if (*p == 'N') fN = atoi(p + 1);
+                else if (*p == 'O') fO = atoi(p + 1);
+                else if (*p == 'S') fS = atoi(p + 1);
+            }
+            double averagines = massDiff / kAvgMass;
+            fC = std::max(0, fC + static_cast<int>(std::round(averagines * kAvgC)));
+            fH = std::max(0, fH + static_cast<int>(std::round(averagines * kAvgH)));
+            fO = std::max(0, fO + static_cast<int>(std::round(averagines * kAvgO)));
+            fN = std::max(0, fN + static_cast<int>(std::round(averagines * kAvgN)));
+            fS = std::max(0, fS + static_cast<int>(std::round(averagines * kAvgS)));
+
+            char corrected[512];
+            if (fS > 0)
+                sprintf(corrected, "C%dH%dN%dO%dS%d", fC, fH, fN, fO, fS);
+            else
+                sprintf(corrected, "C%dH%dN%dO%d", fC, fH, fN, fO);
+
+            CMercury8 corrDist(fn);
+            corrDist.GoMercury(corrected, charge);
+            distMonoMass = corrDist.getMonoMass();
+            for (auto i : corrDist.FixedData) {
+                masses.push_back(i.mass);
+                abundances.push_back(i.data);
+            }
+        } else {
+            distMonoMass = baseDist.getMonoMass();
+            for (auto i : baseDist.FixedData) {
+                masses.push_back(i.mass);
+                abundances.push_back(i.data);
+            }
         }
 
         double highestAbundance =
             *std::max_element(abundances.begin(), abundances.end());
 
         for (int i = 0; i < masses.size(); i++) {
-            masses[i] += (monoisotopic - dist.getMonoMass());
+            masses[i] += (monoisotopic - distMonoMass);
         }
 
         for (int i = 0; i < masses.size(); i++) {
             // Calculate the expected isotopic mass shift for this peptide
             masses[i] -= monoisotopic;
+
+            // Snap mass shifts to integer multiples of C13MinusC12.
+            // CMercury8 returns centroid masses for each M+N cluster, but the
+            // centroid is pulled slightly below the C13-dominated position by
+            // lower-mass contributions (N15, S33, etc.). This small offset
+            // (~1 mDa for M+1) combined with a large negative observedMassError
+            // can push the isotope search outside the tolerance window. Using
+            // exact C13MinusC12 multiples matches C# IsotopicDistribution
+            // behavior and keeps all isotope searches within tolerance.
+            masses[i] = std::round(masses[i] / C13MinusC12) * C13MinusC12;
 
             // Normalize the abundance of each isotope
             abundances[i] /= highestAbundance;
@@ -334,7 +389,17 @@ calculateTheoreticalIsotopeDistributions(
         }
         modifiedSequenceToIsotopicDistribution[peptide_sequence] =
             isotopicMassesAndNormalizedAbundances;
-        delete[] char_array;
+
+        // Diagnostic: log distribution for EITALAPSTMK
+        if (peptide_sequence == "EITALAPSTMK") {
+            carp(CARP_INFO, "[DISTRIB] sequence=%s formula=%s highestAbundance=%.6f",
+                 peptide_sequence.c_str(), formula.c_str(), highestAbundance);
+            for (size_t di = 0; di < isotopicMassesAndNormalizedAbundances.size(); di++) {
+                carp(CARP_INFO, "[DISTRIB] i=%zu massShift=%.6f normAbundance=%.6f",
+                     di, isotopicMassesAndNormalizedAbundances[di].first,
+                     isotopicMassesAndNormalizedAbundances[di].second);
+            }
+        }
     }
 
     std::unordered_map<std::string, std::vector<Identification*>>
@@ -393,6 +458,16 @@ void processRange(int start, int end,
                   CruxLFQResults* lfqResults) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
+        // Match by mass ~1160.606 Da and RT ~66.64 min (the MS1 scan 28996 peak)
+        const bool dbg = (std::abs(identification.monoIsotopicMass - 1160.606) < 0.05 &&
+                          std::abs(identification.ms2RetentionTimeInMinutes - 66.64) < 1.0);
+
+        if (dbg) {
+            carp(CARP_INFO, "[DBG28996] seq=%s scanId=%d charge=%d monoMass=%.6f peakFindMass=%.6f RT=%.4f",
+                 identification.sequence.c_str(), identification.scanId,
+                 identification.precursorCharge, identification.monoIsotopicMass,
+                 identification.peakFindingMass, identification.ms2RetentionTimeInMinutes);
+        }
 
         ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
@@ -420,6 +495,10 @@ void processRange(int start, int end,
                                }
                            });
 
+            if (dbg) {
+                carp(CARP_INFO, "[DBG28996] charge=%d xic after peakFind=%zu", chargeState, xic.size());
+            }
+
             xic.erase(std::remove_if(xic.begin(), xic.end(),
                                      [&](const IndexedMassSpectralPeak& p) {
                                          return !ppmTolerance.Within(
@@ -428,9 +507,24 @@ void processRange(int start, int end,
                                      }),
                       xic.end());
 
+            if (dbg) {
+                carp(CARP_INFO, "[DBG28996] charge=%d xic after ppm filter=%zu", chargeState, xic.size());
+            }
+
             vector<IsotopicEnvelope>&& isotopicEnvelopes = getIsotopicEnvelopes(
                 xic, identification, chargeState,
                 modifiedSequenceToIsotopicDistribution);
+
+            if (dbg) {
+                carp(CARP_INFO, "[DBG28996] charge=%d isotopicEnvelopes=%zu", chargeState, isotopicEnvelopes.size());
+                // Check if scan 28996 (zeroIdx=2141) is in the XIC and/or survived isotope check
+                bool inXic = std::any_of(xic.begin(), xic.end(),
+                    [](const IndexedMassSpectralPeak& p) { return p.nativeScanNumber == 28996; });
+                bool inEnvelopes = std::any_of(isotopicEnvelopes.begin(), isotopicEnvelopes.end(),
+                    [](const IsotopicEnvelope& e) { return e.indexedPeak.nativeScanNumber == 28996; });
+                carp(CARP_INFO, "[DBG28996] charge=%d scan28996 in XIC=%s in envelopes=%s",
+                     chargeState, inXic ? "YES" : "NO", inEnvelopes ? "YES" : "NO");
+            }
 
             msmsFeature.isotopicEnvelopes.insert(
                 msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
@@ -443,7 +537,12 @@ void processRange(int start, int end,
 
         cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes);
 
+        if (dbg) {
+            carp(CARP_INFO, "[DBG28996] envelopes after cutPeak=%zu", msmsFeature.isotopicEnvelopes.size());
+        }
+
         if (msmsFeature.isotopicEnvelopes.empty()) {
+            if (dbg) carp(CARP_INFO, "[DBG28996] DROPPED: empty after cutPeak");
             continue;
         }
 
@@ -455,7 +554,13 @@ void processRange(int start, int end,
                          return p.chargeState == identification.precursorCharge;
                      });
 
+        if (dbg) {
+            carp(CARP_INFO, "[DBG28996] precursorXic (charge=%d) size=%zu",
+                 identification.precursorCharge, precursorXic.size());
+        }
+
         if (precursorXic.empty()) {
+            if (dbg) carp(CARP_INFO, "[DBG28996] DROPPED: precursorXic empty");
             msmsFeature.isotopicEnvelopes.clear();
             continue;
         }
@@ -496,6 +601,12 @@ void processRange(int start, int end,
             std::lock_guard<std::mutex> lock(mtx);
             lfqResults->Peaks[spectralFile].push_back(msmsFeature);
         }
+
+        writePeptidePeakDataToCSV(
+            identification,
+            msmsFeature,
+            spectralFile,
+            LFQMetaData::getInstance().getPeptidePeakDataOutputPath());
     }
 }
 
@@ -771,6 +882,16 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
 
                     IndexedMassSpectralPeak* isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState);
 
+                    if (peak.nativeScanNumber == 28996 && shift.first == 0) {
+                        double lo = theoreticalIsotopeIntensity / 4.0;
+                        double hi = theoreticalIsotopeIntensity * 4.0;
+                        carp(CARP_INFO, "[ISOTOPE28996] i=%d isotopeShift=%.6f theorAbund=%.4f theorIntens=%.2f lo=%.2f hi=%.2f actual=%.2f found=%s",
+                             i, theoreticalIsotopeMassShifts[i], theoreticalIsotopeAbundances[i],
+                             theoreticalIsotopeIntensity, lo, hi,
+                             isotopePeak ? isotopePeak->intensity : 0.0,
+                             isotopePeak ? "YES" : "NO");
+                    }
+
                     if (isotopePeak == nullptr || isotopePeak->intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak->intensity > theoreticalIsotopeIntensity * 4.0) {
                         break;
                     }
@@ -954,7 +1075,7 @@ void cutPeak(ChromatographicPeak& peak, double identificationTime) {
                      j += direction) {
                     if (ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber >= 0 &&
                         ms1Scans->operator[](peak.spectralFile)[j].oneBasedScanNumber !=
-                            valleyEnvelope.indexedPeak.zeroBasedMs1ScanIndex) {
+                            valleyEnvelope.indexedPeak.nativeScanNumber) {
                         nextMs1ScanNum = j + 1;
                         break;
                     }
@@ -1086,6 +1207,67 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
     }
 
     lfqResults.Peaks[spectraFile] = errorCheckedPeaks;
+}
+
+void initializePeptidePeakDataCSV(const string& outputPath) {
+    std::lock_guard<std::mutex> lock(csvWriteMtx);
+    std::ofstream writer(outputPath, std::ios::out | std::ios::trunc);
+    if (writer.is_open()) {
+        writer << "File,PeptideSequence,BaseSequence,ProteinGroups,PeptideMass,"
+                  "PrecursorCharge,MS2ScanNumber,MS2RetentionTime,PeakMZ,"
+                  "PeakIntensity,PeakRetentionTime,MS1ScanNumber,ChargeState\n";
+    } else {
+        carp(CARP_WARNING, "Error initializing peptide peak data CSV: %s", outputPath.c_str());
+    }
+}
+
+void writePeptidePeakDataToCSV(const Identification& identification,
+                                const ChromatographicPeak& peak,
+                                const string& spectraFile,
+                                const string& outputPath) {
+    if (outputPath.empty() || peak.isotopicEnvelopes.empty()) {
+        return;
+    }
+
+    // Extract filename without extension
+    string fileName = spectraFile;
+    size_t slashPos = fileName.find_last_of("/\\");
+    if (slashPos != string::npos) {
+        fileName = fileName.substr(slashPos + 1);
+    }
+    size_t dotPos = fileName.find_last_of('.');
+    if (dotPos != string::npos) {
+        fileName = fileName.substr(0, dotPos);
+    }
+
+    std::lock_guard<std::mutex> lock(csvWriteMtx);
+    std::ofstream writer(outputPath, std::ios::out | std::ios::app);
+    if (!writer.is_open()) {
+        carp(CARP_WARNING, "Error writing peptide peak data to CSV: %s", outputPath.c_str());
+        return;
+    }
+
+    writer << std::setprecision(17);  // full precision (equivalent to C# G17)
+
+    for (const auto& envelope : peak.isotopicEnvelopes) {
+        // nativeScanNumber is stored directly on the peak at index time (from mzML getFirstScan()),
+        // equivalent to C#'s _ms1Scans[fileInfo][ZeroBasedMs1ScanIndex].OneBasedScanNumber
+        int ms1ScanNumber = envelope.indexedPeak.nativeScanNumber;
+
+        writer << fileName << ","
+               << identification.sequence << ","
+               << identification.modifications << ","
+               << identification.protein_id << ","
+               << identification.monoIsotopicMass << ","
+               << identification.precursorCharge << ","
+               << identification.scanId << ","
+               << identification.ms2RetentionTimeInMinutes << ","
+               << envelope.indexedPeak.mz << ","
+               << envelope.indexedPeak.intensity << ","
+               << envelope.indexedPeak.retentionTime << ","
+               << ms1ScanNumber << ","
+               << envelope.chargeState << "\n";
+    }
 }
 
 }  // namespace CruxLFQ

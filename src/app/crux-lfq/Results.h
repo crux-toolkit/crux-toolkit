@@ -213,8 +213,6 @@ class CruxLFQResults {
 
                 PeptideModifiedSequences[sequence].setDetectionType(filePeaks.first, detectionType);
                 PeptideModifiedSequences[sequence].setIntensity(filePeaks.first, intensity);
-                carp(CARP_INFO, "[CALC] Set peptide '%s' intensity for file '%s': %.2f", 
-                     sequence.c_str(), filePeaks.first.c_str(), intensity);
             }
 
             // report ambiguous quantification

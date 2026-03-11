@@ -323,6 +323,13 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults);
 // void quantifyMatchBetweenRunsPeaks(const string& spectraFile, CruxLFQResults&
 // lfqResults);
 
+void initializePeptidePeakDataCSV(const string& outputPath);
+
+void writePeptidePeakDataToCSV(const Identification& identification,
+                                const ChromatographicPeak& peak,
+                                const string& spectraFile,
+                                const string& outputPath);
+
 inline std::ostream& operator<<(std::ostream& os, const DetectionType& dt) {
     switch (dt) {
         case DetectionType::MSMS:
