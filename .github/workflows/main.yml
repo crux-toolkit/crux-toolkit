@@ -163,7 +163,7 @@ jobs:
              rm -rf smoke-tests
              cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
              cd smoke-tests
-             cucumber -v --tags "not @ignore" -f html -o smoke-tests.html    
+             cucumber -v -f html -o smoke-tests.html
 
       - name: Archive smoke test results
         if:  (matrix.os == 'ubuntu-22.04' && always())
