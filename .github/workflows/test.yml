@@ -91,6 +91,7 @@ jobs:
              cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
+               && echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                || echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                && echo $cucumber_exit_code
 
