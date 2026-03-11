@@ -89,12 +89,12 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         psm_data = CruxLFQ::create_psm(psm_file);
     }
 
-    CruxLFQ::CruxLFQResults lfqResults(spec_files);
     if (CruxLFQ::NORMALIZE && !FileUtils::Exists(specfile_replicates)) {
-        carp(CARP_INFO, "Spectrum file replicates file %s not found", specfile_replicates.c_str());
-        carp(CARP_FATAL, "Normalization requires a spectrum file replicates file.");
-        lfqResults = CruxLFQ::CruxLFQResults(specfile_replicates);
+        carp(CARP_FATAL, "Normalization requires a spectrum file replicates file. File '%s' not found.", specfile_replicates.c_str());
     }
+    CruxLFQ::CruxLFQResults lfqResults = CruxLFQ::NORMALIZE
+        ? CruxLFQ::CruxLFQResults(specfile_replicates)
+        : CruxLFQ::CruxLFQResults(spec_files);
 
     vector<CruxLFQ::Identification> allIdentifications;
     std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
