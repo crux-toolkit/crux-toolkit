@@ -553,7 +553,7 @@ vector<string> CometApplication::getOptions() const {
  */
 vector< pair<string, string> > CometApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  outputs.push_back(make_pair("comet.target.txt",
+  outputs.push_back(make_pair("comet.txt",
     "a tab-delimited text file containing the target PSMs. See <a href=\""
     "../file-formats/txt-format.html\">"
     "txt file format</a> for a list of the fields."));

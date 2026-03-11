@@ -312,7 +312,6 @@ ExternalProject_Add(
   comet
   GIT_REPOSITORY https://github.com/UWPR/Comet/
   GIT_TAG  v2026.01.0
-  # GIT_TAG ce5caac454f193637ebac3b7754500cc3adab6d6
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/build
   CMAKE_ARGS ${TOOLCHAIN_FILE}
     -DBASE_INCLUDE_PATH=${base_include_path}
@@ -325,6 +324,9 @@ ExternalProject_Add(
       COMMAND ${CMAKE_COMMAND} -E copy
         ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CMakeLists.txt
         ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/
+      COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_CURRENT_SOURCE_DIR}/patches/comet/CometSearchManager.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/build/src/comet/CometSearch/
     BUILD_IN_SOURCE 1
 )
 
