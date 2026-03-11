@@ -554,13 +554,15 @@ class IntensityNormalizationEngine {
                 return pair.second;
             });
 
-        std::set<std::string> conditionsSet;
+        std::vector<std::string> conditions;
+        std::set<std::string> conditionsSeen;
 
         for (const auto& spectraFile : results.spectraFiles) {
-            conditionsSet.insert(spectraFile.Condition);
+            if (conditionsSeen.find(spectraFile.Condition) == conditionsSeen.end()) {
+                conditionsSeen.insert(spectraFile.Condition);
+                conditions.push_back(spectraFile.Condition);
+            }
         }
-
-        std::vector<std::string> conditions(conditionsSet.begin(), conditionsSet.end());
 
         std::vector<SpectraFileInfo> filesForCond1Biorep1;
         for (const auto& spectraFile : results.spectraFiles) {
@@ -724,15 +726,19 @@ class IntensityNormalizationEngine {
 
         std::vector<std::vector<SpectraFileInfo>> conditions;
         std::map<std::string, std::vector<SpectraFileInfo>> grouped;
+        std::vector<std::string> conditionOrder;
 
         for (const auto& v : results.spectraFiles) {
+            if (grouped.find(v.Condition) == grouped.end()) {
+                conditionOrder.push_back(v.Condition);
+            }
             grouped[v.Condition].push_back(v);
         }
 
         carp(CARP_INFO, "[NORM] Grouped into %zu condition groups", grouped.size());
 
-        for (const auto& group : grouped) {
-            conditions.push_back(group.second);
+        for (const auto& condName : conditionOrder) {
+            conditions.push_back(grouped[condName]);
         }
 
         carp(CARP_INFO, "[NORM] Created %zu condition vectors", conditions.size());
@@ -817,7 +823,7 @@ class IntensityNormalizationEngine {
 
                 if (foldChanges.empty()) {
                     carp(CARP_INFO, "[NORM] No fold changes, skipping");
-                    continue;  // Skip this biorep
+                    return;
                 }
 
                 double medianFoldChange = Median(foldChanges);
