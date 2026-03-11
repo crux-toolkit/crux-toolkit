@@ -90,7 +90,9 @@ jobs:
              rm -rf smoke-tests
              cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
              cd smoke-tests
-             cucumber -v -f html -o smoke-tests.html
+             cucumber -v -f html -o smoke-tests.html \
+               || echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
+               && echo $cucumber_exit_code
 
       - name: Archive smoke test results
         if:  (matrix.os == 'ubuntu-22.04' && always())
@@ -98,3 +100,9 @@ jobs:
         with:
           name: smoke.html
           path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+          
+      - name: Let the workflow fail if the test suite failed
+        if: (matrix.os == 'ubuntu-22.04')
+        shell: bash
+        run: |
+          bash -c 'exit "${{env.cucumber_exit_code}}"'
