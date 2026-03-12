@@ -1,4 +1,4 @@
-name: build-crux-distributions
+name: Build and Test Crux on Ubuntu
 
 on:
   push:
@@ -19,12 +19,12 @@ jobs:
       - name: checkout-repository    
         uses: actions/checkout@v6
  
-      - name: add-short-sha
+      - name: Get short git sha
         shell: bash
         run: |
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
-      - name: configure-build-for-ubuntu
+      - name: Configure Crux build
         shell: bash
         run: |
               cmake -E make_directory "${{runner.workspace}}/build"
@@ -32,26 +32,26 @@ jobs:
               echo Configuring in $(pwd)
               cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-      - name: build
+      - name: Build Crux
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
              echo Building in $(pwd)
              cmake --build . --config $BUILD_TYPE 
 
-      - name: build-package
+      - name: Build package
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
              cmake --build . --config $BUILD_TYPE --target package
 
-      - name: archive-ubuntu-package
+      - name: Archive package
         uses: actions/upload-artifact@v6
         with:
           name: crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04
           path:  ${{runner.workspace}}/build/crux-$CRUX_VERSION.Linux.x86_64.zip
 
-      - name: build-source-package
+      - name: Build source package
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
