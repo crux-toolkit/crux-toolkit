@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
 
       - name: Build source package
         shell: bash
