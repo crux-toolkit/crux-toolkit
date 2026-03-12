@@ -94,14 +94,8 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path: "${{runner.workspace}}/test-dir"
 
-      - name: Download and extract package
-        shell: bash
-        run: |
-             mkdir "${{runner.workspace}}/test-dir"
-             unzip "crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04.zip" -d test-dir
-             ls -laR
- 
       - name: Run smoke tests
         continue-on-error: true
         shell: bash
