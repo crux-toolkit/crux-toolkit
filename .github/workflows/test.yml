@@ -102,7 +102,7 @@ jobs:
         run: |
              cd ${{runner.workspace}}/test-dir
              cp -r ${{runner.workspace}}/crux-toolkit/test/smoke-tests .
-             rm -rf ${{runner.workspace}}/crux-toolkit/
+             rm -rf ${{runner.workspace}}/crux-toolkit/*
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
                && echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
