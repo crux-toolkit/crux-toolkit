@@ -48,8 +48,8 @@ jobs:
       - name: Archive package
         uses: actions/upload-artifact@v6
         with:
-          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-$CRUX_VERSION.Linux.x86_64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
 
       - name: Build source package
         shell: bash
@@ -60,8 +60,8 @@ jobs:
       - name: Archive source package
         uses: actions/upload-artifact@v6
         with:
-          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Source.tar.gz
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
 
   test:
     name: Test Crux with smoke-tests
@@ -81,8 +81,8 @@ jobs:
         run: |
              cd "${{runner.workspace}}/build"
              echo Downloading package from build job
-             gh run download --name "crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04.zip" --dir .
-             unzip "crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04.zip" -d .
+             gh run download --name "crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04.zip" --dir .
+             unzip "crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04.zip" -d .
  
       - name: setup-for-tests
         shell: bash
