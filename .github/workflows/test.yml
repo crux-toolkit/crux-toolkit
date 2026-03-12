@@ -11,8 +11,8 @@ env:
   CRUX_VERSION: 4.3.2
 
 jobs:
-  setup:
-    name: Setup Crux build environment
+  build:
+    name: Setup and Build Crux
     runs-on: 'ubuntu-22.04'
 
     steps:
@@ -24,29 +24,14 @@ jobs:
         run: |
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
-      - name: setup-python
-        uses: actions/setup-python@v6
-        with: 
-            python-version: 3.x
- 
       - name: configure-build-for-ubuntu
         shell: bash
         run: |
-              python -m pip install numpy
-              python -m pip install pandas
-              sudo apt-get install ruby
-              sudo apt-get install cucumber
-              sudo gem install rspec
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
               cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-  build:
-    name: Build Crux
-    needs: setup
-    runs-on: ubuntu-22.04
-    steps:
       - name: build
         shell: bash
         run: |
@@ -54,11 +39,60 @@ jobs:
              echo Building in $(pwd)
              cmake --build . --config $BUILD_TYPE 
 
+      - name: build-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package
+
+      - name: archive-ubuntu-package
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-$CRUX_VERSION.Linux.x86_64.zip
+
+      - name: build-source-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package_source
+
+      - name: Archive source package
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Source.tar.gz
+
   test:
     name: Test Crux with smoke-tests
     needs: build
     runs-on: ubuntu-22.04
     steps:
+      - name: checkout-repository    
+        uses: actions/checkout@v6
+ 
+      - name: setup-python
+        uses: actions/setup-python@v6
+        with: 
+            python-version: 3.x
+      
+      - name: download-and-extract-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             echo Downloading package from build job
+             gh run download --name "crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04.zip" --dir .
+             unzip "crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04.zip" -d .
+ 
+      - name: setup-for-tests
+        shell: bash
+        run: |
+              python -m pip install numpy
+              python -m pip install pandas
+              sudo apt-get install ruby
+              sudo apt-get install cucumber
+              sudo gem install rspec
+
       - name: Test
         continue-on-error: true
         shell: bash
@@ -82,37 +116,3 @@ jobs:
         shell: bash
         run: |
           bash -c 'exit "${{env.cucumber_exit_code}}"'
-
-  build-and-archive-package:
-    name: Build and archive packages
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: build-package
-        shell: bash
-        run: |
-             cd "${{runner.workspace}}/build"
-             cmake --build . --config $BUILD_TYPE --target package
-
-      - name: archive-ubuntu-package
-        uses: actions/upload-artifact@v6
-        with:
-          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-$CRUX_VERSION.Linux.x86_64.zip
-
-  build-and-archive-source-package:
-    name: Build and archive packages
-    needs: build
-    runs-on: ubuntu-22.04
-    steps:
-      - name: build-source-package
-        shell: bash
-        run: |
-             cd "${{runner.workspace}}/build"
-             cmake --build . --config $BUILD_TYPE --target package_source
-
-      - name: Archive source package
-        uses: actions/upload-artifact@v6
-        with:
-          name: crux-$CRUX_VERSION.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-$CRUX_VERSION.Source.tar.gz
