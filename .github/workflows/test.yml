@@ -76,14 +76,11 @@ jobs:
         with: 
             python-version: 3.x
       
-      - name: download-and-extract-package
+      - name: Get short git sha
         shell: bash
         run: |
-             cd "${{runner.workspace}}/build"
-             echo Downloading package from build job
-             gh run download --name "crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04.zip" --dir .
-             unzip "crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04.zip" -d .
- 
+          echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
+          
       - name: setup-for-tests
         shell: bash
         run: |
