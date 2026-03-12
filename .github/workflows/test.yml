@@ -117,7 +117,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: smoke.html
-          path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+          path: ${{runner.workspace}}/test-dir/test/smoke-tests/smoke-tests.html
           
       - name: Let the workflow fail if the test suite failed
         shell: bash
