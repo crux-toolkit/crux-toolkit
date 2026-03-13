@@ -181,7 +181,7 @@ class CruxLFQResults {
         for (auto &filePeaks : Peaks) {
             map<string, vector<ChromatographicPeak>> groupedPeaks;
             for (auto &peak : filePeaks.second) {
-                if (peak.NumIdentificationsByBaseSeq == 1) {
+                if (peak.NumIdentificationsByFullSeq == 1) {
                     groupedPeaks[peak.identifications.front().sequence].push_back(peak);
                 }
             }
@@ -218,7 +218,7 @@ class CruxLFQResults {
             // report ambiguous quantification
             vector<ChromatographicPeak> ambiguousPeaks;
             for (auto &peak : filePeaks.second) {
-                if (peak.NumIdentificationsByBaseSeq > 1) {
+                if (peak.NumIdentificationsByFullSeq > 1) {
                     ambiguousPeaks.push_back(peak);
                 }
             }
@@ -264,81 +264,80 @@ class CruxLFQResults {
             map<int, vector<SpectraFileInfo>> samples;
             for (auto &file : sampleGroup.second) {
                 samples[file.BiologicalReplicate].push_back(file);
-                for (auto &sample : samples) {
-                    // skip unfractionated samples
-                    std::set<int> uniqueFractions;
-                    for (auto &p : sample.second) {
-                        uniqueFractions.insert(p.Fraction);
-                    }
-                    if (uniqueFractions.size() == 1) {
-                        continue;
-                    }
+            }
 
-                    map<std::pair<SpectraFileInfo, std::string>, std::vector<ChromatographicPeak>> peaksForEachSequence;
+            for (auto &sample : samples) {
+                // skip unfractionated samples
+                std::set<int> uniqueFractions;
+                for (auto &p : sample.second) {
+                    uniqueFractions.insert(p.Fraction);
+                }
+                if (uniqueFractions.size() == 1) {
+                    continue;
+                }
+
+                map<std::pair<SpectraFileInfo, std::string>, std::vector<ChromatographicPeak>> peaksForEachSequence;
+
+                for (auto &file : sample.second) {
+                    for (auto &peak : Peaks[file.FullFilePathWithExtension]) {
+                        for (auto &id : peak.identifications) {
+                            auto key = std::make_pair(file, id.sequence);
+                            auto it = peaksForEachSequence.find(key);
+                            if (it != peaksForEachSequence.end()) {
+                                it->second.push_back(peak);
+                            } else {
+                                peaksForEachSequence[key] = std::vector<ChromatographicPeak>{peak};
+                            }
+                        }
+                    }
+                }
+
+                vector<LFQPeptides> peptides;
+                for (auto &item : PeptideModifiedSequences) {
+                    peptides.push_back(item.second);
+                }
+
+                vector<std::pair<double, DetectionType>> fractionIntensitiesWithDetectionTypes;
+
+                for (auto &peptide : peptides) {
+                    fractionIntensitiesWithDetectionTypes.clear();
+                    bool ambiguityObservedInSample = false;
 
                     for (auto &file : sample.second) {
-                        for (auto &peak : Peaks[file.FullFilePathWithExtension]) {
-                            for (auto &id : peak.identifications) {
-                                auto key = std::make_pair(file, id.sequence);
-                                auto it = peaksForEachSequence.find(key);
-                                if (it != peaksForEachSequence.end()) {
-                                    it->second.push_back(peak);
-                                } else {
-                                    peaksForEachSequence[key] = std::vector<ChromatographicPeak>{peak};
-                                }
+                        double fractionIntensity = peptide.getIntensity(file.FullFilePathWithExtension);
+                        DetectionType detectionType = peptide.getDetectionType(file.FullFilePathWithExtension);
+
+                        if (detectionType == DetectionType::MSMSAmbiguousPeakfinding) {
+                            ambiguityObservedInSample = true;
+
+                            auto key = std::make_pair(file, peptide.getSequence());
+                            double sum = 0.0;
+                            for (auto &p : peaksForEachSequence[key]) {
+                                sum += p.intensity;
                             }
+                            fractionIntensity = sum;
                         }
+
+                        fractionIntensitiesWithDetectionTypes.push_back(std::make_pair(fractionIntensity, detectionType));
                     }
 
-                    vector<LFQPeptides> peptides;
-                    for (auto &item : PeptideModifiedSequences) {
-                        peptides.push_back(item.second);
-                    }
+                    if (ambiguityObservedInSample) {
+                        auto compare = [](
+                                           const std::pair<double, DetectionType> &a,
+                                           const std::pair<double, DetectionType> &b) {
+                            return a.first < b.first;
+                        };
 
-                    vector<std::pair<double, DetectionType>> fractionIntensitiesWithDetectionTypes;
+                        auto highestIntensity = *std::max_element(
+                            fractionIntensitiesWithDetectionTypes.begin(),
+                            fractionIntensitiesWithDetectionTypes.end(),
+                            compare);
 
-                    for (auto &peptide : peptides) {
-                        fractionIntensitiesWithDetectionTypes.clear();
-                        bool ambiguityObservedInSample = false;
-
-                        for (auto &file : sample.second) {
-                            double fractionIntensity = peptide.getIntensity(file.FullFilePathWithExtension);
-                            DetectionType detectionType = peptide.getDetectionType(file.FullFilePathWithExtension);
-
-                            if (detectionType == DetectionType::MSMSAmbiguousPeakfinding) {
-                                ambiguityObservedInSample = true;
-
-                                auto key = std::make_pair(file, peptide.getSequence());
-                                double sum = 0.0;
-                                for (auto &p : peaksForEachSequence[key]) {
-                                    sum += p.intensity;
-                                }
-                                fractionIntensity = sum;
-                            }
-
-                            fractionIntensitiesWithDetectionTypes.push_back(std::make_pair(fractionIntensity, detectionType));
-                        }
-                        //
-                        if (ambiguityObservedInSample) {
-                            // Define a comparison function
-                            auto compare = [](
-                                               const std::pair<double, DetectionType> &a,
-                                               const std::pair<double, DetectionType> &b) {
-                                return a.first < b.first;
-                            };
-
-                            // Use std::max_element to find the highest intensity
-                            auto highestIntensity = *std::max_element(
-                                fractionIntensitiesWithDetectionTypes.begin(),
-                                fractionIntensitiesWithDetectionTypes.end(),
-                                compare);
-
-                            DetectionType highestFractionIntensityDetectionType = highestIntensity.second;
-                            if (highestFractionIntensityDetectionType == DetectionType::MSMSAmbiguousPeakfinding) {
-                                // highest fraction intensity is ambiguous - zero out the other fractions
-                                for (SpectraFileInfo &file : sample.second) {
-                                    peptide.setIntensity(file.FullFilePathWithExtension, 0);
-                                }
+                        DetectionType highestFractionIntensityDetectionType = highestIntensity.second;
+                        if (highestFractionIntensityDetectionType == DetectionType::MSMSAmbiguousPeakfinding) {
+                            // highest fraction intensity is ambiguous - zero out the other fractions
+                            for (SpectraFileInfo &file : sample.second) {
+                                peptide.setIntensity(file.FullFilePathWithExtension, 0);
                             }
                         }
                     }
@@ -387,12 +386,7 @@ class CruxLFQResults {
         for (const auto &file : spectraFiles) {
             filesGroupedByCondition[file.Condition].push_back(file);
         }
-        std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
-        for (const auto &group : filesGroupedByCondition) {
-            for (const auto &file : group.second) {
-                groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
-            }
-        }
+
         // quantify each protein
         for (auto &proteinGroupPair : ProteinGroups) {
             ProteinGroup &proteinGroup = proteinGroupPair.second;
@@ -402,19 +396,25 @@ class CruxLFQResults {
                 // set up peptide intensity table
                 // top row is the column effects, left column is the row effects
                 // the other cells are peptide intensity measurements
-                std::vector<std::string> conditions;
-                std::transform(spectraFiles.begin(), spectraFiles.end(), std::back_inserter(conditions), [](const CruxLFQ::SpectraFileInfo &file) {
-                    return file.Condition;
-                });
-                int numSamples = std::unordered_set<std::string>(conditions.begin(), conditions.end()).size();
+                std::set<std::string> sampleKeys;
+                for (const auto &file : spectraFiles) {
+                    sampleKeys.insert(file.Condition + std::to_string(file.BiologicalReplicate));
+                }
+                int numSamples = static_cast<int>(sampleKeys.size());
                 std::vector<std::vector<double>> peptideIntensityMatrix(it->second.size() + 1, std::vector<double>(numSamples + 1));
 
                 // populate matrix w/ log2-transformed peptide intensities
                 // if a value is missing, it will be filled with NaN
                 int sampleN = 0;
                 for (const auto &group : filesGroupedByCondition) {
+                    std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
+                    for (const auto &file : group.second) {
+                        groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
+                    }
+
                     for (const auto &sample : groupedByBiologicalReplicate) {
-                        for (LFQPeptides &peptide : it->second) {
+                        for (size_t peptideIdx = 0; peptideIdx < it->second.size(); peptideIdx++) {
+                            LFQPeptides &peptide = it->second[peptideIdx];
                             double sampleIntensity = 0;
                             double highestFractionIntensity = 0;
 
@@ -424,11 +424,18 @@ class CruxLFQResults {
                             for (const auto &file : sample.second) {
                                 groupedByFraction[file.Fraction].push_back(file);
                             }
-                            for (const auto &fraction : sample.second) {
+
+                            for (const auto &fraction : groupedByFraction) {
                                 double fractionIntensity = 0;
                                 int replicatesWithValidValues = 0;
 
-                                for (const SpectraFileInfo &replicate : groupedByFraction[fraction.Fraction]) {
+                                std::vector<SpectraFileInfo> sortedReplicates = fraction.second;
+                                std::sort(sortedReplicates.begin(), sortedReplicates.end(),
+                                          [](const SpectraFileInfo &a, const SpectraFileInfo &b) {
+                                              return a.TechnicalReplicate < b.TechnicalReplicate;
+                                          });
+
+                                for (const SpectraFileInfo &replicate : sortedReplicates) {
                                     double replicateIntensity = peptide.getIntensity(replicate.FullFilePathWithExtension);
 
                                     if (replicateIntensity > 0) {
@@ -447,16 +454,13 @@ class CruxLFQResults {
                                 }
                             }
 
-                            int sampleNumber = sample.first;
-
                             if (sampleIntensity == 0) {
                                 sampleIntensity = std::numeric_limits<double>::quiet_NaN();
                             } else {
                                 sampleIntensity = std::log2(sampleIntensity);
                             }
 
-                            auto peptideIndex = std::distance(it->second.begin(), std::find(it->second.begin(), it->second.end(), peptide));
-                            peptideIntensityMatrix[peptideIndex + 1][sampleN + 1] = sampleIntensity;
+                            peptideIntensityMatrix[peptideIdx + 1][sampleN + 1] = sampleIntensity;
                         }
 
                         sampleN++;
@@ -499,6 +503,11 @@ class CruxLFQResults {
                 std::vector<std::string> possibleUnquantifiableSample;
                 sampleN = 0;
                 for (auto &group : filesGroupedByCondition) {
+                    std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
+                    for (const auto &file : group.second) {
+                        groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
+                    }
+
                     for (auto &sample : groupedByBiologicalReplicate) {
                         bool isMissingValue = true;
                         for (SpectraFileInfo spectraFile : sample.second) {
@@ -522,6 +531,11 @@ class CruxLFQResults {
 
                 sampleN = 0;
                 for (auto &group : filesGroupedByCondition) {
+                    std::map<int, std::vector<SpectraFileInfo>> groupedByBiologicalReplicate;
+                    for (const auto &file : group.second) {
+                        groupedByBiologicalReplicate[file.BiologicalReplicate].push_back(file);
+                    }
+
                     for (auto &sample : groupedByBiologicalReplicate) {
                         // this step un-logs the protein "intensity". in reality this value is more like a fold-change
                         // than an intensity, but unlike a fold-change it's not relative to a particular sample.

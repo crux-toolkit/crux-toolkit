@@ -237,7 +237,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         CruxLFQ::IntensityNormalizationEngine intensityNormalizationEngine(
             lfqResults,
             CruxLFQ::INTEGRATE,
-            CruxLFQ::QUANTIFY_AMBIGUOUS_PEPTIDES,
+            false,
             output_dir);
         intensityNormalizationEngine.NormalizeResults();
     }
