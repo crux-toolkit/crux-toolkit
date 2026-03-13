@@ -216,8 +216,9 @@ class NelderMeadWithStartPoints : public IOptimizer {
             auto iterationsWithoutImprovement = 0;
             std::vector<OptimizerResult> results{prevBest};
 
+            std::uniform_real_distribution<double> uniform_dist(0.0, 1.0);
             for (int i = 0; i < dim; i++) {
-                auto a = (0.02 + 0.08 * m_random()) * (m_parameters[i].Max - m_parameters[i].Min);  // % simplex size between 2%-8% of min(xrange)
+                auto a = (0.02 + 0.08 * uniform_dist(m_random)) * (m_parameters[i].Max - m_parameters[i].Min);  // % simplex size between 2%-8% of min(xrange)
 
                 auto p = a * (std::sqrt(dim + 1) + dim - 1) / (dim * std::sqrt(2));
                 auto q = a * (std::sqrt(dim + 1) - 1) / (dim * std::sqrt(2));
@@ -554,15 +555,12 @@ class IntensityNormalizationEngine {
                 return pair.second;
             });
 
-        std::vector<std::string> conditions;
+        // C# uses OrderBy(p => p), so conditions must be sorted alphabetically
         std::set<std::string> conditionsSeen;
-
         for (const auto& spectraFile : results.spectraFiles) {
-            if (conditionsSeen.find(spectraFile.Condition) == conditionsSeen.end()) {
-                conditionsSeen.insert(spectraFile.Condition);
-                conditions.push_back(spectraFile.Condition);
-            }
+            conditionsSeen.insert(spectraFile.Condition);
         }
+        std::vector<std::string> conditions(conditionsSeen.begin(), conditionsSeen.end());
 
         std::vector<SpectraFileInfo> filesForCond1Biorep1;
         for (const auto& spectraFile : results.spectraFiles) {
