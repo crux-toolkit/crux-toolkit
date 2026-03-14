@@ -76,6 +76,15 @@ jobs:
         with: 
             python-version: 3.x
       
+      - name: setup-for-tests
+        shell: bash
+        run: |
+              python -m pip install numpy
+              python -m pip install pandas
+              sudo apt-get install ruby
+              sudo apt-get install cucumber
+              sudo gem install rspec
+
       - name: Get short git sha
         shell: bash
         run: |
@@ -86,15 +95,6 @@ jobs:
         with:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
           path: "${{runner.workspace}}/"
-
-      - name: setup-for-tests
-        shell: bash
-        run: |
-              python -m pip install numpy
-              python -m pip install pandas
-              sudo apt-get install ruby
-              sudo apt-get install cucumber
-              sudo gem install rspec
 
       - name: Run smoke tests
         continue-on-error: true
