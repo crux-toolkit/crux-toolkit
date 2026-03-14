@@ -102,7 +102,7 @@ jobs:
         run: |
              mkdir -p ${{runner.workspace}}/test-dir
              cd ${{runner.workspace}}/test-dir
-             cp -r ${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04/test/smoke-tests .
+             cp -r ${{runner.workspace}}/crux-toolkit/test/smoke-tests .
              
              # Remove the source code
              rm -rf ${{runner.workspace}}/
