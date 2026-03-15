@@ -113,7 +113,7 @@ jobs:
              ls -lR $crux_package_dir
              crux_binary=$crux_package_dir/bin/crux
              cp $crux_binary ${{runner.workspace}}/crux-toolkit/src/
-
+             ls
              ls -lR
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
