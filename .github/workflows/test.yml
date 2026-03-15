@@ -109,7 +109,9 @@ jobs:
              
              # Put the binaries where the smoke tests expect them
              mkdir -p ${{runner.workspace}}/crux-toolkit/src
-             crux_binary=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04/bin/crux
+             crux_package_dir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+             ls -lR $crux_package_dir
+             crux_binary=$crux_package_dir/bin/crux
              cp $crux_binary ${{runner.workspace}}/crux-toolkit/src/
 
              ls -lR
