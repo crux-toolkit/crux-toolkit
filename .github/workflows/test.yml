@@ -111,6 +111,11 @@ jobs:
              ls
              ls $pkgdir
 
+             pushd $pkgdir
+             unzip crux-4.3.2.Linux.x86_64.zip
+             ls -Rhl
+             popd
+
              # Copy smoke tests to a clean directory
              mkdir -p $testdir
              cp -r $repodir/test/smoke-tests $testdir/
