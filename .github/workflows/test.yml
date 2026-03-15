@@ -103,19 +103,16 @@ jobs:
              set -x
              repodir=${{runner.workspace}}/crux-toolkit
              testdir=${{runner.workspace}}/test-dir
-             pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+             pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.Linux.x86_64
 
              pwd
              ls
              cd ..
+             pwd
              ls
-             ls $pkgdir
-
-             pushd $pkgdir
-             unzip crux-4.3.2.Linux.x86_64.zip
+             unzip -j crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip crux-${{env.CRUX_VERSION}}.Linux.x86_64/bin/crux
              ls -Rhl
-             popd
-
+             
              # Copy smoke tests to a clean directory
              mkdir -p $testdir
              cp -r $repodir/test/smoke-tests $testdir/
