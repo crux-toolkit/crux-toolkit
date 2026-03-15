@@ -100,13 +100,17 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
+             set -x
              repodir=${{runner.workspace}}/crux-toolkit
              testdir=${{runner.workspace}}/test-dir
              pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
 
              pwd
              ls
-             
+             cd ..
+             ls
+             ls $pkgdir
+
              # Copy smoke tests to a clean directory
              mkdir -p $testdir
              cp -r $repodir/test/smoke-tests $testdir/
