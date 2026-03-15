@@ -123,9 +123,7 @@ jobs:
              
              # Put the binaries where the smoke tests expect them
              mkdir -p $repodir/src
-             ls -lR $pkgdir
-             crux_binary=$pkgdir/bin/crux
-             cp $crux_binary $repodir/src/
+             mv crux $repodir/src/
              ls -lR
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
