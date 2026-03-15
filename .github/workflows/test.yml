@@ -105,7 +105,8 @@ jobs:
              cp -r ${{runner.workspace}}/crux-toolkit/test/smoke-tests .
              
              # Remove the source code
-             rm -rf ${{runner.workspace}}/
+             rm -rf ${{runner.workspace}}/crux-toolkit
+             ls
              
              # Put the binaries where the smoke tests expect them
              mkdir -p ${{runner.workspace}}/crux-toolkit/src
@@ -113,7 +114,6 @@ jobs:
              ls -lR $crux_package_dir
              crux_binary=$crux_package_dir/bin/crux
              cp $crux_binary ${{runner.workspace}}/crux-toolkit/src/
-             ls
              ls -lR
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
