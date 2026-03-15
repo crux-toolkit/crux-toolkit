@@ -100,20 +100,26 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-             mkdir -p ${{runner.workspace}}/test-dir
-             cd ${{runner.workspace}}/test-dir
-             cp -r ${{runner.workspace}}/crux-toolkit/test/smoke-tests .
+             repodir=${{runner.workspace}}/crux-toolkit
+             testdir=${{runner.workspace}}/test-dir
+             pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+
+             pwd
+             ls
+             
+             # Copy smoke tests to a clean directory
+             mkdir -p $testdir
+             cp -r $repodir/test/smoke-tests $testdir/
              
              # Remove the source code
-             rm -rf ${{runner.workspace}}/crux-toolkit
+             rm -rf $repodir
              ls
              
              # Put the binaries where the smoke tests expect them
-             mkdir -p ${{runner.workspace}}/crux-toolkit/src
-             crux_package_dir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
-             ls -lR $crux_package_dir
-             crux_binary=$crux_package_dir/bin/crux
-             cp $crux_binary ${{runner.workspace}}/crux-toolkit/src/
+             mkdir -p $repodir/src
+             ls -lR $pkgdir
+             crux_binary=$pkgdir/bin/crux
+             cp $crux_binary $repodir/src/
              ls -lR
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html \
