@@ -111,26 +111,32 @@ jobs:
              pwd
              ls
              unzip -j crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip crux-${{env.CRUX_VERSION}}.Linux.x86_64/bin/crux
-             ls -Rhl
-             
+             ls -lh
+
              # Copy smoke tests to a clean directory
              mkdir -p $testdir
              cp -r $repodir/test/smoke-tests $testdir/
-             
+
              # Remove the source code
              rm -rf $repodir
              ls
-             
+
              # Put the binaries where the smoke tests expect them
              mkdir -p $repodir/src
              mv crux $repodir/src/
-             ls -lR
+
+             ls -lh
+
              cd smoke-tests
+
+             ls -lh
+
              cucumber -v -f html -o smoke-tests.html \
                && echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                || echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                && echo $cucumber_exit_code
-             ls -l ${{runner.workspace}}/test-dir/smoke-tests/
+
+             ls -lh
 
       - name: Archive smoke test results
         uses: actions/upload-artifact@v6
