@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-                ./ext/build
+                ${{runner.workspace}}/ext/build
           # ./ext/build/src/comet
           # ./ext/build/src/gflags
           # ./ext/build/src/kojak
@@ -38,14 +38,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            .ninja_deps
-            .ninja_log
-            CMakeCache.txt
-            CMakeFiles/
-            CPackConfig.cmake
-            CPackSourceConfig.cmake
-            _CPack_Packages/
-            build.ninja
+            ${{runner.workspace}}/.ninja_deps
+            ${{runner.workspace}}/.ninja_log
+            ${{runner.workspace}}/CMakeCache.txt
+            ${{runner.workspace}}/CMakeFiles/
+            ${{runner.workspace}}/CPackConfig.cmake
+            ${{runner.workspace}}/CPackSourceConfig.cmake
+            ${{runner.workspace}}/_CPack_Packages/
+            ${{runner.workspace}}/build.ninja
           key: ${{ runner.os }}-build-artifacts
 
       - name: Get short git sha
