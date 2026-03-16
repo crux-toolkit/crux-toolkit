@@ -24,28 +24,14 @@ jobs:
         run: |
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
-      - name: Configure Crux build
+      - name: Configure, build and package
         shell: bash
         run: |
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
-              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
-      - name: Build Crux
-        shell: bash
-        run: |
-             cd "${{runner.workspace}}/build"
-             echo Building in $(pwd)
-             # Set the generator to Ninja.
-             cmake -G "Ninja"
-             cmake --build . --config $BUILD_TYPE 
-
-      - name: Build package
-        shell: bash
-        run: |
-             cd "${{runner.workspace}}/build"
-             cmake --build . --config $BUILD_TYPE --target package
+              cmake -G "Ninja" "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake --build . --target package
 
       - name: Archive package
         uses: actions/upload-artifact@v6
