@@ -122,13 +122,15 @@ jobs:
              ls
 
              # Put the binaries where the smoke tests expect them
-             mkdir -p $repodir/src
-             mv crux $repodir/src/
+             pwd
+             mkdir -p src
+             mv crux src/
 
              ls -lh
 
              cd $testdir/smoke-tests
-
+             pwd
+             
              ls -lh
 
              cucumber -v -f html -o smoke-tests.html \
