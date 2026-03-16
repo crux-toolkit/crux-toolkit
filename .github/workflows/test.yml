@@ -127,7 +127,7 @@ jobs:
 
              ls -lh
 
-             cd smoke-tests
+             cd $testdir/smoke-tests
 
              ls -lh
 
