@@ -120,38 +120,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
         CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
-        {
-            auto& ms1Scans = indexResults._ms1Scans[spectra_file];
-            bool found = std::any_of(ms1Scans.begin(), ms1Scans.end(),
-                [](const CruxLFQ::Ms1ScanInfo& info) {
-                    return info.oneBasedScanNumber == 28996;
-                });
-            carp(CARP_INFO, "Scan 28996 %s in %s", found ? "EXISTS" : "NOT FOUND", spectra_file.c_str());
-        }
-
-        {
-            const double targetMz = 581.3101196;
-            const double targetIntensity = 566004.8125;
-            const double mzTol = 0.001;
-            const double intensityTol = 1.0;
-            int binIndex = static_cast<int>(std::round(targetMz * CruxLFQ::BINS_PER_DALTON));
-            bool peakFound = false;
-            if (binIndex < static_cast<int>(indexResults._indexedPeaks.size())) {
-                for (const auto& peak : indexResults._indexedPeaks[binIndex]) {
-                    if (std::abs(peak.mz - targetMz) <= mzTol &&
-                        std::abs(peak.intensity - targetIntensity) <= intensityTol) {
-                        carp(CARP_INFO, "Peak FOUND: mz=%.7f intensity=%.4f scan=%d rt=%.4f in %s",
-                             peak.mz, peak.intensity, peak.nativeScanNumber, peak.retentionTime, spectra_file.c_str());
-                        peakFound = true;
-                    }
-                }
-            }
-            if (!peakFound) {
-                carp(CARP_INFO, "Peak mz=%.7f intensity=%.4f NOT FOUND in %s",
-                     targetMz, targetIntensity, spectra_file.c_str());
-            }
-        }
-
         carp(CARP_INFO, "Finished indexing peaks for %s", spectra_file.c_str());
 
         vector<CruxLFQ::Identification> filteredIdentifications;
@@ -178,48 +146,6 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
             });
         metadata->setIndexedPeaks(&convertedPeaks);
         metadata->setMs1Scans(&indexResults._ms1Scans);
-
-        {
-            const double targetMz = 581.3101196;
-            const double mzTol = 0.001;
-            int binIndex = static_cast<int>(std::round(targetMz * CruxLFQ::BINS_PER_DALTON));
-            bool peakFound = false;
-            if (binIndex < static_cast<int>(convertedPeaks.size()) && convertedPeaks[binIndex] != nullptr) {
-                for (const auto& peak : *convertedPeaks[binIndex]) {
-                    if (std::abs(peak.mz - targetMz) <= mzTol) {
-                        carp(CARP_INFO, "Peak AFTER setIndexedPeaks: mz=%.7f intensity=%.4f scan=%d zeroIdx=%d rt=%.4f in %s",
-                             peak.mz, peak.intensity, peak.nativeScanNumber,
-                             peak.zeroBasedMs1ScanIndex, peak.retentionTime, spectra_file.c_str());
-                        peakFound = true;
-                    }
-                }
-            }
-            if (!peakFound) {
-                carp(CARP_INFO, "Peak mz=%.7f NOT FOUND in convertedPeaks (bin=%d, size=%zu) for %s",
-                     targetMz, binIndex, convertedPeaks.size(), spectra_file.c_str());
-            }
-        }
-
-        // Check if the M+1 isotope of the target peak exists at scan 28996 (zeroIdx=2141)
-        {
-            const double m1Mz = 581.8118;  // M+1 at charge 2: (1160.611 + 1.003355 + 2*1.007276) / 2
-            const double mzTol = 0.005;
-            const int targetZeroIdx = 2141;
-            int binIndex = static_cast<int>(std::round(m1Mz * CruxLFQ::BINS_PER_DALTON));
-            bool m1Found = false;
-            if (binIndex < static_cast<int>(convertedPeaks.size()) && convertedPeaks[binIndex] != nullptr) {
-                for (const auto& peak : *convertedPeaks[binIndex]) {
-                    if (peak.zeroBasedMs1ScanIndex == targetZeroIdx && std::abs(peak.mz - m1Mz) <= mzTol) {
-                        carp(CARP_INFO, "M+1 at scan28996: mz=%.7f intensity=%.4f zeroIdx=%d in %s",
-                             peak.mz, peak.intensity, peak.zeroBasedMs1ScanIndex, spectra_file.c_str());
-                        m1Found = true;
-                    }
-                }
-            }
-            if (!m1Found) {
-                carp(CARP_INFO, "M+1 (mz~%.4f) at zeroIdx=%d NOT FOUND in %s", m1Mz, targetZeroIdx, spectra_file.c_str());
-            }
-        }
 
         CruxLFQ::quantifyMs2IdentifiedPeptides(
             spectra_file,
@@ -492,7 +418,6 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
     var_mod_table.ClearTables();
 
     // parse regular amino acid modifications
-    carp(CARP_DEBUG, "mods_spec='%s'", mods_spec.c_str());
     if (!var_mod_table.Parse(mods_spec.c_str())) {
         carp(CARP_FATAL, "Error parsing mods");
     }
@@ -516,7 +441,6 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
     // if (!mods_spec.empty() && !var_mod_table.Parse(mods_spec.c_str(), NTPRO)) {
     //     carp(CARP_FATAL, "Error parsing n-terminal protein mods");
     // }
-    carp(CARP_INFO, "%s", mods_spec.c_str());
     var_mod_table.SerializeUniqueDeltas();
     if (!MassConstants::Init(var_mod_table.ParsedModTable(),
                              var_mod_table.ParsedNtpepModTable(),

@@ -526,7 +526,6 @@ class IntensityNormalizationEngine {
                 }
             }
         }
-        
     }
 
     void NormalizeFractions() {
@@ -707,10 +706,6 @@ class IntensityNormalizationEngine {
     }
 
     void NormalizeBioreps() {
-        carp(CARP_INFO, "[NORM] === NormalizeBioreps() ENTRY ===");
-        carp(CARP_INFO, "[NORM] results.spectraFiles.size() = %zu", results.spectraFiles.size());
-        carp(CARP_INFO, "[NORM] results.PeptideModifiedSequences.size() = %zu", results.PeptideModifiedSequences.size());
-        
         // CSV logging: collect all inputs and outputs
         std::vector<std::vector<double>> biorepInputs;  // fold changes
         std::vector<std::vector<double>> biorepOutputs; // median fold change, normalization factor
@@ -719,8 +714,6 @@ class IntensityNormalizationEngine {
         for (const auto& v : results.PeptideModifiedSequences) {
             peptides.push_back(v.second);
         }
-
-        carp(CARP_INFO, "[NORM] Copied %zu peptides", peptides.size());
 
         std::vector<std::vector<SpectraFileInfo>> conditions;
         std::map<std::string, std::vector<SpectraFileInfo>> grouped;
@@ -733,20 +726,13 @@ class IntensityNormalizationEngine {
             grouped[v.Condition].push_back(v);
         }
 
-        carp(CARP_INFO, "[NORM] Grouped into %zu condition groups", grouped.size());
-
         for (const auto& condName : conditionOrder) {
             conditions.push_back(grouped[condName]);
         }
 
-        carp(CARP_INFO, "[NORM] Created %zu condition vectors", conditions.size());
-        
         if (conditions.empty()) {
-            carp(CARP_INFO, "[NORM] No conditions found, returning");
             return;
         }
-
-        carp(CARP_INFO, "[NORM] Found %zu peptides, %zu conditions", peptides.size(), conditions.size());
 
         vector<vector<double>> biorepIntensityPair(peptides.size(), vector<double>(2));
 
@@ -761,9 +747,6 @@ class IntensityNormalizationEngine {
             for (size_t p = 0; p < peptides.size(); ++p) {
                 double intensity = peptides[p].getIntensity(file.FullFilePathWithExtension);
                 biorepIntensityPair[p][0] += intensity;
-                if (p == 0) {
-                    carp(CARP_INFO, "[NORM] Ref intensity: %.2f from %s", intensity, file.FullFilePathWithExtension.c_str());
-                }
             }
         }
         
@@ -774,11 +757,7 @@ class IntensityNormalizationEngine {
                 bioreps[v.BiologicalReplicate].push_back(v);
             }
             
-            carp(CARP_INFO, "[NORM] Condition %zu has %zu bioreps", condIdx, bioreps.size());
-            
             for (auto& biorep : bioreps) {
-                carp(CARP_INFO, "[NORM] Processing biorep %d", biorep.first);
-                
                 for (size_t p = 0; p < peptides.size(); ++p) {
                     biorepIntensityPair[p][1] = 0;
                 }
@@ -800,9 +779,6 @@ class IntensityNormalizationEngine {
                     for (size_t p = 0; p < peptides.size(); ++p) {
                         double intensity = peptides[p].getIntensity(firstTechrep.FullFilePathWithExtension);
                         biorepIntensityPair[p][1] += intensity;
-                        if (p == 0) {
-                            carp(CARP_INFO, "[NORM] Target intensity: %.2f from %s", intensity, firstTechrep.FullFilePathWithExtension.c_str());
-                        }
                     }
                 }
 
@@ -812,15 +788,10 @@ class IntensityNormalizationEngine {
                     if (biorepIntensityPair[p][0] > 0 && biorepIntensityPair[p][1] > 0) {
                         double fc = biorepIntensityPair[p][1] / biorepIntensityPair[p][0];
                         foldChanges.push_back(fc);
-                        if (p == 0) {
-                            carp(CARP_INFO, "[NORM] FoldChange: %.2f / %.2f = %.4f", 
-                                 biorepIntensityPair[p][1], biorepIntensityPair[p][0], fc);
-                        }
                     }
                 }
 
                 if (foldChanges.empty()) {
-                    carp(CARP_INFO, "[NORM] No fold changes, skipping");
                     return;
                 }
 
@@ -830,43 +801,31 @@ class IntensityNormalizationEngine {
                 // CSV logging: store inputs and outputs
                 biorepInputs.push_back(foldChanges);
                 biorepOutputs.push_back({medianFoldChange, normalizationFactor});
-                
-                carp(CARP_INFO, "[NORM] Biorep %d: medianFC=%.4f, normFactor=%.4f", 
-                     biorep.first, medianFoldChange, normalizationFactor);
 
                 // normalize to median fold-change
-                int peaksNormalized = 0;
                 for (auto& file : biorep.second) {
-                    carp(CARP_INFO, "[NORM] Normalizing file: %s (%zu peaks)", 
-                         file.FullFilePathWithExtension.c_str(), 
-                         results.Peaks[file.FullFilePathWithExtension].size());
-                    
                     for (auto& peak : results.Peaks[file.FullFilePathWithExtension]) {
-                        double oldIntensity = peak.intensity;
                         for (auto& isotopeEnvelope : peak.isotopicEnvelopes) {
                             isotopeEnvelope.Normalize(normalizationFactor);
                         }
 
                         // recalculate intensity after normalization
                         peak.calculateIntensityForThisFeature(integrate);
-                        carp(CARP_INFO, "[NORM] Peak intensity: %.2f -> %.2f", oldIntensity, peak.intensity);
-                        peaksNormalized++;
                     }
                 }
-                carp(CARP_INFO, "[NORM] Normalized %d peaks for biorep %d", peaksNormalized, biorep.first);
             }
         }
-        
+
         // Write CSV files for biorep normalization
         if (!biorepInputs.empty()) {
             writeVectorToCSV(makeOutputPath("NormalizeBioreps_input.csv"), biorepInputs, {"fold_changes"});
             writeVectorToCSV(makeOutputPath("NormalizeBioreps_output.csv"), biorepOutputs, {"median_fold_change", "normalization_factor"});
         }
-        
-        carp(CARP_INFO, "[NORM] NormalizeBioreps() completed");
     }
 
     double CalculateNormalizationFactorError(vector<double>& reference, vector<vector<double>>& sampleToNormalize, vector<double>& normalizationFactors, int numP, int numF) {
+        static long long callCount = 0;
+        callCount++;
         double totalError = 0;
 
         for (int p = 0; p < numP; ++p) {
@@ -886,7 +845,6 @@ class IntensityNormalizationEngine {
     }
 
     vector<double> GetNormalizationFactors(std::vector<std::vector<std::vector<double>>> peptideIntensities, int numP, int numF) {
-        
         // CSV logging: flatten input peptideIntensities
         std::vector<std::vector<double>> inputData;
         for (const auto& peptide : peptideIntensities) {
@@ -1005,30 +963,11 @@ class IntensityNormalizationEngine {
 
         carp(CARP_INFO, "Normalizing bioreps and conditions");
         NormalizeBioreps();
-        
-        // DEBUG: Check peak values right after biorep normalization
-        carp(CARP_INFO, "[VERIFY] Checking peaks after biorep normalization:");
-        for (const auto& filePeaks : results.Peaks) {
-            if (!filePeaks.second.empty()) {
-                carp(CARP_INFO, "[VERIFY]   File: %s, Peak[0].intensity = %.2f", 
-                     filePeaks.first.c_str(), filePeaks.second[0].intensity);
-            }
-        }
-        
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
 
         carp(CARP_INFO, "Normalizing techreps");
         NormalizeTechreps();
         results.calculatePeptideResults(quantifyAmbiguousPeptides);
-        
-        // DEBUG: Final check
-        carp(CARP_INFO, "[VERIFY] Final peak check:");
-        for (const auto& filePeaks : results.Peaks) {
-            if (!filePeaks.second.empty()) {
-                carp(CARP_INFO, "[VERIFY]   File: %s, Peak[0].intensity = %.2f", 
-                     filePeaks.first.c_str(), filePeaks.second[0].intensity);
-            }
-        }
     }
 };
 }  // namespace CruxLFQ

@@ -389,17 +389,6 @@ calculateTheoreticalIsotopeDistributions(
         }
         modifiedSequenceToIsotopicDistribution[peptide_sequence] =
             isotopicMassesAndNormalizedAbundances;
-
-        // Diagnostic: log distribution for EITALAPSTMK
-        if (peptide_sequence == "EITALAPSTMK") {
-            carp(CARP_INFO, "[DISTRIB] sequence=%s formula=%s highestAbundance=%.6f",
-                 peptide_sequence.c_str(), formula.c_str(), highestAbundance);
-            for (size_t di = 0; di < isotopicMassesAndNormalizedAbundances.size(); di++) {
-                carp(CARP_INFO, "[DISTRIB] i=%zu massShift=%.6f normAbundance=%.6f",
-                     di, isotopicMassesAndNormalizedAbundances[di].first,
-                     isotopicMassesAndNormalizedAbundances[di].second);
-            }
-        }
     }
 
     std::unordered_map<std::string, std::vector<Identification*>>
@@ -458,16 +447,6 @@ void processRange(int start, int end,
                   CruxLFQResults* lfqResults) {
     for (int i = start; i < end; ++i) {
         const Identification& identification = ms2IdsForThisFile[i];
-        // Match by mass ~1160.606 Da and RT ~66.64 min (the MS1 scan 28996 peak)
-        const bool dbg = (std::abs(identification.monoIsotopicMass - 1160.606) < 0.05 &&
-                          std::abs(identification.ms2RetentionTimeInMinutes - 66.64) < 1.0);
-
-        if (dbg) {
-            carp(CARP_INFO, "[DBG28996] seq=%s scanId=%d charge=%d monoMass=%.6f peakFindMass=%.6f RT=%.4f",
-                 identification.sequence.c_str(), identification.scanId,
-                 identification.precursorCharge, identification.monoIsotopicMass,
-                 identification.peakFindingMass, identification.ms2RetentionTimeInMinutes);
-        }
 
         ChromatographicPeak msmsFeature(identification, false, spectralFile);
 
@@ -495,10 +474,6 @@ void processRange(int start, int end,
                                }
                            });
 
-            if (dbg) {
-                carp(CARP_INFO, "[DBG28996] charge=%d xic after peakFind=%zu", chargeState, xic.size());
-            }
-
             xic.erase(std::remove_if(xic.begin(), xic.end(),
                                      [&](const IndexedMassSpectralPeak& p) {
                                          return !ppmTolerance.Within(
@@ -507,24 +482,9 @@ void processRange(int start, int end,
                                      }),
                       xic.end());
 
-            if (dbg) {
-                carp(CARP_INFO, "[DBG28996] charge=%d xic after ppm filter=%zu", chargeState, xic.size());
-            }
-
             vector<IsotopicEnvelope>&& isotopicEnvelopes = getIsotopicEnvelopes(
                 xic, identification, chargeState,
                 modifiedSequenceToIsotopicDistribution);
-
-            if (dbg) {
-                carp(CARP_INFO, "[DBG28996] charge=%d isotopicEnvelopes=%zu", chargeState, isotopicEnvelopes.size());
-                // Check if scan 28996 (zeroIdx=2141) is in the XIC and/or survived isotope check
-                bool inXic = std::any_of(xic.begin(), xic.end(),
-                    [](const IndexedMassSpectralPeak& p) { return p.nativeScanNumber == 28996; });
-                bool inEnvelopes = std::any_of(isotopicEnvelopes.begin(), isotopicEnvelopes.end(),
-                    [](const IsotopicEnvelope& e) { return e.indexedPeak.nativeScanNumber == 28996; });
-                carp(CARP_INFO, "[DBG28996] charge=%d scan28996 in XIC=%s in envelopes=%s",
-                     chargeState, inXic ? "YES" : "NO", inEnvelopes ? "YES" : "NO");
-            }
 
             msmsFeature.isotopicEnvelopes.insert(
                 msmsFeature.isotopicEnvelopes.end(), isotopicEnvelopes.begin(),
@@ -537,12 +497,7 @@ void processRange(int start, int end,
 
         cutPeak(msmsFeature, identification.ms2RetentionTimeInMinutes);
 
-        if (dbg) {
-            carp(CARP_INFO, "[DBG28996] envelopes after cutPeak=%zu", msmsFeature.isotopicEnvelopes.size());
-        }
-
         if (msmsFeature.isotopicEnvelopes.empty()) {
-            if (dbg) carp(CARP_INFO, "[DBG28996] DROPPED: empty after cutPeak");
             continue;
         }
 
@@ -554,13 +509,7 @@ void processRange(int start, int end,
                          return p.chargeState == identification.precursorCharge;
                      });
 
-        if (dbg) {
-            carp(CARP_INFO, "[DBG28996] precursorXic (charge=%d) size=%zu",
-                 identification.precursorCharge, precursorXic.size());
-        }
-
         if (precursorXic.empty()) {
-            if (dbg) carp(CARP_INFO, "[DBG28996] DROPPED: precursorXic empty");
             msmsFeature.isotopicEnvelopes.clear();
             continue;
         }
@@ -881,16 +830,6 @@ vector<IsotopicEnvelope> getIsotopicEnvelopes(
                     double theoreticalIsotopeIntensity = theoreticalIsotopeAbundances[i] * peak.intensity;
 
                     IndexedMassSpectralPeak* isotopePeak = getIndexedPeak(isotopeMass, peak.zeroBasedMs1ScanIndex, isotopeTolerance, chargeState);
-
-                    if (peak.nativeScanNumber == 28996 && shift.first == 0) {
-                        double lo = theoreticalIsotopeIntensity / 4.0;
-                        double hi = theoreticalIsotopeIntensity * 4.0;
-                        carp(CARP_INFO, "[ISOTOPE28996] i=%d isotopeShift=%.6f theorAbund=%.4f theorIntens=%.2f lo=%.2f hi=%.2f actual=%.2f found=%s",
-                             i, theoreticalIsotopeMassShifts[i], theoreticalIsotopeAbundances[i],
-                             theoreticalIsotopeIntensity, lo, hi,
-                             isotopePeak ? isotopePeak->intensity : 0.0,
-                             isotopePeak ? "YES" : "NO");
-                    }
 
                     if (isotopePeak == nullptr || isotopePeak->intensity < theoreticalIsotopeIntensity / 4.0 || isotopePeak->intensity > theoreticalIsotopeIntensity * 4.0) {
                         break;
