@@ -122,41 +122,27 @@ jobs:
              testdir=${{runner.workspace}}/test-dir
              pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.Linux.x86_64
 
-             pwd
-             ls
              cd ..
-             pwd
-             ls
              unzip -j crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip crux-${{env.CRUX_VERSION}}.Linux.x86_64/bin/crux
-             ls -lh
-
+             
              # Copy smoke tests to a clean directory
              mkdir -p $testdir
              cp -r $repodir/test/smoke-tests $testdir/
 
              # Remove the source code
              rm -rf $repodir
-             ls
-
+             
              # Put the binaries where the smoke tests expect them
-             pwd
              mkdir -p src
              mv crux src/
 
-             ls -lh
-
              cd $testdir/smoke-tests
-             pwd
              
-             ls -lh
-
              cucumber -v -f html -o smoke-tests.html \
                && echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                || echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
                && echo $cucumber_exit_code
 
-             ls -lh
-             
              # The upload artifact requires the repository directory.
              mkdir -p $repodir
 
@@ -168,6 +154,7 @@ jobs:
                 ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
                 ${{runner.workspace}}/test-dir/smoke-tests/errors
                 ${{runner.workspace}}/test-dir/smoke-tests/stdout
+
       - name: Let the workflow fail if the test suite failed
         shell: bash
         run: |
