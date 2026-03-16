@@ -37,7 +37,6 @@ jobs:
         run: |
              cd "${{runner.workspace}}/build"
              echo Building in $(pwd)
-             which ninja || echo "ninja not found in PATH" && exit 1
              # Set the generator to Ninja.
              cmake -G "Ninja"
              cmake --build . --config $BUILD_TYPE 
