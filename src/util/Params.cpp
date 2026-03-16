@@ -1513,14 +1513,6 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("find-peptides", true,
                 "Validate peptides by finding them in the given FASTA file.",
                 "Only available for spectral-counts.", false);
-  // ***** static mods *****
-  for (char c = 'A'; c <= 'Z'; c++) {
-    double deltaMass = (c != 'C') ? 0 : CYSTEINE_DEFAULT;
-    bool visible = (c != 'B' && c != 'J' && c != 'O' && c != 'U' && c != 'X' && c != 'Z');
-    InitDoubleParam(string(1, c), deltaMass,
-      "Change the mass of all amino acids '" + string(1, c) + "' by the "
-      "given amount.", "", visible);
-  }
   /* psm-convert options */
   InitStringParam("input-format", "auto", "auto|tsv|sqt|pepxml|mzidentml",
     "Legal values are auto, tsv, sqt, pepxml or mzidentml format.",
@@ -2276,9 +2268,6 @@ void Params::Categorize() {
   items.insert("mods-spec");
   items.insert("nterm-peptide-mods-spec");
   items.insert("nterm-protein-mods-spec");
-  for (char c = 'A'; c <= 'Z'; c++) {
-    items.insert(string(1, c));
-  }
   items.insert("auto-modifications");
   items.insert("fixed_modification");
   items.insert("fixed_modification_protC");
@@ -3050,13 +3039,7 @@ void Params::FinalizeParams() {
     return;
   }
 
-  for (char c = 'A'; c <= 'Z'; c++) {
-    string aa = string(1, c);
-    double deltaMass = GetDouble(aa);
-    if (deltaMass != 0) {
-      ModificationDefinition::NewStaticMod(aa, deltaMass, ANY);
-    }
-  }
+
 
   if (GetString("enzyme") == "no-enzyme") {
     Set("digestion", "non-specific-digest");
