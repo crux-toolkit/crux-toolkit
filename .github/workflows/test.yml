@@ -19,33 +19,11 @@ jobs:
       - name: checkout-repository    
         uses: actions/checkout@v6
       
-      - name: Set up cache for source dependencies
+      - name: Set up cache for build directory
         uses: actions/cache@v4
         with:
           path: |
-                ${{runner.workspace}}/crux-toolkit/ext/build
-          # ./ext/build/src/comet
-          # ./ext/build/src/gflags
-          # ./ext/build/src/kojak
-          # ./ext/build/src/MSToolkit
-          # ./ext/build/src/neopepxmlparser
-          # ./ext/build/src/percolator
-          # ./ext/build/src/ProteoWizard
-          # ./ext/build/src/proteobuf-3.19.4
-          key: source-deps-${{ runner.os }}-${{ github.ref_name }}
-
-      - name: Set up cache for build artifacts
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{runner.workspace}}/crux-toolkit/.ninja_deps
-            ${{runner.workspace}}/crux-toolkit/.ninja_log
-            ${{runner.workspace}}/crux-toolkit/CMakeCache.txt
-            ${{runner.workspace}}/crux-toolkit/CMakeFiles/
-            ${{runner.workspace}}/crux-toolkit/CPackConfig.cmake
-            ${{runner.workspace}}/crux-toolkit/CPackSourceConfig.cmake
-            ${{runner.workspace}}/crux-toolkit/_CPack_Packages/
-            ${{runner.workspace}}/crux-toolkit/build.ninja
+            ${{runner.workspace}}/build
           key: build-artifacts-${{ runner.os }}-${{ github.ref_name }}
 
       - name: Get short git sha
