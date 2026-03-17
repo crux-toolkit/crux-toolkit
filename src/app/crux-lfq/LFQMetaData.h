@@ -16,8 +16,6 @@ class LFQMetaData {
    private:
     vector<vector<IndexedMassSpectralPeak>*>* indexedPeaks;
     unordered_map<string, vector<Ms1ScanInfo>>* ms1Scans;
-    string peptidePeakDataOutputPath;
-
     LFQMetaData() {}                                      // Private constructor to prevent instantiation
     LFQMetaData(const LFQMetaData&) = delete;             // Disable copy constructor
     LFQMetaData& operator=(const LFQMetaData&) = delete;  // Disable assignment operator
@@ -42,14 +40,6 @@ class LFQMetaData {
 
     unordered_map<string, vector<Ms1ScanInfo>>* getMs1Scans() {
         return ms1Scans;
-    }
-
-    void setPeptidePeakDataOutputPath(const string& path) {
-        peptidePeakDataOutputPath = path;
-    }
-
-    const string& getPeptidePeakDataOutputPath() const {
-        return peptidePeakDataOutputPath;
     }
 };
 }  // namespace CruxLFQ

@@ -551,11 +551,6 @@ void processRange(int start, int end,
             lfqResults->Peaks[spectralFile].push_back(msmsFeature);
         }
 
-        writePeptidePeakDataToCSV(
-            identification,
-            msmsFeature,
-            spectralFile,
-            LFQMetaData::getInstance().getPeptidePeakDataOutputPath());
     }
 }
 
@@ -1146,67 +1141,6 @@ void runErrorChecking(const string& spectraFile, CruxLFQResults& lfqResults) {
     }
 
     lfqResults.Peaks[spectraFile] = errorCheckedPeaks;
-}
-
-void initializePeptidePeakDataCSV(const string& outputPath) {
-    std::lock_guard<std::mutex> lock(csvWriteMtx);
-    std::ofstream writer(outputPath, std::ios::out | std::ios::trunc);
-    if (writer.is_open()) {
-        writer << "File,PeptideSequence,BaseSequence,ProteinGroups,PeptideMass,"
-                  "PrecursorCharge,MS2ScanNumber,MS2RetentionTime,PeakMZ,"
-                  "PeakIntensity,PeakRetentionTime,MS1ScanNumber,ChargeState\n";
-    } else {
-        carp(CARP_WARNING, "Error initializing peptide peak data CSV: %s", outputPath.c_str());
-    }
-}
-
-void writePeptidePeakDataToCSV(const Identification& identification,
-                                const ChromatographicPeak& peak,
-                                const string& spectraFile,
-                                const string& outputPath) {
-    if (outputPath.empty() || peak.isotopicEnvelopes.empty()) {
-        return;
-    }
-
-    // Extract filename without extension
-    string fileName = spectraFile;
-    size_t slashPos = fileName.find_last_of("/\\");
-    if (slashPos != string::npos) {
-        fileName = fileName.substr(slashPos + 1);
-    }
-    size_t dotPos = fileName.find_last_of('.');
-    if (dotPos != string::npos) {
-        fileName = fileName.substr(0, dotPos);
-    }
-
-    std::lock_guard<std::mutex> lock(csvWriteMtx);
-    std::ofstream writer(outputPath, std::ios::out | std::ios::app);
-    if (!writer.is_open()) {
-        carp(CARP_WARNING, "Error writing peptide peak data to CSV: %s", outputPath.c_str());
-        return;
-    }
-
-    writer << std::setprecision(17);  // full precision (equivalent to C# G17)
-
-    for (const auto& envelope : peak.isotopicEnvelopes) {
-        // nativeScanNumber is stored directly on the peak at index time (from mzML getFirstScan()),
-        // equivalent to C#'s _ms1Scans[fileInfo][ZeroBasedMs1ScanIndex].OneBasedScanNumber
-        int ms1ScanNumber = envelope.indexedPeak.nativeScanNumber;
-
-        writer << fileName << ","
-               << identification.sequence << ","
-               << identification.modifications << ","
-               << identification.protein_id << ","
-               << identification.monoIsotopicMass << ","
-               << identification.precursorCharge << ","
-               << identification.scanId << ","
-               << identification.ms2RetentionTimeInMinutes << ","
-               << envelope.indexedPeak.mz << ","
-               << envelope.indexedPeak.intensity << ","
-               << envelope.indexedPeak.retentionTime << ","
-               << ms1ScanNumber << ","
-               << envelope.chargeState << "\n";
-    }
 }
 
 }  // namespace CruxLFQ

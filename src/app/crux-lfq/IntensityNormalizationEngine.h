@@ -706,10 +706,6 @@ class IntensityNormalizationEngine {
     }
 
     void NormalizeBioreps() {
-        // CSV logging: collect all inputs and outputs
-        std::vector<std::vector<double>> biorepInputs;  // fold changes
-        std::vector<std::vector<double>> biorepOutputs; // median fold change, normalization factor
-        
         vector<LFQPeptides> peptides;
         for (const auto& v : results.PeptideModifiedSequences) {
             peptides.push_back(v.second);
@@ -797,10 +793,6 @@ class IntensityNormalizationEngine {
 
                 double medianFoldChange = Median(foldChanges);
                 double normalizationFactor = 1.0 / medianFoldChange;
-                
-                // CSV logging: store inputs and outputs
-                biorepInputs.push_back(foldChanges);
-                biorepOutputs.push_back({medianFoldChange, normalizationFactor});
 
                 // normalize to median fold-change
                 for (auto& file : biorep.second) {
@@ -816,11 +808,6 @@ class IntensityNormalizationEngine {
             }
         }
 
-        // Write CSV files for biorep normalization
-        if (!biorepInputs.empty()) {
-            writeVectorToCSV(makeOutputPath("NormalizeBioreps_input.csv"), biorepInputs, {"fold_changes"});
-            writeVectorToCSV(makeOutputPath("NormalizeBioreps_output.csv"), biorepOutputs, {"median_fold_change", "normalization_factor"});
-        }
     }
 
     double CalculateNormalizationFactorError(vector<double>& reference, vector<vector<double>>& sampleToNormalize, vector<double>& normalizationFactors, int numP, int numF) {

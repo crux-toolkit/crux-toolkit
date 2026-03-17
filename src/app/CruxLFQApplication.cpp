@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <exception>
+#include <fstream>
 #include <list>
 #include <memory>
 #include <sstream>
@@ -55,7 +56,7 @@ CruxLFQApplication::~CruxLFQApplication() {}
 int CruxLFQApplication::main(int argc, char** argv) {
     string psm_file = Params::GetString("lfq-peptide-spectrum matches");
     vector<string> spec_files = Params::GetStrings("spectrum files");
-    string specfile_replicates = Params::GetString("spectrum file replicates");
+    string specfile_replicates = Params::GetString("specfile-replicates");
     return main(psm_file, spec_files, specfile_replicates);
 }
 
@@ -110,9 +111,31 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     vector<int> chargeStates = CruxLFQ::createChargeStates(allIdentifications);
 
-    const string peptide_peak_data_file = make_file_path("crux-lfq-peptide-peaks.csv");
-    CruxLFQ::LFQMetaData::getInstance().setPeptidePeakDataOutputPath(peptide_peak_data_file);
-    CruxLFQ::initializePeptidePeakDataCSV(peptide_peak_data_file);
+    // {
+    //     const std::string id_file = make_file_path("crux-lfq-identifications.txt");
+    //     std::ofstream id_out(id_file);
+    //     if (id_out.is_open()) {
+    //         id_out << "sequence\tpeptideMass\tmonoIsotopicMass\tpeakFindingMass\t"
+    //                   "precursorCharge\tspectralFile\tms2RetentionTimeInMinutes\t"
+    //                   "scanId\tmodifications\tprotein_id\n";
+    //         for (const auto& id : allIdentifications) {
+    //             id_out << id.sequence << "\t"
+    //                    << id.peptideMass << "\t"
+    //                    << id.monoIsotopicMass << "\t"
+    //                    << id.peakFindingMass << "\t"
+    //                    << id.precursorCharge << "\t"
+    //                    << id.spectralFile << "\t"
+    //                    << id.ms2RetentionTimeInMinutes << "\t"
+    //                    << id.scanId << "\t"
+    //                    << id.modifications << "\t"
+    //                    << id.protein_id << "\n";
+    //         }
+    //     } else {
+    //         carp(CARP_WARNING, "Could not open identifications file for writing: %s", id_file.c_str());
+    //     }
+    //     // Exit after writing identifications file if no spectrum files are provided, since there's nothing more to do
+    //     return 0;
+    // }
 
     for (const string& spectra_file : spec_files) {
         Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
@@ -195,8 +218,7 @@ string CruxLFQApplication::getDescription() const {
 vector<string> CruxLFQApplication::getArgs() const {
     string arr[] = {
         "lfq-peptide-spectrum matches",
-        "spectrum files+",
-        "spectrum file replicates"};
+        "spectrum files+"};
     return vector<string>(arr, arr + sizeof(arr) / sizeof(string));
 }
 
@@ -218,6 +240,7 @@ vector<string> CruxLFQApplication::getOptions() const {
         "quantify-ambiguous-peptides",
         "use-shared-peptides-for-protein-quant",
         "normalize",
+        "specfile-replicates",
         "psm-file-format",
         "is-rt-seconds",
         "spectrum-parser",
