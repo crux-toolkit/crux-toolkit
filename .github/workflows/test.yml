@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-                ${{runner.workspace}}/ext/build
+                ${{runner.workspace}}/crux-toolkit/ext/build
           # ./ext/build/src/comet
           # ./ext/build/src/gflags
           # ./ext/build/src/kojak
@@ -38,14 +38,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ${{runner.workspace}}/.ninja_deps
-            ${{runner.workspace}}/.ninja_log
-            ${{runner.workspace}}/CMakeCache.txt
-            ${{runner.workspace}}/CMakeFiles/
-            ${{runner.workspace}}/CPackConfig.cmake
-            ${{runner.workspace}}/CPackSourceConfig.cmake
-            ${{runner.workspace}}/_CPack_Packages/
-            ${{runner.workspace}}/build.ninja
+            ${{runner.workspace}}/crux-toolkit/.ninja_deps
+            ${{runner.workspace}}/crux-toolkit/.ninja_log
+            ${{runner.workspace}}/crux-toolkit/CMakeCache.txt
+            ${{runner.workspace}}/crux-toolkit/CMakeFiles/
+            ${{runner.workspace}}/crux-toolkit/CPackConfig.cmake
+            ${{runner.workspace}}/crux-toolkit/CPackSourceConfig.cmake
+            ${{runner.workspace}}/crux-toolkit/_CPack_Packages/
+            ${{runner.workspace}}/crux-toolkit/build.ninja
           key: build-artifacts-${{ runner.os }}-${{ github.ref_name }}
 
       - name: Get short git sha
