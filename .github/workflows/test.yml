@@ -32,7 +32,7 @@ jobs:
           # ./ext/build/src/percolator
           # ./ext/build/src/ProteoWizard
           # ./ext/build/src/proteobuf-3.19.4
-          key: ${{ runner.os }}-source-deps
+          key: source-deps-${{ runner.os }}-${{ github.ref_name }}
 
       - name: Set up cache for build artifacts
         uses: actions/cache@v4
@@ -46,7 +46,7 @@ jobs:
             ${{runner.workspace}}/CPackSourceConfig.cmake
             ${{runner.workspace}}/_CPack_Packages/
             ${{runner.workspace}}/build.ninja
-          key: ${{ runner.os }}-build-artifacts
+          key: build-artifacts-${{ runner.os }}-${{ github.ref_name }}
 
       - name: Get short git sha
         shell: bash
