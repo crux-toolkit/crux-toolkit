@@ -177,6 +177,10 @@ class VariableModTable {
                     } else if (isotopic_mass == "mono") {
                         mass = mod.getMonoMass();
                     }
+                    else
+                    {
+                        throw std::invalid_argument("Modification {" + std::to_string(unimod_id) + "} has neither average nor mono isotopic mass");
+                    }
                     std::string new_spec_text = "";
 
                     if (mass > 0) {
