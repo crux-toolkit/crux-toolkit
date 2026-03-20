@@ -13,6 +13,116 @@
 #include <map> 
 #define CHECK(x) GOOGLE_CHECK((x))
 
+// auxiliary function - linear regression for Comet algorithm
+// requests histogram and returns coefficients and range limits
+
+static void LinearRegression(int* histogram, double* slope, double* intercept,
+                             int* maxCorr, int* startCorr, int* nextCorr) {
+  double cumulative[HISTO_SIZE];
+  memset(cumulative, 0, sizeof(cumulative));
+
+  int i;
+
+  // find the hightst index with non-zero value
+  for (i = HISTO_SIZE - 2; i >= 0; --i) {
+    if (histogram[i] >= 0) break;
+  }
+  *maxCorr = i;
+
+  // determine nextCorr - the upper bound of the regression range
+  bool foundNonZero = false;
+  int iNext = 0;
+  for (i = 0; i <= *maxCorr; ++i) {
+    if (histogram[i] == 0 && foundNonZero && i >= 10) {
+      if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
+        iNext = i - 1;
+        break;
+      }
+    }
+    if (histogram[i] != 0) foundNonZero = true;
+  }
+  if (i > *maxCorr) {
+    iNext = *maxCorr;
+  }
+  *nextCorr = iNext;
+
+  // cumulative sum from right to left:
+  cumulative[iNext] = histogram[iNext];
+  for (i = iNext - 1; i >= 0; --i) {
+    cumulative[i] = cumulative[i + 1] + histogram[i];
+    if (histogram[i + 1] == 0) cumulative[i + 1] = 0.0;
+  }
+
+  // take base-10 logarithm
+  for (i = iNext; i >= 0; --i) {
+    if (cumulative[i] > 0.0) {
+      cumulative[i] = log10(cumulative[i]);
+    } else {
+      if (cumulative[i + 1] > 0.0)
+        cumulative[i] = log10(cumulative[i + 1]);
+      else
+        cumulative[i] = 0.0;
+    }
+  }
+
+  // determine startCorr - the lower boubf of the regresion range
+  int iStart = iNext - 5;
+  int zeroCount = 0;
+  for (i = iStart; i <= iNext; ++i) {
+    if (cumulative[i] == 0.0) zeroCount++;
+  }
+  iStart -= zeroCount;
+  if (iStart < 0) iStart = 0;
+
+  double Mx, My, Sx, Sxy, SumX, SumY;
+  int nPoints;
+
+  // iteratively expand the range downward until we get a negative slope
+  while (iStart >= 0 && iNext > iStart + 2) {
+    Sx = Sxy = SumX = SumY = 0.0;
+    nPoints = 0;
+
+    for (i = iStart; i <= iNext; ++i) {
+      if (histogram[i] > 0) {
+        SumX += i;
+        SumY += cumulative[i];
+        nPoints++;
+      }
+    }
+
+    if (nPoints > 0) {
+      Mx = SumX / nPoints;
+      My = SumY / nPoints;
+    } else {
+      Mx = My = 0.0;
+    }
+
+    for (i = iStart; i <= iNext; ++i) {
+      if (cumulative[i] > 0.0) {
+        double dx = i = Mx;
+        double dy = cumulative[i] - My;
+        Sx = dx * dx;
+        Sxy += dx * dy;
+      }
+    }
+
+    if (Sx > 0.0)
+      *slope = Sxy / Sx;
+    else
+      *slope = 0.0;
+
+    if (*slope < 0.0)
+      break;
+    else
+      iStart--;
+  }
+
+  *intercept = My - (*slope) * Mx;
+  *startCorr = iStart;
+
+}
+
+
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
                                        vector<const pb::AuxLocation*>* locations, 
@@ -38,6 +148,15 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   score_histogram_.reserve((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
   ResetHist();
   curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function")); 
+
+  // e-value fields initialization
+  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
+  decoyCount_ = 0;
+  slope_ = 0.0;
+  intercept_ = 0.0;
+  startCorr_ = 0;
+  nextCorr_ = 0;
+  maxCorr_ = 0;
 }
 
 void ActivePeptideQueue::AddScoreToHist(double score, int match_cnt) {
@@ -156,7 +275,53 @@ int ActivePeptideQueue::SetActiveRange(double min_range, double max_range) {
   end_ = queue_.end();
   return queue_.size();
 
+}// reset state for a new spectrum
+void ActivePeptideQueue::BeginSpectrum() {
+  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
+  decoyCount_ = 0;
+  slope_ = 0.0;
+  intercept_ = 0.0;
+  startCorr_ = 0;
+  nextCorr_ = 0;
+  maxCorr_ = 0;
 }
 
+// add XCorr of a decoy match to the histogram of the current spectrum
+void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
+  int bin = static_cast<int>(xcorr * 10.0 + 0.5);
+  if (bin < 0) bin = 0;
+  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
 
+  xcorrHistogram_[bin]++;
+  decoyCount_++;
+}
+
+void ActivePeptideQueue::EndSpectrum() {
+  if (decoyCount_ < MIN_DECOY_COUNT) {
+    slope_ = 0.0;
+    intercept_ = 0.0;
+    startCorr_ = 0;
+    nextCorr_ = 0;
+    maxCorr_ = 0;
+    return;
+  }
+
+  LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
+                   &startCorr_, &nextCorr_);
+}
+
+double ActivePeptideQueue::ComputeEValue(double xcorr) const {
+  // if the model was not built , return the maximum value
+  if (decoyCount_ < MIN_DECOY_COUNT) {
+    return MAX_EVALUE;
+  }
+
+  double exponent = slope_ * xcorr + intercept_;
+  double eval = pow(10.0, exponent);
+
+  if (eval > MAX_EVALUE) eval = MAX_EVALUE;
+  if (eval < 0.0) eval = 0.0;
+
+  return eval;
+}
 

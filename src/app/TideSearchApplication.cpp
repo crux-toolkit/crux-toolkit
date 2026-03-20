@@ -848,7 +848,7 @@ void TideSearchApplication::XCorrScoringInvertedIDX(int charge, const ObservedPe
       continue;
     peak_int = cache[i];
 
-    peaks = active_peptide_queue->ion_inverted_index_.ions_b2_.at(i); //in XCorr it stores the double charged b and y-ions
+    // peaks = active_peptide_queue->ion_inverted_index_.ions_b2_.at(i); //in XCorr it stores the double charged b and y-ions
 
     for (const auto& itr : peaks ) {
       Peptide* pept = itr;
