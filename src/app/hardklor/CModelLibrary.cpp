@@ -1,4 +1,5 @@
 #include "CModelLibrary.h"
+using namespace std;
 
 CModelLibrary::CModelLibrary(CAveragine* avg, CMercury8* mer){
 	averagine=avg;

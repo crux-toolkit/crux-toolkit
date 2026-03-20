@@ -51,12 +51,22 @@ void PepXMLWriter::writeHeader() {
 }
 
 /**
- * Close the msms_run_summaryand msms_pipeline_analysis tags.
+ * Close the msms_pipeline_analysis tags.
  * Requires OpenFile has been called without CloseFile.
  */
 void PepXMLWriter::writeFooter() {
   closeSpectrumElement();
   MatchCollection::printXmlFooter(file_);
+}
+
+/**
+ * Close the msms_run_summaryand tags.
+ * Requires OpenFile has been called without CloseFile.
+ */
+
+void PepXMLWriter::writeSummaryFooter() {
+    closeSpectrumElement();
+    fprintf(file_, "</msms_run_summary>\n");
 }
 
 /**
@@ -156,6 +166,10 @@ string PepXMLWriter::getSpectrumTitle(int spectrum_scan_number,
 
 void PepXMLWriter::closeSpectrumElement() {
   fprintf(file_, "    </search_result>\n    </spectrum_query>\n");
+}
+
+void PepXMLWriter::closePepXmlSearchSummary(MatchCollection* collection) {
+  collection->printPepXmlSearchSummary(file_, "");
 }
 
 /**

@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.6)
-cmake_policy(VERSION 3.6)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0091 NEW)
+if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
+  cmake_policy(SET CMP0135 NEW)
+endif()
 
 # Generate documentation
 if (UNIX)

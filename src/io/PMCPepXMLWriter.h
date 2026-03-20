@@ -51,6 +51,7 @@ class PMCPepXMLWriter : public Crux::PepXMLWriter, public PSMWriter {
   void writePSMs(
     ProteinMatchCollection* collection ///< collection to be written
   );
+  MatchCollection* match_collection_;
 
 };
 

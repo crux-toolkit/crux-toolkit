@@ -1,4 +1,5 @@
 #include "CNoiseReduction.h"
+using namespace std;
 
 CNoiseReduction::CNoiseReduction(){
   pos=0;

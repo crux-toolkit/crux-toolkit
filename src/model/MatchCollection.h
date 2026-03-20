@@ -98,12 +98,16 @@ class MatchCollection {
 
   /**
    * sort the match collection by score_type(SP, XCORR, ... )
-   *\returns true, if successfully sorts the match_collection
    */
   void sort(
     SCORER_TYPE_T score_type ///< the score type (SP, XCORR) -in
     );
 
+  /**
+   * sort the match collection by the filename of the spectra 
+   */
+  void sortFileCol();
+  
   /**
    * Rank matches in a collection based on the given score type.  
    * Requires that match_collection was already scored for that score type.
@@ -241,10 +245,14 @@ class MatchCollection {
     );
 
   /*
-   * Print the XML file header
+   * Print the pepXML file header
    */ 
   static void printXmlHeader(FILE* outfile, const string& ms2file);
 
+  /*
+   * Print the PepXML file Search Summary for each imput spectrum files (multiple times if needed)
+   */
+  static void printPepXmlSearchSummary(FILE* outfile, const string& ms2file);
   /*
    * Print the SQT file header 
    */

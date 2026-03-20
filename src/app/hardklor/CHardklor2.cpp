@@ -1,5 +1,7 @@
 #include "CHardklor2.h"
 
+using namespace std;
+
 CHardklor2::CHardklor2(CAveragine *a, CMercury8 *m, CModelLibrary *lib){
   averagine=a;
   mercury=m;

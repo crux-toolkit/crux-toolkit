@@ -6,6 +6,8 @@ file(GLOB_RECURSE static_library_list ./*.lib)
 file(COPY ${static_library_list} DESTINATION ./lib)
 file(GLOB_RECURSE dll_list ./build/src/ProteoWizard/build-nt-x86/pwiz/data/vendor_readers/*.dll)
 file(COPY ${dll_list} DESTINATION ./lib)
+file(GLOB_RECURSE dll_list ./build/src/ProteoWizard/pwiz_aux/msrc/utility/vendor_api/thermo/*.dll)
+file(COPY ${dll_list} DESTINATION ./lib)
 
 # Remove the compiler signature from boost library names
 file(GLOB boost_library_list ./lib/libboost*.lib)

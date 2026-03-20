@@ -50,8 +50,8 @@ private:
   char lastFile[256];
   CHardklorSetting cs;
   MSReader* r;
-  deque<Spectrum> s;
-  deque<Spectrum> bs;
+  std::deque<Spectrum> s;
+  std::deque<Spectrum> bs;
 
 	/*
 	  __int64 startTime;

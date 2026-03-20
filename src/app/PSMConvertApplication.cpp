@@ -95,7 +95,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   }
   
   carp(CARP_INFO, "Successfully read %d PSMs.", collection->getMatchTotal());
-  
+
   // What will be used when PSMWriter is finished.
   
   PSMWriter* writer;
@@ -116,6 +116,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
     writer = new PinWriter();
   } else if (output_format == "pepxml") {
     output_file_name_builder << "pep.xml";
+    collection->sortFileCol();
     writer = new PMCPepXMLWriter();
   } else if (output_format == "mzidentml") {
     output_file_name_builder << "mzid";
