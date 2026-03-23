@@ -2230,6 +2230,60 @@ InitStringParam("protein-name-separator", ",",
     "the 'tof6600' is equivalent to spectra-denoising=false, psm-filter=true, prec-ppm=30, frag-ppm=30, coeff-precursor=25.6, coeff-fragment=0.2, coeff-rtdiff=0.2, coeff-elution=0. "
     "Use diameter-instrument=na to set individual parameters.  Otherwise, parameters set using diameter-instrument will override any parameters set separately. ",
     "It is used for DIAmeter", true);
+  
+  // crux-lfq
+  InitArgParam("lfq-peptide-spectrum matches",
+                "A file in mzTab or Percolator tab-delimited format listing peptide-spectrum matches.");
+  InitArgParam("spectrum files",
+                "The name of one or more files from which to parse the MS1 spectra, in any of the file formats supported by ProteoWizard.");
+  InitStringParam("specfile-replicates", "",
+                  "The file containing spectrum file replicates used in normalization.",
+                  "Used by crux-lfq when --normalize is true.", true);
+  InitIntParam("num-isotopes-required", 2, 1, 100000000,
+                "The number of isotopic peaks required to be present in the spectrum for a peptide to be considered.  Default = 2.",
+                "Used by LFQ.", true);
+  InitDoubleParam("peak-finding-ppm-tolerance", 20.0, 1.0, 100000000,
+                  "The tolerance (in ppm) used to find isotopic peaks.  Default = 20.0.",
+                  "Used by LFQ.", true);
+  InitDoubleParam("ppm-tolerance", 10.0, 1.0, 100000000,
+                  "The tolerance (in ppm).  Default = 10.0.",
+                  "Used by LFQ.", true);
+  InitBoolParam("id-specific-charge-state", false,
+                "Indicate whether to use the charge state of the peptide-spectrum match (T) or the charge state of the peptide (F) when computing the theoretical m/z values.  Default = F.",
+                "Used by LFQ.", true);
+  InitIntParam("missed-scans-allowed", 1, 1, 100000000,
+                "The number of scans allowed to be missing between the scans containing the isotopic peaks.  Default = 1.",
+                "Used by LFQ.", true);
+  InitDoubleParam("isotope-tolerance-ppm", 5.0, 1.0, 100000000,
+                  "The tolerance (in ppm) used to determine whether two peaks are isotopic.  Default = 5.0.",
+                  "Used by LFQ.", true);
+  InitBoolParam("integrate", false,
+                "Indicate whether to integrate the area under the curve (T) or use the maximum intensity (F) when computing the intensity of the isotopic peaks.  Default = F.",
+                "Used by LFQ.", true);
+  InitDoubleParam("discrimination-factor-to-cut-peak", 0.6, 0.0, 100000000,
+                  "The factor by which the intensity of the isotopic peak must be greater than the intensity of the next highest peak in order to be considered a true peak.  Default = 6.0.",
+                  "Used by LFQ.", true);
+  InitBoolParam("quantify-ambiguous-peptides", false,
+                "Indicate whether to quantify peptides that are not unique to a single protein (T) or not (F).  Default = F.",
+                "Used by LFQ.", true);
+  InitBoolParam("use-shared-peptides-for-protein-quant", false,
+                "Indicate whether to use peptides that are shared between proteins when quantifying proteins (T) or not (F).  Default = F.",
+                "Used by LFQ.", true);
+  InitBoolParam("normalize", false,
+                "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
+                "Used by LFQ.", true);
+  InitStringParam("psm-file-format", "assign-confidence",
+                  "The format of the PSM file. Possible options are; tide-search and assign-confidence Default = assign-confidence.",
+                  "Used by LFQ.", true);
+  InitBoolParam("is-rt-seconds", false,
+                "Indicate whether retention time is in seconds or minutes (T) or not (F).  Default = F.",
+                "Used by LFQ.", true);
+  InitBoolParam("is-psm-filtered", false,
+                "Indicate whether the PSM file is filtered or not (T) or not (F).  Default = F.",
+                "Used by LFQ.", true);
+  InitDoubleParam("lfq-q-value-threshold", 0.01, 0, 1.0,
+                  "The q-value threshold used by ",
+                  "Used by LFQ.", true);
 
   Categorize();
 }
@@ -2612,6 +2666,25 @@ void Params::Categorize() {
   items.insert("export_pepXML");
   items.insert("export_mzID");
   AddCategory("Input and output", items);
+
+  // crux-lfq
+  items.clear();
+  items.insert("num-isotopes-required");
+  items.insert("peak-finding-ppm-tolerance");
+  items.insert("ppm-tolerance");
+  items.insert("id-specific-charge-state");
+  items.insert("missed-scans-allowed");
+  items.insert("isotope-tolerance-ppm");
+  items.insert("integrate");
+  items.insert("discrimination-factor-to-cut-peak");
+  items.insert("quantify-ambiguous-peptides");
+  items.insert("use-shared-peptides-for-protein-quant");
+  items.insert("normalize");
+  items.insert("psm-file-format");
+  items.insert("is-rt-seconds");
+  items.insert("is-psm-filtered");
+  items.insert("lfq-q-value-threshold");
+  AddCategory("crux-lfq", items);
 
 }
 
