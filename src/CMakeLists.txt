@@ -158,6 +158,12 @@ set (
   app/ParamMedicApplication.cpp
   app/ParamMedicInference.cpp
   util/Params.cpp
+  util/ParamClasses.cpp
+  util/ParamsGeneralOptions.cpp
+  util/ParamsCometOptions.cpp
+  util/ParamsAnalysisOptions.cpp
+  util/ParamsBullseyeOptions.cpp
+  util/ParamsDIAmeterOptions.cpp
   model/Peak.cpp
   model/Peptide.cpp
   model/PeptideConstraint.cpp

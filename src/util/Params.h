@@ -178,6 +178,13 @@ class Params {
   // Lock parameters and prevent them from being modified
   void FinalizeParams();
 
+  // Initialize options grouped by tool/feature area
+  void InitGeneralOptions();
+  void InitCometOptions();
+  void InitAnalysisOptions();
+  void InitBullseyeOptions();
+  void InitDIAmeterOptions();
+
   // Throw exception if the parameters have been finalized
   void CanModifyCheck() const;
 
