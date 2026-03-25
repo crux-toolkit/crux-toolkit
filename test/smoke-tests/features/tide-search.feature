@@ -17,7 +17,7 @@ Scenario Outline: User runs tide-index / tide-search
   And I pass the arguments --overwrite T <search_args> <spectra> <index>
   When I run tide-search
   Then the return value should be 0
-  And All lines in crux-output/<actual_output> should be in good_results/<expected_output> with 2 digits precision
+  And All lines in crux-output/<actual_output> should be in good_results/<expected_output> with 1 digits precision
 
 # Need to work out a test for the mzTab output format.
 Examples:

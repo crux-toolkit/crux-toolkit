@@ -5,8 +5,6 @@
 
 #include "HardklorTypes.h"
 
-using namespace std;
-
 class CHardklorVariant {
  public:
   //Constructors & Destructors:
@@ -35,8 +33,8 @@ class CHardklorVariant {
 
  private:
   //Data Members:
-  vector<sInt> *atoms;
-  vector<sEnrichMercury> *enrich;
+  std::vector<sInt> *atoms;
+  std::vector<sEnrichMercury> *enrich;
 
 };
 

@@ -1620,7 +1620,6 @@ void postToGA4(const std::string& appName) {
         boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
         ctx.set_default_verify_paths();
 #endif       
-
         Client c(io_service, ctx, iterator, jsonGA4Data);
         io_service.run();
     } 

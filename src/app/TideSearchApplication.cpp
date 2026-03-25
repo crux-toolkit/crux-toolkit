@@ -318,6 +318,16 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
     delete out_pin_target_;
   if (out_pin_decoy_ != NULL)
     delete out_pin_decoy_;
+  
+  convertResults();
+
+  // Delete temporary spectrumrecords file
+ for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin(); original_file_name != inputFiles_.end(); ++original_file_name) {
+    if ((*original_file_name).Keep == false) {
+      carp(CARP_DEBUG, "Deleting %s", (*original_file_name).SpectrumRecords.c_str());
+      remove((*original_file_name).SpectrumRecords.c_str());
+    }
+  }
 
   return 0;
 }
@@ -838,7 +848,7 @@ void TideSearchApplication::XCorrScoringInvertedIDX(int charge, const ObservedPe
       continue;
     peak_int = cache[i];
 
-    peaks = active_peptide_queue->ion_inverted_index_.ions_b2_.at(i); //in XCorr it stores the double charged b and y-ions
+    // peaks = active_peptide_queue->ion_inverted_index_.ions_b2_.at(i); //in XCorr it stores the double charged b and y-ions
 
     for (const auto& itr : peaks ) {
       Peptide* pept = itr;

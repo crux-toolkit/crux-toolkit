@@ -12,6 +12,11 @@
 
 class TheoreticalPeakCompiler;
 
+// constants for e-value calculation
+static const int HISTO_SIZE = 2000; // max xCorr * 10
+static const int MIN_DECOY_COUNT = 200; // minimal count of decoy for regression
+static const double MAX_EVALUE = 999.0; // upper border of e-value
+
 class ActivePeptideQueue {
  public:
   ActivePeptideQueue(RecordReader* reader,
@@ -67,6 +72,15 @@ class ActivePeptideQueue {
   void ResetHist();
   void AddScoreToHist(double score, int match_cnt = 0);
 
+  // Calculate e-value methods:
+  void BeginSpectrum(); // call before request of peptides for current score
+  void AddDecoyXCorr(double xcorr); // add XCorr of decoy-match into histogram of current score
+                                    // should be called every time a decoy peptide score is received for the current spectrum.
+  void EndSpectrum(); // finish processing of current spectrum:
+                      // build linear regeression model for accumulative decoy-scores
+                      // after call model is ready for use
+  double ComputeEValue(double xcorr) const;
+
   // class PeptideWrapper {  // Peptide objects split into hot and cold data in order to reduce cache miss ratio. 
   // hot data:
   //   double mass;
@@ -95,6 +109,18 @@ class ActivePeptideQueue {
   
   TheoreticalPeakSetBYSparse theoretical_peak_set_;
   pb::Peptide current_pb_peptide_;
+
+  // for e-value:
+  int xcorrHistogram_[HISTO_SIZE]; // histogram of XCorr decoy-matches for current spectrum
+                                    // index i corresponds XCorr = i / 10.0
+  int decoyCount_; // counter for added decoy-matches for current spectrum
+
+  // linear regression parameters for current spectrum
+  double slope_;
+  double intercept_;
+  int startCorr_; // lower border of regression range (in bins)
+  int nextCorr_;  // upper border of regression range (in bins)
+  int maxCorr_;   // maximal bin with non-zero value
 };
 
 #endif

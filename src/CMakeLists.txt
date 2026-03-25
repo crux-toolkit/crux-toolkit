@@ -37,6 +37,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/model)
 include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_BINARY_DIR}/ext/include)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/CometSearch)
+include_directories(${CMAKE_BINARY_DIR}/ext/include/AScorePro)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/MSToolkit)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/kojak)
 include_directories(${CMAKE_BINARY_DIR}/ext/include/gflags)
@@ -336,6 +337,13 @@ if (WIN32 AND NOT CYGWIN)
       PWIZ_LIBRARIES
       libhdf5.lib
       libhdf5pp.lib
+      libpwiz_analysis_common.lib
+      libpwiz_analysis_diaumpire
+      libpwiz_analysis_frequency
+      libpwiz_analysis_passive_core
+      libpwiz_analysis_peakdetect
+      libpwiz_analysis_spectrum_processing
+      libpwiz_analysis_spectrum_processing_basic
       libpwiz_data_common.lib
       libpwiz_data_identdata.lib
       libpwiz_data_identdata_examples.lib
@@ -414,8 +422,8 @@ if (WIN32 AND NOT CYGWIN)
     debug libboost_serialization-mt-gd
     optimized libboost_system-mt
     debug libboost_system-mt-gd
-    optimized libboost_thread-mt.lib
-    debug libboost_thread-vc142-mt-gd
+    optimized libboost_thread-mt
+    debug libboost_thread-mt-gd
   )
   target_link_libraries(
     crux
@@ -446,6 +454,7 @@ else()
     crux-support
     tide-support
     cometsearch
+    ascorepro
     kojaksearch
     libneopepxmlparser.a
     gflags

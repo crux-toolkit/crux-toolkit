@@ -1,7 +1,6 @@
 #include "FFT-HK.h"
 #include <iostream>
-
-using namespace std;
+using namespace MSToolkit;
 
 void FFTCharge(double *f, Spectrum& s, unsigned int start, unsigned int stop,
 							 unsigned int lowCharge, unsigned int highCharge, double interval, bool bSpline){
@@ -153,7 +152,7 @@ double GetIntensity(Spectrum& s, unsigned int start, unsigned int stop, double m
 
 }
 
-void SenkoCharge(vector<int> *charges, Spectrum& s, unsigned int start, unsigned int stop, 
+void SenkoCharge(std::vector<int> *charges, Spectrum& s, unsigned int start, unsigned int stop, 
 								 unsigned int lowCharge, unsigned int highCharge, double interval, char method) {
 
 	charges->clear();

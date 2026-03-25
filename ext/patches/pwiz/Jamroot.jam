@@ -107,7 +107,7 @@ local default_libraries_path = "./libraries" ;
 local libraries_path = [ MATCH --libraries-path=(.*) : [ modules.peek : ARGV ] ] ;
 libraries_path ?= $(default_libraries_path) ; # set default path in absence of command-line path
 
-local default_boost_src = "$(libraries_path)/boost_1_76_0" ;
+local default_boost_src = "$(libraries_path)/boost_1_86_0" ;
 local boost_src = [ MATCH --boost-src=(.*) : [ modules.peek : ARGV ] ] ;
 boost_src ?= $(default_boost_src) ; # set default path in absence of command-line path
 
@@ -236,38 +236,6 @@ import errors ;
 
 modules.poke : BOOST_BUILD_PATH : [ modules.peek : BOOST_BUILD_PATH ] $(PWIZ_LIBRARIES_PATH)/predef/check ;
 import $(PWIZ_LIBRARIES_PATH)/predef/check/predef : require check : predef-require predef-check ;
-
-
-if --teamcity-test-decoration in [ modules.peek : ARGV ]
-{
-    if [ modules.peek : NT ]
-    {
-        TEST_PRECOMMAND = "set pp=##\necho %pp%teamcity[testStarted name='%name%']" ;
-        TEST_POSTCOMMAND =
-            "set pp=##\n"
-            "IF %status% NEQ 0"
-                "(echo %pp%teamcity[testFailed name='%name%' message='Exit status: %status%'] )\n" # TODO: does testFailed go to stderr? 1>&2
-            "echo %pp%teamcity[testFinished name='%name%']" ;
-        TEST_POSTCOMMAND = $(TEST_POSTCOMMAND:J=" ") ;
-    }
-    else
-    {
-        TEST_PRECOMMAND = "pp=##\necho $pp\"teamcity[testStarted name='$name']\"" ;
-        TEST_POSTCOMMAND = 
-            "pp=##"
-            "if test $status -ne 0 ; then"
-                "echo $pp\"teamcity[testFailed name='$name' message='Exit status: $status']\" ;"
-            "fi"
-            "echo $pp\"teamcity[testFinished name='$name']\"" ;
-        TEST_POSTCOMMAND = $(TEST_POSTCOMMAND:J=\n) ;
-    }
-    
-    # put raw commands in global module
-    modules.poke : TEST_PRECOMMAND : $(TEST_PRECOMMAND) ;
-    modules.poke : TEST_POSTCOMMAND : $(TEST_POSTCOMMAND) ;
-
-    TEAMCITY_TEST_DECORATION = <testing.arg>--teamcity-test-decoration ;
-}
 
 
 # return the itemname if textonly build is off (the default)
@@ -407,6 +375,9 @@ project pwiz
         # avoid warnings like concept_check.hpp ... warning: unused typedef 'boost_concept_check'
         <toolset>clang:<cxxflags>-Wno-unused-local-typedef
         <toolset>darwin:<cxxflags>-Wno-unused-local-typedef
+
+        # disable warning that template argument list is expected after a name prefixed by the template keyword warning
+        <toolset>darwin:<cxxflags>-Wno-missing-template-arg-list-after-template-kw
 
         # avoid unused parameter warnings (especially annoying for stub functions)
         <toolset>clang:<cxxflags>-Wunused-parameter
@@ -591,7 +562,7 @@ path-constant BOOST_SOURCE : $(boost_src) ;
 path-constant ZLIB_SOURCE : $(zlib_src) ;
 path-constant GD_SOURCE : $(PWIZ_LIBRARIES_PATH)/libgd-2.1.0alpha ;
 path-constant PNG_SOURCE : $(PWIZ_LIBRARIES_PATH)/libpng-1.5.6 ;
-path-constant FREETYPE_SOURCE : $(PWIZ_LIBRARIES_PATH)/freetype-2.4.7 ;
+path-constant FREETYPE_SOURCE : $(PWIZ_LIBRARIES_PATH)/freetype-VER-2-13-3 ;
 path-constant EXPAT_SOURCE : $(PWIZ_LIBRARIES_PATH)/expat-2.0.1 ;
 
 using ext-boost : $(BOOST_VERSION:J=.) : $(BOOST_SOURCE) : <zlib-src-location>$(ZLIB_SOURCE) ;

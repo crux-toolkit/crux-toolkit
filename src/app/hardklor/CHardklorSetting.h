@@ -9,8 +9,6 @@
 #include "HardklorTypes.h"
 #include "CHardklorVariant.h"
 
-using namespace std;
-
 /* 
    Defined as a class instead of a struct so
    that default parameters are used. Data access
@@ -78,7 +76,7 @@ class CHardklorSetting {
 
   specType msType;                    //Type of mass spectrometer used to acquire data
   hkAlgorithm algorithm;              //Deconvolving algorithm to use
-  vector<CHardklorVariant> *variant;  //Variants to make to averagine
+  std::vector<CHardklorVariant> *variant;  //Variants to make to averagine
   MSFileFormat fileFormat;            //File format
   MSSpectrumType mzXMLFilter;         //Filter for mzXML files
 

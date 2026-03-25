@@ -42,7 +42,6 @@
 #include "CMercury8.h"
 #include <cmath>
 #include <iostream>
-using namespace std;
 
 CMercury8::CMercury8(){
   InitializeData();
@@ -90,7 +89,7 @@ void CMercury8::Enrich(int c,int e,double d){
 	float f=(float)d;
 
   //c++;
-  if(showOutput) cout << "Enrich: " << Element[c].Symbol << " " << c << "\t" << d << endl;
+  if(showOutput) std::cout << "Enrich: " << Element[c].Symbol << " " << c << "\t" << d << std::endl;
 
   //Find highest probability
   for(i=0;i<Element[c].NumIsotopes;i++){
@@ -575,8 +574,8 @@ void CMercury8::AccurateMass(int NumElements, int Charge){
   int IsoShift;
 
   Result r;
-  vector<Result> vParent;
-  vector<Result> vProduct;
+  std::vector<Result> vParent;
+  std::vector<Result> vProduct;
   
   //If we made it this far, we have valid input, so calculate molecular weight
   CalcWeights(MW, MIMW, tempMW, intMW, MIintMW, MaxIntMW, IsoShift, NumElements);
@@ -775,7 +774,7 @@ void CMercury8::MassToInt(complex* Data, int NumPoints) {
 };
 
 
-void CMercury8::GetPeaks(complex* Data, int NumPoints, vector<Result>& v, 
+void CMercury8::GetPeaks(complex* Data, int NumPoints, std::vector<Result>& v, 
 			 int lower, int upper){
   int i;
   Result r;
@@ -799,7 +798,7 @@ void CMercury8::GetPeaks(complex* Data, int NumPoints, vector<Result>& v,
 
 };
 
-void CMercury8::RelativeAbundance(vector<Result>& v){
+void CMercury8::RelativeAbundance(std::vector<Result>& v){
 
   unsigned int i;
   double max=0;
@@ -968,7 +967,7 @@ double CMercury8::getMonoMass(){
 
 void CMercury8::DefaultValues(){
 
-  string el[MAXAtomNo+1] = {"X","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar",
+  std::string el[MAXAtomNo+1] = {"X","H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Cl","Ar",
     "K","Ca","Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
     "Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd","Pm","Sm",
     "Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg","Tl","Pb","Bi","Po",
