@@ -1000,6 +1000,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
   int temp = 0;
   std::vector<Scores_TS> top_N_PSMs;
   top_N_PSMs.reserve(top_matches);
+  active_peptide_queue->BeginSpectrum();
 
   unsigned int cnt = 0;
   for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; iter != active_peptide_queue->end_; ++iter, ++cnt) {
@@ -1038,6 +1039,10 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     xcorr_score = (double)xcorr/XCORR_SCALING;      
 
     active_peptide_queue->AddScoreToHist(xcorr_score);
+    if (is_target) {  // update the histogram of the decoy scores for E-value calculation with linear regression
+      active_peptide_queue->AddDecoyXCorr(xcorr_score);
+    }
+
 
     if ( !active_peptide ) 
       continue;
@@ -1072,6 +1077,8 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     psm.peptide_ptr_ = itr.peptide_ptr_; 
     psm_scores.psm_scores_.push_back(psm);
   }
+  active_peptide_queue->EndSpectrum();
+
 }
 
 int TideSearchApplication::PeakMatching(const ObservedPeakSet& observed, const vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks) {

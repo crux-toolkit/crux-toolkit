@@ -454,6 +454,7 @@ enum _scorer_type {
   HYPER_SCORE,
   HYPER_SCORE_TAILOR,
   HYPER_SCORE_POISSON,
+  HYPER_SCORE_REGEVAL,   // Evalue based on liner regression
 
   DECOY_XCORR_QVALUE,  ///< q-value derived from decoys
   DECOY_XCORR_PEPTIDE_QVALUE,
@@ -483,6 +484,7 @@ enum _scorer_type {
 
   BOTH_PVALUE, //combined res-ev pvalue and xcorr pvalue. added by Andy Lin
   TAILOR_SCORE,  //Added for tailor score calibration method by AKF
+  XCORR_EVAL, // E-value based on linear regression
 
   // DIAmeter-related scores, added by Yang
   PRECURSOR_INTENSITY_RANK_M0,

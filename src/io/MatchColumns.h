@@ -31,11 +31,13 @@ enum MATCH_COLUMNS_T {
   BOTH_PVALUE_COL, //Added by Andy Lin // Should be renamed to Combined PValue
   BOTH_PVALUE_RANK, //Added by Andy Lin
   SIDAK_ADJUSTED_COL,  
-  TAILOR_COL,  //Added for tailor score calibration method by AKF  
+  TAILOR_COL,  //Added for tailor score calibration method by AKF
+  XCORR_REG_EVAL_COL,  
   HYPER_SCORE_COL,
   HYPER_SCORE_RANK_COL,
   HYPER_SCORE_TAILOR_COL,
   HYPER_POISSON_EVAL_COL,
+  HYPER_REG_EVAL_COL,
   EVALUE_COL,
   ELUTION_WINDOW_COL,
   DISTINCT_MATCHES_PEPTIDE_COL,

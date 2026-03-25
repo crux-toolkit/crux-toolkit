@@ -24,7 +24,7 @@ string TideMatchSet::fasta_file_name_ = "null";
 // The order of the columns in the output is defined here by the order of the column Ids
 int TideMatchSet::XCorr_tsv_cols[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, 
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, XCORR_REG_EVAL_COL,
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
     XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
@@ -52,7 +52,7 @@ int TideMatchSet::XCorr_tsv_cols[] = {
   };
 int TideMatchSet::HyperScore_tsv_cols[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, HYPER_SCORE_COL, HYPER_POISSON_EVAL_COL, HYPER_SCORE_TAILOR_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, HYPER_SCORE_COL, HYPER_POISSON_EVAL_COL, HYPER_SCORE_TAILOR_COL, HYPER_REG_EVAL_COL,
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
     HYPER_SCORE_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
@@ -512,6 +512,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
         (*it).delta_cn_ = ((*it).xcorr_score_ - (*(it+1)).xcorr_score_)/max((*it).xcorr_score_, 1.0);
       else 
         (*it).delta_cn_ = 0.0;
+      (*it).xcorr_eval_ = active_peptide_queue_->ComputeEValue((*it).xcorr_score_);
       break;
     case HYPERSCORE:
       // Perform Tailor calibration
@@ -519,6 +520,7 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
       // loge Poisson prob mass  =   log(lambda^k * e^-lambda)/k!)   =    k*log(lambda) + -lambda*log(e) - log(k!)
       possion_prob_mass =  (*it).by_ion_matched_*log(possion_lambda_) - possion_lambda_ - log(std::tgamma((double)(*it).by_ion_matched_ + 1.0)); 
         (*it).hyper_poisson_ = -1.0*possion_prob_mass;
+      (*it).hyper_regeval_ = active_peptide_queue_->ComputeEValue((*it).hyper_score_);
       break;
     case PVALUES:
       (*it).delta_lcn_ = -log10((*it).combined_pval_) + log10((*last_psm_).combined_pval_);
@@ -670,14 +672,20 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_2:
       case TAILOR_COL:
-        report += StringUtils::ToString((*it).tailor_, score_precision_);           // tailor score
+        report += StringUtils::ToString((*it).tailor_, score_precision_);          
+        break;
+      case XCORR_REG_EVAL_COL:
+        report += StringUtils::ToString((*it).xcorr_eval_, score_precision_);           
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_14:
       case HYPER_SCORE_TAILOR_COL:
-        report += StringUtils::ToString((*it).hyper_score_tailor_, score_precision_);           // tailor score
+        report += StringUtils::ToString((*it).hyper_score_tailor_, score_precision_);         
         break;
       case HYPER_POISSON_EVAL_COL:
-        report += StringUtils::ToString((*it).hyper_poisson_, score_precision_);           // tailor score
+        report += StringUtils::ToString((*it).hyper_poisson_, score_precision_);           
+        break;
+      case HYPER_REG_EVAL_COL:
+        report += StringUtils::ToString((*it).hyper_regeval_, score_precision_);           
         break;
       
       case BY_IONS_MATCHED_COL:

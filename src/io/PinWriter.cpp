@@ -48,9 +48,11 @@ PinWriter::PinWriter():
   features_.push_back(make_pair("deltCn", true));
   features_.push_back(make_pair("XCorr", true));
   features_.push_back(make_pair("TailorScore", true));  
+  features_.push_back(make_pair("XCorrEval", true));  
   features_.push_back(make_pair("HyperScore", true));  
   features_.push_back(make_pair("HyperScoreTailor", true));  
   features_.push_back(make_pair("HyperScorePoissonEval", true));  
+  features_.push_back(make_pair("HyperRegEval", true));  
   features_.push_back(make_pair("byIonsMatched", true));  
   features_.push_back(make_pair("byIonsTotal", true));  
   features_.push_back(make_pair("byIonsFraction", true));  
@@ -177,9 +179,11 @@ void PinWriter::write(MatchCollection* collection, string database) {
   bool exact_p = collection->getScoredType(TIDE_SEARCH_REFACTORED_XCORR);
   bool combine_p = collection->getScoredType(BOTH_PVALUE);
   bool tailor = collection->getScoredType(TAILOR_SCORE);
+  bool xcorreval = collection->getScoredType(XCORR_EVAL);
   bool hyperscore = collection->getScoredType(HYPER_SCORE);
   bool hyperscoretailor = collection->getScoredType(HYPER_SCORE_TAILOR);
   bool hyperscorepoisson = collection->getScoredType(HYPER_SCORE_POISSON);
+  bool hyperscoreregeval = collection->getScoredType(HYPER_SCORE_REGEVAL);
 
   if (combine_p) {
     exact_p = true;
@@ -196,9 +200,11 @@ void PinWriter::write(MatchCollection* collection, string database) {
   setEnabledStatus("NegLog10ResEvPValue", combine_p);
   setEnabledStatus("NegLog10CombinePValue", combine_p);
   setEnabledStatus("TailorScore", tailor);
+  setEnabledStatus("XCorrEval", xcorreval);
   setEnabledStatus("HyperScore", hyperscore);
   setEnabledStatus("HyperScoreTailor", hyperscoretailor);
   setEnabledStatus("HyperScorePoissonEval", hyperscorepoisson);
+  setEnabledStatus("HyperRegEval", hyperscoreregeval);
 
 
   // DIAmeter related, added by Yang
@@ -329,12 +335,18 @@ void PinWriter::printPSM(
     } else if (feature == "TailorScore" ) {
       FLOAT_T tailor = match->getScore(TAILOR_SCORE);
       fields.push_back(StringUtils::ToString(tailor));
+    } else if (feature == "XCorrEval" ) {
+      FLOAT_T xcorreval = match->getScore(XCORR_EVAL);
+      fields.push_back(StringUtils::ToString(xcorreval));
     } else if (feature == "HyperScore" ) {
       FLOAT_T hyperscore = match->getScore(HYPER_SCORE);
       fields.push_back(StringUtils::ToString(hyperscore));
     } else if (feature == "HyperScoreTailor" ) {
       FLOAT_T hyperscoretailor = match->getScore(HYPER_SCORE_TAILOR);
       fields.push_back(StringUtils::ToString(hyperscoretailor));
+    } else if (feature == "HyperRegEval" ) {
+      FLOAT_T hyperscoreregeval = match->getScore(HYPER_SCORE_REGEVAL);
+      fields.push_back(StringUtils::ToString(hyperscoreregeval));
     } else if (feature == "HyperScorePoissonEval" ) {
       FLOAT_T hyperscorepoisson = match->getScore(HYPER_SCORE_POISSON);
       fields.push_back(StringUtils::ToString(hyperscorepoisson));

@@ -362,6 +362,14 @@ void Match::printOneMatchField(
     output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
                                      getScore(TAILOR_SCORE));
     break;
+  case XCORR_REG_EVAL_COL:     //Retrieve XCorr linear regressino Eval
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(XCORR_EVAL));
+    break;
+  case HYPER_REG_EVAL_COL:     //Retrieve Hyper score linear regression Eval
+    output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx,
+                                     getScore(HYPER_SCORE_REGEVAL));
+    break;
   case QVALUE_TDC_COL:
 //    if (null_peptide_ == false) {
       output_file->setColumnCurrentRow((MATCH_COLUMNS_T)column_idx, 

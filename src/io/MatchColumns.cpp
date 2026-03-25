@@ -59,10 +59,12 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "combined p-value rank", //Added by Andy Lin
   "Sidak adjusted p-value",  
   "tailor score",  //Added for tailor score calibration method by AKF  
+  "xcorr reg Eval",
   "HyperScore",
   "HyperScore rank",
   "HyperScore tailor",
   "HyperScore Poisson Eval",
+  "HyperScore reg Eval",
   "e-value",
   "smoothed p-value",
   "distinct matches/peptide",

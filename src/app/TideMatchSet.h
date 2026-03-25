@@ -27,6 +27,7 @@ class TideMatchSet {
    public:
     int ordinal_;
     double xcorr_score_;
+    double xcorr_eval_;
     double exact_pval_;
     double refactored_xcorr_;
     int resEv_score_;
@@ -41,6 +42,7 @@ class TideMatchSet {
     double hyper_score_la_; 
     double hyper_score_tailor_; 
     double hyper_poisson_;
+    double hyper_regeval_;    
     double delta_cn_;
     double delta_lcn_;
     bool active_;
@@ -48,7 +50,7 @@ class TideMatchSet {
     Scores():ordinal_(0), xcorr_score_(0.0), exact_pval_(0.0), refactored_xcorr_(0.0), 
       resEv_score_(0.0), resEv_pval_(0.0), combined_pval_(0.0), tailor_(0.0), by_ion_matched_(0), by_ion_total_(0), 
       sp_score_(0), hyper_score_(0.0), hyper_score_la_(0), delta_cn_(0), delta_lcn_(0),
-      hyper_poisson_(0.0), hyper_score_tailor_(0.0), active_(false) {}
+      hyper_poisson_(0.0), hyper_score_tailor_(0.0), active_(false), hyper_regeval_(0.0), xcorr_eval_(0.0) {}
   };
   // We need a prioirty queue and store and collect the top-N scoring PSMs during search. 
   // We need this priority queue to tell us the smalles XCorr score among the top N matches. 

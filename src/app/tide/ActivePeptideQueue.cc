@@ -289,8 +289,10 @@ void ActivePeptideQueue::BeginSpectrum() {
 // add XCorr of a decoy match to the histogram of the current spectrum
 void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
   int bin = static_cast<int>(xcorr * 10.0 + 0.5);
-  if (bin < 0) bin = 0;
-  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
+  if (bin < 0) 
+    bin = 0;
+  if (bin >= HISTO_SIZE) 
+    bin = HISTO_SIZE - 1;
 
   xcorrHistogram_[bin]++;
   decoyCount_++;
@@ -306,8 +308,8 @@ void ActivePeptideQueue::EndSpectrum() {
     return;
   }
 
-  LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
-                   &startCorr_, &nextCorr_);
+  // LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
+  //                  &startCorr_, &nextCorr_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {
