@@ -134,6 +134,21 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     case TAILOR_COL: //Added for tailor score calibration method by AKF
       score_type = TAILOR_SCORE;      
       break;
+    case XCORR_REG_EVAL_COL: //E-value based on linear regression 
+      score_type = XCORR_EVAL;      
+      break;
+    case HYPER_SCORE_COL:
+      score_type = HYPER_SCORE;      
+      break;
+    case HYPER_SCORE_TAILOR_COL: 
+      score_type = HYPER_SCORE_TAILOR;      
+      break;
+    case HYPER_POISSON_EVAL_COL: //E-value based on poisson distribution 
+      score_type = HYPER_SCORE_POISSON;      
+      break;
+    case HYPER_REG_EVAL_COL: //E-value based on linear distribution distribution 
+      score_type = HYPER_SCORE_REGEVAL;      
+      break;
     default:
       carp(CARP_FATAL, "The PSM feature \"%s\" is not supported.", score_param.c_str());
     }
@@ -192,6 +207,11 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
       vector<SCORER_TYPE_T> scoreTypes;
       scoreTypes.push_back(TAILOR_SCORE); 
       scoreTypes.push_back(XCORR);
+      scoreTypes.push_back(XCORR_EVAL);
+      scoreTypes.push_back(HYPER_SCORE_TAILOR); 
+      scoreTypes.push_back(HYPER_SCORE_POISSON);
+      scoreTypes.push_back(HYPER_SCORE_REGEVAL);
+      scoreTypes.push_back(HYPER_SCORE);
       scoreTypes.push_back(EVALUE);
       scoreTypes.push_back(BOTH_PVALUE);
       scoreTypes.push_back(RESIDUE_EVIDENCE_PVAL);
@@ -243,8 +263,12 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     target_matches->setScoredType(BY_ION_FRACTION, match_collection->getScoredType(BY_ION_FRACTION));
     target_matches->setScoredType(BY_ION_REPEAT_MATCH, match_collection->getScoredType(BY_ION_REPEAT_MATCH));
     target_matches->setScoredType(SIDAK_ADJUSTED, sidak);
-    //Added for tailor score calibration method by AKF
+    target_matches->setScoredType(HYPER_SCORE, match_collection->getScoredType(HYPER_SCORE));
+    target_matches->setScoredType(HYPER_SCORE_TAILOR, match_collection->getScoredType(HYPER_SCORE_TAILOR));
+    target_matches->setScoredType(HYPER_SCORE_POISSON, match_collection->getScoredType(HYPER_SCORE_POISSON));
+    target_matches->setScoredType(HYPER_SCORE_REGEVAL, match_collection->getScoredType(HYPER_SCORE_REGEVAL));
     target_matches->setScoredType(TAILOR_SCORE, match_collection->getScoredType(TAILOR_SCORE));
+    target_matches->setScoredType(XCORR_EVAL, match_collection->getScoredType(XCORR_EVAL));
     for (map<int, MatchCollection*>::iterator i = decoy_matches.begin(); i != decoy_matches.end(); i++) {
       i->second->setScoredType(SIDAK_ADJUSTED, sidak);
     }
@@ -557,6 +581,12 @@ int AssignConfidenceApplication::main(const vector<string>& input_files) {
     if (score_type == TAILOR_SCORE) {
         cols_to_print[TAILOR_COL] = true;
     }
+    cols_to_print[XCORR_REG_EVAL_COL] = target_matches->getScoredType(XCORR_EVAL);
+    cols_to_print[HYPER_SCORE_COL] = target_matches->getScoredType(HYPER_SCORE);
+    cols_to_print[HYPER_SCORE_TAILOR_COL] = target_matches->getScoredType(HYPER_SCORE_TAILOR);
+    cols_to_print[HYPER_POISSON_EVAL_COL] = target_matches->getScoredType(HYPER_SCORE_POISSON);
+    cols_to_print[HYPER_REG_EVAL_COL] = target_matches->getScoredType(HYPER_SCORE_REGEVAL);
+
     cols_to_print[BY_IONS_MATCHED_COL] = target_matches->getScoredType(BY_IONS_MATCHED);
     cols_to_print[BY_IONS_TOTAL_COL] = target_matches->getScoredType(BY_IONS_TOTAL);
     cols_to_print[BY_IONS_FRACTION_COL] = target_matches->getScoredType(BY_ION_FRACTION);
@@ -1336,6 +1366,9 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case TIDE_SEARCH_REFACTORED_XCORR:
     case RESIDUE_EVIDENCE_SCORE:
     case PERCOLATOR_SCORE:
+    case HYPER_SCORE:
+    case HYPER_SCORE_TAILOR:
+    case HYPER_SCORE_POISSON:
     case TAILOR_SCORE:    //Added for tailor score calibration method by AKF    
       // higher score better, ascending = false
       return -1;
@@ -1343,6 +1376,8 @@ int AssignConfidenceApplication::getDirection(SCORER_TYPE_T scoreType) {
     case TIDE_SEARCH_EXACT_PVAL:
     case TIDE_SEARCH_EXACT_SMOOTHED:
     case RESIDUE_EVIDENCE_PVAL:
+    case XCORR_EVAL:
+    case HYPER_SCORE_REGEVAL:
     case BOTH_PVALUE:
       // lower score better, ascending = true
       return 1;

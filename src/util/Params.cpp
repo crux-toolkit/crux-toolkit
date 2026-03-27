@@ -406,6 +406,9 @@ Params::Params() : finalized_(false) {
   InitIntParam("memory-limit", 4, 1, BILLION, 
     "The maximum amount of memory (i.e., RAM), in GB, to be used by tide-index.",
     "Available for tide-index.", true);
+  InitBoolParam("add-snvs", false, 
+    "Include amino acid mutations which can be optained with SNP.",
+    "Available for tide-index.", true);
   // coder options regarding decoys
   InitIntParam("num-decoy-files", 1, 0, 10,
     "Replaces number-decoy-set.  Determined by decoy-location"
@@ -859,13 +862,14 @@ InitStringParam("protein-name-separator", ",",
   InitBoolParam("skip-preprocessing", false,
     "Skip preprocessing steps on spectra. Default = F.",
     "Available for tide-search", true);
-  InitStringParam("score-function", "xcorr", "xcorr|combined-p-values",  //TDOD: implement later : |hyperscore|hyperscore-la
+  InitStringParam("score-function", "xcorr", "xcorr|combined-p-values|hyperscore",  //TDOD: implement later : |hyperscore|hyperscore-la
     "Function used for scoring PSMs. 'xcorr' is the original scoring function used by SEQUEST;"
     "`combined-p-values` combined (1) exact-p-value: a calibrated version of XCorr that uses "
     "dynamic programming and (2) residue-evidence-pvalue: a valibarated version of the  ResEV "
-    "that considers pairs of peaks, rather than single peaks; ",
-//    "`hyperscore` is the score function used in X!Tandem; `hyperscore-la` is a variant of the "  TODO: implement later
-//    "hyperscore designed for open modification searching.",
+    "that considers pairs of peaks, rather than single peaks; "
+    "`hyperscore` is the score function originally used in X!Tandem. The output score is the log of the hyperscore.", 
+    // `hyperscore-la` is a variant of the "  //TODO: implement later
+    // "hyperscore designed for open modification searching.",
     "Available for tide-search.", true);
   InitDoubleParam("fragment-tolerance", .02, 0, 2,
     "Mass tolerance (in Da) for scoring pairs of peaks when creating the residue evidence matrix. "

@@ -221,6 +221,11 @@ MatchCollection* MatchFileReader::parse() {
     match_collection->setScoredType(BY_ION_FRACTION, !empty(  BY_IONS_FRACTION_COL));
     match_collection->setScoredType(BY_ION_REPEAT_MATCH, !empty(BY_IONS_REPEAT_MATCH_COL));
     match_collection->setScoredType(TAILOR_SCORE, !empty(TAILOR_COL)); //Added for tailor score calibration method by AKF
+    match_collection->setScoredType(XCORR_EVAL, !empty(XCORR_REG_EVAL_COL)); // Lin reg Evalue for Xcorr
+    match_collection->setScoredType(HYPER_SCORE, !empty(HYPER_SCORE_COL)); 
+    match_collection->setScoredType(HYPER_SCORE_TAILOR, !empty(HYPER_SCORE_TAILOR_COL)); 
+    match_collection->setScoredType(HYPER_SCORE_POISSON, !empty(HYPER_POISSON_EVAL_COL)); 
+    match_collection->setScoredType(HYPER_SCORE_REGEVAL, !empty(HYPER_REG_EVAL_COL)); 
     match_collection->setScoredType(QVALUE_TDC, !empty(QVALUE_TDC_COL));    
 
     // DIAmeter related, added by Yang
@@ -389,8 +394,23 @@ Crux::Match* MatchFileReader::parseMatch() {
   if (!empty(DECOY_INDEX_COL)) {
     match->setDecoyIndex(getInteger(DECOY_INDEX_COL));
   }
-  if (!empty(TAILOR_COL)) { //Added for tailor score calibration method by AKF
+  if (!empty(TAILOR_COL)) { 
     match->setScore(TAILOR_SCORE, getFloat(TAILOR_COL));
+  }
+  if (!empty(XCORR_REG_EVAL_COL)) { 
+    match->setScore(XCORR_EVAL, getFloat(XCORR_REG_EVAL_COL));
+  }
+  if (!empty(HYPER_SCORE_COL)) { 
+    match->setScore(HYPER_SCORE, getFloat(HYPER_SCORE_COL));
+  }
+  if (!empty(HYPER_SCORE_TAILOR_COL)) { 
+    match->setScore(HYPER_SCORE_TAILOR, getFloat(HYPER_SCORE_TAILOR_COL));
+  }
+  if (!empty(HYPER_POISSON_EVAL_COL)) { 
+    match->setScore(HYPER_SCORE_POISSON, getFloat(HYPER_POISSON_EVAL_COL));
+  }
+  if (!empty(HYPER_REG_EVAL_COL)) { 
+    match->setScore(HYPER_SCORE_REGEVAL, getFloat(HYPER_REG_EVAL_COL));
   }
   if (!empty(QVALUE_TDC_COL)) {
     match->setScore(QVALUE_TDC, getFloat(QVALUE_TDC_COL));

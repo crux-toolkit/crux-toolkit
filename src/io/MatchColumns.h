@@ -31,7 +31,13 @@ enum MATCH_COLUMNS_T {
   BOTH_PVALUE_COL, //Added by Andy Lin // Should be renamed to Combined PValue
   BOTH_PVALUE_RANK, //Added by Andy Lin
   SIDAK_ADJUSTED_COL,  
-  TAILOR_COL,  //Added for tailor score calibration method by AKF  
+  TAILOR_COL,  //Added for tailor score calibration method by AKF
+  XCORR_REG_EVAL_COL,  
+  HYPER_SCORE_COL,
+  HYPER_SCORE_RANK_COL,
+  HYPER_SCORE_TAILOR_COL,
+  HYPER_POISSON_EVAL_COL,
+  HYPER_REG_EVAL_COL,
   EVALUE_COL,
   ELUTION_WINDOW_COL,
   DISTINCT_MATCHES_PEPTIDE_COL,
@@ -140,6 +146,9 @@ enum MATCH_COLUMNS_T {
   MZTAB_SEARCH_ENGINE_SCORE_9,   // [MS, MS:1003364, combined p-value]
   MZTAB_SEARCH_ENGINE_SCORE_10,  // [MS, MS:1003365, combined p-value rank]
   MZTAB_SEARCH_ENGINE_SCORE_11,  // [MS, id: MS:1002354, PSM-level q-value'.]
+  MZTAB_SEARCH_ENGINE_SCORE_12,  // [MS, id: MS:1002354, HyperScore val'.]
+  MZTAB_SEARCH_ENGINE_SCORE_13,  // [MS, id: MS:1002354, HyperScore rank'.]
+  MZTAB_SEARCH_ENGINE_SCORE_14,  // [MS, id: MS:1002354, HyperScore tailor'.]
   MZTAB_MODIFICATIONS,
   MZTAB_RETENTION_TIME,
   MZTAB_CHARGE,

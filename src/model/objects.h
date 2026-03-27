@@ -451,6 +451,11 @@ enum _scorer_type {
   XCORR_FIRST,
   XCORR_SECOND,
   
+  HYPER_SCORE,
+  HYPER_SCORE_TAILOR,
+  HYPER_SCORE_POISSON,
+  HYPER_SCORE_REGEVAL,   // Evalue based on liner regression
+
   DECOY_XCORR_QVALUE,  ///< q-value derived from decoys
   DECOY_XCORR_PEPTIDE_QVALUE,
   DECOY_XCORR_PEP,     ///< posterior error prob for xcorrs (target/decoy)
@@ -479,6 +484,7 @@ enum _scorer_type {
 
   BOTH_PVALUE, //combined res-ev pvalue and xcorr pvalue. added by Andy Lin
   TAILOR_SCORE,  //Added for tailor score calibration method by AKF
+  XCORR_EVAL, // E-value based on linear regression
 
   // DIAmeter-related scores, added by Yang
   PRECURSOR_INTENSITY_RANK_M0,
@@ -532,7 +538,7 @@ enum _score_function { INVALID_SCORE_FUNCTION, //Added by Andy Lin
                        PVALUES, // combined p-values
                       //  PVALUES_HR, // combined p-values for high resolution, including Res-EV,   TODO: Implement these score functions later
                       //  PVALUES_LR, // combined p-values for low  resolution, including only exact p-value,
-                      //  HYPERSCORE, // HyperScore from X!tandem
+                      HYPERSCORE, // HyperScore from X!tandem
                       //  HYPERSCORE_LA, // hyperscore-la 
                       //  DIAMETER, // Diameter scoring 
                       //  RESIDUE_EVIDENCE_MATRIX, //score fxn which can be used high-res MS2 data

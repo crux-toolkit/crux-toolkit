@@ -13,6 +13,117 @@
 #include <map> 
 #define CHECK(x) GOOGLE_CHECK((x))
 
+// auxiliary function - linear regression for Comet algorithm
+// requests histogram and returns coefficients and range limits
+
+static void LinearRegression(int* histogram, double* slope, double* intercept,
+                             int* maxCorr, int* startCorr, int* nextCorr) {
+  double cumulative[HISTO_SIZE];
+  memset(cumulative, 0, sizeof(cumulative));
+
+  int i;
+
+  // find the hightst index with non-zero value
+  for (i = HISTO_SIZE - 2; i >= 0; --i) {
+    if (histogram[i] > 0) break;
+  }
+  *maxCorr = i;
+
+  // determine nextCorr - the upper bound of the regression range
+  bool foundNonZero = false;
+  int iNext = 0;
+  for (i = 0; i < *maxCorr; ++i) {
+    if (histogram[i] == 0 && foundNonZero && i >= 10) {
+      if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
+        iNext = i - 1;
+        break;
+      }
+    }
+    if (histogram[i] != 0) foundNonZero = true;
+  }
+  if (i > *maxCorr) {
+    iNext = *maxCorr;
+  }
+  if (iNext < 0) iNext = 0;
+  *nextCorr = iNext;
+
+  // cumulative sum from right to left:
+  cumulative[iNext] = histogram[iNext];
+  for (i = iNext - 1; i >= 0; --i) {
+    cumulative[i] = cumulative[i + 1] + histogram[i];
+  }
+
+  // take base-10 logarithm
+  for (i = iNext; i >= 0; --i) {
+    if (cumulative[i] > 0.0) {
+      cumulative[i] = log10(cumulative[i]);
+    } else {
+      if (i + 1 <= iNext && cumulative[i + 1] > 0.0)
+        cumulative[i] = log10(cumulative[i + 1]);
+      else
+        cumulative[i] = 0.0;
+    }
+  }
+
+  // determine startCorr - the lower bound of the regresion range
+  int iStart = iNext - 5;
+  if (iStart < 0) iStart = 0; 
+  int zeroCount = 0;
+  for (i = iStart; i <= iNext; ++i) {
+    if (cumulative[i] == 0.0) zeroCount++;
+  }
+  iStart -= zeroCount;
+  if (iStart < 0) iStart = 0;
+
+  double Mx = 0.0, My = 0.0, Sx = 0.0, Sxy = 0.0, SumX = 0.0, SumY = 0.0;
+  int nPoints = 0;
+
+  // iteratively expand the range downward until we get a negative slope
+  while (iStart >= 0 && iNext > iStart + 2) {
+    Sx = Sxy = SumX = SumY = 0.0;
+    nPoints = 0;
+
+    for (i = iStart; i <= iNext; ++i) {
+      if (histogram[i] > 0) {
+        SumX += i;
+        SumY += cumulative[i];
+        nPoints++;
+      }
+    }
+
+    if (nPoints > 0) {
+      Mx = SumX / nPoints;
+      My = SumY / nPoints;
+    } else {
+      Mx = My = 0.0;
+    }
+
+    for (i = iStart; i <= iNext; ++i) {
+      if (cumulative[i] > 0.0) {
+        double dx = i - Mx;
+        double dy = cumulative[i] - My;
+        Sx += dx * dx;
+        Sxy += dx * dy;
+      }
+    }
+
+    if (Sx > 0.0)
+      *slope = Sxy / Sx;
+    else
+      *slope = 0.0;
+
+    if (*slope < 0.0)
+      break;
+    else
+      iStart--;
+  }
+
+  *intercept = My - (*slope) * Mx;
+  *startCorr = iStart;
+
+}
+
+
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
                                        vector<const pb::AuxLocation*>* locations, 
@@ -23,11 +134,67 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     locations_(locations),
     dia_mode_(dia_mode) {
   CHECK(reader_->OK());
-  min_candidates_ = 30;
+  min_candidates_ = 1000;
   nPeptides_ = 0;
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
   CandPeptidesDecoy_ = 0;  
+
+
+  score_histogram_offset_= 10;   // This should be ok for XCorr. It does not matter for HyperScore; TAILOR_OFFSET
+  score_scale_factor_ = 100;   // TODO: may be fine-tuned experimentally.
+  max_score_ = 100;
+  highest_bin_ = 0;
+  score_count_ = 1; // so that the score histogram vector will be set to zero.
+  score_histogram_.reserve((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
+  ResetHist();
+  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function")); 
+
+  // e-value fields initialization
+  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
+  decoyCount_ = 0;
+  slope_ = 0.0;
+  intercept_ = 0.0;
+  startCorr_ = 0;
+  nextCorr_ = 0;
+  maxCorr_ = 0;
+}
+
+void ActivePeptideQueue::AddScoreToHist(double score, int match_cnt) {
+  int bin = round( (score + score_histogram_offset_)*score_scale_factor_ );
+  score_histogram_[bin] += 1;
+  ++score_count_;
+  total_match_ += match_cnt;
+  if (highest_bin_ < bin)
+    highest_bin_ = bin;
+}
+
+void ActivePeptideQueue::ResetHist() {
+  total_match_ = 0;
+  highest_bin_ = 0;
+  if (score_count_ == 0)
+    return;
+  memset(score_histogram_.data(), 0, score_histogram_.capacity() * sizeof(int));
+  // std::fill(score_histogram_.begin(), score_histogram_.end(), 0); // reset the values of the score histogram    
+  score_count_ = 0;
+}
+
+double ActivePeptideQueue::getTailorQuantileFromHistogram(){
+  int bin = highest_bin_+1; //score_histogram_.capacity()-1;
+  int count = 0;
+  double quantile_score_ = 1.0;
+
+  int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)score_count_+0.5)-1; // zero indexed
+  if (quantile_pos < 2) 
+    quantile_pos = 2;  // the third element
+  if (quantile_pos >= score_count_) 
+    quantile_pos = score_count_-1; // the last element
+
+  while (count < quantile_pos ) {
+    count += score_histogram_[bin--];
+  }
+  ++bin;
+  return (double)bin/score_scale_factor_ - score_histogram_offset_; // Make sure scores positive in case of XCorr;
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
@@ -39,21 +206,14 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
   theoretical_peak_set_.Clear();
   Peptide* peptide = queue_.back();
   peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
+  ion_inverted_index_.insert_peaks(peptide);
 }
 
-bool ActivePeptideQueue::isWithinIsotope(vector<double>* min_mass, vector<double>* max_mass, double mass, int* isotope_idx) {
-  for (int i = *isotope_idx; i < min_mass->size(); ++i) {
-    if (mass >= (*min_mass)[i] && mass <= (*max_mass)[i]) {
-      if (i > *isotope_idx) {
-        *isotope_idx = i;
-      }
-      return true;
-    }
-  }
-  return false;
-}
+int ActivePeptideQueue::SetActiveRange(double min_range, double max_range) {
 
-int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>* max_mass, double min_range, double max_range) {
+  // Reset the score histograms
+  ResetHist();
+
   //min_range and max_range have been introduced to fix a bug
   //introduced by m/z selection. see #222 in sourceforge
   //this has to be true:
@@ -65,12 +225,13 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   while (!queue_.empty() && queue_.front()->Mass() < min_range) {
     Peptide* peptide = queue_.front();
     queue_.pop_front();
+    ion_inverted_index_.pop_peaks(peptide);
     delete peptide;
   }
   nPeptides_ = 0;
   nCandPeptides_ = 0;
   CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  CandPeptidesDecoy_ = 0;
 
   // Enqueue all peptides that are not yet queued but are lighter than
   // max_range. For each new enqueued peptide compute the corresponding
@@ -89,9 +250,10 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
         // we would delete current_pb_peptide_;
         continue; // skip peptides that fall below min_range
       }
-      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, locations_);
+      Peptide* peptide = new Peptide(current_pb_peptide_, proteins_, curScoreFunction_, locations_);
       assert(peptide != NULL);
       queue_.push_back(peptide);
+      // ion_inv_.insert(peptide);
       //Modified for tailor score calibration method by AKF
       if (peptide->Mass() > max_range && queue_.size() > min_candidates_) {
         break;
@@ -110,44 +272,61 @@ int ActivePeptideQueue::SetActiveRange(vector<double>* min_mass, vector<double>*
   }
 
   nPeptides_ = 0;
-  begin_ = queue_.begin();
-  while (begin_ != queue_.end() && (*begin_)->Mass() < min_mass->front()) {
-    (*begin_)->active_ = false;
-    ++begin_;
-    ++nPeptides_;
-  }
-  end_ = begin_;
-  begin_ = queue_.begin();
-  int* isotope_idx = new int(0);
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  begin_ = queue_.begin();  
+  end_ = queue_.end();
+  return queue_.size();
 
-  while (end_ != queue_.end() && (*end_)->Mass() < max_mass->back() ) {
-    if (isWithinIsotope(min_mass, max_mass, (*end_)->Mass(), isotope_idx)) {
-      ++nCandPeptides_;
-      (*end_)->active_ = true;
-      if ((*end_)->IsDecoy()){
-        ++CandPeptidesDecoy_;
-      } else {
-        ++CandPeptidesTarget_;
-      }
-    } else {
-      (*end_)->active_ = false;
-    }
-    ++end_;
-    ++nPeptides_;
-  }
-  delete isotope_idx;
-  if (nCandPeptides_ == 0) {
-    return 0;
-  }
-  for (; end_ != queue_.end(); ++end_) {
-    if ((*end_)->peaks_0.size() == 0 || nPeptides_ >= min_candidates_-1) {
-      break;
-    }
-    (*end_)->active_ = false;
-    ++nPeptides_;
-  }
-  return nCandPeptides_;
+}// reset state for a new spectrum
+void ActivePeptideQueue::BeginSpectrum() {
+  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
+  decoyCount_ = 0;
+  slope_ = 0.0;
+  intercept_ = 0.0;
+  startCorr_ = 0;
+  nextCorr_ = 0;
+  maxCorr_ = 0;
 }
+
+// add XCorr of a decoy match to the histogram of the current spectrum
+void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
+  printf("xcorr: %lf\n", xcorr);
+  int bin = static_cast<int>(xcorr * 10.0 + 0.5);
+  if (bin < 0) bin = 0;
+  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
+  printf("bin: %d\n", bin);
+
+  xcorrHistogram_[bin]++;
+  decoyCount_++;
+}
+
+void ActivePeptideQueue::EndSpectrum() {
+  if (decoyCount_ < MIN_DECOY_COUNT) {
+    slope_ = 0.0;
+    intercept_ = 0.0;
+    startCorr_ = 0;
+    nextCorr_ = 0;
+    maxCorr_ = 0;
+    return;
+  }
+
+  LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
+                   &startCorr_, &nextCorr_);
+  printf("slope: %lf\n", slope_);
+  printf("intercept: %lf\n", intercept_);
+}
+
+double ActivePeptideQueue::ComputeEValue(double xcorr) const {
+  // if the model was not built , return the maximum value
+  if (decoyCount_ < MIN_DECOY_COUNT) {
+    return MAX_EVALUE;
+  }
+
+  double exponent = slope_ * xcorr + intercept_;
+  double eval = pow(10.0, exponent);
+
+  if (eval > MAX_EVALUE) eval = MAX_EVALUE;
+  if (eval < 0.0) eval = 0.0;
+
+  return eval;
+}
+

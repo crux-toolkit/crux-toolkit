@@ -117,9 +117,14 @@ void MatchCollection::sort(
   switch (score_type) {
   case SP:
   case XCORR:
-  case TAILOR_SCORE:   //Added for tailor score calibration method by AKF
+  case HYPER_SCORE:
+  case HYPER_SCORE_TAILOR:
+  case HYPER_SCORE_POISSON:
+  case TAILOR_SCORE:   
     smaller_is_better = false;
     break;
+  case HYPER_SCORE_REGEVAL:  // E-vale of Hyperscore based on linear regression
+  case XCORR_EVAL:           // E-vale of xcorr based on linear regression
   case EVALUE:
     smaller_is_better = true;
     break;

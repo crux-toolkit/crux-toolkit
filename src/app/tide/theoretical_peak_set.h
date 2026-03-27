@@ -94,7 +94,7 @@ class TheoreticalPeakSetBYSparse {
   }
 
   void AddYIon(int index_y, int charge) {
-      assert(charge <= 2);
+    assert(charge <= 2);
     if (index_y >= 0 && index_y < peak_mask_end-1 && !peak_mask[index_y]) {
       peak_mask[index_y] = 1;
       index_y += index_y;

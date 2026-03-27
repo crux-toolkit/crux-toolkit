@@ -1,4 +1,4 @@
-// Benjamin Diament
+// Benjamin Diament and Attila Kertesz-Farkas
 //
 
 #include <stdio.h>
@@ -28,6 +28,29 @@
 #include "app/tide/peptide.h"
 
 using namespace std;
+
+//  Possible mutations:
+//1  A: EDPGSTV
+//2  D: ANEVYG
+//3  R: TPKIMHQLSCGW
+//4  N: DHIKSYT
+//5  Q: RKHPLE
+//6  E: DQKVG
+//7  H: QRNYPLD
+//8  I: RNKTSMVFL
+//9  K: NTMEIQ
+//10 L: RQHIMPSFVW
+//11 C: RFSYWG
+//12 G: ARDECSVW
+//13 F: CLISYV
+//14 P: ALQHRTS
+//15 M: LRIKTV
+//16 V: AGDELFIM
+//17 S: AGCFRLPINTYW
+//18 T: ASPMIKRN
+//19 Y: CDFSHN
+//20 W: RGCLS
+
 
 #define CHECK(x) GOOGLE_CHECK(x)
 
@@ -64,7 +87,6 @@ class ModsOutputter {//: public IModsOutputter {
   ModsOutputter(string tempDir,
                 const vector<const pb::Protein*>& proteins,
                 VariableModTable* var_mod_table,
-                HeadedRecordWriter* final_writer,
                 unsigned long long memory_limit)
     : tempDir_(tempDir),
       modPeptideCnt_(0),
@@ -72,10 +94,10 @@ class ModsOutputter {//: public IModsOutputter {
       mod_table_(var_mod_table),
       max_counts_(*mod_table_->MaxCounts()),
       counts_mapper_vec_(max_counts_.size(), 0),
-      final_writer_(final_writer),
       count_(0),
       totalWritten_(0),
       memory_limit_(memory_limit) {
+    temp_file_cnt_ = 0;        
     numFiles_ = 1;
     for (int i = 0; i < max_counts_.size(); ++i) {
       counts_mapper_vec_[i] = numFiles_;
@@ -85,7 +107,44 @@ class ModsOutputter {//: public IModsOutputter {
         numFiles_ *= (max_counts_[i]+1);
     }
     InitCountsMapper();
+    mutations_.resize(100);
+    mutations_[65] = "EDPGSTV"; // A
+    mutations_[67] = "RFSWG"; // C
+    mutations_[68] = "ANEVYG"; // D
+    mutations_[69] = "DQKVG"; // E
+    mutations_[70] = "CLSYV"; // F
+    mutations_[71] = "ARDECSVW"; // G
+    mutations_[72] = "QRNYPLD"; // H 
+    mutations_[73] = "RNKTSMVF"; // I
+    mutations_[74] = ""; // J
+    mutations_[75] = "NTMEIQ"; // K
+    mutations_[76] = "RQHMPSFVW"; // L
+    mutations_[77] = "LRKTV"; // M
+    mutations_[78] = "DHIKSYT"; // N
+    mutations_[79] = ""; // O
+    mutations_[80] = "ALQHRTS"; // P
+    mutations_[81] = "RKHPLE"; // Q
+    mutations_[82] = "TPKMHQLSCGW"; // R
+    mutations_[83] = "AGCFRLPNTYW"; // S
+    mutations_[84] = "ASPMIKRN"; // T
+    mutations_[85] = ""; // U 
+    mutations_[86] = "AGDELFM"; // V
+    mutations_[87] = "RGCLS"; // W
+    mutations_[88] = ""; // X
+    mutations_[89] = "CDFSHN"; // Y
+    mutations_[89] = ""; // Z 
+    // int total = 0;
+    // int aa_num = 0;
+    // for (int i=65; i < 90; ++i){
+    //   if (mutations_[i].size()>0){
+    //     aa_num++;
+    //     total += mutations_[i].size();
+    //   }
+    // }
+    // carp(CARP_INFO, "Average mutations per amino acids %lf.", (double)total/(double)aa_num);
+
   }
+  vector<string> mutations_;
 
   ~ModsOutputter() {
   }
@@ -107,12 +166,67 @@ class ModsOutputter {//: public IModsOutputter {
     }
   }
 
+  void GenerateSNPs(pb::Peptide* peptide){
+    pb_peptide_list_.push_back(*peptide);
+    ++totalWritten_;
+
+    pb::Mutation* pbMut =peptide->add_mutations();
+    double orig_mass = peptide->mass();
+
+    const pb::Location& loc = peptide->first_location();
+    const char* residues = proteins_[loc.protein_id()]->residues().data() + loc.pos();
+
+    // Go over the amino acids in the peptide
+    for (int pos = 0; pos < peptide->length(); ++pos){
+      
+      char AA = residues[pos];
+      double AA_mass = MassConstants::mono_table[AA];
+
+      // Mutate a given amino acid at position 'pos' to the other aminoacids.
+      for (char i=0; i < mutations_[AA].size(); ++i){
+
+        int MUT = mutations_[AA].at(i);
+        double MUT_mass = MassConstants::mono_table[MUT];
+        double delta_mass = MUT_mass - AA_mass;
+        pbMut->set_position(pos);
+        pbMut->set_mutation(MUT);
+        pbMut->set_delta_mass(delta_mass);
+        peptide->set_mass(orig_mass + delta_mass);
+        pb_peptide_list_.push_back(*peptide);
+        ++totalWritten_;
+        if (totalWritten_ % 10000000 == 0) {
+          carp(CARP_INFO, "Wrote %lu mutated and non-mutated target peptides to temp files", totalWritten_);
+        }    
+      }
+    }
+    if (pb_peptide_list_.size() >= memory_limit_) {
+      DumpPeptides();
+    }
+  }
+   
   void Output(pb::Peptide* peptide) {
     peptide_ = peptide;
     const pb::Location& loc = peptide->first_location();
-    residues_ = proteins_[loc.protein_id()]->residues().data() + loc.pos();
+    string peptide_str = string(proteins_[loc.protein_id()]->residues().data() + loc.pos(), peptide->length());
+    residues_ = &peptide_str[0]; //.c_str();
     vector<int> counts(max_counts_.size(), 0);
+    vector<char> reference_AA;  // Store the reference amino acid before the mutation
+    // Apply the mutation to the peptide sequence.. // NOTE: This is absolutely not thread safe, in case Tide-index will ever support multithread
+    for (int i = 0; i < peptide->mutations_size(); ++i){   // So far, only 1 mutation per peptides is allowed.
+      pb::Mutation mut = peptide->mutations(i);
+      int pos = mut.position();
+      const char AA = (char)mut.mutation();
+      pb::Mutation reference;
+      reference_AA.push_back(residues_[pos]);
+      residues_[pos] = AA;
+    }
     OutputNtermMods(0, counts);
+    // Remove the mutation.. // NOTE: This is absolutely not thread safe, in case Tide-index will ever support multithread
+    for (int i = 0; i < peptide->mutations_size(); ++i){   //We assume that the order of the mutations do not change
+      pb::Mutation mut = peptide->mutations(i);
+      int pos = mut.position();
+      residues_[pos] = reference_AA[i];
+    }
   }
 
   bool GetTempFileNames(vector<string>& filenames){
@@ -140,11 +254,10 @@ class ModsOutputter {//: public IModsOutputter {
   vector<int> counts_mapper_vec_;
   vector<RecordWriter*> writers_;
   vector<double> delta_by_file_;
-  HeadedRecordWriter* final_writer_;
   int count_;
 
   pb::Peptide* peptide_;
-  const char* residues_;  
+  char* residues_;  
 
   // Terminal modifications count as a modification and hence
   // it is taken into account the modification limit.
@@ -398,7 +511,6 @@ class ModsOutputter {//: public IModsOutputter {
 };
 
 unsigned long long AddMods(HeadedRecordReader* reader,
-             string out_file,
              string tmpDir,
              const pb::Header& header,
              const vector<const pb::Protein*>& proteins,
@@ -407,11 +519,11 @@ unsigned long long AddMods(HeadedRecordReader* reader,
              VariableModTable* var_mod_table) {
   VariableModTable tempTable;
  
-  HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
-  CHECK(writer.OK());
+  // HeadedRecordWriter writer(out_file, header, FLAGS_buf_size << 10);
+  // CHECK(writer.OK());
 
   memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
-  ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, &writer, memory_limit);
+  ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, memory_limit);
 
   pb::Peptide peptide;
   while (!reader->Done()) {
@@ -420,8 +532,34 @@ unsigned long long AddMods(HeadedRecordReader* reader,
   }
 
   CHECK(reader->OK());
-  unsigned long long peptide_num = outputOrig.Total();
   outputOrig.GetTempFileNames(temp_file_name);
+  unsigned long long peptide_num = outputOrig.Total();
+  return peptide_num;
+  
+}
+
+// Generate mutated peptides. 
+unsigned long long AddSNPs(HeadedRecordReader* reader,
+             string tmpDir,
+             const pb::Header& header,
+             const vector<const pb::Protein*>& proteins,
+             vector<string>& temp_file_name,
+             unsigned long long memory_limit,
+             VariableModTable* var_mod_table) {
+
+  memory_limit = memory_limit*1000000000/(sizeof(pb::Peptide)*2);
+  
+  ModsOutputter outputOrig(tmpDir, proteins, var_mod_table, memory_limit);
+
+  pb::Peptide peptide;
+  while (!reader->Done()) {
+    CHECK(reader->Read(&peptide));
+    outputOrig.GenerateSNPs(&peptide);
+  }
+
+  CHECK(reader->OK());
+  outputOrig.GetTempFileNames(temp_file_name);
+  unsigned long long peptide_num = outputOrig.Total();
   return peptide_num;
   
 }

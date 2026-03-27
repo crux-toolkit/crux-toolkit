@@ -10,6 +10,13 @@ message Location {
   optional int32 pos = 2; // Start position within protein.
 }
 
+message Mutation {
+   required int32 position = 1;   // The position of the mutation in the peptide sequence (not in the protein sequence)
+   required int32 mutation = 2;   // The actual new amino acid. The Alternate amino acid, capitalized, the ASCII code of the letter
+   required double delta_mass = 3; // The peptide mass change induced by this mutation.
+}
+
+
 message Peptide {
   // Comments below refer to usual practice when peptides appear in a file of
   // records sorted by mass.
@@ -42,11 +49,13 @@ message Peptide {
   optional int32 aux_locations_index = 10; // Array index into AuxLocation  // Not used.
   optional int32 decoy_index = 11;
   optional string decoy_sequence = 12;   // Stores the decoy peptide sequence. 
-  optional AuxLocation aux_loc = 13;
+  repeated Location aux_loc = 13;
   repeated int32 decoy_perm_idx = 14; //Amino acid permutation indeces for decoy generation. The list is -1 separated for multiple decoys per target.
   
   optional int32 nterm_mod = 15;
   optional int32 cterm_mod = 16;
+  repeated Mutation mutations = 17;
+  
 }
 
 message AuxLocation {

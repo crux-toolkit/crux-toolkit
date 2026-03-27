@@ -131,6 +131,12 @@ int MakePinApplication::main(const vector<string>& paths) {
                           target_collection->getScoredType(BOTH_PVALUE));
   writer.setEnabledStatus("TailorScore",
                           target_collection->getScoredType(TAILOR_SCORE));
+  writer.setEnabledStatus("HyperScore",
+                          target_collection->getScoredType(HYPER_SCORE));
+  writer.setEnabledStatus("HyperScoreTailor",
+                          target_collection->getScoredType(HYPER_SCORE_TAILOR));
+  writer.setEnabledStatus("HyperScorePoissonEval",
+                          target_collection->getScoredType(HYPER_SCORE_POISSON));
   writer.setEnabledStatus("byIonsMatched",
                           target_collection->getScoredType(BY_IONS_MATCHED));
   writer.setEnabledStatus("byIonsTotal",
