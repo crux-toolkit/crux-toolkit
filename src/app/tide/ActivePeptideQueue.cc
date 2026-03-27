@@ -25,14 +25,14 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
 
   // find the hightst index with non-zero value
   for (i = HISTO_SIZE - 2; i >= 0; --i) {
-    if (histogram[i] >= 0) break;
+    if (histogram[i] > 0) break;
   }
   *maxCorr = i;
 
   // determine nextCorr - the upper bound of the regression range
   bool foundNonZero = false;
   int iNext = 0;
-  for (i = 0; i <= *maxCorr; ++i) {
+  for (i = 0; i < *maxCorr; ++i) {
     if (histogram[i] == 0 && foundNonZero && i >= 10) {
       if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
         iNext = i - 1;
@@ -44,13 +44,13 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
   if (i > *maxCorr) {
     iNext = *maxCorr;
   }
+  if (iNext < 0) iNext = 0;
   *nextCorr = iNext;
 
   // cumulative sum from right to left:
   cumulative[iNext] = histogram[iNext];
   for (i = iNext - 1; i >= 0; --i) {
     cumulative[i] = cumulative[i + 1] + histogram[i];
-    if (histogram[i + 1] == 0) cumulative[i + 1] = 0.0;
   }
 
   // take base-10 logarithm
@@ -58,7 +58,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     if (cumulative[i] > 0.0) {
       cumulative[i] = log10(cumulative[i]);
     } else {
-      if (cumulative[i + 1] > 0.0)
+      if (i + 1 <= iNext && cumulative[i + 1] > 0.0)
         cumulative[i] = log10(cumulative[i + 1]);
       else
         cumulative[i] = 0.0;
@@ -67,6 +67,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
 
   // determine startCorr - the lower boubf of the regresion range
   int iStart = iNext - 5;
+  if (iStart < 0) iStart = 0; 
   int zeroCount = 0;
   for (i = iStart; i <= iNext; ++i) {
     if (cumulative[i] == 0.0) zeroCount++;
@@ -74,8 +75,8 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
   iStart -= zeroCount;
   if (iStart < 0) iStart = 0;
 
-  double Mx, My, Sx, Sxy, SumX, SumY;
-  int nPoints;
+  double Mx = 0.0, My = 0.0, Sx = 0.0, Sxy = 0.0, SumX = 0.0, SumY = 0.0;
+  int nPoints = 0;
 
   // iteratively expand the range downward until we get a negative slope
   while (iStart >= 0 && iNext > iStart + 2) {
@@ -99,9 +100,9 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
 
     for (i = iStart; i <= iNext; ++i) {
       if (cumulative[i] > 0.0) {
-        double dx = i = Mx;
+        double dx = i - Mx;
         double dy = cumulative[i] - My;
-        Sx = dx * dx;
+        Sx += dx * dx;
         Sxy += dx * dy;
       }
     }
@@ -289,10 +290,8 @@ void ActivePeptideQueue::BeginSpectrum() {
 // add XCorr of a decoy match to the histogram of the current spectrum
 void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
   int bin = static_cast<int>(xcorr * 10.0 + 0.5);
-  if (bin < 0) 
-    bin = 0;
-  if (bin >= HISTO_SIZE) 
-    bin = HISTO_SIZE - 1;
+  if (bin < 0) bin = 0;
+  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
 
   xcorrHistogram_[bin]++;
   decoyCount_++;
@@ -308,8 +307,8 @@ void ActivePeptideQueue::EndSpectrum() {
     return;
   }
 
-  // LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
-  //                  &startCorr_, &nextCorr_);
+  LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
+                   &startCorr_, &nextCorr_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {
