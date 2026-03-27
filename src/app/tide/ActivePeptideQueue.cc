@@ -308,8 +308,8 @@ void ActivePeptideQueue::EndSpectrum() {
     return;
   }
 
-  // LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
-  //                  &startCorr_, &nextCorr_);
+  LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
+                   &startCorr_, &nextCorr_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {
