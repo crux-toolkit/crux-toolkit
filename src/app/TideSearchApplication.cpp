@@ -1030,7 +1030,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     // Score with single charged b-y ion theoretical peaks
     xcorr += PeakMatching(observed, (*iter)->peaks_0, match_cnt, temp);
 
-    if (charge > 2){
+    if (charge > 2) {
       // Score with double charged b-y ion theoretical peaks
       xcorr += PeakMatching(observed, (*iter)->peaks_1, match_cnt, temp);      
     }
@@ -1039,10 +1039,9 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     xcorr_score = (double)xcorr/XCORR_SCALING;      
 
     active_peptide_queue->AddScoreToHist(xcorr_score);
-    if (is_target) {  // update the histogram of the decoy scores for E-value calculation with linear regression
+    // if (!is_target) {  // update the histogram of the decoy scores for E-value calculation with linear regression
       active_peptide_queue->AddDecoyXCorr(xcorr_score);
-    }
-
+    // }
 
     if ( !active_peptide ) 
       continue;
@@ -1078,6 +1077,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     psm_scores.psm_scores_.push_back(psm);
   }
   active_peptide_queue->EndSpectrum();
+  exit(0);
 
 }
 

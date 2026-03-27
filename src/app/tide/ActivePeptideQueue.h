@@ -14,7 +14,7 @@ class TheoreticalPeakCompiler;
 
 // constants for e-value calculation
 static const int HISTO_SIZE = 2000; // max xCorr * 10
-static const int MIN_DECOY_COUNT = 200; // minimal count of decoy for regression
+static const int MIN_DECOY_COUNT = 2; // minimal count of decoy for regression
 static const double MAX_EVALUE = 999.0; // upper border of e-value
 
 class ActivePeptideQueue {

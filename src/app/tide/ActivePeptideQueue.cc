@@ -65,7 +65,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     }
   }
 
-  // determine startCorr - the lower boubf of the regresion range
+  // determine startCorr - the lower bound of the regresion range
   int iStart = iNext - 5;
   if (iStart < 0) iStart = 0; 
   int zeroCount = 0;
@@ -289,9 +289,11 @@ void ActivePeptideQueue::BeginSpectrum() {
 
 // add XCorr of a decoy match to the histogram of the current spectrum
 void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
+  printf("xcorr: %lf\n", xcorr);
   int bin = static_cast<int>(xcorr * 10.0 + 0.5);
   if (bin < 0) bin = 0;
   if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
+  printf("bin: %d\n", bin);
 
   xcorrHistogram_[bin]++;
   decoyCount_++;
@@ -309,6 +311,8 @@ void ActivePeptideQueue::EndSpectrum() {
 
   LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
                    &startCorr_, &nextCorr_);
+  printf("slope: %lf\n", slope_);
+  printf("intercept: %lf\n", intercept_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {
