@@ -1,0 +1,2 @@
+Sequence	Unmodified Sequence	Protein ID	Intensity_sliced-mzml.mzML	Detection Type_sliced-mzml.mzML
+EGFQVADGPLYR	EGFQVADGPLYR	P34223	0	NotDetected

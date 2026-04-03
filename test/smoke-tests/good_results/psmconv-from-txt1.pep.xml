@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href=""?>
-<msms_pipeline_analysis date="2025-06-10T10:28:34" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
+<msms_pipeline_analysis date="2026-04-03T20:29:01" xmlns="http://regis-web.systemsbiology.net/pepXML" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://regis-web.systemsbiology.net/pepXML /usr/local/tpp/schema/pepXML_v110.xsd" summary_xml="">
 <msms_run_summary base_name="demo.ms2" msManufacturer="NA" msModel="NA" msIonization="NA" raw_data_type="NA" raw_data=".ms2" >
 <sample_enzyme name="trypsin">
 </sample_enzyme>
@@ -439,6 +439,22 @@
 <parameter name="psm-filter" value="false"/>
 <parameter name="spectra-denoising" value="false"/>
 <parameter name="diameter-instrument" value="na"/>
+<parameter name="specfile-replicates" value=""/>
+<parameter name="num-isotopes-required" value="2"/>
+<parameter name="peak-finding-ppm-tolerance" value="20"/>
+<parameter name="ppm-tolerance" value="10"/>
+<parameter name="id-specific-charge-state" value="false"/>
+<parameter name="missed-scans-allowed" value="1"/>
+<parameter name="isotope-tolerance-ppm" value="5"/>
+<parameter name="integrate" value="false"/>
+<parameter name="discrimination-factor-to-cut-peak" value="0.6"/>
+<parameter name="quantify-ambiguous-peptides" value="false"/>
+<parameter name="use-shared-peptides-for-protein-quant" value="false"/>
+<parameter name="normalize" value="false"/>
+<parameter name="psm-file-format" value="assign-confidence"/>
+<parameter name="is-rt-seconds" value="false"/>
+<parameter name="is-psm-filtered" value="false"/>
+<parameter name="lfq-q-value-threshold" value="0.01"/>
 </search_summary>
     <spectrum_query spectrum="demo.00010.00010.2" start_scan="10" end_scan="10" precursor_neutral_mass="1270.6626" assumed_charge="2" index="1">
     <search_result>

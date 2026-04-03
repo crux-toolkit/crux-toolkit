@@ -10,6 +10,14 @@ set(TEST_DATA_DESTINATION_DIR "${CMAKE_BINARY_DIR}/test/unit-tests")
 file(COPY ${TEST_DATA_SOURCE_DIR} DESTINATION ${TEST_DATA_DESTINATION_DIR})
 add_definitions(-DTEST_DATA_PATH="${TEST_DATA_DESTINATION_DIR}")
 
+if (NOT APPLE AND NOT WIN32)
+  set(
+    SSL_SUPPORT
+    crypto
+    ssl
+  )
+endif (NOT APPLE AND NOT WIN32)
+
 if(UNIX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-pie")
@@ -261,11 +269,12 @@ else()
     crux_lfq_test
     GTest::gtest
     GTest::gtest_main
-    crux-support
-    tide-support
-    cometsearch
-    kojaksearch
     crux-lfq-support
+    crux-support
+    cometsearch
+    ascorepro
+    kojaksearch
+    tide-support
     libneopepxmlparser.a
     gflags
     bullseye
@@ -304,8 +313,7 @@ else()
     ${RT_LIBRARY}
     SHA1
     zlib
-    ssl
-    crypto
+    ${SSL_SUPPORT}
   )
 endif(WIN32 AND NOT CYGWIN)
 

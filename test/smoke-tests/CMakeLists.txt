@@ -24,4 +24,17 @@ file(COPY bullseye.test.ms2 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY params DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY good_results DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+# LFQ smoke-test inputs
+file(COPY lfq-psms-no-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY lfq-psms-with-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY lfq-specfile-replicates.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# mzML files shared with the unit-test suite
+file(COPY
+  ${CMAKE_SOURCE_DIR}/test/unit-tests/test-data/sliced-mzml.mzML
+  ${CMAKE_SOURCE_DIR}/test/unit-tests/test-data/20100614_Velos1_TaGe_SA_K562_3.mzML
+  ${CMAKE_SOURCE_DIR}/test/unit-tests/test-data/20100614_Velos1_TaGe_SA_K562_4.mzML
+  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 add_custom_target(smoke-tests COMMAND ./runall)
