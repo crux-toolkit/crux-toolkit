@@ -1,0 +1,1 @@
+File Name	Base Sequence	Full Sequence	Peptide Monoisotopic Mass	MS2 Retention Time	Precursor Charge	Theoretical MZ	Peak intensity	Num Charge States Observed	Peak Detection Type	PSMs Mapped	Peak Split Valley RT	Peak Apex Mass Error (ppm)	

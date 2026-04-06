@@ -1,0 +1,2 @@
+scan	charge	spectrum precursor m/z	peptide mass	sequence	unmodified sequence	spectrum neutral mass	retention time	tdc q-value	protein id	file
+36	2	676.33484	1350.65681	EGFQVADGPLYR	EGFQVADGPLYR	1350.65512	1.57	0.001	P34223	sliced-mzml

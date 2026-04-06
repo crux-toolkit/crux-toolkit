@@ -51,7 +51,18 @@
 		<!-- START CONTENT -->
     <h2>Release notes for Crux</h2>
 
-    <h3>Version 4.3.2</h3> September 2, 2025
+    <h3>Version 4.3.2</h3> April 3, 2026
+    <h4>Major changes</h4>
+    <ul>
+      <li>3 April 2026: Added new command <code>crux lfq</code> for label-free quantification
+      (LFQ). The command takes a set of peptide-spectrum matches (PSMs) and corresponding
+      spectrum files and quantifies each detected peptide at the MS1 level. The algorithm
+      follows that of
+      <a href="https://pubmed.ncbi.nlm.nih.gov/29083185/">FlashLFQ</a>
+      (Millikin et al., <em>Journal of Proteome Research</em>, 2018).
+      Supports both Crux <code>.psmtsv</code> and Percolator output formats, optional
+      intensity normalization, and protein-level quantification via median polish.</li>
+    </ul>
     <h4>Minor changes</h4>
     <ul>
       <li>10 March 2026: Fixed name of comet target output file when using separate search.</li>

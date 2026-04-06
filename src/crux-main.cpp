@@ -42,6 +42,7 @@
 #include "app/DIAmeterApplication.h"
 #include "app/KojakApplication.h"
 
+#include "app/CruxLFQApplication.h"
 /* Code addded by Rufino*/
 #include "app/CruxApplication.h"
 
@@ -79,7 +80,8 @@ int main(int argc, char** argv) {
     applications.add(new KojakApplication());
 
     applications.add(new DIAmeterApplication());
-
+    applications.add(new CruxLFQApplication());
+    
     // Utilities
     applications.addMessage(applications.getListName() +
       " supports the following utility commands:");
