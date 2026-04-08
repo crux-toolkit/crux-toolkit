@@ -19,7 +19,7 @@ jobs:
     steps:
   
       - name: checkout-repository    
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v6.0.2
  
       - name: add-short-sha
         shell: bash
@@ -27,7 +27,7 @@ jobs:
           echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
           
       - name: setup-python
-        uses: actions/setup-python@v5.0.0
+        uses: actions/setup-python@v6.2.0
         with: 
             python-version: 3.x
  
@@ -127,7 +127,7 @@ jobs:
 
       - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-4.3.2.${{env.git_short_sha}}.macos-15
           path: ${{runner.workspace}}/build/crux-4.3.2.Darwin.*.zip
