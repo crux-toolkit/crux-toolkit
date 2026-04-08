@@ -134,21 +134,21 @@ jobs:
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-latest')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-4.3.2.${{env.git_short_sha}}.windows
           path: ${{runner.workspace}}/build/crux-4.3.2.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-22.04')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-4.3.2.${{env.git_short_sha}}.ubuntu.22.04
           path:  ${{runner.workspace}}/build/crux-4.3.2.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-22.04')
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-4.3.2.${{env.git_short_sha}}.Source
           path: ${{runner.workspace}}/build/crux-4.3.2.Source.tar.gz
