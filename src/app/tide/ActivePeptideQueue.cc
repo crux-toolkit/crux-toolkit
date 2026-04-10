@@ -24,81 +24,77 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
   int i;
 
   // find the hightst index with non-zero value
-  for (i = HISTO_SIZE - 2; i >= 0; --i) {
+  for (i = HISTO_SIZE - 1; i >= 0; --i) {
     if (histogram[i] > 0) break;
   }
   *maxCorr = i;
-
-  // determine nextCorr - the upper bound of the regression range
-  bool foundNonZero = false;
-  int iNext = 0;
-  for (i = 0; i < *maxCorr; ++i) {
-    if (histogram[i] == 0 && foundNonZero && i >= 10) {
-      if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
-        iNext = i - 1;
-        break;
-      }
-    }
-    if (histogram[i] != 0) foundNonZero = true;
+  if (*maxCorr < 0) {
+    *slope = 0.0;
+    *intercept = 0.0;
+    *startCorr = -1;
+    *nextCorr = -1;
+    return;
   }
-  if (i > *maxCorr) {
-    iNext = *maxCorr;
-  }
-  if (iNext < 0) iNext = 0;
-  *nextCorr = iNext;
 
   // cumulative sum from right to left:
-  cumulative[iNext] = histogram[iNext];
-  for (i = iNext - 1; i >= 0; --i) {
+  cumulative[*maxCorr] = histogram[*maxCorr];
+  for (i = *maxCorr - 1; i >= 0; --i) {
     cumulative[i] = cumulative[i + 1] + histogram[i];
   }
 
   // take base-10 logarithm
-  for (i = iNext; i >= 0; --i) {
+  for (i = *maxCorr; i >= 0; --i) {
     if (cumulative[i] > 0.0) {
       cumulative[i] = log10(cumulative[i]);
-    } else {
-      if (i + 1 <= iNext && cumulative[i + 1] > 0.0)
-        cumulative[i] = log10(cumulative[i + 1]);
-      else
-        cumulative[i] = 0.0;
     }
+  }
+
+  // determin upper bound of the regression range (nextCorr)
+  // - the last index where cumulative > 0.0
+
+  for (i = *maxCorr; i >= 0; --i) {
+    if (cumulative[i] > 0.0) break;
+  }
+  *nextCorr = i;
+  if (*nextCorr < 0) {
+    *slope = 0.0;
+    *intercept = 0.0;
+    *startCorr = -1;
+    return;
   }
 
   // determine startCorr - the lower bound of the regresion range
-  int iStart = iNext - 5;
-  if (iStart < 0) iStart = 0; 
-  int zeroCount = 0;
-  for (i = iStart; i <= iNext; ++i) {
-    if (cumulative[i] == 0.0) zeroCount++;
-  }
-  iStart -= zeroCount;
+  int iStart = *nextCorr - 10;
   if (iStart < 0) iStart = 0;
 
-  double Mx = 0.0, My = 0.0, Sx = 0.0, Sxy = 0.0, SumX = 0.0, SumY = 0.0;
+  double Mx = 0.0, My = 0.0, Sx = 0.0, Sxy = 0.0;
   int nPoints = 0;
-
+  *slope = 0.0;
+  *intercept = 0.0;
+  *startCorr = -1;
+  
   // iteratively expand the range downward until we get a negative slope
-  while (iStart >= 0 && iNext > iStart + 2) {
-    Sx = Sxy = SumX = SumY = 0.0;
+  while (iStart >= 0 && *nextCorr - iStart >= 2) {
+    Mx = My = Sx = Sxy = 0.0;
     nPoints = 0;
 
-    for (i = iStart; i <= iNext; ++i) {
+    for (i = iStart; i <= *nextCorr; ++i) {
       if (histogram[i] > 0) {
-        SumX += i;
-        SumY += cumulative[i];
-        nPoints++;
+        Mx += i;
+        Mx += cumulative[i];
+        ++nPoints;
       }
     }
 
-    if (nPoints > 0) {
-      Mx = SumX / nPoints;
-      My = SumY / nPoints;
-    } else {
-      Mx = My = 0.0;
+    if (nPoints < 3) {
+      --iStart;
+      continue;
     }
 
-    for (i = iStart; i <= iNext; ++i) {
+    Mx /= nPoints;
+    My /= nPoints;
+
+    for (i = iStart; i <= *nextCorr; ++i) {
       if (cumulative[i] > 0.0) {
         double dx = i - Mx;
         double dy = cumulative[i] - My;
@@ -107,20 +103,22 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
       }
     }
 
-    if (Sx > 0.0)
-      *slope = Sxy / Sx;
-    else
-      *slope = 0.0;
+    if (Sx > 0.0) {
+      double newSlope = Sxy / Sx;
+      if (newSlope < 0.0) {
+        *slope = newSlope;
+        *intercept = My - newSlope * Mx;
+        *startCorr = iStart;
+        return;
+      }
+    }
 
-    if (*slope < 0.0)
-      break;
-    else
-      iStart--;
+    --iStart;
   }
 
-  *intercept = My - (*slope) * Mx;
-  *startCorr = iStart;
-
+  *slope = 0.0;
+  *intercept = 0.0;
+  *startCorr = -1;
 }
 
 

@@ -109,3 +109,9 @@ src/.project
 src/.settings/language.settings.xml
 doc/user
 
+/.vs
+/build_hehehe
+/build_inverted_index_clean_successful
+/build_inverted_unsuccessful
+/build_master
+/out/build/x64-Debug
