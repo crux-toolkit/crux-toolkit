@@ -115,8 +115,8 @@ vector<string> PipelineApplication::getExpectedResultsFiles(
 
     vector<string> resultsFiles;
     for (vector<string>::const_iterator i = outputBases.begin(); i != outputBases.end(); i++) {
-        if (app->getCommand() == COMET_COMMAND) {
-            // Comet doesn't append '.target' to its output files
+        if (app->getCommand() == COMET_COMMAND && Params::GetInt("decoy_search") < 2) {
+            // Comet doesn't append '.target' to its output files for concatenated search
             resultsFiles.push_back(*i + outputExt);
         } else {
             resultsFiles.push_back(*i + ".target" + outputExt);
