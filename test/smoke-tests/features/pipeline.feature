@@ -16,4 +16,4 @@ Examples:
   |pipeline-percoator-fileroot  | --fileroot foo                                    |pipeline-demo.ms2 small-yeast.fasta   |spectral-counts.target.txt |pipeline-percolator-spectral-counts.target.txt        |
   |pipeline-assign-confidence   | --post-processor assign-confidence                |pipeline-demo.ms2 small-yeast.fasta   |spectral-counts.target.txt |pipeline-assign-confidence-spectral-counts.target.txt |
   |pipeline-assign-confidence   | --fileroot foo --post-processor assign-confidence |pipeline-demo.ms2 small-yeast.fasta   |spectral-counts.target.txt |pipeline-assign-confidence-spectral-counts.target.txt |
-
+  |pipeline-comet               | --search-engine comet --decoy_search 1            |pipeline-demo.ms2 small-yeast.fasta   |spectral-counts.target.txt |pipeline-comet-percolator-spectral-counts.target.txt        | 

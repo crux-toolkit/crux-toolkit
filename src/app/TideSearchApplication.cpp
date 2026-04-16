@@ -1521,12 +1521,18 @@ vector<string> TideSearchApplication::getArgs() const {
 
 vector< pair<string, string> > TideSearchApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("tide-search.txt",
+    "a tab-delimited text file containing both target and decoy PSMs. This file will only "
+    "be created if --concat T is used (the default is --concat F). "
+    "See <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("tide-search.target.txt",
-    "a tab-delimited text file containing the target PSMs. See <a href=\""
-    "../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
+    "a tab-delimited text file containing the target PSMs. This file will only "
+    "be created if --concat F is used (which is the default). "
+    "See <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("tide-search.decoy.txt",
     "a tab-delimited text file containing the decoy PSMs. This file will only "
-    "be created if the index was created with decoys."));
+    "be created if --concat F is used (which is the default). "
+    "See <a href=\"../file-formats/txt-format.html\">txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("tide-search.params.txt",
     "a file containing the name and value of all parameters/options for the "
     "current operation. Not all parameters in the file may have been used in "

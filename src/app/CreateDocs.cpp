@@ -13,6 +13,7 @@
 #include "ComputeQValues.h"
 #include "CruxBullseyeApplication.h"
 #include "CruxHardklorApplication.h"
+#include "CruxLFQApplication.h"
 #include "GeneratePeptides.h"
 #include "GetMs2Spectrum.h"
 #include "MakePinApplication.h"
@@ -52,6 +53,7 @@ int CreateDocs::main(int argc, char** argv) {
   apps.add(new CreateDocs());
   apps.add(new CruxBullseyeApplication());
   apps.add(new CruxHardklorApplication());
+  apps.add(new CruxLFQApplication());
   apps.add(new GeneratePeptides());
   apps.add(new GetMs2Spectrum());
   apps.add(new KojakApplication());

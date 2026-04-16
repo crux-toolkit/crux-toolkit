@@ -308,7 +308,7 @@ void CometApplication::setCometParameters(
   setVarMod("variable_mod14");
   setVarMod("variable_mod15");
   setInt("max_variable_mods_in_peptide");
-  setString("require_variable_mod");
+  setInt("require_variable_mod");
   setString("protein_modlist_file");
   // Static modifications
   setDouble("add_Cterm_peptide");
@@ -553,9 +553,22 @@ vector<string> CometApplication::getOptions() const {
  */
 vector< pair<string, string> > CometApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
+  outputs.push_back(make_pair("comet.txt",
+    "a tab-delimited text file containing only the target PSMs if --decoy_search 0 is given, "
+    "or both target and decoy PSM if --decoy_search 1 is given (--decoy_search 0 is the default). "
+    "See <a href=\"../file-formats/txt-format.html\">"
+    "txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("comet.target.txt",
-    "a tab-delimited text file containing the target PSMs. See <a href=\""
-    "../file-formats/txt-format.html\">"
+    "a tab-delimited text file containing only the target PSMs. "
+    "This file is only generated if --decoy_search 2 is given "
+    "(--decoy_search 0 is the default). "
+    "See <a href=\"../file-formats/txt-format.html\">"
+    "txt file format</a> for a list of the fields."));
+  outputs.push_back(make_pair("comet.decoy.txt",
+    "a tab-delimited text file containing only the decoy PSMs. "
+    "This file is only generated if --decoy_search 2 is given "
+    "(--decoy_search 0 is the default). "
+    "See <a href=\"../file-formats/txt-format.html\">"
     "txt file format</a> for a list of the fields."));
   outputs.push_back(make_pair("comet.params.txt",
     "a file containing the name and value of all parameters/options for the "

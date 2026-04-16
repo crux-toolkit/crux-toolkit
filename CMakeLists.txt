@@ -5,8 +5,8 @@ if (${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
 endif()
 project(crux)
 
-set (CRUX_VERSION_MAJOR "4")
-set (CRUX_VERSION_MINOR "3.2")
+set (CRUX_VERSION_MAJOR "5")
+set (CRUX_VERSION_MINOR "0.0")
 set (CRUX_VERSION ${CRUX_VERSION_MAJOR}.${CRUX_VERSION_MINOR})
 
 message(
@@ -130,6 +130,9 @@ add_dependencies(tide-support gflags-2.2.2)
 add_dependencies(tide-support MSToolkit)
 add_dependencies(tide-support ProteoWizard)
 add_dependencies(tide-support protobuf-3.19.4)
+add_dependencies(crux-lfq-support MSToolkit)
+add_dependencies(crux-lfq-support protobuf-3.19.4)
+add_dependencies(crux crux-lfq-support)
 
 # build a CPack driven installer package
 include (InstallRequiredSystemLibraries)

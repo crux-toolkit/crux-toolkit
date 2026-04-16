@@ -1108,4 +1108,3 @@ void CMercury8::DefaultValues(){
   }
 
 }
-

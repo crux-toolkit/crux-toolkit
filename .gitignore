@@ -3,6 +3,8 @@
 *.swo
 *.swp
 *.a
+.vscode
+crux-output
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
@@ -20,7 +22,6 @@ rules.ninja
 /build
 /Debug
 /Release
-
 # /doc
 /doc/user/Makefile
 /doc/user/assign-confidence.html
@@ -108,3 +109,5 @@ src/.project
 src/.settings/language.settings.xml
 doc/user
 
+PXD005590/
+.vscode

@@ -21,14 +21,16 @@ echo $id_latest_run
 # Download the artifacts for the latest run
 gh run download $id_latest_run  -R github.com/crux-toolkit/crux-toolkit
 # Copy artifacts to web site
-cp crux-4.3.2.$new_version.Source/crux-4.3.2.Source.tar.gz /noble/www/htdocs/crux-downloads/daily/crux-4.3.2.$new_version.Source.tar.gz
-echo "$(date): Updated crux-4.3.2.$new_version.Source.tar.gz" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
-cp crux-4.3.2.$new_version.windows/crux-4.3.2.Windows.AMD64.zip /noble/www/htdocs/crux-downloads/daily/crux-4.3.2.$new_version.Windows.AMD64.zip 
-echo "$(date): Updated crux-4.3.2.$new_version.Windows.AMD64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
-cp crux-4.3.2.$new_version.macos/crux-4.3.2.Darwin.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-4.3.2.$new_version.Darwin.x86_64.zip
-echo "$(date): Updated crux-4.3.2.$new_version.Darwin.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
-cp crux-4.3.2.$new_version.ubuntu.20.04/crux-4.3.2.Linux.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-4.3.2.$new_version.Linux.x86_64.zip
-echo "$(date): Updated crux-4.3.2.$new_version.Linux.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.Source/crux-5.0.0.Source.tar.gz /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Source.tar.gz
+echo "$(date): Updated crux-5.0.0.$new_version.Source.tar.gz" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.windows/crux-5.0.0.Windows.AMD64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Windows.AMD64.zip 
+echo "$(date): Updated crux-5.0.0.$new_version.Windows.AMD64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.macos/crux-5.0.0.Darwin.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Darwin.x86_64.zip
+echo "$(date): Updated crux-5.0.0.$new_version.Darwin.X86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.macos/crux-5.0.0.Darwin.arm64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Darwin.x86_64.zip
+echo "$(date): Updated crux-5.0.0.$new_version.Darwin.arm64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.ubuntu.20.04/crux-5.0.0.Linux.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Linux.x86_64.zip
+echo "$(date): Updated crux-5.0.0.$new_version.Linux.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 cp latest-build.txt /noble/www/htdocs/crux-downloads/daily/latest-build.txt
 echo "$(date): Updated latest-build.txt" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 else
