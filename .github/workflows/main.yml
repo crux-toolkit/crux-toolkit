@@ -13,7 +13,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-15, windows-latest]
+        os: [ubuntu-22.04, macos-15, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -46,7 +46,7 @@ jobs:
               cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-macos
-        if: matrix.os == 'macos-15'
+        if: matrix.os == 'macos-15' || matrix.os == 'macos-15-intel'
         shell: bash
         run: |
               python -m pip install --upgrade pip numpy pandas
@@ -130,7 +130,14 @@ jobs:
         uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-5.0.0.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.*.zip
+          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.amd64.zip
+        
+      - name: archive-macos-15-intel-package
+        if: (matrix.os == 'macos-15-intel')
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: crux-5.0.0.${{env.git_short_sha}}.macos-15-intel
+          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.X86_64.zip
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-latest')
