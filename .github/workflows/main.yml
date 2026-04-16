@@ -130,7 +130,7 @@ jobs:
         uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-5.0.0.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.amd64.zip
+          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.arm64.zip
         
       - name: archive-macos-15-intel-package
         if: (matrix.os == 'macos-15-intel')
