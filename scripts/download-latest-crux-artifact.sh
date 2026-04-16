@@ -27,6 +27,8 @@ cp crux-5.0.0.$new_version.windows/crux-5.0.0.Windows.AMD64.zip /noble/www/htdoc
 echo "$(date): Updated crux-5.0.0.$new_version.Windows.AMD64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 cp crux-5.0.0.$new_version.macos/crux-5.0.0.Darwin.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Darwin.x86_64.zip
 echo "$(date): Updated crux-5.0.0.$new_version.Darwin.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
+cp crux-5.0.0.$new_version.macos/crux-5.0.0.Darwin.arm64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Darwin.x86_64.zip
+echo "$(date): Updated crux-5.0.0.$new_version.Darwin.arm64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 cp crux-5.0.0.$new_version.ubuntu.20.04/crux-5.0.0.Linux.x86_64.zip /noble/www/htdocs/crux-downloads/daily/crux-5.0.0.$new_version.Linux.x86_64.zip
 echo "$(date): Updated crux-5.0.0.$new_version.Linux.x86_64.zip" >> /noble/www/htdocs/crux-downloads/daily/crux-update.log
 cp latest-build.txt /noble/www/htdocs/crux-downloads/daily/latest-build.txt

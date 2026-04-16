@@ -48,7 +48,7 @@
    if (isset($_POST['release_button'])) {
      $FileNameBaseArray = array(
        "Linux X86-64" => "crux-5.0.0.Linux.x86_64.zip",
-       "MacOS 13 X86-64" => "crux-5.0.0.Darwin.x86_64.zip",
+       "MacOS 15 X86-64" => "crux-5.0.0.Darwin.x86_64.zip",
        "MacOS 15 ARM64" => "crux-5.0.0.Darwin.arm64.zip",
        "Windows X86-64" => "crux-5.0.0.Windows.AMD64.zip",
        "Source" => "crux-5.0.0.Source.tar.gz"
@@ -61,7 +61,7 @@
       $version = chop(file_get_contents("daily/latest-build.txt"));
       $FileNameBaseArray = array(
         "Linux X86-64" => "crux-5.0.0.$version.Linux.x86_64.zip",
-        "MacOS 13 X86-64" => "crux-5.0.0.$version.Darwin.x86_64.zip",
+        "MacOS 15 X86-64" => "crux-5.0.0.$version.Darwin.x86_64.zip",
         "MacOS 15 ARM64" => "crux-5.0.0.$version.Darwin.arm64.zip",
         "Windows X86-64" => "crux-5.0.0.$version.Windows.AMD64.zip",
         "Source" => "crux-5.0.0.$version.Source.tar.gz",
