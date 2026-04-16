@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-  CRUX_VERSION: 4.3.2
+  CRUX_VERSION: 5.0.0
 
 jobs:
   build:
