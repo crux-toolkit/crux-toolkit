@@ -98,14 +98,14 @@ jobs:
              set -x
              repodir=${{runner.workspace}}/crux-toolkit
              testdir=${{runner.workspace}}/test-dir
-             pkgdir=${{runner.workspace}}/crux-${{env.CRUX_VERSION}}.Linux.x86_64
+             pkgname=crux-${{env.CRUX_VERSION}}.Linux.x86_64
 
              cd ..
-             unzip -j crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip crux-${{env.CRUX_VERSION}}.Linux.x86_64/bin/crux
+             unzip -j "$pkgname.zip" "$pkgname/bin/crux"
              
-             # Copy smoke tests to a clean directory
+             # Move the smoke tests to a clean directory
              mkdir -p $testdir
-             cp -r $repodir/test/smoke-tests $testdir/
+             mv $repodir/test/smoke-tests $testdir/
 
              # Remove the source code
              rm -rf $repodir
