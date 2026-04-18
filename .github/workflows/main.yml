@@ -178,7 +178,11 @@ jobs:
         uses: actions/upload-artifact@v7.0.0
         with:
           name: smoke.html
-          path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+          path: |
+                ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
+                ${{runner.workspace}}/test-dir/smoke-tests/errors
+                ${{runner.workspace}}/test-dir/smoke-tests/stdout
+
                  
       - name: Create version file
         if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
