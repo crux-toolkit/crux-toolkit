@@ -179,9 +179,9 @@ jobs:
         with:
           name: smoke-test-results-${{env.git_short_sha}}
           path: |
-                ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
-                ${{runner.workspace}}/test-dir/smoke-tests/errors
-                ${{runner.workspace}}/test-dir/smoke-tests/stdout
+                ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+                ${{runner.workspace}}/build/test/smoke-tests/errors
+                ${{runner.workspace}}/build/test/smoke-tests/stdout
 
                  
       - name: Create version file
