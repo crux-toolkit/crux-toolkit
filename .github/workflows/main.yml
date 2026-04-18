@@ -177,7 +177,7 @@ jobs:
         if:  (matrix.os == 'ubuntu-22.04' && always())
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: smoke.html
+          name: smoke-test-results-${{env.git_short_sha}}
           path: |
                 ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
                 ${{runner.workspace}}/test-dir/smoke-tests/errors

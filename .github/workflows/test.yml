@@ -127,7 +127,7 @@ jobs:
       - name: Archive smoke test results
         uses: actions/upload-artifact@v6
         with:
-          name: smoke.html
+          name: smoke-test-results-${{env.git_short_sha}}
           path: |
                 ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
                 ${{runner.workspace}}/test-dir/smoke-tests/errors
