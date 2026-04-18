@@ -7,9 +7,11 @@ on:
 
 env:
   BUILD_TYPE: Release
+  CRUX_VERSION: 5.0.0
 
 jobs:
   build-distributions:
+    name: Build Crux Distributions
     continue-on-error: true
     strategy:
       matrix:
@@ -127,38 +129,39 @@ jobs:
 
       - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
+
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.arm64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.macos-15
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Darwin.arm64.zip
         
       - name: archive-macos-15-intel-package
         if: (matrix.os == 'macos-15-intel')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.macos-15-intel
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.X86_64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.macos-15-intel
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Darwin.X86_64.zip
         
       - name: archive-windows-package
         if: (matrix.os == 'windows-latest')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-5.0.0.Windows.AMD64.zip 
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-5.0.0.Linux.x86_64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-5.0.0.Source.tar.gz
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
 
       - name: Test
         if: (matrix.os == 'ubuntu-22.04')
@@ -174,8 +177,12 @@ jobs:
         if:  (matrix.os == 'ubuntu-22.04' && always())
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: smoke.html
-          path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+          name: smoke-test-results-${{env.git_short_sha}}
+          path: |
+                ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+                ${{runner.workspace}}/build/test/smoke-tests/errors
+                ${{runner.workspace}}/build/test/smoke-tests/stdout
+
                  
       - name: Create version file
         if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')

@@ -1,0 +1,139 @@
+name: Build and Test Crux on Ubuntu
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: Release
+  CRUX_VERSION: 5.0.0
+
+jobs:
+  build:
+    name: Setup and Build Crux
+    runs-on: 'ubuntu-22.04'
+
+    steps:
+      - name: checkout-repository    
+        uses: actions/checkout@v6
+      
+      - name: Set up cache for build directory
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{runner.workspace}}/build
+          key: build-artifacts-${{ runner.os }}-${{ github.ref_name }}
+
+      - name: Get short git sha
+        shell: bash
+        run: |
+          echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
+          
+      - name: Configure, build and package
+        shell: bash
+        run: |
+              cmake -E make_directory "${{runner.workspace}}/build"
+              cd "${{runner.workspace}}/build"
+              echo Configuring in $(pwd)
+              cmake -G "Ninja" "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake --build . --target package
+
+      - name: Archive package
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
+
+      - name: Build source package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build . --config $BUILD_TYPE --target package_source
+
+      - name: Archive source package
+        uses: actions/upload-artifact@v6
+        with:
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
+
+  test:
+    name: Test Crux with smoke-tests
+    needs: build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout-repository    
+        uses: actions/checkout@v6
+ 
+      - name: setup-python
+        uses: actions/setup-python@v6
+        with: 
+            python-version: 3.x
+      
+      - name: setup-for-tests
+        shell: bash
+        run: |
+              python -m pip install numpy
+              python -m pip install pandas
+              sudo apt-get install ruby
+              sudo apt-get install cucumber
+              sudo gem install rspec
+
+      - name: Get short git sha
+        shell: bash
+        run: |
+          echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
+          
+      - name: Download package
+        uses: actions/download-artifact@v8
+        with:
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path: "${{runner.workspace}}/"
+
+      - name: Run smoke tests
+        continue-on-error: true
+        shell: bash
+        run: |
+             set -x
+             repodir=${{runner.workspace}}/crux-toolkit
+             testdir=${{runner.workspace}}/test-dir
+             pkgname=crux-${{env.CRUX_VERSION}}.Linux.x86_64
+
+             cd ..
+             unzip -j "$pkgname.zip" "$pkgname/bin/crux"
+             
+             # Move the smoke tests to a clean directory
+             mkdir -p $testdir
+             mv $repodir/test/smoke-tests $testdir/
+
+             # Remove the source code
+             rm -rf $repodir
+             
+             # Put the binaries where the smoke tests expect them
+             mkdir -p src
+             mv crux src/
+
+             cd $testdir/smoke-tests
+             
+             cucumber -v -f html -o smoke-tests.html \
+               && echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
+               || echo "cucumber_exit_code=$?"  >> $GITHUB_ENV \
+               && echo $cucumber_exit_code
+
+             # The upload artifact requires the repository directory.
+             mkdir -p $repodir
+
+      - name: Archive smoke test results
+        uses: actions/upload-artifact@v6
+        with:
+          name: smoke-test-results-${{env.git_short_sha}}
+          path: |
+                ${{runner.workspace}}/test-dir/smoke-tests/smoke-tests.html
+                ${{runner.workspace}}/test-dir/smoke-tests/errors
+                ${{runner.workspace}}/test-dir/smoke-tests/stdout
+
+      - name: Let the workflow fail if the test suite failed
+        shell: bash
+        run: |
+          bash -c 'exit "${{env.cucumber_exit_code}}"'
