@@ -474,6 +474,8 @@ void TideMatchSet::gatherTargetsDecoys() {
 
 void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const SpectrumCollection::SpecCharge* sc) {  // Additional scores are:  delta_cn, delta_lcn, tailor;
   // The  gatherTargetsDecoys must be run before calling this function.
+  if (psm_scores.empty()) return;
+
   int last_psm_pos = -2;
   if (top_matches_ >= psm_scores.size()) {
     last_psm_pos = -1;

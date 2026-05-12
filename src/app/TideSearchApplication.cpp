@@ -479,12 +479,27 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     locks_array_[LOCK_CANDIDATES]->unlock();  
     // Print the top-N results to the output files, 
     // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults
-    PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
 
+    if (psm_scores.psm_scores_.empty()) {
+      carp(CARP_DEBUG,
+           "No top-scoring peptides for this spectrum, skipping PrintResults.");
+      delete spectrum;
+      delete sc;
+      continue;
+    }
+
+
+    try {
+      PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
+    } catch (const std::exception& e) {
+      carp(CARP_ERROR, "PrintResults exception: %s", e.what());
+    }
     delete spectrum;
     delete sc;
   }
+  carp(CARP_INFO, "Spectrum search finished !!!!!!");
 }
+
 void TideSearchApplication::HyperScoringKeepTop(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows) {
   // Perform the scoring of peptides with respect to experimental spectrum peak
   // int peak_cnt = 0;
@@ -1077,8 +1092,6 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     psm_scores.psm_scores_.push_back(psm);
   }
   active_peptide_queue->EndSpectrum();
-  exit(0);
-
 }
 
 int TideSearchApplication::PeakMatching(const ObservedPeakSet& observed, const vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks) {
@@ -2251,16 +2264,17 @@ void TideSearchApplication::processParams() {
 
 void TideSearchApplication::getInputFiles(int thread_id) {
   // Try to read all spectrum files as spectrumrecords, convert those that fail
-  if (thread_id > inputFiles_.size())
+  size_t n = inputFiles_.size();
+
+  if (thread_id >= static_cast<int>(n))
     return;
-  for (vector<TideSearchApplication::InputFile>::iterator original_file_name = inputFiles_.begin()+thread_id; 
-       original_file_name < inputFiles_.begin() + (inputFiles_.size()); 
-       original_file_name = original_file_name + num_threads_) 
-    {
+
+  for (size_t i = thread_id; i < n; i += num_threads_) {
     carp(CARP_DEBUG, "Start processing input files");
     bool keepSpectrumrecords = true;
-    string original_name = (*original_file_name).OriginalName;
+    string original_name = inputFiles_[i].OriginalName;
     string spectrumrecords = original_name;
+
     // Check if the input file is spectrum records of google protocol buffer
     pb::Header header;
     HeadedRecordReader reader(original_name, &header);
@@ -2288,8 +2302,8 @@ void TideSearchApplication::getInputFiles(int thread_id) {
       locks_array_[LOCK_SPECTRUM_READING]->unlock();
 
     }
-    (*original_file_name).SpectrumRecords  = spectrumrecords;
-    (*original_file_name).Keep = keepSpectrumrecords;
+    inputFiles_[i].SpectrumRecords = spectrumrecords;
+    inputFiles_[i].Keep = keepSpectrumrecords;
     carp(CARP_DEBUG, "Finish converting");
   }
 }

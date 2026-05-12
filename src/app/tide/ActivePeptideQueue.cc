@@ -1,5 +1,6 @@
 // original author: Benjamin Diament
 // subsequently modified by Attila Kertesz-Farkas, Jeff Howbert
+#include <algorithm>
 #include <deque>
 #include <gflags/gflags.h>
 #include "records.h"
@@ -18,12 +19,14 @@
 
 static void LinearRegression(int* histogram, double* slope, double* intercept,
                              int* maxCorr, int* startCorr, int* nextCorr) {
+
+  // CARP_INFO();
   double cumulative[HISTO_SIZE];
   memset(cumulative, 0, sizeof(cumulative));
 
   int i;
 
-  // find the hightst index with non-zero value
+  // find highest index with non-zero value
   for (i = HISTO_SIZE - 1; i >= 0; --i) {
     if (histogram[i] > 0) break;
   }
@@ -36,26 +39,21 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     return;
   }
 
-  // cumulative sum from right to left:
+  // cumulative sum from right to left
   cumulative[*maxCorr] = histogram[*maxCorr];
   for (i = *maxCorr - 1; i >= 0; --i) {
     cumulative[i] = cumulative[i + 1] + histogram[i];
   }
 
-  // take base-10 logarithm
+  // determine nextCorr BEFORE log (using original integer counts)
   for (i = *maxCorr; i >= 0; --i) {
-    if (cumulative[i] > 0.0) {
-      cumulative[i] = log10(cumulative[i]);
+    if (cumulative[i] > 0.0) {  // original cumulative count > 0
+      *nextCorr = i;
+      break;
     }
   }
-
-  // determin upper bound of the regression range (nextCorr)
-  // - the last index where cumulative > 0.0
-
-  for (i = *maxCorr; i >= 0; --i) {
-    if (cumulative[i] > 0.0) break;
-  }
-  *nextCorr = i;
+  // (the case where nothing found is impossible because at least maxCorr is >0,
+  //  but keep the early exit for safety)
   if (*nextCorr < 0) {
     *slope = 0.0;
     *intercept = 0.0;
@@ -63,7 +61,14 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     return;
   }
 
-  // determine startCorr - the lower bound of the regresion range
+  // apply log10 (0.0 remains for bins with count 0)
+  for (i = *maxCorr; i >= 0; --i) {
+    if (cumulative[i] > 0.0) {
+      cumulative[i] = log10(cumulative[i]);
+    }
+  }
+
+  // determine startCorr – lower bound of regression range
   int iStart = *nextCorr - 10;
   if (iStart < 0) iStart = 0;
 
@@ -72,7 +77,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
   *slope = 0.0;
   *intercept = 0.0;
   *startCorr = -1;
-  
+
   // iteratively expand the range downward until we get a negative slope
   while (iStart >= 0 && *nextCorr - iStart >= 2) {
     Mx = My = Sx = Sxy = 0.0;
@@ -81,7 +86,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     for (i = iStart; i <= *nextCorr; ++i) {
       if (histogram[i] > 0) {
         Mx += i;
-        Mx += cumulative[i];
+        My += cumulative[i];  // fixed: My was previously Mx
         ++nPoints;
       }
     }
@@ -95,7 +100,7 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     My /= nPoints;
 
     for (i = iStart; i <= *nextCorr; ++i) {
-      if (cumulative[i] > 0.0) {
+      if (histogram[i] > 0) {  // fixed: use same condition as for the mean
         double dx = i - Mx;
         double dy = cumulative[i] - My;
         Sx += dx * dx;
@@ -144,7 +149,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
   max_score_ = 100;
   highest_bin_ = 0;
   score_count_ = 1; // so that the score histogram vector will be set to zero.
-  score_histogram_.reserve((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
+  score_histogram_.resize((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
   ResetHist();
   curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function")); 
 
@@ -172,8 +177,8 @@ void ActivePeptideQueue::ResetHist() {
   highest_bin_ = 0;
   if (score_count_ == 0)
     return;
-  memset(score_histogram_.data(), 0, score_histogram_.capacity() * sizeof(int));
-  // std::fill(score_histogram_.begin(), score_histogram_.end(), 0); // reset the values of the score histogram    
+  //memset(score_histogram_.data(), 0, score_histogram_.capacity() * sizeof(int));
+  std::fill(score_histogram_.begin(), score_histogram_.end(), 0); // reset the values of the score histogram    
   score_count_ = 0;
 }
 
@@ -287,12 +292,9 @@ void ActivePeptideQueue::BeginSpectrum() {
 
 // add XCorr of a decoy match to the histogram of the current spectrum
 void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
-  printf("xcorr: %lf\n", xcorr);
   int bin = static_cast<int>(xcorr * 10.0 + 0.5);
   if (bin < 0) bin = 0;
   if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
-  printf("bin: %d\n", bin);
-
   xcorrHistogram_[bin]++;
   decoyCount_++;
 }
@@ -309,8 +311,6 @@ void ActivePeptideQueue::EndSpectrum() {
 
   LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
                    &startCorr_, &nextCorr_);
-  printf("slope: %lf\n", slope_);
-  printf("intercept: %lf\n", intercept_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {

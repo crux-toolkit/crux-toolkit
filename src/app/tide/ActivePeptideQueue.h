@@ -30,7 +30,10 @@ class ActivePeptideQueue {
   inline size_t size() const { return queue_.size(); }  
 
   Peptide* GetPeptide(int index) {
-    return *(begin_ + index); 
+    size_t sz = end_ - begin_;
+    if (index >= static_cast<int>(sz)) index = static_cast<int>(sz) - 1;
+    if (index < 0) index = 0;
+    return *(begin_ + index);
   }
 
   SCORE_FUNCTION_T curScoreFunction_;  
