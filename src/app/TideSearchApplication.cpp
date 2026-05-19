@@ -481,8 +481,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     // The delta_cn, delta_lcn, repeat_ion_match, and tailor score calculation happens in PrintResults
 
     if (psm_scores.psm_scores_.empty()) {
-      carp(CARP_DEBUG,
-           "No top-scoring peptides for this spectrum, skipping PrintResults.");
       delete spectrum;
       delete sc;
       continue;
@@ -497,7 +495,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
     delete spectrum;
     delete sc;
   }
-  carp(CARP_INFO, "Spectrum search finished !!!!!!");
 }
 
 void TideSearchApplication::HyperScoringKeepTop(int charge, const ObservedPeakSet& observed, ActivePeptideQueue* active_peptide_queue, TideMatchSet& psm_scores, const vector<pair<double,double>>& mass_tol_windows) {

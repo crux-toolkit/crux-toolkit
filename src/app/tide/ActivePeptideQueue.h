@@ -20,14 +20,14 @@ static const double MAX_EVALUE = 999.0; // upper border of e-value
 class ActivePeptideQueue {
  public:
   ActivePeptideQueue(RecordReader* reader,
-        const vector<const pb::Protein*>& proteins,
-        vector<const pb::AuxLocation*>* locations=NULL, 
-        bool dia_mode = false);
+                     const vector<const pb::Protein*>& proteins,
+                     vector<const pb::AuxLocation*>* locations=NULL,
+                     bool dia_mode = false);
 
   ~ActivePeptideQueue();
 
-  int SetActiveRange(double min_range, double max_range); 
-  inline size_t size() const { return queue_.size(); }  
+  int SetActiveRange(double min_range, double max_range);
+  inline size_t size() const { return queue_.size(); }
 
   Peptide* GetPeptide(int index) {
     size_t sz = end_ - begin_;
@@ -36,7 +36,7 @@ class ActivePeptideQueue {
     return *(begin_ + index);
   }
 
-  SCORE_FUNCTION_T curScoreFunction_;  
+  SCORE_FUNCTION_T curScoreFunction_;
 
   int nPeptides_;
   int nCandPeptides_;
@@ -49,10 +49,10 @@ class ActivePeptideQueue {
   vector<int> score_histogram_;
   // Since scores are real valued, the scores will be discretized, the bin of a scores S is 
   // score_histogram[round(score*score_scale_factor)]
-  int score_scale_factor_;    
+  int score_scale_factor_;
   // XCorr scores can have negative value, so we need an offset to make scores positive
   // the bin of the score_histogram[round(score+score_histogram_offset)*score_scale_factor)]
-  int score_histogram_offset_;   
+  int score_histogram_offset_;
   int max_score_;
   int highest_bin_;
   int score_count_;
@@ -62,8 +62,7 @@ class ActivePeptideQueue {
   // int bin = round( (score + score_histogram_offset_)*score_scale_factor_ );
   // ++score_histogram_[bin];
   // bin --> Score:
-  // score = (double)end/score_scale_factor_ - score_histogram_offset_ 
-
+  // score = (double)end/score_scale_factor_ - score_histogram_offset_
 
   const double TAILOR_QUANTILE_TH = 0.005;
   const double TAILOR_OFFSET = 5.0 ;
@@ -91,7 +90,7 @@ class ActivePeptideQueue {
   //   vector<unsigned int> peaks_0;   // Single charged b-y ions, in case of exact p-value, this contains only the b-ions
   //   vector<unsigned int> peaks_1;   // Double charged b-y ions
   // cold data:
-    // Peptide* peptide;
+  // Peptide* peptide;
   // }
 
   deque<Peptide*> queue_;
@@ -104,12 +103,12 @@ class ActivePeptideQueue {
 
  private:
 
-  void ComputeTheoreticalPeaksBack();    
+  void ComputeTheoreticalPeaksBack();
 
   RecordReader* reader_;
-  const vector<const pb::Protein*>& proteins_; 
+  const vector<const pb::Protein*>& proteins_;
   vector<const pb::AuxLocation*>* locations_;
-  
+
   TheoreticalPeakSetBYSparse theoretical_peak_set_;
   pb::Peptide current_pb_peptide_;
 

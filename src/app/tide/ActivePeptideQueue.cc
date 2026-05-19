@@ -1,4 +1,4 @@
-// original author: Benjamin Diament
+ï»¿// original author: Benjamin Diament
 // subsequently modified by Attila Kertesz-Farkas, Jeff Howbert
 #include <algorithm>
 #include <deque>
@@ -14,23 +14,21 @@
 #include <map> 
 #define CHECK(x) GOOGLE_CHECK((x))
 
-// auxiliary function - linear regression for Comet algorithm
-// requests histogram and returns coefficients and range limits
+static inline int XCorrToBin(double xcorr) {
+  int bin = static_cast<int>(xcorr * 10.0 + 0.5);
+  if (bin < 0) bin = 0;
+  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
+  return bin;
+}
 
 static void LinearRegression(int* histogram, double* slope, double* intercept,
                              int* maxCorr, int* startCorr, int* nextCorr) {
-
-  // CARP_INFO();
-  double cumulative[HISTO_SIZE];
-  memset(cumulative, 0, sizeof(cumulative));
-
   int i;
-
-  // find highest index with non-zero value
   for (i = HISTO_SIZE - 1; i >= 0; --i) {
     if (histogram[i] > 0) break;
   }
   *maxCorr = i;
+
   if (*maxCorr < 0) {
     *slope = 0.0;
     *intercept = 0.0;
@@ -39,93 +37,111 @@ static void LinearRegression(int* histogram, double* slope, double* intercept,
     return;
   }
 
-  // cumulative sum from right to left
-  cumulative[*maxCorr] = histogram[*maxCorr];
-  for (i = *maxCorr - 1; i >= 0; --i) {
-    cumulative[i] = cumulative[i + 1] + histogram[i];
-  }
-
-  // determine nextCorr BEFORE log (using original integer counts)
-  for (i = *maxCorr; i >= 0; --i) {
-    if (cumulative[i] > 0.0) {  // original cumulative count > 0
-      *nextCorr = i;
-      break;
-    }
-  }
-  // (the case where nothing found is impossible because at least maxCorr is >0,
-  //  but keep the early exit for safety)
-  if (*nextCorr < 0) {
+  double totalDecoys = 0.0;
+  for (i = 0; i <= *maxCorr; ++i) totalDecoys += histogram[i];
+  if (totalDecoys < MIN_DECOY_COUNT) {
     *slope = 0.0;
     *intercept = 0.0;
     *startCorr = -1;
+    *nextCorr = -1;
     return;
   }
 
-  // apply log10 (0.0 remains for bins with count 0)
-  for (i = *maxCorr; i >= 0; --i) {
-    if (cumulative[i] > 0.0) {
-      cumulative[i] = log10(cumulative[i]);
+  int iNextCorr = 0;
+  bool foundFirstNonZero = false;
+
+  for (i = 0; i < *maxCorr; ++i) {
+    if (histogram[i] == 0 && foundFirstNonZero && i >= 10) {
+      if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
+        iNextCorr = (i > 0) ? i - 1 : i;
+        break;
+      }
     }
+    if (histogram[i] != 0) foundFirstNonZero = true;
   }
 
-  // determine startCorr – lower bound of regression range
-  int iStart = *nextCorr - 10;
+  if (i == *maxCorr) {
+    iNextCorr = *maxCorr;
+    if (*maxCorr >= 10) {
+      for (i = *maxCorr; i >= *maxCorr - 5; --i) {
+        if (histogram[i] == 0) {
+          iNextCorr = i;
+          if (*maxCorr <= 20) break;
+        }
+      }
+      if (iNextCorr == *maxCorr) iNextCorr = *maxCorr - 1;
+    }
+  }
+  *nextCorr = iNextCorr;
+
+  double cumulative[HISTO_SIZE];
+  cumulative[*nextCorr] = histogram[*nextCorr];
+  for (i = *nextCorr - 1; i >= 0; --i) {
+    cumulative[i] = cumulative[i + 1] + histogram[i];
+  }
+
+  double logCumulative[HISTO_SIZE];
+  for (i = 0; i <= *nextCorr; ++i) {
+    if (cumulative[i] > 0.0)
+      logCumulative[i] = log10(cumulative[i]);
+    else
+      logCumulative[i] = 0.0;
+  }
+
+  int iStart = *nextCorr - 5;
+  int numZeros = 0;
+  for (i = iStart; i <= *nextCorr; ++i)
+    if (logCumulative[i] == 0.0) numZeros++;
+  iStart -= numZeros;
   if (iStart < 0) iStart = 0;
 
-  double Mx = 0.0, My = 0.0, Sx = 0.0, Sxy = 0.0;
-  int nPoints = 0;
-  *slope = 0.0;
-  *intercept = 0.0;
-  *startCorr = -1;
+  double Mx, My, a, b;
+  Mx = My = a = b = 0.0;
 
-  // iteratively expand the range downward until we get a negative slope
-  while (iStart >= 0 && *nextCorr - iStart >= 2) {
-    Mx = My = Sx = Sxy = 0.0;
-    nPoints = 0;
+  while (iStart >= 0 && *nextCorr > iStart + 2) {
+    double Sx = 0.0, Sxy = 0.0, SumX = 0.0, SumY = 0.0;
+    int n = 0;
 
     for (i = iStart; i <= *nextCorr; ++i) {
-      if (histogram[i] > 0) {
-        Mx += i;
-        My += cumulative[i];  // fixed: My was previously Mx
-        ++nPoints;
+      if (cumulative[i] > 0.0) {  
+        SumX += i;
+        SumY += logCumulative[i];
+        ++n;
       }
     }
 
-    if (nPoints < 3) {
-      --iStart;
-      continue;
+    if (n > 0) {
+      Mx = SumX / n;
+      My = SumY / n;
+    } else {
+      Mx = My = 0.0;
     }
-
-    Mx /= nPoints;
-    My /= nPoints;
 
     for (i = iStart; i <= *nextCorr; ++i) {
-      if (histogram[i] > 0) {  // fixed: use same condition as for the mean
-        double dx = i - Mx;
-        double dy = cumulative[i] - My;
-        Sx += dx * dx;
-        Sxy += dx * dy;
+      if (cumulative[i] > 0.0) {
+        double dX = i - Mx;
+        double dY = logCumulative[i] - My;
+        Sx += dX * dX;
+        Sxy += dX * dY;
       }
     }
 
-    if (Sx > 0.0) {
-      double newSlope = Sxy / Sx;
-      if (newSlope < 0.0) {
-        *slope = newSlope;
-        *intercept = My - newSlope * Mx;
-        *startCorr = iStart;
-        return;
-      }
-    }
+    if (Sx > 0.0)
+      b = Sxy / Sx;
+    else
+      b = 0.0;
 
-    --iStart;
+    if (b < 0.0)
+      break; 
+    else
+      iStart--;  
   }
 
-  *slope = 0.0;
-  *intercept = 0.0;
-  *startCorr = -1;
+  a = My - b * Mx;
+  *startCorr = iStart;
+  *slope = b;
+  *intercept = a;
 }
-
 
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
                                        const vector<const pb::Protein*>& proteins, 
@@ -303,28 +319,21 @@ void ActivePeptideQueue::EndSpectrum() {
   if (decoyCount_ < MIN_DECOY_COUNT) {
     slope_ = 0.0;
     intercept_ = 0.0;
-    startCorr_ = 0;
-    nextCorr_ = 0;
-    maxCorr_ = 0;
     return;
   }
-
   LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
                    &startCorr_, &nextCorr_);
 }
 
 double ActivePeptideQueue::ComputeEValue(double xcorr) const {
-  // if the model was not built , return the maximum value
-  if (decoyCount_ < MIN_DECOY_COUNT) {
-    return MAX_EVALUE;
-  }
+  if (decoyCount_ < MIN_DECOY_COUNT) return MAX_EVALUE;
+  if (slope_ == 0.0 && intercept_ == 0.0) return MAX_EVALUE;
 
-  double exponent = slope_ * xcorr + intercept_;
+  int bin = XCorrToBin(xcorr); 
+  double exponent = slope_ * bin + intercept_;
   double eval = pow(10.0, exponent);
-
   if (eval > MAX_EVALUE) eval = MAX_EVALUE;
   if (eval < 0.0) eval = 0.0;
-
   return eval;
 }
 

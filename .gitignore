@@ -115,3 +115,4 @@ doc/user
 /build_inverted_unsuccessful
 /build_master
 /out/build/x64-Debug
+/test/cppunit-tests/cppunit-1.12.1/examples/qt
