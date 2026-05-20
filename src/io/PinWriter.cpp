@@ -337,7 +337,7 @@ void PinWriter::printPSM(
       fields.push_back(StringUtils::ToString(tailor));
     } else if (feature == "XCorrEval" ) {
       FLOAT_T xcorreval = match->getScore(XCORR_EVAL);
-      fields.push_back(StringUtils::ToString(xcorreval));
+      fields.push_back(StringUtils::ToString(-1.0*log(xcorreval + 1.0)));
     } else if (feature == "HyperScore" ) {
       FLOAT_T hyperscore = match->getScore(HYPER_SCORE);
       fields.push_back(StringUtils::ToString(hyperscore));

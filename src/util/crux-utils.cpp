@@ -530,6 +530,7 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "HyperScore",
   "HyperScore tailor",
   "HyperScore Poisson Eval",
+  "HyperScore Reg Eval",
 
   "decoy_xcorr_qvalue",
   "decoy_xcorr_peptide_qvalue",
@@ -556,6 +557,7 @@ static const char* scorer_type_strings[NUMBER_SCORER_TYPES] = {
   "res-ev p-value",
   "combined p-value",
   "tailor score",
+  "xcorr reg Eval",
   "precursor intensity logrank M0",
   "precursor intensity logrank M1",
   "precursor intensity logrank M2",

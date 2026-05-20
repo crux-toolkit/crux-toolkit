@@ -677,7 +677,7 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
         report += StringUtils::ToString((*it).tailor_, score_precision_);          
         break;
       case XCORR_REG_EVAL_COL:
-        report += StringUtils::ToString((*it).xcorr_eval_, score_precision_);           
+        report += StringUtils::ToString((*it).xcorr_eval_, score_precision_, false);           
         break;
       case MZTAB_SEARCH_ENGINE_SCORE_14:
       case HYPER_SCORE_TAILOR_COL:
