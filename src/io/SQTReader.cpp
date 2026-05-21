@@ -291,8 +291,10 @@ void SQTReader::parseInfo(const string& line) {
   // Example: I\tRTime\t644.634
   vector<string> tokens = StringUtils::Split(line, '\t');
   if (tokens.size() >= 3 && tokens[1] == "RTime" && current_spectrum_ != NULL) {
-    double rtime = StringUtils::FromString<double>(tokens[2]);
-    current_spectrum_->setRTime(rtime);
+    double rtime;
+    if (StringUtils::TryFromString(tokens[2], &rtime)) {
+      current_spectrum_->setRTime(rtime);
+    }
   }
 }
 
