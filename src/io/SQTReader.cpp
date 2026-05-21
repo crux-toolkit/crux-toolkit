@@ -87,6 +87,9 @@ MatchCollection* SQTReader::parse() {
         case 'L':
           parseLocus(line);
           break;
+        case 'I':
+          parseInfo(line);
+          break;
         default:
           carp(CARP_ERROR, "Unknown line %d\n%s", line_reader.getCurrentRow(), line.c_str());
       }
@@ -280,6 +283,17 @@ void SQTReader::parseLocus(const string& line) {
   }
 
   last_parsed_ = SQT_LINE_LOCUS;
+}
+
+void SQTReader::parseInfo(const string& line) {
+  // Parse 'I' (information) lines. These may contain retention time info.
+  // Format: I\t<key>\t<value>
+  // Example: I\tRTime\t644.634
+  vector<string> tokens = StringUtils::Split(line, '\t');
+  if (tokens.size() >= 3 && tokens[1] == "RTime" && current_spectrum_ != NULL) {
+    double rtime = StringUtils::FromString<double>(tokens[2]);
+    current_spectrum_->setRTime(rtime);
+  }
 }
 
 /**
