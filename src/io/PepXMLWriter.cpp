@@ -342,7 +342,9 @@ void PepXMLWriter::print_modifications_xml(
     for (map<int, double>::iterator it = var_mods.begin(); it != var_mods.end(); ++it) {
       fprintf(output_file, "<mod_aminoacid_mass position=\"%i\" mass=\"%.*f\"/>\n",
               it->first,   //index
-              mod_precision, it->second); //mass
+              mod_precision,
+              std::round(it->second * std::pow(10.0, mod_precision)) /
+                  std::pow(10.0, mod_precision));  // mass
     }
     // static modifications
     for (map<int, double>::iterator it = static_mods.begin(); it != static_mods.end(); ++it) {
