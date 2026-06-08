@@ -687,7 +687,7 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
         report += StringUtils::ToString((*it).hyper_poisson_, score_precision_);           
         break;
       case HYPER_REG_EVAL_COL:
-        report += StringUtils::ToString((*it).hyper_regeval_, score_precision_);           
+        report += StringUtils::ToString((*it).hyper_regeval_, score_precision_, false);
         break;
       
       case BY_IONS_MATCHED_COL:

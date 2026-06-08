@@ -26,7 +26,7 @@ class ActivePeptideQueue {
 
   ~ActivePeptideQueue();
 
-  int SetActiveRange(double min_range, double max_range);
+  int SetActiveRange(double min_range, double max_range, double max_exp_peak_mz);
   inline size_t size() const { return queue_.size(); }
 
   Peptide* GetPeptide(int index) {
@@ -64,7 +64,7 @@ class ActivePeptideQueue {
   // bin --> Score:
   // score = (double)end/score_scale_factor_ - score_histogram_offset_
 
-  const double TAILOR_QUANTILE_TH = 0.005;
+  const double TAILOR_QUANTILE_TH = 0.01;
   const double TAILOR_OFFSET = 5.0 ;
   // Calculate Tailor scores. Get the 99th quantile:
   double getTailorQuantileFromHistogram();
@@ -82,7 +82,9 @@ class ActivePeptideQueue {
                       // build linear regeression model for accumulative decoy-scores
                       // after call model is ready for use
   double ComputeEValue(double xcorr) const;
-
+  int XCorrToBin(const double xcorr) const;
+  void LinearRegression(int* histogram, double* slope, double* intercept, int* maxCorr, int* startCorr, int* nextCorr);
+  bool LinearRegressionHyperScore(const int* piHistogram, int iHistSize, double* pdSlope, double* pdIntercept, double* pdRsq);
   // class PeptideWrapper {  // Peptide objects split into hot and cold data in order to reduce cache miss ratio. 
   // hot data:
   //   double mass;

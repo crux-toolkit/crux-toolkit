@@ -72,6 +72,7 @@ class TheoreticalPeakSetBYSparse {
     cache_end = MassConstants::mass2bin(MAX_THEORETICAL_PEAK_MZ, 1) * NUM_PEAK_TYPES;
     peak_mask = new int[peak_mask_end];
     memset(peak_mask, 0,  sizeof(int)*peak_mask_end);
+    max_exp_peak_mz_ = 0.0;
   }
 
   virtual ~TheoreticalPeakSetBYSparse() {}
@@ -122,10 +123,12 @@ class TheoreticalPeakSetBYSparse {
   const TheoreticalPeakArr* GetPeaks() const { return peaks_; }
 
  private:
-    int* peak_mask = 0; //  MaxBin::Global().CacheBinEnd();
-    int peak_mask_end = 0;
-    int cache_end = 0;
-    TheoreticalPeakArr peaks_[2];
+  int* peak_mask = 0; //  MaxBin::Global().CacheBinEnd();
+  int peak_mask_end = 0;
+  int cache_end = 0;
+  TheoreticalPeakArr peaks_[2];
+public:
+  double max_exp_peak_mz_;
 };
 
 #endif // THEORETICAL_PEAK_SET_H

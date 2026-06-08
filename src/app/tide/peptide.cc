@@ -130,6 +130,11 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
   if (MaxBin::Global().MaxBinEnd() > 0)
     max_possible_peak = MaxBin::Global().CacheBinEnd();
 
+  
+  if (workspace->max_exp_peak_mz_ < max_possible_peak)
+    max_possible_peak = workspace->max_exp_peak_mz_;
+  
+
   vector<double> aa_masses = getAAMasses();
 
   // added by Yang
