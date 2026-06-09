@@ -180,6 +180,13 @@ int TideSearchApplication::main(const vector<string>& input_files, const string 
   TideMatchSet::mass_precision_ =  Params::GetInt("mass-precision");
   TideMatchSet::score_precision_ = Params::GetInt("precision");
   TideMatchSet::mod_precision_ = Params::GetInt("mod-precision");
+  if (TideMatchSet::mod_precision_ < 6) {
+    carp(CARP_WARNING,
+         "Increasing mod-precision from %d to 6 for indexing to avoid rounding "
+         "errors",
+         TideMatchSet::mod_precision_);
+    TideMatchSet::mod_precision_ = 6;
+  }
   TideMatchSet::concat_ = Params::GetBool("concat");  
 
   // Create the output files, print headers
