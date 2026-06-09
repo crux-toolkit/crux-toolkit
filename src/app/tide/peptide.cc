@@ -249,12 +249,6 @@ vector<double> Peptide::getAAMasses() const {
       }
     }
 
-    // if (mutations_[i] != 0){ // there is a mutations at this position
-    //   AA = &mutations_[i];
-    // } else {
-    //   AA = residue;
-    // }
-
     if (i == 0) { // nterm static pep
       if(first_loc_pos_ == 0)
         masses_charge[i] = MassConstants::nprotterm_mono_table[AA];

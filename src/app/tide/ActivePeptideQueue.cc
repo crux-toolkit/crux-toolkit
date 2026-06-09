@@ -20,8 +20,8 @@
 
 
 ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
-                                       const vector<const pb::Protein*>& proteins, 
-                                       vector<const pb::AuxLocation*>* locations, 
+                                       const vector<const pb::Protein*>& proteins,
+                                       vector<const pb::AuxLocation*>* locations,
                                        bool dia_mode)
   : reader_(reader),
     proteins_(proteins),
@@ -29,67 +29,71 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     locations_(locations),
     dia_mode_(dia_mode) {
   CHECK(reader_->OK());
-  min_candidates_ = 3000;
-  nPeptides_ = 0;
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;  
+  min_candidates_ = 1000;
+  total_peptides_loaded_ = 0;
+  candidate_peptide_count_ = 0;
+  candidate_target_count_ = 0;
+  candidate_decoy_count_ = 0;
 
 
-  score_histogram_offset_= 10;   // This should be ok for XCorr. It does not matter for HyperScore; TAILOR_OFFSET
-  score_scale_factor_ = 100;   // TODO: may be fine-tuned experimentally.
-  max_score_ = 100;
-  highest_bin_ = 0;
-  score_count_ = 1; // so that the score histogram vector will be set to zero.
-  score_histogram_.resize((max_score_+score_histogram_offset_)*score_scale_factor_); // The maximum score can be 100. Can be increased
-  ResetHist();
-  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function")); 
+  tailor_histogram_offset_ = 10;   // Sufficient offset for XCorr (which can be negative); irrelevant for HyperScore
+  histogram_bin_scale_ = 100;   // TODO: may be fine-tuned experimentally.
+  tailor_histogram_max_score_ = 100;
+  tailor_histogram_max_bin_ = 0;
+  tailor_score_count_ = 1; // ensure the score histogram vector is allocated
+  tailor_histogram_.resize((tailor_histogram_max_score_ + tailor_histogram_offset_) * histogram_bin_scale_);
+  ResetTailorHistogram();
+  curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));
 
-  // e-value fields initialization
-  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
-  decoyCount_ = 0;
-  slope_ = 0.0;
-  intercept_ = 0.0;
-  startCorr_ = 0;
-  nextCorr_ = 0;
-  maxCorr_ = 0;
+  // E-value fields initialization
+  memset(evalue_histogram_, 0, sizeof(evalue_histogram_));
+  evalue_score_count_ = 0;
+  evalue_slope_ = 0.0;
+  evalue_intercept_ = 0.0;
+  evalue_reg_start_bin_ = 0;
+  evalue_reg_end_bin_ = 0;
+  evalue_max_bin_ = 0;
 }
 
-void ActivePeptideQueue::AddScoreToHist(double score, int match_cnt) {
-  int bin = round( (score + score_histogram_offset_)*score_scale_factor_ );
-  score_histogram_[bin] += 1;
-  ++score_count_;
-  total_match_ += match_cnt;
-  if (highest_bin_ < bin)
-    highest_bin_ = bin;
+void ActivePeptideQueue::AddToTailorHistogram(double score, int match_cnt) {
+  int bin = round((score + tailor_histogram_offset_) * histogram_bin_scale_);
+  tailor_histogram_[bin] += 1;
+  ++tailor_score_count_;
+  tailor_total_matches_ += match_cnt;
+  if (tailor_histogram_max_bin_ < bin)
+    tailor_histogram_max_bin_ = bin;
 }
 
-void ActivePeptideQueue::ResetHist() {
-  total_match_ = 0;
-  highest_bin_ = 0;
-  if (score_count_ == 0)
+void ActivePeptideQueue::ResetTailorHistogram() {
+  tailor_total_matches_ = 0;
+  tailor_histogram_max_bin_ = 0;
+  if (tailor_score_count_ == 0)
     return;
-  //memset(score_histogram_.data(), 0, score_histogram_.capacity() * sizeof(int));
-  std::fill(score_histogram_.begin(), score_histogram_.end(), 0); // reset the values of the score histogram    
-  score_count_ = 0;
+  //memset(tailor_histogram_.data(), 0, tailor_histogram_.capacity() * sizeof(int));
+  std::fill(tailor_histogram_.begin(), tailor_histogram_.end(), 0); // reset the values of the score histogram
+  tailor_score_count_ = 0;
 }
 
-double ActivePeptideQueue::getTailorQuantileFromHistogram(){
-  int bin = highest_bin_+1; //score_histogram_.capacity()-1;
+double ActivePeptideQueue::GetTailorQuantile() {
+  int bin = tailor_histogram_max_bin_ + 1;
   int count = 0;
-  double quantile_score_ = 1.0;
+  double quantile_score = 1.0;
 
-  int quantile_pos = (int)(TAILOR_QUANTILE_TH*(double)score_count_+0.5)-1; // zero indexed
-  if (quantile_pos < 2) 
+  int quantile_pos = (int)(TAILOR_QUANTILE_TH * (double)tailor_score_count_ + 0.5) - 1; // zero indexed
+  if (quantile_pos < 2)
     quantile_pos = 2;  // the third element
-  if (quantile_pos >= score_count_) 
-    quantile_pos = score_count_-1; // the last element
+  if (quantile_pos >= tailor_score_count_)
+    quantile_pos = tailor_score_count_ - 1; // the last element
 
-  while (count < quantile_pos ) {
-    count += score_histogram_[bin--];
+  while (count < quantile_pos) {
+    count += tailor_histogram_[bin--];
   }
   ++bin;
-  return (double)bin/score_scale_factor_ - score_histogram_offset_; // Make sure scores positive in case of XCorr;
+  return (double)bin / histogram_bin_scale_ - tailor_histogram_offset_;
+}
+
+double ActivePeptideQueue::GetTailorMeanMatches() {
+  return (double)tailor_total_matches_ / (double)tailor_score_count_;
 }
 
 ActivePeptideQueue::~ActivePeptideQueue() {
@@ -106,12 +110,12 @@ void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
 
 int ActivePeptideQueue::SetActiveRange(double min_range, double max_range, double max_exp_peak_mz) {
 
-  // Reset the score histograms
-  ResetHist();
+  // Reset the Tailor score histogram for the new spectrum
+  ResetTailorHistogram();
 
-  //min_range and max_range have been introduced to fix a bug
-  //introduced by m/z selection. see #222 in sourceforge
-  //this has to be true:
+  // min_range and max_range have been introduced to fix a bug
+  // introduced by m/z selection. see #222 in sourceforge
+  // this has to be true:
   // min_range <= min_mass <= max_mass <= max_range
 
   // queue front() is lightest; back() is heaviest
@@ -123,10 +127,10 @@ int ActivePeptideQueue::SetActiveRange(double min_range, double max_range, doubl
     ion_inverted_index_.pop_peaks(peptide);
     delete peptide;
   }
-  nPeptides_ = 0;
-  nCandPeptides_ = 0;
-  CandPeptidesTarget_ = 0;
-  CandPeptidesDecoy_ = 0;
+  total_peptides_loaded_ = 0;
+  candidate_peptide_count_ = 0;
+  candidate_target_count_ = 0;
+  candidate_decoy_count_ = 0;
   theoretical_peak_set_.max_exp_peak_mz_ = max_exp_peak_mz + 100.00;
 
   // Enqueue all peptides that are not yet queued but are lighter than
@@ -167,146 +171,139 @@ int ActivePeptideQueue::SetActiveRange(double min_range, double max_range, doubl
     return 0;
   }
 
-  nPeptides_ = 0;
-  begin_ = queue_.begin();  
+  total_peptides_loaded_ = 0;
+  begin_ = queue_.begin();
   end_ = queue_.end();
   return queue_.size();
-
-}// reset state for a new spectrum
-void ActivePeptideQueue::BeginSpectrum() {
-  memset(xcorrHistogram_, 0, sizeof(xcorrHistogram_));
-  decoyCount_ = 0;
-  slope_ = 0.0;
-  intercept_ = 0.0;
-  startCorr_ = 0;
-  nextCorr_ = 0;
-  maxCorr_ = 0;
 }
 
-// add XCorr of a decoy match to the histogram of the current spectrum
-void ActivePeptideQueue::AddDecoyXCorr(double xcorr) {
-  // int bin = static_cast<int>(xcorr * 10.0 + 0.5);
-  // if (bin < 0) bin = 0;
-  // if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
-  int bin = XCorrToBin(xcorr);   
-  xcorrHistogram_[bin]++;
-  decoyCount_++;
+// Reset state: clear E-value histogram and regression parameters before scoring a spectrum
+void ActivePeptideQueue::ResetEValueHistogram() {
+  memset(evalue_histogram_, 0, sizeof(evalue_histogram_));
+  evalue_score_count_ = 0;
+  evalue_slope_ = 0.0;
+  evalue_intercept_ = 0.0;
+  evalue_reg_start_bin_ = 0;
+  evalue_reg_end_bin_ = 0;
+  evalue_max_bin_ = 0;
 }
 
-void ActivePeptideQueue::EndSpectrum() {
-  if (decoyCount_ < MIN_DECOY_COUNT) {
-    slope_ = 0.0;
-    intercept_ = 0.0;
+// Add a score to the E-value histogram (collects ALL scores, target + decoy)
+void ActivePeptideQueue::AddToEValueHistogram(double score) {
+  int bin = ScoreToBin(score);
+  evalue_histogram_[bin]++;
+  evalue_score_count_++;
+}
+
+// Map a score to an E-value histogram bin (score × 10, clamped to [0, EVALUE_HISTOGRAM_SIZE))
+int ActivePeptideQueue::ScoreToBin(const double score) const {
+  int bin = static_cast<int>(score * 10.0 + 0.5);
+  if (bin < 0) bin = 0;
+  if (bin >= EVALUE_HISTOGRAM_SIZE) bin = EVALUE_HISTOGRAM_SIZE - 1;
+  return bin;
+}
+
+// Fit regression model on the E-value score histogram; enables ComputeEValue for this spectrum.
+// For XCorr: fits log10(cumulative count) vs bin index.
+// For HyperScore: fits log10(survival function S(x)) vs bin index.
+void ActivePeptideQueue::FitEValueRegression() {
+  if (evalue_score_count_ < MIN_SCORES_FOR_REGRESSION) {
+    evalue_slope_ = 0.0;
+    evalue_intercept_ = 0.0;
     return;
   }
 
   if (curScoreFunction_ == HYPERSCORE) {
-    double pdRsq;
-    LinearRegressionHyperScore(xcorrHistogram_, HISTO_SIZE, &slope_, &intercept_, &pdRsq);
+    double rsq;
+    LinearRegressionHyperScore(evalue_histogram_, EVALUE_HISTOGRAM_SIZE, &evalue_slope_, &evalue_intercept_, &rsq);
   } else {
-    LinearRegression(xcorrHistogram_, &slope_, &intercept_, &maxCorr_,
-                    &startCorr_, &nextCorr_);
+    LinearRegression(evalue_histogram_, &evalue_slope_, &evalue_intercept_,
+                     &evalue_max_bin_, &evalue_reg_start_bin_, &evalue_reg_end_bin_);
   }
-
-  // LinearRegressionHyperScore(const int* piHistogram, int iHistSize, double* pdSlope, double* pdIntercept, double* pdRsq);
-                   
-  // FILE * fp = fopen("score_histogram_scanID.txt", "w");
-  // fprintf(fp, "%lf\t%lf\n" ,slope_, intercept_);
-  // for (int i = 0; i< HISTO_SIZE; ++i) {
-  //   fprintf(fp, "%d\t%d\n", i,xcorrHistogram_[i]);
-  // }
-  // fclose(fp);
 }
 
-double ActivePeptideQueue::ComputeEValue(double xcorr) const {
-  if (decoyCount_ < MIN_DECOY_COUNT) return MAX_EVALUE;
-  if (slope_ == 0.0 && intercept_ == 0.0) return MAX_EVALUE;
+double ActivePeptideQueue::ComputeEValue(double score) const {
+  if (evalue_score_count_ < MIN_SCORES_FOR_REGRESSION) return EVALUE_UPPER_BOUND;
+  if (evalue_slope_ == 0.0 && evalue_intercept_ == 0.0) return EVALUE_UPPER_BOUND;
 
-  int bin = XCorrToBin(xcorr); 
-  double exponent = slope_ * bin + intercept_;
+  int bin = ScoreToBin(score);
+  double exponent = evalue_slope_ * bin + evalue_intercept_;
   double eval = pow(10.0, exponent);
-  if (eval > MAX_EVALUE) eval = MAX_EVALUE;
+  if (eval > EVALUE_UPPER_BOUND) eval = EVALUE_UPPER_BOUND;
   if (eval < 0.0) eval = 0.0;
   return eval;
 }
 
-int ActivePeptideQueue::XCorrToBin(const double xcorr) const {
-  int bin = static_cast<int>(xcorr * 10.0 + 0.5);
-  if (bin < 0) bin = 0;
-  if (bin >= HISTO_SIZE) bin = HISTO_SIZE - 1;
-  return bin;
-}
-
-void ActivePeptideQueue::LinearRegression(int* histogram, double* slope, double* intercept,
-                             int* maxCorr, int* startCorr, int* nextCorr) { 
+void ActivePeptideQueue::LinearRegression(const int* histogram, double* slope, double* intercept,
+                             int* max_bin, int* start_bin, int* end_bin) {
   int i;
-  for (i = HISTO_SIZE - 1; i >= 0; --i) {
+  for (i = EVALUE_HISTOGRAM_SIZE - 1; i >= 0; --i) {
     if (histogram[i] > 0) break;
   }
-  *maxCorr = i;
+  *max_bin = i;
 
-  if (*maxCorr < 0) {
+  if (*max_bin < 0) {
     *slope = 0.0;
     *intercept = 0.0;
-    *startCorr = -1;
-    *nextCorr = -1;
+    *start_bin = -1;
+    *end_bin = -1;
     return;
   }
 
-  double totalDecoys = 0.0;
-  for (i = 0; i <= *maxCorr; ++i) totalDecoys += histogram[i];
-  if (totalDecoys < MIN_DECOY_COUNT) {
+  double totalScores = 0.0;
+  for (i = 0; i <= *max_bin; ++i) totalScores += histogram[i];
+  if (totalScores < MIN_SCORES_FOR_REGRESSION) {
     *slope = 0.0;
     *intercept = 0.0;
-    *startCorr = -1;
-    *nextCorr = -1;
+    *start_bin = -1;
+    *end_bin = -1;
     return;
   }
 
-  int iNextCorr = 0;
+  int iEndBin = 0;
   bool foundFirstNonZero = false;
 
-  for (i = 0; i < *maxCorr; ++i) {
+  for (i = 0; i < *max_bin; ++i) {
     if (histogram[i] == 0 && foundFirstNonZero && i >= 10) {
-      if (histogram[i + 1] == 0 || i + 1 == *maxCorr) {
-        iNextCorr = (i > 0) ? i - 1 : i;
+      if (histogram[i + 1] == 0 || i + 1 == *max_bin) {
+        iEndBin = (i > 0) ? i - 1 : i;
         break;
       }
     }
     if (histogram[i] != 0) foundFirstNonZero = true;
   }
 
-  if (i == *maxCorr) {
-    iNextCorr = *maxCorr;
-    if (*maxCorr >= 10) {
-      for (i = *maxCorr; i >= *maxCorr - 5; --i) {
+  if (i == *max_bin) {
+    iEndBin = *max_bin;
+    if (*max_bin >= 10) {
+      for (i = *max_bin; i >= *max_bin - 5; --i) {
         if (histogram[i] == 0) {
-          iNextCorr = i;
-          if (*maxCorr <= 20) break;
+          iEndBin = i;
+          if (*max_bin <= 20) break;
         }
       }
-      if (iNextCorr == *maxCorr) iNextCorr = *maxCorr - 1;
+      if (iEndBin == *max_bin) iEndBin = *max_bin - 1;
     }
   }
-  *nextCorr = iNextCorr;
+  *end_bin = iEndBin;
 
-  double cumulative[HISTO_SIZE];
-  cumulative[*nextCorr] = histogram[*nextCorr];
-  for (i = *nextCorr - 1; i >= 0; --i) {
+  double cumulative[EVALUE_HISTOGRAM_SIZE];
+  cumulative[*end_bin] = histogram[*end_bin];
+  for (i = *end_bin - 1; i >= 0; --i) {
     cumulative[i] = cumulative[i + 1] + histogram[i];
   }
 
-  double logCumulative[HISTO_SIZE];
-  for (i = 0; i <= *nextCorr; ++i) {
+  double logCumulative[EVALUE_HISTOGRAM_SIZE];
+  for (i = 0; i <= *end_bin; ++i) {
     if (cumulative[i] > 0.0)
       logCumulative[i] = log10(cumulative[i]);
     else
       logCumulative[i] = 0.0;
   }
 
-  int iStart = *nextCorr - 5;
+  int iStart = *end_bin - 5;
   int numZeros = 0;
-  for (i = iStart; i <= *nextCorr; ++i)
+  for (i = iStart; i <= *end_bin; ++i)
     if (logCumulative[i] == 0.0) numZeros++;
   iStart -= numZeros;
   if (iStart < 0) iStart = 0;
@@ -314,12 +311,12 @@ void ActivePeptideQueue::LinearRegression(int* histogram, double* slope, double*
   double Mx, My, a, b;
   Mx = My = a = b = 0.0;
 
-  while (iStart >= 0 && *nextCorr > iStart + 2) {
+  while (iStart >= 0 && *end_bin > iStart + 2) {
     double Sx = 0.0, Sxy = 0.0, SumX = 0.0, SumY = 0.0;
     int n = 0;
 
-    for (i = iStart; i <= *nextCorr; ++i) {
-      if (cumulative[i] > 0.0) {  
+    for (i = iStart; i <= *end_bin; ++i) {
+      if (cumulative[i] > 0.0) {
         SumX += i;
         SumY += logCumulative[i];
         ++n;
@@ -333,7 +330,7 @@ void ActivePeptideQueue::LinearRegression(int* histogram, double* slope, double*
       Mx = My = 0.0;
     }
 
-    for (i = iStart; i <= *nextCorr; ++i) {
+    for (i = iStart; i <= *end_bin; ++i) {
       if (cumulative[i] > 0.0) {
         double dX = i - Mx;
         double dY = logCumulative[i] - My;
@@ -348,13 +345,13 @@ void ActivePeptideQueue::LinearRegression(int* histogram, double* slope, double*
       b = 0.0;
 
     if (b < 0.0)
-      break; 
+      break;
     else
-      iStart--;  
+      iStart--;
   }
 
   a = My - b * Mx;
-  *startCorr = iStart;
+  *start_bin = iStart;
   *slope = b;
   *intercept = a;
 }
@@ -396,34 +393,34 @@ void ActivePeptideQueue::LinearRegression(int* histogram, double* slope, double*
 //   ref_evalue = 10^(ref_slope * top_score + ref_intercept), the pre-computed
 //                reference E-value already in absolute-count units.
 
-bool ActivePeptideQueue::LinearRegressionHyperScore(const int* piHistogram,
-                     int        iHistSize,
-                     double*    pdSlope,
-                     double*    pdIntercept,
-                     double*    pdRsq)
+bool ActivePeptideQueue::LinearRegressionHyperScore(const int* histogram,
+                     int hist_size,
+                     double* slope,
+                     double* intercept,
+                     double* rsq)
 {
    // --- total counts ---
    long long llTotal = 0;
-   for (int i = 0; i < iHistSize; i++)
-      llTotal += piHistogram[i];
+   for (int i = 0; i < hist_size; i++)
+      llTotal += histogram[i];
    if (llTotal == 0)
       return false;
 
    // --- mode: score with the highest count ---
    int iMode = 0;
-   for (int i = 1; i < iHistSize; i++)
+   for (int i = 1; i < hist_size; i++)
    {
-      if (piHistogram[i] > piHistogram[iMode])
+      if (histogram[i] > histogram[iMode])
          iMode = i;
    }
 
    // --- survival fraction S(x) = count(score >= x) / total ---
-   std::vector<double> vdS(iHistSize, 0.0);
+   std::vector<double> vdS(hist_size, 0.0);
    {
       long long llCum = 0;
-      for (int i = iHistSize - 1; i >= 0; i--)
+      for (int i = hist_size - 1; i >= 0; i--)
       {
-         llCum   += piHistogram[i];
+         llCum   += histogram[i];
          vdS[i]   = (double)llCum / (double)llTotal;
       }
    }
@@ -436,9 +433,9 @@ bool ActivePeptideQueue::LinearRegressionHyperScore(const int* piHistogram,
    int iTailEnd  = iMode;
    int iGapCount = 0;
 
-   for (int i = iMode + 1; i < iHistSize; i++)
+   for (int i = iMode + 1; i < hist_size; i++)
    {
-      if (piHistogram[i] > 0)
+      if (histogram[i] > 0)
       {
          iTailEnd  = i;
          iGapCount = 0;
@@ -515,8 +512,8 @@ bool ActivePeptideQueue::LinearRegressionHyperScore(const int* piHistogram,
    if (fabs(dDenom) < 1e-12)
       return false;
 
-   *pdSlope     = ((double)iN * dSumXY - dSumX * dSumY) / dDenom;
-   *pdIntercept = (dSumY - *pdSlope * dSumX) / (double)iN;
+   *slope     = ((double)iN * dSumXY - dSumX * dSumY) / dDenom;
+   *intercept = (dSumY - *slope * dSumX) / (double)iN;
 
    // --- R^2: fraction of log10(S) variance explained by the linear fit ---
    double dMeanY    = dSumY / (double)iN;
@@ -524,13 +521,13 @@ bool ActivePeptideQueue::LinearRegressionHyperScore(const int* piHistogram,
    double dSSRes    = 0.0;
    for (int i = 0; i < iN; i++)
    {
-      double dYhat  = *pdSlope * vdX[i] + *pdIntercept;
+      double dYhat  = *slope * vdX[i] + *intercept;
       double dDev   = vdY[i] - dMeanY;
       double dRes   = vdY[i] - dYhat;
       dSSTot += dDev * dDev;
       dSSRes += dRes * dRes;
    }
-   *pdRsq = (dSSTot < 1e-15) ? 1.0 : 1.0 - dSSRes / dSSTot;
+   *rsq = (dSSTot < 1e-15) ? 1.0 : 1.0 - dSSRes / dSSTot;
 
    return true;
 }

@@ -416,8 +416,8 @@ void TideMatchSet::gatherTargetsDecoys() {
     break;
   }
 
-  quantile_score_ = active_peptide_queue_->getTailorQuantileFromHistogram();
-  possion_lambda_ = active_peptide_queue_->getMeanMatch();
+  quantile_score_ = active_peptide_queue_->GetTailorQuantile();
+  possion_lambda_ = active_peptide_queue_->GetTailorMeanMatches();
 
   // Calculate Tailor scores. Get the 99th quantile:
 
@@ -726,11 +726,11 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
       case MZTAB_OPT_MS_RUN_1_DISTINCT_MATCHES_PER_SPEC:
       case DISTINCT_MATCHES_SPECTRUM_COL:
         if (concat_ == true) {
-          report += StringUtils::ToString(active_peptide_queue_->nCandPeptides_, 0); // Print num of targets and decoys
+          report += StringUtils::ToString(active_peptide_queue_->candidate_peptide_count_, 0); // Print num of targets and decoys
         } else if (target) {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesTarget_, 0); // Print num of targets
+          report += StringUtils::ToString(active_peptide_queue_->candidate_target_count_, 0); // Print num of targets
         } else {
-          report += StringUtils::ToString(active_peptide_queue_->CandPeptidesDecoy_, 0); // Print num of decoys
+          report += StringUtils::ToString(active_peptide_queue_->candidate_decoy_count_, 0); // Print num of decoys
         }
         break;
       case SEQUENCE_COL:

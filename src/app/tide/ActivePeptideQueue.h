@@ -12,10 +12,10 @@
 
 class TheoreticalPeakCompiler;
 
-// constants for e-value calculation
-static const int HISTO_SIZE = 2000; // max xCorr * 10
-static const int MIN_DECOY_COUNT = 2; // minimal count of decoy for regression
-static const double MAX_EVALUE = 999.0; // upper border of e-value
+// Constants for E-value calculation from score distribution (all scores, target + decoy)
+static const int EVALUE_HISTOGRAM_SIZE = 2000;  // max xCorr * 10; bin count for E-value histogram
+static const int MIN_SCORES_FOR_REGRESSION = 2;  // minimum scores required to fit a regression model for E-values
+static const double EVALUE_UPPER_BOUND = 999.0;  // maximum reported E-value
 
 class ActivePeptideQueue {
  public:
@@ -38,53 +38,61 @@ class ActivePeptideQueue {
 
   SCORE_FUNCTION_T curScoreFunction_;
 
-  int nPeptides_;
-  int nCandPeptides_;
-  int CandPeptidesTarget_;
-  int CandPeptidesDecoy_;
+  // Peptide counting statistics
+  int total_peptides_loaded_;     // total peptides currently in the queue
+  int candidate_peptide_count_;   // peptides within the precursor mass tolerance window
+  int candidate_target_count_;    // candidate peptides that are targets
+  int candidate_decoy_count_;     // candidate peptides that are decoys
 
-  // This vector will store the score hitograms for either the XCorr or for the HyperScore.
-  // This histogram is used for score calibration, currently for Tailor.
-  // Later, this histogram also can be used for the linear regression based score calibration, (E-value) like in Comet or X!Tandem
-  vector<int> score_histogram_;
-  // Since scores are real valued, the scores will be discretized, the bin of a scores S is 
-  // score_histogram[round(score*score_scale_factor)]
-  int score_scale_factor_;
-  // XCorr scores can have negative value, so we need an offset to make scores positive
-  // the bin of the score_histogram[round(score+score_histogram_offset)*score_scale_factor)]
-  int score_histogram_offset_;
-  int max_score_;
-  int highest_bin_;
-  int score_count_;
-  int total_match_;
+  // --- Tailor score calibration histogram ---
+  // Collects scores from ALL scored peptides (target + decoy) in both XCorr and
+  // HyperScore modes. Used for:
+  //   1. Tailor quantile calibration (GetTailorQuantile) — applied to both XCorr
+  //      and HyperScore PSMs.
+  //   2. Poisson E-value for HyperScore — GetTailorMeanMatches() provides the
+  //      lambda parameter (average ion matches per peptide).
+  vector<int> tailor_histogram_;
 
-  // Score --> bin:
-  // int bin = round( (score + score_histogram_offset_)*score_scale_factor_ );
-  // ++score_histogram_[bin];
-  // bin --> Score:
-  // score = (double)end/score_scale_factor_ - score_histogram_offset_
+  // Histogram discretization: bin = round((score + tailor_histogram_offset_) * histogram_bin_scale_)
+  int histogram_bin_scale_;          // scale factor converting real-valued scores to integer bins
+  int tailor_histogram_offset_;      // offset to ensure non-negative bin indices (needed for negative XCorr scores)
+  int tailor_histogram_max_score_;   // maximum score the histogram can represent (before resizing)
+  int tailor_histogram_max_bin_;     // highest bin index that has received a score
+  int tailor_score_count_;           // number of scores added to the Tailor histogram
+  int tailor_total_matches_;         // total ion matches across all scored peptides
+
+  // Score → bin conversion:
+  //   int bin = round((score + tailor_histogram_offset_) * histogram_bin_scale_);
+  //   ++tailor_histogram_[bin];
+  // Bin → score conversion:
+  //   score = (double)bin / histogram_bin_scale_ - tailor_histogram_offset_
 
   const double TAILOR_QUANTILE_TH = 0.01;
-  const double TAILOR_OFFSET = 5.0 ;
-  // Calculate Tailor scores. Get the 99th quantile:
-  double getTailorQuantileFromHistogram();
-  double getMeanMatch() {
-    return (double)total_match_/(double)score_count_;
-  }  
-  void ResetHist();
-  void AddScoreToHist(double score, int match_cnt = 0);
+  const double TAILOR_OFFSET = 5.0;
 
-  // Calculate e-value methods:
-  void BeginSpectrum(); // call before request of peptides for current score
-  void AddDecoyXCorr(double xcorr); // add XCorr of decoy-match into histogram of current score
-                                    // should be called every time a decoy peptide score is received for the current spectrum.
-  void EndSpectrum(); // finish processing of current spectrum:
-                      // build linear regeression model for accumulative decoy-scores
-                      // after call model is ready for use
-  double ComputeEValue(double xcorr) const;
-  int XCorrToBin(const double xcorr) const;
-  void LinearRegression(int* histogram, double* slope, double* intercept, int* maxCorr, int* startCorr, int* nextCorr);
-  bool LinearRegressionHyperScore(const int* piHistogram, int iHistSize, double* pdSlope, double* pdIntercept, double* pdRsq);
+  // Tailor calibration: returns the score at the 99th percentile of the Tailor histogram
+  double GetTailorQuantile();
+  // Returns the average ion matches per scored peptide; used as Poisson
+  // lambda for the HyperScore Poisson-based E-value calculation.
+  double GetTailorMeanMatches();
+
+  void ResetTailorHistogram();
+  void AddToTailorHistogram(double score, int match_cnt = 0);
+
+  // --- E-value calculation from score distribution (all scores, target + decoy) ---
+  // The E-value histogram collects ALL peptide scores (not just decoys).
+  // For XCorr:  regression on the cumulative score distribution → ComputeEValue(xcorr)
+  // For HyperScore: regression on the survival function S(x) = P(score >= x) → ComputeEValue(hyper)
+  // HyperScore also supports a Poisson-based E-value using GetTailorMeanMatches() as lambda.
+  void ResetEValueHistogram();   // clear E-value histogram before scoring a spectrum
+  void AddToEValueHistogram(double score);  // record a score for E-value computation
+  void FitEValueRegression();    // fit regression model after all scores are collected
+  double ComputeEValue(double score) const;  // E-value from fitted regression
+  int ScoreToBin(double score) const;  // map a score to an E-value histogram bin
+  void LinearRegression(const int* histogram, double* slope, double* intercept,
+                        int* max_bin, int* start_bin, int* end_bin);
+  bool LinearRegressionHyperScore(const int* histogram, int hist_size,
+                                  double* slope, double* intercept, double* rsq);
   // class PeptideWrapper {  // Peptide objects split into hot and cold data in order to reduce cache miss ratio. 
   // hot data:
   //   double mass;
@@ -98,8 +106,8 @@ class ActivePeptideQueue {
   deque<Peptide*> queue_;
   deque<Peptide*>::const_iterator begin_, end_;
 
-  int min_candidates_;
-  bool dia_mode_;
+  int min_candidates_;       // minimum peptides to buffer for Tailor calibration
+  bool dia_mode_;            // DIA (data-independent acquisition) mode flag
 
   IonInvertedIndex ion_inverted_index_;
 
@@ -114,17 +122,16 @@ class ActivePeptideQueue {
   TheoreticalPeakSetBYSparse theoretical_peak_set_;
   pb::Peptide current_pb_peptide_;
 
-  // for e-value:
-  int xcorrHistogram_[HISTO_SIZE]; // histogram of XCorr decoy-matches for current spectrum
-                                    // index i corresponds XCorr = i / 10.0
-  int decoyCount_; // counter for added decoy-matches for current spectrum
+  // --- E-value regression state (per-spectrum) ---
+  int evalue_histogram_[EVALUE_HISTOGRAM_SIZE];  // histogram of ALL scores for E-value; index i → score = i / 10.0
+  int evalue_score_count_;                       // number of scores added for current spectrum
 
-  // linear regression parameters for current spectrum
-  double slope_;
-  double intercept_;
-  int startCorr_; // lower border of regression range (in bins)
-  int nextCorr_;  // upper border of regression range (in bins)
-  int maxCorr_;   // maximal bin with non-zero value
+  // Linear regression parameters fitted on the score distribution
+  double evalue_slope_;
+  double evalue_intercept_;
+  int evalue_reg_start_bin_;   // lower bound of regression range (in bins)
+  int evalue_reg_end_bin_;     // upper bound of regression range (in bins)
+  int evalue_max_bin_;         // highest bin with a non-zero count
 };
 
 #endif
