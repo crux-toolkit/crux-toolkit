@@ -273,13 +273,13 @@ int DIAmeterApplication::main(const vector<string>& input_files, const string in
 //          active_peptide_queue->SetActiveRange(min_mass, max_mass, min_range, max_range);  FIXME AKF
 
 
-          if (active_peptide_queue->nCandPeptides_ == 0) { // No peptides to score.
+          if (active_peptide_queue->candidate_peptide_count_ == 0) { // No peptides to score.
             delete min_mass;
             delete max_mass;
-            continue; 
+            continue;
           }
           // allocate PSMscores for N scores
-          TideMatchSet psm_scores(active_peptide_queue, &observed);  //nPeptides_ includes acitve and inacitve peptides
+          TideMatchSet psm_scores(active_peptide_queue, &observed);  // total_peptides_loaded_ includes active and inactive peptides
 
           // TideSearchApplication::XCorrScoring(charge, observed, active_peptide_queue, psm_scores);  FIXME AKF
 
