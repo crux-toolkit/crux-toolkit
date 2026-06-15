@@ -80,10 +80,7 @@ TideSearchApplication::TideSearchApplication() {
   out_pin_target_ = NULL;        // pin output format for percolator
   out_pin_decoy_ = NULL;        // pin output format for percolator for the decoy psms only
   total_spectra_num_ = 0;       // The total number of spectra searched. This is counted during the spectrum conversion
-  // previous_min_range_ = -1.0;
-  // previous_precurMZ_ = 0;
-  // previous_charge_ = 0;
-  // previous_max_range_ = 0;
+ 
 
   // log (N!) = log (1*2*3*...*N) = log(1)+log(2)+...+log(N)
   // Log (N!) = logNFakt_[N]
@@ -513,6 +510,7 @@ void TideSearchApplication::HyperScoringKeepTop(int charge, const ObservedPeakSe
   active_peptide_queue->ResetEValueHistogram();
 
   for (auto& peak : observed.top_N_peaks_){
+
     peak_mz = peak.first;
     
     if (peak_mz >= active_peptide_queue->ion_inverted_index_.capacity_)  // peak_mz is coming from the experimental spectrum
