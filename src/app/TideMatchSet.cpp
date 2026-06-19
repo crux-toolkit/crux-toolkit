@@ -24,7 +24,7 @@ string TideMatchSet::fasta_file_name_ = "null";
 // The order of the columns in the output is defined here by the order of the column Ids
 int TideMatchSet::XCorr_tsv_cols[] = {
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
-    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, XCORR_REG_EVAL_COL,
+    PEPTIDE_MASS_COL, DELTA_CN_COL, DELTA_LCN_COL, XCORR_SCORE_COL, TAILOR_COL, //XCORR_REG_EVAL_COL,
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
     XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
@@ -514,14 +514,14 @@ void TideMatchSet::calculateAdditionalScores(PSMScores& psm_scores, const Spectr
         (*it).delta_cn_ = ((*it).xcorr_score_ - (*(it+1)).xcorr_score_)/max((*it).xcorr_score_, 1.0);
       else 
         (*it).delta_cn_ = 0.0;
-      (*it).xcorr_eval_ = active_peptide_queue_->ComputeEValue((*it).xcorr_score_);
+      // (*it).xcorr_eval_ = active_peptide_queue_->ComputeEValue((*it).xcorr_score_);
       break;
     case HYPERSCORE:
       // Perform Tailor calibration
       (*it).hyper_score_tailor_ =  ((*it).hyper_score_)/ quantile_score_;
       // loge Poisson prob mass  =   log(lambda^k * e^-lambda)/k!)   =    k*log(lambda) + -lambda*log(e) - log(k!)
       possion_prob_mass =  (*it).by_ion_matched_*log(possion_lambda_) - possion_lambda_ - log(std::tgamma((double)(*it).by_ion_matched_ + 1.0)); 
-        (*it).hyper_poisson_ = -1.0*possion_prob_mass;
+      (*it).hyper_poisson_ = -1.0*possion_prob_mass;
       (*it).hyper_regeval_ = active_peptide_queue_->ComputeEValue((*it).hyper_score_);
       break;
     case PVALUES:

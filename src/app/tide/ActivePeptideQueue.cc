@@ -29,7 +29,7 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
     locations_(locations),
     dia_mode_(dia_mode) {
   CHECK(reader_->OK());
-  min_candidates_ = 1000;
+  min_candidates_ = 100;
   total_peptides_loaded_ = 0;
   candidate_peptide_count_ = 0;
   candidate_target_count_ = 0;
@@ -65,6 +65,9 @@ void ActivePeptideQueue::AddToTailorHistogram(double score, int match_cnt) {
 }
 
 void ActivePeptideQueue::ResetTailorHistogram() {
+  if (tailor_score_count_ < 300) // Do not reset in case of data sparsity.
+    return;
+
   tailor_total_matches_ = 0;
   tailor_histogram_max_bin_ = 0;
   if (tailor_score_count_ == 0)
@@ -179,6 +182,9 @@ int ActivePeptideQueue::SetActiveRange(double min_range, double max_range, doubl
 
 // Reset state: clear E-value histogram and regression parameters before scoring a spectrum
 void ActivePeptideQueue::ResetEValueHistogram() {
+  if (evalue_score_count_ < 3000) // Do not resent statistics in case of data sparsity
+    return;
+
   memset(evalue_histogram_, 0, sizeof(evalue_histogram_));
   evalue_score_count_ = 0;
   evalue_slope_ = 0.0;
