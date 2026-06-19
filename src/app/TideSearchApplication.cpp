@@ -469,7 +469,6 @@ void TideSearchApplication::spectrum_search(void *threadarg) {
       continue;
     }
 
-
     try {
       PrintResults(sc, spectrum_file_name, input_file_source, &psm_scores);
     } catch (const std::exception& e) {
@@ -673,7 +672,6 @@ void TideSearchApplication::HyperScoringKeepTop(int charge, const ObservedPeakSe
       hyper_score = logNFakt_[(*iter)->Nb_] + logNFakt_[(*iter)->Ny_] + log10((*iter)->Ib_) + log10((*iter)->Iy_);
       active_peptide_queue->AddToEValueHistogram(hyper_score);
     }
-    // if (hyper_score )
 
     active_peptide_queue->AddToTailorHistogram(hyper_score, (*iter)->Nb_+(*iter)->Ny_);
 
@@ -740,7 +738,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
   int temp = 0;
   std::vector<Scores_TS> top_N_PSMs;
   top_N_PSMs.reserve(top_matches);
-  // active_peptide_queue->ResetEValueHistogram();
+  active_peptide_queue->ResetEValueHistogram();
 
   unsigned int cnt = 0;
   for (deque<Peptide*>::const_iterator iter = active_peptide_queue->begin_; iter != active_peptide_queue->end_; ++iter, ++cnt) {
@@ -752,16 +750,6 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     is_target = !(*iter)->IsDecoy();
 
     ++peptides_scored;   // Active and inactive peptides are scored to get better statistics for score calibration (tailor)
-
-    // if ( active_peptide == true) {
-    //   ++active_candidate_cnt;  // number of active peptides, scored
-
-    //   if (is_target) {  // count the targets and decoy only for reporting.
-    //     ++active_candidate_target;
-    //   } else {
-    //     ++active_candidate_decoy;
-    //   }
-    // }
 
     xcorr = 0;
     match_cnt = 0;
@@ -779,7 +767,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     xcorr_score = (double)xcorr/XCORR_SCALING;
 
     active_peptide_queue->AddToTailorHistogram(xcorr_score);
-    // active_peptide_queue->AddToEValueHistogram(xcorr_score);
+    active_peptide_queue->AddToEValueHistogram(xcorr_score);
 
     if ( !active_peptide ) 
       continue;
@@ -806,9 +794,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
       std::pop_heap(top_N_PSMs.begin(), top_N_PSMs.end(), cmpScoreRev());   // bring the smallest element to the last position.
       previous_min_score = top_N_PSMs[top_N_PSMs.size()-1].score_;
     }
-    // carp(CARP_INFO, "min PSM in PQ: %lf, current xcorr score: %lf", psm_scores.get_min_PSM(is_target), psm_score.xcorr_score_);
   }
-  // carp(CARP_FATAL, "size of the PQ: %d", psm_scores.concat_or_target_psm_scores_pq_.size());
   active_peptide_queue->candidate_peptide_count_ = active_candidate_cnt;
   active_peptide_queue->candidate_target_count_ = active_candidate_target;
   active_peptide_queue->candidate_decoy_count_ = active_candidate_decoy;
@@ -821,7 +807,7 @@ void TideSearchApplication::XCorrScoring(int charge, const ObservedPeakSet& obse
     psm.peptide_ptr_ = itr.peptide_ptr_;
     psm_scores.psm_scores_.push_back(psm);
   }
-  // active_peptide_queue->FitEValueRegression();
+  active_peptide_queue->FitEValueRegression();
 }
 
 int TideSearchApplication::PeakMatching(const ObservedPeakSet& observed, const vector<unsigned int>& peak_list, int& matching_peaks, int& repeat_matching_peaks) {
