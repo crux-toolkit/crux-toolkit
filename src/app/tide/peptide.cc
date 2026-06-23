@@ -142,10 +142,10 @@ void Peptide::AddIons(W* workspace, bool dia_mode) {
     ion_mzs_.clear(); ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
     ion_mzbins_.clear(); b_ion_mzbins_.clear(); y_ion_mzbins_.clear();
   }
-  peaks_1b.clear();
-  peaks_1y.clear();
-  peaks_2b.clear();
-  peaks_2y.clear();
+  // peaks_1b.clear();
+  // peaks_1y.clear();
+  // peaks_2b.clear();
+  // peaks_2y.clear();
 
   if (peaks_1b.size() > 0) {
     carp(CARP_FATAL, "Duplicated theoretical fragment ion calculation");

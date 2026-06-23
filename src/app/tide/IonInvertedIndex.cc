@@ -9,10 +9,12 @@ void IonInvertedIndex::insert_peaks(Peptide* peptide) {
     return;
 
   for (const auto peak : peptide->peaks_1b) {
-    ions_b_.at(peak).emplace_back(peptide);
+    if (peak < capacity_)
+      ions_b_.at(peak).emplace_back(peptide);
   }
   for (const auto peak : peptide->peaks_1y) {
-    ions_y_.at(peak).emplace_back(peptide);
+    if (peak < capacity_)
+      ions_y_.at(peak).emplace_back(peptide);
   }
 }
 
@@ -22,12 +24,16 @@ void IonInvertedIndex::pop_peaks(Peptide* peptide) {
     return;  
 
   for (const auto peak : peptide->peaks_1b) {
-    assert(ions_b_.at(peak).front() == peptide);
-    ions_b_[peak].pop_front();
+    if (peak < capacity_) {
+      assert(ions_b_.at(peak).front() == peptide);
+      ions_b_[peak].pop_front();
+    }
   }
   for (const auto peak : peptide->peaks_1y) {
-    assert(ions_y_.at(peak).front() == peptide);
-    ions_y_[peak].pop_front();
+    if (peak < capacity_) {
+      assert(ions_y_.at(peak).front() == peptide);
+      ions_y_[peak].pop_front();
+    }
   }
 }
 

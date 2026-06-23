@@ -38,9 +38,9 @@ ActivePeptideQueue::ActivePeptideQueue(RecordReader* reader,
 
   tailor_histogram_offset_ = 10;   // Sufficient offset for XCorr (which can be negative); irrelevant for HyperScore
   histogram_bin_scale_ = 100;   // TODO: may be fine-tuned experimentally.
-  tailor_histogram_max_score_ = 100;
+  tailor_histogram_max_score_ = 1000;
   tailor_histogram_max_bin_ = 0;
-  tailor_score_count_ = 1; // ensure the score histogram vector is allocated
+  tailor_score_count_ = 100000; // ensure the score histogram vector is allocated and ResetTailorHistogram is executed
   tailor_histogram_.resize((tailor_histogram_max_score_ + tailor_histogram_offset_) * histogram_bin_scale_);
   ResetTailorHistogram();
   curScoreFunction_ = string_to_score_function_type(Params::GetString("score-function"));
@@ -72,7 +72,7 @@ void ActivePeptideQueue::ResetTailorHistogram() {
   tailor_histogram_max_bin_ = 0;
   if (tailor_score_count_ == 0)
     return;
-  //memset(tailor_histogram_.data(), 0, tailor_histogram_.capacity() * sizeof(int));
+
   std::fill(tailor_histogram_.begin(), tailor_histogram_.end(), 0); // reset the values of the score histogram
   tailor_score_count_ = 0;
 }
@@ -107,8 +107,10 @@ ActivePeptideQueue::~ActivePeptideQueue() {
 void ActivePeptideQueue::ComputeTheoreticalPeaksBack() {
   theoretical_peak_set_.Clear();
   Peptide* peptide = queue_.back();
-  peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
-  ion_inverted_index_.insert_peaks(peptide);
+  if (peptide->peaks_1b.size() == 0 ) {
+    peptide->ComputeTheoreticalPeaks(&theoretical_peak_set_, dia_mode_);
+    ion_inverted_index_.insert_peaks(peptide);
+  }
 }
 
 int ActivePeptideQueue::SetActiveRange(double min_range, double max_range, double max_exp_peak_mz) {
