@@ -34,8 +34,8 @@ class Spectrum {
  public:
   // Manual instantiation and specification
   Spectrum(int spectrum_number, double precursor_m_z)
-    : spectrum_number_(spectrum_number), precursor_m_z_(precursor_m_z),
-      rtime_(0.0) {
+    : spectrum_number_(spectrum_number), rtime_(0.0),
+      precursor_m_z_(precursor_m_z) {
   }
   void ReservePeaks(int num) {
     peak_m_z_.reserve(num);
