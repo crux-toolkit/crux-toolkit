@@ -2591,6 +2591,8 @@ void Params::Categorize() {
   items.insert("test-fdr");
   items.insert("train-fdr");
   items.insert("static");
+  items.insert("no-terminate");
+  items.insert("train-best-positive");
   AddCategory("SVM training options", items);
 
   items.clear();
@@ -2600,6 +2602,7 @@ void Params::Categorize() {
   items.insert("output-weights");
   items.insert("override");
   items.insert("unitnorm");
+  items.insert("max-charge-feature");
   AddCategory("SVM feature input options", items);
 
   items.clear();
@@ -2677,6 +2680,11 @@ void Params::Categorize() {
   AddCategory("Predicting peptide ions", items);
 
   items.clear();
+  items.insert("memory-limit");
+  items.insert("auto-modifications-spectra");
+  AddCategory("Tide index options", items);
+
+  items.clear();
   items.insert("combine-charge-states");
   items.insert("combine-modified-peptides");
   items.insert("estimation-method");
@@ -2713,6 +2721,8 @@ void Params::Categorize() {
   items.insert("list-of-files");
   items.insert("mass-precision");
   items.insert("protein-database");
+  items.insert("protein-name-separator");
+  items.insert("spectral-counting-fdr");
   items.insert("mzid-output");
   items.insert("num_output_lines");
   items.insert("output-dir");
