@@ -2393,6 +2393,7 @@ void Params::Categorize() {
   items.insert("top_count");
   items.insert("e_value_depth");
   items.insert("override-charges");
+  items.insert("elution-window-size");
   AddCategory("Search parameters", items);
 
   items.clear();
@@ -2617,6 +2618,91 @@ void Params::Categorize() {
   AddCategory("param-medic options", items);
 
   items.clear();
+  items.insert("algorithm");
+  items.insert("averagine-mod");
+  items.insert("boxcar-averaging");
+  items.insert("boxcar-filter");
+  items.insert("boxcar-filter-ppm");
+  items.insert("cdm");
+  items.insert("centroided");
+  items.insert("corr");
+  items.insert("depth");
+  items.insert("distribution-area");
+  items.insert("hardklor-algorithm");
+  items.insert("hardklor-data-file");
+  items.insert("hardklor-xml-output");
+  items.insert("instrument");
+  items.insert("isotope-data-file");
+  items.insert("max-charge");
+  items.insert("max-features");
+  items.insert("min-charge");
+  items.insert("mz-max");
+  items.insert("mz-min");
+  items.insert("mz-window");
+  items.insert("mzxml-filter");
+  items.insert("resolution");
+  items.insert("scan-range-max");
+  items.insert("scan-range-min");
+  items.insert("sensitivity");
+  items.insert("signal-to-noise");
+  items.insert("smooth");
+  items.insert("sn-window");
+  items.insert("static-sn");
+  AddCategory("Hardklor options", items);
+
+  items.clear();
+  items.insert("coeff-elution");
+  items.insert("coeff-fragment");
+  items.insert("coeff-precursor");
+  items.insert("coeff-rtdiff");
+  items.insert("coeff-tag");
+  items.insert("coelution-oneside-scans");
+  items.insert("coelution-topk");
+  items.insert("diameter-instrument");
+  items.insert("frag-ppm");
+  items.insert("prec-ppm");
+  items.insert("msamanda-regional-topk");
+  items.insert("predrt-files");
+  items.insert("psm-filter");
+  items.insert("spectra-denoising");
+  AddCategory("DIAmeter options", items);
+
+  items.clear();
+  items.insert("flanking");
+  items.insert("h2o");
+  items.insert("isotope");
+  items.insert("nh3");
+  items.insert("precursor-ions");
+  items.insert("primary-ions");
+  AddCategory("Predicting peptide ions", items);
+
+  items.clear();
+  items.insert("combine-charge-states");
+  items.insert("combine-modified-peptides");
+  items.insert("estimation-method");
+  items.insert("percolator-intraset-features");
+  items.insert("pi-zero");
+  items.insert("score");
+  items.insert("sidak");
+  items.insert("top-match-in");
+  items.insert("use-old-atdc");
+  AddCategory("Assigning confidence / q-value estimation", items);
+
+  items.clear();
+  items.insert("custom-threshold-min");
+  items.insert("custom-threshold-name");
+  items.insert("find-peptides");
+  items.insert("input-ms2");
+  items.insert("measure");
+  items.insert("mzid-use-pass-threshold");
+  items.insert("parsimony");
+  items.insert("quant-level");
+  items.insert("threshold");
+  items.insert("threshold-type");
+  items.insert("unique-mapping");
+  AddCategory("Spectral counts options", items);
+
+  items.clear();
   items.insert("concat");
   items.insert("decoy-prefix");
   items.insert("decoy-xml-output");
@@ -2626,6 +2712,7 @@ void Params::Categorize() {
   items.insert("brief-output");
   items.insert("list-of-files");
   items.insert("mass-precision");
+  items.insert("protein-database");
   items.insert("mzid-output");
   items.insert("num_output_lines");
   items.insert("output-dir");
