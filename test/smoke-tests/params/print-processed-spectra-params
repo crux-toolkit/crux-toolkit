@@ -1258,9 +1258,6 @@ bullseye=false
 # Available for crux pipeline
 search-engine=tide-search
 
-# Specify which post-processor to apply to the search results.
-# Available for crux pipeline
-post-processor=percolator
 
 # Minimum precursor m/z value to use in measurement error estimation.
 # Available for param-medic, tide-search, comet, and kojak

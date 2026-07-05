@@ -369,7 +369,6 @@
 <parameter name="spectrum-format" value=""/>
 <parameter name="bullseye" value="false"/>
 <parameter name="search-engine" value="tide-search"/>
-<parameter name="post-processor" value="percolator"/>
 <parameter name="pm-min-precursor-mz" value="400"/>
 <parameter name="pm-max-precursor-mz" value="1800"/>
 <parameter name="pm-min-frag-mz" value="150"/>
