@@ -210,7 +210,8 @@ int PipelineApplication::runPostProcessor(
   const vector<string>& resultsFiles
 ) {
   if (app->getCommand() != PERCOLATOR_COMMAND) {
-    carp(CARP_FATAL, "Something went wrong.");
+    carp(CARP_FATAL, "Pipeline post-processing only supports Percolator, "
+                     "but got '%s'.", app->getName().c_str());
   }
 
   carp(CARP_INFO, "Post-processing will be run using the following files:");
