@@ -889,7 +889,8 @@ void MatchCollection::printMultiSpectraXml(PepXMLWriter* output) {
         protein_descriptions,
         scored_type_,
         scores,
-        num_matches);
+        num_matches, 
+        spectrum->getNativeID().c_str());
     }
   }
   
@@ -1005,7 +1006,8 @@ bool MatchCollection::printXml(
         protein_descriptions,
         scores_computed,
         scores,
-        num_matches);
+        num_matches, 
+        spectrum->getNativeID().c_str());
       count++;
       last_rank = cur_rank;
       free(peptide_sequence);

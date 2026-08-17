@@ -48,6 +48,7 @@ bool SpectrumRecordSpectrumCollection::parse(int ms_level, bool dia_mode) {
       pb_spectrum.precursor_m_z(),
       charges,
       filename_);
+    spectrum->setNativeID(pb_spectrum.native_id());
     double mzDenom = pb_spectrum.peak_m_z_denominator();
     double intensityDenom = pb_spectrum.peak_intensity_denominator();
     uint64_t total = 0;
