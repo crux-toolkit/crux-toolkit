@@ -23,6 +23,8 @@
 using namespace std;
 using namespace Crux;
 
+std::string MatchCollection::global_database_path_ = "";
+
 /**
  * \returns An (empty) match_collection object.
  */
@@ -481,8 +483,11 @@ void MatchCollection::printXmlHeader(
 }
 
 void MatchCollection::printPepXmlSearchSummary(FILE* output,
-    const string& ms2file
+    const string& ms2file,
+    const string& db_path
 ) {
+  carp(CARP_INFO, "DEBUG: printPepXmlSearchSummary: db_path parameter = '%s'",
+       db_path.c_str());
     if (output == NULL) {
         return;
     }
@@ -530,15 +535,30 @@ void MatchCollection::printPepXmlSearchSummary(FILE* output,
         fragment_mass = "monoisotopic";
     }
 
-    char* absolute_database_path = NULL;
-    if (!database.empty()) {
-#if DARWIN
-        char path_buffer[PATH_MAX];
-        absolute_database_path = realpath(database.c_str(), path_buffer);
-#else
-        absolute_database_path = realpath(database.c_str(), NULL);
-#endif
+    std::string db_path_str;
+    if (!db_path.empty()) {
+      db_path_str = db_path;
+    } else if (!database.empty()) {
+      db_path_str = database;
+    } else if (!global_database_path_.empty()) {
+      db_path_str = global_database_path_;
+    } else {
+      db_path_str = "NA";
     }
+
+    std::string final_db_path;
+    if (db_path_str != "NA") {
+      char* abs_path = realpath(db_path_str.c_str(), NULL);
+      if (abs_path) {
+        final_db_path = abs_path;
+        free(abs_path);
+      } else {
+        final_db_path = db_path_str;  // keep original if realpath fails
+      }
+    } else {
+      final_db_path = "NA";
+    }
+
 
     fprintf(output, "<msms_run_summary base_name=\"%s\" msManufacturer=\"%s\" "
         "msModel=\"%s\" msIonization=\"%s\" "
@@ -563,18 +583,14 @@ void MatchCollection::printPepXmlSearchSummary(FILE* output,
         "NA",
         1 // TODO, dummy value
     );
-    fprintf(output, "<search_database local_path=\"%s\" type=\"%s\" />\n",
-        absolute_database_path,
-        "AA");
+    carp(CARP_INFO, "DEBUG: final_db_path = '%s'", final_db_path.c_str());
+    fprintf(output, "<search_database local_path=\"%s\" type=\"AA\" />\n",
+            final_db_path.c_str());
     fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
         "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
         enz_str,
         max_num_internal_cleavages,
         min_number_termini);
-#ifndef DARWIN
-    free(absolute_database_path);
-#endif
-
 
     char aa_str[2];
     aa_str[1] = '\0';
