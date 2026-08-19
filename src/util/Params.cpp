@@ -1762,9 +1762,6 @@ InitStringParam("protein-name-separator", ",",
   InitStringParam("search-engine", "tide-search", "comet|tide-search",
     "Specify which search engine to use.",
     "Available for crux pipeline", true);
-  InitStringParam("post-processor", "percolator", "percolator|assign-confidence",
-    "Specify which post-processor to apply to the search results.",
-    "Available for crux pipeline", true);
   // create-docs
   InitArgParam("tool-name",
     "Specifies the Crux tool to generate documentation for. If the value is "
