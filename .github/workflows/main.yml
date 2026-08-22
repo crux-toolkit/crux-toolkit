@@ -59,7 +59,7 @@ jobs:
               cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-windows-latest
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2022'
         shell: powershell
         run: |
           choco install gsudo -y
@@ -143,7 +143,7 @@ jobs:
           path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Darwin.X86_64.zip
         
       - name: archive-windows-package
-        if: (matrix.os == 'windows-latest')
+        if: (matrix.os == 'windows-2022')
         uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.windows
