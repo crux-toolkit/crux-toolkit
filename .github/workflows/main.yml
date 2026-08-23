@@ -12,6 +12,8 @@ env:
 jobs:
   build-distributions:
     name: Build Crux Distributions
+    # In forks, only allow manual runs; push only triggers the build in the upstream repo
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'crux-toolkit/crux-toolkit'
     continue-on-error: false
     strategy:
       matrix:
@@ -169,7 +171,7 @@ jobs:
         run: |
              cd ${{runner.workspace}}/build/test
              rm -rf smoke-tests
-             cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
+             cp -r ${{github.workspace}}/test/smoke-tests .
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html    
 
@@ -183,15 +185,27 @@ jobs:
                 ${{runner.workspace}}/build/test/smoke-tests/errors
                 ${{runner.workspace}}/build/test/smoke-tests/stdout
 
-                 
+  # Runs once (not per matrix os) and only publishes from the upstream repo's master branch.
+  publish-docs:
+    name: Publish Website Docs
+    needs: build-distributions
+    if: github.repository == 'crux-toolkit/crux-toolkit' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout-repository
+        uses: actions/checkout@v6.0.2
+
+      - name: add-short-sha
+        shell: bash
+        run: |
+          echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
+
       - name: Create version file
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         shell: bash
         run: |
           echo ${{env.git_short_sha}} > doc/user/latest-build.txt
-            
+
       - name: Push modified webpages to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: nkoppel/push-files-to-another-repository@v1.1.1
         env:
           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
@@ -201,9 +215,8 @@ jobs:
            destination-repository: 'crux-toolkit.github.io'
            destination-directory: '.'
            commit-email: 'cegrant@uw.edu'
-             
+
       - name: Push command webpages to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
@@ -217,7 +230,6 @@ jobs:
            commit_message: 'Update version file for the web site' 
 
       - name: Copy version file to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
