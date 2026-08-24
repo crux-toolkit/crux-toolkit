@@ -54,6 +54,10 @@
     <h3>Version 5.0.0</h3> April 15, 2026
     <h4>Major changes</h4>
     <ul>
+      <li>24 August 2026: <code>crux pipeline</code> now runs <code>crux lfq</code>
+      as a final label-free quantification step, using the Percolator PSMs and the
+      spectrum files supplied to the pipeline. This runs alongside the existing
+      <code>spectral-counts</code> step.</li>
       <li>5 July 2026: <code>crux pipeline</code> no longer supports
       <code>assign-confidence</code> as a post-processor. The <code>--post-processor</code>
       option has been removed and <code>pipeline</code> now always uses Percolator for
