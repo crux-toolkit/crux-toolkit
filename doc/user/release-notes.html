@@ -68,6 +68,12 @@
       Supports both Crux <code>.psmtsv</code> and Percolator output formats, optional
       intensity normalization, and protein-level quantification via median polish.</li>
     </ul>
+    <h4>Minor changes</h4>
+    <ul>
+      <li>28 June 2026: Fixed retention-time parsing for pepXML and SQT inputs so
+      <code>make-pin</code> and Percolator output no longer report incorrect or NaN
+      retention times when the source data omits retention time values.</li>
+    </ul>
     <h3>Version 4.3.2</h3> April 3, 2026
     <h4>Minor changes</h4>
     <ul>
@@ -2444,4 +2450,3 @@ Initial release
 </body>
 
 </html>
-
