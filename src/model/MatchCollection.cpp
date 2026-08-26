@@ -486,8 +486,6 @@ void MatchCollection::printPepXmlSearchSummary(FILE* output,
     const string& ms2file,
     const string& db_path
 ) {
-  carp(CARP_INFO, "DEBUG: printPepXmlSearchSummary: db_path parameter = '%s'",
-       db_path.c_str());
     if (output == NULL) {
         return;
     }
@@ -583,7 +581,6 @@ void MatchCollection::printPepXmlSearchSummary(FILE* output,
         "NA",
         1 // TODO, dummy value
     );
-    carp(CARP_INFO, "DEBUG: final_db_path = '%s'", final_db_path.c_str());
     fprintf(output, "<search_database local_path=\"%s\" type=\"AA\" />\n",
             final_db_path.c_str());
     fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "

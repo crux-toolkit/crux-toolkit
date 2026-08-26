@@ -1212,12 +1212,8 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
   if (protein_header.has_database_path()) {
     index_database_path_ = protein_header.database_path();
     MatchCollection::global_database_path_ = index_database_path_;
-    carp(CARP_INFO, "DEBUG: Read database_path from index: '%s'",
-         index_database_path_.c_str());
-  } else {
-    carp(CARP_WARNING, "DEBUG: Index does NOT have database_path field!");
   }
-
+  
   // There shouldn't be more than one header in the protein pb.
   pb::Header_Source headerSource = protein_header.source(0);  
   string decoy_prefix = "";
@@ -1775,8 +1771,6 @@ void TideSearchApplication::createOutputFiles() {
 
 void TideSearchApplication::convertResults() const {
   PSMConvertApplication converter;
-  carp(CARP_INFO, "DEBUG: Passing database_path to converter: '%s'",
-       index_database_path_.c_str());
   converter.setDatabasePath(index_database_path_);
   if (!Params::GetBool("concat")) {
     string target_file_name = make_file_path("tide-search.target.txt");

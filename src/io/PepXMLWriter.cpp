@@ -171,9 +171,6 @@ void PepXMLWriter::closeSpectrumElement() {
 }
 
 void PepXMLWriter::closePepXmlSearchSummary(MatchCollection* collection) {
-  carp(CARP_INFO,
-       "DEBUG: closePepXmlSearchSummary: collection->getDatabasePath() = '%s'",
-       collection->getDatabasePath().c_str());
   collection->printPepXmlSearchSummary(file_, "",
                                        collection->getDatabasePath());
 }

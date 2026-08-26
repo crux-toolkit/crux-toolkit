@@ -418,7 +418,6 @@ bool Spectrum::parsePwizSpecInfo(
   last_scan_ = lastScan;
 
   native_id_ = pwiz_spectrum->id;
-  carp(CARP_INFO, "DEBUG: pwiz_spectrum->id = '%s'", pwiz_spectrum->id.c_str());
 
   // Get the retention time
   //  MS_retention_time = 1000894,
