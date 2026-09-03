@@ -244,6 +244,7 @@ int TideIndexApplication::main(
   proteinPbHeader.Clear();
   proteinPbHeader.set_file_type(pb::Header::RAW_PROTEINS);
   proteinPbHeader.set_command_line(cmd_line);
+  proteinPbHeader.set_database_path(AbsPath(fasta));
   pb::Header_Source* headerSource = proteinPbHeader.add_source();
   headerSource->set_filename(AbsPath(fasta));
   headerSource->set_filetype("fasta");

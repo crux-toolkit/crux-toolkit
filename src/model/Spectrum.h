@@ -72,6 +72,7 @@ class Spectrum{
   FLOAT_T iso_window_upper_mz_;
   int ms1_scan_;
 
+  std::string native_id_;
 
   // constants
   /**
@@ -384,6 +385,9 @@ class Spectrum{
    */
   const char* getFilename();
   const char* getFullFilename();
+
+  const std::string& getNativeID() const { return native_id_; }
+  void setNativeID(const std::string& id) { native_id_ = id; }
 };    
 
 }

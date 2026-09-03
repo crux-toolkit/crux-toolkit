@@ -29,5 +29,5 @@ message Spectrum {
   optional int32 scan_index = 12;
   optional double neutral_mass = 13;
   
-  
+  optional string native_id = 14;
 }

@@ -72,6 +72,8 @@ class MatchCollection {
   ///< Is this a post process match_collection?
   Crux::Match* top_scoring_sp_; ///< the match with Sp rank == 1
 
+  std::string database_path_;
+
   /**
    * initializes a MatchCollection object
    */
@@ -79,6 +81,7 @@ class MatchCollection {
 
 
  public:
+  static std::string global_database_path_;
   bool exact_pval_search_;
 
   /**
@@ -252,7 +255,8 @@ class MatchCollection {
   /*
    * Print the PepXML file Search Summary for each imput spectrum files (multiple times if needed)
    */
-  static void printPepXmlSearchSummary(FILE* outfile, const string& ms2file);
+  static void printPepXmlSearchSummary(FILE* outfile, const string& ms2file,
+                                       const string& db_path = "");
   /*
    * Print the SQT file header 
    */
@@ -375,6 +379,9 @@ class MatchCollection {
    * match_collection post_process extension
    ******************************************/
   bool addMatchToPostMatchCollection(Crux::Match* match);
+
+  void setDatabasePath(const std::string& path) { database_path_ = path; }
+  const std::string& getDatabasePath() const { return database_path_; }
 };
 
 #endif

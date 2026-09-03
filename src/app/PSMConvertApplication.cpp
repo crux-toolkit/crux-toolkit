@@ -82,6 +82,8 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   }
   
   MatchCollection* collection = reader->parse();
+
+  collection->setDatabasePath(database_path_);
   
   if (!isTabDelimited) {
     collection->setHasDistinctMatches(distinct_matches);

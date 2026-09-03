@@ -147,7 +147,8 @@ void PMCPepXMLWriter::writePSMs(
              protein_names.size(), flanking_str.c_str(),
              protein_names, protein_descriptions,
              scores_computed, scores,
-             (lookup != spectrum_counts.end()) ? lookup->second : 0);
+             (lookup != spectrum_counts.end()) ? lookup->second : 0,
+             spectrum->getNativeID().c_str());
   }
 
 }

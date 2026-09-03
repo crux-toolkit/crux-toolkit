@@ -85,4 +85,5 @@ message Header {
   optional ResultsHeader results_header = 6;
   optional AuxLocationsHeader aux_locs_header = 7;
   optional string command_line = 8;
+  optional string database_path = 9;
 }
