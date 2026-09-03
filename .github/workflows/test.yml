@@ -1,9 +1,6 @@
 name: Build and Test Crux on Ubuntu
 
 on:
-  push:
-    branches: [master]
-  pull_request:
   workflow_dispatch:
 
 env:
