@@ -260,6 +260,27 @@
 		That completes the installation!  Skip ahead to 
 		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
+		<li><b>Optional use of Ninja for building</b></li>
+		<p/>
+		CMake can also use 
+		<a href="https://ninja-build.org">Ninja</a>
+		as the build system.
+		Ninja is an alternative build system which can be used instead of the 
+		default Makefiles,
+		and which can be much faster than Makefiles.
+		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
+		Then, configure the build with the following command:
+		<div class=code><code>
+		cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		<p/>
+		You can then build and install using:
+		<div class=code><code>
+		cmake --build .<br>
+		cmake --build . --target install
+		</code>
+		</div>
 		</ul>
 		<a name="MacOS"></a>
 		<h3>MacOS</h3>
@@ -421,6 +442,26 @@
 		That completes the installation!  Skip ahead to 
 		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
+		<li><b>Optional use of Ninja for building</b></li>
+		<p/>
+		CMake can also use 
+		<a href="https://ninja-build.org">Ninja</a>
+		as the build system.
+		Ninja is an alternative build system which can be used instead of the 
+		default Makefiles,
+		and which can be much faster than Makefiles.
+		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
+		Then, configure the build with the following command:
+		<div class=code><code>
+		cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		</code>
+		</div>
+		<p/>
+		You can then build and install using:
+		<div class=code><code>
+		cmake --build .<br>
+		cmake --build . --target install
+		</code>
 		</ul>
 
 		<a name="linux_path"></a>
