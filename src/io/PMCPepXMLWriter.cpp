@@ -22,6 +22,7 @@ void PMCPepXMLWriter::write(
   MatchCollection* collection,
   string database
 ) {
+  match_collection_ = collection;
   ProteinMatchCollection protein_collection(collection);
   write(&protein_collection);
 }
@@ -114,7 +115,9 @@ void PMCPepXMLWriter::writePSMs(
         writeSummaryFooter();
       
       const char* spec_filename_str = spectrum->getFullFilename();
-      match_collection_->printPepXmlSearchSummary(file_, string(spec_filename_str));
+      match_collection_->printPepXmlSearchSummary(
+          file_, string(spec_filename_str),
+          match_collection_->getDatabasePath());
       last_spectrum_printed_ = string();
     }
 
