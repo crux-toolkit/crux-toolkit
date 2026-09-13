@@ -55,6 +55,7 @@ class Spectrum {
   int SpectrumNumber() const { return spectrum_number_; }
   double PrecursorMZ() const { return precursor_m_z_; }
   double RTime() const { return rtime_; }
+  const string& NativeID() const { return native_id_; }
 
   int NumChargeStates() const { return charge_states_.size(); }
   int ChargeState(int index) const { return charge_states_[index]; }
@@ -105,6 +106,7 @@ class Spectrum {
   int spectrum_number_;
   double rtime_;
   double precursor_m_z_;
+  string native_id_;
   vector<int> charge_states_;
 
   vector<double> peak_m_z_;

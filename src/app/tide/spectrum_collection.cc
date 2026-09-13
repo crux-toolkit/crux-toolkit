@@ -28,6 +28,7 @@ Spectrum::Spectrum(const pb::Spectrum& spec) {
   spectrum_number_ = spec.scan_id();
   precursor_m_z_ = spec.precursor_m_z();
   rtime_ = spec.rtime();
+  native_id_ = spec.native_id();
   for (int i = 0; i < spec.charge_state_size(); ++i)
     charge_states_.push_back(spec.charge_state(i));
   int size = spec.peak_m_z_size();
@@ -131,6 +132,7 @@ void Spectrum::FillPB(pb::Spectrum* spec) {
   spec->set_iso_window_lower_mz(iso_window_lower_mz_);
   spec->set_iso_window_upper_mz(iso_window_upper_mz_);
 
+  spec->set_native_id(native_id_);
 }
 
 void Spectrum::SortIfNecessary() {

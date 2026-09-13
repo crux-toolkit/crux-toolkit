@@ -184,6 +184,8 @@ static const char* match_column_strings[NUMBER_MATCH_COLUMNS] = {
   "opt_ms_run[1]_original_target_sequence",
   "opt_ms_run[1]_decoy_index",
 
+  "spectrum native id",
+
 };
 
 /**
