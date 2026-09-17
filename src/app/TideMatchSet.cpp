@@ -28,7 +28,7 @@ int TideMatchSet::XCorr_tsv_cols[] = {
     BY_IONS_MATCHED_COL, BY_IONS_TOTAL_COL, BY_IONS_FRACTION_COL, BY_IONS_REPEAT_MATCH_COL,
     XCORR_RANK_COL, DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
-    DECOY_INDEX_COL, SPECTRUM_NATIVE_ID_COL
+    DECOY_INDEX_COL
   };
  int TideMatchSet::Pvalues_tsv_cols[] = {  //TODO: update the columns.
     FILE_COL, SCAN_COL, CHARGE_COL, RETENTION_TIME_COL, SPECTRUM_PRECURSOR_MZ_COL, SPECTRUM_NEUTRAL_MASS_COL,
@@ -37,7 +37,7 @@ int TideMatchSet::XCorr_tsv_cols[] = {
     RESIDUE_EVIDENCE_COL, RESIDUE_PVALUE_COL, BOTH_PVALUE_COL, BOTH_PVALUE_RANK, 
     DISTINCT_MATCHES_SPECTRUM_COL, SEQUENCE_COL, MODIFICATIONS_COL, UNMOD_SEQUENCE_COL,
     PROTEIN_ID_COL, FLANKING_AA_COL, TARGET_DECOY_COL, ORIGINAL_TARGET_SEQUENCE_COL,
-    DECOY_INDEX_COL, SPECTRUM_NATIVE_ID_COL
+    DECOY_INDEX_COL
   };
 
   int TideMatchSet::Diameter_tsv_cols[] = {
@@ -817,9 +817,6 @@ cnt[i] counts only decoys, for i = 0-->decoy_num
         break;
       case ENSEMBLE_SCORE_COL:
         report += StringUtils::ToString(0.0, score_precision_, true);
-        break;
-      case SPECTRUM_NATIVE_ID_COL:
-        report += sc->spectrum->NativeID();
         break;
       }
 
