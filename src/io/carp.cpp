@@ -21,8 +21,6 @@ static FILE* log_file = NULL;
 
 unsigned int hash_size_ = 1000;
 
-static std::string global_database_path_;
-
 void set_verbosity_level(int verbosity) {
   G_verbosity = verbosity;
 }
