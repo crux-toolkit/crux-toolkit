@@ -184,6 +184,9 @@ class StringUtils {
   // Break a string into lines limited by length
   static std::string LineFormat(std::string s, unsigned limit, unsigned indentSize = 0);
 
+  // Escape characters that are not valid in an XML attribute value
+  static std::string XmlEscape(std::string s);
+
  private:
   static const char* WHITESPACE_CHARS;
 

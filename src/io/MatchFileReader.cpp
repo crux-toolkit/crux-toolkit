@@ -482,6 +482,9 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
                               vector<int>(1, getInteger(CHARGE_COL)),
                               getString(FILE_COL));
     new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    if (!empty(SPECTRUM_NATIVE_ID_COL)) {
+      new_spectrum->setNativeID(getString(SPECTRUM_NATIVE_ID_COL));
+    }
     return new_spectrum;
   } else {
     // This part allows Percolator output files to be read in
