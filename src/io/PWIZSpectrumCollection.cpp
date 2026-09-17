@@ -298,22 +298,6 @@ Crux::Spectrum* PWIZSpectrumCollection::getSpectrum(
 }
 
 /*
-void getFilters() {  
-  // select only the MS2 level spectra and only those in the given scan range
-  ostringstream string_builder;
-  vector<string> spectrum_filters;
-  spectrum_filters.push_back("msLevel 2");
-
-  string_builder << "scanNumber [";
-  string_builder << first_scan_;
-  string_builder << ",";
-  string_builder << last_scan_;
-  string_buildter << "]";
-  spectrum_filters.push_back(string_builder.c_str());
-  // where filters include scan range, ms2 only
-}
-*/
-/*
  * Local Variables:
  * mode: c
  * c-basic-offset: 2

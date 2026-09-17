@@ -13,7 +13,6 @@
 
 #include "app/CruxApplicationList.h"
 #include "app/ComputeQValues.h"
-#include "app/ComputeQValuesLegacy.h"
 #include "app/CreateDocs.h"
 #include "app/PrintProcessedSpectra.h"
 #include "app/GeneratePeptides.h"

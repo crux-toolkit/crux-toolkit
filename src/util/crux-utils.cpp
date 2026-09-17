@@ -231,14 +231,6 @@ OBSERVED_PREPROCESS_STEP_T string_to_observed_preprocess_step(const string& name
   return (OBSERVED_PREPROCESS_STEP_T)obs_int;
 }
 
-char* observed_preproces_step_to_string(OBSERVED_PREPROCESS_STEP_T type) {
-  if ( (int)type > NUMBER_PREPROCESS_STEPS) {
-    return NULL;
-  }
-  char* obs_str = my_copy_string(observed_preprocess_step_strings[type]);
-  return(obs_str);
-}
-
 /**
  * The string version of enzyme types
  */

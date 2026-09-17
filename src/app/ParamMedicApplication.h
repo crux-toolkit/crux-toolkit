@@ -275,7 +275,6 @@ static void estimateMuSigma(
 
 int calcBinIndexMassPrecursor(double mass);
 int calcBinIndexMzFragment(double mz);
-double calcMH(double mz, int charge);
 std::vector<double> binSpectrum(const Crux::Spectrum* spectrum);
 int processSpectra(
   const std::vector<std::string>& files,

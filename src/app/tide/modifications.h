@@ -394,12 +394,6 @@ class VariableModTable {
         return unique_delta_[PossDeltIx(aa, index)];
     }
 
-#if 0
-  const IntPairVec* Possibles(char aa) const {
-    return &possibles_[aa];
-  }
-#endif
-
     /**
      * @brief Deduplicates the unique_deltas_ collection after reserving a copy
      * in the original_deltas_. Loads possibles and unique_deltas for each mod type.

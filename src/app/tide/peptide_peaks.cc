@@ -29,30 +29,6 @@
 using namespace std;
 
 #define CHECK(x) GOOGLE_CHECK(x)
-/*
-static void AddPeaksToPB(pb::Peptide* peptide, const TheoreticalPeakArr* peaks,
-			 int charge, bool neg) {
-  int last_code = 0;
-  TheoreticalPeakArr::const_iterator i = peaks->begin();
-  for (; i != peaks->end(); ++i) {
-    int delta = i->Code() - last_code;
-    last_code = i->Code();
-    if (neg) {
-      if (charge == 1) {
-        peptide->add_neg_peak1(delta);
-      } else {
-        peptide->add_neg_peak2(delta);
-      }
-    } else {
-      if (charge == 1) {
-        peptide->add_peak1(delta);
-      } else {
-        peptide->add_peak2(delta);
-      }
-    }
-  }
-}
-*/
 
 void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
 			 const string& input_filename,

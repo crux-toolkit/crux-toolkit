@@ -417,24 +417,6 @@ bool is_peptide_modifiable(
   return success;
 }
 
-// move this to peptide.c
-/*
-void add_peptide_mod_seq(Peptide* peptide, MODIFIED_AA_T* cur_mod_seq) {
-  if( peptide == NULL || cur_mod_seq == NULL ) {
-    carp(CARP_ERROR, "Cannot add NULL modified sequence to null peptide");
-  }
-
-  // test out that the mod seq is valid
-  int i = 0;
-  while( cur_mod_seq[i] != MOD_SEQ_NULL) {
-    printf("%d(%c) ", cur_mod_seq[i], (char)cur_mod_seq[i] + 'A');
-    i++;
-  }
-  printf("\n");
-}
-  */
-
-
 /**
  * \brief Take a peptide and a peptide_mod and return via the third
  * arguement a list of modified peptides.
@@ -800,20 +782,6 @@ double peptide_mod_get_mass_change(PEPTIDE_MOD_T* mod) {
  */
 int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod) {
   return mod->num_mods;
-}
-
-void peptide_mod_get_aa_mods(PEPTIDE_MOD_T* mod, vector<AA_MOD_T*>& aa_mods) {
-  aa_mods.clear();
-  
-  AA_MOD_T** all_mods = NULL;
-  int num_aa_mods = get_all_aa_mod_list( &all_mods );
-  assert( num_aa_mods < MAX_AA_MODS );
-  for (int aa_mod_idx = 0;aa_mod_idx < num_aa_mods;aa_mod_idx++) {
-    for (int copies = 0;copies < mod->aa_mod_counts[aa_mod_idx];copies++) {
-      aa_mods.push_back(all_mods[aa_mod_idx]);
-    }
-  }
-  
 }
 
 /**

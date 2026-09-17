@@ -74,7 +74,6 @@ set(
   ActivePeptideQueue.cc  
   crux_sp_spectrum.cc
   fifo_alloc.cc
-  index_settings.cc
   make_peptides.cc
   mass_constants.cc
   max_mz.cc

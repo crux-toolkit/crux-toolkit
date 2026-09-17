@@ -1147,10 +1147,6 @@ int calcBinIndexMzFragment(double mz) {
   return bin > 0 ? bin : 0;
 }
 
-double calcMH(double mz, int charge) {
-  return (mz - MASS_H_AVERAGE) * charge + MASS_H_AVERAGE;
-}
-
 vector<double> binSpectrum(const Spectrum* spectrum) {
   //int numBins = (int)((BINNING_MAX_MZ - BINNING_MIN_MZ)/AVERAGINE_PEAK_SEPARATION) + 1;
   const int numBins = 5950;

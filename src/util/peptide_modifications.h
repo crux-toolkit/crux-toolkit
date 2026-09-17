@@ -116,18 +116,6 @@ double peptide_mod_get_mass_change(PEPTIDE_MOD_T* mod);
 int peptide_mod_get_num_aa_mods(PEPTIDE_MOD_T* mod);
 
 /**
- * \brief Get a pointer to the list of aa_mods in this peptide_mod.
- * The number of elements in the list is given by
- * peptide_mod_get_num_aa_mods. A unique aa_mod may be listed more
- * than once.  There is no particular order to the aa_mods in the
- * list.
- * \returns A pointer to a list of AA_MOD_T pointers.
- */
-LINKED_LIST_T* peptide_mod_get_aa_mod_list(PEPTIDE_MOD_T* mod);
-
-void peptide_mod_get_aa_mods(PEPTIDE_MOD_T* mod, std::vector<AA_MOD_T*>& aa_mods);
-
-/**
  * \brief Compares the number of aa mods in two peptide mods for
  * sorting.
  * \returns Negative int, 0, or positive int if the number of aa_mods

@@ -8,7 +8,6 @@
 #include "tide/records.h"
 #include "tide/fixed_cap_array.h"
 #include "tide/peptide.h"
-#include "tide/sp_scorer.h"
 #include "tide/spectrum_collection.h"
 #include "tide/ActivePeptideQueue.h"
 #include "tide/spectrum_preprocess.h"
