@@ -582,7 +582,7 @@ void MatchCollection::printPepXmlSearchSummary(FILE* output,
         1 // TODO, dummy value
     );
     fprintf(output, "<search_database local_path=\"%s\" type=\"AA\" />\n",
-            final_db_path.c_str());
+            StringUtils::XmlEscape(final_db_path).c_str());
     fprintf(output, "<enzymatic_search_constraint enzyme=\"%s\" "
         "max_num_internal_cleavages=\"%i\" min_number_termini=\"%i\"/>\n",
         enz_str,

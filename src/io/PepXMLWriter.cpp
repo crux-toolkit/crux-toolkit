@@ -148,7 +148,7 @@ void PepXMLWriter::printSpectrumElement(int spectrum_scan_number,
           spectrum_neutral_mass,
           charge,
           current_index_++,
-          spectrum_native_id ? spectrum_native_id : "");
+          StringUtils::XmlEscape(spectrum_native_id ? spectrum_native_id : "").c_str());
 }
 
 string PepXMLWriter::getSpectrumTitle(int spectrum_scan_number, 

@@ -1223,8 +1223,11 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
   if (headerSource.has_filename()){
     TideMatchSet::fasta_file_name_ = headerSource.filename();
     index_database_path_ = headerSource.filename();
-    MatchCollection::global_database_path_ = index_database_path_;
   }
+  // Always resync the static database path from this index, even when it has
+  // no filename, so a stale path from a previous index (e.g. an earlier
+  // cascade-search round) isn't carried over.
+  MatchCollection::global_database_path_ = index_database_path_;
   
   // Read auxlocs index file
   ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file);
