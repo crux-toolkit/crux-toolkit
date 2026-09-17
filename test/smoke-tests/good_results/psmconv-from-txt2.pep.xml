@@ -5,7 +5,7 @@
 <sample_enzyme name="trypsin">
 </sample_enzyme>
 <search_summary base_name="demo.ms2" search_engine="Crux" precursor_mass_type="monoisotopic" fragment_mass_type="monoisotopic" out_data_type="NA" out_data="NA" search_id="1" >
-<search_database local_path="NA" type="AA" />
+<search_database local_path="/c/crux/test/smoke-tests/small-yeast.fasta" type="AA" />
 <enzymatic_search_constraint enzyme="trypsin" max_num_internal_cleavages="0" min_number_termini="2"/>
 <aminoacid_modification aminoacid="C" mass="160.0307" massdiff="57.0215" variable="N" />
 <aminoacid_modification aminoacid="C" mass="160.0292" massdiff="57.0200" variable="N" />

@@ -1209,13 +1209,8 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
     carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
 
-  if (protein_header.has_database_path()) {
-    index_database_path_ = protein_header.database_path();
-    MatchCollection::global_database_path_ = index_database_path_;
-  }
-  
   // There shouldn't be more than one header in the protein pb.
-  pb::Header_Source headerSource = protein_header.source(0);  
+  pb::Header_Source headerSource = protein_header.source(0);
   string decoy_prefix = "";
   if (headerSource.has_decoy_prefix()){
     decoy_prefix = headerSource.decoy_prefix();
@@ -1224,9 +1219,11 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
                        "This will not affect your results, but this index may need to be "
                        "re-created to work with future versions of tide-index. ");
   }
-  TideMatchSet::decoy_prefix_ = decoy_prefix;  
+  TideMatchSet::decoy_prefix_ = decoy_prefix;
   if (headerSource.has_filename()){
     TideMatchSet::fasta_file_name_ = headerSource.filename();
+    index_database_path_ = headerSource.filename();
+    MatchCollection::global_database_path_ = index_database_path_;
   }
   
   // Read auxlocs index file
