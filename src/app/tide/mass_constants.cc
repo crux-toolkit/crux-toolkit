@@ -57,14 +57,6 @@ const double MassConstants::B = 0.0;
 //const double MassConstants::Y_H2O = MassConstants::mono_h2o - 18.0;
 //const double MassConstants::Y_NH3 = MassConstants::mono_h2o - 17.0;
 const double MassConstants::Y = MassConstants::mono_h2o;
-/*const double MassConstants::BIN_SHIFT_A_ION_CHG_1 = 28;
-const double MassConstants::BIN_SHIFT_A_ION_CHG_2 = 14;
-const double MassConstants::BIN_SHIFT_H2O_CHG_1 = 18;
-const double MassConstants::BIN_SHIFT_H2O_CHG_2 = 9;
-const double MassConstants::BIN_SHIFT_NH3_CHG_1 = 17;
-const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_A = 9;
-const double MassConstants::BIN_SHIFT_NH3_CHG_2_CASE_B = 8;
-*/
 double MassConstants::BIN_H2O = 18;
 double MassConstants::BIN_NH3 = 17;
 double MassConstants::BIN_CO = 28;

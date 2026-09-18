@@ -68,14 +68,6 @@ class MassConstants {
   static double BIN_H2O;
   static double BIN_NH3;
   static double BIN_CO;
-/*  static const double BIN_SHIFT_A_ION_CHG_1;
-  static const double BIN_SHIFT_A_ION_CHG_2;
-  static const double BIN_SHIFT_H2O_CHG_1;
-  static const double BIN_SHIFT_H2O_CHG_2;
-  static const double BIN_SHIFT_NH3_CHG_1;
-  static const double BIN_SHIFT_NH3_CHG_2_CASE_A;
-  static const double BIN_SHIFT_NH3_CHG_2_CASE_B;
-*/  // Fixed-Point Versions
   static const double kFixedPointScalar;
   static FixPt ToFixPt(double x) {
     return FixPt(x * kFixedPointScalar + 0.5);

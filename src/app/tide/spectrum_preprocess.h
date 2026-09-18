@@ -117,23 +117,7 @@ class Spectrum;
 class ObservedPeakSet {
  public:
 
-  // This constructor is to be removed when marging TideSearchLite into the main branch.
-/*  ObservedPeakSet(double bin_width = MassConstants::bin_width_,
-     double bin_offset = MassConstants::bin_offset_,
-     bool NL = false, bool FP = false)
-    : peaks_(NULL),
-    cache_(NULL) {
-
-    bin_width_  = bin_width;
-    bin_offset_ = bin_offset;
-    NL_ = NL; //NL means neutral loss
-    FP_ = FP; //FP means flanking peaks
-    background_bin_end_ = 0;
-    cache_end_ = 0;
-  }
-
-  // Keep this constructor when TideSearchLite is accepted.
-*/  ObservedPeakSet( bool NL = false, bool FP = false) {
+  ObservedPeakSet( bool NL = false, bool FP = false) {
     peaks_ = NULL;
     cache_ = NULL;
 

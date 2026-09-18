@@ -54,20 +54,7 @@ void AddTheoreticalPeaks(const vector<const pb::Protein*>& proteins,
 //  TheoreticalPeakSetDiff workspace(workspace_size);
   while (!reader.Done()) {
     reader.Read(&pb_peptide);
-/*    Peptide peptide(pb_peptide, proteins);
-    workspace.Clear();
-    peptide.ComputeTheoreticalPeaks(&workspace);
-    TheoreticalPeakArr peaks_charge_1(2000);
-    TheoreticalPeakArr peaks_charge_2(2000);
-    TheoreticalPeakArr negs_charge_1(2000);
-    TheoreticalPeakArr negs_charge_2(2000);
-    workspace.GetPeaks(&peaks_charge_1, &negs_charge_1,
-		       &peaks_charge_2, &negs_charge_2, NULL);
-    AddPeaksToPB(&pb_peptide, &peaks_charge_1, 1, false);
-    AddPeaksToPB(&pb_peptide, &peaks_charge_2, 2, false);
-    AddPeaksToPB(&pb_peptide, &negs_charge_1, 1, true);
-    AddPeaksToPB(&pb_peptide, &negs_charge_2, 2, true);
-*/    CHECK(writer.Write(&pb_peptide));
+    CHECK(writer.Write(&pb_peptide));
   }
   CHECK(reader.OK());
 }

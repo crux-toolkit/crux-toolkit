@@ -161,13 +161,6 @@ class TheoreticalPeakCompiler {
     pos_ += 4;
   }
 
-/*  void AddNegative(int peak) {
-    *((uint16_t*) pos_) = sub_from_eax_at_edx_plus;
-    pos_ += 2;
-    *((int*) pos_) = peak << 2; // Store 4 * the peak position.
-    pos_ += 4;
-  }
-*/
   static void AddJump(unsigned char* pos, unsigned char* whereto) {
     int diff = whereto - (pos + jmp_size);
     *pos++ = jmp_relative;
