@@ -62,11 +62,11 @@ $CRUX psm-convert --no-analytics T --overwrite T \
   test_results/results2.tide-search.txt pin
 cp crux-output/psm-convert.pin "$GOOD_RESULTS_SRC/psmconv-from-txt2.pin"
 
-$CRUX psm-convert --no-analytics T --overwrite T \
+$CRUX psm-convert --no-analytics T --overwrite T --protein-database small-yeast.fasta \
   test_results/results1.tide-search.txt pepxml
 cp crux-output/psm-convert.pep.xml "$GOOD_RESULTS_SRC/psmconv-from-txt1.pep.xml"
 
-$CRUX psm-convert --no-analytics T --overwrite T \
+$CRUX psm-convert --no-analytics T --overwrite T --protein-database small-yeast.fasta \
   test_results/results2.tide-search.txt pepxml
 cp crux-output/psm-convert.pep.xml "$GOOD_RESULTS_SRC/psmconv-from-txt2.pep.xml"
 

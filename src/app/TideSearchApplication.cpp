@@ -80,6 +80,7 @@ TideSearchApplication::TideSearchApplication() {
   for (int i = 0; i < NUMBER_LOCK_TYPES; i++) {  // LOCK_TYPES are defined in model/objects.h
     locks_array_.push_back(new boost::mutex());
   }
+  index_database_path_.clear();
 }
 
 TideSearchApplication::~TideSearchApplication() {
@@ -1204,12 +1205,12 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
   carp(CARP_INFO, "Reading index %s", input_index.c_str());
 
   pb::Header protein_header;
-
   if (!ReadRecordsToVector<pb::Protein, const pb::Protein>(&proteins, proteins_file, &protein_header)) {
     carp(CARP_FATAL, "Error reading index (%s)", proteins_file.c_str());
   }
+
   // There shouldn't be more than one header in the protein pb.
-  pb::Header_Source headerSource = protein_header.source(0);  
+  pb::Header_Source headerSource = protein_header.source(0);
   string decoy_prefix = "";
   if (headerSource.has_decoy_prefix()){
     decoy_prefix = headerSource.decoy_prefix();
@@ -1218,10 +1219,15 @@ void TideSearchApplication::getPeptideIndexData(const string input_index, Protei
                        "This will not affect your results, but this index may need to be "
                        "re-created to work with future versions of tide-index. ");
   }
-  TideMatchSet::decoy_prefix_ = decoy_prefix;  
+  TideMatchSet::decoy_prefix_ = decoy_prefix;
   if (headerSource.has_filename()){
     TideMatchSet::fasta_file_name_ = headerSource.filename();
+    index_database_path_ = headerSource.filename();
   }
+  // Always resync the static database path from this index, even when it has
+  // no filename, so a stale path from a previous index (e.g. an earlier
+  // cascade-search round) isn't carried over.
+  MatchCollection::global_database_path_ = index_database_path_;
   
   // Read auxlocs index file
   ReadRecordsToVector<pb::AuxLocation>(&locations, auxlocs_file);
@@ -1765,6 +1771,7 @@ void TideSearchApplication::createOutputFiles() {
 
 void TideSearchApplication::convertResults() const {
   PSMConvertApplication converter;
+  converter.setDatabasePath(index_database_path_);
   if (!Params::GetBool("concat")) {
     string target_file_name = make_file_path("tide-search.target.txt");
     if (Params::GetBool("pin-output")) {

@@ -1,0 +1,26 @@
+# Force LF line endings for the tab-delimited/XML smoke-test fixtures that
+# crux's own parsers read or that get compared byte/line-exact against
+# crux's output, regardless of a developer's core.autocrlf setting.
+#
+# crux's tab-delimited reader (StringUtils::FromString, used via
+# MatchFileReader) does not tolerate a trailing \r on the last column of a
+# line. On a Windows checkout with core.autocrlf=true, these text fixtures
+# get silently converted from the committed LF to CRLF, so the last numeric
+# column of every row throws "Could not convert string '...'" and fails
+# nearly every smoke-test scenario that parses or compares them
+# (assign-confidence, make-pin, percolator, psm-convert, tide-index, ...).
+#
+# Deliberately scoped to an allow-list of known-text extensions rather than
+# a blanket "* eol=lf" with binary exceptions: once "eol" is set on a path
+# it forces line-ending normalization for that path even if a later pattern
+# also sets "-text" on it, so a catch-all rule risks corrupting genuinely
+# binary fixtures (.mzML, .hk, .ms1, spectrumrecords, the compiled
+# standard2_crux_index/* protobuf index, ...) that this repo also carries.
+*.txt text eol=lf
+*.tsv text eol=lf
+*.pin text eol=lf
+*.sqt text eol=lf
+*.mzid text eol=lf
+*.xml text eol=lf
+*.html text eol=lf
+*.ms2 text eol=lf

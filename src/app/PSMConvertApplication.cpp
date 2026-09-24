@@ -82,6 +82,8 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   }
   
   MatchCollection* collection = reader->parse();
+
+  collection->setDatabasePath(!database_path_.empty() ? database_path_ : database_file);
   
   if (!isTabDelimited) {
     collection->setHasDistinctMatches(distinct_matches);
@@ -129,7 +131,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   string output_file_name = make_file_path(output_file_name_builder.str());
   
   writer->openFile(this, output_file_name, PSMWriter::PSMS);
-  writer->write(collection, database_file);
+  writer->write(collection, collection->getDatabasePath());
   writer->closeFile();
   
   // Clean Up
@@ -146,6 +148,7 @@ int PSMConvertApplication::main(int argc, char** argv) {
   string input_file = Params::GetString("input PSM file");
   string output_format = Params::GetString("output format");
   bool distinct_matches = Params::GetBool("distinct-matches");
+  setDatabasePath(database_file); 
   
   convertFile(input_format, output_format, input_file, "psm-convert.", database_file, distinct_matches);
 
