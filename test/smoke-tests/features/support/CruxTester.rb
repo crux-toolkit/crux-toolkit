@@ -4,6 +4,15 @@ require "set"
 
 class CruxTester
   def initialize(path)
+    # On native Windows Ruby, File.executable? only recognizes paths with a
+    # PATHEXT extension (.exe, .bat, ...); it never probes "path.exe" for an
+    # extensionless "path". The feature files pass extensionless Unix-style
+    # paths (e.g. "../../src/crux"), which is fine under MSYS/git-bash Ruby
+    # but leaves cmd.exe's Ruby unable to find the built crux.exe. Fall back
+    # to the .exe form when that's what actually exists.
+    if !File.executable?(path) && File.executable?(path + ".exe")
+      path = path + ".exe"
+    end
     @crux_path = path
     @crux_args = Array.new
     @ignore_patterns = Array.new
