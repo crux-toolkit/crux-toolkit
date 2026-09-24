@@ -1,0 +1,91 @@
+FROM docker.io/library/ubuntu:20.04 AS builder
+ARG crux_cmake_args="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/app"
+
+###
+# Install certs
+###
+
+RUN apt-get update \
+      && apt-get -y install \
+      ca-certificates \
+      && rm -rf /var/lib/apt/lists/*
+
+###
+# Build the binary. These intermediate layers will be discarded.
+###
+
+LABEL description="Build layers - crux-toolkit"
+
+# Required system packages
+RUN apt-get update
+RUN apt-get install -y wget software-properties-common
+RUN wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | tee /etc/apt/trusted.gpg.d/kitware.asc > /dev/null
+RUN echo "deb https://apt.kitware.com/ubuntu/ focal main" | tee /etc/apt/sources.list.d/kitware.list
+RUN apt-get update
+RUN apt-get install -y cmake
+  
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  build-essential \
+  curl \
+  git \
+  subversion \
+  wget \
+  libcurl4-openssl-dev \
+  libssl-dev \
+  uuid-dev \
+  zlib1g-dev \
+  libpulse-dev \
+  unzip \
+  tzdata \
+  && rm -rf /var/lib/apt/lists/*
+
+  
+RUN mkdir /app  
+
+WORKDIR /src
+
+#RUN git config --global user.email "you@example.com" && \
+#    git config --global user.name "Your Name"
+
+COPY . /src/crux-toolkit
+
+# Next build crux
+###
+
+WORKDIR /src/crux-toolkit
+
+RUN cmake ${crux_cmake_args} .
+
+RUN make && make install
+
+# Gather binary and dynamic dependencies to copy over to base layer
+###
+
+LABEL description="crux-toolkit"
+
+FROM docker.io/library/ubuntu:24.04 AS runtime
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  libcurl4-openssl-dev \
+  libssl-dev \
+  uuid-runtime \
+  zlib1g \
+  libpulse0 \
+  tzdata \
+  wget \
+  libgomp1 \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN wget http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+RUN dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+RUN rm libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+
+RUN mkdir /app
+# RUN mkdir /home/crux && \
+#    groupadd -r crux && useradd --no-log-init -r -g crux crux && \
+#    chown crux:crux /home/crux
+  
+COPY --from=builder /app/bin/crux /app/bin/crux
+
+ENV PATH="${PATH}:/app/bin"
+# WORKDIR /home/crux
