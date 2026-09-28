@@ -143,6 +143,9 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     newSpectrum.mutable_charge_state()->Add(i->getCharge());
     newSpectrum.set_neutral_mass(i->getNeutralMass());
     newSpectrum.set_scan_index(++scan_index_);
+    if (!s->getNativeID().empty()) {
+      newSpectrum.set_native_id(s->getNativeID());
+    }
     addPeaks(&newSpectrum, s);
     if (newSpectrum.peak_m_z_size() == 0) {
       spectra.pop_back();

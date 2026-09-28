@@ -28,6 +28,7 @@ message Spectrum {
   optional double iso_window_upper_mz = 11;
   optional int32 scan_index = 12;
   optional double neutral_mass = 13;
+  optional string native_id = 14; // e.g. mzML spectrum id, reported in pepXML
   
   
 }

@@ -66,6 +66,7 @@ class Spectrum{
   Peak         **mz_peak_array_;  ///< Allows rapid peak retrieval by mz.
   bool             charge_state_assigned_;
   FLOAT_T          retention_time_;
+  std::string      native_id_;     ///< Native spectrum id (e.g. from mzML)
 
   // added by Yang
   FLOAT_T iso_window_lower_mz_;
@@ -146,6 +147,8 @@ class Spectrum{
 
   FLOAT_T getRTime() const;
   void setRTime(double retention_time);
+  const std::string& getNativeID() const { return native_id_; }
+  void setNativeID(const std::string& native_id) { native_id_ = native_id; }
   /**
    * Prints a spectrum object to file.
    */
