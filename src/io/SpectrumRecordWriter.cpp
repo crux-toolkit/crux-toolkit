@@ -132,8 +132,6 @@ vector<pb::Spectrum> SpectrumRecordWriter::getPbSpectra(
     spectra.push_back(pb::Spectrum());
     pb::Spectrum& newSpectrum = spectra.back();
 
-    newSpectrum.set_native_id(s->getNativeID());
-
     // added by Yang
     newSpectrum.set_ms1_spectrum_number(s->getMS1Scan());
     newSpectrum.set_iso_window_lower_mz(s->getIsoWindowLowerMZ());

@@ -71,8 +71,7 @@ class PepXMLWriter {
     std::vector<std::string>& protein_descriptions, ///<
     bool* scores_computed,
     double* scores, ///< indexed by score type
-    unsigned current_num_matches, 
-    const char* spectrum_native_id
+    unsigned current_num_matches
   );
 
  protected:
@@ -80,8 +79,7 @@ class PepXMLWriter {
   void printSpectrumElement(int spectrum_scan_number, 
                             const char* filename,
                             double spectrum_neutral_mass, 
-                            int charge,
-                            const char* spectrum_native_id);
+                            int charge);
   void closeSpectrumElement();
   void closePepXmlSearchSummary(MatchCollection* collection);
   std::string getSpectrumTitle(int spectrum_scan_number,

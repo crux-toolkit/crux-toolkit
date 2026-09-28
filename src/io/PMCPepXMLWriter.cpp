@@ -22,7 +22,6 @@ void PMCPepXMLWriter::write(
   MatchCollection* collection,
   string database
 ) {
-  match_collection_ = collection;
   ProteinMatchCollection protein_collection(collection);
   write(&protein_collection);
 }
@@ -115,9 +114,7 @@ void PMCPepXMLWriter::writePSMs(
         writeSummaryFooter();
       
       const char* spec_filename_str = spectrum->getFullFilename();
-      match_collection_->printPepXmlSearchSummary(
-          file_, string(spec_filename_str),
-          match_collection_->getDatabasePath());
+      match_collection_->printPepXmlSearchSummary(file_, string(spec_filename_str));
       last_spectrum_printed_ = string();
     }
 
@@ -150,8 +147,7 @@ void PMCPepXMLWriter::writePSMs(
              protein_names.size(), flanking_str.c_str(),
              protein_names, protein_descriptions,
              scores_computed, scores,
-             (lookup != spectrum_counts.end()) ? lookup->second : 0,
-             spectrum->getNativeID().c_str());
+             (lookup != spectrum_counts.end()) ? lookup->second : 0);
   }
 
 }

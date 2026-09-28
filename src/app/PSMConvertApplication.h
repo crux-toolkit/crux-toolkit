@@ -66,11 +66,6 @@ class PSMConvertApplication : public CruxApplication {
   virtual bool needsOutputDirectory() const;
 
   virtual COMMAND_T getCommand() const;
-
-  void setDatabasePath(const std::string& path) { database_path_ = path; }
- 
-private:
-  std::string database_path_;
   
 };
 

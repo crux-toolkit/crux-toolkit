@@ -98,8 +98,8 @@ void PepXMLWriter::writePSM(
   vector<string>& protein_descriptions, ///<
   bool* scores_computed,
   double* scores, ///< indexed by score type
-  unsigned cur_num_matches, 
-  const char* spectrum_native_id) {
+  unsigned cur_num_matches
+) {
   string spectrum_title = getSpectrumTitle(spectrum_scan_number, filename, charge);
   //cerr<<"by_ion_fraction_matched: "<<by_ion_fraction_matched<<endl;
   // close the last spec element if this is a new spectrum and not the first
@@ -110,7 +110,7 @@ void PepXMLWriter::writePSM(
   // print the spec info if this is a new spectrum
   if (last_spectrum_printed_ != spectrum_title) {
     printSpectrumElement(spectrum_scan_number, spectrum_title.c_str(), 
-                         spectrum_neutral_mass, charge, spectrum_native_id);
+                         spectrum_neutral_mass, charge);
     last_spectrum_printed_ = spectrum_title;
   }
   // else, just add to the search_result list
@@ -135,11 +135,10 @@ void PepXMLWriter::writePSM(
 void PepXMLWriter::printSpectrumElement(int spectrum_scan_number, 
                                         const char* spectrum_title,
                                         double spectrum_neutral_mass, 
-                                        int charge,
-                                        const char* spectrum_native_id) {
+                                        int charge) {
   fprintf(file_, "    <spectrum_query spectrum=\"%s\" start_scan=\"%i\""
           " end_scan=\"%i\" precursor_neutral_mass=\"%.*f\""
-          " assumed_charge=\"%i\" index=\"%i\" spectrumNativeID=\"%s\">\n"
+          " assumed_charge=\"%i\" index=\"%i\">\n"
           "    <search_result>\n",
           spectrum_title,
           spectrum_scan_number,
@@ -147,8 +146,7 @@ void PepXMLWriter::printSpectrumElement(int spectrum_scan_number,
           Params::GetInt("mass-precision"),
           spectrum_neutral_mass,
           charge,
-          current_index_++,
-          StringUtils::XmlEscape(spectrum_native_id ? spectrum_native_id : "").c_str());
+          current_index_++);
 }
 
 string PepXMLWriter::getSpectrumTitle(int spectrum_scan_number, 
@@ -171,8 +169,7 @@ void PepXMLWriter::closeSpectrumElement() {
 }
 
 void PepXMLWriter::closePepXmlSearchSummary(MatchCollection* collection) {
-  collection->printPepXmlSearchSummary(file_, "",
-                                       collection->getDatabasePath());
+  collection->printPepXmlSearchSummary(file_, "");
 }
 
 /**

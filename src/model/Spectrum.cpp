@@ -51,8 +51,8 @@ Spectrum::Spectrum() :
    iso_window_lower_mz_(0),
    iso_window_upper_mz_(0),
    ms1_scan_(0),
-   retention_time_(0.0),
-   native_id_("") {
+   retention_time_(0.0)
+{
   mz_peak_array_ = NULL;
 }
 
@@ -81,8 +81,7 @@ Spectrum::Spectrum (
    sorted_by_intensity_(false),
    has_mz_peak_array_(false),
    charge_state_assigned_(false),
-   retention_time_(0.0),
-   native_id_("")
+   retention_time_(0.0)
  {
   mz_peak_array_ = NULL;
 
@@ -329,7 +328,6 @@ void Spectrum::copyFrom(Spectrum *src) {
  has_mz_peak_array_ = src->has_mz_peak_array_;
  charge_state_assigned_ = src->charge_state_assigned_;
  retention_time_ = src->retention_time_;
- native_id_ = src->native_id_;
  // copy each peak
  for(int peak_idx=0; peak_idx < (int)src->peaks_.size(); ++peak_idx){
    this->addPeak(src->peaks_[peak_idx]->getIntensity(),
@@ -416,8 +414,6 @@ bool Spectrum::parsePwizSpecInfo(
   // assign new values
   first_scan_ = firstScan;
   last_scan_ = lastScan;
-
-  native_id_ = pwiz_spectrum->id;
 
   // Get the retention time
   //  MS_retention_time = 1000894,

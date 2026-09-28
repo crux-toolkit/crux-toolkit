@@ -69,7 +69,6 @@ class TideSearchApplication : public CruxApplication {
   int granularityScale_;  
   int total_spectra_num_;
   string tide_index_mzTab_file_path_;
-  std::string index_database_path_;
 
   ofstream* out_tsv_target_; // original tide-search output format in tab-delimited text files (txt)
   ofstream* out_tsv_decoy_;  // original tide-search output format in tab-delimited text files (txt) for the decoy psms only

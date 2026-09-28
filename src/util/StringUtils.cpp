@@ -136,15 +136,6 @@ string StringUtils::LineFormat(string s, unsigned limit, unsigned indentSize) {
   return lines.str();
 }
 
-string StringUtils::XmlEscape(string s) {
-  s = Replace(s, "&", "&amp;");
-  s = Replace(s, "<", "&lt;");
-  s = Replace(s, ">", "&gt;");
-  s = Replace(s, "\"", "&quot;");
-  s = Replace(s, "'", "&apos;");
-  return s;
-}
-
 StringUtils::StringUtils() {}
 StringUtils::~StringUtils() {}
 
