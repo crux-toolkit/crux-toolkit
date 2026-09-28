@@ -28,7 +28,7 @@ PSMConvertApplication::PSMConvertApplication() {
 PSMConvertApplication::~PSMConvertApplication() {
 }
 
-void PSMConvertApplication::convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches) {
+void PSMConvertApplication::convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches, string search_database) {
   Database* data;
   if (database_file.empty()) {
     data = new Database();
@@ -129,7 +129,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   string output_file_name = make_file_path(output_file_name_builder.str());
   
   writer->openFile(this, output_file_name, PSMWriter::PSMS);
-  writer->write(collection, database_file);
+  writer->write(collection, search_database.empty() ? database_file : search_database);
   writer->closeFile();
   
   // Clean Up

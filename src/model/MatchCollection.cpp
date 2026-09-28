@@ -481,14 +481,16 @@ void MatchCollection::printXmlHeader(
 }
 
 void MatchCollection::printPepXmlSearchSummary(FILE* output,
-    const string& ms2file
+    const string& ms2file,
+    const string& database_path
 ) {
     if (output == NULL) {
         return;
     }
     ENZYME_T enzyme = GlobalParams::getEnzyme();
     const char* enz_str = enzyme_type_to_string(enzyme);
-    string database = Params::GetString("protein-database");
+    string database = database_path.empty() ?
+        Params::GetString("protein-database") : database_path;
 
     MASS_TYPE_T isotopic_mass_type = GlobalParams::getIsotopicMass();
     MASS_TYPE_T fragment_mass_type = GlobalParams::getFragmentMass();

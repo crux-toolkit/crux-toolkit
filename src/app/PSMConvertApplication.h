@@ -32,8 +32,10 @@ class PSMConvertApplication : public CruxApplication {
 
   /**
    * Perform Convert
+   * search_database: database path reported in the output (e.g. pepXML
+   * search_database); if empty, database_file is reported.
    */
-  virtual void convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches);
+  virtual void convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches, string search_database = "");
   
   /**
    * Returns the command name
