@@ -5,6 +5,7 @@
 #include "util/StringUtils.h"
 #include "PSMConvertApplication.h"
 #include "model/MatchCollection.h"
+#include "model/MatchIterator.h"
 #include "model/ProteinMatchCollection.h"
 #include "io/HTMLWriter.h"
 #include "io/MatchFileReader.h"
@@ -28,7 +29,8 @@ PSMConvertApplication::PSMConvertApplication() {
 PSMConvertApplication::~PSMConvertApplication() {
 }
 
-void PSMConvertApplication::convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches) {
+void PSMConvertApplication::convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches, string search_database,
+                                        const map<pair<string, int>, string>* native_ids) {
   Database* data;
   if (database_file.empty()) {
     data = new Database();
@@ -83,6 +85,18 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   
   MatchCollection* collection = reader->parse();
   
+  if (native_ids != NULL && !native_ids->empty()) {
+    MatchIterator match_iter(collection);
+    while (match_iter.hasNext()) {
+      Crux::Spectrum* spectrum = match_iter.next()->getSpectrum();
+      map<pair<string, int>, string>::const_iterator lookup = native_ids->find(
+        make_pair(string(spectrum->getFullFilename()), spectrum->getFirstScan()));
+      if (lookup != native_ids->end()) {
+        spectrum->setNativeID(lookup->second);
+      }
+    }
+  }
+  
   if (!isTabDelimited) {
     collection->setHasDistinctMatches(distinct_matches);
   } else if (collection->getHasDistinctMatches() != distinct_matches) {
@@ -129,7 +143,7 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   string output_file_name = make_file_path(output_file_name_builder.str());
   
   writer->openFile(this, output_file_name, PSMWriter::PSMS);
-  writer->write(collection, database_file);
+  writer->write(collection, search_database.empty() ? database_file : search_database);
   writer->closeFile();
   
   // Clean Up

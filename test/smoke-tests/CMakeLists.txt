@@ -29,6 +29,9 @@ file(COPY lfq-psms-no-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY lfq-psms-with-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY lfq-specfile-replicates.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+# tide-search pepXML (spectrumNativeID) smoke-test input
+file(COPY sliced-sciex.mzML DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # mzML files shared with the unit-test suite
 file(COPY
   ${CMAKE_SOURCE_DIR}/test/unit-tests/test-data/sliced-mzml.mzML

@@ -251,8 +251,10 @@ class MatchCollection {
 
   /*
    * Print the PepXML file Search Summary for each imput spectrum files (multiple times if needed)
+   * If database is empty, the protein-database parameter is used.
    */
-  static void printPepXmlSearchSummary(FILE* outfile, const string& ms2file);
+  static void printPepXmlSearchSummary(FILE* outfile, const string& ms2file,
+                                       const string& database = "");
   /*
    * Print the SQT file header 
    */

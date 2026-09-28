@@ -52,6 +52,7 @@ class PMCPepXMLWriter : public Crux::PepXMLWriter, public PSMWriter {
     ProteinMatchCollection* collection ///< collection to be written
   );
   MatchCollection* match_collection_;
+  string database_; ///< database path reported in search_database
 
 };
 

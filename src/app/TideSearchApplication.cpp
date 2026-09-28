@@ -1765,13 +1765,30 @@ void TideSearchApplication::createOutputFiles() {
 
 void TideSearchApplication::convertResults() const {
   PSMConvertApplication converter;
+  // FASTA file the index was built from, as recorded in the index header
+  string search_database =
+    TideMatchSet::fasta_file_name_ != "null" ? TideMatchSet::fasta_file_name_ : "";
+  // Native spectrum ids (e.g. from mzML) for pepXML spectrumNativeID, read
+  // back from the spectrumrecords files and keyed by (spectrum file, scan)
+  map<pair<string, int>, string> native_ids;
+  if (Params::GetBool("pepxml-output")) {
+    for (vector<InputFile>::const_iterator f = inputFiles_.begin(); f != inputFiles_.end(); ++f) {
+      HeadedRecordReader reader(f->SpectrumRecords);
+      pb::Spectrum pb_spectrum;
+      while (!reader.Done() && reader.Read(&pb_spectrum)) {
+        if (pb_spectrum.has_native_id()) {
+          native_ids[make_pair(f->OriginalName, pb_spectrum.scan_id())] = pb_spectrum.native_id();
+        }
+      }
+    }
+  }
   if (!Params::GetBool("concat")) {
     string target_file_name = make_file_path("tide-search.target.txt");
     if (Params::GetBool("pin-output")) {
       converter.convertFile("tsv", "pin", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
     }
     if (Params::GetBool("pepxml-output")) {
-      converter.convertFile("tsv", "pepxml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
+      converter.convertFile("tsv", "pepxml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true, search_database, &native_ids);
     }
     if (Params::GetBool("mzid-output")) {
       converter.convertFile("tsv", "mzidentml", target_file_name, "tide-search.target.", Params::GetString("protein-database"), true);
@@ -1786,7 +1803,7 @@ void TideSearchApplication::convertResults() const {
         converter.convertFile("tsv", "pin", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
       }
       if (Params::GetBool("pepxml-output")) {
-        converter.convertFile("tsv", "pepxml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
+        converter.convertFile("tsv", "pepxml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true, search_database, &native_ids);
       }
       if (Params::GetBool("mzid-output")) {
         converter.convertFile("tsv", "mzidentml", decoy_file_name, "tide-search.decoy.", Params::GetString("protein-database"), true);
@@ -1801,7 +1818,7 @@ void TideSearchApplication::convertResults() const {
       converter.convertFile("tsv", "pin", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
     }
     if (Params::GetBool("pepxml-output")) {
-      converter.convertFile("tsv", "pepxml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);
+      converter.convertFile("tsv", "pepxml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true, search_database, &native_ids);
     }
     if (Params::GetBool("mzid-output")) {
       converter.convertFile("tsv", "mzidentml", concat_file_name, "tide-search.", Params::GetString("protein-database"), true);

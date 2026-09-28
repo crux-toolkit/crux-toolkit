@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <gflags/gflags.h>
 #include <string>
+#include <map>
+#include <utility>
 
 using namespace std;
 
@@ -32,8 +34,13 @@ class PSMConvertApplication : public CruxApplication {
 
   /**
    * Perform Convert
+   * search_database: database path reported in the output (e.g. pepXML
+   * search_database); if empty, database_file is reported.
+   * native_ids: optional (spectrum file, scan) -> native spectrum id, used
+   * to fill spectrumNativeID in pepXML output.
    */
-  virtual void convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches);
+  virtual void convertFile(string input_format, string output_format, string input_file, string output_file_base, string database_file, bool distinct_matches, string search_database = "",
+                           const map<pair<string, int>, string>* native_ids = NULL);
   
   /**
    * Returns the command name
