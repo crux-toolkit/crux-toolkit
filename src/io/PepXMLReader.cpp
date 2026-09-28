@@ -218,6 +218,7 @@ void PepXMLReader::spectrumQueryOpen(
   int last_scan = -1;
   double precursor_mass = -1;
   int  charge = -1;
+  double retention_time = 0.0;
  
   for (int i = 0; attr[i]; i += 2) {
     if (strcmp(attr[i], "start_scan") == 0) {
@@ -228,6 +229,8 @@ void PepXMLReader::spectrumQueryOpen(
       precursor_mass = atof(attr[i+1]);
     } else if (strcmp(attr[i], "assumed_charge") == 0) {
       charge = atoi(attr[i+1]);
+    } else if (strcmp(attr[i], "retention_time_sec") == 0) {
+      retention_time = atof(attr[i+1]);
     }
   }
 
@@ -235,6 +238,7 @@ void PepXMLReader::spectrumQueryOpen(
   vector<int> charge_vec;
   charge_vec.push_back(charge);
   current_spectrum_ = new Crux::Spectrum(first_scan, last_scan, precursor_mz, charge_vec, current_spectrum_filename_);
+  current_spectrum_->setRTime(retention_time);
   current_zstate_.setNeutralMass(precursor_mass, charge);
 }
 

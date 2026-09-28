@@ -481,7 +481,9 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
                               getFloat(SPECTRUM_PRECURSOR_MZ_COL),
                               vector<int>(1, getInteger(CHARGE_COL)),
                               getString(FILE_COL));
-    new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    if (!empty(RETENTION_TIME_COL)) {
+      new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    }
     return new_spectrum;
   } else {
     // This part allows Percolator output files to be read in
@@ -500,7 +502,9 @@ Crux::Spectrum* MatchFileReader::parseSpectrum() {
                               getFloat(SPECTRUM_PRECURSOR_MZ_COL),
                               vector<int>(1, stoi(tokens[3])),
                               getString(FILE_COL));
-    new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    if (!empty(RETENTION_TIME_COL)) {
+      new_spectrum->setRTime(getFloat(RETENTION_TIME_COL));
+    }
     return new_spectrum;
   }
     
