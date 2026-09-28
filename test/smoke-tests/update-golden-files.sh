@@ -70,6 +70,18 @@ $CRUX psm-convert --no-analytics T --overwrite T \
   test_results/results2.tide-search.txt pepxml
 cp crux-output/psm-convert.pep.xml "$GOOD_RESULTS_SRC/psmconv-from-txt2.pep.xml"
 
+echo "=== Updating tide-search pepXML golden files ==="
+
+# The search_database path is machine specific (the test ignores it as long as
+# it points to small-yeast.fasta), so store a generic path in the golden file.
+for run in "thermo sliced-mzml.mzML" "sciex sliced-sciex.mzML"; do
+  set -- $run
+  $CRUX tide-search --no-analytics T --overwrite T --seed 7 --num-threads 1 \
+    --pepxml-output T "$2" small-yeast.fasta
+  sed 's|<search_database local_path=".*small-yeast\.fasta"|<search_database local_path="/path/to/small-yeast.fasta"|' \
+    crux-output/tide-search.target.pep.xml > "$GOOD_RESULTS_SRC/tide-pepxml-$1.pep.xml"
+done
+
 echo "=== Syncing build good_results directory ==="
 
 cp "$GOOD_RESULTS_SRC/lfq-no-norm-peaks.txt"     "$GOOD_RESULTS_BUILD/"
@@ -82,6 +94,8 @@ cp "$GOOD_RESULTS_SRC/psmconv-from-txt1.pin"      "$GOOD_RESULTS_BUILD/"
 cp "$GOOD_RESULTS_SRC/psmconv-from-txt2.pin"      "$GOOD_RESULTS_BUILD/"
 cp "$GOOD_RESULTS_SRC/psmconv-from-txt1.pep.xml"  "$GOOD_RESULTS_BUILD/"
 cp "$GOOD_RESULTS_SRC/psmconv-from-txt2.pep.xml"  "$GOOD_RESULTS_BUILD/"
+cp "$GOOD_RESULTS_SRC/tide-pepxml-thermo.pep.xml" "$GOOD_RESULTS_BUILD/"
+cp "$GOOD_RESULTS_SRC/tide-pepxml-sciex.pep.xml"  "$GOOD_RESULTS_BUILD/"
 
 echo "=== Done. Run cucumber to verify: ==="
 echo "cucumber \\"
@@ -89,4 +103,5 @@ echo "  --require $SMOKE_SRC/features/support \\"
 echo "  --require $SMOKE_SRC/features/step_definitions \\"
 echo "  $SMOKE_SRC/features/lfq.feature \\"
 echo "  $SMOKE_SRC/features/make-pin.feature \\"
-echo "  $SMOKE_SRC/features/psm-convert.feature"
+echo "  $SMOKE_SRC/features/psm-convert.feature \\"
+echo "  $SMOKE_SRC/features/tide-search-pepxml.feature"
