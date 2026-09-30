@@ -269,18 +269,19 @@
 		default Makefiles,
 		and which can be much faster than Makefiles.
 		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
-		Then, configure the build with the following command:
+		Then, configure the build in the root directory of the project with the following command:
 		<div class=code><code>
-		cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		cmake -S . -B build-ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt;
 		</code>
 		</div>
+    <p/>
+    <code>build-ninja</code> is the name of the directory where the build will be done.
 		<p/>
 		You can then build and install using:
 		<div class=code><code>
-		cmake --build .<br>
-		cmake --build . --target install
-		</code>
-		</div>
+		cmake --build build-ninja<br>
+		cmake --build build-ninja --target install
+		</code></div>
 		</ul>
 		<a name="MacOS"></a>
 		<h3>MacOS</h3>
@@ -451,17 +452,19 @@
 		default Makefiles,
 		and which can be much faster than Makefiles.
 		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
-		Then, configure the build with the following command:
+		Then, configure the build in the root directory of the project with the following command:
 		<div class=code><code>
-		cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt; .
+		cmake -S . -B build-ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt;
 		</code>
 		</div>
+    <p/>
+    <code>build-ninja</code> is the name of the directory where the build will be done.
 		<p/>
 		You can then build and install using:
 		<div class=code><code>
-		cmake --build .<br>
-		cmake --build . --target install
-		</code>
+		cmake --build build-ninja<br>
+		cmake --build build-ninja --target install
+		</code></div>
 		</ul>
 
 		<a name="linux_path"></a>
