@@ -9,6 +9,7 @@
 #include "TideSearchApplication.h"
 #include "TideIndexApplication.h"
 #include "CometApplication.h"
+#include "CruxLFQApplication.h"
 #include "SpectralCounts.h"
 
 using namespace std;
@@ -48,6 +49,9 @@ int PipelineApplication::main(int argc, char** argv) {
         break;
       case SPECTRAL_COUNTS_COMMAND:
         ret = runSpectralCounts(cur);
+        break;
+      case CRUX_LFQ_COMMAND:
+        ret = runLFQ(cur, spectra);
         break;
       default:
         carp(CARP_FATAL, "Pipeline is not set up to run command '%s'",
@@ -245,6 +249,30 @@ int PipelineApplication::runSpectralCounts(
   return ((SpectralCounts*)app)->main(filename);
 }
 
+int PipelineApplication::runLFQ(
+  CruxApplication* app,
+  const vector<string>& spectra
+) {
+  if (app->getCommand() != CRUX_LFQ_COMMAND) {
+    carp(CARP_FATAL, "Something went wrong.");
+  }
+
+  string fileroot = Params::GetString("fileroot");
+  if (!fileroot.empty()) {
+    fileroot.append(".");
+  }
+  string psmFile = FileUtils::Join(Params::GetString("output-dir"), fileroot + "percolator.target.psms.txt");
+  string specfileReplicates = Params::GetString("specfile-replicates");
+
+  carp(CARP_INFO, "LFQ will be run using PSM file '%s' and the following spectra files:",
+                  psmFile.c_str());
+  for (vector<string>::const_iterator i = spectra.begin(); i != spectra.end(); i++) {
+    carp(CARP_INFO, "--> %s", i->c_str());
+  }
+
+  return ((CruxLFQApplication*)app)->main(psmFile, spectra, specfileReplicates);
+}
+
 string PipelineApplication::getName() const {
   return "pipeline";
 }
@@ -263,7 +291,8 @@ string PipelineApplication::getDescription() const {
     "provided as a file in FASTA format, or additionally, an index as produced "
     "by <a href=\"tide-index.html\">tide-index</a>.</li><li>Post-processing "
     "using <a href=\"percolator.html\">Percolator</a>.</li><li>Pseudo quantitation "
-    "using <a href=\"spectral-counts.html\">spectral-counts</a></li></ol>"
+    "using <a href=\"spectral-counts.html\">spectral-counts</a></li><li>Label-free "
+    "quantitation using <a href=\"lfq.html\">lfq</a></li></ol>"
     "<p>All of the command line options associated with the individual tools "
     "in the pipeline can be used with the <code>pipeline</code> command.</p>]]";
 }
@@ -289,6 +318,11 @@ vector<string> PipelineApplication::getOptions() const {
   addOptionsFrom<CometApplication>(&options);
   addOptionsFrom<PercolatorApplication>(&options);
   addOptionsFrom<SpectralCounts>(&options);
+  addOptionsFrom<CruxLFQApplication>(&options);
+
+  // Pipeline always feeds LFQ the Percolator PSMs file (see runLFQ()), so
+  // psm-file-format isn't actually a user choice here.
+  removeOptionFrom(&options, "psm-file-format");
 
   return options;
 }
@@ -301,6 +335,7 @@ vector< pair<string, string> > PipelineApplication::getOutputs() const {
   addOutputsFrom<CometApplication>(&outputs);
   addOutputsFrom<PercolatorApplication>(&outputs);
   addOutputsFrom<SpectralCounts>(&outputs);
+  addOutputsFrom<CruxLFQApplication>(&outputs);
 
   return outputs;
 }
@@ -347,6 +382,11 @@ void PipelineApplication::processParams() {
     Params::Set("protein-database", Params::GetString("peptide source"));
   }
   apps_.push_back(new SpectralCounts());
+
+  // Pipeline always post-processes with Percolator, so LFQ must parse its
+  // percolator.target.psms.txt output rather than an assign-confidence file.
+  Params::Set("psm-file-format", "percolator");
+  apps_.push_back(new CruxLFQApplication());
 
   for (vector<CruxApplication*>::iterator i = apps_.begin(); i != apps_.end(); i++) {
     (*i)->processParams();
