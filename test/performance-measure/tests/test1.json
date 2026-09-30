@@ -1,0 +1,35 @@
+{
+    "data_file": "datafile",
+    "index_dir": "crux-index-dir",
+    "threads": [1, 2, 4, 8],
+    "index": {
+        "fasta": "fastafile",
+        "max-mods": 2,
+        "mods-spec": "1M+15.9949,K+229.162932",
+        "nterm-peptide-mods-spec": "X+229.162932",
+        "decoy-format": "shuffle",
+        "digestion": "full-digest",
+        "missed-cleavages": 2,
+        "min-length": 7,
+        "max-length": 50,
+        "overwrite": "T",
+        "peptide-list": "F",
+        "memory-limit": 16
+    },
+    "tests":
+    [
+        {
+            "test_name": "basic",
+            "params": {
+                "mz-bin-width": 0.02,
+                "score-function": "xcorr",
+                "print-search-progress": 10000,
+                "precursor-window": 10,
+                "precursor-window-type": "ppm",
+                "concat": "T",
+                "top-match": 1,
+                "overwrite": "T"
+            }
+        }
+    ]
+}
