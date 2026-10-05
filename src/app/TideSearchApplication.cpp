@@ -1768,8 +1768,15 @@ void TideSearchApplication::convertResults() const {
   // FASTA file the index was built from, as recorded in the index header
   string search_database =
     TideMatchSet::fasta_file_name_ != "null" ? TideMatchSet::fasta_file_name_ : "";
-  // Native spectrum ids (e.g. from mzML) for pepXML spectrumNativeID, read
-  // back from the spectrumrecords files and keyed by (spectrum file, scan)
+  // Native spectrum ids (e.g. from mzML) for pepXML spectrumNativeID.
+  // pepXML is not written from the search spectra: psm-convert reads the .txt
+  // results and makes new spectra from them. The .txt file has no native id
+  // column (the id belongs only in pepXML), and the spectra that had the id
+  // are already deleted. So we read the ids again from the spectrumrecords
+  // files (they are deleted only after this function) and pass them to
+  // psm-convert as a map. The key is (spectrum file, scan), because the .txt
+  // file has these two values, and several input files can have the same scan
+  // numbers.
   map<pair<string, int>, string> native_ids;
   if (Params::GetBool("pepxml-output")) {
     for (vector<InputFile>::const_iterator f = inputFiles_.begin(); f != inputFiles_.end(); ++f) {

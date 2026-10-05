@@ -85,6 +85,9 @@ void PSMConvertApplication::convertFile(string input_format, string output_forma
   
   MatchCollection* collection = reader->parse();
   
+  // Spectra made from a tab-delimited file have no native id. When tide-search
+  // gives us the ids (read from its spectrumrecords files), find each spectrum
+  // by (file, scan) and set the id, so that pepXML can write spectrumNativeID.
   if (native_ids != NULL && !native_ids->empty()) {
     MatchIterator match_iter(collection);
     while (match_iter.hasNext()) {
