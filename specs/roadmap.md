@@ -32,6 +32,14 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
   exists). Verify and close them.
 - **Done when:** every issue has a status and a link to its repro input.
 
+### Phase 1a — Smoke tests check exit codes · 🟠 #754
+- `CruxTester#exec` always returns 0, so "the return value should be 0"
+  can never fail. Return the real exit status, then fix or record every
+  scenario that had been failing unnoticed.
+- **Done when:** a scenario whose command fails turns red. Every existing
+  scenario's exit-code expectation is verified, and those that fail are
+  linked to issues.
+
 ### Phase 2 — Unit tests build and run
 - Wire `test/unit-tests` into the root CMake behind `CRUX_BUILD_TESTS`.
   Replace the PXD005590 manual download with a small fixture.
@@ -282,3 +290,6 @@ All 95 open issues appear above exactly once:
 478, 485, 488, 491, 501, 533, 534, 547, 548, 566, 573, 592, 593, 609, 620,
 638, 645, 651, 652, 665, 670, 672, 683, 705, 707, 711, 712, 716, 722, 723,
 731, 735, 736, 742.
+
+Issues opened after the 2026-10-30 snapshot are listed here when they are
+added to a phase: #754 (Phase 1a).
