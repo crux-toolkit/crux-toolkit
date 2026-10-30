@@ -63,6 +63,7 @@ class SQTReader : public PSMReader {
   void parseSpectrum(const std::string& line);
   void parseMatch(const std::string& line);
   void parseLocus(const std::string& line);
+  void parseInfo(const std::string& line);
 
  public:  
 

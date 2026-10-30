@@ -1,4 +1,4 @@
-name: build-crux-distributions
+name: Build all Crux distributions and run smoke tests
  
 on:
   push:
