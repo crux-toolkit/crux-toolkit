@@ -47,9 +47,11 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
 
 ### Phase 4 — Scientific invariant checks
 - Add generic checks to the harness: no NaN/Inf, target/decoy feature
-  symmetry, monotone q-values, mass = residues + mods.
-- **Done when:** the checks run against every golden output. Any current
-  violations are recorded as expected failures, each linked to its issue.
+  symmetry, monotone q-values, mass = residues + H₂O + mods. Also add the
+  command-to-invariant applicability matrix (`test/golden/INVARIANTS.md`).
+- **Done when:** each check runs on every golden output the matrix says it
+  applies to. Any current violations are recorded as expected failures,
+  each linked to its issue.
 
 ### Phase 5 — PR CI on all platforms
 - A PR workflow runs build + `ctest` + golden tests on Ubuntu, macOS

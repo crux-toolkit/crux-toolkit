@@ -92,10 +92,26 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
   - **Exact rank-order + relative 1e-6:** q-values and PEPs.
   - Any looser tolerance needs a written per-column justification.
   - NaN/Inf anywhere is a failure unless that column explicitly allows it.
-- **Invariant checks** on every run: target/decoy feature symmetry,
-  monotone q-values, mass-consistency (`peptide mass` = sum of residues +
-  mods), and format equivalence between tsv/pepXML/mzIdentML for the same
-  search.
+- **Invariant checks**, each scoped to the commands whose outputs contain
+  the data it needs. An applicability matrix in `test/golden/INVARIANTS.md`
+  maps each command to its invariants. A check reports `not-applicable`
+  only when the matrix says so. If the matrix says a check applies but the
+  output lacks the required columns, the check fails.
+
+  | Invariant | Applies to (initial list) |
+  |---|---|
+  | Target/decoy feature symmetry | `make-pin`, `percolator`, `tide-search`, `comet` (decoy runs) |
+  | Monotone q-values | `percolator`, `assign-confidence`, `diameter` |
+  | Mass consistency (below) | every command that reports peptide or precursor masses |
+  | Format equivalence (tsv/pepXML/mzIdentML/pin) | commands with more than one output format for the same results |
+
+  Mass consistency is defined with explicit formulas, using
+  monoisotopic or average masses to match the `isotopic-mass` setting:
+  - Neutral peptide mass: `M = Σ residue masses + H₂O + Σ modification
+    deltas` (static and variable, terminal mods included).
+  - Precursor m/z for charge `z`: `m/z = (M + z · m_proton) / z`, with
+    `m_proton = 1.007276 Da`.
+  - Tolerance is absolute 1e-6 Da on `M`, per the tolerance policy above.
 - **Reference agreement tests:** `crux comet` vs. standalone Comet and
   `crux percolator` vs. standalone Percolator at the pinned versions.
 - Golden files are updated only by an explicit `--update-golden` run, and
@@ -144,7 +160,18 @@ Toolchain changes are limited to what open issues need:
 
 ## Rules for dependencies
 
-- Every external dependency is pinned to an exact tag or commit. Bumping a
+- **Build dependencies** (everything under `ext/` that is compiled into
+  Crux) are pinned to an exact tag, commit or checksummed tarball. Bumping a
   pin is its own PR, with golden-output diffs reviewed and explained.
+  - `USE_LATEST_PWIZ=ON` (default `OFF`) uses an unpinned ProteoWizard
+    build. It is for local experiments only. Release builds and golden-output
+    CI runs must use the pinned version, and CI asserts that it is `OFF`.
+- **Test and CI tooling** (pip, gem, apt and Homebrew packages, GitHub
+  Actions) doesn't affect Crux's scientific output, but it can change what
+  the tests see. Today it is unpinned (`numpy`, `pandas`, `cucumber`,
+  `rspec` in `main.yml` and `test.yml`). The new pytest harness (Phase 3)
+  and PR CI (Phase 5) pin their tooling in a lock file. The legacy
+  Cucumber jobs stay as they are until they are retired (#670); pinning
+  them is not worth the churn.
 - Patches to upstream tools live in `ext/patches` with a comment linking the
   upstream issue/PR. The aim is to upstream them and delete them.
