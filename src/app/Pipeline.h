@@ -37,7 +37,10 @@ class PipelineApplication : public CruxApplication {
   int runPostProcessor(CruxApplication* app,
                        const std::vector<std::string>& resultsFiles);
   int runSpectralCounts(CruxApplication* app);
-  int runLFQ(CruxApplication* app, const std::vector<std::string>& spectra);
+  int runLFQ(CruxApplication* app,
+             const std::vector<std::string>& originalSpectra,
+             const std::vector<std::string>& searchedSpectra,
+             const std::vector<std::string>& resultsFiles);
 };
 
 #endif

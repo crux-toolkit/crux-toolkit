@@ -29,6 +29,8 @@ int PipelineApplication::main(int argc, char** argv) {
   }
 
   vector<string> spectra = Params::GetStrings("mass spectra");
+  // Bullseye replaces spectra with MS2-only files; LFQ needs the originals' MS1 scans.
+  const vector<string> originalSpectra = spectra;
   string database = Params::GetString("peptide source");
 
   vector<string> resultsFiles;
@@ -51,7 +53,7 @@ int PipelineApplication::main(int argc, char** argv) {
         ret = runSpectralCounts(cur);
         break;
       case CRUX_LFQ_COMMAND:
-        ret = runLFQ(cur, spectra);
+        ret = runLFQ(cur, originalSpectra, spectra, resultsFiles);
         break;
       default:
         carp(CARP_FATAL, "Pipeline is not set up to run command '%s'",
@@ -251,10 +253,22 @@ int PipelineApplication::runSpectralCounts(
 
 int PipelineApplication::runLFQ(
   CruxApplication* app,
-  const vector<string>& spectra
+  const vector<string>& originalSpectra,
+  const vector<string>& searchedSpectra,
+  const vector<string>& resultsFiles
 ) {
   if (app->getCommand() != CRUX_LFQ_COMMAND) {
     carp(CARP_FATAL, "Something went wrong.");
+  }
+
+  // LFQ quantifies from MS1 scans, which these formats don't contain.
+  for (vector<string>::const_iterator i = originalSpectra.begin(); i != originalSpectra.end(); i++) {
+    if (StringUtils::IEndsWith(*i, ".ms2") || StringUtils::IEndsWith(*i, ".cms2") ||
+        StringUtils::IEndsWith(*i, ".mgf")) {
+      carp(CARP_WARNING, "Skipping LFQ: '%s' has no MS1 scans. LFQ needs spectrum files "
+                         "with MS1 scans (e.g. mzML or mzXML).", i->c_str());
+      return 0;
+    }
   }
 
   string fileroot = Params::GetString("fileroot");
@@ -264,13 +278,34 @@ int PipelineApplication::runLFQ(
   string psmFile = FileUtils::Join(Params::GetString("output-dir"), fileroot + "percolator.target.psms.txt");
   string specfileReplicates = Params::GetString("specfile-replicates");
 
+  // Percolator's file column names the search results file (e.g. comet.txt), or
+  // the searched spectra file (Tide, possibly a Bullseye output). Map both back
+  // to the original spectra file.
+  unordered_map<string, string> fileAliases;
+  for (size_t i = 0; i < originalSpectra.size(); i++) {
+    fileAliases[searchedSpectra[i]] = originalSpectra[i];
+    fileAliases[FileUtils::BaseName(searchedSpectra[i])] = originalSpectra[i];
+  }
+  for (vector<string>::const_iterator r = resultsFiles.begin(); r != resultsFiles.end(); r++) {
+    string resultsName = FileUtils::BaseName(*r);
+    for (size_t i = 0; i < originalSpectra.size(); i++) {
+      // Multi-file Comet output is named <command>.<spectra stem>[.target].<ext>.
+      if (originalSpectra.size() == 1 ||
+          resultsName.find("." + FileUtils::Stem(searchedSpectra[i]) + ".") != string::npos) {
+        fileAliases[*r] = originalSpectra[i];
+        fileAliases[resultsName] = originalSpectra[i];
+        break;
+      }
+    }
+  }
+
   carp(CARP_INFO, "LFQ will be run using PSM file '%s' and the following spectra files:",
                   psmFile.c_str());
-  for (vector<string>::const_iterator i = spectra.begin(); i != spectra.end(); i++) {
+  for (vector<string>::const_iterator i = originalSpectra.begin(); i != originalSpectra.end(); i++) {
     carp(CARP_INFO, "--> %s", i->c_str());
   }
 
-  return ((CruxLFQApplication*)app)->main(psmFile, spectra, specfileReplicates);
+  return ((CruxLFQApplication*)app)->main(psmFile, originalSpectra, specfileReplicates, fileAliases);
 }
 
 string PipelineApplication::getName() const {
@@ -283,7 +318,7 @@ string PipelineApplication::getDescription() const {
     "sets of tandem mass spectra.]]"
     "[[html:<p>Given one or more sets of tandem mass spectra as well as a "
     "protein database, this command runs a series of Crux tools and reports all "
-    "of the results in a single output directory. There are four steps in the "
+    "of the results in a single output directory. There are five steps in the "
     "pipeline:</p><ol><li><a href=\"bullseye.html\">Bullseye</a> to assign high-"
     "resolution precursor m/z values to MS/MS data. This step is optional.</li>"
     "<li>Database searching using either <a href=\"tide-search.html\">"
@@ -292,7 +327,9 @@ string PipelineApplication::getDescription() const {
     "by <a href=\"tide-index.html\">tide-index</a>.</li><li>Post-processing "
     "using <a href=\"percolator.html\">Percolator</a>.</li><li>Pseudo quantitation "
     "using <a href=\"spectral-counts.html\">spectral-counts</a></li><li>Label-free "
-    "quantitation using <a href=\"lfq.html\">lfq</a></li></ol>"
+    "quantitation using <a href=\"lfq.html\">lfq</a>. This step needs MS1 scans, so "
+    "it is skipped with a warning when the spectra are in ms2, cms2 or mgf format."
+    "</li></ol>"
     "<p>All of the command line options associated with the individual tools "
     "in the pipeline can be used with the <code>pipeline</code> command.</p>]]";
 }
