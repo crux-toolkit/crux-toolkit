@@ -16,6 +16,9 @@ criteria):
 - [ ] Golden outputs pass on all CI platforms (once Phase 3 exists).
 - [ ] `doc/user/release-notes.html` updated, including any change to output
       values.
+- [ ] The PR targets `develop`, the integration branch, which is promoted to
+      `master` in reviewed batches. It is stacked on another PR only when it
+      builds on that PR's changes.
 - [ ] The issue is closed with a link to the PR.
 
 Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform ·
@@ -40,11 +43,24 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
   scenario's exit-code expectation is verified, and those that fail are
   linked to issues.
 
+### Phase 1b — Builds outside a git checkout don't crash · 🟠 #755
+- With no `.git/HEAD`, `CRUX_VERSION` has no date and tide-search throws.
+  This hits source-package builds and `git worktree` checkouts, which
+  parallel phase work relies on.
+- **Done when:** tide-search runs from a worktree build and from the source
+  tarball, with a test covering a version string that has no date.
+
 ### Phase 2 — Unit tests build and run
 - Wire `test/unit-tests` into the root CMake behind `CRUX_BUILD_TESTS`.
   Replace the PXD005590 manual download with a small fixture.
 - **Done when:** `ctest` runs the crux-lfq tests locally with no manual
   steps.
+
+### Phase 2a — Test mzML files Comet can read · 🟡 #756
+- The K562 and sliced mzML files are committed with CRLF line endings, and
+  Comet can't parse them. That leaves the Comet path untestable.
+- **Done when:** `crux comet` runs on every committed mzML, and
+  `.gitattributes` keeps them byte-exact.
 
 ### Phase 3 — Golden-output harness skeleton
 - Add a pytest harness and `TOLERANCES.md` (see `tech-stack.md`). Add a
@@ -84,6 +100,14 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
 ### Phase 8 — NaN retention times · #716
 - **Done when:** RT is carried through correctly from the spectrum file, or
   the run fails loudly if RT is missing.
+
+### Phase 8a — Explicit "RT unknown" instead of rt = 0 · #752
+- **Done when:** every writer uses one documented missing-RT value, and every
+  reader treats it as missing.
+
+### Phase 8b — One retention-time unit across readers · #753
+- **Done when:** pwiz, MSToolkit, pepXML and SQT readers all yield RT in one
+  documented unit, checked on files whose RT is in seconds and in minutes.
 
 ### Phase 9 — TMT static-mod mass offset · #435, #453
 - Spectrum neutral mass and peptide mass are off by multiples of the static
@@ -292,4 +316,5 @@ All 95 open issues appear above exactly once:
 731, 735, 736, 742.
 
 Issues opened after the 2026-10-30 snapshot are listed here when they are
-added to a phase: #754 (Phase 1a).
+added to a phase: #754 (Phase 1a), #755 (Phase 1b), #756 (Phase 2a),
+#752 (Phase 8a), #753 (Phase 8b).

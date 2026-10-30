@@ -135,6 +135,10 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
 
 ### 4. CI as the gatekeeper
 
+- Fixes merge into **`develop`**, an integration branch created from
+  `master`. A workflow merges `master` into it on every `master` push and
+  runs the full build there. `develop` is promoted to `master` in reviewed
+  batches, so a bad change can be reverted before it reaches a release.
 - On every **PR**: build + unit tests + golden-output tests on all four
   platforms (ubuntu-22.04, macos-15, macos-15-intel, windows-2022), plus
   the existing release-notes check.
