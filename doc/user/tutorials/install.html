@@ -260,6 +260,28 @@
 		That completes the installation!  Skip ahead to 
 		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
+		<li><b>Optional use of Ninja for building</b></li>
+		<p/>
+		CMake can also use 
+		<a href="https://ninja-build.org">Ninja</a>
+		as the build system.
+		Ninja is an alternative build system which can be used instead of the 
+		default Makefiles,
+		and which can be much faster than Makefiles.
+		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
+		Then, configure the build in the root directory of the project with the following command:
+		<div class=code><code>
+		cmake -S . -B build-ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt;
+		</code>
+		</div>
+    <p/>
+    <code>build-ninja</code> is the name of the directory where the build will be done.
+		<p/>
+		You can then build and install using:
+		<div class=code><code>
+		cmake --build build-ninja<br>
+		cmake --build build-ninja --target install
+		</code></div>
 		</ul>
 		<a name="MacOS"></a>
 		<h3>MacOS</h3>
@@ -421,6 +443,28 @@
 		That completes the installation!  Skip ahead to 
 		<a href="#linux_path">Setting the PATH on Linux and MacOS</a>
 		for notes on how to run the executables.
+		<li><b>Optional use of Ninja for building</b></li>
+		<p/>
+		CMake can also use 
+		<a href="https://ninja-build.org">Ninja</a>
+		as the build system.
+		Ninja is an alternative build system which can be used instead of the 
+		default Makefiles,
+		and which can be much faster than Makefiles.
+		To use Ninja for building, first ensure that you have installed the <code>ninja</code> build system.
+		Then, configure the build in the root directory of the project with the following command:
+		<div class=code><code>
+		cmake -S . -B build-ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=&lt;install directory&gt;
+		</code>
+		</div>
+    <p/>
+    <code>build-ninja</code> is the name of the directory where the build will be done.
+		<p/>
+		You can then build and install using:
+		<div class=code><code>
+		cmake --build build-ninja<br>
+		cmake --build build-ninja --target install
+		</code></div>
 		</ul>
 
 		<a name="linux_path"></a>

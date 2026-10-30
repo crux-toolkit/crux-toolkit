@@ -54,6 +54,11 @@
     <h3>Version 5.0.0</h3> April 15, 2026
     <h4>Major changes</h4>
     <ul>
+      <li>5 July 2026: <code>crux pipeline</code> no longer supports
+      <code>assign-confidence</code> as a post-processor. The <code>--post-processor</code>
+      option has been removed and <code>pipeline</code> now always uses Percolator for
+      post-processing. The standalone <code>crux assign-confidence</code> command is
+      unaffected.</li>
       <li>15 April 2026: Added new command <code>crux lfq</code> for label-free quantification
       (LFQ). The command takes a set of peptide-spectrum matches (PSMs) and corresponding
       spectrum files and quantifies each detected peptide at the MS1 level. The algorithm
@@ -65,6 +70,8 @@
     </ul>
     <h4>Minor changes</h4>
     <ul>
+      <li>20 September 2026: Added information on building 
+      using Ninja to the installation guide.</li>
       <li>28 June 2026: Fixed retention-time parsing for pepXML and SQT inputs so
       <code>make-pin</code> and Percolator output no longer report incorrect or NaN
       retention times when the source data omits retention time values.</li>
@@ -72,6 +79,7 @@
     <h3>Version 4.3.2</h3> April 3, 2026
     <h4>Minor changes</h4>
     <ul>
+      <li>Added information on building using Ninja to the installation guide.</li>
       <li>10 March 2026: Fixed name of comet target output file when using separate search.</li>
       <li>10 March 2026: Updated to 2026.01.0 release of Comet.</li>
       <li>10 March 2026: Fixed linked libraries in debug build.</li>

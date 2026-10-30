@@ -1,5 +1,4 @@
 #include "io/carp.h"
-#include "AssignConfidenceApplication.h"
 #include "bullseye/CruxBullseyeApplication.h"
 #include "util/FileUtils.h"
 #include "MakePinApplication.h"
@@ -32,7 +31,6 @@ int PipelineApplication::main(int argc, char** argv) {
   string database = Params::GetString("peptide source");
 
   vector<string> resultsFiles;
-  COMMAND_T post_processor_command;
   while (!apps_.empty()) {
     CruxApplication* cur = apps_.front();
     carp(CARP_INFO, "Running %s...", cur->getName().c_str());
@@ -45,12 +43,11 @@ int PipelineApplication::main(int argc, char** argv) {
       case TIDE_SEARCH_COMMAND:
         ret = runSearch(cur, spectra, database, &resultsFiles);
         break;
-      case QVALUE_COMMAND:
       case PERCOLATOR_COMMAND:
-        ret = runPostProcessor(cur, resultsFiles, post_processor_command);
+        ret = runPostProcessor(cur, resultsFiles);
         break;
       case SPECTRAL_COUNTS_COMMAND:
-        ret = runSpectralCounts(cur, post_processor_command);
+        ret = runSpectralCounts(cur);
         break;
       default:
         carp(CARP_FATAL, "Pipeline is not set up to run command '%s'",
@@ -70,9 +67,8 @@ int PipelineApplication::main(int argc, char** argv) {
 
 void PipelineApplication::checkParams() {
   string search = Params::GetString("search-engine");
-  string postProcessor = Params::GetString("post-processor");
   if (search == "comet") {
-    if (Params::GetInt("decoy_search") == 0 && postProcessor != "none") {
+    if (Params::GetInt("decoy_search") == 0) {
       carp(CARP_FATAL, "Cannot perform post-processing without decoys. "
                        "Set decoy_search to 1 or 2.");
     }
@@ -211,29 +207,16 @@ int PipelineApplication::runSearch(
 
 int PipelineApplication::runPostProcessor(
   CruxApplication* app,
-  const vector<string>& resultsFiles,
-  COMMAND_T& post_processor_name
+  const vector<string>& resultsFiles
 ) {
-  bool assignConfidence = app->getCommand() == QVALUE_COMMAND;
-  bool percolator = app->getCommand() == PERCOLATOR_COMMAND;
-  if (!assignConfidence && !percolator) {
-    carp(CARP_FATAL, "Something went wrong.");
+  if (app->getCommand() != PERCOLATOR_COMMAND) {
+    carp(CARP_FATAL, "Pipeline post-processing only supports Percolator, "
+                     "but got '%s'.", app->getName().c_str());
   }
 
   carp(CARP_INFO, "Post-processing will be run using the following files:");
   for (vector<string>::const_iterator i = resultsFiles.begin(); i != resultsFiles.end(); i++) {
     carp(CARP_INFO, "--> %s", i->c_str());
-  }
-
-  if (assignConfidence) {
-    vector<string> targetFiles;
-    for (vector<string>::const_iterator i = resultsFiles.begin(); i != resultsFiles.end(); i++) {
-      if (i->find("decoy") == string::npos) {
-        targetFiles.push_back(*i);
-      }
-    }
-    post_processor_name = QVALUE_COMMAND;
-    return ((AssignConfidenceApplication*)app)->main(targetFiles);
   }
 
   string pin;
@@ -248,27 +231,18 @@ int PipelineApplication::runPostProcessor(
     }
     carp(CARP_INFO, "Finished make-pin.");
   }
-  post_processor_name = PERCOLATOR_COMMAND;
   return ((PercolatorApplication*)app)->main(pin, "", "pipeline");
 }
 
 int PipelineApplication::runSpectralCounts(
-  CruxApplication* app,
-  COMMAND_T post_processor_command
+  CruxApplication* app
 ) {
-  string filename;  
   string fileroot = Params::GetString("fileroot");
   if (!fileroot.empty()) {
     fileroot.append(".");
   }
-  if (post_processor_command == PERCOLATOR_COMMAND) {
-    filename = FileUtils::Join(Params::GetString("output-dir"), fileroot + "percolator.target.psms.txt");
-     return ((SpectralCounts*)app)->main(filename);
-  }
-  else {
-    filename = FileUtils::Join(Params::GetString("output-dir"), fileroot + "assign-confidence.target.txt");
-    return ((SpectralCounts*)app)->main(filename);
-  }
+  string filename = FileUtils::Join(Params::GetString("output-dir"), fileroot + "percolator.target.psms.txt");
+  return ((SpectralCounts*)app)->main(filename);
 }
 
 string PipelineApplication::getName() const {
@@ -288,8 +262,7 @@ string PipelineApplication::getDescription() const {
     "Tide-search</a> or <a href=\"comet.html\">Comet</a>. The database can be "
     "provided as a file in FASTA format, or additionally, an index as produced "
     "by <a href=\"tide-index.html\">tide-index</a>.</li><li>Post-processing "
-    "using either <a href=\"assign-confidence.html\">assign-confidence</a> or "
-    "<a href=\"percolator.html\">Percolator</a>.</li><li>Pseudo quantitation "
+    "using <a href=\"percolator.html\">Percolator</a>.</li><li>Pseudo quantitation "
     "using <a href=\"spectral-counts.html\">spectral-counts</a></li></ol>"
     "<p>All of the command line options associated with the individual tools "
     "in the pipeline can be used with the <code>pipeline</code> command.</p>]]";
@@ -306,8 +279,7 @@ vector<string> PipelineApplication::getArgs() const {
 vector<string> PipelineApplication::getOptions() const {
   string arr[] = {
     "bullseye",
-    "search-engine",
-    "post-processor"
+    "search-engine"
   };
   vector<string> options(arr, arr + sizeof(arr) / sizeof(string));
 
@@ -316,7 +288,6 @@ vector<string> PipelineApplication::getOptions() const {
   addOptionsFrom<TideSearchApplication>(&options);
   addOptionsFrom<CometApplication>(&options);
   addOptionsFrom<PercolatorApplication>(&options);
-  addOptionsFrom<AssignConfidenceApplication>(&options);
   addOptionsFrom<SpectralCounts>(&options);
 
   return options;
@@ -324,12 +295,11 @@ vector<string> PipelineApplication::getOptions() const {
 
 vector< pair<string, string> > PipelineApplication::getOutputs() const {
   vector< pair<string, string> > outputs;
-  
+
   addOutputsFrom<CruxBullseyeApplication>(&outputs);
   addOutputsFrom<TideSearchApplication>(&outputs);
   addOutputsFrom<CometApplication>(&outputs);
   addOutputsFrom<PercolatorApplication>(&outputs);
-  addOutputsFrom<AssignConfidenceApplication>(&outputs);
   addOutputsFrom<SpectralCounts>(&outputs);
 
   return outputs;
@@ -371,12 +341,7 @@ void PipelineApplication::processParams() {
     apps_.push_back(new TideSearchApplication());
   }
 
-  const string postProcessor = Params::GetString("post-processor");
-  if (postProcessor == "assign-confidence") {
-    apps_.push_back(new AssignConfidenceApplication());
-  } else if (postProcessor == "percolator") {
-    apps_.push_back(new PercolatorApplication());
-  }
+  apps_.push_back(new PercolatorApplication());
 
   if (Params::GetString("protein-database").empty()) {
     Params::Set("protein-database", Params::GetString("peptide source"));

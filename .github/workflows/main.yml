@@ -1,4 +1,4 @@
-name: build-crux-distributions
+name: Build all Crux distributions and run smoke tests
  
 on:
   push:
@@ -7,13 +7,17 @@ on:
 
 env:
   BUILD_TYPE: Release
+  CRUX_VERSION: 5.0.0
 
 jobs:
   build-distributions:
-    continue-on-error: true
+    name: Build Crux Distributions
+    # In forks, only allow manual runs; push only triggers the build in the upstream repo
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'crux-toolkit/crux-toolkit'
+    continue-on-error: false
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-15, macos-15-intel, windows-latest]
+        os: [ubuntu-22.04, macos-15, macos-15-intel, windows-2022]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -56,8 +60,8 @@ jobs:
               echo Configuring in $(pwd)
               cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
-      - name: configure-build-for-windows-latest
-        if: matrix.os == 'windows-latest'
+      - name: configure-build-for-windows-2022
+        if: matrix.os == 'windows-2022'
         shell: powershell
         run: |
           choco install gsudo -y
@@ -127,38 +131,39 @@ jobs:
 
       - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
+
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.macos-15
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.arm64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.macos-15
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Darwin.arm64.zip
         
       - name: archive-macos-15-intel-package
         if: (matrix.os == 'macos-15-intel')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.macos-15-intel
-          path: ${{runner.workspace}}/build/crux-5.0.0.Darwin.X86_64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.macos-15-intel
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Darwin.X86_64.zip
         
       - name: archive-windows-package
-        if: (matrix.os == 'windows-latest')
+        if: (matrix.os == 'windows-2022')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.windows
-          path: ${{runner.workspace}}/build/crux-5.0.0.Windows.AMD64.zip 
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.windows
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Windows.AMD64.zip 
 
       - name: archive-ubuntu-package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.ubuntu.22.04
-          path:  ${{runner.workspace}}/build/crux-5.0.0.Linux.x86_64.zip
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.ubuntu.22.04
+          path:  ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Linux.x86_64.zip
           
       - name: Archive source package
         if: (matrix.os == 'ubuntu-22.04')
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: crux-5.0.0.${{env.git_short_sha}}.Source
-          path: ${{runner.workspace}}/build/crux-5.0.0.Source.tar.gz
+          name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
+          path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
 
       - name: Test
         if: (matrix.os == 'ubuntu-22.04')
@@ -166,7 +171,7 @@ jobs:
         run: |
              cd ${{runner.workspace}}/build/test
              rm -rf smoke-tests
-             cp -r /home/runner/work/crux-toolkit/crux-toolkit/test/smoke-tests .
+             cp -r ${{github.workspace}}/test/smoke-tests .
              cd smoke-tests
              cucumber -v -f html -o smoke-tests.html    
 
@@ -174,17 +179,33 @@ jobs:
         if:  (matrix.os == 'ubuntu-22.04' && always())
         uses: actions/upload-artifact@v7.0.0
         with:
-          name: smoke.html
-          path: ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
-                 
+          name: smoke-test-results-${{env.git_short_sha}}
+          path: |
+                ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+                ${{runner.workspace}}/build/test/smoke-tests/errors
+                ${{runner.workspace}}/build/test/smoke-tests/stdout
+
+  # Runs once (not per matrix os) and only publishes from the upstream repo's master branch.
+  publish-docs:
+    name: Publish Website Docs
+    needs: build-distributions
+    if: github.repository == 'crux-toolkit/crux-toolkit' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: checkout-repository
+        uses: actions/checkout@v6.0.2
+
+      - name: add-short-sha
+        shell: bash
+        run: |
+          echo "git_short_sha=`git rev-parse --short HEAD`"  >> $GITHUB_ENV
+
       - name: Create version file
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         shell: bash
         run: |
           echo ${{env.git_short_sha}} > doc/user/latest-build.txt
-            
+
       - name: Push modified webpages to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: nkoppel/push-files-to-another-repository@v1.1.1
         env:
           API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY}}
@@ -194,9 +215,8 @@ jobs:
            destination-repository: 'crux-toolkit.github.io'
            destination-directory: '.'
            commit-email: 'cegrant@uw.edu'
-             
+
       - name: Push command webpages to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
@@ -210,7 +230,6 @@ jobs:
            commit_message: 'Update version file for the web site' 
 
       - name: Copy version file to website repository
-        if: (github.ref == 'refs/heads/master' && matrix.os == 'ubuntu-22.04')
         uses: dmnemec/copy_file_to_another_repo_action@main
         env:
            API_TOKEN_GITHUB: ${{ secrets.DOC_UPDATE_KEY }}
