@@ -61,6 +61,11 @@ int CruxLFQApplication::main(int argc, char** argv) {
 }
 
 int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates) {
+    return main(psm_file, spec_files, specfile_replicates, unordered_map<string, string>());
+}
+
+int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates,
+                             const unordered_map<string, string>& file_aliases) {
     carp(CARP_INFO, "Running crux-lfq...");
 
     CruxLFQ::NUM_ISOTOPES_REQUIRED = Params::GetInt("num-isotopes-required");                                   // Default value is 2
@@ -99,7 +104,7 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
 
     vector<CruxLFQ::Identification> allIdentifications;
     std::unordered_set<CruxLFQ::Identification> uniqueIdentifications;
-    vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_data, spec_files);
+    vector<CruxLFQ::Identification> tempIdentifications = createIdentifications(psm_data, spec_files, file_aliases);
     for (auto& id : tempIdentifications) {
         uniqueIdentifications.insert(id);
     }
@@ -140,6 +145,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
     for (const string& spectra_file : spec_files) {
         Crux::SpectrumCollection* spectra_ms1 = loadSpectra(spectra_file, 1);
         carp(CARP_INFO, "Read %d spectra. for MS1. from %s", spectra_ms1->getNumSpectra(), spectra_file.c_str());
+        if (spectra_ms1->getNumSpectra() == 0) {
+            carp(CARP_FATAL, "No MS1 spectra found in '%s'. LFQ quantifies from MS1 scans, so it needs a "
+                 "spectrum file that contains them (e.g. mzML or mzXML, not ms2 or mgf).", spectra_file.c_str());
+        }
 
         CruxLFQ::IndexedSpectralResults indexResults = indexedMassSpectralPeaks(spectra_ms1, spectra_file);
 
@@ -341,7 +350,8 @@ IndexedSpectralResults CruxLFQApplication::indexedMassSpectralPeaks(Crux::Spectr
 }
 
 // Make this a multithreaded process
-vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files) {
+vector<Identification> CruxLFQApplication::createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files,
+                                                                 const unordered_map<string, string>& file_aliases) {
     carp(CARP_INFO, "Creating identifications, this may take a bit of time, do not terminate the process...");
 
     // Build a map from file stem -> CLI spectra file path (like C# FindMatchingSpecFile)
@@ -350,14 +360,66 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
         stemToSpecFile[fileNameWithoutExtension(spec_file)] = spec_file;
     }
 
+    // Resolve a PSM's file entry to a spectra file: directly by stem, or via an
+    // alias (e.g. the search results file a pipeline produced from that spectra file).
+    auto resolveSpecFile = [&](const string& file_name) -> const string* {
+        auto it = stemToSpecFile.find(fileNameWithoutExtension(file_name));
+        if (it != stemToSpecFile.end()) {
+            return &it->second;
+        }
+        auto alias = file_aliases.find(file_name);
+        if (alias == file_aliases.end()) {
+            alias = file_aliases.find(FileUtils::BaseName(file_name));
+        }
+        if (alias != file_aliases.end()) {
+            it = stemToSpecFile.find(fileNameWithoutExtension(alias->second));
+            if (it != stemToSpecFile.end()) {
+                return &it->second;
+            }
+        }
+        return NULL;
+    };
+
+    // MS2 retention times by scan, loaded only for files whose PSMs lack RT.
+    unordered_map<string, unordered_map<int, double>> ms2RetentionTimes;
+    auto ms2RetentionTime = [&](const string& spec_file, int scan, double* rt) -> bool {
+        auto file_it = ms2RetentionTimes.find(spec_file);
+        if (file_it == ms2RetentionTimes.end()) {
+            carp(CARP_INFO, "Reading MS2 retention times from '%s' for PSMs that lack them", spec_file.c_str());
+            Crux::SpectrumCollection* spectra_ms2 = loadSpectra(spec_file, 2);
+            unordered_map<int, double>& scanToRt = ms2RetentionTimes[spec_file];
+            for (auto spectrum = spectra_ms2->begin(); spectrum != spectra_ms2->end(); ++spectrum) {
+                scanToRt[(*spectrum)->getFirstScan()] = (*spectrum)->getRTime();
+            }
+            delete spectra_ms2;
+            file_it = ms2RetentionTimes.find(spec_file);
+        }
+        auto scan_it = file_it->second.find(scan);
+        if (scan_it == file_it->second.end()) {
+            return false;
+        }
+        *rt = scan_it->second;
+        return true;
+    };
+
     vector<Identification> allIdentifications;
+    size_t unmatched = 0;
 
     for (const auto& psm : psm_data) {
-        string psmStem = fileNameWithoutExtension(psm.file_name);
-        auto it = stemToSpecFile.find(psmStem);
-        if (it == stemToSpecFile.end()) {
+        const string* specFile = resolveSpecFile(psm.file_name);
+        if (specFile == NULL) {
             // PSM is from a file we're not processing — skip it
+            ++unmatched;
             continue;
+        }
+
+        // A missing retention time (absent, NaN or non-positive in the PSM file)
+        // is taken from the MS2 scan itself, so it is in the same units as the
+        // MS1 scans it will be matched against.
+        double retentionTime = psm.retention_time;
+        if (!(retentionTime > 0) && !ms2RetentionTime(*specFile, psm.scan_col, &retentionTime)) {
+            carp(CARP_FATAL, "PSM for scan %d has no retention time, and scan %d was not found in '%s'.",
+                 psm.scan_col, psm.scan_col, specFile->c_str());
         }
 
         allIdentifications.emplace_back(
@@ -365,8 +427,8 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
             psm.monoisotopic_mass_col,
             psm.peptide_mass_col,
             psm.charge_col,
-            it->second,  // resolved CLI spectra file path
-            psm.retention_time,
+            *specFile,  // resolved CLI spectra file path
+            retentionTime,
             psm.scan_col,
             psm.modifications,
             psm.protein_id);
@@ -374,6 +436,14 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
 
     carp(CARP_INFO, "Created %zu identifications matching %zu spectra files (from %zu total PSMs)",
          allIdentifications.size(), spec_files.size(), psm_data.size());
+    if (!psm_data.empty() && allIdentifications.empty()) {
+        carp(CARP_FATAL, "None of the %zu PSMs could be matched to the spectrum files given. The PSM file's "
+             "file column must name the spectrum files (e.g. '%s').",
+             psm_data.size(), spec_files.empty() ? "" : spec_files.front().c_str());
+    } else if (unmatched > 0) {
+        carp(CARP_WARNING, "%zu of %zu PSMs are from spectrum files that were not given and will not be quantified.",
+             unmatched, psm_data.size());
+    }
 
     return allIdentifications;
 }
@@ -475,11 +545,10 @@ vector<PSM> CruxLFQApplication::create_percolator_psm(const string& psm_file) {
         carp(CARP_FATAL, "Error in MassConstants::Init");
     }
 
-    int line_number = 0;
+    // The header was consumed above; line numbers below count it as line 1.
+    int line_number = 1;
     while (std::getline(file, line)) {
         line_number++;
-        // Skip header
-        if (line_number == 1) continue;
         std::istringstream iss(line);
         std::vector<std::string> tokens;
         std::string token;

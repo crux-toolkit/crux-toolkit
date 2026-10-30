@@ -2270,7 +2270,7 @@ InitStringParam("protein-name-separator", ",",
                 "Indicate whether to normalize the intensities of the peptides (T) or not (F).  Default = F.",
                 "Used by LFQ.", true);
   InitStringParam("psm-file-format", "assign-confidence",
-                  "The format of the PSM file. Possible options are; tide-search and assign-confidence Default = assign-confidence.",
+                  "The format of the PSM file. Possible options are; assign-confidence and percolator. Default = assign-confidence.",
                   "Used by LFQ.", true);
   InitBoolParam("is-rt-seconds", false,
                 "Indicate whether retention time is in seconds or minutes (T) or not (F).  Default = F.",
