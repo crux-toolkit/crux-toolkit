@@ -52,7 +52,8 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
 
 ### Phase 2 — Unit tests build and run
 - Wire `test/unit-tests` into the root CMake behind `CRUX_BUILD_TESTS`.
-  Replace the PXD005590 manual download with a small fixture.
+  The tests already use in-memory data; fix the README, which still says
+  to download PXD005590.
 - **Done when:** `ctest` runs the crux-lfq tests locally with no manual
   steps.
 
@@ -71,7 +72,8 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
 
 ### Phase 4 — Scientific invariant checks
 - Add generic checks to the harness: no NaN/Inf, target/decoy feature
-  symmetry, monotone q-values, mass = residues + H₂O + mods. Also add the
+  symmetry, monotone q-values, peptide mass = residues + H₂O + mods,
+  and precursor m/z consistent with spectrum neutral mass. Also add the
   command-to-invariant applicability matrix (`test/golden/INVARIANTS.md`).
 - **Done when:** each check runs on every golden output the matrix says it
   applies to. Any current violations are recorded as expected failures,
@@ -166,8 +168,11 @@ Legend: 🔴 silent wrong results · 🟠 crash/data loss · 🟡 build/platform
   `spectrum_query`, validated against the pepXML schema.
 
 ### Phase 23 — `top-match` ignored for delimited files · #303
-- **Done when:** the row count per spectrum equals `top-match` in all
-  formats.
+- **Done when:** every format returns at most `top-match` matches per
+  spectrum (fewer when fewer candidates exist), and keeps ties at the
+  cutoff the same documented way as the text writer
+  (`MatchCollection.cpp`, which prints further matches tied with the last
+  rank).
 
 ### Phase 24 — Cascade-search column bug · #358
 - **Done when:** the column values match a non-cascade search for the same

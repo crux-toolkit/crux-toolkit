@@ -36,7 +36,7 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
 | Layer | Current state |
 |---|---|
 | Smoke tests | Ruby/Cucumber `.feature` files in `test/smoke-tests/features`, with expected outputs in `good_results/`. Python (numpy, pandas) helpers. Legacy Perl `crux-test.pl`; its `runall` script starts with `exit`, so it's dead. |
-| Unit tests | GoogleTest in `test/unit-tests`, covering **only crux-lfq**. **Not wired into the root `CMakeLists.txt`** and not run in CI. Needs a manual download of PXD005590. |
+| Unit tests | GoogleTest in `test/unit-tests`, covering **only crux-lfq**. **Not wired into the root `CMakeLists.txt`** and not run in CI. The tests build their data in memory; `test/unit-tests/README.md` still says to download PXD005590, which is out of date. |
 | Legacy unit tests | `test/cppunit-tests` (cppunit 1.12.1), not built |
 | Lint | `test/lint` (cpplint + `cruxlint.sh`), not run in CI; open lint debt (#322, #325) |
 | CI: PR | `lint.yml`, which (despite its name) only checks that release notes changed |
@@ -67,8 +67,8 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
 3. **No tolerance policy.** Expected-output comparisons are ad hoc. It isn't
    written down which columns must match exactly and which may differ by
    floating-point noise.
-4. **Unit tests are orphaned.** They exist for one tool, aren't built by
-   default and depend on a manual external download.
+4. **Unit tests are orphaned.** They exist for one tool and aren't built
+   by default.
 5. **Test harness in Ruby/Cucumber/Perl.** That's a third and fourth
    language beside C++ and Python, which raises contributor friction (#670).
 6. **Toolchain breakages.** The macro bug above, `-fpermissive` in the Comet
@@ -87,7 +87,12 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
   enforced by the harness:
   - **Exact:** identifiers, sequences, modification strings, protein IDs,
     charges, ranks, counts, column names and order, row counts.
-  - **Absolute 1e-6 Da:** masses (neutral and m/z).
+  - **Absolute 1e-6 Da:** masses (neutral and m/z). Golden runs therefore
+    set `--mass-precision` high enough to resolve it (the default of 4
+    decimals can't). Masses read from output written at a lower precision
+    are compared within half a unit in the last written decimal, and
+    within `z` times that when a neutral mass is rebuilt from a rounded
+    m/z.
   - **Relative 1e-6:** scores (XCorr, E-value, Percolator scores).
   - **Exact rank-order + relative 1e-6:** q-values and PEPs.
   - Any looser tolerance needs a written per-column justification.
@@ -106,12 +111,18 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
   | Format equivalence (tsv/pepXML/mzIdentML/pin) | commands with more than one output format for the same results |
 
   Mass consistency is defined with explicit formulas, using
-  monoisotopic or average masses to match the `isotopic-mass` setting:
-  - Neutral peptide mass: `M = Σ residue masses + H₂O + Σ modification
-    deltas` (static and variable, terminal mods included).
-  - Precursor m/z for charge `z`: `m/z = (M + z · m_proton) / z`, with
-    `m_proton = 1.007276 Da`.
-  - Tolerance is absolute 1e-6 Da on `M`, per the tolerance policy above.
+  monoisotopic or average masses to match the `isotopic-mass` setting.
+  There are two separate checks, because the observed precursor and the
+  sequence-derived peptide mass can legitimately differ by the search
+  tolerance:
+  - **Peptide mass** (calculated from the sequence): the reported peptide
+    mass equals `M = Σ residue masses + H₂O + Σ modification deltas`
+    (static and variable, terminal mods included).
+  - **Spectrum mass** (observed): for charge `z`, the reported spectrum
+    neutral mass `S` and precursor m/z agree as
+    `m/z = (S + z · m_proton) / z`, with `m_proton = 1.007276 Da`.
+  - Tolerances follow the policy above, including its rule for rounded
+    output.
 - **Reference agreement tests:** `crux comet` vs. standalone Comet and
   `crux percolator` vs. standalone Percolator at the pinned versions.
 - Golden files are updated only by an explicit `--update-golden` run, and
@@ -121,8 +132,8 @@ risk, and the stack we commit to moving to. Facts reflect `master` @
 
 - Wire `test/unit-tests` into the root build behind `-DCRUX_BUILD_TESTS=ON`.
   Run via `ctest`.
-- Replace the PXD005590 manual download with a small committed fixture (or
-  a cached, checksummed download).
+- Correct `test/unit-tests/README.md`, which still describes a PXD005590
+  download the tests no longer use.
 - Every bug fix adds a unit test at the lowest layer that reproduces it.
 - Retire `test/cppunit-tests` once its cases have been ported.
 
