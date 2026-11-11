@@ -109,18 +109,32 @@ jobs:
           }
           cmake "${{github.workspace}}" -G "Visual Studio 17 2022" -A x64
 
-      - name: build
+      - name: build-unix
+        if: (matrix.os == 'macos-15' || matrix.os == 'macos-15-intel' || matrix.os == 'ubuntu-22.04')
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
              echo Building in $(pwd)
              cmake --build build-ninja  --config $BUILD_TYPE 
 
-      - name: build-package
+      - name: build-windows
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
-             cmake --build . --config $BUILD_TYPE --target package
+             echo Building in $(pwd)
+             cmake --build "${{github.workspace}}"  --config $BUILD_TYPE 
+
+      - name: build-unix package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build build-ninja --config $BUILD_TYPE --target package
+
+      - name: build-windows-package
+        shell: bash
+        run: |
+             cd "${{runner.workspace}}/build"
+             cmake --build "${{github.workspace}}" --config $BUILD_TYPE --target package
 
       - name: build-source-package
         if: (matrix.os == 'ubuntu-22.04')
@@ -131,7 +145,6 @@ jobs:
 
       - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
-
         uses: actions/upload-artifact@v7.0.0
         with:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.macos-15
