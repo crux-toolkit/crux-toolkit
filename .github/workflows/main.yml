@@ -47,7 +47,7 @@ jobs:
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
-              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake -S "${{github.workspace}}" -B build-ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-macos
         if: matrix.os == 'macos-15' || matrix.os == 'macos-15-intel'
@@ -58,7 +58,7 @@ jobs:
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
-              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake -S "${{github.workspace}}" -B build-ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-windows-2022
         if: matrix.os == 'windows-2022'
@@ -114,7 +114,7 @@ jobs:
         run: |
              cd "${{runner.workspace}}/build"
              echo Building in $(pwd)
-             cmake --build . --config $BUILD_TYPE 
+             cmake --build build-ninja  --config $BUILD_TYPE 
 
       - name: build-package
         shell: bash
@@ -127,7 +127,7 @@ jobs:
         shell: bash
         run: |
              cd "${{runner.workspace}}/build"
-             cmake --build . --config $BUILD_TYPE --target package_source
+             cmake --build build-ninja --config $BUILD_TYPE --target package_source
 
       - name: archive-macos-15-package
         if: (matrix.os == 'macos-15')
