@@ -62,8 +62,10 @@
       <code>crux lfq</code>: the first PSM of a Percolator-format PSM file is
       no longer skipped; PSMs without a retention time take it from their MS2
       scan; and the run stops with an error, rather than writing empty results,
-      when no PSM matches the given spectrum files or a spectrum file has no MS1
-      scans.</li>
+      when the PSM file has no PSMs, no PSM matches the given spectrum files, a
+      PSM has no retention time in either the PSM file or its MS2 scan, a PSM
+      file entry matches two spectrum files with the same name, or a spectrum
+      file has no MS1 scans.</li>
       <li>5 July 2026: <code>crux pipeline</code> no longer supports
       <code>assign-confidence</code> as a post-processor. The <code>--post-processor</code>
       option has been removed and <code>pipeline</code> now always uses Percolator for
@@ -80,14 +82,14 @@
     </ul>
     <h4>Minor changes</h4>
     <ul>
+      <li>30 October 2026: Added developer planning documents
+      (<code>specs/</code>) describing the mission, technology stack and
+      issue-driven roadmap. No changes to Crux behavior or outputs.</li>
       <li>20 September 2026: Added information on building
       using Ninja to the installation guide.</li>
       <li>28 June 2026: Fixed retention-time parsing for pepXML and SQT inputs so
       <code>make-pin</code> and Percolator output no longer report incorrect or NaN
       retention times when the source data omits retention time values.</li>
-      <li>30 October 2026: Added developer planning documents
-      (<code>specs/</code>) describing the mission, technology stack and
-      issue-driven roadmap. No changes to Crux behavior or outputs.</li>
     </ul>
     <h3>Version 4.3.2</h3> April 3, 2026
     <h4>Minor changes</h4>

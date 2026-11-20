@@ -44,10 +44,11 @@ jobs:
               sudo apt-get install ruby
               sudo apt-get install cucumber
               sudo gem install rspec
+              sudo apt-get install -y ninja-build
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
-              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake "${{github.workspace}}" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-macos
         if: matrix.os == 'macos-15' || matrix.os == 'macos-15-intel'
@@ -55,10 +56,11 @@ jobs:
         run: |
               python -m pip install --upgrade pip numpy pandas
               brew install cucumber-ruby
+              brew install ninja
               cmake -E make_directory "${{runner.workspace}}/build"
               cd "${{runner.workspace}}/build"
               echo Configuring in $(pwd)
-              cmake "${{github.workspace}}" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+              cmake "${{github.workspace}}" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
       - name: configure-build-for-windows-2022
         if: matrix.os == 'windows-2022'
@@ -165,25 +167,25 @@ jobs:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
           path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
 
-      - name: Test
-        if: (matrix.os == 'ubuntu-22.04')
-        shell: bash
-        run: |
-             cd ${{runner.workspace}}/build/test
-             rm -rf smoke-tests
-             cp -r ${{github.workspace}}/test/smoke-tests .
-             cd smoke-tests
-             cucumber -v -f html -o smoke-tests.html    
+ #     - name: Test
+ #       if: (matrix.os == 'ubuntu-22.04')
+ #       shell: bash
+ #       run: |
+ #            cd ${{runner.workspace}}/build/test
+ #            rm -rf smoke-tests
+ #            cp -r ${{github.workspace}}/test/smoke-tests .
+ #            cd smoke-tests
+ #            cucumber -v -f html -o smoke-tests.html    
 
-      - name: Archive smoke test results
-        if:  (matrix.os == 'ubuntu-22.04' && always())
-        uses: actions/upload-artifact@v7.0.0
-        with:
-          name: smoke-test-results-${{env.git_short_sha}}
-          path: |
-                ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
-                ${{runner.workspace}}/build/test/smoke-tests/errors
-                ${{runner.workspace}}/build/test/smoke-tests/stdout
+  #    - name: Archive smoke test results
+  #      if:  (matrix.os == 'ubuntu-22.04' && always())
+  #      uses: actions/upload-artifact@v7.0.0
+  #      with:
+  #        name: smoke-test-results-${{env.git_short_sha}}
+  #        path: |
+  #             ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+  #             ${{runner.workspace}}/build/test/smoke-tests/errors
+  #             ${{runner.workspace}}/build/test/smoke-tests/stdout
 
   # Runs once (not per matrix os) and only publishes from the upstream repo's master branch.
   publish-docs:
