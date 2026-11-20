@@ -178,6 +178,9 @@ Toolchain changes are limited to what open issues need:
 - **Build dependencies** (everything under `ext/` that is compiled into
   Crux) are pinned to an exact tag, commit or checksummed tarball. Bumping a
   pin is its own PR, with golden-output diffs reviewed and explained.
+  - Known gap: the ProteoWizard, protobuf and gflags tarballs in
+    `ext/CMakeLists.txt` are pinned by versioned URL only, with no
+    `URL_HASH`. Adding SHA-256 hashes is a Stage D task.
   - `USE_LATEST_PWIZ=ON` (default `OFF`) uses an unpinned ProteoWizard
     build. It is for local experiments only. Release builds and golden-output
     CI runs must use the pinned version, and CI asserts that it is `OFF`.

@@ -9,11 +9,14 @@ is roughly one PR.
 **Definition of done for every phase** (in addition to the phase's own
 criteria):
 
-- [ ] A failing test reproduces the issue before the fix (or the issue is
-      shown to be already fixed on `master` and closed with that evidence).
-- [ ] The fix is checked against an independent reference (standalone tool,
-      hand calculation or known-answer data).
-- [ ] Golden outputs pass on all CI platforms (once Phase 3 exists).
+- [ ] Bugs (🔴 🟠 🟡): a failing test reproduces the issue before the fix
+      (or the issue is shown to be already fixed on `master` and closed with
+      that evidence). Documentation phases (Stage G) instead get a check of
+      the changed content and links. Enhancements (Stage H) get tests of the
+      new behaviour.
+- [ ] Changed scientific output is checked against an independent reference
+      (standalone tool, hand calculation or known-answer data).
+- [ ] Golden outputs pass on all CI platforms (once Phase 5 exists).
 - [ ] `doc/user/release-notes.html` updated, including any change to output
       values.
 - [ ] The PR targets `develop`, the integration branch, which is promoted to

@@ -6,7 +6,7 @@ Crux (<https://crux.ms/>) is an open-source, cross-platform toolkit for
 interpreting tandem mass spectrometry proteomics data: building peptide
 indexes (`tide-index`, `comet-index`), searching spectra (`tide-search`,
 `comet`, `kojak`, `diameter`), estimating confidence (`percolator`,
-`assign-confidence`), and quantifying (`spectral-counts`, `crux-lfq`).
+`assign-confidence`), and quantifying (`spectral-counts`, `lfq`).
 
 Results from Crux end up in published papers, biomarker studies and
 clinical-research pipelines. A wrong number that looks plausible — a
@@ -69,7 +69,10 @@ however many issues it closes.
 - **Reproduce first.** Each issue starts with a failing test that shows the
   bug on a small, committed input. No reproduction, no fix. (If an issue
   can't be reproduced on current `master`, record that evidence on the
-  issue and close it.)
+  issue. Close it only with positive evidence that it is fixed, such as the
+  reporter's input now giving the right result on the reporter's platform.
+  Otherwise it stays open, labelled as not reproduced, until it is
+  reproduced or shown fixed.)
 - **Prove the fix scientifically, not just mechanically.** "It no longer
   crashes" isn't enough. Check outputs against an independent reference:
   the standalone upstream tool, a hand calculation, or a known-answer
