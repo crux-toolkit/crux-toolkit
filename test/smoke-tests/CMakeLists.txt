@@ -28,6 +28,7 @@ file(COPY good_results DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY lfq-psms-no-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY lfq-psms-with-norm.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY lfq-specfile-replicates.tsv DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY lfq-pipeline-human.fasta DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # mzML files shared with the unit-test suite
 file(COPY
