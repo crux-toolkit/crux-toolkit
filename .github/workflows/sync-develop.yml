@@ -1,0 +1,54 @@
+name: Sync develop with master
+
+# develop is the integration branch: fixes merge there first and are promoted
+# to master in reviewed batches. This keeps develop up to date with anything
+# merged to master directly, then runs the full build and smoke tests on it.
+
+on:
+  push:
+    branches: master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: sync-develop
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'crux-toolkit/crux-toolkit'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop
+        uses: actions/checkout@v6.0.2
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Merge master into develop
+        id: merge
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin master
+          if git merge-base --is-ancestor origin/master HEAD; then
+            echo "develop already contains master; nothing to do."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A conflict fails this job; resolve it by hand with a PR into develop.
+          git merge --no-edit origin/master -m "Merge master into develop"
+          git push origin HEAD:develop
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      # Pushes made with GITHUB_TOKEN don't trigger other workflows, so start
+      # the full build + smoke tests on develop explicitly.
+      - name: Build and test develop
+        if: steps.merge.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run main.yml --ref develop --repo "${{ github.repository }}"

@@ -82,6 +82,11 @@
     </ul>
     <h4>Minor changes</h4>
     <ul>
+      <li>30 October 2026: Added a <code>develop</code> integration branch. Fixes
+      merge there first and reach <code>master</code> in reviewed batches. A workflow
+      keeps <code>develop</code> in sync with <code>master</code> and builds and tests it
+      on all platforms. The release-notes check now compares against each PR's
+      own base branch.</li>
       <li>30 October 2026: Added developer planning documents
       (<code>specs/</code>) describing the mission, technology stack and
       issue-driven roadmap. No changes to Crux behavior or outputs.</li>

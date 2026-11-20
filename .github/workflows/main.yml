@@ -2,7 +2,7 @@ name: Build all Crux distributions and run smoke tests
  
 on:
   push:
-    branches: master
+    branches: [master, develop]
   workflow_dispatch:
 
 env:
