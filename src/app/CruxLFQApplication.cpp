@@ -6,6 +6,7 @@
 #include <list>
 #include <memory>
 #include <sstream>
+#include <unordered_set>
 
 #include "IndexedMassSpectralPeak.h"
 #include "LFQMetaData.h"
@@ -93,6 +94,10 @@ int CruxLFQApplication::main(const string& psm_file, const vector<string>& spec_
         psm_data = create_percolator_psm(psm_file);
     } else {
         psm_data = CruxLFQ::create_psm(psm_file);
+    }
+
+    if (psm_data.empty()) {
+        carp(CARP_FATAL, "No PSMs were read from '%s'; there is nothing to quantify.", psm_file.c_str());
     }
 
     if (CruxLFQ::NORMALIZE && !FileUtils::Exists(specfile_replicates)) {
@@ -354,30 +359,55 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
                                                                  const unordered_map<string, string>& file_aliases) {
     carp(CARP_INFO, "Creating identifications, this may take a bit of time, do not terminate the process...");
 
-    // Build a map from file stem -> CLI spectra file path (like C# FindMatchingSpecFile)
+    // Build a map from file stem -> CLI spectra file path (like C# FindMatchingSpecFile).
+    // A stem shared by two spectra files (same name in different directories)
+    // is ambiguous: it is recorded with an empty path and never matched by stem.
+    std::unordered_set<string> specFileSet(spec_files.begin(), spec_files.end());
     unordered_map<string, string> stemToSpecFile;
     for (const auto& spec_file : spec_files) {
-        stemToSpecFile[fileNameWithoutExtension(spec_file)] = spec_file;
+        string stem = fileNameWithoutExtension(spec_file);
+        auto inserted = stemToSpecFile.emplace(stem, spec_file);
+        if (!inserted.second && inserted.first->second != spec_file) {
+            inserted.first->second.clear();
+        }
     }
 
-    // Resolve a PSM's file entry to a spectra file: directly by stem, or via an
-    // alias (e.g. the search results file a pipeline produced from that spectra file).
-    auto resolveSpecFile = [&](const string& file_name) -> const string* {
+    auto resolveByStem = [&](const string& file_name) -> const string* {
         auto it = stemToSpecFile.find(fileNameWithoutExtension(file_name));
-        if (it != stemToSpecFile.end()) {
-            return &it->second;
+        if (it == stemToSpecFile.end()) {
+            return NULL;
+        }
+        if (it->second.empty()) {
+            carp(CARP_FATAL, "PSM file entry '%s' matches more than one spectrum file with the same "
+                 "name. Give spectrum files with distinct names, or name them by full path in the PSM file.",
+                 file_name.c_str());
+        }
+        return &it->second;
+    };
+
+    // Resolve a PSM's file entry to a spectra file: by exact path, then via an
+    // alias (e.g. the search results file a pipeline produced from that spectra
+    // file), then by an unambiguous file stem.
+    auto resolveSpecFile = [&](const string& file_name) -> const string* {
+        auto exact = specFileSet.find(file_name);
+        if (exact != specFileSet.end()) {
+            return &*exact;
         }
         auto alias = file_aliases.find(file_name);
         if (alias == file_aliases.end()) {
             alias = file_aliases.find(FileUtils::BaseName(file_name));
         }
         if (alias != file_aliases.end()) {
-            it = stemToSpecFile.find(fileNameWithoutExtension(alias->second));
-            if (it != stemToSpecFile.end()) {
-                return &it->second;
+            exact = specFileSet.find(alias->second);
+            if (exact != specFileSet.end()) {
+                return &*exact;
+            }
+            const string* byAlias = resolveByStem(alias->second);
+            if (byAlias != NULL) {
+                return byAlias;
             }
         }
-        return NULL;
+        return resolveByStem(file_name);
     };
 
     // MS2 retention times by scan, loaded only for files whose PSMs lack RT.
@@ -417,9 +447,15 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
         // is taken from the MS2 scan itself, so it is in the same units as the
         // MS1 scans it will be matched against.
         double retentionTime = psm.retention_time;
-        if (!(retentionTime > 0) && !ms2RetentionTime(*specFile, psm.scan_col, &retentionTime)) {
-            carp(CARP_FATAL, "PSM for scan %d has no retention time, and scan %d was not found in '%s'.",
-                 psm.scan_col, psm.scan_col, specFile->c_str());
+        if (!(retentionTime > 0)) {
+            if (!ms2RetentionTime(*specFile, psm.scan_col, &retentionTime)) {
+                carp(CARP_FATAL, "PSM for scan %d has no retention time, and scan %d was not found in '%s'.",
+                     psm.scan_col, psm.scan_col, specFile->c_str());
+            }
+            if (!(retentionTime > 0)) {
+                carp(CARP_FATAL, "PSM for scan %d has no retention time, and scan %d in '%s' has none either.",
+                     psm.scan_col, psm.scan_col, specFile->c_str());
+            }
         }
 
         allIdentifications.emplace_back(
@@ -436,7 +472,7 @@ vector<Identification> CruxLFQApplication::createIdentifications(const vector<PS
 
     carp(CARP_INFO, "Created %zu identifications matching %zu spectra files (from %zu total PSMs)",
          allIdentifications.size(), spec_files.size(), psm_data.size());
-    if (!psm_data.empty() && allIdentifications.empty()) {
+    if (allIdentifications.empty()) {
         carp(CARP_FATAL, "None of the %zu PSMs could be matched to the spectrum files given. The PSM file's "
              "file column must name the spectrum files (e.g. '%s').",
              psm_data.size(), spec_files.empty() ? "" : spec_files.front().c_str());
