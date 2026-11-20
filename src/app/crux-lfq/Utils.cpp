@@ -92,7 +92,7 @@ vector<PSM> create_psm(const string& psm_file) {
                                   file_col);
         }
     }else {
-        carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and tide-search");
+        carp(CARP_FATAL, "PSM file format unknown, the options are assign-confidence and percolator");
     }
     return psm_data;
 }

@@ -35,6 +35,14 @@ class CruxLFQApplication : public CruxApplication {
     int main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates);
 
     /**
+     * Runs LFQ. file_aliases maps a PSM file's "file" entry (e.g. a search
+     * results file, as written by Percolator) to the spectrum file it came
+     * from; used when that entry doesn't name a spectrum file directly.
+     */
+    int main(const string& psm_file, const vector<string>& spec_files, const string& specfile_replicates,
+             const unordered_map<string, string>& file_aliases);
+
+    /**
      * \returns the name of the subclassed application
      */
     virtual string getName() const;
@@ -75,7 +83,8 @@ class CruxLFQApplication : public CruxApplication {
 
     static IndexedSpectralResults indexedMassSpectralPeaks(Crux::SpectrumCollection* spectrum_collection, const string& spectra_file);
 
-    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files);
+    static vector<Identification> createIdentifications(const vector<PSM>& psm_data, const vector<string>& spec_files,
+                                                        const unordered_map<string, string>& file_aliases);
 
     static vector<PSM> create_percolator_psm(const string& psm_file);
     static void gen_mods(
