@@ -177,15 +177,15 @@ jobs:
  #            cd smoke-tests
  #            cucumber -v -f html -o smoke-tests.html    
 
-  #    - name: Archive smoke test results
-  #      if:  (matrix.os == 'ubuntu-22.04' && always())
-  #      uses: actions/upload-artifact@v7.0.0
-  #      with:
-  #        name: smoke-test-results-${{env.git_short_sha}}
-  #        path: |
-  #             ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
-  #             ${{runner.workspace}}/build/test/smoke-tests/errors
-  #             ${{runner.workspace}}/build/test/smoke-tests/stdout
+      - name: Archive smoke test results
+        if:  (matrix.os == 'ubuntu-22.04' && always())
+        uses: actions/upload-artifact@v7.0.0
+        with:
+          name: smoke-test-results-${{env.git_short_sha}}
+          path: |
+               ${{runner.workspace}}/build/test/smoke-tests/smoke-tests.html
+               ${{runner.workspace}}/build/test/smoke-tests/errors
+               ${{runner.workspace}}/build/test/smoke-tests/stdout
 
   # Runs once (not per matrix os) and only publishes from the upstream repo's master branch.
   publish-docs:
