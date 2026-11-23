@@ -167,15 +167,15 @@ jobs:
           name: crux-${{env.CRUX_VERSION}}.${{env.git_short_sha}}.Source
           path: ${{runner.workspace}}/build/crux-${{env.CRUX_VERSION}}.Source.tar.gz
 
- #     - name: Test
- #       if: (matrix.os == 'ubuntu-22.04')
- #       shell: bash
- #       run: |
- #            cd ${{runner.workspace}}/build/test
- #            rm -rf smoke-tests
- #            cp -r ${{github.workspace}}/test/smoke-tests .
- #            cd smoke-tests
- #            cucumber -v -f html -o smoke-tests.html    
+      - name: Test
+        if: (matrix.os == 'ubuntu-22.04')
+        shell: bash
+        run: |
+             cd ${{runner.workspace}}/build/test
+             rm -rf smoke-tests
+             cp -r ${{github.workspace}}/test/smoke-tests .
+             cd smoke-tests
+             cucumber -v -f html -o smoke-tests.html    
 
       - name: Archive smoke test results
         if:  (matrix.os == 'ubuntu-22.04' && always())
